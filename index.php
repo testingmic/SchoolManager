@@ -80,7 +80,7 @@ $SITEURL = (($URL == '') || ($URL == 'index.php') || ($URL == 'index.html')) ? A
 */
 
 // call the user logged in class
-$myclassClass = load_class('myschoolgh', 'models');
+$myClass = load_class('myschoolgh', 'models');
 $usersClass = load_class('users', 'controllers');
 $accessObject = load_class('accesslevel', 'controllers');
 $noticeClass = load_class('notification', 'controllers');
@@ -92,7 +92,7 @@ $loadedJS = [];
 
 // default file to include
 $defaultFile = config_item('default_view_path').strtolower(preg_replace('/[^\w_]-/','',$SITEURL[0])).'.php';
-$mainFile = config_item('default_view_path').'dashboard.php';
+$mainFile = config_item('default_view_path').'main.php';
 $errorFile = config_item('default_view_path').'404.php';
 
 // Check the site status
@@ -111,13 +111,13 @@ if(isset($SITEURL[1]) && (!in_array($SITEURL[0], ["api", "auth", "history", "pay
 	} elseif(is_file($defaultFile) and file_exists($defaultFile)) {
 		include($defaultFile);
 	} else {
-		include($errorFile);
+		no_file_log();
 	}
 } 
 // confirm if the first index has been parsed
 elseif(is_file($defaultFile) and file_exists($defaultFile)) {
 	include($defaultFile);
 } else {
-	include($errorFile);
+	no_file_log();
 }
 ?>

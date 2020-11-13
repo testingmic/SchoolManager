@@ -51,9 +51,10 @@ class Auth extends Myschoolgh {
                 WHERE u.username = ? AND u.deleted =  ? LIMIT 1
             ");
             $stmt->execute([$params->username, 0]);
+
             // count the number of rows found
             if($stmt->rowCount() == 1) {
-
+                
                 #check the number of login attempts 
                 $loginAttempt = $this->confirmAttempt($params->username, "login", 1);
 
@@ -160,7 +161,7 @@ class Auth extends Myschoolgh {
                             $this->addAttempt($params->username, "login", 1);
                             $this->db->commit();
                             //return the error message
-                            return ["code" => 201, "data" => "Sorry! Invalid Username/Password."];
+                            return ["code" => 201, "data" => "Sorry! Invalid Username/Password.3"];
                         }
                     }
                 } else {
@@ -171,7 +172,7 @@ class Auth extends Myschoolgh {
                 // add user attempt
                 $this->addAttempt($params->username);
                 $this->db->commit();
-                return ["code" => 201, "data" => "Sorry! Invalid Username/Password."];
+                return ["code" => 201, "data" => "Sorry! Invalid Username/Password.1"];
             }
 
             // return the success response

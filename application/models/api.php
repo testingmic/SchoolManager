@@ -36,13 +36,14 @@ class Api {
         /**
          * global variables
          **/
-        global $session, $accessObject, $config, $usersClass, $myClass, $medics;
+        global $session, $accessObject, $config, $usersClass, $myClass, $myschoolgh;
 
         $this->session = $session;
         $this->config = $config;
-        $this->medics = $medics;
+        $this->myschoolgh = $myschoolgh;
         
         $this->userId = $param["userId"];
+        $this->clientId = $param["clientId"];
 
         // the query parameter to load the user information
         $i_params = (object) [
@@ -65,7 +66,7 @@ class Api {
             $this->accessCheck->clientId = $param["clientId"];
             $this->accessCheck->userPermits = $this->userData->user_permissions;
         }
-        // medics class initializing
+        // myschoolgh class initializing
         $this->myClass = $myClass;
 
         // set the global variables
@@ -199,6 +200,7 @@ class Api {
 
         // set additional parameters
         $params->userId = $this->userId;
+        $params->clientId = $this->clientId;
         $params->userData = (object) $this->userData;
 
         // set the default limit to 1000
@@ -261,7 +263,7 @@ class Api {
         try {
 
             /** prepare and execute the statement */
-            $stmt = $this->medics->prepare("UPDATE users SET online='1', last_seen = now() WHERE item_id = ? LIMIT 1");
+            $stmt = $this->myschoolgh->prepare("UPDATE users SET online='1', last_seen = now() WHERE item_id = ? LIMIT 1");
             return $stmt->execute([$userId]);
 
         } catch(PDOException $e) {}
@@ -282,18 +284,18 @@ class Api {
 			// check if a request has been made today and then increment
 			if($this->todayRequestCheck()) {
 				// update the request count
-				$this->medics->query("
+				$this->myschoolgh->query("
 					UPDATE users_api_queries SET requests_count = (requests_count+1) WHERE  DATE(request_date) = CURDATE()
 				");
 			} else {
 				// insert a new query count
-				$this->medics->query("
+				$this->myschoolgh->query("
 					INSERT INTO users_api_queries SET requests_count = '1', request_date = now()
 				");
 			}
 
 			// log the request parsed by the user
-			$stmt = $this->medics->prepare("
+			$stmt = $this->myschoolgh->prepare("
 				INSERT INTO users_api_requests SET  user_id = ?,
 				request_uri = ?, user_ipaddress = ?, user_agent = ?, response_code = ?,
 				request_payload = ?, request_method = ?
@@ -320,7 +322,7 @@ class Api {
 
 		try {
 
-			$stmt = $this->medics->prepare("
+			$stmt = $this->myschoolgh->prepare("
 				SELECT COUNT(*) AS row_count FROM users_api_queries
 				WHERE DATE(request_date) = CURDATE()
 			");

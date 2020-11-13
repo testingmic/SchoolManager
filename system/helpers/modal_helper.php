@@ -31,6 +31,19 @@ function form_loader($position = "absolute") {
  * 
  * @return String
  */
+function pageoverlay() {
+  return '
+    <div class="pageoverlay" style="display: none; position: fixed">
+        <div class="offline-content text-center">
+            <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+        </div>
+    </div>';
+}
+/** 
+ * Form loader placeholder 
+ * 
+ * @return String
+ */
 function absolute_loader() {
   return '
     <div class="absolute-content-loader" style="display: none; position: absolute">

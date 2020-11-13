@@ -86,7 +86,7 @@ class Api_validate {
 		try {
 			$stmt = $this->db->prepare("
 				SELECT 
-					a.username, a.user_id,
+					a.username, a.user_id, a.client_id,
 					a.expiry_timestamp, a.access_token,
 					a.requests_limit, a.permissions,
 					(

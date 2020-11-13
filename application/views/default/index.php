@@ -13,7 +13,7 @@ if($usersClass->loggedIn()):
 		else
 			include_once config_item('default_view_path')."error.php";
 	else:
-		include_once config_item('default_view_path')."dashboard.php";
+		include_once config_item('default_view_path')."main.php";
 	endif;
 else:
 	require config_item('default_view_path')."login.php";

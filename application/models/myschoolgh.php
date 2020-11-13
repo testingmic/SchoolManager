@@ -15,6 +15,7 @@ class Myschoolgh extends Models {
 	public $browser;
 	public $platform;
 	public $userId;
+	public $clientId;
 	public $appName;
 	public $start_date;
     public $end_date;
@@ -28,6 +29,7 @@ class Myschoolgh extends Models {
 		$this->db = $myschoolgh;
 
 		$this->session = $session;
+		$this->clientId = $session->clientId;
 		$this->ip_address = ip_address();
 		$this->baseUrl = config_item('base_url');
 
@@ -215,11 +217,12 @@ class Myschoolgh extends Models {
 	 * @return null
 	 *
 	 **/
-	final function userLogs($subject, $itemId, $prevData = null, $description, $userId = null, $source = null) {
+	final function userLogs($subject, $itemId, $prevData = null, $description, $userId = null, $clientId = null, $source = null) {
 		
 		try {
 
 			// user agent variable
+			$clientId = !empty($clientId) ? $clientId : $this->clientId;
 			$ur_agent = $this->platform .' | '.$this->browser . ' | '.ip_address();
 			$prevData = (!empty($prevData) && is_object($prevData)) ? json_encode($prevData) : $prevData;
 			$source = !empty($source) ? $source : "{$this->appName} Calculation<br>Property changed by an update from another property.";

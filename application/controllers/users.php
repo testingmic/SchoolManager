@@ -45,31 +45,11 @@ class Users extends Myschoolgh {
 		// boolean value
         $params->remote = (bool) (isset($params->remote) && $params->remote);
 
-		// if the user id parameter was not parsed
-		if(!isset($params->user_id) && isset($params->userData)) {
-			// perform some checks
-			$the_user_type = $params->userData->user_type ?? $params->the_user_type;
-
-			// go ahead
-			if(in_array($the_user_type, ["agent", "broker", "bankassurance"])) {
-				$params->or_clause = " AND (a.created_by = '{$params->userId}' OR a.assigned_to = '{$params->userId}')";
-			}
-            // if insurance company user
-            elseif(in_array($the_user_type, ["insurance_company"])) {
-                $params->or_clause = " AND (a.created_by = '{$params->userId}' OR a.company_id='{$params->userData->company_id}')";
-            }
-            // if insurance company user
-            elseif(in_array($the_user_type, ["user", "business"])) {
-                $params->or_clause = " AND (a.item_id = '{$params->userId}')";
-            }
-		}
-
 		// if the field is null (dont perform all these checks if minified was parsed)
 		if(!isset($params->minified)) {
 			$params->query .= (isset($params->user_id)) ? (preg_match("/^[0-9]+$/", $params->user_id) ? " AND a.id='{$params->user_id}'" : " AND a.item_id='{$params->user_id}'") : null;
-			$params->query .= (isset($params->client_id) && !empty($params->client_id)) ? " AND a.client_id='{$params->client_id}'" : null;
+			$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
 			$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
-			$params->query .= (isset($params->company_id) && !empty($params->company_id)) ? " AND a.company_id='{$params->company_id}'" : null;
 			$params->query .= (isset($params->email)) ? " AND a.email='{$params->email}'" : null;
 			$params->query .= (isset($params->or_clause) && !empty($params->or_clause)) ? $params->or_clause : null;
 			$params->query .= (isset($params->date_of_birth) && !empty($params->date_of_birth)) ? " AND a.date_of_birth='{$params->date_of_birth}'" : null;
@@ -115,18 +95,11 @@ class Users extends Myschoolgh {
 			$sql = $this->db->prepare("SELECT 
 				".((isset($params->columns) ? $params->columns : "
 					a.*, a.item_id AS user_id,
-					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description,
-					(SELECT COUNT(*) FROM users_policy b WHERE (
-						(b.user_id = a.item_id) OR (b.created_by = a.item_id) OR
-						(b.agent_id = a.item_id) OR (b.broker_id = a.item_id) OR
-						(b.assigned_to = a.item_id)
-					) AND b.policy_status !='Deleted') AS policies_count, c.country_name,
-					(SELECT CONCAT(name,'|',email,'|',contact,'|',address,'|',website,'|',logo) FROM companies WHERE companies.item_id = a.company_id LIMIT 1) AS company_info,
-					(SELECT COUNT(*) FROM users_policy_claims b WHERE (b.user_id = a.item_id) OR (b.created_by = a.item_id)) AS claims_count,
+					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
 					(SELECT COUNT(*) FROM users b WHERE (b.created_by = a.item_id) AND a.deleted='0') AS clients_count,
 					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
 					(SELECT phone_number FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_phone
-				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id) AS user_permissions
+				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions
 				FROM users a 
 				LEFT JOIN country c ON c.id = a.country
 				WHERE {$params->query} AND a.deleted='0' {$order_by} LIMIT {$params->limit}
@@ -142,9 +115,6 @@ class Users extends Myschoolgh {
 
 				// if not a minified suggestion list
 				if(!isset($params->minified)) {
-
-					// convert the user company information into an object
-					$result->company_info = !empty($result->company_info) ? (object) $this->stringToArray($result->company_info, "|", ["name", "email", "contact", "address", "website", "logo"], true) : (object) [];
 
 					// unset the id
 					unset($result->id);
@@ -225,6 +195,7 @@ class Users extends Myschoolgh {
 			];
 
 		} catch(PDOException $e) {
+			print_r($e->getMessage());
 			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
 		}
 
@@ -251,7 +222,7 @@ class Users extends Myschoolgh {
 		$params->phone = preg_replace("/[\s]/", "", $params->phone);
 
 		// client id
-		$params->client_id = isset($params->client_id) ? strtoupper($params->client_id) : null;
+		$params->client_id = isset($params->clientId) ? strtoupper($params->clientId) : null;
 
 		/** Check the email address if not empty */
 		if(!isset($params->email) || (isset($params->email) && !filter_var($params->email, FILTER_VALIDATE_EMAIL))) {
@@ -272,11 +243,8 @@ class Users extends Myschoolgh {
 				return ["code" => 201, "data" => $this->permission_denied];
 			}
 
-			/** Set the company id */
-			$params->company_id = $params->userData->company_id;
-
 			/** Set the username as the client id provided by the company */
-			$params->username = !empty($params->client_id) ? strtoupper($params->client_id) : null;
+			$params->username = !empty($params->clientId) ? strtoupper($params->clientId) : null;
 
 			/** Generate a random password */
 			$params->password = random_string("alnum", 12);
@@ -333,26 +301,6 @@ class Users extends Myschoolgh {
 		// confirm that the username does not already exist
 		$i_params = (object) ["limit" => 1, "username" => $params->username];
 
-		/** If a company id was set */
-		if(isset($params->company_id)) {
-
-			// if access_level was not set
-			if(!isset($params->access_level)) {
-				return ["code" => 203, "data" => "Sorry! An invalid user_type was provided for processing."];
-			}
-			
-			// if the access level parsed does not match the users access level
-			if(!in_array($params->access_level, array_keys($this->permissions_list($params->userData->user_type)))) {
-				return ["code" => 203, "data" => "Sorry! You are unauthorized to add user with an elevated access permissions."];
-			}
-
-			// append the company id
-			$i_params->company_id = $params->company_id;
-
-			// set the value in the access level column as the user_type
-			$params->user_type = $params->access_level;
-		}
-		
 		// get the user data
 		if(!empty($this->list($i_params)["data"])) {
 			return ["code" => 203, "data" => "Sorry! The username is already in use."];
@@ -377,33 +325,9 @@ class Users extends Myschoolgh {
 		// confirm that the email does not already exist
 		$i_params = (object) ["limit" => 1, "email" => $params->email];
 		
-		/** If a company id was set */
-		if(isset($params->company_id)) {
-			// append the company id and access level of the user
-			$i_params->company_id = $params->company_id;
-		}
 		// get the user data
 		if(!empty($this->list($i_params)["data"])) {
 			return ["code" => 203, "data" => "Sorry! The email is already in use."];
-		}
-
-		// if the company id is set and a user/business is been created, confirm that there another user with same date of birth and same email
-		if(isset($params->company_id)) {
-
-			// use the date of birth, gender, type==user, firstname, lastname
-			$i_params = (object) [
-				"limit" => 1, 
-				"date_of_birth" => $params->date_of_birth ?? null, 
-				"user_type" => "user", 
-				"company_id" => $params->company_id,
-				"gender" => $params->gender ?? null,
-				"firstname" => $params->firstname ?? null,
-				"lastname" => $params->lastname ?? null
-			];
-			// get the user data
-			if(!empty($this->list($i_params)["data"])) {
-				return ["code" => 203, "data" => "There is a user with the same record parsed: firstname, lastname, gender and date of birth."];
-			}
 		}
 
 		// insert the user information
@@ -434,13 +358,12 @@ class Users extends Myschoolgh {
 			$stmt = $this->db->prepare("
 				INSERT INTO users SET item_id = ?, user_type = ?, access_level = ?,
 				verify_token = ?, token_expiry = ?, changed_password = ?
-				".(!empty($params->client_id) ? ", client_id='{$params->client_id}'" : null)."
+				".(!empty($params->clientId) ? ", client_id='{$params->clientId}'" : null)."
 				".(isset($params->firstname) ? ", firstname='{$params->firstname}'" : null)."
 				".(isset($params->lastname) ? ", lastname='{$params->lastname}'" : null)."
 				".(isset($params->othername) ? ", othername='{$params->othername}'" : null)."
 				".(isset($params->fullname) ? ", name='{$params->fullname}'" : null)."
 				".(isset($params->email) ? ", email='{$params->email}'" : null)."
-				".(isset($params->company_id) ? ", company_id='{$params->company_id}'" : null)."
 				".(isset($params->gender) ? ", gender='{$params->gender}'" : null)."
 				".(isset($params->username) ? ", username='{$params->username}'" : null)."
 				".(isset($params->position) ? ", position='{$params->position}'" : null)."
@@ -467,23 +390,7 @@ class Users extends Myschoolgh {
 			$stmt2->execute([$params->user_id, $permissions]);
 
 			// email comfirmation link
-			$message = "Hello {$params->firstname},";			
-			// if the account was created from the Web Portal
-			if(!isset($params->company_id)) {
-				$message .= "<br>Thank you for registering for an account with ".config_item('site_name').".<br>We humbly welcome you to aboard and envisage 
-				that you will be able achieve the purpose for creating an account with us.<br>
-				After verifying your account, please use the following to login:<br>";
-				$message .= "<strong>Username:</strong> {$params->username}<br>";
-				$message .= "<strong>Password:</strong> <em>The password entered in the form.</em><br><br>";
-			} else {
-				// content for onbehalf user
-				$message .= "<br>An account has been created for you on ".config_item('site_name').".<br>
-				Please click on the link below in 
-				After verifying your account, please use the following to login:<br>";
-				// if the account was created within the Web Portal
-				$message .= "<strong>Username:</strong> {$params->username}<br>";
-				$message .= "<strong>Password:</strong> {$params->password}<br><br>";
-			}
+			$message = "Hello {$params->firstname},";
 
 			$message .= '<a class="alert alert-success" href="'.config_item('base_url').'verify?account&token='.$token.'">Verify your account</a>';
 			$message .= '<br><br>If it does not work please copy this link and place it in your browser url.<br><br>';
@@ -549,11 +456,6 @@ class Users extends Myschoolgh {
 			return ["code" => 201, "data" => "Sorry! You are not permitted to modify this user account details."];
 		}
 
-		// if the user is with an insurance company
-		if(in_array($params->userData->user_type, ["insurance_company"]) && ($the_user[0]->company_id !== $params->userData->company_id)) {
-			return ["code" => 201, "data" => "Sorry! You are not permitted to modify this user account details."];
-		}
-
 		// clean the contact number
 		$params->phone = str_ireplace(["(", ")", "-", "_"], "", $params->phone);
 		$params->phone = preg_replace("/[\s]/", "", $params->phone);
@@ -598,7 +500,7 @@ class Users extends Myschoolgh {
             $prevData = $this->prevData("users", $params->user_id);
 			
 			// usertype and fullname
-			$params->client_id = isset($params->client_id) ? strtoupper($params->client_id) : null;
+			$params->client_id = isset($params->clientId) ? strtoupper($params->clientId) : null;
 			$params->fullname = $params->firstname . " " . $params->lastname ?? null . " " . $params->othername ?? null;
 			
 			// convert the user type to lowercase
@@ -607,7 +509,7 @@ class Users extends Myschoolgh {
 			// insert the user information
 			$stmt = $this->db->prepare("
 				UPDATE users SET last_updated = now()
-				".(!empty($params->client_id) ? ", client_id='{$params->client_id}'" : null)."
+				".(!empty($params->clientId) ? ", client_id='{$params->clientId}'" : null)."
 				".(isset($params->firstname) ? ", firstname='{$params->firstname}'" : null)."
 				".(isset($params->lastname) ? ", lastname='{$params->lastname}'" : null)."
 				".(isset($params->othername) ? ", othername='{$params->othername}'" : null)."
@@ -924,7 +826,7 @@ class Users extends Myschoolgh {
 					"policy_form" => $this->prependData("id, name, type", "policy_form", "status='1'"),
 					"users_list" => $this->prependData("a.id, a.item_id, a.email, a.employer, a.date_created, a.last_login, a.description, a.position, a.name, a.phone_number, a.phone_number_2, a.date_of_birth, a.nationality, a.residence, a.occupation, a.image, a.address, (SELECT country_name b FROM country b WHERE b.id = a.country) AS country_name", "users a", "a.status='1' AND a.deleted='0'"),
 					"insurance_policies" => $this->prependData(
-							"a.id, a.item_id, a.company_id, a.requirements, a.policy_code, a.year_enrolled, a.category, a.name, a.description, a.payment_plans,
+							"a.id, a.item_id, a.requirements, a.policy_code, a.year_enrolled, a.category, a.name, a.description, a.payment_plans,
 							(SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id) AS attachment", "policy_types a", "a.status='1' AND a.deleted='0'"
 						),
 					"insurance_companies" => $this->prependData("establishment_date AS date_established, item_id, name, contact, contact_2, email, website, logo, address, description, awards, managers", "companies", "activated='1' AND deleted='0'"),
