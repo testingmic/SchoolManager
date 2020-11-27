@@ -159,7 +159,7 @@
 }
 
 .select2-container {
-    min-width: 250px;
+    min-width: 230px;
 }
 
 .modal-dialog-right.left .modal-dialog,
@@ -194,4 +194,8 @@
 
 .underline {
     text-decoration: underline;
+}
+
+textarea.form-control {
+    height: 100px !important;
 }

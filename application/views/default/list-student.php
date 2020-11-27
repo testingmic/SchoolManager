@@ -46,7 +46,7 @@ foreach($student_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='#' data-record_id='{$each->user_id}' data-record_type='user' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
-    $students .= "<tr>";
+    $students .= "<tr data-row_id=\"{$each->user_id}\">";
     $students .= "<td>".($key+1)."</td>";
     $students .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
     $students .= "<td>{$each->class_name}</td>";

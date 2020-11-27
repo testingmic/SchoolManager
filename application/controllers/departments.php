@@ -25,6 +25,7 @@ class Departments extends Myschoolgh {
         $params->query .= (isset($params->department_head)) ? " AND a.department_head='{$params->department_head}'" : null;
         $params->query .= (isset($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->department_id)) ? " AND a.id='{$params->department_id}'" : null;
 
         try {
 

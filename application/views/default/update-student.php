@@ -77,7 +77,7 @@ if(!empty($user_id)) {
         $data = $data["data"][0];
 
         // guardian information
-        $user_form = load_class("forms", "controllers")->users_form($clientId, $baseUrl, $data);
+        $user_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl, $data);
         $hasUpdate = $accessObject->hasAccess("update", "student");
 
         $guardian = "";
@@ -129,7 +129,7 @@ if(!empty($user_id)) {
                 <div class="card-header">
                     <h4>Personal Details</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body pt-0 pb-0">
                     <div class="py-4">
                         <p class="clearfix">
                             <span class="float-left">Enrollment Date</span>

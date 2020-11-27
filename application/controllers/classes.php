@@ -1,6 +1,6 @@
 <?php 
 
-class Sections extends Myschoolgh {
+class Classes extends Myschoolgh {
 
     public function __construct()
     {
@@ -22,17 +22,21 @@ class Sections extends Myschoolgh {
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
         $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
-        $params->query .= (isset($params->section_leader)) ? " AND a.section_leader='{$params->section_leader}'" : null;
+        $params->query .= (isset($params->class_teacher)) ? " AND a.class_teacher='{$params->class_teacher}'" : null;
+        $params->query .= (isset($params->class_assistant)) ? " AND a.class_assistant='{$params->class_assistant}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->section_id)) ? " AND a.id='{$params->section_id}'" : null;
+        $params->query .= (isset($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
+        $params->query .= (isset($params->class_id)) ? " AND a.id='{$params->class_id}'" : null;
 
         try {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT COUNT(*) FROM users b WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' AND b.department = a.id AND b.client_id = a.client_id) AS students_count,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.section_leader LIMIT 1) AS section_leader_info
-                FROM sections a
+                    (SELECT COUNT(*) FROM users b WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' AND b.class_id = a.id AND b.client_id = a.client_id) AS students_count,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.class_assistant LIMIT 1) AS class_assistant_info,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.class_teacher LIMIT 1) AS class_teacher_info
+                FROM classes a
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
             ");
             $stmt->execute([1]);
@@ -41,7 +45,7 @@ class Sections extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
                 // loop through the information
-                foreach(["section_leader_info"] as $each) {
+                foreach(["class_teacher_info", "class_assistant_info", "created_by_info"] as $each) {
                     // convert the created by string into an object
                     $result->{$each} = (object) $this->stringToArray($each, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);    
                 }
@@ -54,9 +58,7 @@ class Sections extends Myschoolgh {
                 "data" => $data
             ];
 
-        } catch(PDOException $e) {
-            print $e->getMessage();
-        } 
+        } catch(PDOException $e) {} 
 
     }
 

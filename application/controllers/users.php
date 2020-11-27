@@ -54,8 +54,13 @@ class Users extends Myschoolgh {
 			$params->query .= (isset($params->or_clause) && !empty($params->or_clause)) ? $params->or_clause : null;
 			$params->query .= (isset($params->date_of_birth) && !empty($params->date_of_birth)) ? " AND a.date_of_birth='{$params->date_of_birth}'" : null;
 			$params->query .= (isset($params->created_by) && !empty($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
-			$params->query .= (isset($params->firstname) && !empty($params->firstname)) ? " AND a.firstname='{$params->firstname}'" : null;
-			$params->query .= (isset($params->lastname) && !empty($params->lastname)) ? " AND a.lastname='{$params->lastname}'" : null;
+			$params->query .= (isset($params->academic_year) && !empty($params->academic_year)) ? " AND a.academic_year='{$params->academic_year}'" : null;
+			$params->query .= (isset($params->academic_term) && !empty($params->academic_term)) ? " AND a.academic_term='{$params->academic_term}'" : null;
+			$params->query .= (isset($params->firstname) && !empty($params->firstname)) ? " AND a.firstname LIKE '%{$params->firstname}%'" : null;
+			$params->query .= (isset($params->lastname) && !empty($params->lastname)) ? " AND a.lastname LIKE '%{$params->lastname}%'" : null;
+			$params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department='{$params->department_id}'" : null;
+			$params->query .= (isset($params->section_id) && !empty($params->section_id)) ? " AND a.section='{$params->section_id}'" : null;
+			$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
 			$params->query .= (isset($params->username)) ? " AND a.username='{$params->username}'" : null;
 			$params->query .= (isset($params->gender)) ? " AND a.gender='{$params->gender}'" : null;
 		}
@@ -104,7 +109,6 @@ class Users extends Myschoolgh {
 					(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name,
 					(SELECT guardian_information FROM users_guardian WHERE users_guardian.user_id = a.item_id LIMIT 1) AS guardian_information,
 					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name,
-					(SELECT programme_name FROM programmes WHERE programmes.id = a.programme LIMIT 1) AS programme_name,
 					(SELECT phone_number FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_phone
 				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions
 				FROM users a 

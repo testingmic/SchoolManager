@@ -838,8 +838,8 @@ var initDataTables = () => {
             $(element).dataTable({
                 search: null,
                 lengthMenu: [
-                    [50, 100, 200, -1],
-                    [50, 100, 200, "All"]
+                    [20, 35, 50, 75, 100, 200, -1],
+                    [20, 35, 50, 75, 100, 200, "All"]
                 ],
                 language: {
                     sEmptyTable: ifempty == undefined ? "Nothing Found" : ifempty,

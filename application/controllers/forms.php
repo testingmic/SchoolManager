@@ -90,7 +90,7 @@ class Forms extends Myschoolgh {
                 }
 
                 /** Load the policy application form */
-                $result = $this->preview_form($params);
+                // $result = $this->preview_form($params);
             }
 
         }
@@ -127,14 +127,14 @@ class Forms extends Myschoolgh {
     }
 
     /**
-     * Users form
+     * Students form
      * 
      * @param String $clientId
      * @param String $baseUrl
      * 
      * return String
      */
-    public function users_form($clientId, $baseUrl, $userData = null) {
+    public function student_form($clientId, $baseUrl, $userData = null) {
 
         $isData = !empty($userData) && isset($userData->country) ? true : false;
 
@@ -383,6 +383,211 @@ class Forms extends Myschoolgh {
                                 $response .= "<option ".($isData && ($each->id == $userData->section) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 text-right">
+                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>
+        </form>';
+
+        return $response;
+
+    }
+
+    /**
+     * Department form
+     * 
+     * @param String $clientId
+     * @param String $baseUrl
+     * 
+     * return String
+     */
+    public function department_form($clientId, $baseUrl, $itemData = null) {
+
+        $isData = !empty($itemData) && isset($itemData->department_code) ? true : false;
+
+        $guardian = "";
+
+        $response = '
+        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/departments/'.( $isData ? "update" : "add").'" method="POST">
+            <div class="row mb-4 border-bottom pb-3">
+                <div class="col-lg-12"><h5>SECTION INFORMATION</h5></div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="image">Department Image</label>
+                        <input type="file" name="image" id="image" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="department_code">Department Code (optional)</label>
+                        <input type="text" value="'.($itemData->department_code ?? null).'" name="department_code" id="department_code" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-6">
+                    <div class="form-group">
+                        <label for="name">Department Name<span class="required">*</span></label>
+                        <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="department_head">Department Head</label>
+                        <select data-width="100%" name="department_head" id="department_head" class="form-control selectpicker">
+                            <option value="null">Select Department Head</option>';
+                            foreach($this->pushQuery("item_id, name", "users", "user_type IN ('employee','teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->item_id == $itemData->department_head) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea type="text" rows="5" name="description" id="description" class="form-control">'.($itemData->description ?? null).'</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 text-right">
+                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>
+        </form>';
+
+        return $response;
+
+    }
+    
+    /**
+     * Section form
+     * 
+     * @param String $clientId
+     * @param String $baseUrl
+     * 
+     * return String
+     */
+    public function section_form($clientId, $baseUrl, $itemData = null) {
+
+        $isData = !empty($itemData) && isset($itemData->section_code) ? true : false;
+
+        $guardian = "";
+
+        $response = '
+        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/sections/'.( $isData ? "update" : "add").'" method="POST">
+            <div class="row mb-4 border-bottom pb-3">
+                <div class="col-lg-12">
+                    <h5>SECTION INFORMATION</h5>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="image">Section Image</label>
+                        <input type="file" name="image" id="image" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="section_code">Section Code (optional)</label>
+                        <input type="text" value="'.($itemData->section_code ?? null).'" name="section_code" id="section_code" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-8">
+                    <div class="form-group">
+                        <label for="name">Section Name<span class="required">*</span></label>
+                        <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="section_leader">Section Leader</label>
+                        <select data-width="100%" name="section_leader" id="section_leader" class="form-control selectpicker">
+                            <option value="null">Select Section Leader</option>';
+                            foreach($this->pushQuery("item_id, name", "users", "user_type IN ('student','teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->item_id == $itemData->section_leader) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea type="text" rows="5" name="description" id="description" class="form-control">'.($itemData->description ?? null).'</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 text-right">
+                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>
+        </form>';
+
+        return $response;
+
+    }
+
+    /**
+     * Class form
+     * 
+     * @param String $clientId
+     * @param String $baseUrl
+     * 
+     * return String
+     */
+    public function class_form($clientId, $baseUrl, $itemData = null) {
+
+        $isData = !empty($itemData) && isset($itemData->class_code) ? true : false;
+
+        $guardian = "";
+
+        $response = '
+        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/classes/'.( $isData ? "update" : "add").'" method="POST">
+            <div class="row mb-4 border-bottom pb-3">
+                <div class="col-lg-12"><h5>CLASS INFORMATION</h5></div>
+                <div class="col-lg-4 col-md-5">
+                    <div class="form-group">
+                        <label for="class_code">Class Code (optional)</label>
+                        <input type="text" value="'.($itemData->class_code ?? null).'" name="class_code" id="class_code" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-7">
+                    <div class="form-group">
+                        <label for="name">Class Name<span class="required">*</span></label>
+                        <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label for="class_teacher">Class Teacher</label>
+                        <select data-width="100%" name="class_teacher" id="class_teacher" class="form-control selectpicker">
+                            <option value="null">Select Class Teacher</option>';
+                            foreach($this->pushQuery("item_id, name", "users", "user_type IN ('teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->item_id == $itemData->class_teacher) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label for="class_assistant">Class Assistant</label>
+                        <select data-width="100%" name="class_assistant" id="class_assistant" class="form-control selectpicker">
+                            <option value="null">Select Class Assistant</option>';
+                            foreach($this->pushQuery("item_id, name", "users", "user_type IN ('teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->item_id == $itemData->class_assistant) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea type="text" rows="5" name="description" id="description" class="form-control">'.($itemData->description ?? null).'</textarea>
                     </div>
                 </div>
             </div>

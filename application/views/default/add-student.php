@@ -31,7 +31,7 @@ $student_param = (object) [
 ];
 
 $student_list = load_class("users", "controllers")->list($student_param);
-$user_form = load_class("forms", "controllers")->users_form($clientId, $baseUrl);
+$user_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl);
 
 $response->html = '
     <section class="section">

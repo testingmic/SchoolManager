@@ -27,7 +27,7 @@ $department_param = (object) [
     "limit" => 99999
 ];
 
-$department_list = load_class("departments", "controllers")->list($department_param);
+$item_list = load_class("departments", "controllers")->list($department_param);
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
@@ -35,7 +35,7 @@ $hasDelete = $accessObject->hasAccess("delete", "department");
 $hasUpdate = $accessObject->hasAccess("update", "department");
 
 $departments = "";
-foreach($department_list["data"] as $key => $each) {
+foreach($item_list["data"] as $key => $each) {
     
     $action = "<a href='{$baseUrl}update-department/{$each->id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
@@ -46,7 +46,7 @@ foreach($department_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='#' data-record_id='{$each->id}' data-record_type='department' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
-    $departments .= "<tr>";
+    $departments .= "<tr data-row_id=\"{$each->id}\">";
     $departments .= "<td>".($key+1)."</td>";
     $departments .= "<td>{$each->name}</td>";
     $departments .= "<td>{$each->students_count}</td>";
