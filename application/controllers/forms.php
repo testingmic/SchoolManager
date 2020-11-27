@@ -408,7 +408,7 @@ class Forms extends Myschoolgh {
      */
     public function department_form($clientId, $baseUrl, $itemData = null) {
 
-        $isData = !empty($itemData) && isset($itemData->department_code) ? true : false;
+        $isData = !empty($itemData) && isset($itemData->id) ? true : false;
 
         $guardian = "";
 
@@ -439,14 +439,15 @@ class Forms extends Myschoolgh {
                         <label for="department_head">Department Head</label>
                         <select data-width="100%" name="department_head" id="department_head" class="form-control selectpicker">
                             <option value="null">Select Department Head</option>';
-                            foreach($this->pushQuery("item_id, name", "users", "user_type IN ('employee','teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->item_id == $itemData->department_head) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
+                            foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('employee','teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->item_id == $itemData->department_head) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
                         $response .= '</select>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
+                        <input type="hidden" readonly name="department_id" id="department_id" value="'.($itemData->id ?? null).'">
                         <label for="description">Description</label>
                         <textarea type="text" rows="5" name="description" id="description" class="form-control">'.($itemData->description ?? null).'</textarea>
                     </div>
@@ -474,7 +475,7 @@ class Forms extends Myschoolgh {
      */
     public function section_form($clientId, $baseUrl, $itemData = null) {
 
-        $isData = !empty($itemData) && isset($itemData->section_code) ? true : false;
+        $isData = !empty($itemData) && isset($itemData->id) ? true : false;
 
         $guardian = "";
 
@@ -507,14 +508,15 @@ class Forms extends Myschoolgh {
                         <label for="section_leader">Section Leader</label>
                         <select data-width="100%" name="section_leader" id="section_leader" class="form-control selectpicker">
                             <option value="null">Select Section Leader</option>';
-                            foreach($this->pushQuery("item_id, name", "users", "user_type IN ('student','teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->item_id == $itemData->section_leader) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
+                            foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('student','teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->item_id == $itemData->section_leader) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
                         $response .= '</select>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
+                        <input type="hidden" readonly name="section_id" id="section_id" value="'.($itemData->id ?? null).'">
                         <label for="description">Description</label>
                         <textarea type="text" rows="5" name="description" id="description" class="form-control">'.($itemData->description ?? null).'</textarea>
                     </div>
@@ -542,7 +544,7 @@ class Forms extends Myschoolgh {
      */
     public function class_form($clientId, $baseUrl, $itemData = null) {
 
-        $isData = !empty($itemData) && isset($itemData->class_code) ? true : false;
+        $isData = !empty($itemData) && isset($itemData->id) ? true : false;
 
         $guardian = "";
 
@@ -567,8 +569,8 @@ class Forms extends Myschoolgh {
                         <label for="class_teacher">Class Teacher</label>
                         <select data-width="100%" name="class_teacher" id="class_teacher" class="form-control selectpicker">
                             <option value="null">Select Class Teacher</option>';
-                            foreach($this->pushQuery("item_id, name", "users", "user_type IN ('teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->item_id == $itemData->class_teacher) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
+                            foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->item_id == $itemData->class_teacher) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
                         $response .= '</select>
                     </div>
@@ -578,14 +580,15 @@ class Forms extends Myschoolgh {
                         <label for="class_assistant">Class Assistant</label>
                         <select data-width="100%" name="class_assistant" id="class_assistant" class="form-control selectpicker">
                             <option value="null">Select Class Assistant</option>';
-                            foreach($this->pushQuery("item_id, name", "users", "user_type IN ('teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->item_id == $itemData->class_assistant) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
+                            foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('student') AND status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->item_id == $itemData->class_assistant) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
                         $response .= '</select>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
+                        <input type="hidden" readonly name="class_id" id="class_id" value="'.($itemData->id ?? null).'">
                         <label for="description">Description</label>
                         <textarea type="text" rows="5" name="description" id="description" class="form-control">'.($itemData->description ?? null).'</textarea>
                     </div>

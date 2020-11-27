@@ -216,7 +216,6 @@ if(!empty($item_id)) {
             </div>
         </div>
         </section>';
-        
     }
 
 }
