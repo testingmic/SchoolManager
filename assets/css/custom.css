@@ -191,3 +191,7 @@
 .modal-dialog-right.right.fade.in .modal-dialog {
     right: 0;
 }
+
+.underline {
+    text-decoration: underline;
+}

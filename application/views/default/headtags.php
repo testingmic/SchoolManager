@@ -247,6 +247,13 @@ if(!isset($userPrefs->messages)) {
                             </ul>
                         </li>
                         <li class="dropdown">
+                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-sitemap"></i><span>Sections</span></a>
+                            <ul class="dropdown-menu">
+                                <li><a class="nav-link" href="<?= $baseUrl ?>list-sections">List Sections</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>add-section">Add Section</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
                             <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Library</span></a>
                             <ul class="dropdown-menu">
                                 <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
