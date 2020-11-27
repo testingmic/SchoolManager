@@ -4,6 +4,126 @@ class Forms extends Myschoolgh {
 
     public function __construct() {
         parent::__construct();
+
+        global $accessObject;
+        $this->hasit = $accessObject;
+    }
+
+    
+    /**
+     * Generate a form and return in the response back to the user
+     * The variable module will contain all the needed parameters that will be used to generate the form
+     * and parse back in the data key of the result set. The process will be very intellegent and take into consideration 
+     * everything that should be considered in generating a form for the user.
+     * 
+     * @param \stdClass $params
+     * @param Array $params->module
+     * 
+     * @return Array
+     */
+    public function load(stdClass $params) {
+
+        /** Access object */
+        global $accessObject, $usersClass;
+        
+        /** Set parameters */
+        $this->thisUser = $params->userData;
+        $this->hasit->userId = $params->userData->user_id;
+        $this->hasit->userPermits = $params->userData->user_permissions;
+        $this->userPrefs = $params->userData->preferences;
+        $this_user_id = $params->userData->user_id;
+
+        // set the user's default text edit if not already set
+        $this->userPrefs->text_editor = isset($this->userPrefs->text_editor) ? $this->userPrefs->text_editor : "trix";
+
+        /** Test Module Variable */
+        if(!isset($params->module)) {
+            return ["code" => 201, "data" => "Sorry! The module parameter is required."];
+        }
+
+        /** If module not an array */
+        if(!is_array($params->module)) {
+            return ["code" => 201, "data" => "Sorry! The module parameter is must be an array variable."];
+        }
+        
+        /** If module not an array */
+        if(!isset($params->module["label"])) {
+            return ["code" => 201, "data" => "Sorry! The label key in the array must be supplied."];
+        }
+
+        /** If the label is not in the array list */
+        if(!in_array($params->module["label"], array_keys($this->form_modules))) {
+            return ["code" => 201, "data" => "Sorry! An invalid label value was parsed."];
+        }
+
+        /** Init variables */
+        $result = null;
+        $resources = [];
+        $content = [];
+        
+        /** Form processing div */
+        $the_form = $params->module["label"];
+
+        /** content type */
+        if(isset($params->module["content"]) && $params->module["content"] == "form") {
+            
+            /** The label and method to load */
+            if($the_form == "incident_log_form") {
+                /** Confirm the user has the permission to perform this action */
+                if(!$accessObject->hasAccess("add", "incident")) {
+                    return ["code" => 201, "data" => $this->permission_denied];
+                }
+                
+                /** Append to parameters */
+                $params->incident_log_form = true;
+                
+                /** Load the policy application form */
+                $result = $this->incident_log_form($params);
+            }
+            
+            /** preview a form variable data set */
+            elseif($the_form == "preview_form") {
+
+                // return if no policy id was parsed
+                if(!isset($params->module["item_id"])) {
+                    return;
+                }
+
+                /** Load the policy application form */
+                $result = $this->preview_form($params);
+            }
+
+        }
+
+        // the result set to return
+        $result_set = ["form" => $result];
+
+        // if the content is not empty
+        if(!empty($content)) {
+            $result_set["content"] = $content;
+        }
+        // if resources was parsed
+        if(!empty($resources)) {
+            $result_set["resources"] = $resources;
+        }
+
+        // return the result
+        return [
+            "code" => !empty($result) ? 200 : 201,
+            "data" => $result_set
+        ];
+    }
+
+    /**
+     * Incident Form
+     * 
+     * @param String $clientId
+     * @param String $baseUrl
+     * 
+     * @return String
+     */
+    public function incident_log_form() {
+        
     }
 
     /**
@@ -72,7 +192,7 @@ class Forms extends Myschoolgh {
         }
 
         $response = '
-        <form class="ajaxform" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
                     <h5>BIO INFORMATION</h5>

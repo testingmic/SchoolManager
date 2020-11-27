@@ -41,15 +41,38 @@ if(!empty($user_id)) {
         "clientId" => $clientId,
         "user_id" => $user_id,
         "limit" => 1,
+        "no_limit" => 1,
         "user_type" => "student"
     ];
 
     $data = load_class("users", "controllers")->list($student_param);
+    $incidents = load_class("incidents", "controllers")->list($student_param);
     
     // if no record was found
     if(empty($data["data"])) {
         $response->html = page_not_found();
     } else {
+
+        // populate the incidents
+        $incidents_list = "";
+        if(!empty($incidents["data"])) {
+            $incidents_list = "<div class='row mb-3'>";
+            // set the header for the list
+            $incidents_list .= '<div><h5>INCIDENTS LIST</h5></div>';
+            // loop through the list of all incidents
+            foreach($incidents["data"] as $each) {
+                $incidents_list .= "
+                    <div class=\"col-12 col-md-6 load_incident_record col-lg-4\" data-id=\"{$each->item_id}\">
+                        <div class=\"card card-success\">
+                            <div class=\"card-header\"><h4>{$each->subject}</h4></div>
+                            <div class=\"card-body\">{$each->incident}</div>
+                        </div>
+                    </div>";
+            }
+            $incidents_list = "</div>";
+            $response->client_auto_save = ["incidents_array" => $incidents["data"]];
+        }
+
         // set the first key
         $data = $data["data"][0];
 
@@ -163,6 +186,10 @@ if(!empty($user_id)) {
                     <li class="nav-item">
                         <a class="nav-link" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab"
                         aria-selected="true">Student Attendance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="incident-tab2" data-toggle="tab" href="#incident" role="tab"
+                        aria-selected="true">Incident Logs</a>
                     </li>';
 
                     if($hasUpdate) {
@@ -173,7 +200,8 @@ if(!empty($user_id)) {
                         </li>';
                     }
                     
-                    $response->html .= '</ul>
+                    $response->html .= '
+                    </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
                             '.$guardian.'
@@ -185,6 +213,12 @@ if(!empty($user_id)) {
                         <div class="tab-pane fade" id="attendance" role="tabpanel" aria-labelledby="attendance-tab2">
                             
                             
+                        </div>
+                        <div class="tab-pane fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
+                            <div class="text-right">
+                                <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\');" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Log Incident</button>
+                            </div>
+                            '.$incidents_list.'
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                         

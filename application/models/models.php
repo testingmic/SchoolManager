@@ -28,7 +28,7 @@ class Models {
     public function __construct() {
 
         $this->form_modules = [
-            
+            "incident_log_form" => "Log Incident"
         ];
 
 		$this->favicon_array = [

@@ -14,6 +14,15 @@ $.pageloader = $(".loader");
 $.env = "development";
 $.chatinterval = 2000;
 
+$form_modal = $(`div[id="formsModal"]`);
+$replies_modal = $(`div[id="repliesModal"]`);
+$form_body = $(`div[id="formsModal"] div[class="modal-body"]`);
+$form_header = $(`div[id="formsModal"] h5[class="modal-title"]`);
+$form_loaded = $(`div[id="formsModal"] input[class="ajax-form-loaded"]`);
+$form_loader = `<div class="form-content-loader" style="display: flex; position: absolute;"><div class="offline-content text-center"><p><i class="fa fa-spin fa-spinner fa-2x"></i></p><small style='font-size:12px; padding-top:10px'>Populating Data...</small></div></div>`;
+$form_error = `<div class="form-content-loader" style="display: flex; position: absolute;"><div class="offline-content text-center"><p><i class="fa text-warning fa-exclamation-triangle fa-2x"></i></p><small class="text-danger" style='font-size:12px; padding-top:10px'>Error processing request!</small><p><small class="text-danger font-weight-bold cursor" data-dismiss="modal" id="close-div">Close</small></p></div></div>`;
+$no_record = `<div class="form-content-loader" style="display: flex; position: absolute;"><div class="offline-content text-center"><p><i class="fa text-warning fa-exclamation-triangle fa-2x"></i></p><small class="text-warning" style='font-size:12px; padding-top:10px'>No content found to display at the moment!</small><p><small class="text-danger font-weight-bold cursor" data-dismiss="modal" id="close-div">Close</small></p></div></div>`;
+
 //Main navigation
 $.navigation = $(`aside[id="sidebar-wrapper"] ul[class~="sidebar-menu"] > li`);
 
@@ -378,21 +387,23 @@ var loadPage = (loc, callback, pushstate) => {
 }
 
 var loadFormAction = (form) => {
-    let progress = moveProgress()
+
+    console.log(form[0]);
     $.ajax({
         url: form[0].action,
         method: form[0].method,
-        dataType: "JSON",
-        data: form.serialize(),
+        data: new FormData(form[0]),
+        dataType: 'JSON',
+        contentType: false,
+        cache: false,
+        processData: false,
         beforeSend: () => {
             $.mainprogress.show()
-            progress.move($.mainprogress, 5, true)
             $.pageoverlay.show()
         },
         success: (result) => {
             var urlLink = result.data.additional === undefined ? null : result.data.additional.href || null;
             var error = result.code === 200 ? null : result.data.result || null;
-            progress.complete($.mainprogress, false)
             $.pageoverlay.hide();
 
             if (error !== null) notify(error)
@@ -835,18 +846,7 @@ var initDataTables = () => {
                     lengthMenu: "Display _MENU_ rows"
                 }
             });
-        })
-
-        // $('.datatable.datatable-').dataTable({
-        //     search: false,
-        //     lengthMenu: [
-        //         [50, 100, 200, -1],
-        //         [50, 100, 200, "All"]
-        //     ],
-        //     language: {
-        //         lengthMenu: "Display _MENU_ rows"
-        //     }
-        // });
+        });
     }
 }
 
@@ -1072,46 +1072,6 @@ var notify = (text, type = "error") => {
     $.notify(text, type);
 }
 
-var notifySettingUnset = (text) => {
-    var animateEnter = 'animated bounceInRight',
-        animateExit = 'animated fadeOutUp',
-        allowDismiss = true,
-        icon = "<i class='fa fa-exclamation-circle text-info'></i>";
-    $.notify({
-        message: text,
-        title: "notification"
-    }, {
-        url: "#",
-        type: "card text-gray-dark w-300 b-primary",
-        allow_dismiss: true,
-        newest_on_top: true,
-        timer: 1000,
-        z_index: 2000,
-        delay: 10000,
-        placement: {
-            from: "bottom",
-            align: "right"
-        },
-        animate: {
-            enter: animateEnter,
-            exit: animateExit
-        },
-        template: '<div data-notify="container" class="card alert alert-dismissible {0} p-0 b-shadow-2 ' + (allowDismiss ? "p-r-35" : "") + '" role="alert">' +
-            '<div class="card-header">' +
-            '<button type="button" aria-hidden="true" class="btn btn-transparent font-xl" style="margin-top:-5px" data-notify="dismiss"><i class="icon-close text-gray-dark font-sm"></i></button>' +
-            '<span data-notify="icon">' + icon + '</span> ' +
-            '<span data-notify="title" class="font-weight-bold">{1}</span> ' +
-            '</div>' +
-            '<div class="card-block">' +
-            '<span data-notify="message">{2}</span>' +
-            '<div class="progress" data-notify="progressbar">' +
-            '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
-            '</div>' +
-            '<a href="{3}" target="{4}" data-notify="url"></a>' +
-            '</div></div>'
-    });
-}
-
 var hasError = (element) => {
     if (element.is("select") && element.hasClass("selectpicker")) {
         let elementid = element.attr("id");
@@ -1202,4 +1162,76 @@ var randomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+
+var form_loader = async(form_module, module_item_id) => {
+    let $module = {
+        label: form_module,
+        item_id: module_item_id,
+        content: "form"
+    }
+    $form_loaded.attr("value", 0);
+    $form_loaded.attr("data-form", "none");
+
+    await $.post(`${baseUrl}api/forms/load`, { module: $module }).then((response) => {
+        if (response.code !== 200) {
+            $form_body.html($form_error);
+        } else {
+            let formRecord = response.data.result;
+
+            if (!formRecord.form) {
+                $form_body.html($form_error);
+                return false;
+            }
+
+            $form_loaded.attr("value", 1);
+            $form_loaded.attr("data-form", form_module);
+            $form_body.html(formRecord.form);
+
+            linkClickStopper();
+            formSubmitStopper();
+
+            $(`[data-toggle="tooltip"]`).tooltip();
+            $(`select[class~="selectpicker"]`).select2();
+
+            $(`div[class~="trix-button-row"] span[class~="trix-button-group--file-tools"], div[class~="trix-button-row"] span[class~="trix-button-group-spacer"]`).remove();
+
+            if (formRecord.resources) {
+                var time = 100;
+                $.each(formRecord.resources, function(ii, ie) {
+                    setTimeout(function() {
+                        $.cachedScript(`${baseUrl}${ie}`);
+                    }, time);
+                    time += 500;
+                });
+            }
+            if (formRecord.content) {
+                $.each(formRecord.content, function(key, value) {
+                    $(`trix-editor[id="${key}"]`).html(`${value}`);
+                });
+            }
+        }
+    }).catch(() => {
+        $form_body.html($form_error);
+    });
+}
+
+var load_quick_form = async(module, module_item_id) => {
+    $replies_modal.modal("hide");
+    $form_header.html(form_modules[module]);
+
+    if (module == "user_basic_information") {
+        let user_info = await load_idb_record("user_list", module_item_id);
+        if (user_info) {
+            $basic_data_modal.modal("show");
+            $basic_data_header.html(form_modules[module]);
+            preview_user_info(user_info);
+            return false;
+        }
+    }
+
+    $form_modal.modal("show");
+    $form_body.html($form_loader);
+
+    form_loader(module, module_item_id);
 }
