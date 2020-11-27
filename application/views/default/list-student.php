@@ -5,6 +5,9 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
+// global 
+global $myClass, $accessObject;
+
 // initial variables
 $appName = config_item("site_name");
 $baseUrl = $config->base_url();
@@ -26,6 +29,33 @@ $student_param = (object) [
 
 $student_list = load_class("users", "controllers")->list($student_param);
 
+$accessObject->userId = $session->userId;
+$accessObject->clientId = $session->clientId;
+$hasDelete = $accessObject->hasAccess("delete", "student");
+$hasUpdate = $accessObject->hasAccess("update", "student");
+
+$students = "";
+foreach($student_list["data"] as $key => $each) {
+    
+    $action = "<a href='{$baseUrl}update-student/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+
+    if($hasUpdate) {
+        $action .= "&nbsp;<a href='{$baseUrl}update-student/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+    }
+    if($hasDelete) {
+        $action .= "&nbsp;<a href='#' data-record_id='{$each->user_id}' data-record_type='user' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>";
+    }
+
+    $students .= "<tr>";
+    $students .= "<td>".($key+1)."</td>";
+    $students .= "<td>{$each->name}</td>";
+    $students .= "<td>{$each->class_name}</td>";
+    $students .= "<td>{$each->gender}</td>";
+    $students .= "<td>{$each->department_name}</td>";
+    $students .= "<td>{$action}</td>";
+    $students .= "</tr>";
+}
+
 $response->html = '
     <section class="section">
         <div class="section-header">
@@ -40,19 +70,18 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive table-student_staff_list">
-                            <table class="table table-striped datatable">
+                            <table data-empty="" class="table table-striped datatable">
                                 <thead>
                                     <tr>
-                                        <th class="text-center">#</th>
+                                        <th width="5%" class="text-center">#</th>
                                         <th>Student Name</th>
                                         <th>Class</th>
-                                        <th>Guardian</th>
+                                        <th>Gender</th>
                                         <th>Department</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
+                                        <th width="10%">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+                                <tbody>'.$students.'</tbody>
                             </table>
                         </div>
                     </div>

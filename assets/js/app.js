@@ -834,16 +834,16 @@ var initDataTables = () => {
             });
         })
 
-        $('.datatable.datatable-').dataTable({
-            search: false,
-            lengthMenu: [
-                [50, 100, 200, -1],
-                [50, 100, 200, "All"]
-            ],
-            language: {
-                lengthMenu: "Display _MENU_ rows"
-            }
-        });
+        // $('.datatable.datatable-').dataTable({
+        //     search: false,
+        //     lengthMenu: [
+        //         [50, 100, 200, -1],
+        //         [50, 100, 200, "All"]
+        //     ],
+        //     language: {
+        //         lengthMenu: "Display _MENU_ rows"
+        //     }
+        // });
     }
 }
 
@@ -1199,6 +1199,4 @@ var randomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-}
-return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }

@@ -256,6 +256,25 @@ class Users extends Myschoolgh {
 			
 		}
 
+		// confirm that a logo was parsed
+        if(isset($params->image)) {
+            // set the upload directory
+            $uploadDir = "assets/img/users/";
+            // File path config 
+            $fileName = basename($params->image["name"]); 
+            $targetFilePath = $uploadDir . $fileName; 
+            $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+            // Allow certain file formats 
+            $allowTypes = array('jpg', 'png', 'jpeg');            
+            // check if its a valid image
+            if(!empty($fileName) && in_array($fileType, $allowTypes)){
+                // set a new filename
+                $fileName = $uploadDir . random_string('alnum', 10)."__{$fileName}";
+                // Upload file to the server 
+                if(move_uploaded_file($params->image["tmp_name"], $fileName)){}
+            }
+        }
+
 		/** Check the username if not empty */
 		if(!isset($params->username) || (isset($params->username) && strlen($params->username) < 3)) {
 			return ["code" => 203, "data" => "Sorry! Username must be at least 6 characters long."];
@@ -348,7 +367,7 @@ class Users extends Myschoolgh {
 			// insert the user information
 			$stmt = $this->db->prepare("
 				INSERT INTO users SET item_id = ?, user_type = ?, access_level = ?,
-				verify_token = ?, token_expiry = ?, changed_password = ?
+				verify_token = ?, token_expiry = ?, changed_password = ?, status = '1'
 				".(isset($params->unique_id) ? ", unique_id='{$params->unique_id}'" : null)."
 				".(!empty($params->clientId) ? ", client_id='{$params->clientId}'" : null)."
 				".(isset($params->firstname) ? ", firstname='{$params->firstname}'" : null)."
@@ -361,6 +380,8 @@ class Users extends Myschoolgh {
 				".(isset($params->position) ? ", position='{$params->position}'" : null)."
 				".(isset($params->created_by) ? ", created_by='{$params->created_by}'" : null)."
 				".(isset($encrypt_password) ? ", password='{$encrypt_password}'" : null)."
+
+				".(isset($fileName) ? ", image='{$fileName}'" : null)."
 
 				".(isset($params->enrollment_date) ? ", enrollment_date='{$params->enrollment_date}'" : null)."
 				".(isset($params->class_id) ? ", class_id='{$params->class_id}'" : null)."
@@ -499,6 +520,25 @@ class Users extends Myschoolgh {
 			}
 		}
 
+		// confirm that a logo was parsed
+        if(isset($params->image)) {
+            // set the upload directory
+            $uploadDir = "assets/img/users/";
+            // File path config 
+            $fileName = basename($params->image["name"]); 
+            $targetFilePath = $uploadDir . $fileName; 
+            $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+            // Allow certain file formats 
+            $allowTypes = array('jpg', 'png', 'jpeg');            
+            // check if its a valid image
+            if(!empty($fileName) && in_array($fileType, $allowTypes)){
+                // set a new filename
+                $fileName = $uploadDir . random_string('alnum', 10)."__{$fileName}";
+                // Upload file to the server 
+                if(move_uploaded_file($params->image["tmp_name"], $fileName)){}
+            }
+        }
+
 		// insert the user information
 		try {
 
@@ -527,6 +567,8 @@ class Users extends Myschoolgh {
 				".(isset($params->email) ? ", email='{$params->email}'" : null)."
 				".(isset($params->residence) ? ", residence='{$params->residence}'" : null)."
 				".(isset($params->gender) ? ", gender='{$params->gender}'" : null)."
+
+				".(isset($fileName) ? ", image='{$fileName}'" : null)."
 
 				".(isset($params->unique_id) ? ", unique_id='{$params->unique_id}'" : null)."
 				".(isset($params->class_id) ? ", class_id='{$params->class_id}'" : null)."

@@ -53,6 +53,12 @@ $response->html = '
                             </div>
                             <div class="col-lg-4 col-md-6">
                                 <div class="form-group">
+                                    <label for="image">Student Image</label>
+                                    <input type="file" name="image" id="image" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6">
+                                <div class="form-group">
                                     <label for="unique_id">Student ID (optional)</label>
                                     <input type="text" name="unique_id" id="unique_id" class="form-control">
                                 </div>
@@ -69,7 +75,7 @@ $response->html = '
                                     <select name="gender" id="gender" class="form-control selectpicker">
                                         <option value="null">Select Gender</option>';
                                         foreach($myClass->pushQuery("*", "users_gender") as $each) {
-                                            $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";                            
+                                            $response->html .= "<option value=\"{$each->name}\">{$each->name}</option>";                            
                                         }
                 $response->html .= '</select>
                                 </div>
