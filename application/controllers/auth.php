@@ -46,7 +46,7 @@ class Auth extends Myschoolgh {
                 SELECT 
                     u.id, u.password, u.item_id AS user_id, 
                     u.access_level, u.username, u.client_id, 
-                    u.status AS activated, u.email, u.user_type, u.company_id
+                    u.status AS activated, u.email, u.user_type
                 FROM users u
                 WHERE u.username = ? AND u.deleted =  ? LIMIT 1
             ");
@@ -141,7 +141,7 @@ class Auth extends Myschoolgh {
                             // log the history record
                             $stmt = $this->db->prepare("INSERT INTO users_login_history 
                                 SET username='{$params->username}', client_id='{$results->client_id}', log_ipaddress='{$ip}', log_browser='{$br}', 
-                                user_id='{$session->userId}', log_platform='{$this->agent}', company_id = '{$results->company_id}'
+                                user_id='{$session->userId}', log_platform='{$this->agent}'
                             ");
                             $stmt->execute();
 

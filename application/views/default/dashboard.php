@@ -5,8 +5,25 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
+// if no referer was parsed
+if(!isset($_SERVER["HTTP_REFERER"])) {
+    header("location: {$config->base_url("main")}");
+    exit;
+}
+
 // initial variables
 $appName = config_item("site_name");
+
+// confirm that user id has been parsed
+global $SITEURL, $usersClass;
+$loggedUserId = $session->userId;
+$cur_user_id = (confirm_url_id(1)) ? xss_clean($SITEURL[1]) : $loggedUserId;
+
+// the query parameter to load the user information
+$i_params = (object) ["limit" => 1, "user_id" => $loggedUserId];
+
+// get the user data
+$userData = $usersClass->list($i_params)["data"][0];
 
 // filters
 $filters = [
@@ -39,6 +56,11 @@ $response->scripts = [
     "assets/js/page/index.js"
 ];
 
+// get the list of users
+$iusers = (object) ["user_type" => $userData->user_type];
+$iusers_list = $usersClass->list($iusers)["data"];
+
+// set the response dataset
 $response->html = '
     <section class="section">
         <div class="d-flex mt-3 justify-content-between">
@@ -194,6 +216,7 @@ $response->html .= '</select>
         </div>
 
     </section>';
+
 // print out the response
 echo json_encode($response);
 ?>

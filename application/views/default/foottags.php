@@ -65,8 +65,9 @@
     <script src="<?= $baseUrl; ?>assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/inputmask/jquery.inputmask.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/magnify.js"></script>
+    <script src="<?= $baseUrl; ?>assets/js/notify.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/trix/trix.js"></script>
-
+    <script src="<?= $baseUrl; ?>assets/bundles/bootstrap-daterangepicker/daterangepicker.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
     
     <script src="<?= $baseUrl; ?>assets/js/myschoolgh.js"></script>

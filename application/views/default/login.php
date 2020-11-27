@@ -1,5 +1,13 @@
 <?php
 $baseUrl = $config->base_url();
+$user_current_url = current_url();
+
+// if the user is not loggedin then show the login form
+if($usersClass->loggedIn()) { 
+    header("location: {$config->base_url("main")}");
+    exit;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -13,6 +21,7 @@ $baseUrl = $config->base_url();
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/components.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
   <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
+  <link id="current_url" name="current_url" value="<?= $user_current_url ?>">
 </head>
 
 <body>

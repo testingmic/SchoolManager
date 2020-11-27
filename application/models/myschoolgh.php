@@ -41,6 +41,33 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * client_data
+	 * 
+	 * @param String $clientId
+	 * 
+	 * @return Object
+	 */
+	public function client_data($clientId = null) {
+
+		$clientId = !empty($clientId) ? $clientId : (!empty($this->clientId) ? $this->clientId : $this->session->clientId);
+
+		try {
+
+			$stmt = $this->db->prepare("SELECT * FROM clients_accounts WHERE client_id = ? AND client_status = ? LIMIT 1");
+			$stmt->execute([$clientId, 1]);
+			
+			$data = [];
+			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+				$result->client_preferences = json_decode($result->client_preferences);
+				$data[] = $result;
+			}
+			return !(empty($data)) ? $data[0] : (object) [];
+		} catch(PDOException $e) {
+			return (object) [];
+		}
+	}
+
+	/**
 	 * @method lastRowId()
 	 * @param $tableName The user needs to specify the table name for the query
 	 * @return $rowId

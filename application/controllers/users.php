@@ -59,6 +59,7 @@ class Users extends Myschoolgh {
 			$params->query .= (isset($params->username)) ? " AND a.username='{$params->username}'" : null;
 			$params->query .= (isset($params->gender)) ? " AND a.gender='{$params->gender}'" : null;
 		}
+		$params->query .= isset($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
 
 		// if a search parameter was parsed in the request
 		$order_by = "ORDER BY a.id ASC";
@@ -98,6 +99,9 @@ class Users extends Myschoolgh {
 					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
 					(SELECT COUNT(*) FROM users b WHERE (b.created_by = a.item_id) AND a.deleted='0') AS clients_count,
 					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
+					(SELECT name FROM classes WHERE classes.item_id = a.class_id LIMIT 1) AS class_name,
+					(SELECT name FROM departments WHERE departments.item_id = a.department LIMIT 1) AS department_name,
+					(SELECT programme_name FROM programmes WHERE programmes.item_id = a.programme LIMIT 1) AS programme_name,
 					(SELECT phone_number FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_phone
 				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions
 				FROM users a 
@@ -128,16 +132,6 @@ class Users extends Myschoolgh {
 						
 						// set the label for the policy
 						$result->the_status_label = $this->the_status_label($result->user_status);
-
-						// if the user type is a user or business
-						if(in_array($result->user_type, ["user", "business"])) {
-							// the details of the user 
-							$result->assigned_details = "
-								<span title=\"Click to the view details of the agent handling this account.\" class=\"cursor\" onclick=\"return user_basic_information('{$result->created_by}')\">
-									<br><i style=\"font-size:10px\" class=\"fa fa-user\"></i> {$result->created_by_name}
-									<br><i style=\"font-size:10px\" class=\"fa fa-phone\"></i> {$result->phone_number}
-								</span>";
-						}
 
 						// action buttons
 						$result->action .= " &nbsp; <a class='btn p-1 btn-outline-success m-0 btn-sm' title='Click to view details of this policy' href='{$this->baseUrl}profile/{$result->user_id}'><i class='fa fa-eye'></i></a>";
@@ -239,12 +233,9 @@ class Users extends Myschoolgh {
 		if($loggedInAccount || (isset($params->remote) && $params->remote)) {
 
 			/** If not permitted */
-			if(!$accessObject->hasAccess("add", "users")) {
+			if(!$accessObject->hasAccess("add", $params->user_type)) {
 				return ["code" => 201, "data" => $this->permission_denied];
 			}
-
-			/** Set the username as the client id provided by the company */
-			$params->username = !empty($params->clientId) ? strtoupper($params->clientId) : null;
 
 			/** Generate a random password */
 			$params->password = random_string("alnum", 12);
@@ -265,21 +256,6 @@ class Users extends Myschoolgh {
 			
 		}
 
-		// get the username from the email address parsed
-		if(isset($params->portal_registration)) {
-			// get the username
-			$params->username = explode("@", $params->email)[0];
-
-			// confirm that the confirm password was parsed
-			if(!isset($params->password) || !isset($params->password_2)) {
-				return ["code" => 203, "data" => "Sorry! Please confirm the password entered."];
-			}
-			// confirm if the passwords match
-			if($params->password !== $params->password_2) {
-				return ["code" => 203, "data" => "Sorry! The passwords do not match."];
-			}
-		}
-
 		/** Check the username if not empty */
 		if(!isset($params->username) || (isset($params->username) && strlen($params->username) < 3)) {
 			return ["code" => 203, "data" => "Sorry! Username must be at least 6 characters long."];
@@ -296,7 +272,7 @@ class Users extends Myschoolgh {
 		}
 
 		// set the user type
-		$params->user_type = isset($params->user_type) && !empty($params->user_type) ? $params->user_type : "user";
+		$params->user_type = isset($params->user_type) && !empty($params->user_type) ? $params->user_type : "student";
 		
 		// confirm that the username does not already exist
 		$i_params = (object) ["limit" => 1, "username" => $params->username];
@@ -330,6 +306,21 @@ class Users extends Myschoolgh {
 			return ["code" => 203, "data" => "Sorry! The email is already in use."];
 		}
 
+		// generate a new unique user id
+		$counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='{$params->user_type}'") + 1), $this->append_zeros);
+        $unique_id = $this->client_data($params->clientId)->client_preferences->labels->{"{$params->user_type}_label"}.$counter.date("Y");
+		// set the unique id
+		$params->unique_id = isset($params->unique_id) && !empty($params->unique_id) ? $params->unique_id : $unique_id;
+
+		// grouping guardian
+		$guardian = [];
+		if(isset($params->guardian_info) && is_array($params->guardian_info)) {
+			foreach($params->guardian_info as $key => $value) {
+				foreach($value as $kk => $vv) {
+					$guardian[$kk][$key] = $vv;
+				}
+			}
+		}
 		// insert the user information
 		try {
 
@@ -358,6 +349,7 @@ class Users extends Myschoolgh {
 			$stmt = $this->db->prepare("
 				INSERT INTO users SET item_id = ?, user_type = ?, access_level = ?,
 				verify_token = ?, token_expiry = ?, changed_password = ?
+				".(isset($params->unique_id) ? ", unique_id='{$params->unique_id}'" : null)."
 				".(!empty($params->clientId) ? ", client_id='{$params->clientId}'" : null)."
 				".(isset($params->firstname) ? ", firstname='{$params->firstname}'" : null)."
 				".(isset($params->lastname) ? ", lastname='{$params->lastname}'" : null)."
@@ -369,6 +361,15 @@ class Users extends Myschoolgh {
 				".(isset($params->position) ? ", position='{$params->position}'" : null)."
 				".(isset($params->created_by) ? ", created_by='{$params->created_by}'" : null)."
 				".(isset($encrypt_password) ? ", password='{$encrypt_password}'" : null)."
+
+				".(isset($params->enrollment_date) ? ", enrollment_date='{$params->enrollment_date}'" : null)."
+				".(isset($params->class_id) ? ", class_id='{$params->class_id}'" : null)."
+				".(isset($params->blood_group) ? ", blood_group='{$params->blood_group}'" : null)."
+				".(isset($params->religion) ? ", religion='{$params->religion}'" : null)."
+				".(isset($params->section) ? ", section='{$params->section}'" : null)."
+				".(isset($params->programme) ? ", programme='{$params->programme}'" : null)."
+				".(isset($params->department) ? ", department='{$params->department}'" : null)."
+
 				".(isset($params->residence) ? ", residence='{$params->residence}'" : null)."
 				".(isset($params->phone) ? ", phone_number='{$params->phone}'" : null)."
 				".(isset($params->phone_2) ? ", phone_number_2='{$params->phone_2}'" : null)."
@@ -386,27 +387,36 @@ class Users extends Myschoolgh {
 			$stmt->execute([$params->user_id, $params->user_type, $access_level, $token, $token_expiry, $params->changed_password]);
 
 			// log the user access level
-			$stmt2 = $this->db->prepare("INSERT INTO users_roles SET user_id = ?, permissions = ?");
-			$stmt2->execute([$params->user_id, $permissions]);
+			$stmt2 = $this->db->prepare("INSERT INTO users_roles SET user_id = ?, client_id = ?, permissions = ?");
+			$stmt2->execute([$params->user_id, $params->clientId, $permissions]);
 
-			// email comfirmation link
-			$message = "Hello {$params->firstname},";
+			// insert the user guardian information
+			$stmt = $this->db->prepare("INSERT INTO users_guardian SET user_id = ?, guardian_information = ?");
+			$stmt->execute([$params->user_id, json_encode($guardian)]);
+			
+			// if the email address was parsed
+			if(isset($params->email) && filter_var($params->email, FILTER_VALIDATE_EMAIL)) {
 
-			$message .= '<a class="alert alert-success" href="'.config_item('base_url').'verify?account&token='.$token.'">Verify your account</a>';
-			$message .= '<br><br>If it does not work please copy this link and place it in your browser url.<br><br>';
-			$message .= config_item('base_url').'verify?account&token='.$token;
+				// email comfirmation link
+				$message = "Hello {$params->firstname},";
 
-			// recipient list
-			$reciepient = ["recipients_list" => [["fullname" => $params->fullname,"email" => $params->email,"customer_id" => $params->user_id]]];
+				$message .= '<a class="alert alert-success" href="'.config_item('base_url').'verify?account&token='.$token.'">Verify your account</a>';
+				$message .= '<br><br>If it does not work please copy this link and place it in your browser url.<br><br>';
+				$message .= config_item('base_url').'verify?account&token='.$token;
 
-			// insert the email content to be processed by the cron job
-			$stmt = $this->db->prepare("
-				INSERT INTO users_messaging_list SET template_type = ?, item_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?, users_id = ?
-			");
-			$stmt->execute([
-				'account-verify', random_string("alnum", 32), json_encode($reciepient),
-				$params->created_by, "[".config_item('site_name')."] Account Verification", $message, $params->user_id
-			]);
+				// recipient list
+				$reciepient = ["recipients_list" => [["fullname" => $params->fullname,"email" => $params->email,"customer_id" => $params->user_id]]];
+
+				// insert the email content to be processed by the cron job
+				$stmt = $this->db->prepare("
+					INSERT INTO users_messaging_list SET template_type = ?, item_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?, users_id = ?
+				");
+				$stmt->execute([
+					'account-verify', random_string("alnum", 32), json_encode($reciepient),
+					$params->created_by, "[".config_item('site_name')."] Account Verification", $message, $params->user_id
+				]);
+
+			}
 			
 			// insert the user activity
 			$this->userLogs("account-verify", $params->user_id, null, "{$params->fullname} - verify account by clicking on the link sent to the provided email address.", $params->created_by, null);
@@ -517,6 +527,16 @@ class Users extends Myschoolgh {
 				".(isset($params->email) ? ", email='{$params->email}'" : null)."
 				".(isset($params->residence) ? ", residence='{$params->residence}'" : null)."
 				".(isset($params->gender) ? ", gender='{$params->gender}'" : null)."
+
+				".(isset($params->unique_id) ? ", unique_id='{$params->unique_id}'" : null)."
+				".(isset($params->class_id) ? ", class_id='{$params->class_id}'" : null)."
+				".(isset($params->blood_group) ? ", blood_group='{$params->blood_group}'" : null)."
+				".(isset($params->religion) ? ", religion='{$params->religion}'" : null)."
+				".(isset($params->section) ? ", section='{$params->section}'" : null)."
+				".(isset($params->programme) ? ", programme='{$params->programme}'" : null)."
+				".(isset($params->department) ? ", department='{$params->department}'" : null)."
+				".(isset($params->enrollment_date) ? ", enrollment_date='{$params->enrollment_date}'" : null)."
+
 				".(isset($params->username) ? ", username='{$params->username}'" : null)."
 				".(isset($params->created_by) ? ", created_by='{$params->created_by}'" : null)."
 				".(isset($params->password) ? ", password='{$params->password}'" : null)."

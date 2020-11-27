@@ -6,15 +6,16 @@
 $.protocol = window.location.protocol;
 $.host = window.location.host;
 $.baseurl = $.protocol + "//" + $.host + "/myschool_gh";
+$.default = $.protocol + "//" + $.host + "/myschool_gh/main";
 $.pagecontent = $("#pagecontent");
 $.mainprogress = $(".main-progress-bar");
 $.pageoverlay = $(".pageoverlay");
 $.pageloader = $(".loader");
-$.env = "production";
+$.env = "development";
 $.chatinterval = 2000;
 
 //Main navigation
-$.navigation = $('nav > ul.nav');
+$.navigation = $(`aside[id="sidebar-wrapper"] ul[class~="sidebar-menu"] > li`);
 
 $.panelIconOpened = 'icon-arrow-up';
 $.panelIconClosed = 'icon-arrow-down';
@@ -25,8 +26,8 @@ $.maxTimetableTime = '6:00 PM';
 'use strict';
 var devlog = $.env == "development" ? console.log : () => {}
 
-$(window).on("beforeunload", () => {
-    $('.pageoverlay').css({ "display": "none" });
+$(window).on("beforeunload", (evt) => {
+    window.location.href = `${baseUrl}main`;
 });
 
 var strings = {
@@ -238,7 +239,7 @@ var linkHandler = (target, pushstate) => {
 
     let callback = getCallback(target)
 
-    if (target.slice(0, -1) === $.baseurl || target === $.baseurl) {
+    if (target.slice(0, -1) === $.baseurl || target === $.baseurl || target === $.default) {
         target = $.baseurl + "/dashboard"
     }
 
@@ -348,8 +349,8 @@ var loadPage = (loc, callback, pushstate) => {
             initDataTables();
             linkClickStopper($.pagecontent)
             formSubmitStopper($.pagecontent)
-                // var prev = window.history.state === null ? null : window.history.state.current
-                // if (pushstate !== false) window.history.pushState({ previous: prev, current: loc }, "", loc)
+            var prev = window.history.state === null ? null : window.history.state.current
+            if (pushstate !== false) window.history.pushState({ previous: prev, current: loc }, "", loc)
 
             if (window.history.state === null) {
                 $("#history-back, #history-forward").addClass("disabled");
@@ -370,14 +371,6 @@ var loadPage = (loc, callback, pushstate) => {
                     title: err.status === 404 ? "404" : "OOPS!",
                     text: err.status === 404 ? "Page Not Found\nThe page you are requesting cannot be found" : "Something went wrong. Please try again",
                     icon: "error",
-                    showCancelButton: true,
-                    confirmButtonColor: "#DD6B55",
-                    cancelButtonText: "Ok",
-                    confirmButtonText: "Go To Dashboard",
-                    showLoaderOnConfirm: false,
-                    closeOnConfirm: true,
-                    allowClickOutside: false,
-                    allowEscapeKey: false
                 });
             }
             console.log(err)
@@ -398,27 +391,23 @@ var loadFormAction = (form) => {
             $.pageoverlay.show()
         },
         success: (result) => {
-            var urlLink = result.extra === undefined ? null : result.extra.link || null
-            var error = result.extra === undefined ? null : result.extra.error || null
-            var success = result.extra === undefined ? null : result.extra.success || null
+            var urlLink = result.data.additional === undefined ? null : result.data.additional.href || null
+            var error = result.code === 200 ? null : result.data.result || null
+            var success = result.code === 200 ? null : result.data.result || null
             progress.complete($.mainprogress, false)
-            $.pageoverlay.hide()
+            $.pageoverlay.hide();
 
             if (error !== null) notify(error)
-            if (success !== null) notify(success, "success")
 
-            $.pagecontent.html($.parseHTML(result.html))
-            document.title = result.title
-            init()
-            getCallback(window.location)(true)
-            linkClickStopper($.pagecontent)
-            formSubmitStopper($.pagecontent)
-                // if(urlLink !== null) window.history.pushState({link:urlLink}, "", urlLink)
-
-            var prev = window.history.state === null ? null : window.history.state.current
-            window.history.pushState({ previous: prev, current: urlLink }, "", urlLink)
-
-            setActiveNavLink()
+            if (result.code == 200) {
+                if (result.data.additional !== undefined) {
+                    if (result.data.additional.clear) {
+                        $(`form[class~="ajaxform"] input`).val("");
+                        $(`form[class~="ajaxform"] select`).val("null").change();
+                    }
+                }
+                notify(success, "success");
+            }
         },
         error: (err) => {
             console.log(err)
@@ -641,23 +630,13 @@ var initMainMenu = () => {
 }
 
 var initPlugins = () => {
-    if ($('.datetimepicker').length > 0) {
-        $('.datetimepicker').datetimepicker({
-            format: "d-m-Y h:i A",
-            scrollInput: false,
-            timepicker: true
-        });
-    }
 
     if ($('.datepicker').length > 0) {
-        $('.datepicker').datetimepicker({
-            format: "d-m-Y",
-            timepicker: false,
-            closeOnDateSelect: true,
-            scrollInput: false,
-            onSelectDate: (selected, element) => {
-                element.trigger('input');
-            }
+        $('.datepicker').daterangepicker({
+            locale: { format: 'YYYY-MM-DD' },
+            singleDatePicker: true,
+            drops: 'down',
+            opens: 'right'
         });
     }
 
@@ -710,6 +689,7 @@ var setActiveNavLink = () => {
     devlog("setActiveNavLink() I called =>")
     var splitter = String(window.location).split('/');
     var cUrl = splitter[0];
+
     if (cUrl.substr(cUrl.length - 1) == '#') {
         cUrl = cUrl.slice(0, -1);
     } else {
@@ -723,15 +703,15 @@ var setActiveNavLink = () => {
     }
     cUrl = cUrl.charAt(cUrl.length - 1) == '/' && cUrl != $.baseurl + '/' ? cUrl.slice("/", -1) : cUrl;
 
+    $.navigation.removeClass('active');
+
     $.navigation.find('a').each((index, el) => {
         if ($(el)[0].href == cUrl) {
-            let parentDropdown = $(el).parents("ul.nav-dropdown-items").parent()
-            $(el).addClass('active');
-            parentDropdown.addClass('open');
-            $("li.nav-dropdown").not(parentDropdown).removeClass("open")
-        } else {
-            $(el).removeClass('active');
-        }
+            let parentDropdown = $(el).parent("li").parent("ul");
+            parentDropdown.css("display", "block");
+            $("ul.dropdown-menu").not(parentDropdown).css("display", "none");
+            $(el).parent("li").parent("ul").parent("li").addClass('active');
+        } else {}
     });
 }
 
@@ -1085,61 +1065,8 @@ var notifyInbox = (text) => {
     });
 }
 
-var notify = (text, type, delay) => {
-    var animateEnter = 'animated bounceIn',
-        animateExit = 'animated fadeOutUp',
-        allowDismiss = true;
-
-    var classNames = ["error", "success", "info", "primary", "warning"];
-
-    if (!classNames.includes(type)) type = 'error';
-
-    switch (type) {
-        case "success":
-            icon = "<i class='fa fa-thumbs-up'></i>";
-            break;
-        default:
-            icon = "<i class='fa fa-exclamation-circle'></i>";
-            break;
-    }
-    if (type == "error") colorName = 'card-danger';
-    else colorName = 'card-' + type;
-
-    if (delay === null || delay === undefined) delay = 5000;
-    if (text === null || text === undefined) text = 'Error Processing Request';
-
-    $.notify({
-        message: "<b class='text-white'>" + text + "</b>",
-        title: type.toUpperCase()
-    }, {
-        type: colorName,
-        allow_dismiss: allowDismiss,
-        newest_on_top: true,
-        timer: 1000,
-        z_index: 2000,
-        delay: delay,
-        placement: {
-            from: "top",
-            align: "center"
-        },
-        animate: {
-            enter: animateEnter,
-            exit: animateExit
-        },
-        template: '<div data-notify="container" class="card alert alert-dismissible {0} p-0 b-shadow-2 ' + (allowDismiss ? "p-r-35" : "") + '" role="alert">' +
-            '<div class="card-header">' +
-            '<button type="button" aria-hidden="true" class="btn btn-transparent font-xl" style="margin-top:-5px" data-notify="dismiss"><i class="icon-close text-gray-dark font-sm"></i></button>' +
-            '<span data-notify="icon">' + icon + '</span> ' +
-            '<span data-notify="title" class="font-weight-bold">{1}</span> ' +
-            '</div>' +
-            '<div class="card-block">' +
-            '<span data-notify="message">{2}</span>' +
-            '<div class="progress" data-notify="progressbar">' +
-            '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
-            '</div>' +
-            '<a href="{3}" target="{4}" data-notify="url"></a>' +
-            '</div></div>'
-    });
+var notify = (text, type = "error") => {
+    $.notify(text, type);
 }
 
 var notifySettingUnset = (text) => {
@@ -1272,4 +1199,6 @@ var randomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
