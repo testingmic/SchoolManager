@@ -24,12 +24,6 @@
     <?php // below variables can be found in modal_helper.php ?>
     <?= ajax_forms_modal($auto_close_modal); ?>
     <?= replies_modal($auto_close_modal); ?>
-    <?= user_preferences_modal($auto_close_modal, $userData->user_type); ?>
-    <?= resource_information_modal(); ?>
-    <?= ajax_form_button(); ?>
-    <?php if(in_array($SITEURL[0], ["policies", "claims"])) { ?>
-        <?= discard_form(); ?>
-    <?php } ?>
     <?= general_modal(); ?>
     <?= save_form_data(); ?>
     <div id="announcement_preview"></div>

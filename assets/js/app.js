@@ -373,7 +373,6 @@ var loadPage = (loc, callback, pushstate) => {
                     icon: "error",
                 });
             }
-            console.log(err)
         }
     })
 }
@@ -409,9 +408,7 @@ var loadFormAction = (form) => {
                 notify(success, "success");
             }
         },
-        error: (err) => {
-            console.log(err)
-        }
+        error: (err) => {}
     })
 }
 

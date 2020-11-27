@@ -53,3 +53,4 @@ $(`div[id="student_guardian_list"] button[class~="append-row"]`).on('click', fun
     $(`select[class~="selectpicker"]`).select2();
     removeRow();
 });
+removeRow();

@@ -99,9 +99,12 @@ class Users extends Myschoolgh {
 					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
 					(SELECT COUNT(*) FROM users b WHERE (b.created_by = a.item_id) AND a.deleted='0') AS clients_count,
 					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
-					(SELECT name FROM classes WHERE classes.item_id = a.class_id LIMIT 1) AS class_name,
-					(SELECT name FROM departments WHERE departments.item_id = a.department LIMIT 1) AS department_name,
-					(SELECT programme_name FROM programmes WHERE programmes.item_id = a.programme LIMIT 1) AS programme_name,
+					(SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
+					(SELECT name FROM departments WHERE departments.id = a.department LIMIT 1) AS department_name,
+					(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name,
+					(SELECT guardian_information FROM users_guardian WHERE users_guardian.user_id = a.item_id LIMIT 1) AS guardian_information,
+					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name,
+					(SELECT programme_name FROM programmes WHERE programmes.id = a.programme LIMIT 1) AS programme_name,
 					(SELECT phone_number FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_phone
 				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions
 				FROM users a 
@@ -123,6 +126,7 @@ class Users extends Myschoolgh {
 					// unset the id
 					unset($result->id);
 					$result->action = "";
+					$result->guardian_information = json_decode($result->guardian_information);
 
 					// if not a remote 
 					if(!$params->remote) {
