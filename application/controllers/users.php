@@ -543,6 +543,16 @@ class Users extends Myschoolgh {
             }
         }
 
+		// grouping guardian
+		$guardian = [];
+		if(isset($params->guardian_info) && is_array($params->guardian_info)) {
+			foreach($params->guardian_info as $key => $value) {
+				foreach($value as $kk => $vv) {
+					$guardian[$kk][$key] = $vv;
+				}
+			}
+		}
+
 		// insert the user information
 		try {
 
@@ -598,74 +608,87 @@ class Users extends Myschoolgh {
 				".(isset($params->country) ? ", country='{$params->country}'" : null)."
 				".(isset($params->city) ? ", city='{$params->city}'" : null)."
 				".(isset($params->date_of_birth) ? ", date_of_birth='{$params->date_of_birth}'" : null)."
+				
 				WHERE item_id = ? LIMIT 1
 			");
 
 			// execute the insert user data
 			$stmt->execute([$params->user_id]);
 
+			// update the user guardian information
+			$stmt = $this->db->prepare("UPDATE users_guardian SET guardian_information = ? WHERE user_id = ? LIMIT 1");
+			$stmt->execute([json_encode($guardian), $params->user_id]);
+
 			// save the name change
             if(isset($params->fullname) && ($prevData->name !== $params->fullname)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->name, "Name was changed from {$prevData->name}", $params->userId);
+
+				// set the value
+				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
             }
 
 			// save the email address
             if(isset($params->email) && ($prevData->email !== $params->email)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->email, "Email Address was changed from {$prevData->email}", $params->userId);
+				// set the value
+				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
             }
 			
 			// save the postal address changes
             if(isset($params->address) && ($prevData->address !== $params->address)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->address, "Postal Address has been changed.", $params->userId);
+				// set the value
+				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
             }
 
 			// save the date of birth change
             if(isset($params->date_of_birth) && ($prevData->date_of_birth !== $params->date_of_birth)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->date_of_birth, "Date of Birth has been changed to {$params->date_of_birth}", $params->userId);
+				// set the value
+				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
             }
 
 			// save the phone_number change
             if(isset($params->phone) && ($prevData->phone_number !== $params->phone)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->phone_number, "Primary Contact was been changed from {$prevData->phone_number}", $params->userId);
+				// set the value
+				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
             }
 
 			// save the phone_number_2 change
             if(isset($params->phone_2) && ($prevData->phone_number !== $params->phone_2)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->phone_number_2, "Primary Contact was been changed from {$prevData->phone_number_2}", $params->userId);
+				// set the value
+				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
             }
 			
 			// save the occupation
             if(isset($params->occupation) && ($prevData->occupation !== $params->occupation)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->occupation, "Occupation has been altered. {$prevData->occupation} => {$params->occupation}", $params->userId);
+				// set the value
+				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
             }
 			
 			// save the employer
             if(isset($params->employer) && ($prevData->employer !== $params->employer)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->employer, "Employer details has been altered. {$prevData->employer} => {$params->employer}", $params->userId);
+				// set the value
+				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
             }
 			
 			// save the position
             if(isset($params->position) && ($prevData->position !== $params->position)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->position, "Position has been altered. {$prevData->position} => {$params->position}", $params->userId);
+				// set the value
+				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
             }
 
 			// insert the user activity
 			if($params->user_id == $params->userId) {
 				// Insert the log
 				$this->userLogs("user-account", $params->user_id, $prevData, "You updated your account information", $params->userId);
-				
-				// load the new details and push back as a response
-				$i_params = (object) ["limit" => 1, "user_id" => $params->user_id];
-				
 				// set the value
-				$additional = [
-					[
-						"modify" => "idb",
-						"section" => "all",
-						"field" => "user_information",
-						"data" => $this->list($i_params)["data"][0]
-					]
-				];
+				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
 			} else {
 				// notification object
 				global $noticeClass;

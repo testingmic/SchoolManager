@@ -390,22 +390,28 @@ var loadFormAction = (form) => {
             $.pageoverlay.show()
         },
         success: (result) => {
-            var urlLink = result.data.additional === undefined ? null : result.data.additional.href || null
-            var error = result.code === 200 ? null : result.data.result || null
-            var success = result.code === 200 ? null : result.data.result || null
+            var urlLink = result.data.additional === undefined ? null : result.data.additional.href || null;
+            var error = result.code === 200 ? null : result.data.result || null;
             progress.complete($.mainprogress, false)
             $.pageoverlay.hide();
 
             if (error !== null) notify(error)
 
             if (result.code == 200) {
+                swal({
+                    position: 'top',
+                    text: result.data.result,
+                    icon: "success",
+                });
                 if (result.data.additional !== undefined) {
-                    if (result.data.additional.clear) {
+                    if (result.data.additional.clear !== undefined) {
                         $(`form[class~="ajaxform"] input`).val("");
                         $(`form[class~="ajaxform"] select`).val("null").change();
                     }
+                    if (result.data.additional.href !== undefined) {
+                        loadPage(result.data.additional.href);
+                    }
                 }
-                notify(success, "success");
             }
         },
         error: (err) => {}

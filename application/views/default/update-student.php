@@ -113,6 +113,10 @@ if(!empty($user_id)) {
                             <span class="float-right text-muted">'.$data->enrollment_date.'</span>
                         </p>
                         <p class="clearfix">
+                            <span class="float-left">Gender</span>
+                            <span class="float-right text-muted">'.$data->gender.'</span>
+                        </p>
+                        <p class="clearfix">
                             <span class="float-left">Section</span>
                             <span class="float-right text-muted">'.$data->section_name.'</span>
                         </p>

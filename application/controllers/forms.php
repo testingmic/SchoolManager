@@ -22,7 +22,8 @@ class Forms extends Myschoolgh {
 
         // if the guardian information is parsed
         if(!empty($userData->guardian_information)) {
-            
+            // user id
+            $guardian .= '<input type="hidden" id="user_id" value="'.$userData->user_id.'" name="user_id" value="student">';
             // loop through the information
             foreach($userData->guardian_information as $key => $eachItem) {
                 $key_id = $key;
@@ -138,13 +139,13 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="phone">Primary Contact</label>
-                        <input type="text" name="phone" value="'.($userData->phone ?? null).'" id="phone" class="form-control">
+                        <input type="text" name="phone" value="'.($userData->phone_number ?? null).'" id="phone" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="phone_2">Secondary Contact</label>
-                        <input type="text" name="phone_2" value="'.($userData->phone_2 ?? null).'" id="phone_2" class="form-control">
+                        <input type="text" name="phone_2" value="'.($userData->phone_number_2 ?? null).'" id="phone_2" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -173,7 +174,7 @@ class Forms extends Myschoolgh {
                                 $response .= "<option ".($isData && ($each->id == $userData->blood_group) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
-                        <input type="hidden" id="user_type" name="user_type" value="student">
+                        <input type="hidden" id="user_type" name="user_type" value="'.(!$isData ? "student" : null).'">
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12">
