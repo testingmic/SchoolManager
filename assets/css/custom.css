@@ -210,3 +210,19 @@
 textarea.form-control {
     height: 100px !important;
 }
+
+.attachment-container .file-options {
+    position: absolute;
+    right: 2px;
+    top: 3px;
+}
+
+.attachment-container .attachment-item:hover .file-options {
+    display: block!important;
+}
+
+.attachment-container .attachment-item {
+    padding-top: 10px;
+    max-height: 180px;
+    overflow: hidden;
+}

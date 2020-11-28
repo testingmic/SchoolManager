@@ -1154,6 +1154,7 @@ $(`div[id="ajaxFormSubmitModal"] button[class~="btn-outline-success"]`).on("clic
                 });
 
                 if (response.data.additional) {
+
                     if (response.data.additional.clear) {
                         if ($(`textarea[name="faketext"]`).length) {
                             CKEDITOR.instances['ajax-form-content'].setData("");
@@ -1176,9 +1177,13 @@ $(`div[id="ajaxFormSubmitModal"] button[class~="btn-outline-success"]`).on("clic
                         });
                     }
                     if (response.data.additional.href !== undefined) {
-                        loadPage(response.data.additional.href);
+                        setTimeout(() => {
+                            loadPage(response.data.additional.href);
+                        }, 2000);
                     }
                 }
+
+                $form_modal.modal("hide");
                 $(`form[class="ajax-data-form"] div[class~="file-preview"]`).html("");
             } else {
                 if (response.data.result !== undefined) {
@@ -1310,6 +1315,7 @@ var form_loader = async(form_module, module_item_id) => {
             $form_body.html(formRecord.form);
 
             initPlugins();
+            init_image_popup();
 
             $(`div[class~="trix-button-row"] span[class~="trix-button-group--file-tools"], div[class~="trix-button-row"] span[class~="trix-button-group-spacer"]`).remove();
 
@@ -1352,4 +1358,32 @@ var load_quick_form = async(module, module_item_id) => {
     $form_body.html($form_loader);
 
     form_loader(module, module_item_id);
+}
+
+var init_image_popup = () => {
+    $(`a[class~="image-popup"]`).magnificPopup({
+        type: 'image',
+        callbacks: {
+            beforeOpen: function() {
+                this.st.image.markup = this.st.image.markup.replace('mfp-figure', 'mfp-figure animated zoomInDown');
+            }
+        },
+        gallery: {
+            enabled: true
+        }
+    });
+}
+
+var delete_existing_file_attachment = async(record_id) => {
+    let module = {
+        "module": "remove_existing",
+        "label": record_id
+    };
+    await $.post(`${baseUrl}api/files/attachments`, module).then((response) => {
+        if (response.code == 200) {
+            if (response.data.result == "File deleted!") {
+                $(`div[data-file_container="${record_id}"]`).remove();
+            }
+        }
+    });
 }

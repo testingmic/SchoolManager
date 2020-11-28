@@ -30,6 +30,7 @@ class Models {
         $this->form_modules = [
             "course_unit_form" => "Lesson Planner: Course Unit",
             "course_lesson_form" => "Lesson Planner: Unit Lesson",
+            "course_lesson_form_view" => "Lesson Planner: Unit Lesson",
             "incident_log_form" => "Log Incident"
         ];
 

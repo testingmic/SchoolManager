@@ -79,6 +79,7 @@ if(!isset($userPrefs->messages)) {
     <!-- Template CSS -->
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/components.css">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/gallery.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/datatables/datatables.min.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-daterangepicker/daterangepicker.css">

@@ -34,7 +34,7 @@ class Courses extends Myschoolgh {
             $stmt = $this->db->prepare("
                 SELECT a.*,
                     (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
-                    (SELECT b.description FROM files_attachment b WHERE b.record_id = a.id ORDER BY b.id DESC LIMIT 1) AS attachment,
+                    (SELECT b.description FROM files_attachment b WHERE b.record_id = a.id AND b.resource='courses_plan' ORDER BY b.id DESC LIMIT 1) AS attachment,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.course_tutor LIMIT 1) AS course_tutor_info
                 FROM courses a
@@ -53,25 +53,36 @@ class Courses extends Myschoolgh {
             
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                // if the files is set
-                if(isset($result->attachment->files)) {
-                    // format the attachements list
-                    $result->attachment_html = $filesObject->list_attachments($result->attachment->files, $result->user_id, "col-lg-6 col-md-6", false, false);
-                } else {
-                    $result->attachment = (object) [
-                        "files" => [],
-                        "files_count" => 0,
-                        "files_size" => 0,
-                        "raw_size_mb" => 0
-                    ];
+                
+                // if a request was made for full details
+                if(isset($params->full_details)) {
+
+                    // if attachment variable was parsed
+                    if(isset($result->attachment)) {
+                        $result->attachment_html = "";
+                        $result->attachment = json_decode($result->attachment);
+                    }
+
+                    // if the files is set
+                    if(isset($result->attachment->files)) {
+                        // format the attachements list
+                        //$result->attachment_html = $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false);
+                    } else {
+                        $result->attachment = (object) [
+                            "files" => [],
+                            "files_count" => 0,
+                            "files_size" => 0,
+                            "raw_size_mb" => 0
+                        ];
+                    }
+                    
+                    // create a new object
+                    $threadInteraction->resource_id = $result->id;
+                    $result->comments_list = $commentsObj->list($threadInteraction);
+                    
+                    // if the user is permitted
+                    $result->lesson_plan = $this->course_lessons($result->client_id, $result->id);
                 }
-                
-                // create a new object
-                $threadInteraction->resource_id = $result->id;
-                $result->comments_list = $commentsObj->list($threadInteraction);
-                
-                // if the user is permitted
-                $result->lesson_plan = $this->course_lessons($result->client_id, $result->id);
                 
                 // loop through the information
                 foreach(["course_tutor_info", "created_by_info"] as $each) {
@@ -103,11 +114,11 @@ class Courses extends Myschoolgh {
 
         try {
 
-            $query = !empty($unit_id) ? " AND unit_id = '{$unit_id}'" : null; 
+            $query = !empty($unit_id) ? " AND unit_id = '{$unit_id}'" : null;
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT b.description FROM files_attachment b WHERE b.record_id = a.id ORDER BY b.id DESC LIMIT 1) AS attachment,
+                    (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM courses_plan a
                 WHERE client_id=? AND course_id = ? AND plan_type = ? AND a.status = ? {$query} ORDER BY a.id
@@ -121,6 +132,22 @@ class Courses extends Myschoolgh {
                 foreach(["created_by_info"] as $each) {
                     // convert the created by string into an object
                     $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                }
+
+                // if attachment variable was parsed
+                if(isset($result->attachment)) {
+                    $result->attachment_html = "";
+                    $result->attachment = json_decode($result->attachment);
+                }
+
+                // if the files is set
+                if(!isset($result->attachment->files)) {
+                   $result->attachment = (object) [
+                        "files" => [],
+                        "files_count" => 0,
+                        "files_size" => 0,
+                        "raw_size_mb" => 0
+                    ];
                 }
 
                 // clean the description attached to the list
@@ -176,9 +203,11 @@ class Courses extends Myschoolgh {
 
         try {
 
+            $item_id = random_string("alnum", 32);
+
             // execute the statement
             $stmt = $this->db->prepare("
-                INSERT INTO courses SET client_id = ?, created_by = ?
+                INSERT INTO courses SET client_id = ?, created_by = ?, item_id = '{$item_id}'
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
@@ -291,9 +320,11 @@ class Courses extends Myschoolgh {
 
         try {
 
+            $item_id = random_string("alnum", 32);
+
             // execute the statement
             $stmt = $this->db->prepare("
-                INSERT INTO courses_plan SET client_id = ?, created_by = ?
+                INSERT INTO courses_plan SET client_id = ?, created_by = ?, item_id = '{$item_id}'
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
@@ -377,9 +408,16 @@ class Courses extends Myschoolgh {
 
         try {
 
+            $item_id = random_string("alnum", 32);
+
+            if(isset($params->unit_id)) {
+                $this->session->set("thisLast_UnitId", $params->unit_id);
+            }
+
             // execute the statement
             $stmt = $this->db->prepare("
-                INSERT INTO courses_plan SET client_id = ?, created_by = ?, plan_type = 'lesson'
+                INSERT INTO courses_plan SET client_id = ?, created_by = ?, 
+                plan_type = 'lesson', item_id = '{$item_id}'
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
@@ -388,10 +426,21 @@ class Courses extends Myschoolgh {
                 ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
+
+            // append the attachments
+            $lesson_id = $this->lastRowId("courses_plan");
+            $filesObj = load_class("files", "controllers");
+
+            // attachments
+            $attachments = $filesObj->prep_attachments("course_lesson_{$params->unit_id}", $params->userId, $item_id);
             
             // log the user activity
-            $this->userLogs("courses_plan", $this->lastRowId("courses_plan"), null, "{$params->userData->name} created a new Course Unit: {$params->name}", $params->userId);
+            $this->userLogs("courses_plan", $lesson_id, null, "{$params->userData->name} created a new Course Unit: {$params->name}", $params->userId);
 
+            // insert the record if not already existing
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
+            $files->execute(["courses_plan", $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
+            
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Lesson successfully created.", "refresh" => 2000];
 			
@@ -417,12 +466,34 @@ class Courses extends Myschoolgh {
         try {
 
             // old record
-            $prevData = $this->pushQuery("*", "courses_plan", "id='{$params->lesson_id}' AND course_id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+            $prevData = $this->pushQuery(
+                "a.*, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment",
+                "courses_plan a", 
+                "a.id='{$params->lesson_id}' AND a.course_id='{$params->course_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1"
+            );
 
             // if empty then return
             if(empty($prevData)) {
                 return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
             }
+
+            // initialize
+            $initial_attachment = [];
+
+            /** Confirm that there is an attached document */
+            if(!empty($prevData[0]->attachment)) {
+                // decode the json string
+                $db_attachments = json_decode($prevData[0]->attachment);
+                // get the files
+                if(isset($db_attachments->files)) {
+                    $initial_attachment = $db_attachments->files;
+                }
+            }
+
+            // append the attachments
+            $filesObj = load_class("files", "controllers");
+            $module = "course_lesson_{$prevData[0]->unit_id}";
+            $attachments = $filesObj->prep_attachments($module, $params->userId, $prevData[0]->item_id, $initial_attachment);
 
             // execute the statement
             $stmt = $this->db->prepare("
@@ -436,6 +507,16 @@ class Courses extends Myschoolgh {
             ");
             $stmt->execute([$params->clientId, $params->course_id, $params->lesson_id]);
             
+            // update attachment if already existing
+            if(isset($db_attachments)) {
+                $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? LIMIT 1");
+                $files->execute([json_encode($attachments), $attachments["raw_size_mb"], $prevData[0]->item_id]);
+            } else {
+                // insert the record if not already existing
+                $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
+                $files->execute(["courses_plan", $prevData[0]->item_id, json_encode($attachments), "{$prevData[0]->item_id}", $params->userId, $attachments["raw_size_mb"]]);
+            }
+
             // log the user activity
             $this->userLogs("courses_plan", $params->unit_id, $prevData[0], "{$params->userData->name} Updated Course Unit: {$params->name}", $params->userId);
 

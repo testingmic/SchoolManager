@@ -41,6 +41,7 @@ if(!empty($item_id)) {
         "clientId" => $clientId,
         "userId" => $session->userId,
         "course_id" => $item_id,
+        "full_details" => true,
         "limit" => 1
     ];
 
@@ -66,6 +67,7 @@ if(!empty($item_id)) {
         $lessons_list = "<div class='mb-2'>&nbsp;</div>";
         foreach($data->lesson_plan as $key => $plan) {
 
+            $key++;
             $unit_lessons = "";
 
             // if the lesson is not empty
@@ -74,10 +76,13 @@ if(!empty($item_id)) {
                 foreach($plan->lessons_list as $ikey => $lesson) {
                     $ikey++;
 
+                    // view button
+                    $action = "<button onclick='return load_quick_form(\"course_lesson_form_view\",\"{$plan->course_id}_{$plan->id}_{$lesson->id}\");' class='btn  btn-sm btn-outline-primary' type='button'><i class='fa fa-eye'></i></button>";
+
                     // if the user has the permission
                     if($hasPlanner) {
                         // show the lesson content
-                        $action = "<button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}_{$lesson->id}\");' class='btn  btn-sm btn-primary' type='button'><i class='fa fa-edit'></i></button>
+                        $action .= "&nbsp;<button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}_{$lesson->id}\");' class='btn  btn-sm btn-outline-success' type='button'><i class='fa fa-edit'></i></button>
                         <a href='#' data-record_id='{$lesson->id}' data-record_type='course_lesson' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>";
                     }
 
@@ -87,9 +92,7 @@ if(!empty($item_id)) {
                     $unit_lessons .= "<td>{$lesson->name}</td>";
                     $unit_lessons .= "<td>{$lesson->start_date}</td>";
                     $unit_lessons .= "<td>{$lesson->end_date}</td>";
-                    if($hasPlanner) {
-                        $unit_lessons .= "<td>{$action}</td>";
-                    }
+                    $unit_lessons .= "<td class='text-center'>{$action}</td>";
                     $unit_lessons .= "</tr>";
                 }
             }
@@ -97,10 +100,10 @@ if(!empty($item_id)) {
             $lessons_list .= "
                 <div id=\"accordion\" data-unit_id=\"{$plan->id}\">
                     <div class=\"accordion\">
-                    <div class=\"accordion-header ".($key !== 0 ? "collapsed" : null)."\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\" aria-expanded=\"".($key !== 0 ? "false" : "true")."\">
+                    <div class=\"accordion-header ".($plan->id == $session->thisLast_UnitId ? null : "collapsed")."\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\" ".($plan->id == $session->thisLast_UnitId ? "aria-expanded=\"true\"" : null)."\">
                         <h4>{$plan->name}</h4>
                     </div>
-                    <div class=\"accordion-body ".($key !== 0 ? "collapse" : "collapse show")."\" id=\"panel-body-{$key}\" data-parent=\"#accordion\" style=\"\">
+                    <div class=\"accordion-body ".($plan->id == $session->thisLast_UnitId ? "collapse show" : "collapse")."\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
                         <div class='d-flex justify-content-between'>
                             <div>
                                 <span class=\"mr-3\"><strong>Start Date: </strong> {$plan->start_date}</span>
@@ -123,9 +126,9 @@ if(!empty($item_id)) {
                                 <th>Lesson Title</th>
                                 <th>Start Date</th>
                                 <th>End Date</th>
-                                ".($hasPlanner ? "<th>Action</th>" : null)."
+                                <th>Action</th>
                             </thead>
-                            <tbody>'.$unit_lessons.'</tbody>
+                            <tbody>{$unit_lessons}</tbody>
                         </table>
                     </div>
                     </div>

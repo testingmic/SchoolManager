@@ -88,10 +88,6 @@ class Forms extends Myschoolgh {
                 if(!isset($params->module["item_id"])) {
                     return;
                 }
-                /** Confirm the user has the permission to perform this action */
-                if(!$accessObject->hasAccess("lesson", "course")) {
-                    return ["code" => 201, "data" => $this->permission_denied];
-                }
                 /** Set the course id */
                 $item_id = explode("_", $params->module["item_id"]);
 
@@ -109,25 +105,31 @@ class Forms extends Myschoolgh {
             }
 
             /** Course Unit Lesson Form */
-            elseif($the_form == "course_lesson_form") {
+            elseif(($the_form == "course_lesson_form") || ($the_form == "course_lesson_form_view")) {
                 // return if no policy id was parsed
                 if(!isset($params->module["item_id"])) {
                     return;
                 }
-                /** Confirm the user has the permission to perform this action */
-                if(!$accessObject->hasAccess("lesson", "course")) {
-                    return ["code" => 201, "data" => $this->permission_denied];
-                }
                 /** Set the course id */
+                $resources = ["assets/js/upload.js"];
                 $item_id = explode("_", $params->module["item_id"]);
 
                 /** If a second item was parsed then load the lesson unit information */
                 if(isset($item_id[2])) {
-                    $data = $this->pushQuery("*", "courses_plan", "client_id='{$params->clientId}' AND unit_id='{$item_id[1]}' AND id='{$item_id[2]}' AND plan_type='lesson' LIMIT 1");
+                    $data = $this->pushQuery(
+                        "a.*, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment", 
+                        "courses_plan a", 
+                        "a.client_id='{$params->clientId}' AND a.unit_id='{$item_id[1]}' AND a.id='{$item_id[2]}' AND a.plan_type='lesson' LIMIT 1"
+                    );
                     if(empty($data)) {
                         return ["code" => 201, "data" => "An invalid id was parsed"];
                     }
                     $params->data = $data[0];
+                }
+
+                /** If view record */
+                if($the_form == "course_lesson_form_view") {
+                    $params->view_record = true;
                 }
 
                 /** Load the policy application form */
@@ -177,6 +179,313 @@ class Forms extends Myschoolgh {
     }
 
     /**
+     * This method will be used to list attachments onto the page
+     * 
+     * @param Array $params
+     * @param String $user_id
+     * @param Bool $is_deletable            This allows the user to delete the file
+     * @param Bool $show_view               This when set to false will hide the view icon
+     * 
+     * @return String
+     */
+    public function list_attachments($attachment_list = null, $user_id = null, $list_class = "col-lg-4 col-md-6", $is_deletable = false, $show_view = true) {
+
+        // variables
+        $list_class = empty($list_class) ? "col-lg-4 col-md-6" : $list_class;
+        
+        // images mimetypes for creating thumbnails
+        $image_mime = ["jpg", "jpeg", "png", "gif"];
+        $docs_mime = ["pdf", "doc", "docx", "txt", "rtf", "jpg", "jpeg", "png", "gif"];
+
+        // set the thumbnail path
+        $tmp_path = "assets/uploads/{$user_id}/tmp/thumbnail/";
+
+        // create directories if none existent
+        if(!is_dir("assets/uploads/{$user_id}")) {
+            mkdir("assets/uploads/{$user_id}");
+            mkdir("assets/uploads/{$user_id}/tmp/");
+            mkdir("assets/uploads/{$user_id}/tmp/thumbnail/");
+        }
+        // create the tmp directory if non existent
+        if(!is_dir("assets/uploads/{$user_id}/tmp/")) {
+            mkdir("assets/uploads/{$user_id}/tmp/");
+        }
+        // create the thumbnail directory
+        if(!is_dir("assets/uploads/{$user_id}/tmp/thumbnail/")) {
+            mkdir("assets/uploads/{$user_id}/tmp/thumbnail/");
+        }
+
+        // confirm if the variable is not empty and an array
+        if(!empty($attachment_list) && is_array($attachment_list)) {
+
+            $files_list = "<div class=\"rs-gallery-4 rs-gallery\">";
+            $files_list .=  "<div class=\"row\">";
+
+            // loop through the array text
+            foreach($attachment_list as $eachFile) {
+                
+                // if the file is deleted then show a note
+                if($eachFile->is_deleted) { 
+                    
+                    $files_list .= "";
+
+                    // $files_list .= "<div class=\"{$list_class} attachment-container text-center p-3\">
+                    //         <div class=\"col-lg-12 p-2 font-italic border\">
+                    //             This file is deleted
+                    //         </div>
+                    //     </div>";
+
+                } else {
+                    // if the file exists
+                    if(is_file($eachFile->path) && file_exists($eachFile->path)) {
+
+                        // is image check
+                        $isImage = in_array($eachFile->type, $image_mime);
+
+                        // set the file to download
+                        $record_id = isset($eachFile->record_id) ? $eachFile->record_id : null;
+
+                        // set the file id and append 4 underscores between the names
+                        $file_to_download = base64_encode($eachFile->path."{$this->underscores}{$record_id}");
+
+                        // preview link
+                        $preview_link = "data-function=\"load-form\" data-resource=\"file_attachments\" data-module-id=\"{$user_id}_{$eachFile->unique_id}\" data-module=\"preview_file_attachment\"";
+                        
+                        // set init
+                        $thumbnail = "
+                            <div><span class=\"text text-{$eachFile->color}\"><i class=\"{$eachFile->favicon} fa-6x\"></i></span></div>
+                            <div title=\"Click to preview: {$eachFile->name}\" data-toggle=\"tooltip\">
+                                <a href=\"javascript:void(0)\" {$preview_link}><strong class=\"text-primary\">{$eachFile->name}</strong></a> <span class=\"text-muted tx-11\">({$eachFile->size})</span>
+                            </div>";
+
+                        $view_option = "";
+                        $image_desc = "";
+                        $delete_btn = "";
+
+                        // if document list the show the view button
+                        if($show_view) {
+                            // if the type is in the array list
+                            if(in_array($eachFile->type, $docs_mime)) {
+                                // $view_option .= "
+                                // <a title=\"Click to Click\" {$preview_link} class=\"btn btn-sm btn-primary\" style=\"padding:5px\" href=\"javascript:void(0)\">
+                                //     <i style=\"font-size:12px\" class=\"fa fa-eye fa-1x\"></i>
+                                // </a>";
+                            }
+                        }
+
+                        // display this if the object is deletable.
+                        if($is_deletable) {
+                            $delete_btn = "&nbsp;<a href=\"javascript:void(0)\" onclick=\"return delete_existing_file_attachment('{$record_id}_{$eachFile->unique_id}');\" style=\"padding:5px\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+
+                        }
+                        
+                        // if the file is an type
+                        if($isImage) {
+
+                            // get the file name
+                            $filename = "{$tmp_path}{$eachFile->unique_id}.{$eachFile->type}";
+                            
+                            // if the file does not already exist
+                            if(!is_file($filename) && !file_exists($filename)) {
+                                
+                                // create a new thumbnail of the file
+                                create_thumbnail($eachFile->path, $filename);
+                            } else {
+                                $thumbnail = "<img height=\"100%\" width=\"100%\" src=\"{$this->baseUrl}{$filename}\">";
+                            }
+                            $image_desc = "
+                                <div class=\"gallery-desc\">
+                                    <a class=\"image-popup\" href=\"{$this->baseUrl}{$eachFile->path}\" title=\"{$eachFile->name} ({$eachFile->size}) on {$eachFile->datetime}\">
+                                        <i class=\"fa fa-search\"></i>
+                                    </a>
+                                </div>";
+                        }
+
+                        // append to the list
+                        $files_list .= "<div data-file_container='{$record_id}_{$eachFile->unique_id}' class=\"{$list_class} attachment-container text-center p-3\">";
+                        $files_list .= $isImage ? "<div class=\"gallery-item\">" : null;
+                            $files_list .= "
+                                <div class=\"col-lg-12 attachment-item border\" data-attachment_item='{$record_id}_{$eachFile->unique_id}'>
+                                    <span style=\"display:none\" class=\"file-options\" data-attachment_options='{$record_id}_{$eachFile->unique_id}'>
+                                        {$view_option}
+                                        <a title=\"Click to Download\" target=\"_blank\" class=\"btn btn-sm btn-success\" style=\"padding:5px\" href=\"{$this->baseUrl}download?file={$file_to_download}\">
+                                            <i style=\"font-size:12px\" class=\"fa fa-download fa-1x\"></i>
+                                        </a>
+                                        {$delete_btn}    
+                                    </span> {$thumbnail} {$image_desc}
+                                </div>
+                            </div>";
+                        $files_list .= $isImage ? "</div>" : null;
+                    }
+                }
+
+            }
+
+            $files_list .=  "</div>";
+            $files_list .=  "</div>";
+
+            return $files_list;
+
+        }
+
+    }
+
+    /**
+     * A global space for uploading temporary files
+     * 
+     * @param \stdClass $params
+     * 
+     * @return String
+     */
+    public function form_attachment_placeholder(stdClass $params = null) {
+        
+        // initialize
+        $preloaded_attachments = "";
+        
+        // set a new parameter for the items
+        $files_param = (object) [
+            "userData" => $this->thisUser ?? null,
+            "label" => "list",
+            "module" => $params->module ?? null,
+            "item_id" => $params->item_id ?? "temp_attachment",
+        ];
+
+        // preload some file attachments
+        $attachments = load_class("files", "controllers")->attachments($files_param);
+       
+        // get the attachments list
+        $fresh_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
+
+        // if attachment list was set
+        if(isset($params->attachments_list) && !empty($params->attachments_list)) {
+
+            // set a new parameter for the items
+            $files_param = (object) [
+                "userData" => $params->userData ?? null,
+                "label" => "list",
+                "is_deletable" => isset($params->is_deletable) ? $params->is_deletable : false,
+                "module" => $params->module ?? null,
+                "item_id" => $params->item_id ?? null,
+                "attachments_list" => $params->attachments_list
+            ];
+
+            // create a new object
+            $attachments = load_class("files", "controllers")->attachments($files_param);
+
+            // get the attachments list
+            $preloaded_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
+        }
+        
+        // set the file content
+        $html_content = "
+            <div class='post-attachment'>
+                <div class=\"col-lg-12\" id=\"".($params->module ?? null)."\">
+                    <div class=\"file_attachment_url\" data-url=\"{$this->baseUrl}api/files/attachments\"></div>
+                </div>
+                <div class=\"".(isset($params->class) ? $params->class : "col-md-12")." text-left\">
+                    <div class='form-group row justify-content-start'>";
+                    if(!isset($params->no_title)) {
+                        $html_content .= "<label>Attach a Document <small class='text-danger'>(Maximum size <strong>{$this->max_attachment_size}MB</strong>)</small></label><br>";
+                    }
+                $html_content .= "
+                        <div class=\"ml-3\">
+                            <input class='form-control cursor attachment_file_upload' data-form_item_id=\"".($params->item_id ?? "temp_attachment")."\" data-form_module=\"".($params->module ?? null)."\" type=\"file\" name=\"attachment_file_upload\" id=\"attachment_file_upload\">
+                        </div>
+                        <div class=\"upload-document-loader hidden\"><span class=\"float-right\">Uploading <i class=\"fa fa-spin fa-spinner\"></i></span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class=\"col-md-12\">
+                <div class=\"file-preview slim-scroll\" preview-id=\"".($params->module ?? null)."\">{$fresh_attachments}</div>
+                <div class='form-group text-center mb-1'>{$preloaded_attachments}</div>
+            </div>";
+            $html_content .= !isset($params->no_footer) ? "<div class=\"col-lg-12 mb-3 border-bottom mt-3\"></div>" : null;
+
+        return $html_content;
+        
+    }
+
+    /**
+     * A global space for uploading temporary files
+     * 
+     * @param \stdClass $params
+     * 
+     * @return String
+     */
+    public function comments_form_attachment_placeholder(stdClass $params = null) {
+        
+        // existing
+        $preloaded_attachments = "";
+        
+        // set a new parameter for the items
+        $files_param = (object) [
+            "userData" => $this->thisUser ?? null,
+            "label" => "list",
+            "module" => $params->module ?? null,
+            "item_id" => $params->item_id ?? "temp_attachment",
+        ];
+
+        // preload some file attachments
+        $attachments = load_class("files", "controllers")->attachments($files_param);
+       
+        // get the attachments list
+        $fresh_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
+
+        // if attachment list was set
+        if(isset($params->attachments_list) && !empty($params->attachments_list)) {
+ 
+            // set a new parameter for the items
+            $files_param = (object) [
+                "userData" => $this->thisUser ?? null,
+                "label" => "list",
+                "is_deletable" => isset($params->is_deletable) ? $params->is_deletable : false,
+                "module" => $params->module ?? null,
+                "item_id" => $params->item_id ?? null,
+                "attachments_list" => $params->attachments_list
+            ];
+
+            // create a new object
+            $attachments = load_class("files", "controllers")->attachments($files_param);
+
+            // get the attachments list
+            $preloaded_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
+
+        }
+
+        // set the file content
+        $html_content = "
+            <div class='post-attachment'>
+                <div class=\"col-lg-12\" id=\"".($params->module ?? null)."\">
+                    <div class=\"file_attachment_url\" data-url=\"{$this->baseUrl}api/files/attachments\"></div>
+                </div>
+                ".upload_overlay()."
+                <div class=\"".(isset($params->class) ? $params->class : "col-md-12")." text-left\">
+                    <div class='form-group row justify-content-start'>";
+                    if(!isset($params->no_title)) {
+                        $html_content .= "<label>Attach a Document <small class='text-danger'>(Maximum size <strong>{$this->max_attachment_size}MB</strong>)</small></label><br>";
+                    }
+                $html_content .= "
+                        <div class=\"ml-3\">
+                            <input multiple accept=\"".($params->accept ?? "")."\" class='form-control cursor comment_attachment_file_upload' data-form_item_id=\"".($params->item_id ?? "temp_attachment")."\" data-form_module=\"".($params->module ?? null)."\" type=\"file\" name=\"comment_attachment_file_upload\" id=\"comment_attachment_file_upload\">
+                        </div>
+                        <div class=\"upload-document-loader hidden\"><span class=\"float-right\">Uploading <i class=\"fa fa-spin fa-spinner\"></i></span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class=\"col-md-12 ".(isset($params->no_padding) ? "p-0": "")."\">
+                <div class=\"file-preview slim-scroll\" preview-id=\"".($params->module ?? null)."\">{$fresh_attachments}</div>
+            </div>";
+            // list the attached documents
+            $html_content .= "<div class='form-group text-center mb-1'>{$preloaded_attachments}</div>";
+            $html_content .= !isset($params->no_footer) ? "<div class=\"col-lg-12 mb-3 border-bottom mt-3\"></div>" : null;
+
+        return $html_content;
+        
+    }
+
+    /**
      * Course Unit Form
      * 
      * @param String $clientId
@@ -187,9 +496,13 @@ class Forms extends Myschoolgh {
     public function course_unit_form($params, $course_id) {
 
         // description
-        $message = isset($params->data->description) ? $params->data->description : null;
+        $html_content = "";
+        $message = isset($params->data->description) ? htmlspecialchars_decode($params->data->description) : null;
         $item_id = isset($params->data->id) ? $params->data->id : null;
         $title = isset($params->data->name) ? $params->data->name : null;
+
+        /** Confirm the user has the permission to perform this action */
+        $hasAccess = $this->hasit->hasAccess("lesson", "course");
         
         $html_content = "
         <form action='{$this->baseUrl}api/courses/".(!$title ? "add_unit" : "update_unit")."' method='POST' id='ajax-data-form-content' class='ajax-data-form'>
@@ -244,49 +557,123 @@ class Forms extends Myschoolgh {
     public function course_lesson_form($params, $course_id, $unit_id) {
         
         // description
-        $message = isset($params->data->description) ? $params->data->description : null;
+        $html_content = "";
+        $message = isset($params->data->description) ? htmlspecialchars_decode($params->data->description) : null;
         $item_id = isset($params->data->id) ? $params->data->id : null;
         $unit_id = isset($params->data->unit_id) ? $params->data->unit_id : $unit_id;
         $title = isset($params->data->name) ? $params->data->name : null;
         
-        $html_content = "
-        <form action='{$this->baseUrl}api/courses/".(!$title ? "add_lesson" : "update_lesson")."' method='POST' id='ajax-data-form-content' class='ajax-data-form'>
-            <div class='row'>
-                <div class='col-lg-12'>
-                    <div class='form-group'>
-                        <label>Lesson Title</label>
-                        <input value='{$title}' type='text' name='name' id='name' class='form-control'>
+        /** Confirm the user has the permission to perform this action */
+        $hasAccess = $this->hasit->hasAccess("lesson", "course");
+
+        /** init content */
+        $preloaded_attachments = "";
+
+        /** Set parameters for the data to attach */
+        $form_params = (object) [
+            "module" => "course_lesson_{$unit_id}",
+            "userData" => $this->thisUser,
+            "item_id" => $item_id ?? null
+        ];
+        
+        if((!$hasAccess && $item_id) || isset($params->view_record)) {
+            // load the file attachments
+            $attachments = "";
+
+            if(!empty($params->data->attachment)) {
+                $attached = json_decode($params->data->attachment);
+                if(!empty($attached)) {
+                    $attachments = $this->list_attachments($attached->files, $params->userId, "col-lg-6");
+                }
+            }
+
+            // show the details
+            $html_content = "
+                <div class='row'>
+                    <div class='col-md-12 mb-2'><strong>Title:</strong> {$title}</div>
+                    <div class='col-md-6 mb-2'><strong>Start Date:</strong> {$params->data->start_date}</div>
+                    <div class='col-md-6 mb-2'><strong>End Date:</strong> {$params->data->end_date}</div>
+                    <div class='col-md-12 mb-2 border-top pt-3'>{$message}</div>
+                    <div class='col-md-12 border-bottom mb-3 mt-4'><h6>LESSON RESOURCES</h6></div>
+                    <div class='col-md-12'>{$attachments}</div>
+                </div>";
+
+        }
+
+        // if the user has the required permissions
+        elseif($hasAccess) {
+
+            
+            // get the attachment list
+            if(isset($params->data->attachment)) {
+
+                // convert to object
+                $params->data->attachment = json_decode($params->data->attachment);
+
+                // set a new parameter for the items
+                $files_param = (object) [
+                    "userData" => $this->thisUser,
+                    "label" => "list",
+                    "is_deletable" => $hasAccess,
+                    "module" => "course_lesson_{$unit_id}",
+                    "item_id" => $item_id,
+                    "attachments_list" => $params->data->attachment
+                ];
+
+                // create a new object
+                $attachments = load_class("files", "controllers")->attachments($files_param);
+            
+                // get the attachments list
+                $preloaded_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
+
+            }
+
+            $html_content = "
+            <form action='{$this->baseUrl}api/courses/".(!$title ? "add_lesson" : "update_lesson")."' method='POST' id='ajax-data-form-content' class='ajax-data-form'>
+                <div class='row'>
+                    <div class='col-lg-12'>
+                        <div class='form-group'>
+                            <label>Lesson Title</label>
+                            <input value='{$title}' type='text' name='name' id='name' class='form-control'>
+                        </div>
+                    </div>
+                    <div class='col-md-6'>
+                        <div class='form-group'>
+                            <label>Start Date</label>
+                            <input value='".($params->data->start_date ?? null)."' type='text' name='start_date' id='start_date' class='form-control datepicker'>
+                        </div>
+                    </div>
+                    <div class='col-md-6'>
+                        <div class='form-group'>
+                            <label>End Date</label>
+                            <input value='".($params->data->end_date ?? null)."' type='text' name='end_date' id='end_date' class='form-control datepicker'>
+                        </div>
+                    </div>
+                    <div class='col-md-12'>
+                        <div class='form-group'>
+                            <label>Description</label>
+                            {$this->textarea_editor($message)}
+                        </div>
+                    </div>";
+
+                    $html_content .= "<div class='col-lg-12'>
+                        <div class='form-group text-center mb-1'><div class='row'>{$this->form_attachment_placeholder($form_params)}</div></div>
+                    </div>";
+                    
+                    $html_content .= "<div class='col-md-12 text-center mb-4'>{$preloaded_attachments}</div>";
+
+                    $html_content .= "<div class=\"col-md-6 text-left\">
+                        <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
+                        <input type=\"hidden\" name=\"course_id\" id=\"course_id\" value=\"{$course_id}\" hidden class=\"form-control\">
+                        <input type=\"hidden\" name=\"unit_id\" id=\"unit_id\" value=\"{$unit_id}\" hidden class=\"form-control\">
+                        <input type=\"hidden\" name=\"lesson_id\" id=\"lesson_id\" value=\"{$item_id}\" hidden class=\"form-control\">
+                    </div>
+                    <div class=\"col-md-6 text-right\">
+                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
                     </div>
                 </div>
-                <div class='col-md-6'>
-                    <div class='form-group'>
-                        <label>Start Date</label>
-                        <input value='".($params->data->start_date ?? null)."' type='text' name='start_date' id='start_date' class='form-control datepicker'>
-                    </div>
-                </div>
-                <div class='col-md-6'>
-                    <div class='form-group'>
-                        <label>End Date</label>
-                        <input value='".($params->data->end_date ?? null)."' type='text' name='end_date' id='end_date' class='form-control datepicker'>
-                    </div>
-                </div>
-                <div class='col-md-12'>
-                    <div class='form-group'>
-                        <label>Description</label>
-                        {$this->textarea_editor($message)}
-                    </div>
-                </div>
-                <div class=\"col-md-6 text-left\">
-                    <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
-                    <input type=\"hidden\" name=\"course_id\" id=\"course_id\" value=\"{$course_id}\" hidden class=\"form-control\">
-                    <input type=\"hidden\" name=\"unit_id\" id=\"unit_id\" value=\"{$unit_id}\" hidden class=\"form-control\">
-                    <input type=\"hidden\" name=\"lesson_id\" id=\"lesson_id\" value=\"{$item_id}\" hidden class=\"form-control\">
-                </div>
-                <div class=\"col-md-6 text-right\">
-                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
-                </div>
-            </div>
-        </div>";
+            </div>";
+        }
 
         return $html_content;
 
