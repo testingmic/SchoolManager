@@ -477,8 +477,6 @@ class Forms extends Myschoolgh {
 
         $isData = !empty($itemData) && isset($itemData->id) ? true : false;
 
-        $guardian = "";
-
         $response = '
         <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/sections/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
@@ -615,6 +613,83 @@ class Forms extends Myschoolgh {
 
         return $response;
 
+    }
+
+    /**
+     * Course form
+     * 
+     * @param String $clientId
+     * @param String $baseUrl
+     * 
+     * return String
+     */
+    public function course_form($clientId, $baseUrl, $itemData = null) {
+
+        $isData = !empty($itemData) && isset($itemData->id) ? true : false;
+
+        $response = '
+        <form class="ajaxform" id="ajaxform" action="'.$baseUrl.'api/courses/'.( $isData ? "update" : "add").'" method="POST">
+            <div class="row mb-4 border-bottom pb-3">
+                <div class="col-lg-12">
+                    <h5>COURSE DETAILS</h5>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="course_code">Course Code (optional)</label>
+                        <input type="text" value="'.($itemData->course_code ?? null).'" name="course_code" id="course_code" class="form-control text-uppercase">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="credit_hours">Credit Hours</label>
+                        <input type="number" value="'.($itemData->credit_hours ?? null).'" name="credit_hours" id="credit_hours" class="form-control text-uppercase">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="class_id">Class</label>
+                        <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
+                            <option value="null">Select Class</option>';
+                            foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $itemData->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-8">
+                    <div class="form-group">
+                        <label for="name">Course Title<span class="required">*</span></label>
+                        <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="course_tutor">Course Tutor</label>
+                        <select data-width="100%" name="course_tutor" id="course_tutor" class="form-control selectpicker">
+                            <option value="null">Select Section Leader</option>';
+                            foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->item_id == $itemData->course_tutor) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
+                    <div class="form-group">
+                        <input type="hidden" readonly name="course_id" id="course_id" value="'.($itemData->id ?? null).'">
+                        <label for="description">Description</label>
+                        <textarea type="text" rows="5" name="description" id="description" class="form-control">'.($itemData->description ?? null).'</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 text-right">
+                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>
+        </form>';
+
+        return $response;
     }
 
 }

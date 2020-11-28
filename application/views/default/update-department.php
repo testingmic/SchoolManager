@@ -32,7 +32,7 @@ $response->scripts = [
 
 // item id
 $item_id = confirm_url_id(2) ? xss_clean($SITEURL[1]) : null;
-$pageTitle = confirm_url_id(2, "update") ? "Update Department Details" : "View Department Details";
+$pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty
 if(!empty($item_id)) {
