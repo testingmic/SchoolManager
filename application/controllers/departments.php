@@ -170,6 +170,25 @@ class Departments extends Myschoolgh {
             // convert the code to uppercase
             $params->department_code = strtoupper($params->department_code);
 
+            // confirm that a logo was parsed
+            if(isset($params->image)) {
+                // set the upload directory
+                $uploadDir = "assets/img/posts/";
+                // File path config 
+                $fileName = basename($params->image["name"]); 
+                $targetFilePath = $uploadDir . $fileName; 
+                $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+                // Allow certain file formats 
+                $allowTypes = array('jpg', 'png', 'jpeg');            
+                // check if its a valid image
+                if(!empty($fileName) && in_array($fileType, $allowTypes)){
+                    // set a new filename
+                    $fileName = $uploadDir . random_string('alnum', 25)."__{$fileName}";
+                    // Upload file to the server 
+                    if(move_uploaded_file($params->image["tmp_name"], $fileName)){}
+                }
+            }
+            
             // execute the statement
             $stmt = $this->db->prepare("
                 UPDATE departments SET date_updated = now()
