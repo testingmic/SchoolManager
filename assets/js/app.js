@@ -19,6 +19,7 @@ $replies_modal = $(`div[id="repliesModal"]`);
 $form_body = $(`div[id="formsModal"] div[class="modal-body"]`);
 $form_header = $(`div[id="formsModal"] h5[class="modal-title"]`);
 $form_loaded = $(`div[id="formsModal"] input[class="ajax-form-loaded"]`);
+$replies_loaded = $(`div[id="repliesModal"] input[class="ajax-replies-loaded"]`);
 $form_loader = `<div class="form-content-loader" style="display: flex; position: absolute;"><div class="offline-content text-center"><p><i class="fa fa-spin fa-spinner fa-2x"></i></p><small style='font-size:12px; padding-top:10px'>Populating Data...</small></div></div>`;
 $form_error = `<div class="form-content-loader" style="display: flex; position: absolute;"><div class="offline-content text-center"><p><i class="fa text-warning fa-exclamation-triangle fa-2x"></i></p><small class="text-danger" style='font-size:12px; padding-top:10px'>Error processing request!</small><p><small class="text-danger font-weight-bold cursor" data-dismiss="modal" id="close-div">Close</small></p></div></div>`;
 $no_record = `<div class="form-content-loader" style="display: flex; position: absolute;"><div class="offline-content text-center"><p><i class="fa text-warning fa-exclamation-triangle fa-2x"></i></p><small class="text-warning" style='font-size:12px; padding-top:10px'>No content found to display at the moment!</small><p><small class="text-danger font-weight-bold cursor" data-dismiss="modal" id="close-div">Close</small></p></div></div>`;

@@ -310,7 +310,7 @@ class Courses extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Unit successfully created.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true];
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}update-course/{$params->course_id}/view"];
 
 			// return the output
             return $return;
@@ -354,6 +354,93 @@ class Courses extends Myschoolgh {
 
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Unit successfully updated.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["href" => "{$this->baseUrl}update-course/{$params->course_id}/view"];
+
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {} 
+
+    }
+
+    
+    /**
+     * Add new Course Unit Lesson record
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function add_lesson(stdClass $params) {
+
+        try {
+
+            // execute the statement
+            $stmt = $this->db->prepare("
+                INSERT INTO courses_plan SET client_id = ?, created_by = ?, plan_type = 'lesson'
+                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
+                ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
+                ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
+                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
+            ");
+            $stmt->execute([$params->clientId, $params->userId]);
+            
+            // log the user activity
+            $this->userLogs("courses_plan", $this->lastRowId("courses_plan"), null, "{$params->userData->name} created a new Course Unit: {$params->name}", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Lesson successfully created.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}update-course/{$params->course_id}/view"];
+
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {} 
+
+    }
+
+    /**
+     * Update Course Unit Lesson record
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function update_lesson(stdClass $params) {
+
+        try {
+
+            // old record
+            $prevData = $this->pushQuery("*", "courses_plan", "id='{$params->lesson_id}' AND course_id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+
+            // if empty then return
+            if(empty($prevData)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            // execute the statement
+            $stmt = $this->db->prepare("
+                UPDATE courses_plan SET date_updated = now()
+                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
+                ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
+                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
+                WHERE client_id = ? AND course_id = ? AND id = ?
+            ");
+            $stmt->execute([$params->clientId, $params->course_id, $params->lesson_id]);
+            
+            // log the user activity
+            $this->userLogs("courses_plan", $params->unit_id, $prevData[0], "{$params->userData->name} Updated Course Unit: {$params->name}", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Lesson successfully updated.", "refresh" => 2000];
 			
 			# append to the response
 			$return["additional"] = ["href" => "{$this->baseUrl}update-course/{$params->course_id}/view"];

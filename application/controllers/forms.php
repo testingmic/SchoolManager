@@ -122,8 +122,8 @@ class Forms extends Myschoolgh {
                 $item_id = explode("_", $params->module["item_id"]);
 
                 /** If a second item was parsed then load the lesson unit information */
-                if(isset($item_id[1])) {
-                    $data = $this->pushQuery("*", "courses_plan", "client_id='{$params->clientId}' AND unit_id='{$item_id[0]}' AND id='{$item_id[1]}' AND plan_type='lesson' LIMIT 1");
+                if(isset($item_id[2])) {
+                    $data = $this->pushQuery("*", "courses_plan", "client_id='{$params->clientId}' AND unit_id='{$item_id[1]}' AND id='{$item_id[2]}' AND plan_type='lesson' LIMIT 1");
                     if(empty($data)) {
                         return ["code" => 201, "data" => "An invalid id was parsed"];
                     }
@@ -131,7 +131,7 @@ class Forms extends Myschoolgh {
                 }
 
                 /** Load the policy application form */
-                $result = $this->course_lesson_form($params, $item_id[0]);
+                $result = $this->course_lesson_form($params, $item_id[0], $item_id[1]);
             }
 
         }
@@ -229,7 +229,6 @@ class Forms extends Myschoolgh {
             </div>
         </div>";
 
-
         return $html_content;
 
     }
@@ -242,11 +241,52 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function course_lesson_form() {
+    public function course_lesson_form($params, $course_id, $unit_id) {
         
-        $html_content = "";
-
-
+        // description
+        $message = isset($params->data->description) ? $params->data->description : null;
+        $item_id = isset($params->data->id) ? $params->data->id : null;
+        $unit_id = isset($params->data->unit_id) ? $params->data->unit_id : $unit_id;
+        $title = isset($params->data->name) ? $params->data->name : null;
+        
+        $html_content = "
+        <form action='{$this->baseUrl}api/courses/".(!$title ? "add_lesson" : "update_lesson")."' method='POST' id='ajax-data-form-content' class='ajax-data-form'>
+            <div class='row'>
+                <div class='col-lg-12'>
+                    <div class='form-group'>
+                        <label>Lesson Title</label>
+                        <input value='{$title}' type='text' name='name' id='name' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-6'>
+                    <div class='form-group'>
+                        <label>Start Date</label>
+                        <input value='".($params->data->start_date ?? null)."' type='text' name='start_date' id='start_date' class='form-control datepicker'>
+                    </div>
+                </div>
+                <div class='col-md-6'>
+                    <div class='form-group'>
+                        <label>End Date</label>
+                        <input value='".($params->data->end_date ?? null)."' type='text' name='end_date' id='end_date' class='form-control datepicker'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Description</label>
+                        {$this->textarea_editor($message)}
+                    </div>
+                </div>
+                <div class=\"col-md-6 text-left\">
+                    <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
+                    <input type=\"hidden\" name=\"course_id\" id=\"course_id\" value=\"{$course_id}\" hidden class=\"form-control\">
+                    <input type=\"hidden\" name=\"unit_id\" id=\"unit_id\" value=\"{$unit_id}\" hidden class=\"form-control\">
+                    <input type=\"hidden\" name=\"lesson_id\" id=\"lesson_id\" value=\"{$item_id}\" hidden class=\"form-control\">
+                </div>
+                <div class=\"col-md-6 text-right\">
+                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
+                </div>
+            </div>
+        </div>";
 
         return $html_content;
 

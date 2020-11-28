@@ -77,7 +77,7 @@ if(!empty($item_id)) {
                     // if the user has the permission
                     if($hasPlanner) {
                         // show the lesson content
-                        $action = "<button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->id}_{$lesson->id}\");' class='btn  btn-sm btn-primary' type='button'><i class='fa fa-edit'></i></button>
+                        $action = "<button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}_{$lesson->id}\");' class='btn  btn-sm btn-primary' type='button'><i class='fa fa-edit'></i></button>
                         <a href='#' data-record_id='{$lesson->id}' data-record_type='course_lesson' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>";
                     }
 
@@ -109,7 +109,7 @@ if(!empty($item_id)) {
                             ".($hasPlanner ? "
                             <div>
                                 <button onclick='return load_quick_form(\"course_unit_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-success btn-sm' type='button'><i class='fa fa-edit'></i> Edit</button>
-                                <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-plus'></i> Add Lesson</button>
+                                <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-plus'></i> Add Lesson</button>
                                 <a href='#' data-record_id='{$plan->id}' data-record_type='course_unit' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>
                             </div>
                             " : null)."
