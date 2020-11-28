@@ -145,10 +145,57 @@ class Sections extends Myschoolgh {
 
         try {
 
-        } catch(PDOException $e) {
+            // old record
+            $prevData = $this->pushQuery("*", "sections", "id='{$params->section_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
-        } 
+            // if empty then return
+            if(empty($prevData)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            }
 
+            // create a new class code
+            if(isset($params->section_code) && !empty($params->section_code) && ($prevData[0]->section_code !== $params->section_code)) {
+                // replace any empty space with 
+                $params->section_code = str_replace("/^[\s]+$/", "", $params->section_code);
+                // confirm if the class code already exist
+                if(!empty($this->pushQuery("id, name", "sections", "status='1' AND client_id='{$params->clientId}' AND section_code='{$params->section_code}'"))) {
+                    return ["code" => 203, "data" => "Sorry! There is an existing Section with the same code."];
+                }
+            } elseif(empty($prevData[0]->section_code) || !isset($params->section_code)) {
+                // generate a new class code
+                $counter = $this->append_zeros(($this->itemsCount("sections", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+                $params->section_code = $this->client_data($params->clientId)->client_preferences->labels->{"section_label"}.$counter;
+            }
+
+            // convert the code to uppercase
+            $params->section_code = strtoupper($params->section_code);
+
+            // execute the statement
+            $stmt = $this->db->prepare("
+                UPDATE sections SET date_updated = now()
+                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(isset($fileName) ? ", image='{$fileName}'" : null)."
+                ".(isset($params->section_code) ? ", section_code = '{$params->section_code}'" : null)."
+                ".(isset($params->section_leader) ? ", section_leader = '{$params->section_leader}'" : null)."
+                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                WHERE id = ? AND client_id = ?
+            ");
+            $stmt->execute([$params->section_id, $params->clientId]);
+            
+            // log the user activity
+            $this->userLogs("sections", $params->section_id, $prevData[0], "{$params->userData->name} updated the Section: {$prevData[0]->name}", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Section successfully updated.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["href" => "{$this->baseUrl}update-section/{$params->section_id}/update"];
+
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {} 
+        
     }
 
     

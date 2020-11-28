@@ -130,8 +130,8 @@ if(!empty($item_id)) {
                     <div class="card-header">
                         <h4>Description</h4>
                     </div>
-                    <div class="card-body">
-                        <div class="py-1 pt-0">
+                    <div class="card-body pt-0">
+                        <div class="py-3 pt-0">
                             '.$data->description.'
                         </div>
                     </div>
@@ -144,15 +144,15 @@ if(!empty($item_id)) {
                         <div class="py-3 pt-0">
                             <p class="clearfix">
                                 <span class="float-left">Fullname</span>
-                                <span class="float-right text-muted">'.($each->department_head_info->name ?? null).'</span>
+                                <span class="float-right text-muted">'.($data->class_teacher_info->name ?? null).'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Email</span>
-                                <span class="float-right text-muted">'.($each->department_head_info->email ?? null).'</span>
+                                <span class="float-right text-muted">'.($data->class_teacher_info->email ?? null).'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Contact</span>
-                                <span class="float-right text-muted">'.($each->department_head_info->phone_number ?? null).'</span>
+                                <span class="float-right text-muted">'.($data->class_teacher_info->phone_number ?? null).'</span>
                             </p>
                         </div>
                     </div>
@@ -165,15 +165,15 @@ if(!empty($item_id)) {
                         <div class="py-3 pt-0">
                             <p class="clearfix">
                                 <span class="float-left">Fullname</span>
-                                <span class="float-right text-muted">'.($each->class_assistant_info->name ?? null).'</span>
+                                <span class="float-right text-muted">'.($data->class_assistant_info->name ?? null).'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Email</span>
-                                <span class="float-right text-muted">'.($each->class_assistant_info->email ?? null).'</span>
+                                <span class="float-right text-muted">'.($data->class_assistant_info->email ?? null).'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Contact</span>
-                                <span class="float-right text-muted">'.($each->class_assistant_info->phone_number ?? null).'</span>
+                                <span class="float-right text-muted">'.($data->class_assistant_info->phone_number ?? null).'</span>
                             </p>
                         </div>
                     </div>

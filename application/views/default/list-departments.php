@@ -48,7 +48,7 @@ foreach($item_list["data"] as $key => $each) {
 
     $departments .= "<tr data-row_id=\"{$each->id}\">";
     $departments .= "<td>".($key+1)."</td>";
-    $departments .= "<td>{$each->name}</td>";
+    $departments .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
     $departments .= "<td>{$each->department_code}</td>";
     $departments .= "<td>{$each->students_count}</td>";
     $departments .= "<td><span class='underline'>".($each->department_head_info->name ?? null)."</span></td>";

@@ -145,9 +145,56 @@ class Departments extends Myschoolgh {
 
         try {
 
-        } catch(PDOException $e) {
+            // old record
+            $prevData = $this->pushQuery("*", "departments", "id='{$params->department_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
-        } 
+            // if empty then return
+            if(empty($prevData)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            // create a new class code
+            if(isset($params->department_code) && !empty($params->department_code) && ($prevData[0]->department_code !== $params->department_code)) {
+                // replace any empty space with 
+                $params->department_code = str_replace("/^[\s]+$/", "", $params->department_code);
+                // confirm if the class code already exist
+                if(!empty($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$params->clientId}' AND department_code='{$params->department_code}'"))) {
+                    return ["code" => 203, "data" => "Sorry! There is an existing Department with the same code."];
+                }
+            } elseif(empty($prevData[0]->department_code) || !isset($params->department_code)) {
+                // generate a new class code
+                $counter = $this->append_zeros(($this->itemsCount("departments", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+                $params->department_code = $this->client_data($params->clientId)->client_preferences->labels->{"department_label"}.$counter;
+            }
+
+            // convert the code to uppercase
+            $params->department_code = strtoupper($params->department_code);
+
+            // execute the statement
+            $stmt = $this->db->prepare("
+                UPDATE departments SET date_updated = now()
+                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(isset($fileName) ? ", image='{$fileName}'" : null)."
+                ".(isset($params->department_code) ? ", department_code = '{$params->department_code}'" : null)."
+                ".(isset($params->department_head) ? ", department_head = '{$params->department_head}'" : null)."
+                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                WHERE id = ? AND client_id = ?
+            ");
+            $stmt->execute([$params->department_id, $params->clientId]);
+            
+            // log the user activity
+            $this->userLogs("departments", $params->department_id, $prevData[0], "{$params->userData->name} updated the Department: {$prevData[0]->name}", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Department successfully updated.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["href" => "{$this->baseUrl}update-department/{$params->department_id}/update"];
+
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {} 
 
     }
 
