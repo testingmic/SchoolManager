@@ -49,6 +49,7 @@ foreach($item_list["data"] as $key => $each) {
     $departments .= "<tr data-row_id=\"{$each->id}\">";
     $departments .= "<td>".($key+1)."</td>";
     $departments .= "<td>{$each->name}</td>";
+    $departments .= "<td>{$each->department_code}</td>";
     $departments .= "<td>{$each->students_count}</td>";
     $departments .= "<td><span class='underline'>".($each->department_head_info->name ?? null)."</span></td>";
     $departments .= "<td>{$action}</td>";
@@ -74,6 +75,7 @@ $response->html = '
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
                                         <th>Department Name</th>
+                                        <th>Department Code</th>
                                         <th width="15%">Students Count</th>
                                         <th>Head of Department</th>
                                         <th width="10%">Action</th>

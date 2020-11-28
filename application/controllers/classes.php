@@ -47,7 +47,7 @@ class Classes extends Myschoolgh {
                 // loop through the information
                 foreach(["class_teacher_info", "class_assistant_info", "created_by_info"] as $each) {
                     // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($each, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);    
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
                 }
 
                 $data[] = $result;
@@ -73,9 +73,50 @@ class Classes extends Myschoolgh {
 
         try {
 
-        } catch(PDOException $e) {
+            // create a new class code
+            if(isset($params->class_code) && !empty($params->class_code)) {
+                // replace any empty space with 
+                $params->class_code = str_replace("/^[\s]+$/", "", $params->class_code);
+                // confirm if the class code already exist
+                if(!empty($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$params->clientId}' AND class_code='{$params->class_code}'"))) {
+                    return ["code" => 203, "data" => "Sorry! There is an existing Class with the same code."];
+                }
+            } else {
+                // generate a new class code
+                $counter = $this->append_zeros(($this->itemsCount("classes", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+                $params->class_code = $this->client_data($params->clientId)->client_preferences->labels->{"class_label"}.$counter;
+            }
 
-        } 
+            // convert the code to uppercase
+            $params->class_code = strtoupper($params->class_code);
+
+            // execute the statement
+            $stmt = $this->db->prepare("
+                INSERT INTO classes SET client_id = ?, created_by = ?
+                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(isset($params->class_code) ? ", class_code = '{$params->class_code}'" : null)."
+                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
+                ".(isset($params->class_teacher) ? ", class_teacher = '{$params->class_teacher}'" : null)."
+                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
+                ".(isset($params->class_assistant) ? ", class_assistant = '{$params->class_assistant}'" : null)."
+                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+            ");
+            $stmt->execute([$params->clientId, $params->userId]);
+            
+            // log the user activity
+            $this->userLogs("classes", $this->lastRowId("classes"), null, "{$params->userData->name} created a new Class: {$params->name}", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Class successfully created.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["clear" => true];
+
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {} 
 
     }
 

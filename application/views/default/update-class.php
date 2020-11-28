@@ -121,6 +121,7 @@ if(!empty($item_id)) {
                     <div class="author-box-center">
                         <div class="clearfix"></div>
                         <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
+                        <div class="author-box-job">'.$data->class_code.'</div>
                         <div class="author-box-job">('.$data->students_count.' Students)</div>
                     </div>
                 </div>

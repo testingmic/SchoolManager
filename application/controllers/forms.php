@@ -415,7 +415,7 @@ class Forms extends Myschoolgh {
         $response = '
         <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/departments/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
-                <div class="col-lg-12"><h5>SECTION INFORMATION</h5></div>
+                <div class="col-lg-12"><h5>DEPARTMENT INFORMATION</h5></div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Department Image</label>
@@ -425,7 +425,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="department_code">Department Code (optional)</label>
-                        <input type="text" value="'.($itemData->department_code ?? null).'" name="department_code" id="department_code" class="form-control">
+                        <input type="text" value="'.($itemData->department_code ?? null).'" name="department_code" id="department_code" class="form-control text-uppercase">
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-6">
@@ -494,7 +494,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="section_code">Section Code (optional)</label>
-                        <input type="text" value="'.($itemData->section_code ?? null).'" name="section_code" id="section_code" class="form-control">
+                        <input type="text" value="'.($itemData->section_code ?? null).'" name="section_code" id="section_code" class="form-control text-uppercase">
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-8">
@@ -555,13 +555,24 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-5">
                     <div class="form-group">
                         <label for="class_code">Class Code (optional)</label>
-                        <input type="text" value="'.($itemData->class_code ?? null).'" name="class_code" id="class_code" class="form-control">
+                        <input type="text" value="'.($itemData->class_code ?? null).'" name="class_code" id="class_code" class="form-control text-uppercase">
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-7">
                     <div class="form-group">
                         <label for="name">Class Name<span class="required">*</span></label>
                         <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label for="department_id">Department ID</label>
+                        <select data-width="100%" name="department_id" id="department_id" class="form-control selectpicker">
+                            <option value="null">Select Department</option>';
+                            foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $itemData->department_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">

@@ -43,7 +43,7 @@ class Sections extends Myschoolgh {
                 // loop through the information
                 foreach(["section_leader_info"] as $each) {
                     // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($each, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);    
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
                 }
 
                 $data[] = $result;
@@ -69,11 +69,68 @@ class Sections extends Myschoolgh {
      */
     public function add(stdClass $params) {
 
+        // create a new department code
+        if(isset($params->section_code) && !empty($params->section_code)) {
+            // replace any empty space with 
+            $params->section_code = str_replace("/^[\s]+$/", "", $params->section_code);
+            // confirm if the department code already exist
+            if(!empty($this->pushQuery("id, name", "sections", "status='1' AND client_id='{$params->clientId}' AND section_code='{$params->section_code}'"))) {
+                return ["code" => 203, "data" => "Sorry! There is an existing Section with the same code."];
+            }
+        } else {
+            // generate a new department code
+            $counter = $this->append_zeros(($this->itemsCount("sections", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+            $params->section_code = $this->client_data($params->clientId)->client_preferences->labels->{"section_label"}.$counter;
+        }
+
+        // convert the code to uppercase
+        $params->section_code = strtoupper($params->section_code);
+        
+        // confirm that a logo was parsed
+        if(isset($params->image)) {
+            // set the upload directory
+            $uploadDir = "assets/img/posts/";
+            // File path config 
+            $fileName = basename($params->image["name"]); 
+            $targetFilePath = $uploadDir . $fileName; 
+            $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+            // Allow certain file formats 
+            $allowTypes = array('jpg', 'png', 'jpeg');            
+            // check if its a valid image
+            if(!empty($fileName) && in_array($fileType, $allowTypes)){
+                // set a new filename
+                $fileName = $uploadDir . random_string('alnum', 25)."__{$fileName}";
+                // Upload file to the server 
+                if(move_uploaded_file($params->image["tmp_name"], $fileName)){}
+            }
+        }
+
         try {
 
-        } catch(PDOException $e) {
+            // execute the statement
+            $stmt = $this->db->prepare("
+                INSERT INTO sections SET client_id = ?, created_by = ?
+                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(isset($fileName) ? ", image='{$fileName}'" : null)."
+                ".(isset($params->section_code) ? ", section_code = '{$params->section_code}'" : null)."
+                ".(isset($params->section_leader) ? ", section_leader = '{$params->section_leader}'" : null)."
+                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+            ");
+            $stmt->execute([$params->clientId, $params->userId]);
+            
+            // log the user activity
+            $this->userLogs("sections", $this->lastRowId("sections"), null, "{$params->userData->name} created a new Section: {$params->name}", $params->userId);
 
-        } 
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Section successfully created.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["clear" => true];
+
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {} 
 
     }
 

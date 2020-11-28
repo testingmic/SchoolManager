@@ -192,7 +192,8 @@
     right: 0;
 }
 
-.underline {
+.underline:hover {
+    cursor: pointer;
     text-decoration: underline;
 }
 

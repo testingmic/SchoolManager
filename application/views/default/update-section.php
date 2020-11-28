@@ -122,6 +122,7 @@ if(!empty($item_id)) {
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="author-box-picture">
                         <div class="clearfix"></div>
                         <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
+                        <div class="author-box-job">'.$data->section_code.'</div>
                         <div class="author-box-job">('.$data->students_count.' Students)</div>
                     </div>
                     <div class="text-center">

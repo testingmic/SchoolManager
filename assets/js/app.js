@@ -936,12 +936,11 @@ var fetchUserChats = () => {
             success: (res) => {
                 if (res.count > 0) {
                     playAudio("alert");
-                    $.notifyClose();
                     $('.messagescount-badge').text(res.count);
                     if ($('.messagescount-badge').length < 2) {
                         $('.messagescount').append("<span class='badge badge-pill badge-success messagescount-badge'>" + res.count + "</span>");
                     }
-                    notifyInbox(res.message);
+                    notify(res.message);
                 }
             }
         })
@@ -1025,47 +1024,6 @@ var moveProgress = () => {
         move: move,
         complete: complete
     }
-}
-
-var notifyInbox = (text) => {
-    var animateEnter = 'animated bounceIn',
-        animateExit = 'animated fadeOutUp',
-        allowDismiss = true,
-        icon = "<i class='fa fa-envelope text-success'></i>";
-
-    $.notify({
-        message: text,
-        title: "New Message"
-    }, {
-        url: "#",
-        type: "card text-gray-dark w-300",
-        allow_dismiss: true,
-        newest_on_top: true,
-        timer: 1000,
-        z_index: 2000,
-        delay: 300000,
-        placement: {
-            from: "bottom",
-            align: "right"
-        },
-        animate: {
-            enter: animateEnter,
-            exit: animateExit
-        },
-        template: '<div data-notify="container" class="card alert alert-dismissible {0} p-0 b-shadow-2 ' + (allowDismiss ? "p-r-35" : "") + '" role="alert">' +
-            '<div class="card-header">' +
-            '<button type="button" aria-hidden="true" class="btn btn-transparent font-xl" style="margin-top:-5px" data-notify="dismiss"><i class="icon-close text-gray-dark font-sm"></i></button>' +
-            '<span data-notify="icon">' + icon + '</span> ' +
-            '<span data-notify="title" class="font-weight-bold">{1}</span> ' +
-            '</div>' +
-            '<div class="card-block">' +
-            '<span data-notify="message">{2}</span>' +
-            '<div class="progress" data-notify="progressbar">' +
-            '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
-            '</div>' +
-            '<a href="{3}" target="{4}" data-notify="url"></a>' +
-            '</div></div>'
-    });
 }
 
 var notify = (text, type = "error") => {

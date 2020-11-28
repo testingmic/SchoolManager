@@ -49,6 +49,7 @@ foreach($department_list["data"] as $key => $each) {
     $sections .= "<tr data-row_id=\"{$each->id}\">";
     $sections .= "<td>".($key+1)."</td>";
     $sections .= "<td>{$each->name}</td>";
+    $sections .= "<td>{$each->section_code}</td>";
     $sections .= "<td>{$each->students_count}</td>";
     $sections .= "<td><span class='underline'>".($each->section_leader_info->name ?? null)."</span></td>";
     $sections .= "<td>{$action}</td>";
@@ -74,6 +75,7 @@ $response->html = '
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
                                         <th>Section Name</th>
+                                        <th>Section Code</th>
                                         <th width="15%">Students Count</th>
                                         <th>Section Leader</th>
                                         <th width="10%">Action</th>
