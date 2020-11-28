@@ -661,4 +661,52 @@ class Files extends Myschoolgh {
         } 
     }
 
+    /**
+     * Load all files for a particular resource
+     * 
+     * After getting all the list, append the files into a single array list
+     * 
+     * @param String $resource
+     * @param String $resource_id
+     * 
+     * @return Array
+     */
+    public function resource_attachments_list($resource, $resource_id) {
+
+        try {
+
+            $stmt = $this->db->prepare("SELECT description AS attachments, attachment_size FROM files_attachment WHERE resource = ? AND resource_id = ?");
+            $stmt->execute([$resource, $resource_id]);
+
+            $data = [];
+            $size = 0;
+            $count = 0;
+
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                // convert to object
+                $result->attachments = json_decode($result->attachments);
+
+                // append only the rows where the description is not empty
+                if(!empty($result->attachments->files)) {
+                    $data[] = $result->attachments->files;
+                    $size += $result->attachments->raw_size_mb;
+                    $count += $result->attachments->files_count;
+                }
+            }
+
+            $new_list = [];
+            foreach($data as $value) {
+                foreach($value as $k => $v) {
+                    $new_list[] = $v;
+                }
+            }
+
+            return [
+                "files_list" => $new_list,
+                "files_size" => round($size, 3),
+                "files_count" => $count,
+            ];
+
+        } catch(PDOException $e) {}
+    }
 }

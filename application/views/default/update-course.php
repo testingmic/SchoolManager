@@ -101,7 +101,7 @@ if(!empty($item_id)) {
                 <div id=\"accordion\" data-unit_id=\"{$plan->id}\">
                     <div class=\"accordion\">
                     <div class=\"accordion-header ".($plan->id == $session->thisLast_UnitId ? null : "collapsed")."\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\" ".($plan->id == $session->thisLast_UnitId ? "aria-expanded=\"true\"" : null)."\">
-                        <h4>{$plan->name}</h4>
+                        <h4>{$key}. {$plan->name}</h4>
                     </div>
                     <div class=\"accordion-body ".($plan->id == $session->thisLast_UnitId ? "collapse show" : "collapse")."\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
                         <div class='d-flex justify-content-between'>

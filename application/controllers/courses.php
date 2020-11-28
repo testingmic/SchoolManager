@@ -34,7 +34,6 @@ class Courses extends Myschoolgh {
             $stmt = $this->db->prepare("
                 SELECT a.*,
                     (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
-                    (SELECT b.description FROM files_attachment b WHERE b.record_id = a.id AND b.resource='courses_plan' ORDER BY b.id DESC LIMIT 1) AS attachment,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.course_tutor LIMIT 1) AS course_tutor_info
                 FROM courses a
@@ -44,7 +43,7 @@ class Courses extends Myschoolgh {
 
             $is_permitted = false;
             $commentsObj = load_class("replies", "controllers");
-            $filesObject = load_class("forms", "controllers");
+            $filesObject = load_class("files", "controllers");
 
             $threadInteraction = (object)[
                 "userId" => $params->userId,
@@ -54,27 +53,13 @@ class Courses extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 
+                // if the files is set
+                if(isset($params->full_attachments)) {
+                   $result->attachment = $filesObject->resource_attachments_list("courses_plan", $result->id);
+                }
+                
                 // if a request was made for full details
                 if(isset($params->full_details)) {
-
-                    // if attachment variable was parsed
-                    if(isset($result->attachment)) {
-                        $result->attachment_html = "";
-                        $result->attachment = json_decode($result->attachment);
-                    }
-
-                    // if the files is set
-                    if(isset($result->attachment->files)) {
-                        // format the attachements list
-                        //$result->attachment_html = $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false);
-                    } else {
-                        $result->attachment = (object) [
-                            "files" => [],
-                            "files_count" => 0,
-                            "files_size" => 0,
-                            "raw_size_mb" => 0
-                        ];
-                    }
                     
                     // create a new object
                     $threadInteraction->resource_id = $result->id;
@@ -135,10 +120,7 @@ class Courses extends Myschoolgh {
                 }
 
                 // if attachment variable was parsed
-                if(isset($result->attachment)) {
-                    $result->attachment_html = "";
-                    $result->attachment = json_decode($result->attachment);
-                }
+                $result->attachment = json_decode($result->attachment);
 
                 // if the files is set
                 if(!isset($result->attachment->files)) {
@@ -330,12 +312,18 @@ class Courses extends Myschoolgh {
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
                 ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
             
+            // set the last unit id
+            $unit_id = $this->lastRowId("courses_plan");
+            $this->session->set("thisLast_UnitId", $unit_id);
+
             // log the user activity
-            $this->userLogs("courses_plan", $this->lastRowId("courses_plan"), null, "{$params->userData->name} created a new Course Unit: {$params->name}", $params->userId);
+            $this->userLogs("courses_plan", $unit_id, null, "{$params->userData->name} created a new Course Unit: {$params->name}", $params->userId);
 
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Unit successfully created.", "refresh" => 2000];
@@ -375,10 +363,15 @@ class Courses extends Myschoolgh {
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
                 WHERE client_id = ? AND course_id = ? AND id = ?
             ");
             $stmt->execute([$params->clientId, $params->course_id, $params->unit_id]);
+
+            // set the last unit id
+            $this->session->set("thisLast_UnitId", $params->unit_id);
             
             // log the user activity
             $this->userLogs("courses_plan", $params->unit_id, $prevData[0], "{$params->userData->name} Updated Course Unit: {$params->name}", $params->userId);
@@ -420,6 +413,8 @@ class Courses extends Myschoolgh {
                 plan_type = 'lesson', item_id = '{$item_id}'
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
+                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
                 ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
@@ -439,7 +434,7 @@ class Courses extends Myschoolgh {
 
             // insert the record if not already existing
             $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
-            $files->execute(["courses_plan", $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
+            $files->execute(["courses_plan", $params->course_id ?? $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
             
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Lesson successfully created.", "refresh" => 2000];
@@ -490,6 +485,10 @@ class Courses extends Myschoolgh {
                 }
             }
 
+            if(isset($params->unit_id)) {
+                $this->session->set("thisLast_UnitId", $prevData[0]->unit_id);
+            }
+
             // append the attachments
             $filesObj = load_class("files", "controllers");
             $module = "course_lesson_{$prevData[0]->unit_id}";
@@ -500,6 +499,8 @@ class Courses extends Myschoolgh {
                 UPDATE courses_plan SET date_updated = now()
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
+                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
                 ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
@@ -514,7 +515,7 @@ class Courses extends Myschoolgh {
             } else {
                 // insert the record if not already existing
                 $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
-                $files->execute(["courses_plan", $prevData[0]->item_id, json_encode($attachments), "{$prevData[0]->item_id}", $params->userId, $attachments["raw_size_mb"]]);
+                $files->execute(["courses_plan", $params->course_id ?? $prevData[0]->item_id, json_encode($attachments), "{$prevData[0]->item_id}", $params->userId, $attachments["raw_size_mb"]]);
             }
 
             // log the user activity
