@@ -28,6 +28,8 @@ class Models {
     public function __construct() {
 
         $this->form_modules = [
+            "course_unit_form" => "Lesson Planner: Course Unit",
+            "course_lesson_form" => "Lesson Planner: Unit Lesson",
             "incident_log_form" => "Log Incident"
         ];
 

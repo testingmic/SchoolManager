@@ -121,6 +121,16 @@
     background-color: #919599;
 }
 
+.ajax-data-form trix-editor {
+    min-height: 250px;
+    max-height: 350px;
+}
+
+.leave-comment-wrapper trix-editor {
+    min-height: 250px;
+    max-height: 350px;
+}
+
 .form-data-unavailable {
     display: flex;
     align-items: center;

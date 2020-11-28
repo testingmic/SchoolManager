@@ -70,14 +70,8 @@ class Courses extends Myschoolgh {
                 $threadInteraction->resource_id = $result->id;
                 $result->comments_list = $commentsObj->list($threadInteraction);
                 
-                // if the user is permitted ie. an insurance company or admin
-                $result->is_permitted = $is_permitted;
-                
-                // load and return the replies list as well
-                if($is_permitted) {
-                    $threadInteraction->feedback_type = "reply";
-                    $result->replies_list = $commentsObj->list($threadInteraction);
-                }
+                // if the user is permitted
+                $result->lesson_plan = $this->course_lessons($result->client_id, $result->id);
                 
                 // loop through the information
                 foreach(["course_tutor_info", "created_by_info"] as $each) {
@@ -98,6 +92,56 @@ class Courses extends Myschoolgh {
     }
 
     /**
+     * List Lessons
+     * 
+     * @param Int $course_id
+     * @param Int $client_id
+     * 
+     * @return Array
+     */
+    public function course_lessons($client_id, $course_id, $type = "unit", $unit_id = null) {
+
+        try {
+
+            $query = !empty($unit_id) ? " AND unit_id = '{$unit_id}'" : null; 
+
+            $stmt = $this->db->prepare("
+                SELECT a.*,
+                    (SELECT b.description FROM files_attachment b WHERE b.record_id = a.id ORDER BY b.id DESC LIMIT 1) AS attachment,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                FROM courses_plan a
+                WHERE client_id=? AND course_id = ? AND plan_type = ? AND a.status = ? {$query} ORDER BY a.id
+            ");
+            $stmt->execute([$client_id, $course_id, $type, 1]);
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // loop through the information
+                foreach(["created_by_info"] as $each) {
+                    // convert the created by string into an object
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                }
+
+                // clean the description attached to the list
+                $result->description = htmlspecialchars_decode($result->description);
+                $result->description = custom_clean($result->description);
+
+                if($result->plan_type == "unit") {
+                    $result->lessons_list = $this->course_lessons($client_id, $course_id, "lesson", $result->id);
+                }
+
+                $data[] = $result;
+            }
+
+            return $data;
+
+
+        } catch(PDOException $e) {}
+        
+    }
+
+    /**
      * Add new Course record
      * 
      * @param stdClass $params
@@ -105,6 +149,13 @@ class Courses extends Myschoolgh {
      * @return Array
      */
     public function add(stdClass $params) {
+
+        global $accessObject;
+
+        // check permission
+        if(!$accessObject->hasAccess("add", "course")) {
+            return ["code" => 203, "data" => $this->permission_denied];
+        }
  
         // create a new Course code
         if(isset($params->course_code) && !empty($params->course_code)) {
@@ -164,6 +215,13 @@ class Courses extends Myschoolgh {
      */
     public function update(stdClass $params) {
 
+        global $accessObject;
+
+        // check permission
+        if(!$accessObject->hasAccess("update", "course")) {
+            return ["code" => 203, "data" => $this->permission_denied];
+        }
+
         try {
 
             // old record
@@ -214,6 +272,91 @@ class Courses extends Myschoolgh {
 			
 			# append to the response
 			$return["additional"] = ["href" => "{$this->baseUrl}update-course/{$params->course_id}/update"];
+
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {} 
+
+    }
+
+    /**
+     * Add new Course Unit record
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function add_unit(stdClass $params) {
+
+        try {
+
+            // execute the statement
+            $stmt = $this->db->prepare("
+                INSERT INTO courses_plan SET client_id = ?, created_by = ?
+                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
+                ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
+                ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
+                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
+            ");
+            $stmt->execute([$params->clientId, $params->userId]);
+            
+            // log the user activity
+            $this->userLogs("courses_plan", $this->lastRowId("courses_plan"), null, "{$params->userData->name} created a new Course Unit: {$params->name}", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Unit successfully created.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["clear" => true];
+
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {} 
+
+    }
+
+    /**
+     * Update Course Unit record
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function update_unit(stdClass $params) {
+
+        try {
+
+            // old record
+            $prevData = $this->pushQuery("*", "courses_plan", "id='{$params->unit_id}' AND course_id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+
+            // if empty then return
+            if(empty($prevData)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            // execute the statement
+            $stmt = $this->db->prepare("
+                UPDATE courses_plan SET date_updated = now()
+                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
+                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
+                WHERE client_id = ? AND course_id = ? AND id = ?
+            ");
+            $stmt->execute([$params->clientId, $params->course_id, $params->unit_id]);
+            
+            // log the user activity
+            $this->userLogs("courses_plan", $params->unit_id, $prevData[0], "{$params->userData->name} Updated Course Unit: {$params->name}", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Unit successfully updated.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["href" => "{$this->baseUrl}update-course/{$params->course_id}/view"];
 
 			// return the output
             return $return;

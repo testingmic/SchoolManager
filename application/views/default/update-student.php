@@ -216,7 +216,7 @@ if(!empty($user_id)) {
                         </div>
                         <div class="tab-pane fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
                             <div class="text-right">
-                                <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\');" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Log Incident</button>
+                                <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\');" class="btn btn-primary"><i class="fa fa-plus"></i> Log Incident</button>
                             </div>
                             '.$incidents_list.'
                         </div>

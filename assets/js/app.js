@@ -66,6 +66,10 @@ window.onpopstate = (e) => {
     linkHandler(current, false)
 }
 
+function htmlEntities(str) {
+    return String(str).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 $("#lock-system").on("click", function(e) {
     e.preventDefault();
     if ($(this).hasClass("disabled")) {
@@ -388,7 +392,6 @@ var loadPage = (loc, callback, pushstate) => {
 
 var loadFormAction = (form) => {
 
-    console.log(form[0]);
     $.ajax({
         url: form[0].action,
         method: form[0].method,
@@ -683,7 +686,6 @@ var initPlugins = () => {
             select.select2();
         })
     }
-
     // ---------- Tooltip ---------- 
     $('[rel="tooltip"],[data-rel="tooltip"],[data-toggle="tooltip"]').tooltip();
 
@@ -1122,6 +1124,166 @@ var randomInt = (min, max) => {
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
+$(`div[id="ajaxFormSubmitModal"] button[class~="btn-outline-success"]`).on("click", async function(evt) {
+
+    let formLoader = $(`form[class="ajax-data-form"] div[class="form-content-loader"]`),
+        submitLoader = $(`div[id="ajaxFormSubmitModal"] div[class="form-content-loader"]`),
+        formButton = $(`form[class="app-data-form"] button[type="button-submit"]`);
+
+    formLoader.css({ "display": "flex", "position": "fixed" });
+    submitLoader.css({ "display": "flex", "position": "fixed" });
+
+    await $.ajax({
+        url: `${ajaxFormAction}`,
+        data: ajaxFormData,
+        contentType: false,
+        cache: false,
+        type: `POST`,
+        processData: false,
+        success: function(response) {
+
+            formButton.prop("disabled", false);
+
+            if (response.code == 200) {
+
+                swal({
+                    position: 'top',
+                    text: response.data.result,
+                    icon: "success",
+                });
+
+                if (response.data.additional) {
+                    if (response.data.additional.clear) {
+                        if ($(`textarea[name="faketext"]`).length) {
+                            CKEDITOR.instances['ajax-form-content'].setData("");
+                        }
+                        if ($(`trix-editor[name="faketext"][id="ajax-form-content"]`).length) {
+                            $(`trix-editor[name="faketext"][id="ajax-form-content"]`).html("");
+                        }
+                        $replies_loaded.attr("value", "0");
+                        $replies_loaded.attr("data-form", "none");
+                        $(`form[class="ajax-data-form"] select`).val("null").change();
+                        $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
+                    }
+                    if (response.data.additional.append) {
+                        $(`div[id="${response.data.additional.append.div_id}"]`).html(response.data.additional.append.data);
+                    }
+                    if (response.data.additional.record) {
+                        $.each(response.data.additional.record, function(ie, iv) {
+                            $(`form[class="ajax-data-form"] input[name="${ie}"]`).val(iv);
+                            $(`[data-record="${ie}"]`).html(iv);
+                        });
+                    }
+                    if (response.data.additional.href !== undefined) {
+                        loadPage(response.data.additional.href);
+                    }
+                }
+                $(`form[class="ajax-data-form"] div[class~="file-preview"]`).html("");
+            } else {
+                if (response.data.result !== undefined) {
+                    notify(response.data.result);
+                } else {
+                    notify("Sorry! Error processing request.");
+                }
+            }
+        },
+        complete: function() {
+            formLoader.css({ "display": "none" });
+            submitLoader.css({ "display": "none" });
+            formButton.prop("disabled", false);
+            $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+        },
+        error: function() {
+            formLoader.css({ "display": "none" });
+            submitLoader.css({ "display": "none" });
+            formButton.prop("disabled", false);
+            $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+            Toast.fire({
+                title: "Error processing request!",
+                icon: "error"
+            });
+        }
+    });
+
+});
+
+var trigger_form_submit = () => {
+    $(`form[class="ajax-data-form"] button[type="button-submit"]`).on("click", async function(evt) {
+
+        evt.preventDefault();
+        let theButton = $(this),
+            draftButton = $(`form[class="ajax-data-form"] button[type="button-submit"][data-function="draft"]`),
+            formAction = $(`form[class="ajax-data-form"]`).attr("action"),
+            formButton = $(`form[class="app-data-form"] button[type="button-submit"]`);
+
+        let optional_flow = "We recommend that you save the form as a draft, and review it before submitting. Do you wish to proceed with this action?";
+
+        $(`div[id="ajaxFormSubmitModal"] div[class="modal-body"]`).html(`Are you sure you want to Submit this form? ${draftButton.length ? optional_flow : ""}`);
+
+        formButton.prop("disabled", true);
+
+        let myForm = document.getElementById('ajax-data-form-content');
+        let theFormData = new FormData(myForm);
+
+        let button = theButton.attr("data-function");
+        theFormData.append("the_button", button);
+
+        if ($(`textarea[name="faketext"]`).length) {
+            theFormData.delete("faketext");
+            let content = CKEDITOR.instances['ajax-form-content'].getData();
+            theFormData.append("description", htmlEntities(content));
+        }
+
+        if ($(`textarea[name="faketext_2"]`).length) {
+            theFormData.delete("faketext_2");
+            let content = CKEDITOR.instances['ajax-form-content_2'].getData();
+            theFormData.append("reason", htmlEntities(content));
+        }
+
+        if ($(`trix-editor[name="faketext"][id="ajax-form-content"]`).length) {
+            theFormData.delete("faketext");
+            let content = $(`trix-editor[id="ajax-form-content"]`).html();
+            theFormData.append("description", htmlEntities(content));
+        }
+
+        if ($(`trix-editor[name="faketext_2"][id="ajax-form-content_2"]`).length) {
+            theFormData.delete("faketext_2");
+            let content = $(`trix-editor[id="ajax-form-content_2"]`).html();
+            theFormData.append("reason", htmlEntities(content));
+        }
+
+        ajaxFormAction = formAction,
+            ajaxFormData = theFormData;
+
+        $(`div[id="ajaxFormSubmitModal"]`).modal("show");
+    });
+}
+
+var form_processing = () => {
+
+    $(`select[name="related_to"]`).on("change", function() {
+        let value = $(this).val(),
+            module = $(this).attr("data-module"),
+            related_to_id = $(`select[name="related_to_id"]`);
+        if (value == "null") {
+            related_to_id.find('option').remove().end();
+            related_to_id.append(`<option value="">Please select item</option>`);
+            return;
+        }
+
+        related_to_id.find('option').remove().end();
+        related_to_id.append(`<option value="">Select select item</option>`);
+        $.get(`${baseUrl}api/related/list?module=${module}&related_item=${value}`).then((response) => {
+            if (response.code == 200) {
+                select_options("related_to_id", response.data.result, "Please select item");
+            }
+        });
+    });
+
+    trigger_form_submit();
+
+}
+
 var form_loader = async(form_module, module_item_id) => {
     let $module = {
         label: form_module,
@@ -1146,11 +1308,7 @@ var form_loader = async(form_module, module_item_id) => {
             $form_loaded.attr("data-form", form_module);
             $form_body.html(formRecord.form);
 
-            linkClickStopper();
-            formSubmitStopper();
-
-            $(`[data-toggle="tooltip"]`).tooltip();
-            $(`select[class~="selectpicker"]`).select2();
+            initPlugins();
 
             $(`div[class~="trix-button-row"] span[class~="trix-button-group--file-tools"], div[class~="trix-button-row"] span[class~="trix-button-group-spacer"]`).remove();
 
@@ -1168,6 +1326,7 @@ var form_loader = async(form_module, module_item_id) => {
                     $(`trix-editor[id="${key}"]`).html(`${value}`);
                 });
             }
+            form_processing();
         }
     }).catch(() => {
         $form_body.html($form_error);

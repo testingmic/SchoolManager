@@ -62,6 +62,76 @@ if(!empty($item_id)) {
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
 
+        // lesson planner display
+        $lessons_list = "<div class='mb-2'>&nbsp;</div>";
+        foreach($data->lesson_plan as $key => $plan) {
+
+            $unit_lessons = "";
+
+            // if the lesson is not empty
+            if(!empty($plan->lessons_list)) {
+                // loop through the list of lessons
+                foreach($plan->lessons_list as $ikey => $lesson) {
+                    $ikey++;
+
+                    // if the user has the permission
+                    if($hasPlanner) {
+                        // show the lesson content
+                        $action = "<button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->id}_{$lesson->id}\");' class='btn  btn-sm btn-primary' type='button'><i class='fa fa-edit'></i></button>
+                        <a href='#' data-record_id='{$lesson->id}' data-record_type='course_lesson' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>";
+                    }
+
+                    // list the actions
+                    $unit_lessons .= "<tr>";
+                    $unit_lessons .= "<td>{$ikey}</td>";
+                    $unit_lessons .= "<td>{$lesson->name}</td>";
+                    $unit_lessons .= "<td>{$lesson->start_date}</td>";
+                    $unit_lessons .= "<td>{$lesson->end_date}</td>";
+                    if($hasPlanner) {
+                        $unit_lessons .= "<td>{$action}</td>";
+                    }
+                    $unit_lessons .= "</tr>";
+                }
+            }
+
+            $lessons_list .= "
+                <div id=\"accordion\" data-unit_id=\"{$plan->id}\">
+                    <div class=\"accordion\">
+                    <div class=\"accordion-header ".($key !== 0 ? "collapsed" : null)."\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\" aria-expanded=\"".($key !== 0 ? "false" : "true")."\">
+                        <h4>{$plan->name}</h4>
+                    </div>
+                    <div class=\"accordion-body ".($key !== 0 ? "collapse" : "collapse show")."\" id=\"panel-body-{$key}\" data-parent=\"#accordion\" style=\"\">
+                        <div class='d-flex justify-content-between'>
+                            <div>
+                                <span class=\"mr-3\"><strong>Start Date: </strong> {$plan->start_date}</span>
+                                <span><strong>End Date: </strong> {$plan->end_date}</span>
+                            </div>
+                            ".($hasPlanner ? "
+                            <div>
+                                <button onclick='return load_quick_form(\"course_unit_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-success btn-sm' type='button'><i class='fa fa-edit'></i> Edit</button>
+                                <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-plus'></i> Add Lesson</button>
+                                <a href='#' data-record_id='{$plan->id}' data-record_type='course_unit' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>
+                            </div>
+                            " : null)."
+                        </div>
+                        <div class='mt-2 mb-3'>{$plan->description}</div>
+
+                        <div class='border-bottom mb-3'><h6>UNIT LESSONS</h6></div>
+                        <table class='table table-bordered datatable'>
+                            <thead>
+                                <th>#</th>
+                                <th>Lesson Title</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                ".($hasPlanner ? "<th>Action</th>" : null)."
+                            </thead>
+                            <tbody>'.$unit_lessons.'</tbody>
+                        </table>
+                    </div>
+                    </div>
+                </div>";
+        }
+
         // append the html content
         $response->html = '
         <section class="section">
@@ -123,7 +193,7 @@ if(!empty($item_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Lessons</a>
+                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Course Lesson Planner</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="resources-tab2" data-toggle="tab" href="#resources" role="tab" aria-selected="true">Course Materials</a>
@@ -141,8 +211,13 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
-                            <div class="col-lg-12 pl-0"><h5>COURSE LESSONS</h5></div>
-                            
+                            <div class="d-flex justify-content-between">
+                                <div><h5>COURSE LESSONS</h5></div>
+                                '.($hasPlanner ? '
+                                    <div><button  onclick="return load_quick_form(\'course_unit_form\',\''.$item_id.'\');" class="btn  btn-sm btn-primary" type="button"><i class="fa fa-plus"></i> Add Unit</button></div>' 
+                                : null ).'
+                            </div>
+                            '.$lessons_list.'
                         </div>
                         <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab2">
                             <div class="col-lg-12 pl-0"><h5>COURSE MATERIALS</h5></div>

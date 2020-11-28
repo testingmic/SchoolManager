@@ -216,3 +216,32 @@ function page_not_found() {
         </div>
     </section>';
 }
+
+/**
+ * Save Information Popup
+ * 
+ * 
+ * @return String
+ */
+function ajax_form_button() {
+    $html = "<div class=\"modal fade modal-dialog-right right\" id=\"ajaxFormSubmitModal\" data-backdrop=\"static\" data-keyboard=\"false\">
+        <div class=\"modal-dialog modal-dialog-top modal-md\" style=\"width:100%;height:100%;\" role=\"document\">
+            <div class=\"modal-content\">
+                ".form_loader()."
+                <div class=\"modal-header\">
+                    <h5 class=\"modal-title\">Submit Form</h5>
+                    <button type=\"button\" class=\"close\" data-dismiss=\"modal\"><span>&times;</span></button>
+                </div>
+                <input hidden class=\"ajax-replies-loaded\" value=\"0\" data-form=\"none\">
+                <div class=\"modal-body\" data-scrolling=\"false\" style=\"text-align:left\">
+                    Are you sure you want to submit the form?
+                </div>
+                <div class=\"modal-footer\">
+                    <button class=\"btn btn-outline-success\">Yes! Submit</button>
+                    <button class=\"btn btn-outline-danger\" data-dismiss=\"modal\">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>";
+    return $html;
+}

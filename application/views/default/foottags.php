@@ -26,6 +26,7 @@
     <?= replies_modal($auto_close_modal); ?>
     <?= general_modal(); ?>
     <?= save_form_data(); ?>
+    <?= ajax_form_button(); ?>
     <div id="announcement_preview"></div>
 </div>
 

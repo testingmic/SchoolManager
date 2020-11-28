@@ -81,16 +81,57 @@ class Forms extends Myschoolgh {
                 $result = $this->incident_log_form($params);
             }
             
-            /** preview a form variable data set */
-            elseif($the_form == "preview_form") {
+            /** Course Unit Form */
+            elseif($the_form == "course_unit_form") {
 
                 // return if no policy id was parsed
                 if(!isset($params->module["item_id"])) {
                     return;
                 }
+                /** Confirm the user has the permission to perform this action */
+                if(!$accessObject->hasAccess("lesson", "course")) {
+                    return ["code" => 201, "data" => $this->permission_denied];
+                }
+                /** Set the course id */
+                $item_id = explode("_", $params->module["item_id"]);
+
+                /** If a second item was parsed then load the lesson unit information */
+                if(isset($item_id[1])) {
+                    $data = $this->pushQuery("*", "courses_plan", "client_id='{$params->clientId}' AND course_id='{$item_id[0]}' AND id='{$item_id[1]}' AND plan_type='unit' LIMIT 1");
+                    if(empty($data)) {
+                        return ["code" => 201, "data" => "An invalid id was parsed"];
+                    }
+                    $params->data = $data[0];
+                }
 
                 /** Load the policy application form */
-                // $result = $this->preview_form($params);
+                $result = $this->course_unit_form($params, $item_id[0]);
+            }
+
+            /** Course Unit Lesson Form */
+            elseif($the_form == "course_lesson_form") {
+                // return if no policy id was parsed
+                if(!isset($params->module["item_id"])) {
+                    return;
+                }
+                /** Confirm the user has the permission to perform this action */
+                if(!$accessObject->hasAccess("lesson", "course")) {
+                    return ["code" => 201, "data" => $this->permission_denied];
+                }
+                /** Set the course id */
+                $item_id = explode("_", $params->module["item_id"]);
+
+                /** If a second item was parsed then load the lesson unit information */
+                if(isset($item_id[1])) {
+                    $data = $this->pushQuery("*", "courses_plan", "client_id='{$params->clientId}' AND unit_id='{$item_id[0]}' AND id='{$item_id[1]}' AND plan_type='lesson' LIMIT 1");
+                    if(empty($data)) {
+                        return ["code" => 201, "data" => "An invalid id was parsed"];
+                    }
+                    $params->data = $data[0];
+                }
+
+                /** Load the policy application form */
+                $result = $this->course_lesson_form($params, $item_id[0]);
             }
 
         }
@@ -115,6 +156,103 @@ class Forms extends Myschoolgh {
     }
 
     /**
+     * Text editor to show
+     * 
+     * @param String $preference
+     * @param String $data
+     * @param String $name          Default is faketext
+     * @param String $id            Default is ajax-form-content
+     * 
+     * @return String
+     */
+    public function textarea_editor($data = null, $name = "faketext", $id = "ajax-form-content") {
+
+        // set the form
+        $form_content = "<input type='hidden' hidden id='trix-editor-input' value='{$data}'>";
+        $form_content .= "<trix-editor name=\"{$name}\" input='trix-editor-input' class=\"trix-slim-scroll\" id=\"{$id}\"></trix-editor>";
+
+        // return the results
+        return $form_content;
+
+    }
+
+    /**
+     * Course Unit Form
+     * 
+     * @param String $clientId
+     * @param String $baseUrl
+     * 
+     * @return String
+     */
+    public function course_unit_form($params, $course_id) {
+
+        // description
+        $message = isset($params->data->description) ? $params->data->description : null;
+        $item_id = isset($params->data->id) ? $params->data->id : null;
+        $title = isset($params->data->name) ? $params->data->name : null;
+        
+        $html_content = "
+        <form action='{$this->baseUrl}api/courses/".(!$title ? "add_unit" : "update_unit")."' method='POST' id='ajax-data-form-content' class='ajax-data-form'>
+            <div class='row'>
+                <div class='col-lg-12'>
+                    <div class='form-group'>
+                        <label>Unit Title</label>
+                        <input value='{$title}' type='text' name='name' id='name' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-6'>
+                    <div class='form-group'>
+                        <label>Start Date</label>
+                        <input value='".($params->data->start_date ?? null)."' type='text' name='start_date' id='start_date' class='form-control datepicker'>
+                    </div>
+                </div>
+                <div class='col-md-6'>
+                    <div class='form-group'>
+                        <label>End Date</label>
+                        <input value='".($params->data->end_date ?? null)."' type='text' name='end_date' id='end_date' class='form-control datepicker'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Description</label>
+                        {$this->textarea_editor($message)}
+                    </div>
+                </div>
+                <div class=\"col-md-6 text-left\">
+                    <input type=\"hidden\" name=\"course_id\" id=\"course_id\" value=\"{$course_id}\" hidden class=\"form-control\">
+                    <input type=\"hidden\" name=\"unit_id\" id=\"unit_id\" value=\"{$item_id}\" hidden class=\"form-control\">
+                    <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
+                </div>
+                <div class=\"col-md-6 text-right\">
+                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
+                </div>
+            </div>
+        </div>";
+
+
+        return $html_content;
+
+    }
+
+    /**
+     * Course Unit Lesson Form
+     * 
+     * @param String $clientId
+     * @param String $baseUrl
+     * 
+     * @return String
+     */
+    public function course_lesson_form() {
+        
+        $html_content = "";
+
+
+
+        return $html_content;
+
+    }
+
+    /**
      * Incident Form
      * 
      * @param String $clientId
@@ -124,6 +262,10 @@ class Forms extends Myschoolgh {
      */
     public function incident_log_form() {
         
+        $html_content = "";
+
+        return $html_content;
+
     }
 
     /**
