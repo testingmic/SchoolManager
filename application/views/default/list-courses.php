@@ -44,7 +44,7 @@ foreach($item_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='{$baseUrl}update-course/{$each->id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
     if($hasDelete) {
-        $action .= "&nbsp;<a href='#' data-record_id='{$each->id}' data-record_type='course' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     $courses .= "<tr data-row_id=\"{$each->id}\">";

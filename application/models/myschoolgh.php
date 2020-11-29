@@ -19,6 +19,7 @@ class Myschoolgh extends Models {
 	public $appName;
 	public $start_date;
     public $end_date;
+	public $client_data;
 
 	public function __construct() {
 

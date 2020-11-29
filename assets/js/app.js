@@ -71,6 +71,20 @@ function htmlEntities(str) {
     return String(str).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+var init_image_popup = () => {
+    $(`a[class~="image-popup"]`).magnificPopup({
+        type: 'image',
+        callbacks: {
+            beforeOpen: function() {
+                this.st.image.markup = this.st.image.markup.replace('mfp-figure', 'mfp-figure animated zoomInDown');
+            }
+        },
+        gallery: {
+            enabled: true
+        }
+    });
+}
+
 $("#lock-system").on("click", function(e) {
     e.preventDefault();
     if ($(this).hasClass("disabled")) {
@@ -361,6 +375,7 @@ var loadPage = (loc, callback, pushstate) => {
             init()
             callback(true)
             initDataTables();
+            init_image_popup();
             linkClickStopper($.pagecontent)
             formSubmitStopper($.pagecontent)
             var prev = window.history.state === null ? null : window.history.state.current
@@ -378,9 +393,10 @@ var loadPage = (loc, callback, pushstate) => {
             $('body, html').scrollTop(0);
         },
         error: (err) => {
+            progress.complete($.mainprogress, false);
+            $.pageoverlay.hide();
+            notify("Sorry! Error processing request.");
             if ([404, 500].includes(err.status)) {
-                progress.complete($.mainprogress, false)
-                $.pageoverlay.hide()
                 swal({
                     title: err.status === 404 ? "404" : "OOPS!",
                     text: err.status === 404 ? "Page Not Found\nThe page you are requesting cannot be found" : "Something went wrong. Please try again",
@@ -1358,20 +1374,6 @@ var load_quick_form = async(module, module_item_id) => {
     $form_body.html($form_loader);
 
     form_loader(module, module_item_id);
-}
-
-var init_image_popup = () => {
-    $(`a[class~="image-popup"]`).magnificPopup({
-        type: 'image',
-        callbacks: {
-            beforeOpen: function() {
-                this.st.image.markup = this.st.image.markup.replace('mfp-figure', 'mfp-figure animated zoomInDown');
-            }
-        },
-        gallery: {
-            enabled: true
-        }
-    });
 }
 
 var delete_existing_file_attachment = async(record_id) => {

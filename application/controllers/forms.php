@@ -69,16 +69,20 @@ class Forms extends Myschoolgh {
             
             /** The label and method to load */
             if($the_form == "incident_log_form") {
-                /** Confirm the user has the permission to perform this action */
-                if(!$accessObject->hasAccess("add", "incident")) {
-                    return ["code" => 201, "data" => $this->permission_denied];
+
+                // return if no policy id was parsed
+                if(!isset($params->module["item_id"])) {
+                    return;
                 }
+
+                // set the user id
+                $the_user_id = xss_clean($params->module["item_id"]);
                 
                 /** Append to parameters */
                 $params->incident_log_form = true;
                 
                 /** Load the policy application form */
-                $result = $this->incident_log_form($params);
+                $result = $this->incident_log_form($params, $the_user_id);
             }
             
             /** Course Unit Form */
@@ -501,9 +505,6 @@ class Forms extends Myschoolgh {
         $item_id = isset($params->data->id) ? $params->data->id : null;
         $title = isset($params->data->name) ? $params->data->name : null;
 
-        /** Confirm the user has the permission to perform this action */
-        $hasAccess = $this->hasit->hasAccess("lesson", "course");
-        
         $html_content = "
         <form action='{$this->baseUrl}api/courses/".(!$title ? "add_unit" : "update_unit")."' method='POST' id='ajax-data-form-content' class='ajax-data-form'>
             <div class='row'>
@@ -682,16 +683,158 @@ class Forms extends Myschoolgh {
     /**
      * Incident Form
      * 
-     * @param String $clientId
-     * @param String $baseUrl
+     * @param stdClass $params
+     * @param String $user_id
      * 
      * @return String
      */
-    public function incident_log_form() {
+    public function incident_log_form($params, $user_id = null) {
         
+        // description
         $html_content = "";
+        $message = isset($params->data->description) ? htmlspecialchars_decode($params->data->description) : null;
+        $item_id = isset($params->data->item_id) ? $params->data->item_id : null;
+        $title = isset($params->data->subject) ? $params->data->subject : null;
+        
+        /** Confirm the user has the permission to perform this action */
+        $hasAccess = $this->hasit->hasAccess("add", "incident");
+
+        /** init content */
+        $preloaded_attachments = "";
+
+        /** Set parameters for the data to attach */
+        $form_params = (object) [
+            "module" => "incidents",
+            "userData" => $this->thisUser,
+            "item_id" => $item_id ?? null
+        ];
+        
+        // if the user has the required permissions
+        if((!$hasAccess && $item_id) || isset($params->view_record)) {
+            // load the file attachments
+            $attachments = "";
+
+            if(!empty($params->data->attachment)) {
+                $attached = json_decode($params->data->attachment);
+                if(!empty($attached)) {
+                    $attachments = $this->list_attachments($attached->files, $params->userId, "col-lg-6");
+                }
+            }
+
+            // show the details
+            $html_content = "
+                <div class='row'>
+                    <div class='col-md-12 mb-2'><strong>Subject:</strong> {$params->data->subject}</div>
+                    <div class='col-md-6 mb-2'><strong>Incident Date:</strong> {$params->data->incident_date}</div>
+                    <div class='col-md-6 mb-2'><strong>Current State:</strong> {$params->data->status}</div>
+                    <div class='col-md-12 mb-2'><strong>Location:</strong> {$params->data->location}</div>
+                    <div class='col-md-12 mb-2'><strong>Reported By:</strong> {$params->data->reported_by}</div>
+                    <div class='col-md-6 mb-2'>
+                        <h5>Assigned To:</h5>
+                        <p><strong>Name:</strong> {$params->data->assigned_to_info->name}</p>
+                        <p><strong>Email:</strong> {$params->data->assigned_to_info->email}</p>
+                        <p><strong>Contact:</strong> {$params->data->assigned_to_info->contact}</p>
+                    </div>
+                    <div class='col-md-12 mb-2 border-top pt-3'>{$message}</div>
+                    <div class='col-md-12 border-bottom mb-3 mt-4'><h6>ATTACHMENTS</h6></div>
+                    <div class='col-md-12'>{$attachments}</div>
+                </div>";
+
+        }
+
+        // if the user has the required permissions
+        elseif($hasAccess) {
+
+            
+            // get the attachment list
+            if(isset($params->data->attachment)) {
+
+                // convert to object
+                $params->data->attachment = json_decode($params->data->attachment);
+
+                // set a new parameter for the items
+                $files_param = (object) [
+                    "userData" => $this->thisUser,
+                    "label" => "list",
+                    "is_deletable" => $hasAccess,
+                    "module" => "incidents",
+                    "item_id" => $item_id,
+                    "attachments_list" => $params->data->attachment
+                ];
+
+                // create a new object
+                $attachments = load_class("files", "controllers")->attachments($files_param);
+            
+                // get the attachments list
+                $preloaded_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
+
+            }
+
+            $html_content = "
+            <form action='{$this->baseUrl}api/incidents/".(!$title ? "add" : "update")."' method='POST' id='ajax-data-form-content' class='ajax-data-form'>
+                <div class='row'>
+                    <div class='col-lg-12'>
+                        <div class='form-group'>
+                            <label>Subject <span class='required'>*</span></label>
+                            <input value='{$title}' type='text' name='subject' id='subject' class='form-control'>
+                        </div>
+                    </div>
+                    <div class='col-lg-12'>
+                        <div class='form-group'>
+                            <label>Reported By</label>
+                            <input value='".($params->data->reported_by ?? null)."' type='text' name='reported_by' id='reported_by' class='form-control'>
+                        </div>
+                    </div>
+                    <div class='col-md-5'>
+                        <div class='form-group'>
+                            <label>Incident Date <span class='required'>*</span></label>
+                            <input value='".($params->data->incident_date ?? null)."' type='text' name='incident_date' id='incident_date' class='form-control datepicker'>
+                        </div>
+                    </div>
+                    <div class=\"col-md-7\">
+                        <div class=\"form-group\">
+                            <label for=\"assigned_to\">Assigned To</label>
+                            <select data-width=\"100%\" name=\"assigned_to\" id=\"assigned_to\" class=\"form-control selectpicker\">
+                                <option value=\"null\">Select User</option>";
+                                foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('employee','teacher') AND status='1' AND client_id='{$params->clientId}'") as $each) {
+                                    $html_content .= "<option ".(($title && ($each->item_id == $params->data->assigned_to) || (!$title && ($each->item_id == $params->userId))) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
+                                }
+                            $html_content .= "</select>
+                        </div>
+                    </div>    
+                    <div class='col-md-12'>
+                        <div class='form-group'>
+                            <label>Incident Location</label>
+                            <input value='".($params->data->location?? null)."' type='text' name='location' id='location' class='form-control'>
+                        </div>
+                    </div>
+                    <div class='col-md-12'>
+                        <div class='form-group'>
+                            <label>Description</label>
+                            {$this->textarea_editor($message)}
+                        </div>
+                    </div>";
+
+                    $html_content .= "<div class='col-lg-12'>
+                        <div class='form-group text-center mb-1'><div class='row'>{$this->form_attachment_placeholder($form_params)}</div></div>
+                    </div>";
+                    
+                    $html_content .= "<div class='col-md-12 text-center mb-4'>{$preloaded_attachments}</div>";
+
+                    $html_content .= "<div class=\"col-md-6 text-left\">
+                        <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
+                        <input type=\"hidden\" name=\"user_id\" id=\"user_id\" value=\"{$user_id}\" hidden class=\"form-control\">
+                        <input type=\"hidden\" name=\"incident_id\" id=\"incident_id\" value=\"{$item_id}\" hidden class=\"form-control\">
+                    </div>
+                    <div class=\"col-md-6 text-right\">
+                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
+                    </div>
+                </div>
+            </div>";
+        }
 
         return $html_content;
+
 
     }
 

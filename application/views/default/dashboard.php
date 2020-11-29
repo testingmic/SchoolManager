@@ -13,6 +13,11 @@ if(!isset($_SERVER["HTTP_REFERER"])) {
 
 // initial variables
 $appName = config_item("site_name");
+$baseUrl = $config->base_url();
+
+// initial variables
+global $accessObject;
+$appName = config_item("site_name");
 
 // confirm that user id has been parsed
 global $SITEURL, $usersClass;
@@ -24,6 +29,11 @@ $i_params = (object) ["limit" => 1, "user_id" => $loggedUserId];
 
 // get the user data
 $userData = $usersClass->list($i_params)["data"][0];
+$accessObject->userId = $loggedUserId;
+$accessObject->clientId = $session->clientId;
+$hasDelete = $accessObject->hasAccess("delete", "student");
+$hasUpdate = $accessObject->hasAccess("update", "student");
+
 
 // filters
 $filters = [
@@ -57,8 +67,32 @@ $response->scripts = [
 ];
 
 // get the list of users
-$iusers = (object) ["user_type" => $userData->user_type];
-$iusers_list = $usersClass->list($iusers)["data"];
+$student_param = (object) ["clientId" => $session->clientId,"user_type" => "student"];
+$student_list = load_class("users", "controllers")->list($student_param);
+
+$students = "";
+foreach($student_list["data"] as $key => $each) {
+    
+    $action = "<a href='{$baseUrl}update-student/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+
+    if($hasUpdate) {
+        $action .= "&nbsp;<a href='{$baseUrl}update-student/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+    }
+    if($hasDelete) {
+        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+    }
+
+    $students .= "<tr data-row_id=\"{$each->user_id}\">";
+    $students .= "<td>".($key+1)."</td>";
+    $students .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
+    $students .= "<td>{$each->class_name}</td>";
+    $students .= "<td>{$each->gender}</td>";
+    $students .= "<td>{$each->date_of_birth}</td>";
+    $students .= "<td>{$each->department_name}</td>";
+    $students .= "<td class='text-center'>{$action}</td>";
+    $students .= "</tr>";
+}
+
 
 // set the response dataset
 $response->html = '
@@ -198,16 +232,16 @@ $response->html .= '</select>
                             <table class="table table-striped datatable">
                                 <thead>
                                     <tr>
-                                        <th class="text-center">#</th>
+                                        <th width="5%" class="text-center">#</th>
                                         <th>Student Name</th>
                                         <th>Class</th>
-                                        <th>Guardian</th>
+                                        <th>Gender</th>
+                                        <th>Date of Birth</th>
                                         <th>Department</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
+                                        <th width="10%">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+                                <tbody>'.$students.'</tbody>
                             </table>
                         </div>
                     </div>

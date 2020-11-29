@@ -41,6 +41,7 @@ if(!empty($item_id)) {
         "clientId" => $clientId,
         "userId" => $session->userId,
         "course_id" => $item_id,
+        "full_attachments" => true,
         "full_details" => true,
         "limit" => 1
     ];
@@ -64,7 +65,20 @@ if(!empty($item_id)) {
         $updateItem = confirm_url_id(2, "update") ? true : false;
 
         // lesson planner display
+        $attachments_list = "";
         $lessons_list = "<div class='mb-2'>&nbsp;</div>";
+
+        // if the attachment parameter is not empty
+        if(!empty($data->attachment)) {
+            // create a new forms object
+            $formsObj = load_class("forms", "controllers");
+            // convert the attachment 
+            $attachments = (array) $data->attachment;
+            // print_r($attachments);
+            $attachments_list = $formsObj->list_attachments($attachments["files_list"], $session->userId, "col-lg-4 col-md-6", false);
+        }
+
+        // loop through the lesson plan
         foreach($data->lesson_plan as $key => $plan) {
 
             $key++;
@@ -82,8 +96,8 @@ if(!empty($item_id)) {
                     // if the user has the permission
                     if($hasPlanner) {
                         // show the lesson content
-                        $action .= "&nbsp;<button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}_{$lesson->id}\");' class='btn  btn-sm btn-outline-success' type='button'><i class='fa fa-edit'></i></button>
-                        <a href='#' data-record_id='{$lesson->id}' data-record_type='course_lesson' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>";
+                        $action .= "&nbsp;<button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}_{$lesson->id}\");' class='btn  btn-sm btn-outline-success' type='button'><i class='fa fa-edit'></i></button>";
+                        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$lesson->id}\", \"course_lesson\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
                     }
 
                     // list the actions
@@ -101,7 +115,10 @@ if(!empty($item_id)) {
                 <div id=\"accordion\" data-unit_id=\"{$plan->id}\">
                     <div class=\"accordion\">
                     <div class=\"accordion-header ".($plan->id == $session->thisLast_UnitId ? null : "collapsed")."\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\" ".($plan->id == $session->thisLast_UnitId ? "aria-expanded=\"true\"" : null)."\">
-                        <h4>{$key}. {$plan->name}</h4>
+                        <div class=\"d-flex justify-content-between\">
+                            <div><h4>{$key}. {$plan->name}</h4></div>
+                            <div><i class=\"fa fa-calendar-check\"></i> {$plan->date_created}</div>
+                        </div>
                     </div>
                     <div class=\"accordion-body ".($plan->id == $session->thisLast_UnitId ? "collapse show" : "collapse")."\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
                         <div class='d-flex justify-content-between'>
@@ -113,7 +130,7 @@ if(!empty($item_id)) {
                             <div>
                                 <button onclick='return load_quick_form(\"course_unit_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-success btn-sm' type='button'><i class='fa fa-edit'></i> Edit</button>
                                 <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-plus'></i> Add Lesson</button>
-                                <a href='#' data-record_id='{$plan->id}' data-record_type='course_unit' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>
+                                <a href='#' onclick='return delete_record(\"{$plan->id}\", \"course_unit\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>
                             </div>
                             " : null)."
                         </div>
@@ -224,7 +241,7 @@ if(!empty($item_id)) {
                         </div>
                         <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab2">
                             <div class="col-lg-12 pl-0"><h5>COURSE MATERIALS</h5></div>
-                            
+                            '.$attachments_list.'
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                         

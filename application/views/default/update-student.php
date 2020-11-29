@@ -41,6 +41,7 @@ if(!empty($user_id)) {
         "clientId" => $clientId,
         "user_id" => $user_id,
         "limit" => 1,
+        "full_details" => true,
         "no_limit" => 1,
         "user_type" => "student"
     ];
@@ -52,24 +53,47 @@ if(!empty($user_id)) {
     if(empty($data["data"])) {
         $response->html = page_not_found();
     } else {
+        
+
+        // user permissions
+        $hasUpdate = $accessObject->hasAccess("update", "student");
+        $hasIncident = $accessObject->hasAccess("add", "incident");
 
         // populate the incidents
         $incidents_list = "";
+
+        // list the user incidents
         if(!empty($incidents["data"])) {
+            // begin the html contents
             $incidents_list = "<div class='row mb-3'>";
-            // set the header for the list
-            $incidents_list .= '<div><h5>INCIDENTS LIST</h5></div>';
             // loop through the list of all incidents
             foreach($incidents["data"] as $each) {
                 $incidents_list .= "
-                    <div class=\"col-12 col-md-6 load_incident_record col-lg-4\" data-id=\"{$each->item_id}\">
-                        <div class=\"card card-success\">
-                            <div class=\"card-header\"><h4>{$each->subject}</h4></div>
-                            <div class=\"card-body\">{$each->incident}</div>
+                <div class=\"col-12 col-md-6 load_incident_record col-lg-6\" data-id=\"{$each->item_id}\">
+                    <div class=\"card card-success\">
+                        <div class=\"card-header pr-2 pl-2\"><h4>{$each->subject}</h4></div>
+                        <div class=\"card-body p-2\">{$each->description}</div>
+                        <div class=\"pl-2 border-top\"><strong>Reported By: </strong> {$each->reported_by}</div>
+                        ".(!empty($each->assigned_to_info->name) ? 
+                            "<div class=\"pl-2\"><strong>Assigned To: </strong> 
+                                {$each->assigned_to_info->name}, {$each->assigned_to_info->phone_number}
+                            </div>" : null
+                        )."
+                        ".(($each->created_by === $session->userId) ? 
+                            "<div class=\"pl-2\"><strong>Recorded By: </strong> 
+                                {$each->created_by_information->name}, {$each->created_by_information->phone_number}
+                            </div>" : null
+                        )."
+                        <div class=\"card-footer pr-2 pb-2 pl-2 m-0 pt-1 border-top\">
+                            <div class=\"d-flex justify-content-between\">
+                                <div><i class=\"fa fa-home\"></i> {$each->location}</div>
+                                <div><i class=\"fa fa-calendar-check\"></i> {$each->incident_date}</div>
+                            </div>
                         </div>
-                    </div>";
+                    </div>
+                </div>";
             }
-            $incidents_list = "</div>";
+            $incidents_list .= "</div>";
             $response->client_auto_save = ["incidents_array" => $incidents["data"]];
         }
 
@@ -78,7 +102,6 @@ if(!empty($user_id)) {
 
         // guardian information
         $user_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl, $data);
-        $hasUpdate = $accessObject->hasAccess("update", "student");
 
         $guardian = "";
         if(!empty($data->guardian_information)) {
@@ -215,8 +238,13 @@ if(!empty($user_id)) {
                             
                         </div>
                         <div class="tab-pane fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
-                            <div class="text-right">
-                                <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\');" class="btn btn-primary"><i class="fa fa-plus"></i> Log Incident</button>
+                            <div class="d-flex justify-content-between">
+                                <div><h5>INCIDENTS LOG</h5></div>
+                                '.($hasIncident ? '
+                                    <div>
+                                        <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\');" class="btn btn-primary"><i class="fa fa-plus"></i> Log Incident</button>
+                                    </div>' 
+                                : null ).'
                             </div>
                             '.$incidents_list.'
                         </div>

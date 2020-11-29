@@ -180,6 +180,10 @@ class Courses extends Myschoolgh {
             $params->course_code = $this->client_data($params->clientId)->client_preferences->labels->{"course_label"}.$counter;
         }
 
+        // set the academic_term and the academic_year
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->client_data($params->clientId)->client_preferences->academics->academic_term;
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->client_data($params->clientId)->client_preferences->academics->academic_year;
+
         // convert the code to uppercase
         $params->course_code = strtoupper($params->course_code);
 
@@ -303,6 +307,9 @@ class Courses extends Myschoolgh {
         try {
 
             $item_id = random_string("alnum", 32);
+            // set the academic_term and the academic_year
+            $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->client_data($params->clientId)->client_preferences->academics->academic_term;
+            $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->client_data($params->clientId)->client_preferences->academics->academic_year;
 
             // execute the statement
             $stmt = $this->db->prepare("
@@ -406,6 +413,10 @@ class Courses extends Myschoolgh {
             if(isset($params->unit_id)) {
                 $this->session->set("thisLast_UnitId", $params->unit_id);
             }
+
+            // set the academic_term and the academic_year
+            $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->client_data($params->clientId)->client_preferences->academics->academic_term;
+            $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->client_data($params->clientId)->client_preferences->academics->academic_year;
 
             // execute the statement
             $stmt = $this->db->prepare("

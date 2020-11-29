@@ -43,7 +43,7 @@ foreach($student_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='{$baseUrl}update-student/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
     if($hasDelete) {
-        $action .= "&nbsp;<a href='#' data-record_id='{$each->user_id}' data-record_type='user' class='btn btn-sm delete_record btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     $students .= "<tr data-row_id=\"{$each->user_id}\">";
@@ -51,8 +51,9 @@ foreach($student_list["data"] as $key => $each) {
     $students .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
     $students .= "<td>{$each->class_name}</td>";
     $students .= "<td>{$each->gender}</td>";
+    $students .= "<td>{$each->date_of_birth}</td>";
     $students .= "<td>{$each->department_name}</td>";
-    $students .= "<td>{$action}</td>";
+    $students .= "<td class='text-center'>{$action}</td>";
     $students .= "</tr>";
 }
 
@@ -77,6 +78,7 @@ $response->html = '
                                         <th>Student Name</th>
                                         <th>Class</th>
                                         <th>Gender</th>
+                                        <th>Date of Birth</th>
                                         <th>Department</th>
                                         <th width="10%">Action</th>
                                     </tr>
