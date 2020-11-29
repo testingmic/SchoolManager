@@ -1389,3 +1389,52 @@ var delete_existing_file_attachment = async(record_id) => {
         }
     });
 }
+
+var post_incident_followup = (user_id, incident_id) => {
+    $(`button[id="post_incident_followup"][data-resource_id="${incident_id}"]`)
+        .attr("disabled", true)
+        .html("Processing! Please wait...");
+    let content = $(`textarea[name="incident_followup"]`).val();
+
+    let comment = {
+        incident_id: incident_id,
+        user_id: user_id,
+        comment: content
+    };
+
+    if (content.length < 5) {
+        notify("The comment field cannot be empty");
+        $(`button[id="post_incident_followup"][data-resource_id="${incident_id}"]`)
+            .attr("disabled", false)
+            .html("Share Comment");
+        return false;
+    }
+
+    $(`[data-threads="cancel_policy_list"]`).attr("data-autoload", "true");
+
+    $.post(`${baseUrl}api/incidents/add_followup`, comment).then((response) => {
+        if (response.code == 200) {
+            if (response.data.additional.data !== undefined) {
+                $(`div[id="no_message_content"]`).remove();
+                let the_comment = formatThreadComment(response.data.additional.data);
+                if ($(`div[id="formsModal"] div[id="incident_log_followup_list"] div[id="comment-listing"]:first`).length) {
+                    $(`div[id="formsModal"] div[id="incident_log_followup_list"] div[id="comment-listing"]:first`).before(the_comment);
+                } else {
+                    $(`div[id="formsModal"] div[id="incident_log_followup_list"]`).append(the_comment);
+                }
+                $(`textarea[name="incident_followup"]`).val("");
+            }
+        } else {
+            notify(response.data.result);
+        }
+        $(`button[id="post_incident_followup"][data-resource_id="${incident_id}"]`)
+            .attr("disabled", false)
+            .html("Share Comment");
+    }).catch(() => {
+        $(`button[id="post_incident_followup"][data-resource_id="${incident_id}"]`)
+            .attr("disabled", false)
+            .html("Share Comment");
+        notify("Sorry! Error processing request.");
+    });
+
+}

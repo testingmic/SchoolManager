@@ -68,21 +68,53 @@ class Forms extends Myschoolgh {
         if(isset($params->module["content"]) && $params->module["content"] == "form") {
             
             /** The label and method to load */
-            if($the_form == "incident_log_form") {
+            if(in_array($the_form, ["incident_log_form", "incident_log_form_view", "incident_log_followup_form"])) {
 
                 // return if no policy id was parsed
                 if(!isset($params->module["item_id"])) {
                     return;
                 }
 
-                // set the user id
-                $the_user_id = xss_clean($params->module["item_id"]);
+                /** Set the course id */
+                $query = "";
+                $item_id = explode("_", $params->module["item_id"]);
+
+                /** If a second item was parsed then load the lesson unit information */
+                if(isset($item_id[1])) {
+
+                    /** If view record */
+                    if(in_array($the_form, ["incident_log_form_view", "incident_log_followup_form"])) {
+
+                        /** If view record */
+                        $params->view_record = true;
+
+                        // append some query
+                        $query = ", (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online,'|',user_type) FROM users WHERE users.item_id = a.assigned_to LIMIT 1) AS assigned_to_info,
+                            (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online,'|',user_type) FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_information,
+                            (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online,'|',user_type) FROM users WHERE users.item_id = a.user_id LIMIT 1) AS user_information";
+                    }
+
+                    $data = $this->pushQuery(
+                        "a.*, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment {$query}", 
+                        "incidents a", 
+                        "a.client_id='{$params->clientId}' AND a.item_id='{$item_id[1]}' AND a.user_id='{$item_id[0]}' AND a.incident_type='incident' LIMIT 1"
+                    );
+
+                    if(empty($data)) {
+                        return ["code" => 201, "data" => "An invalid id was parsed"];
+                    }
+                    $params->data = $data[0];
+                }
                 
                 /** Append to parameters */
                 $params->incident_log_form = true;
                 
                 /** Load the policy application form */
-                $result = $this->incident_log_form($params, $the_user_id);
+                if($the_form == "incident_log_followup_form") {
+                    $result = $this->incident_log_followup_form($params, $item_id[0]);
+                } else {
+                    $result = $this->incident_log_form($params, $item_id[0]);
+                }
             }
             
             /** Course Unit Form */
@@ -114,12 +146,15 @@ class Forms extends Myschoolgh {
                 if(!isset($params->module["item_id"])) {
                     return;
                 }
+
                 /** Set the course id */
                 $resources = ["assets/js/upload.js"];
                 $item_id = explode("_", $params->module["item_id"]);
 
                 /** If a second item was parsed then load the lesson unit information */
                 if(isset($item_id[2])) {
+                    
+                    // make the query
                     $data = $this->pushQuery(
                         "a.*, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment", 
                         "courses_plan a", 
@@ -591,12 +626,14 @@ class Forms extends Myschoolgh {
             // show the details
             $html_content = "
                 <div class='row'>
-                    <div class='col-md-12 mb-2'><strong>Title:</strong> {$title}</div>
+                    <div class='col-md-12 mb-2'>Title: <h5 class=\"text-uppercase\">{$title}</h5></div>
                     <div class='col-md-6 mb-2'><strong>Start Date:</strong> {$params->data->start_date}</div>
                     <div class='col-md-6 mb-2'><strong>End Date:</strong> {$params->data->end_date}</div>
                     <div class='col-md-12 mb-2 border-top pt-3'>{$message}</div>
-                    <div class='col-md-12 border-bottom mb-3 mt-4'><h6>LESSON RESOURCES</h6></div>
-                    <div class='col-md-12'>{$attachments}</div>
+                    ".(isset($attached) && !empty($attached->files) ? "
+                        <div class='col-md-12 border-bottom mb-3 mt-4'><h6>LESSON RESOURCES</h6></div>
+                        <div class='col-md-12'>{$attachments}</div>" : ""
+                    )."
                 </div>";
 
         }
@@ -688,7 +725,7 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function incident_log_form($params, $user_id = null) {
+    public function incident_log_form(stdClass $params, $user_id = null) {
         
         // description
         $html_content = "";
@@ -711,6 +748,7 @@ class Forms extends Myschoolgh {
         
         // if the user has the required permissions
         if((!$hasAccess && $item_id) || isset($params->view_record)) {
+            
             // load the file attachments
             $attachments = "";
 
@@ -721,23 +759,34 @@ class Forms extends Myschoolgh {
                 }
             }
 
+            // loop through the information
+            foreach(["created_by_information", "user_information", "assigned_to_info"] as $each) {
+                // convert the created by string into an object
+                $params->data->{$each} = (object) $this->stringToArray($params->data->$each, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);    
+            }
+
             // show the details
             $html_content = "
                 <div class='row'>
-                    <div class='col-md-12 mb-2'><strong>Subject:</strong> {$params->data->subject}</div>
-                    <div class='col-md-6 mb-2'><strong>Incident Date:</strong> {$params->data->incident_date}</div>
-                    <div class='col-md-6 mb-2'><strong>Current State:</strong> {$params->data->status}</div>
+                    <div class='col-md-12 mb-2'>Subject: <h5 class=\"text-uppercase\">{$params->data->subject}</h5></div>
+                    <div class='col-md-12 mb-2'><strong>Incident Date:</strong> {$params->data->incident_date}</div>
+                    <div class='col-md-12 mb-2'><strong>Current State:</strong> {$this->the_status_label($params->data->status)}</div>
                     <div class='col-md-12 mb-2'><strong>Location:</strong> {$params->data->location}</div>
                     <div class='col-md-12 mb-2'><strong>Reported By:</strong> {$params->data->reported_by}</div>
-                    <div class='col-md-6 mb-2'>
-                        <h5>Assigned To:</h5>
-                        <p><strong>Name:</strong> {$params->data->assigned_to_info->name}</p>
-                        <p><strong>Email:</strong> {$params->data->assigned_to_info->email}</p>
-                        <p><strong>Contact:</strong> {$params->data->assigned_to_info->contact}</p>
-                    </div>
+                    ".(
+                        !empty($params->data->assigned_to_info->name) ? "
+                        <div class='col-md-6 mb-2'>
+                            <h6>ASSIGNED TO:</h6>
+                            <p><strong>Name:</strong> ".($params->data->assigned_to_info->name ?? null)."</p>
+                            <p><strong>Email:</strong> ".($params->data->assigned_to_info->email ?? null)."</p>
+                            <p><strong>Contact:</strong> ".($params->data->assigned_to_info->contact ?? null)."</p>
+                        </div>" : ""
+                    )."
                     <div class='col-md-12 mb-2 border-top pt-3'>{$message}</div>
-                    <div class='col-md-12 border-bottom mb-3 mt-4'><h6>ATTACHMENTS</h6></div>
-                    <div class='col-md-12'>{$attachments}</div>
+                    ".(isset($attached) && !empty($attached->files) ? "
+                        <div class='col-md-12 border-bottom mb-3 mt-4'><h6>ATTACHMENTS</h6></div>
+                        <div class='col-md-12'>{$attachments}</div>" : ""
+                    )."
                 </div>";
 
         }
@@ -802,13 +851,30 @@ class Forms extends Myschoolgh {
                             $html_content .= "</select>
                         </div>
                     </div>    
-                    <div class='col-md-12'>
+                    <div class='col-md-".($title ? 8 : 12)."'>
                         <div class='form-group'>
                             <label>Incident Location</label>
-                            <input value='".($params->data->location?? null)."' type='text' name='location' id='location' class='form-control'>
+                            <input value='".($params->data->location ?? null)."' type='text' name='location' id='location' class='form-control'>
                         </div>
-                    </div>
-                    <div class='col-md-12'>
+                    </div>";
+                    
+                    // if the user wants to update
+                    if($title) {
+                        // display the status
+                        $html_content .= '<div class="col-lg-4 col-md-6">
+                            <div class="form-group">
+                                <label for="status">Status</label>
+                                <select data-width="100%" name="status" id="status" class="form-control cursor">
+                                    <option value="null">Select Status</option>
+                                    <option '.($params->data->status == "Pending" ? "selected" : null).' value="Pending">Pending</option>
+                                    <option '.($params->data->status == "Processing" ? "selected" : null).' value="Processing">Processing</option>
+                                    <option '.($params->data->status == "Solved" ? "selected" : null).' value="Solved">Solved</option>
+                                </select>
+                            </div>
+                        </div>';
+                    }
+
+                    $html_content .= "<div class='col-md-12'>
                         <div class='form-group'>
                             <label>Description</label>
                             {$this->textarea_editor($message)}
@@ -835,7 +901,95 @@ class Forms extends Myschoolgh {
 
         return $html_content;
 
+    }
 
+    /**
+     * Followup Thread Messages
+     * 
+     * @param stdClass $data
+     * 
+     * @return String
+     */
+    public function followup_thread($data) {
+
+        return "
+        <div class=\"col-md-12 grid-margin\" id=\"comment-listing\" data-reply-container=\"{$data->item_id}\">
+            <div class=\"card rounded replies-item\">
+                <div class=\"card-header\">
+                    <div class=\"d-flex align-items-center justify-content-between\">
+                        <div class=\"d-flex align-items-center\">
+                            <img class=\"img-xs rounded-circle\" src=\"{$this->baseUrl}{$data->created_by_information->image}\" alt=\"\">
+                            <div class=\"ml-2\">
+                                <p class=\"cursor underline\" title=\"Click to view summary information about {$data->created_by_information->name}\" onclick=\"return user_basic_information('{$data->created_by}')\" data-id=\"{$$data->created_by}\">{$data->created_by_information->name}</p>
+                                <p title=\"{$data->date_created}\" class=\"tx-11 replies-timestamp text-muted\">${rv.time_ago}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class=\"card-body\">
+                    <div class=\"tx-14\">{$data->description}</div>
+                </div>
+            </div>
+        </div>";
+    }
+
+    /**
+     * Incident Followup Form
+     * 
+     * List the followup details before showing the textarea field to add more information to it
+     * 
+     * @param stdClass $params
+     * @param String $user_id 
+     * 
+     * @return String
+     */
+    public function incident_log_followup_form(stdClass $params, $user_id = null) {
+        
+        /** Initializing */
+        $prev_date = "";
+        $html_content = "<div id='incident_log_followup_list'>";
+        $followups_list = "";
+
+        /** Load the followups for the incident */
+        $followups = $this->pushQuery(
+            "a.*, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment", 
+            "incidents a", 
+            "a.client_id='{$params->clientId}' AND a.incident_id='{$params->data->item_id}' AND a.user_id='{$user_id}' AND a.incident_type='followup' LIMIT 1"
+        );
+        
+        /** Loop through the followups */
+        foreach($followups as $followup) {
+
+            /** Clean date */
+            $clean_date = date("l, F Y", strtotime($followup->date_created));
+            $raw_date = date("Y-m-d", strtotime($followup->date_created));
+            $prev_date = date("Y-m-d", strtotime($followup->date_created));
+
+            /** If the previous date is not the same as the current date */
+            if (!$prev_date || $prev_date !== $raw_date) {
+                $followups_list .= "<div class=\"message_list_day_divider_label\"><button class=\"message_list_day_divider_label_pill\">{$clean_date}</button></div>";
+            }
+            $followups_list .= $this->followup_thread($followup);
+            $prev_date = $raw_date;
+
+        }
+
+        $html_content .= !empty($followups_list) ? $followups_list : "<div id=\"no_message_content\" class=\"text-center font-italic\">No followup message available.</div>";
+        $html_content .= "
+            </div>
+            <div class='form-group'>
+                <label></label>
+                <textarea class='form-control' name='incident_followup' id='incident_followup'></textarea>
+            </div>
+            <div class='row'>
+                <div class='col-lg-6'><button data-resource_id='{$params->data->item_id}' onclick='return post_incident_followup(\"{$user_id}\",\"{$params->data->item_id}\")' id='post_incident_followup' class='btn btn-outline-success'>Share Comment</button></div>
+                <div class=\"col-md-6 text-right\">
+                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
+                </div>
+            </div>
+        ";
+
+        return $html_content;
     }
 
     /**
@@ -866,7 +1020,7 @@ class Forms extends Myschoolgh {
                         <input type="text" value="'.$eachItem->guardian_fullname.'" name="guardian_info[guardian_fullname]['.$key_id.']" id="guardian_info[guardian_fullname]['.$key_id.']" class="form-control">
                         <div class="col-lg-12 col-md-12 pl-0 mt-2">
                             <label for="guardian_info[guardian_relation]['.$key_id.']">Relationship</label>
-                            <select name="guardian_info[guardian_relation]['.$key_id.']" id="guardian_info[guardian_relation]['.$key_id.']" class="form-control selectpicker">
+                            <select data-width="100%" name="guardian_info[guardian_relation]['.$key_id.']" id="guardian_info[guardian_relation]['.$key_id.']" class="form-control selectpicker">
                                 <option value="null">Select Relation</option>';
                                 foreach($this->pushQuery("id, name", "guardian_relation", "status='1' AND client_id='{$clientId}'") as $each) {
                                     $guardian .= "<option ".($each->name == $eachItem->guardian_relation ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
@@ -930,7 +1084,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="gender">Gender</label>
-                        <select name="gender" id="gender" class="form-control selectpicker">
+                        <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
                             <option value="null">Select Gender</option>';
                             foreach($this->pushQuery("*", "users_gender") as $each) {
                                 $response .= "<option ".($isData && ($each->name == $userData->gender) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
@@ -983,7 +1137,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="country">Country</label>
-                        <select name="country" id="country" class="form-control selectpicker">
+                        <select data-width="100%" name="country" id="country" class="form-control selectpicker">
                             <option value="null">Select Country</option>';
                             foreach($this->pushQuery("*", "country") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->country) ? "selected" : null)." value=\"{$each->id}\">{$each->country_name}</option>";                            
@@ -1000,7 +1154,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="blood_group">Blood Broup</label>
-                        <select name="blood_group" id="blood_group" class="form-control selectpicker">
+                        <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="null">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->blood_group) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
@@ -1032,7 +1186,7 @@ class Forms extends Myschoolgh {
                             <input type="text" name="guardian_info[guardian_fullname][1]" id="guardian_info[guardian_fullname][1]" class="form-control">
                             <div class="col-lg-12 col-md-12 pl-0 mt-2">
                                 <label for="guardian_info[guardian_relation][1]">Relationship</label>
-                                <select name="guardian_info[guardian_relation][1]" id="guardian_info[guardian_relation][1]" class="form-control selectpicker">
+                                <select data-width="100%" name="guardian_info[guardian_relation][1]" id="guardian_info[guardian_relation][1]" class="form-control selectpicker">
                                     <option value="null">Select Relation</option>';
                                     foreach($this->pushQuery("id, name", "guardian_relation", "status='1' AND client_id='{$clientId}'") as $each) {
                                         $response .= "<option value=\"{$each->name}\">{$each->name}</option>";                            
@@ -1067,7 +1221,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="class_id">Class</label>
-                        <select name="class_id" id="class_id" class="form-control selectpicker">
+                        <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
                             <option value="null">Select Student Class</option>';
                             foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
@@ -1078,7 +1232,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="department">Department <span class="required">*</span></label>
-                        <select name="department" id="department" class="form-control selectpicker">
+                        <select data-width="100%" name="department" id="department" class="form-control selectpicker">
                             <option value="">Select Student Department</option>';
                             foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->department) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
@@ -1089,7 +1243,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="section">Section</label>
-                        <select name="section" id="section" class="form-control selectpicker">
+                        <select data-width="100%" name="section" id="section" class="form-control selectpicker">
                             <option value="null">Select Student Section</option>';
                             foreach($this->pushQuery("id, name", "sections", "status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->section) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            

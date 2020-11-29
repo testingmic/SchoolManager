@@ -23,8 +23,13 @@ $response = (object) [];
 $pageTitle = "Student Details";
 $response->title = "{$pageTitle} : {$appName}";
 
+// the query parameter to load the user information
+$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "userId" => $session->userId];
+$userData = $usersClass->list($i_params)["data"][0];
+
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
+$accessObject->userPermits = $userData->user_permissions;
 
 $response->scripts = [
     "assets/js/page/index.js"
@@ -54,26 +59,43 @@ if(!empty($user_id)) {
         $response->html = page_not_found();
     } else {
         
-
         // user permissions
         $hasUpdate = $accessObject->hasAccess("update", "student");
         $hasIncident = $accessObject->hasAccess("add", "incident");
+        $updateIncident = $accessObject->hasAccess("update", "incident");
+        $deleteIncident = $accessObject->hasAccess("delete", "incident");
 
         // populate the incidents
         $incidents_list = "";
 
         // list the user incidents
         if(!empty($incidents["data"])) {
+            
             // begin the html contents
             $incidents_list = "<div class='row mb-3'>";
+
             // loop through the list of all incidents
             foreach($incidents["data"] as $each) {
+                // generate the buttons
+                $buttons = "<button onclick=\"return load_quick_form('incident_log_form_view','{$each->user_id}_{$each->item_id}');\" class=\"btn mb-1 btn-sm btn-outline-primary\" type=\"button\"><i class=\"fa fa-eye\"></i> View</button>&nbsp;";
+                
+                // set the update button
+                if($updateIncident && !in_array($each->status, ["Solved", "Cancelled"])) {
+                    $buttons .= "<button onclick=\"return load_quick_form('incident_log_form','{$each->user_id}_{$each->item_id}');\" class=\"btn mb-1 btn-sm btn-outline-success\" type=\"button\"><i class=\"fa fa-edit\"></i> Update</button>";
+                }
+
+                if($deleteIncident && !in_array($each->status, ["Solved", "Cancelled"])) {
+                    $buttons .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"incident\");' class='btn mb-1 btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a>";
+                }
+
+                //append to the list
                 $incidents_list .= "
                 <div class=\"col-12 col-md-6 load_incident_record col-lg-6\" data-id=\"{$each->item_id}\">
                     <div class=\"card card-success\">
                         <div class=\"card-header pr-2 pl-2\"><h4>{$each->subject}</h4></div>
-                        <div class=\"card-body p-2\">{$each->description}</div>
-                        <div class=\"pl-2 border-top\"><strong>Reported By: </strong> {$each->reported_by}</div>
+                        <div class=\"card-body p-2\" style=\"height:150px;max-height:150px;overflow:hidden;\">{$each->description}</div>
+                        <div class=\"pl-2 border-top mt-2\"><strong>Status: </strong> {$myClass->the_status_label($each->status)}</div>
+                        <div class=\"pl-2\"><strong>Reported By: </strong> {$each->reported_by}</div>
                         ".(!empty($each->assigned_to_info->name) ? 
                             "<div class=\"pl-2\"><strong>Assigned To: </strong> 
                                 {$each->assigned_to_info->name}, {$each->assigned_to_info->phone_number}
@@ -84,6 +106,16 @@ if(!empty($user_id)) {
                                 {$each->created_by_information->name}, {$each->created_by_information->phone_number}
                             </div>" : null
                         )."
+                        <div class=\"pl-2 mb-1 mt-2\">
+                            <div class=\"d-flex p-2 justify-content-between\">
+                                ".($updateIncident ? "
+                                    <div>
+                                        <button onclick=\"return load_quick_form('incident_log_followup_form','{$each->user_id}_{$each->item_id}');\" class=\"btn mb-1 btn-sm btn-outline-warning\" type=\"button\"><i class=\"fa fa-list\"></i> Followups</button>
+                                    </div>" : ""
+                                )."
+                                <div>{$buttons}</div>
+                            </div>
+                        </div>
                         <div class=\"card-footer pr-2 pb-2 pl-2 m-0 pt-1 border-top\">
                             <div class=\"d-flex justify-content-between\">
                                 <div><i class=\"fa fa-home\"></i> {$each->location}</div>
@@ -239,7 +271,7 @@ if(!empty($user_id)) {
                         </div>
                         <div class="tab-pane fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
                             <div class="d-flex justify-content-between">
-                                <div><h5>INCIDENTS LOG</h5></div>
+                                <div class="mb-2"><h5>INCIDENTS LOG</h5></div>
                                 '.($hasIncident ? '
                                     <div>
                                         <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\');" class="btn btn-primary"><i class="fa fa-plus"></i> Log Incident</button>

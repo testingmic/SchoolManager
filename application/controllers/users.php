@@ -44,10 +44,10 @@ class Users extends Myschoolgh {
 
 		// boolean value
         $params->remote = (bool) (isset($params->remote) && $params->remote);
-
+		$params->query .= (isset($params->user_id)) ? (preg_match("/^[0-9]+$/", $params->user_id) ? " AND a.id='{$params->user_id}'" : " AND a.item_id='{$params->user_id}'") : null;
+		
 		// if the field is null (dont perform all these checks if minified was parsed)
 		if(!isset($params->minified)) {
-			$params->query .= (isset($params->user_id)) ? (preg_match("/^[0-9]+$/", $params->user_id) ? " AND a.id='{$params->user_id}'" : " AND a.item_id='{$params->user_id}'") : null;
 			$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
 			$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 			$params->query .= (isset($params->email)) ? " AND a.email='{$params->email}'" : null;
@@ -156,8 +156,6 @@ class Users extends Myschoolgh {
 					// append to the list and return
 					$row++;
 					$result->row_id = $row;
-				} else {
-					unset($result->user_permissions);
 				}
 				
 				// online algorithm (user is online if last activity is at most 5minutes ago)

@@ -30,8 +30,10 @@ class Models {
         $this->form_modules = [
             "course_unit_form" => "Lesson Planner: Course Unit",
             "course_lesson_form" => "Lesson Planner: Unit Lesson",
-            "course_lesson_form_view" => "Lesson Planner: Unit Lesson",
-            "incident_log_form" => "Log Incident"
+            "course_lesson_form_view" => "Lesson Planner: Unit Lesson Details",
+            "incident_log_form" => "Log Incident",
+            "incident_log_form_view" => "Incident Details",
+            "incident_log_followup_form" => "Incident: Followups"
         ];
 
 		$this->favicon_array = [

@@ -121,7 +121,7 @@ class Incidents extends Myschoolgh {
                 ".(isset($params->reported_by) ? ", reported_by = '{$params->reported_by}'" : null)."
                 ".(isset($params->location) ? ", location = '{$params->location}'" : null)."
                 ".(isset($params->user_id) ? ", user_id = '{$params->user_id}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
 
@@ -163,9 +163,71 @@ class Incidents extends Myschoolgh {
 
         try {
 
-        } catch(PDOException $e) {
+            // old record
+            $prevData = $this->pushQuery(
+                "a.*, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment",
+                "incidents a", 
+                "a.item_id = '{$params->incident_id}' AND a.user_id = '{$params->user_id}' AND a.client_id = '{$params->clientId}' AND a.deleted = '0' LIMIT 1"
+            );
 
-        } 
+            // if empty then return
+            if(empty($prevData)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            // initialize
+            $initial_attachment = [];
+
+            /** Confirm that there is an attached document */
+            if(!empty($prevData[0]->attachment)) {
+                // decode the json string
+                $db_attachments = json_decode($prevData[0]->attachment);
+                // get the files
+                if(isset($db_attachments->files)) {
+                    $initial_attachment = $db_attachments->files;
+                }
+            }
+
+            // append the attachments
+            $filesObj = load_class("files", "controllers");
+            $module = "incidents";
+            $attachments = $filesObj->prep_attachments($module, $params->userId, $prevData[0]->item_id, $initial_attachment);
+
+            // execute the statement
+            $stmt = $this->db->prepare("
+                UPDATE incidents SET date_updated = now()
+                    ".(isset($params->subject) ? ", subject = '{$params->subject}'" : null)."
+                    ".(isset($params->incident_date) ? ", incident_date = '{$params->incident_date}'" : null)."
+                    ".(isset($params->assigned_to) ? ", assigned_to = '{$params->assigned_to}'" : null)."
+                    ".(isset($params->reported_by) ? ", reported_by = '{$params->reported_by}'" : null)."
+                    ".(isset($params->location) ? ", location = '{$params->location}'" : null)."
+                    ".(isset($params->status) ? ", status = '{$params->status}'" : null)."
+                    ".(isset($params->user_id) ? ", user_id = '{$params->user_id}'" : null)."
+                    ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
+                WHERE client_id = ? AND item_id = ? LIMIT 1
+            ");
+            $stmt->execute([$params->clientId, $params->incident_id]);
+
+            // append the attachments
+            $filesObj = load_class("files", "controllers");
+
+            // insert the record if not already existing
+            $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? LIMIT 1");
+            $files->execute([json_encode($attachments), $attachments["raw_size_mb"], $prevData[0]->item_id]);
+            
+            // log the user activity
+            $this->userLogs("incidents", $params->incident_id, null, "{$params->userData->name} updated the incident record.", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Incident successfully updated.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}update-student/{$params->user_id}/incidents"];
+
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {} 
 
     }
 

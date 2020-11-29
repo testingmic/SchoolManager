@@ -318,7 +318,7 @@ class Courses extends Myschoolgh {
                 ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
                 ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
@@ -369,11 +369,11 @@ class Courses extends Myschoolgh {
                 UPDATE courses_plan SET date_updated = now()
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
-                WHERE client_id = ? AND course_id = ? AND id = ?
+                WHERE client_id = ? AND course_id = ? AND id = ? LIMIT 1
             ");
             $stmt->execute([$params->clientId, $params->course_id, $params->unit_id]);
 
@@ -428,7 +428,7 @@ class Courses extends Myschoolgh {
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
                 ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
@@ -513,9 +513,9 @@ class Courses extends Myschoolgh {
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
-                WHERE client_id = ? AND course_id = ? AND id = ?
+                WHERE client_id = ? AND course_id = ? AND id = ? LIMIT 1
             ");
             $stmt->execute([$params->clientId, $params->course_id, $params->lesson_id]);
             
@@ -541,7 +541,7 @@ class Courses extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {print $e->getMessage();} 
 
     }
 

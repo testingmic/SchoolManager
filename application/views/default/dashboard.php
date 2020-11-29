@@ -25,12 +25,14 @@ $loggedUserId = $session->userId;
 $cur_user_id = (confirm_url_id(1)) ? xss_clean($SITEURL[1]) : $loggedUserId;
 
 // the query parameter to load the user information
-$i_params = (object) ["limit" => 1, "user_id" => $loggedUserId];
+$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "userId" => $session->userId];
 
 // get the user data
 $userData = $usersClass->list($i_params)["data"][0];
 $accessObject->userId = $loggedUserId;
 $accessObject->clientId = $session->clientId;
+$accessObject->userPermits = $userData->user_permissions;
+
 $hasDelete = $accessObject->hasAccess("delete", "student");
 $hasUpdate = $accessObject->hasAccess("update", "student");
 
