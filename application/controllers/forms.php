@@ -111,8 +111,9 @@ class Forms extends Myschoolgh {
                 
                 /** Load the policy application form */
                 if($the_form == "incident_log_followup_form") {
-                    $result = $this->incident_log_followup_form($params, $item_id[0]);
+                    $result = $this->incident_log_followup_form($item_id[1], $params->clientId, $item_id[0]);
                 } else {
+                    $resources = ["assets/js/upload.js"];
                     $result = $this->incident_log_form($params, $item_id[0]);
                 }
             }
@@ -765,6 +766,9 @@ class Forms extends Myschoolgh {
                 $params->data->{$each} = (object) $this->stringToArray($params->data->$each, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);    
             }
 
+            // load the followup list
+            $followups = $this->incident_log_followup_form($item_id, $params->clientId, $user_id, true);
+
             // show the details
             $html_content = "
                 <div class='row'>
@@ -786,6 +790,10 @@ class Forms extends Myschoolgh {
                     ".(isset($attached) && !empty($attached->files) ? "
                         <div class='col-md-12 border-bottom mb-3 mt-4'><h6>ATTACHMENTS</h6></div>
                         <div class='col-md-12'>{$attachments}</div>" : ""
+                    )."
+                    ".(!empty($followups) ? "
+                        <div class='col-md-12 border-bottom mb-3 mt-4'><h6>FOLLOWUPS</h6></div>
+                        <div class='col-md-12'>{$followups}</div>" : ""
                     )."
                 </div>";
 
@@ -913,7 +921,7 @@ class Forms extends Myschoolgh {
     public function followup_thread($data) {
 
         return "
-        <div class=\"col-md-12 grid-margin\" id=\"comment-listing\" data-reply-container=\"{$data->item_id}\">
+        <div class=\"col-md-12 p-0 grid-margin\" id=\"comment-listing\" data-reply-container=\"{$data->item_id}\">
             <div class=\"card rounded mb-4 replies-item\">
                 <div class=\"card-header pb-0 mb-0\">
                     <div class=\"d-flex align-items-center justify-content-between\">
@@ -938,12 +946,13 @@ class Forms extends Myschoolgh {
      * 
      * List the followup details before showing the textarea field to add more information to it
      * 
-     * @param stdClass $params
+     * @param String $item_id
+     * @param String $clientId
      * @param String $user_id 
      * 
      * @return String
      */
-    public function incident_log_followup_form(stdClass $params, $user_id = null) {
+    public function incident_log_followup_form($item_id, $clientId, $user_id = null, $list_only = false) {
         
         /** Initializing */
         $prev_date = null;
@@ -953,7 +962,7 @@ class Forms extends Myschoolgh {
         /** Load the followups for the incident */
         $q_param = (object) [
             "user_id" => $user_id, "incident_type" => "followup", 
-            "followup_id" => $params->data->item_id, "clientId" => $params->clientId
+            "followup_id" => $item_id, "clientId" => $clientId
         ];
 		$followups = load_class("incidents", "controllers")->list($q_param)["data"];
 
@@ -986,15 +995,16 @@ class Forms extends Myschoolgh {
                     <textarea class='form-control' name='incident_followup' id='incident_followup'></textarea>
                 </div>
                 <div class='row'>
-                    <div class='col-lg-6'><button data-resource_id='{$params->data->item_id}' onclick='return post_incident_followup(\"{$user_id}\",\"{$params->data->item_id}\")' id='post_incident_followup' class='btn btn-outline-success'>Share Comment</button></div>
+                    <div class='col-lg-6'><button data-resource_id='{$item_id}' onclick='return post_incident_followup(\"{$user_id}\",\"{$item_id}\")' id='post_incident_followup' class='btn btn-outline-success'>Share Comment</button></div>
                     <div class=\"col-md-6 text-right\">
                         <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
                     </div>
                 </div>
-            </div>
-        ";
+            </div>";
+        
+        $close = '<div class="col-md-12 mt-4 border-top pt-4 mb-3 text-center"><span class="btn btn-outline-secondary" data-dismiss="modal">Close Modal</span></div>';
 
-        return $form_content.$html_content;
+        return !$list_only ? $form_content.$html_content : $html_content.$close;
     }
 
     /**
