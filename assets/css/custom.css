@@ -226,3 +226,36 @@ textarea.form-control {
     max-height: 180px;
     overflow: hidden;
 }
+
+.message_list_day_divider_label {
+    cursor: default;
+    display: block;
+    height: .1px;
+    top: 14px;
+    border: none;
+    text-align: center;
+    z-index: 298;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.message_list_day_divider_label_pill {
+    font-size: 13px;
+    height: 28px;
+    line-height: 17px;
+    padding: 0 16px;
+    z-index: 295;
+    text-align: center;
+    border: solid .3px #c8c4c4;
+}
+
+.message_list_day_divider_label_pill {
+    background: #ffff;
+    display: inline-block;
+    z-index: 298;
+    top: -13px;
+    border-radius: 24px;
+    position: relative;
+}

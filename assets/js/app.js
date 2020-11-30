@@ -1390,6 +1390,29 @@ var delete_existing_file_attachment = async(record_id) => {
     });
 }
 
+var format_followup_thread = (data) => {
+    return `
+    <div class="col-md-12 grid-margin" id="comment-listing" data-reply-container="${data.item_id}">
+        <div class="card mb-4 rounded replies-item">
+            <div class="card-header pb-0 mb-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <img class="img-xs rounded-circle" src="${baseUrl}${data.created_by_information.image}" alt="">
+                        <div class="ml-2">
+                            <p class="cursor underline m-0" title="Click to view summary information about ${data.created_by_information.name}" onclick="return user_basic_information('${data.created_by}')" data-id="${data.created_by}">${data.created_by_information.name}</p>
+                            <p title="${data.date_created}" class="tx-11 mb-2 replies-timestamp text-muted">${data.time_ago}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body mt-0 pt-2 pb-2">
+                <div class="tx-14">${data.description}</div>
+            </div>
+        </div>
+    </div>
+    `;
+}
+
 var post_incident_followup = (user_id, incident_id) => {
     $(`button[id="post_incident_followup"][data-resource_id="${incident_id}"]`)
         .attr("disabled", true)
@@ -1416,7 +1439,7 @@ var post_incident_followup = (user_id, incident_id) => {
         if (response.code == 200) {
             if (response.data.additional.data !== undefined) {
                 $(`div[id="no_message_content"]`).remove();
-                let the_comment = formatThreadComment(response.data.additional.data);
+                let the_comment = format_followup_thread(response.data.additional.data);
                 if ($(`div[id="formsModal"] div[id="incident_log_followup_list"] div[id="comment-listing"]:first`).length) {
                     $(`div[id="formsModal"] div[id="incident_log_followup_list"] div[id="comment-listing"]:first`).before(the_comment);
                 } else {

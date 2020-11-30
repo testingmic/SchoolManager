@@ -28,6 +28,7 @@ class Incidents extends Myschoolgh {
         $params->query .= (isset($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
         $params->query .= (isset($params->client_id)) ? " AND a.client_id='{$params->client_id}'" : null;
         $params->query .= (isset($params->incident_id)) ? " AND (a.item_id='{$params->incident_id}' OR a.id='{$params->incident_id}')" : null;
+        $params->query .= (isset($params->followup_id)) ? " AND a.incident_id='{$params->followup_id}'" : null;
 
         try {
 
@@ -38,7 +39,7 @@ class Incidents extends Myschoolgh {
                     (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online,'|',user_type) FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_information,
                     (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online,'|',user_type) FROM users WHERE users.item_id = a.user_id LIMIT 1) AS user_information
                 FROM incidents a
-                WHERE {$params->query} AND a.deleted = ? AND client_id = ? ORDER BY DATE(a.incident_date) LIMIT {$params->limit}
+                WHERE {$params->query} AND a.deleted = ? AND client_id = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([0, $params->clientId]);
 
@@ -57,6 +58,7 @@ class Incidents extends Myschoolgh {
                 // clean the description attached to the list
                 $result->description = htmlspecialchars_decode($result->description);
                 $result->description = custom_clean($result->description);
+                $result->time_ago = time_diff($result->date_created); 
 
                 // if the files is set
                 if(!isset($result->attachment->files)) {
@@ -93,9 +95,7 @@ class Incidents extends Myschoolgh {
                 "data" => $data
             ];
 
-        } catch(PDOException $e) {
-            print $e->getMessage();
-        } 
+        } catch(PDOException $e) {} 
 
     }
 
@@ -110,6 +110,7 @@ class Incidents extends Myschoolgh {
 
         try {
 
+            // generate a unique id
             $item_id = random_string("alnum", 32);
 
             // execute the statement
@@ -229,6 +230,56 @@ class Incidents extends Myschoolgh {
 
         } catch(PDOException $e) {} 
 
+    }
+
+    /**
+     * Update existing incident record
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function add_followup(stdClass $params) {
+
+        // old record
+        $prevData = $this->pushQuery(
+            "a.*",
+            "incidents a", 
+            "a.item_id = '{$params->incident_id}' AND a.user_id = '{$params->user_id}' AND a.client_id = '{$params->clientId}' AND a.deleted = '0' LIMIT 1"
+        );
+
+        // if empty then return
+        if(empty($prevData)) {
+            return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+        }
+
+        try {
+
+            // generate a unique id
+            $item_id = random_string("alnum", 32);
+            
+            // execute the statement
+            $stmt = $this->db->prepare("
+                INSERT INTO incidents SET client_id = ?, created_by = ?, incident_type = ?, item_id = ?
+                ".(isset($params->incident_id) ? ", incident_id = '{$params->incident_id}'" : null)."
+                ".(isset($params->status) ? ", status = '{$params->status}'" : null)."
+                ".(isset($params->user_id) ? ", user_id = '{$params->user_id}'" : null)."
+                ".(isset($params->comment) ? ", description = '".addslashes(nl2br($params->comment))."'" : null)."
+            ");
+            $stmt->execute([$params->clientId, $params->userId, "followup", $item_id]);
+
+            // log the user activity
+            $this->userLogs("incidents", $params->incident_id, null, "{$params->userData->name} added a new comment to the Incident.", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Incident followup comment added successfully."];
+            $q_param = (object) ["incident_type" => "followup", "incident_id" => $item_id, "limit" => 1, "clientId" => $params->clientId];
+			$return["additional"] = ["data" => $this->list($q_param)["data"][0]];
+
+            return $return;
+
+        } catch(PDOException $e) {} 
+        
     }
 
     

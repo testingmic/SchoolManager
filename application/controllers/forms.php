@@ -914,19 +914,19 @@ class Forms extends Myschoolgh {
 
         return "
         <div class=\"col-md-12 grid-margin\" id=\"comment-listing\" data-reply-container=\"{$data->item_id}\">
-            <div class=\"card rounded replies-item\">
-                <div class=\"card-header\">
+            <div class=\"card rounded mb-4 replies-item\">
+                <div class=\"card-header pb-0 mb-0\">
                     <div class=\"d-flex align-items-center justify-content-between\">
                         <div class=\"d-flex align-items-center\">
                             <img class=\"img-xs rounded-circle\" src=\"{$this->baseUrl}{$data->created_by_information->image}\" alt=\"\">
                             <div class=\"ml-2\">
-                                <p class=\"cursor underline\" title=\"Click to view summary information about {$data->created_by_information->name}\" onclick=\"return user_basic_information('{$data->created_by}')\" data-id=\"{$$data->created_by}\">{$data->created_by_information->name}</p>
-                                <p title=\"{$data->date_created}\" class=\"tx-11 replies-timestamp text-muted\">${rv.time_ago}</p>
+                                <p class=\"cursor underline m-0\" title=\"Click to view summary information about {$data->created_by_information->name}\" onclick=\"return user_basic_information('{$data->created_by}')\" data-id=\"{$data->created_by}\">{$data->created_by_information->name}</p>
+                                <p title=\"{$data->date_created}\" class=\"tx-11 mb-2 replies-timestamp text-muted\">{$data->time_ago}</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class=\"card-body\">
+                <div class=\"card-body mt-0 pt-2 pb-2\">
                     <div class=\"tx-14\">{$data->description}</div>
                 </div>
             </div>
@@ -946,50 +946,55 @@ class Forms extends Myschoolgh {
     public function incident_log_followup_form(stdClass $params, $user_id = null) {
         
         /** Initializing */
-        $prev_date = "";
+        $prev_date = null;
         $html_content = "<div id='incident_log_followup_list'>";
         $followups_list = "";
 
         /** Load the followups for the incident */
-        $followups = $this->pushQuery(
-            "a.*, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment", 
-            "incidents a", 
-            "a.client_id='{$params->clientId}' AND a.incident_id='{$params->data->item_id}' AND a.user_id='{$user_id}' AND a.incident_type='followup' LIMIT 1"
-        );
-        
+        $q_param = (object) [
+            "user_id" => $user_id, "incident_type" => "followup", 
+            "followup_id" => $params->data->item_id, "clientId" => $params->clientId
+        ];
+		$followups = load_class("incidents", "controllers")->list($q_param)["data"];
+
         /** Loop through the followups */
         foreach($followups as $followup) {
 
             /** Clean date */
             $clean_date = date("l, F Y", strtotime($followup->date_created));
             $raw_date = date("Y-m-d", strtotime($followup->date_created));
-            $prev_date = date("Y-m-d", strtotime($followup->date_created));
 
             /** If the previous date is not the same as the current date */
             if (!$prev_date || $prev_date !== $raw_date) {
                 $followups_list .= "<div class=\"message_list_day_divider_label\"><button class=\"message_list_day_divider_label_pill\">{$clean_date}</button></div>";
             }
             $followups_list .= $this->followup_thread($followup);
+
+            // prepare the previous date
+            $prev_date = date("Y-m-d", strtotime($followup->date_created));
             $prev_date = $raw_date;
 
         }
 
         $html_content .= !empty($followups_list) ? $followups_list : "<div id=\"no_message_content\" class=\"text-center font-italic\">No followup message available.</div>";
-        $html_content .= "
-            </div>
-            <div class='form-group'>
-                <label></label>
-                <textarea class='form-control' name='incident_followup' id='incident_followup'></textarea>
-            </div>
-            <div class='row'>
-                <div class='col-lg-6'><button data-resource_id='{$params->data->item_id}' onclick='return post_incident_followup(\"{$user_id}\",\"{$params->data->item_id}\")' id='post_incident_followup' class='btn btn-outline-success'>Share Comment</button></div>
-                <div class=\"col-md-6 text-right\">
-                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
+        $html_content .= "</div>";
+
+        $form_content = "
+            <div class='mb-4'>
+                <div class='form-group'>
+                    <label></label>
+                    <textarea class='form-control' name='incident_followup' id='incident_followup'></textarea>
+                </div>
+                <div class='row'>
+                    <div class='col-lg-6'><button data-resource_id='{$params->data->item_id}' onclick='return post_incident_followup(\"{$user_id}\",\"{$params->data->item_id}\")' id='post_incident_followup' class='btn btn-outline-success'>Share Comment</button></div>
+                    <div class=\"col-md-6 text-right\">
+                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
+                    </div>
                 </div>
             </div>
         ";
 
-        return $html_content;
+        return $form_content.$html_content;
     }
 
     /**
