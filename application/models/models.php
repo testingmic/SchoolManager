@@ -33,7 +33,9 @@ class Models {
             "course_lesson_form_view" => "Lesson Planner: Unit Lesson Details",
             "incident_log_form" => "Log Incident",
             "incident_log_form_view" => "Incident Details",
-            "incident_log_followup_form" => "Incident: Followups"
+            "incident_log_followup_form" => "Incident: Followups",
+            "course_link_upload" => "Lesson Planner: Course Link Upload",
+            "course_file_upload" => "Lesson Planner: Course File Upload"
         ];
 
 		$this->favicon_array = [
@@ -65,6 +67,18 @@ class Models {
             "files_count" => 0,
             "files_size" => 0,
             "raw_size_mb" => 0
+        ];
+
+        $this->user_roles_list = [
+            "teacher" => "Teacher",
+            "employee" => "Employee",
+            "finance" => "Accountant",
+            "admin" => "Admin"
+        ];
+
+        $this->user_status_list = [
+            "0" => "Active",
+            "1" => "Inactive"
         ];
 
 		$this->permission_denied = "Sorry! You do not have the required permission to perform this action.";

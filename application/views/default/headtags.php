@@ -72,7 +72,7 @@ if(!isset($userPrefs->messages)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><?= $page_title ?? "Dashboard" ?> - <?= $appName ?></title>
+    <title><?= $page_title ?? "Dashboard" ?> : <?= $appName ?></title>
 
     <!-- General CSS Files -->
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
@@ -200,36 +200,47 @@ if(!isset($userPrefs->messages)) {
 
                         <li>
                             <a href="<?= $baseUrl ?>" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a>
-                        </li>                   
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-user"></i><span>Staff</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-staff">Staff List</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-staff">Add Staff</a></li>
-                            </ul>
                         </li>
                         <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Students</span></a>
+                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
                             <ul class="dropdown-menu">
                                 <li><a class="nav-link" href="<?= $baseUrl ?>list-student">Students List</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>add-student">Add Student</a></li>
                             </ul>
                         </li>
+                        <li class="dropdown">
+                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-clock"></i><span>Guardians</span></a>
+                            <ul class="dropdown-menu">
+                                <li><a class="nav-link" href="<?= $baseUrl ?>list-guardian">Guardian List</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>add-guardian">Add Guardian</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Staff</span></a>
+                            <ul class="dropdown-menu">
+                                <li><a class="nav-link" href="<?= $baseUrl ?>list-staff">Staff List</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>add-staff">Add Staff</a></li>
+                            </ul>
+                        </li>
                         <li><a href="<?= $baseUrl ?>attendance" class="nav-link"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a></li>
                         <li class="menu-header">Academics</li>
                         <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Courses</span></a>
+                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Academics</span></a>
                             <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-courses">List Courses</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-course">Add Course</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Course Resources</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>list-classes">List Classes</a></li>
+                                <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>add-class">Add Class</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>list-departments">List Departments</a></li>
+                                <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>add-department">Add Department</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>list-sections">List Sections</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>add-section">Add Section</a></li>
                             </ul>
                         </li>
                         <li class="dropdown">
                             <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
                             <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-lessons">List Lessons</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-lesson">Create Lesson Plan</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>list-courses">List Courses</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>add-course">Add Course</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Course Resources</a></li>
                             </ul>
                         </li>
                         <li><a href="<?= $baseUrl ?>timetable" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
@@ -242,27 +253,6 @@ if(!isset($userPrefs->messages)) {
                             </ul>
                         </li>
                         <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-box-open"></i><span>Classes</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-classes">List Classes</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-class">Add Class</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-box"></i><span>Departments</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-departments">List Departments</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-department">Add Department</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-sitemap"></i><span>Sections</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-sections">List Sections</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-section">Add Section</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
                             <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Library</span></a>
                             <ul class="dropdown-menu">
                                 <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
@@ -270,6 +260,27 @@ if(!isset($userPrefs->messages)) {
                                 <li><a class="nav-link" href="<?= $baseUrl ?>add-book">Add New Book</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>issue-book">Issue Book</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>return-book">Return Book</a></li>
+                            </ul>
+                        </li>
+                        <li class="menu-header">Finance</li>
+                        <li class="dropdown">
+                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Fees</span></a>
+                            <ul class="dropdown-menu">
+                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Receive Payment</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Category</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Allocation</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Reports</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>HR/Payroll</span></a>
+                            <ul class="dropdown-menu">
+                                <li><a class="nav-link" href="<?= $baseUrl ?>hr-payroll">Payroll</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>hr-history">List History</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>hr-category">Category</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>hr-expenditure">Expenditure</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
                             </ul>
                         </li>
                         <li class="menu-header">Communication</li>

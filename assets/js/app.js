@@ -395,7 +395,7 @@ var loadPage = (loc, callback, pushstate) => {
         error: (err) => {
             progress.complete($.mainprogress, false);
             $.pageoverlay.hide();
-            notify("Sorry! Error processing request.");
+            // notify("Sorry! Error processing request.");
             if ([404, 500].includes(err.status)) {
                 swal({
                     title: err.status === 404 ? "404" : "OOPS!",
@@ -857,8 +857,8 @@ var initDataTables = () => {
             $(element).dataTable({
                 search: null,
                 lengthMenu: [
-                    [20, 35, 50, 75, 100, 200, -1],
-                    [20, 35, 50, 75, 100, 200, "All"]
+                    [15, 30, 50, 75, 100, 200, -1],
+                    [15, 30, 50, 75, 100, 200, "All"]
                 ],
                 language: {
                     sEmptyTable: ifempty == undefined ? "Nothing Found" : ifempty,

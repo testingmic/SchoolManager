@@ -245,3 +245,20 @@ function ajax_form_button() {
     </div>";
     return $html;
 }
+
+/** Add new button */
+function add_new_item($item_id = null) {
+	global $accessObject;
+	$buttons = "
+    <div class=\"btn-group dropdown d-inline mr-2\">
+		<button type=\"button\" class=\"btn btn-outline-info btn-icon-text dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">
+			Add New
+		</button>
+		<div class=\"dropdown-menu\" style=\"width:160px\" data-function=\"add-item-module\">
+			<a href=\"#\" onclick=\"return load_quick_form('course_link_upload','{$item_id}');\" class=\"dropdown-item btn-sm\" type=\"button\">New Link</a>
+            <a href=\"#\" onclick=\"return load_quick_form('course_file_upload','{$item_id}');\" class=\"dropdown-item btn-sm\" type=\"button\">New File</a>
+	    </div>
+    </div>";
+
+	return $buttons;
+}

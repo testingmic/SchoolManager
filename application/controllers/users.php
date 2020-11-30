@@ -283,7 +283,7 @@ class Users extends Myschoolgh {
 
 		/** Check the username if not empty */
 		if(!isset($params->username) || (isset($params->username) && strlen($params->username) < 3)) {
-			return ["code" => 203, "data" => "Sorry! Username must be at least 6 characters long."];
+			return ["code" => 203, "data" => "Sorry! Username must be at least 3 characters long."];
 		}
 
 		/** Check the contact number if not empty */
@@ -332,8 +332,10 @@ class Users extends Myschoolgh {
 		}
 
 		// generate a new unique user id
+		$label = $params->user_type == "student" ? "student_label" : "staff_label";
 		$counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='{$params->user_type}'") + 1), $this->append_zeros);
-        $unique_id = $this->client_data($params->clientId)->client_preferences->labels->{"{$params->user_type}_label"}.$counter.date("Y");
+        $unique_id = $this->client_data($params->clientId)->client_preferences->labels->$label.$counter.date("Y");
+
 		// set the unique id
 		$params->unique_id = isset($params->unique_id) && !empty($params->unique_id) ? $params->unique_id : $unique_id;
 
@@ -346,6 +348,7 @@ class Users extends Myschoolgh {
 				}
 			}
 		}
+		
 		// insert the user information
 		try {
 
@@ -385,6 +388,8 @@ class Users extends Myschoolgh {
 				".(isset($params->username) ? ", username='{$params->username}'" : null)."
 				".(isset($params->position) ? ", position='{$params->position}'" : null)."
 				".(isset($params->created_by) ? ", created_by='{$params->created_by}'" : null)."
+				
+				".(isset($params->status) ? ", status='{$params->status}'" : null)."
 				".(isset($encrypt_password) ? ", password='{$encrypt_password}'" : null)."
 
 				".(isset($fileName) ? ", image='{$fileName}'" : null)."

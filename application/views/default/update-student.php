@@ -79,12 +79,15 @@ if(!empty($user_id)) {
                 // generate the buttons
                 $buttons = "<button onclick=\"return load_quick_form('incident_log_form_view','{$each->user_id}_{$each->item_id}');\" class=\"btn mb-1 btn-sm btn-outline-primary\" type=\"button\"><i class=\"fa fa-eye\"></i> View</button>&nbsp;";
                 
+                // is not active
+                $isActive = !in_array($each->status, ["Solved", "Cancelled"]);
+
                 // set the update button
-                if($updateIncident && !in_array($each->status, ["Solved", "Cancelled"])) {
+                if($updateIncident && $isActive) {
                     $buttons .= "<button onclick=\"return load_quick_form('incident_log_form','{$each->user_id}_{$each->item_id}');\" class=\"btn mb-1 btn-sm btn-outline-success\" type=\"button\"><i class=\"fa fa-edit\"></i> Update</button>";
                 }
 
-                if($deleteIncident && !in_array($each->status, ["Solved", "Cancelled"])) {
+                if($deleteIncident && $isActive) {
                     $buttons .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"incident\");' class='btn mb-1 btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a>";
                 }
 
@@ -108,10 +111,10 @@ if(!empty($user_id)) {
                         )."
                         <div class=\"pl-2 mb-1 mt-2\">
                             <div class=\"d-flex p-2 justify-content-between\">
-                                ".($updateIncident ? "
+                                ".($updateIncident && $isActive ? "
                                     <div>
                                         <button onclick=\"return load_quick_form('incident_log_followup_form','{$each->user_id}_{$each->item_id}');\" class=\"btn mb-1 btn-sm btn-outline-warning\" type=\"button\"><i class=\"fa fa-list\"></i> Followups</button>
-                                    </div>" : ""
+                                    </div>" : "<div>&nbsp;</div>"
                                 )."
                                 <div>{$buttons}</div>
                             </div>
@@ -144,6 +147,7 @@ if(!empty($user_id)) {
                 $guardian .= "<div class='col-lg-2'><strong>Relation:</strong><br> {$each->guardian_relation}</div>";
                 $guardian .= "<div class='col-lg-3'><strong>Contact:</strong><br> {$each->guardian_contact}</div>";
                 $guardian .= "<div class='col-lg-4'><strong>Email:</strong><br> {$each->guardian_email}</div>";
+                $guardian .= "<div class='col-lg-12'><strong>Address:</strong><br> {$each->guardian_address}</div>";
                 $guardian .= "</div>";
             }
         }
@@ -236,15 +240,15 @@ if(!empty($user_id)) {
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab"
-                        aria-selected="true">Academic Calendar</a>
+                        aria-selected="true">Timetable</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab"
-                        aria-selected="true">Student Attendance</a>
+                        aria-selected="true">Attendance</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="incident-tab2" data-toggle="tab" href="#incident" role="tab"
-                        aria-selected="true">Incident Logs</a>
+                        aria-selected="true">Incidents</a>
                     </li>';
 
                     if($hasUpdate) {

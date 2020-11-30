@@ -24,12 +24,6 @@ $(`div[id="student_guardian_list"] button[class~="append-row"]`).on('click', fun
             <div class="col-lg-4 col-md-4">
                 <label for="guardian_info[guardian_fullname][${lastRowId}]">Fullname</label>
                 <input type="text" name="guardian_info[guardian_fullname][${lastRowId}]" id="guardian_info[guardian_fullname][${lastRowId}]" class="form-control">
-                <div class="col-lg-12 col-md-12 pl-0 mt-2">
-                    <label for="guardian_info[guardian_relation][${lastRowId}]">Relationship</label>
-                    <select name="guardian_info[guardian_relation][${lastRowId}]" id="guardian_info[guardian_relation][${lastRowId}]" class="form-control selectpicker">
-                        ${htmlData}
-                    </select>
-                </div>
             </div>            
             <div class="col-lg-4 col-md-4">
                 <label for="guardian_info[guardian_contact][${lastRowId}]">Contact Number</label>
@@ -46,6 +40,16 @@ $(`div[id="student_guardian_list"] button[class~="append-row"]`).on('click', fun
                         <button data-row="${lastRowId}" class="btn remove_guardian_row btn-danger" type="button"><i class="fa fa-trash"></i></button>
                     </div>
                 </div>
+            </div>
+            <div class="col-lg-4 col-md-4 mt-2">
+                <label for="guardian_info[guardian_relation][${lastRowId}]">Relationship</label>
+                <select name="guardian_info[guardian_relation][${lastRowId}]" id="guardian_info[guardian_relation][${lastRowId}]" class="form-control selectpicker">
+                    ${htmlData}
+                </select>
+            </div>
+            <div class="col-lg-8 col-md-8 mt-2">
+                <label for="guardian_info[guardian_address][${lastRowId}]">Address</label>
+                <input type="text" name="guardian_info[guardian_address][${lastRowId}]" id="guardian_info[guardian_address][${lastRowId}]" class="form-control">
             </div>
         </div>
     `);

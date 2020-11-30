@@ -991,35 +991,3 @@ function quick_links($pref = null) {
 	/** Return the text */
 	return $new_pref;
 }
-
-/** Add new button */
-function add_buttons() {
-	global $accessObject;
-	$buttons = "<div class=\"btn-group dropup\">
-		<button type=\"button\" class=\"btn btn-outline-info btn-icon-text dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">
-			<i style=\"font-size:10px;\" class=\"fa fa-plus-circle\"></i> Add New
-		</button>
-		<div class=\"dropdown-menu\" data-function=\"add-item-module\">";
-			if($accessObject->hasAccess("add", "users")) {
-				$buttons .= "<a class=\"dropdown-item\" data-function=\"load-form\" data-module=\"user_account\" href=\"javascript:void(0)\">User Account</a>";
-			}
-			if($accessObject->hasAccess("signup", "company_policy")) {
-				$buttons .= "<a class=\"dropdown-item\" data-function=\"load-form\" data-module=\"apply_policy\" href=\"javascript:void(0)\">Apply for Policy</a>";
-			}
-			if($accessObject->hasAccess("create", "proposals")) {
-				$buttons .= "<a class=\"dropdown-item\" data-function=\"load-form\" data-module=\"new_proposal\" href=\"javascript:void(0)\">New Proposal</a>";
-			}
-			if($accessObject->hasAccess("apply", "licenses")) {
-				$buttons .= "<a class=\"dropdown-item\" data-function=\"load-form\" data-module=\"apply_license\" href=\"javascript:void(0)\">Apply for License</a>";
-			}
-			if($accessObject->hasAccess("lodge", "complaints")) {
-				$buttons .= "<a class=\"dropdown-item\" data-function=\"load-form\" data-module=\"lodge_complaint\" href=\"javascript:void(0)\">Lodge Complaint</a>";
-			}
-			if($accessObject->hasAccess("request", "claims")) {
-				$buttons .= "<a class=\"dropdown-item\" data-function=\"load-form\" data-module=\"make_claim\" href=\"javascript:void(0)\">Make Claim</a>";
-			}
-
-	$buttons .="</div></div>";
-
-	return $buttons;
-}

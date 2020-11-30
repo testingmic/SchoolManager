@@ -109,7 +109,7 @@ class Forms extends Myschoolgh {
                 /** Append to parameters */
                 $params->incident_log_form = true;
                 
-                /** Load the policy application form */
+                /** Load the function */
                 if($the_form == "incident_log_followup_form") {
                     $result = $this->incident_log_followup_form($item_id[1], $params->clientId, $item_id[0]);
                 } else {
@@ -137,12 +137,12 @@ class Forms extends Myschoolgh {
                     $params->data = $data[0];
                 }
 
-                /** Load the policy application form */
+                /** Load the function */
                 $result = $this->course_unit_form($params, $item_id[0]);
             }
 
             /** Course Unit Lesson Form */
-            elseif(($the_form == "course_lesson_form") || ($the_form == "course_lesson_form_view")) {
+            elseif(in_array($the_form, ["course_lesson_form", "course_lesson_form_view"])) {
                 // return if no policy id was parsed
                 if(!isset($params->module["item_id"])) {
                     return;
@@ -172,8 +172,28 @@ class Forms extends Myschoolgh {
                     $params->view_record = true;
                 }
 
-                /** Load the policy application form */
+                /** Load the function */
                 $result = $this->course_lesson_form($params, $item_id[0], $item_id[1]);
+            }
+
+            /** Course link and file upload */
+            elseif(in_array($the_form, ["course_link_upload", "course_file_upload"])) {
+                // return if no policy id was parsed
+                if(!isset($params->module["item_id"])) {
+                    return;
+                }
+                /** Set the course id */
+                $item_id = $params->module["item_id"];
+
+                /** If a second item was parsed then load the lesson unit information */
+                $data = $this->pushQuery("id, name, description, course_code", "courses", "client_id='{$params->clientId}' AND id='{$item_id[0]}' LIMIT 1");
+                if(empty($data)) {
+                    return ["code" => 201, "data" => "An invalid id was parsed"];
+                }
+                $params->data = $data[0];
+
+                // load the class
+                $result = $this->{$the_form}($params, $item_id);
             }
 
         }
@@ -210,6 +230,7 @@ class Forms extends Myschoolgh {
     public function textarea_editor($data = null, $name = "faketext", $id = "ajax-form-content") {
 
         // set the form
+        $data = str_ireplace("'", "", $data);
         $form_content = "<input type='hidden' hidden id='trix-editor-input' value='{$data}'>";
         $form_content .= "<trix-editor name=\"{$name}\" input='trix-editor-input' class=\"trix-slim-scroll\" id=\"{$id}\"></trix-editor>";
 
@@ -528,12 +549,12 @@ class Forms extends Myschoolgh {
     /**
      * Course Unit Form
      * 
-     * @param String $clientId
-     * @param String $baseUrl
+     * @param stdClass $params
+     * @param String $course_id
      * 
      * @return String
      */
-    public function course_unit_form($params, $course_id) {
+    public function course_unit_form(stdClass $params, $course_id) {
 
         // description
         $html_content = "";
@@ -586,12 +607,13 @@ class Forms extends Myschoolgh {
     /**
      * Course Unit Lesson Form
      * 
-     * @param String $clientId
-     * @param String $baseUrl
+     * @param stdClass $params
+     * @param String $course_id
+     * @param String $unit_id
      * 
      * @return String
      */
-    public function course_lesson_form($params, $course_id, $unit_id) {
+    public function course_lesson_form(stdClass $params, $course_id, $unit_id) {
         
         // description
         $html_content = "";
@@ -719,6 +741,27 @@ class Forms extends Myschoolgh {
     }
 
     /**
+     * Course Link Upload Form
+     * 
+     * @param stdClass $params
+     * @param stdClass $course_id
+     * 
+     * @return String
+     */
+    public function course_link_upload(stdClass $params, $course_id = null) {
+
+        // description
+        $html_content = "";
+        $message = isset($params->data->description) ? htmlspecialchars_decode($params->data->description) : null;
+        $item_id = isset($params->data->id) ? $params->data->id : null;
+        $title = isset($params->data->name) ? $params->data->name : null;
+
+        
+
+        return $html_content;
+    }
+
+    /**
      * Incident Form
      * 
      * @param stdClass $params
@@ -838,7 +881,7 @@ class Forms extends Myschoolgh {
                     </div>
                     <div class='col-lg-12'>
                         <div class='form-group'>
-                            <label>Reported By</label>
+                            <label>Reported By <small>(Name & Contact/ID)</small></label>
                             <input value='".($params->data->reported_by ?? null)."' type='text' name='reported_by' id='reported_by' class='form-control'>
                         </div>
                     </div>
@@ -876,6 +919,7 @@ class Forms extends Myschoolgh {
                                     <option value="null">Select Status</option>
                                     <option '.($params->data->status == "Pending" ? "selected" : null).' value="Pending">Pending</option>
                                     <option '.($params->data->status == "Processing" ? "selected" : null).' value="Processing">Processing</option>
+                                    <option '.($params->data->status == "Cancelled" ? "selected" : null).' value="Cancelled">Cancelled</option>
                                     <option '.($params->data->status == "Solved" ? "selected" : null).' value="Solved">Solved</option>
                                 </select>
                             </div>
@@ -1033,24 +1077,14 @@ class Forms extends Myschoolgh {
                     <div class="col-lg-4 col-md-4">
                         <label for="guardian_info[guardian_fullname]['.$key_id.']">Fullname</label>
                         <input type="text" value="'.$eachItem->guardian_fullname.'" name="guardian_info[guardian_fullname]['.$key_id.']" id="guardian_info[guardian_fullname]['.$key_id.']" class="form-control">
-                        <div class="col-lg-12 col-md-12 pl-0 mt-2">
-                            <label for="guardian_info[guardian_relation]['.$key_id.']">Relationship</label>
-                            <select data-width="100%" name="guardian_info[guardian_relation]['.$key_id.']" id="guardian_info[guardian_relation]['.$key_id.']" class="form-control selectpicker">
-                                <option value="null">Select Relation</option>';
-                                foreach($this->pushQuery("id, name", "guardian_relation", "status='1' AND client_id='{$clientId}'") as $each) {
-                                    $guardian .= "<option ".($each->name == $eachItem->guardian_relation ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
-                                }
-                        $guardian .= '</select>
-                        </div>
                     </div>
-                    
                     <div class="col-lg-4 col-md-4">
                         <label for="guardian_info[guardian_contact]['.$key_id.']">Contact Number</label>
                         <input type="text" value="'.$eachItem->guardian_contact.'" name="guardian_info[guardian_contact]['.$key_id.']" id="guardian_info[guardian_contact]['.$key_id.']" class="form-control">
                     </div>
                     <div class="col-lg-3 col-md-3">
                         <label for="guardian_info[guardian_email]['.$key_id.']">Email Address</label>
-                        <input type="text" value="'.$eachItem->guardian_email.'" name="guardian_info[guardian_email]['.$key_id.']" id="guardian_info[guardian_email]['.$key_id.']" class="form-control">
+                        <input type="email" value="'.$eachItem->guardian_email.'" name="guardian_info[guardian_email]['.$key_id.']" id="guardian_info[guardian_email]['.$key_id.']" class="form-control">
                     </div>
                     <div class="col-lg-1 col-md-1 text-right">
                         <div class="d-flex justify-content-end">';
@@ -1067,6 +1101,19 @@ class Forms extends Myschoolgh {
                         }
                         $guardian .= '
                             </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 mt-2">
+                        <label for="guardian_info[guardian_relation]['.$key_id.']">Relationship</label>
+                        <select data-width="100%" name="guardian_info[guardian_relation]['.$key_id.']" id="guardian_info[guardian_relation]['.$key_id.']" class="form-control selectpicker">
+                            <option value="null">Select Relation</option>';
+                            foreach($this->pushQuery("id, name", "guardian_relation", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $guardian .= "<option ".($each->name == $eachItem->guardian_relation ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
+                            }
+                    $guardian .= '</select>
+                    </div>
+                    <div class="col-lg-8 col-md-8 mt-2">
+                        <label for="guardian_info[guardian_address]['.$key_id.']">Address</label>
+                        <input type="text" value="'.($eachItem->guardian_address ?? null).'" name="guardian_info[guardian_address]['.$key_id.']" id="guardian_info[guardian_address]['.$key_id.']" class="form-control">
                     </div>
                 </div>';
             }
@@ -1199,17 +1246,7 @@ class Forms extends Myschoolgh {
                         <div class="col-lg-4 col-md-4">
                             <label for="guardian_info[guardian_fullname][1]">Fullname</label>
                             <input type="text" name="guardian_info[guardian_fullname][1]" id="guardian_info[guardian_fullname][1]" class="form-control">
-                            <div class="col-lg-12 col-md-12 pl-0 mt-2">
-                                <label for="guardian_info[guardian_relation][1]">Relationship</label>
-                                <select data-width="100%" name="guardian_info[guardian_relation][1]" id="guardian_info[guardian_relation][1]" class="form-control selectpicker">
-                                    <option value="null">Select Relation</option>';
-                                    foreach($this->pushQuery("id, name", "guardian_relation", "status='1' AND client_id='{$clientId}'") as $each) {
-                                        $response .= "<option value=\"{$each->name}\">{$each->name}</option>";                            
-                                    }
-                            $response .= '</select>
-                            </div>
-                        </div>
-                        
+                        </div>                        
                         <div class="col-lg-4 col-md-4">
                             <label for="guardian_info[guardian_contact][1]">Contact Number</label>
                             <input type="text" name="guardian_info[guardian_contact][1]" id="guardian_info[guardian_contact][1]" class="form-control">
@@ -1225,6 +1262,19 @@ class Forms extends Myschoolgh {
                                     <button data-row="1" class="btn append-row btn-primary" type="button"><i class="fa fa-plus"></i> Add</button>
                                 </div>
                             </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 mt-2">
+                            <label for="guardian_info[guardian_relation][1]">Relationship</label>
+                            <select data-width="100%" name="guardian_info[guardian_relation][1]" id="guardian_info[guardian_relation][1]" class="form-control selectpicker">
+                                <option value="null">Select Relation</option>';
+                                foreach($this->pushQuery("id, name", "guardian_relation", "status='1' AND client_id='{$clientId}'") as $each) {
+                                    $response .= "<option value=\"{$each->name}\">{$each->name}</option>";                            
+                                }
+                        $response .= '</select>
+                        </div>
+                        <div class="col-lg-8 col-md-8 mt-2">
+                            <label for="guardian_info[guardian_address][1]">Address</label>
+                            <input type="text" name="guardian_info[guardian_address][1]" id="guardian_info[guardian_address][1]" class="form-control">
                         </div>
                     </div>';
                 }
@@ -1443,7 +1493,7 @@ class Forms extends Myschoolgh {
                         <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-6">
+                <div class="'.($isData ? "col-lg-6 col-md-6" : "col-lg-4 col-md-4").'">
                     <div class="form-group">
                         <label for="department_id">Department ID</label>
                         <select data-width="100%" name="department_id" id="department_id" class="form-control selectpicker">
@@ -1454,7 +1504,7 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-6">
+                <div class="'.($isData ? "col-lg-6 col-md-6" : "col-lg-4 col-md-4").'">
                     <div class="form-group">
                         <label for="class_teacher">Class Teacher</label>
                         <select data-width="100%" name="class_teacher" id="class_teacher" class="form-control selectpicker">
@@ -1465,12 +1515,12 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-6">
+                <div class="'.($isData ? "col-lg-6 col-md-6" : "col-lg-4 col-md-4").'">
                     <div class="form-group">
                         <label for="class_assistant">Class Assistant</label>
                         <select data-width="100%" name="class_assistant" id="class_assistant" class="form-control selectpicker">
                             <option value="null">Select Class Assistant</option>';
-                            foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('student') AND status='1' AND client_id='{$clientId}'") as $each) {
+                            foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('student') AND status='1' AND client_id='{$clientId}' ".($isData ? " AND class_id='{$itemData->id}'" : "")."") as $each) {
                                 $response .= "<option ".($isData && ($each->item_id == $itemData->class_assistant) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
                         $response .= '</select>
@@ -1571,6 +1621,218 @@ class Forms extends Myschoolgh {
         </form>';
 
         return $response;
+    }
+
+    /**
+     * Staff form
+     * 
+     * @param String $clientId
+     * @param String $baseUrl
+     * 
+     * return String
+     */
+    public function staff_form($clientId, $baseUrl, $userData = null) {
+
+        $isData = !empty($userData) && isset($userData->country) ? true : false;
+
+        $guardian = "";
+
+        $response = '
+        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+            <div class="row mb-4 border-bottom pb-3">
+                <div class="col-lg-12">
+                    <h5>BIO INFORMATION</h5>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="image">Staff Image</label>
+                        <input type="file" name="image" id="image" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="unique_id">Staff ID (optional)</label>
+                        <input type="text" value="'.($userData->unique_id ?? null).'" name="unique_id" id="unique_id" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="enrollment_date">Date Employed <span class="required">*</span></label>
+                        <input type="date" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
+                            <option value="null">Select Gender</option>';
+                            foreach($this->pushQuery("*", "users_gender") as $each) {
+                                $response .= "<option ".($isData && ($each->name == $userData->gender) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
+                            }
+                    $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="firstname">Firstname <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->firstname ?? null).'" name="firstname" id="firstname" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="lastname">Lastname <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->lastname ?? null).'" name="lastname" id="lastname" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="othername">Othernames</label>
+                        <input type="text" value="'.($userData->othername ?? null).'" name="othername" id="othername" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
+                        <input type="date" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" value="'.($userData->email ?? null).'" name="email" id="email" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="phone">Primary Contact</label>
+                        <input type="text" name="phone" value="'.($userData->phone_number ?? null).'" id="phone" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="phone_2">Secondary Contact</label>
+                        <input type="text" name="phone_2" value="'.($userData->phone_number_2 ?? null).'" id="phone_2" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select data-width="100%" name="country" id="country" class="form-control selectpicker">
+                            <option value="null">Select Country</option>';
+                            foreach($this->pushQuery("*", "country") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $userData->country) ? "selected" : null)." value=\"{$each->id}\">{$each->country_name}</option>";                            
+                            }
+                    $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="residence">Place of Residence <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->residence ?? null).'" name="residence" id="residence" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="blood_group">Blood Broup</label>
+                        <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
+                            <option value="null">Select Blood Group</option>';
+                            foreach($this->pushQuery("id, name", "blood_groups") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $userData->blood_group) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                        <input type="hidden" id="user_type" name="user_type" value="'.(!$isData ? "student" : null).'">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="position">Position / Role <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->position ?? null).'" name="position" id="position" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea type="text" name="description" id="description" class="form-control">'.($userData->description ?? null).'</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-4 border-bottom pb-4">
+                <div class="col-lg-12"><h5>ACADEMICS</h5></div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="class_id">Class</label>
+                        <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
+                            <option value="null">Select Class</option>';
+                            foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $userData->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="department">Department <span class="required">*</span></label>
+                        <select data-width="100%" name="department" id="department" class="form-control selectpicker">
+                            <option value="">Select Department</option>';
+                            foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $userData->department) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="section">Section</label>
+                        <select data-width="100%" name="section" id="section" class="form-control selectpicker">
+                            <option value="null">Select Section</option>';
+                            foreach($this->pushQuery("id, name", "sections", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $userData->section) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-4 border-bottom pb-4">
+                <div class="col-lg-12"><h5>LOGIN INFORMATION</h5></div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="user_type">User Permission <span class="required">*</span></label>
+                        <select data-width="100%" name="user_type" id="user_type" class="form-control selectpicker">
+                            <option value="">Select User Permission</option>';
+                            foreach($this->user_roles_list as $key => $value) {
+                                $response .= "<option ".($isData && ($key == $userData->user_type) ? "selected" : null)." value=\"{$key}\">{$value}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" value="'.($userData->username ?? null).'" name="username" id="username" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select data-width="100%" name="status" id="status" class="form-control selectpicker">
+                            <option value="null">Select Employee Status</option>';
+                            foreach($this->user_status_list as $key => $value) {
+                                $response .= "<option ".($isData && ($key == $userData->status) ? "selected" : null)." value=\"{$key}\">{$value}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 text-right">
+                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>
+        </form>';
+
+        return $response;
+
     }
 
 }

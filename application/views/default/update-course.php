@@ -239,8 +239,14 @@ if(!empty($item_id)) {
                             </div>
                             '.$lessons_list.'
                         </div>
+                        
                         <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab2">
-                            <div class="col-lg-12 pl-0"><h5>COURSE MATERIALS</h5></div>
+                            <div class="d-flex justify-content-between">
+                                <div><h5>COURSE MATERIALS</h5></div>
+                                '.($hasPlanner ? 
+                                    add_new_item($item_id) 
+                                : null ).'
+                            </div>
                             '.$attachments_list.'
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';

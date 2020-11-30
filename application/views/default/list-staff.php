@@ -19,52 +19,52 @@ if(!isset($_SERVER["HTTP_REFERER"])) {
 }
 
 $response = (object) [];
-$response->title = "Students List : {$appName}";
+$response->title = "Staff List : {$appName}";
 $response->scripts = [];
 
-$student_param = (object) [
+$staff_param = (object) [
     "clientId" => $session->clientId,
-    "user_type" => "student"
+    "user_type" => "employee,teacher,admin"
 ];
 
-$student_list = load_class("users", "controllers")->list($student_param);
+$student_list = load_class("users", "controllers")->list($staff_param);
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
-$hasDelete = $accessObject->hasAccess("delete", "student");
-$hasUpdate = $accessObject->hasAccess("update", "student");
+$hasDelete = $accessObject->hasAccess("delete", "staff");
+$hasUpdate = $accessObject->hasAccess("update", "staff");
 
-$students = "";
+$staff_list = "";
 foreach($student_list["data"] as $key => $each) {
     
-    $action = "<a href='{$baseUrl}update-student/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a href='{$baseUrl}update-staff/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate) {
-        $action .= "&nbsp;<a href='{$baseUrl}update-student/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a href='{$baseUrl}update-staff/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
-    $students .= "<tr data-row_id=\"{$each->user_id}\">";
-    $students .= "<td>".($key+1)."</td>";
-    $students .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
-    $students .= "<td>{$each->class_name}</td>";
-    $students .= "<td>{$each->gender}</td>";
-    $students .= "<td>{$each->blood_group_name}</td>";
-    $students .= "<td>{$each->date_of_birth}</td>";
-    $students .= "<td>{$each->department_name}</td>";
-    $students .= "<td class='text-center'>{$action}</td>";
-    $students .= "</tr>";
+    $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
+    $staff_list .= "<td>".($key+1)."</td>";
+    $staff_list .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
+    $staff_list .= "<td>{$each->position}</td>";
+    $staff_list .= "<td>{$each->gender}</td>";
+    $staff_list .= "<td>{$each->date_of_birth}</td>";
+    $staff_list .= "<td>{$each->enrollment_date}</td>";
+    $staff_list .= "<td>{$each->department_name}</td>";
+    $staff_list .= "<td class='text-center'>{$action}</td>";
+    $staff_list .= "</tr>";
 }
 
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Students List</h1>
+            <h1>Staff List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'">Dashboard</a></div>
-                <div class="breadcrumb-item">Students List</div>
+                <div class="breadcrumb-item">Staff List</div>
             </div>
         </div>
         <div class="row">
@@ -76,16 +76,16 @@ $response->html = '
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
-                                        <th>Student Name</th>
-                                        <th>Class</th>
+                                        <th>Staff Name</th>
+                                        <th>Staff Role</th>
                                         <th>Gender</th>
-                                        <th>Blood Group</th>
                                         <th>Date of Birth</th>
+                                        <th>Date Employed</th>
                                         <th>Department</th>
                                         <th width="10%">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>'.$students.'</tbody>
+                                <tbody>'.$staff_list.'</tbody>
                             </table>
                         </div>
                     </div>
