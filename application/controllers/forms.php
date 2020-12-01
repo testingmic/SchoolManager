@@ -186,14 +186,14 @@ class Forms extends Myschoolgh {
                 $item_id = $params->module["item_id"];
 
                 /** If a second item was parsed then load the lesson unit information */
-                $data = $this->pushQuery("id, name, description, course_code", "courses", "client_id='{$params->clientId}' AND id='{$item_id[0]}' LIMIT 1");
+                $data = $this->pushQuery("id, item_id, name, description, course_code", "courses", "client_id='{$params->clientId}' AND id='{$item_id[0]}' LIMIT 1");
                 if(empty($data)) {
                     return ["code" => 201, "data" => "An invalid id was parsed"];
                 }
                 $params->data = $data[0];
 
                 // load the class
-                $result = $this->{$the_form}($params, $item_id);
+                $result = $this->course_upload_item($params, $item_id, $the_form);
             }
 
         }
@@ -585,7 +585,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class='col-md-12'>
                     <div class='form-group'>
-                        <label>Description</label>
+                        <label>Overview / Objective</label>
                         {$this->textarea_editor($message)}
                     </div>
                 </div>
@@ -595,7 +595,7 @@ class Forms extends Myschoolgh {
                     <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
                 </div>
                 <div class=\"col-md-6 text-right\">
-                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
+                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
                 </div>
             </div>
         </div>";
@@ -730,7 +730,7 @@ class Forms extends Myschoolgh {
                         <input type=\"hidden\" name=\"lesson_id\" id=\"lesson_id\" value=\"{$item_id}\" hidden class=\"form-control\">
                     </div>
                     <div class=\"col-md-6 text-right\">
-                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
+                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
                     </div>
                 </div>
             </div>";
@@ -745,18 +745,105 @@ class Forms extends Myschoolgh {
      * 
      * @param stdClass $params
      * @param stdClass $course_id
+     * @param stdClass $item_type //- course_file_upload
      * 
      * @return String
      */
-    public function course_link_upload(stdClass $params, $course_id = null) {
+    public function course_upload_item(stdClass $params, $course_id = null, $item_type = "course_link_upload") {
 
         // description
         $html_content = "";
-        $message = isset($params->data->description) ? htmlspecialchars_decode($params->data->description) : null;
+        $link_file = $item_type == "course_file_upload" ? false : true;
         $item_id = isset($params->data->id) ? $params->data->id : null;
-        $title = isset($params->data->name) ? $params->data->name : null;
 
+        $item_label = [
+            "course_link_upload" => [
+                "title" => "Link",
+                "name" => "link_name",
+            ],
+            "course_file_upload" => [
+                "title" => "File",
+                "name" => "file_name"
+            ]
+        ];
+
+        $lessons_list = $this->pushQuery("id, item_id, course_id, unit_id, name", "courses_plan", "course_id = '{$item_id}' AND client_id='{$params->clientId}'");
         
+        $html_content = "
+        <form id='ajax-data-form-content' class='ajax-data-form' enctype=\"multipart/form-data\" action=\"{$this->baseUrl}api/resources/upload_4courses\" method=\"POST\">
+            <div class=\"row\">
+                <div class=\"col-lg-12 pt-0 mt-0\">
+                    <div class=\"form-group pb-1 pt-0 mb-2 mt-0\">
+                        <label for=\"upload[description]\">Description</label>
+                        <textarea name=\"upload[description]\" id=\"upload[description]\" class=\"form-control\"></textarea>
+                    </div>
+                </div>
+                ".($link_file ? 
+                    "<div class=\"col-lg-12 pt-0 mt-0\">
+                        <div class=\"form-group pb-1 mb-2 pt-0 mt-0\">
+                            <label for=\"upload[link_name]\">Link Name</label>
+                            <input name=\"upload[link_name]\" id=\"upload[link_name]\" class=\"form-control\">
+                        </div>
+                    </div>
+                    <div class=\"col-lg-12 pt-0 mt-0\">
+                        <div class=\"form-group pb-1 mb-2 pt-0 mt-0\">
+                            <label for=\"upload[link_url]\">URL</label>
+                            <input name=\"upload[link_url]\" id=\"upload[link_url]\" class=\"form-control\">
+                        </div>
+                    </div>" : 
+                    "
+                    <div class=\"col-lg-12 pt-0 mt-0\">
+                        <div class=\"form-group pb-1 mb-2 pt-0 mt-0\">
+                            <label for=\"upload[file_name]\">File Name</label>
+                            <input name=\"upload[file_name]\" id=\"upload[file_name]\" class=\"form-control\">
+                        </div>
+                    </div>
+                    <div class=\"col-lg-12 pt-0 mt-0   \">
+                        <div class=\"form-group pt-0 mt-0\">
+                            <label for=\"upload[file]\">Select File</label>
+                            <input name=\"upload[file]\" type=\"file\" id=\"upload[file]\" class=\"form-control\">
+                        </div>
+                    </div>"
+                )."
+                <div class=\"col-lg-12 mb-4\">
+                    <label for=\"lesson_id\">Select Lesson</label>
+                    <table class=\"table table-bordered\">
+                        <thead>
+                            <th width=\"8%\"></th>
+                            <th>Lesson Title</th>
+                        </thead>
+                    </table>
+                    <div style=\"height:200px; overflow-y:auto;\" class=\"slim-scroll\">
+                        <div class=\"form-group pt-0 mt-2\">
+                            <table class=\"table table-bordered\">
+                                <tbody>";
+                                foreach($lessons_list as $each) {
+                                    $html_content .= "
+                                        <tr class=\"pt-0 pb-0\">
+                                            <td style=\"height:40px\">
+                                                <input type=\"checkbox\" class=\"form-control\" value=\"{$each->item_id}\" name=\"upload[lesson_id][]\" id=\"lesson_id[{$each->item_id}][]\">
+                                            </td>
+                                            <td style=\"height:40px\">
+                                                <label for=\"lesson_id[{$each->item_id}][]\">{$each->name}</label>
+                                            </td>
+                                        </tr>
+                                    ";
+                                }
+                                $html_content .= "</tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <input type='hidden' name='upload[upload_type]' value='".($link_file ? "is_link" : "is_file")."' id='upload[upload_type]'>
+                    <input type='hidden' name='upload[course_id]' value='{$params->data->item_id}' id='upload[course_id]'>
+                </div>
+                <div class=\"col-md-6 text-left\">
+                    <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
+                </div>
+                <div class=\"col-md-6 text-right\">
+                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                </div>
+            </div>
+        </form>";
 
         return $html_content;
     }
@@ -945,7 +1032,7 @@ class Forms extends Myschoolgh {
                         <input type=\"hidden\" name=\"incident_id\" id=\"incident_id\" value=\"{$item_id}\" hidden class=\"form-control\">
                     </div>
                     <div class=\"col-md-6 text-right\">
-                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
+                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
                     </div>
                 </div>
             </div>";

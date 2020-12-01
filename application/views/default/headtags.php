@@ -179,7 +179,7 @@ if(!isset($userPrefs->messages)) {
                         <i class="fas fa-cog"></i> Settings
                     </a>
                     <div class="dropdown-divider"></div>
-                    <a href="javascript:void(0)" class="dropdown-item has-icon text-danger">
+                    <a href="#" onclick="return logout()" class="dropdown-item anchor has-icon text-danger">
                         <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                     </div>

@@ -6,6 +6,26 @@ class Courses extends Myschoolgh {
     {
         parent::__construct();
     }
+
+    /**
+     * Load the resources and return
+     * 
+     * @return Array
+     */
+    public function resources_list($client_id, $item_id) {
+
+        $list = $this->pushQuery(
+            "a.item_id, a.lesson_id, a.course_id, a.description, a.resource_type, a.link_name, a.link_url, a.date_created", 
+            "courses_resource_links a", 
+            "a.client_id ='{$client_id}' AND a.course_id='{$item_id}' AND a.status='1'"
+        );
+        $the_list = [];
+        foreach($list as $each) {
+            $the_list[$each->resource_type][] = $each;
+        }
+
+        return $the_list;
+    }
     
     /**
      * Update existing incident record
@@ -57,6 +77,9 @@ class Courses extends Myschoolgh {
                 if(isset($params->full_attachments)) {
                    $result->attachment = $filesObject->resource_attachments_list("courses_plan", $result->id);
                 }
+
+                // load the course links
+                $result->resources_list = $this->resources_list($params->clientId, $result->item_id);
                 
                 // if a request was made for full details
                 if(isset($params->full_details)) {
@@ -135,8 +158,9 @@ class Courses extends Myschoolgh {
                 // clean the description attached to the list
                 $result->description = htmlspecialchars_decode($result->description);
                 $result->description = custom_clean($result->description);
-
+                
                 if($result->plan_type == "unit") {
+                    // load the course links
                     $result->lessons_list = $this->course_lessons($client_id, $course_id, "lesson", $result->id);
                 }
 

@@ -54,6 +54,7 @@ if((($inner_url == "devlog") && ($outer_url == "auth")) || ($inner_url == "auth"
 
     // Auth object
     $logObj = load_class("auth", "controllers");
+    
     // if the parameters were parsed
     if($method !== "POST") {
         $response->result = "Sorry! The method must be POST.";

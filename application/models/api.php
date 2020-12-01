@@ -218,7 +218,7 @@ class Api {
         $classObject = load_class("{$this->inner_url}", "controllers");
         
         // confirm that there is a method to process the resource endpoint
-        if(method_exists($classObject, $this->outer_url)) {
+        if(!empty($this->clientId) && method_exists($classObject, $this->outer_url)) {
 
             // set the method to load
             $method = $this->outer_url;

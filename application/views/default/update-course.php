@@ -61,6 +61,50 @@ if(!empty($item_id)) {
         $hasUpdate = $accessObject->hasAccess("update", "course");
         $hasPlanner = $accessObject->hasAccess("lesson", "course");
         
+        // parse the resources list 
+        $response->client_auto_save = ["resources_list" => $data->resources_list];
+
+        //links list
+        $links_list = "";
+
+        // confirm that the link is not empty
+        if(!empty($data->resources_list) && isset($data->resources_list["link"])) {
+            
+            // loop through the list of links
+            foreach($data->resources_list["link"] as $key => $link) {
+                $key++;
+
+                $link = (object) $link;
+
+                $links_list .= "
+                <div id=\"accordion\" data-unit_id=\"{$link->item_id}\">
+                    <div class=\"accordion\">
+                        <div class=\"accordion-header collapsed\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\"\">
+                            <div class=\"d-flex justify-content-between\">
+                                <div><h4>{$key}. {$link->link_name}</h4></div>
+                                <div><i class=\"fa fa-calendar-check\"></i> {$link->date_created}</div>
+                            </div>
+                        </div>
+                        <div class=\"accordion-body collapse\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
+                            <div class='d-flex justify-content-between'>
+                                <div>
+                                    <a href='{$link->link_url}' class='anchor' targe='_blank'>Visit Link</a>
+                                </div>
+                                ".($hasPlanner ? "
+                                <div>
+                                    <button onclick='return load_quick_form(\"course_link_upload\",\"{$link->course_id}_{$link->item_id}\");' class='btn btn-outline-success btn-sm' type='button'><i class='fa fa-edit'></i> Edit</button>
+                                    <a href='#' onclick='return delete_record(\"{$link->item_id}\", \"resource_link\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>
+                                </div>
+                                " : null)."
+                            </div>
+                            <div class='mt-2 mb-3'>{$link->description}</div>
+                        </div>
+                    </div>
+                </div>";
+        
+            }
+        }
+
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
 
@@ -86,6 +130,7 @@ if(!empty($item_id)) {
 
             // if the lesson is not empty
             if(!empty($plan->lessons_list)) {
+
                 // loop through the list of lessons
                 foreach($plan->lessons_list as $ikey => $lesson) {
                     $ikey++;
@@ -129,7 +174,7 @@ if(!empty($item_id)) {
                             ".($hasPlanner ? "
                             <div>
                                 <button onclick='return load_quick_form(\"course_unit_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-success btn-sm' type='button'><i class='fa fa-edit'></i> Edit</button>
-                                <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-plus'></i> Add Lesson</button>
+                                <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-plus'></i> New Lesson</button>
                                 <a href='#' onclick='return delete_record(\"{$plan->id}\", \"course_unit\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>
                             </div>
                             " : null)."
@@ -165,7 +210,7 @@ if(!empty($item_id)) {
             </div>
             <div class="section-body">
             <div class="row mt-sm-4">
-            <div class="col-12 col-md-12 col-lg-4">
+            <div class="col-12 col-md-12 col-lg-3">
                 <div class="card author-box">
                 <div class="card-body">
                     <div class="author-box-center">
@@ -208,7 +253,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-12 col-lg-8">
+            <div class="col-12 col-md-12 col-lg-9">
                 <div class="card">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
@@ -234,7 +279,7 @@ if(!empty($item_id)) {
                             <div class="d-flex justify-content-between">
                                 <div><h5>COURSE LESSONS</h5></div>
                                 '.($hasPlanner ? '
-                                    <div><button  onclick="return load_quick_form(\'course_unit_form\',\''.$item_id.'\');" class="btn  btn-sm btn-primary" type="button"><i class="fa fa-plus"></i> Add Unit</button></div>' 
+                                    <div><button  onclick="return load_quick_form(\'course_unit_form\',\''.$item_id.'\');" class="btn  btn-sm btn-primary" type="button"><i class="fa fa-plus"></i> New Unit</button></div>' 
                                 : null ).'
                             </div>
                             '.$lessons_list.'
@@ -247,7 +292,13 @@ if(!empty($item_id)) {
                                     add_new_item($item_id) 
                                 : null ).'
                             </div>
-                            '.$attachments_list.'
+                            <div class="slim-scroll p-0 m-0" style="max-height:400px; overflow-y:auto;">
+                                '.$attachments_list.'
+                            </div>
+                            <div class="mt-4"><h5>RESOURCE LINKS</h5></div>
+                            <div class="slim-scroll p-0 m-0" style="max-height:400px; overflow-y:auto;">
+                                '.$links_list.'
+                            </div>
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                         

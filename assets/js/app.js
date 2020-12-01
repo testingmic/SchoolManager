@@ -36,6 +36,15 @@ $.maxTimetableTime = '6:00 PM';
 'use strict';
 var devlog = $.env == "development" ? console.log : () => {}
 
+var form_error = (message) => {
+    return `<div class="form-content-loader" style="display: flex; position: absolute;">
+                <div class="offline-content text-center">
+                    <p><i class="fa text-warning fa-exclamation-triangle fa-2x"></i></p>
+                    <small class="text-danger" style='font-size:12px; padding-top:10px'>${message}</small>
+                    <p><small class="text-danger font-weight-bold cursor" data-dismiss="modal" id="close-div">Close</small></p>
+                </div>
+            </div>`;
+}
 $(window).on("beforeunload", (evt) => {
     window.location.href = `${baseUrl}main`;
 });
@@ -151,6 +160,23 @@ $.cachedScript = function(url, options) {
     });
     return $.ajax(options);
 };
+
+var logout = async() => {
+    await $.post(`${baseUrl}api/auth/logout`).then((resp) => {
+        if (resp.result.code == 200) {
+            swal({
+                position: 'top',
+                text: "You have successfully been logged out.",
+                icon: "success",
+            });
+            setTimeout(() => {
+                window.location.href = `${baseUrl}`
+            }, 1500)
+        } else {
+            notify("Sorry! An unexpected error was encountered.");
+        }
+    });
+}
 
 $(() => {
     init()
@@ -353,7 +379,6 @@ var loadPage = (loc, callback, pushstate) => {
             $.mainprogress.show()
             progress.move($.mainprogress, 5, true)
             $.pageoverlay.show();
-            // $.pageloader.show();
         },
         success: (result) => {
             if (result.redirect !== undefined) {
@@ -367,13 +392,17 @@ var loadPage = (loc, callback, pushstate) => {
                     $.cachedScript(`${baseUrl}${ie}`);
                 });
             }
-            $.pagecontent.html($.parseHTML(result.html))
+
+            $.pagecontent.html($.parseHTML(result.html));
+
+            if (result.client_auto_save !== undefined) {
+                client_auto_save = result.client_auto_save;
+            }
 
             document.title = result.title
             progress.complete($.mainprogress, false)
-            $.pageoverlay.hide()
-            init()
-            callback(true)
+            $.pageoverlay.hide();
+            init();
             initDataTables();
             init_image_popup();
             linkClickStopper($.pagecontent)
@@ -1220,10 +1249,7 @@ $(`div[id="ajaxFormSubmitModal"] button[class~="btn-outline-success"]`).on("clic
             submitLoader.css({ "display": "none" });
             formButton.prop("disabled", false);
             $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
-            Toast.fire({
-                title: "Error processing request!",
-                icon: "error"
-            });
+            notify("Sorry! Error processing request.");
         }
     });
 
@@ -1316,7 +1342,9 @@ var form_loader = async(form_module, module_item_id) => {
     $form_loaded.attr("data-form", "none");
 
     await $.post(`${baseUrl}api/forms/load`, { module: $module }).then((response) => {
-        if (response.code !== 200) {
+        if (response.code === 401) {
+            $form_body.html(form_error(response.description));
+        } else if (response.code !== 200) {
             $form_body.html($form_error);
         } else {
             let formRecord = response.data.result;

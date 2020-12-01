@@ -256,7 +256,7 @@ function add_new_item($item_id = null) {
 		</button>
 		<div class=\"dropdown-menu\" style=\"width:160px\" data-function=\"add-item-module\">
 			<a href=\"#\" onclick=\"return load_quick_form('course_link_upload','{$item_id}');\" class=\"dropdown-item btn-sm\" type=\"button\">New Link</a>
-            <a href=\"#\" onclick=\"return load_quick_form('course_file_upload','{$item_id}');\" class=\"dropdown-item btn-sm\" type=\"button\">New File</a>
+            <!--<a href=\"#\" onclick=\"return load_quick_form('course_file_upload','{$item_id}');\" class=\"dropdown-item btn-sm\" type=\"button\">New File</a>-->
 	    </div>
     </div>";
 
