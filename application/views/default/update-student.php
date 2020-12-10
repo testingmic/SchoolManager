@@ -60,7 +60,7 @@ if(!empty($user_id)) {
         
         // user permissions
         $hasUpdate = $accessObject->hasAccess("update", "student");
-        $hasIncident = $accessObject->hasAccess("add", "incident");
+        $addIncident = $accessObject->hasAccess("add", "incident");
         $updateIncident = $accessObject->hasAccess("update", "incident");
         $deleteIncident = $accessObject->hasAccess("delete", "incident");
 
@@ -260,7 +260,7 @@ if(!empty($user_id)) {
                         $response->html .= '
                         <li class="nav-item">
                             <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
-                            aria-selected="false">Update Details</a>
+                            aria-selected="false">Update Record</a>
                         </li>';
                     }
                     
@@ -289,7 +289,7 @@ if(!empty($user_id)) {
                         <div class="tab-pane fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
                             <div class="d-flex justify-content-between">
                                 <div class="mb-2"><h5>INCIDENTS LOG</h5></div>
-                                '.($hasIncident ? '
+                                '.($addIncident ? '
                                     <div>
                                         <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\');" class="btn btn-primary"><i class="fa fa-plus"></i> Log Incident</button>
                                     </div>' 

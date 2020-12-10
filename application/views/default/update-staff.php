@@ -58,46 +58,60 @@ if(!empty($user_id)) {
         // load the incidents
         $incidents = load_class("incidents", "controllers")->list($staff_param);
 
-        // course list parameter
-        $courses_param = (object) [
-            "clientId" => $session->clientId,
-            "userId" => $session->userId,
-            "course_tutor" => $data["data"][0]->user_id,
-            "limit" => 99999
-        ];
-        $courses_list = load_class("courses", "controllers")->list($courses_param);
-
         // course listing
         $course_listing = "";
 
         // user permissions
         $hasUpdate = $accessObject->hasAccess("update", $data["data"][0]->user_type);
-        $courseDelete = $accessObject->hasAccess("delete", "course");
-        $courseUpdate = $accessObject->hasAccess("update", "course");
-        $hasIncident = $accessObject->hasAccess("add", "incident");
+        $addIncident = $accessObject->hasAccess("add", "incident");
+        $addCourse = $accessObject->hasAccess("add", "course");
         $updateIncident = $accessObject->hasAccess("update", "incident");
         $deleteIncident = $accessObject->hasAccess("delete", "incident");
 
-        // courses list
-        if(!empty($courses_list["data"])) {
-            foreach($courses_list["data"] as $key => $each) {
+        // has the right to update the user permissions
+        $updatePermission = $accessObject->hasAccess("update", "permissions");
 
-                $action = "<a href='{$baseUrl}update-course/{$each->id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+        // confirm that the user is a teacher
+        $isTeacher = (bool) ($data["data"][0]->user_type == "teacher");
 
-                if($courseUpdate) {
-                    $action .= "&nbsp;<a href='{$baseUrl}update-course/{$each->id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        // confirm that the user is a teacher
+        if($isTeacher) {
+
+            // course list parameter
+            $courses_param = (object) [
+                "clientId" => $session->clientId,
+                "userId" => $session->userId,
+                "course_tutor" => $data["data"][0]->user_id,
+                "limit" => 99999
+            ];
+            $courses_list = load_class("courses", "controllers")->list($courses_param);
+
+            // courses list
+            if(!empty($courses_list["data"])) {
+
+                $courseDelete = $accessObject->hasAccess("delete", "course");
+                $courseUpdate = $accessObject->hasAccess("update", "course");
+
+                // loop through the courses that the teacher handles
+                foreach($courses_list["data"] as $key => $each) {
+
+                    $action = "<a href='{$baseUrl}update-course/{$each->id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+
+                    if($courseUpdate) {
+                        $action .= "&nbsp;<a href='{$baseUrl}update-course/{$each->id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+                    }
+                    if($courseDelete) {
+                        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+                    }
+
+                    $course_listing .= "<tr data-row_id=\"{$each->id}\">";
+                    $course_listing .= "<td>&nbsp; {$each->name}</td>";
+                    $course_listing .= "<td>{$each->course_code}</td>";
+                    $course_listing .= "<td>{$each->credit_hours}</td>";
+                    $course_listing .= "<td>{$each->class_name}</td>";
+                    $course_listing .= "<td class='text-center'>{$action}</td>";
+                    $course_listing .= "</tr>";
                 }
-                if($courseDelete) {
-                    $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
-                }
-
-                $course_listing .= "<tr data-row_id=\"{$each->id}\">";
-                $course_listing .= "<td>&nbsp; {$each->name}</td>";
-                $course_listing .= "<td>{$each->course_code}</td>";
-                $course_listing .= "<td>{$each->credit_hours}</td>";
-                $course_listing .= "<td>{$each->class_name}</td>";
-                $course_listing .= "<td class='text-center'>{$action}</td>";
-                $course_listing .= "</tr>";
             }
         }
 
@@ -182,6 +196,53 @@ if(!empty($user_id)) {
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
 
+        // user  permission information
+        $level_data = "<div class='row'>";
+
+        // if the user can update permission
+        if($updatePermission) {
+
+            // convert to an array
+            $user_permission = json_decode($data->user_permissions, true)["permissions"];
+            
+            // disable the input field if the current user is also logged in
+            $isDisabled = ($session->userId == $user_id) ? "disabled='disabled'" : null;
+
+            // loop through the list
+            foreach ($user_permission as $key => $value) {
+                $header = ucwords(str_replace("_", " ", $key));
+                $level_data .= "<div class='".(isset($thisUserAccess) ? "col-lg-4 col-md-4" : "col-lg-12")." mb-2 border-bottom border-default'><h6 style='font-weight:bolder'>".$header."</h6>";
+                
+                if(!isset($thisUserAccess)) {
+                    $level_data .= "<div class='row'>";
+                }
+                
+                // loop through the user permissions
+                foreach($value as $nkey => $nvalue) {						
+                    
+                    // if the user access was parsed
+                    if(isset($thisUserAccess)) {
+                        $level_data .= "<div class='col-lg-12'>";
+                        $level_data .= "<input {$isDisabled} ".(isset($thisUserAccess[$key][$nkey]) && ($thisUserAccess[$key][$nkey] == 1) ? "checked" : null )." type='checkbox' id='access_level[$key][$nkey]' class='brands-checkbox' name='access_level[$key][$nkey][]'>";
+                    } else {
+                        $level_data .= "<div class='col-lg-3 col-md-4'>";
+                        $level_data .= "<input {$isDisabled} checked='checked' type='checkbox' id='access_level[$key][$nkey]' class='brands-checkbox' name='access_level[$key][$nkey][]'>";
+                    }
+                    $level_data .= "<label class='cursor' for='access_level[$key][$nkey]'> &nbsp; ".ucfirst($nkey)."</label>";
+                    $level_data .= "</div>";
+                    
+                }
+
+                if(!isset($thisUserAccess)) {
+                    $level_data .= "</div>";
+                }
+                $level_data .= "</div>";
+            }
+            
+            $level_data .= "</div>";
+
+        }
+
         // append the html content
         $response->html = '
         <section class="section">
@@ -263,12 +324,15 @@ if(!empty($user_id)) {
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
                         <a class="nav-link '.(!$updateItem ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab"
-                        aria-selected="true">Other Information</a>
+                        aria-selected="true">Summary</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#course_list" role="tab"
-                        aria-selected="true">Course List</a>
-                    </li>
+                    '.(
+                        $isTeacher ? '
+                        <li class="nav-item">
+                            <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#course_list" role="tab"
+                            aria-selected="true">Course List</a>
+                        </li>' : null
+                    ).'
                     <li class="nav-item">
                         <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab"
                         aria-selected="true">Timetable</a>
@@ -286,7 +350,15 @@ if(!empty($user_id)) {
                         $response->html .= '
                         <li class="nav-item">
                             <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
-                            aria-selected="false">Update Details</a>
+                            aria-selected="false">Update Record</a>
+                        </li>';
+                    }
+
+                    if($updatePermission) {
+                        $response->html .= '
+                        <li class="nav-item">
+                            <a class="nav-link" id="permissions-tab2" data-toggle="tab" href="#permissions" role="tab"
+                            aria-selected="true">Permissions</a>
                         </li>';
                     }
                     
@@ -303,22 +375,48 @@ if(!empty($user_id)) {
                                 </div>
                             " : "").'
                         </div>
-                        <div class="tab-pane fade" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
-                            <div class="table-responsive">
-                                <table data-empty="" class="table table-striped datatable">
-                                    <thead>
-                                        <tr>
-                                            <th>Course Title</th>
-                                            <th>Course Code</th>
-                                            <th>Credit Hours</th>
-                                            <th width="15%">Class</th>
-                                            <th class="text-center" width="10%">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>'.$course_listing.'</tbody>
-                                </table>
-                            </div>
-                        </div>
+                        '.(
+                        $isTeacher ? '
+                            <div class="tab-pane fade" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
+                                <div class="d-flex justify-content-between mb-4">
+                                    <div class="mb-2"><h5>COURSES LIST</h5></div>
+                                    '.($addCourse ? '
+                                        <div>
+                                            <a href="'.$baseUrl.'add-course" class="btn btn-primary"><i class="fa fa-plus"></i> Add Course</a>
+                                        </div>' 
+                                    : null ).'
+                                </div>
+                                <div class="table-responsive">
+                                    <table data-empty="" class="table table-striped datatable">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Title</th>
+                                                <th>Course Code</th>
+                                                <th>Credit Hours</th>
+                                                <th width="15%">Class</th>
+                                                <th class="text-center" width="10%"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>'.$course_listing.'</tbody>
+                                    </table>
+                                </div>
+                            </div>' : null
+                        ).'
+                        '.(
+                        $updatePermission ? '
+                            <div class="tab-pane fade" id="permissions" role="tabpanel" aria-labelledby="permissions-tab2">
+                                <div class="mb-3 pb-0 border-bottom"><h5>USER PERMISSIONS</h5></div>
+                                <form class="ajaxform" id="ajaxform" action="'.$baseUrl.'api/users/save_permission" method="POST">
+                                    '.$level_data.'
+                                    <div class="row">
+                                        <input type="hidden" readonly name="user_id" id="user_id" value="'.$user_id.'">
+                                        <div class="col-lg-12 text-right">
+                                            <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Permissions</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>' : null
+                        ).'
                         <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">
                             
 
@@ -330,7 +428,7 @@ if(!empty($user_id)) {
                         <div class="tab-pane fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
                             <div class="d-flex justify-content-between">
                                 <div class="mb-2"><h5>INCIDENTS LOG</h5></div>
-                                '.($hasIncident ? '
+                                '.($addIncident ? '
                                     <div>
                                         <button type="button" onclick="return load_quick_form(\'incident_log_form\',\''.$user_id.'\');" class="btn btn-primary"><i class="fa fa-plus"></i> Log Incident</button>
                                     </div>' 

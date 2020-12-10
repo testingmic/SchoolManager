@@ -15,7 +15,7 @@ $(`div[id="student_guardian_list"] button[class~="append-row"]`).on('click', fun
 
     let selectOptions = $('div[id="student_guardian_list"] div[data-row]:last select > option').length;
 
-    if (selectOptions == lastRowId) {
+    if ((selectOptions + 3) == lastRowId) {
         return false;
     }
 

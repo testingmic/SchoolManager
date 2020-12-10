@@ -195,6 +195,8 @@ if(!empty($item_id)) {
                 </div>";
         }
 
+        $link = !empty($data->course_tutor) ? "href='{$baseUrl}update-staff/{$data->course_tutor}/view'" : null;
+
         // append the html content
         $response->html = '
         <section class="section">
@@ -237,7 +239,7 @@ if(!empty($item_id)) {
                         <div class="py-3 pt-0">
                             <p class="clearfix">
                                 <span class="float-left">Fullname</span>
-                                <span class="float-right text-muted">'.($data->course_tutor_info->name ?? null).'</span>
+                                <span class="float-right text-muted"><a '.$link.'>'.($data->course_tutor_info->name ?? null).'</a></span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Email</span>

@@ -80,7 +80,7 @@ $response->html = '
                                         <th>Credit Hours</th>
                                         <th width="15%">Class</th>
                                         <th>Course Tutor</th>
-                                        <th width="10%">Action</th>
+                                        <th width="10%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$courses.'</tbody>

@@ -97,7 +97,7 @@ $response->html = '
                                         <th>Date of Birth</th>
                                         <th>Date Employed</th>
                                         <th>Department</th>
-                                        <th width="10%" align="center">Action</th>
+                                        <th width="10%" align="center"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$staff_list.'</tbody>

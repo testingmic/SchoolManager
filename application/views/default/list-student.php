@@ -79,7 +79,7 @@ $response->html = '
                                         <th>Blood Group</th>
                                         <th>Date of Birth</th>
                                         <th>Department</th>
-                                        <th width="10%">Action</th>
+                                        <th width="10%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$students.'</tbody>
