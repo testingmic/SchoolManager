@@ -65,13 +65,41 @@ if(!empty($user_id)) {
             "course_tutor" => $data["data"][0]->user_id,
             "limit" => 99999
         ];
-        $item_list = load_class("courses", "controllers")->list($courses_param);
-        
+        $courses_list = load_class("courses", "controllers")->list($courses_param);
+
+        // course listing
+        $course_listing = "";
+
         // user permissions
         $hasUpdate = $accessObject->hasAccess("update", $data["data"][0]->user_type);
+        $courseDelete = $accessObject->hasAccess("delete", "course");
+        $courseUpdate = $accessObject->hasAccess("update", "course");
         $hasIncident = $accessObject->hasAccess("add", "incident");
         $updateIncident = $accessObject->hasAccess("update", "incident");
         $deleteIncident = $accessObject->hasAccess("delete", "incident");
+
+        // courses list
+        if(!empty($courses_list["data"])) {
+            foreach($courses_list["data"] as $key => $each) {
+
+                $action = "<a href='{$baseUrl}update-course/{$each->id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+
+                if($courseUpdate) {
+                    $action .= "&nbsp;<a href='{$baseUrl}update-course/{$each->id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+                }
+                if($courseDelete) {
+                    $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+                }
+
+                $course_listing .= "<tr data-row_id=\"{$each->id}\">";
+                $course_listing .= "<td>&nbsp; {$each->name}</td>";
+                $course_listing .= "<td>{$each->course_code}</td>";
+                $course_listing .= "<td>{$each->credit_hours}</td>";
+                $course_listing .= "<td>{$each->class_name}</td>";
+                $course_listing .= "<td class='text-center'>{$action}</td>";
+                $course_listing .= "</tr>";
+            }
+        }
 
         // populate the incidents
         $incidents_list = "";
@@ -267,7 +295,7 @@ if(!empty($user_id)) {
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
                             '.($data->description ? "
-                                <div class='mb-3 border-bottom'>
+                                <div class='mb-3 border-bottom_'>
                                     <div class='card-body p-2 pl-0'>
                                         <div><h5>DESCRIPTION</h5></div>
                                         {$data->description}
@@ -276,7 +304,20 @@ if(!empty($user_id)) {
                             " : "").'
                         </div>
                         <div class="tab-pane fade" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
-                            
+                            <div class="table-responsive">
+                                <table data-empty="" class="table table-striped datatable">
+                                    <thead>
+                                        <tr>
+                                            <th>Course Title</th>
+                                            <th>Course Code</th>
+                                            <th>Credit Hours</th>
+                                            <th width="15%">Class</th>
+                                            <th class="text-center" width="10%">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>'.$course_listing.'</tbody>
+                                </table>
+                            </div>
                         </div>
                         <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">
                             

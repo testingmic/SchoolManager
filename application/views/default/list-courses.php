@@ -44,14 +44,16 @@ foreach($item_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
+    $link = !empty($each->course_tutor) ? "href='{$baseUrl}update-staff/{$each->course_tutor}/view'" : null;
+
     $courses .= "<tr data-row_id=\"{$each->id}\">";
     $courses .= "<td>".($key+1)."</td>";
     $courses .= "<td>&nbsp; {$each->name}</td>";
     $courses .= "<td>{$each->course_code}</td>";
     $courses .= "<td>{$each->credit_hours}</td>";
     $courses .= "<td>{$each->class_name}</td>";
-    $courses .= "<td><span class='underline'>".($each->course_tutor_info->name ?? null)."</span></td>";
-    $courses .= "<td>{$action}</td>";
+    $courses .= "<td><a {$link}><span class='underline'>".($each->course_tutor_info->name ?? null)."</span></a></td>";
+    $courses .= "<td class='text-center'>{$action}</td>";
     $courses .= "</tr>";
 }
 
