@@ -47,18 +47,35 @@ class Resources extends Myschoolgh {
 
             // if the request is to upload a link
             if(isset($upload->upload_type) && $upload->upload_type == "is_link") {
-                // insert the link record
-                $stmt = $this->db->prepare("
-                    INSERT INTO courses_resource_links 
-                    SET item_id = ?, client_id = ?, course_id = ?, lesson_id = ?,
-                    description = ?, link_url = ?, link_name = ?, created_by = ?
-                ");
-                $stmt->execute([
-                    $item_id, $params->clientId, $upload->course_id, $lesson_ids, 
-                    $upload->description, $upload->link_url, $upload->link_name, $params->userId
-                ]);    
-                # set the output to return when successful
-                $return = ["code" => 200, "data" => "Resource Link successfully uploaded.", "refresh" => 2000];
+
+                // upload the file
+                if(isset($upload->resource_id) && !empty($upload->resource_id)) {
+                    // insert the link record
+                    $stmt = $this->db->prepare("
+                        UPDATE courses_resource_links 
+                        SET course_id = ?, lesson_id = ?, description = ?, link_url = ?, 
+                            link_name = ?, created_by = ?, resource_type = ?
+                        WHERE item_id = ? AND client_id = ?
+                    ");
+                    $stmt->execute([$upload->course_id, $lesson_ids, $upload->description, $upload->link_url, 
+                        $upload->link_name, $params->userId, "link", $upload->resource_id, $params->clientId
+                    ]);    
+                    # set the output to return when successful
+                    $return = ["code" => 200, "data" => "Resource Link successfully updated.", "refresh" => 2000];
+                } else {
+                    // insert the link record
+                    $stmt = $this->db->prepare("
+                        INSERT INTO courses_resource_links 
+                        SET item_id = ?, client_id = ?, course_id = ?, lesson_id = ?,
+                        description = ?, link_url = ?, link_name = ?, created_by = ?
+                    ");
+                    $stmt->execute([
+                        $item_id, $params->clientId, $upload->course_id, $lesson_ids, 
+                        $upload->description, $upload->link_url, $upload->link_name, $params->userId
+                    ]);    
+                    # set the output to return when successful
+                    $return = ["code" => 200, "data" => "Resource Link successfully uploaded.", "refresh" => 2000];
+                }
             }
             // if a file was uploaded
             elseif(isset($upload->upload_type) && $upload->upload_type == "is_file") {
@@ -99,27 +116,45 @@ class Resources extends Myschoolgh {
                 }
 
                 // upload the file
-                // insert the link record
-                $stmt = $this->db->prepare("
-                    INSERT INTO courses_resource_links 
-                    SET item_id = ?, client_id = ?, course_id = ?, lesson_id = ?,
-                    description = ?, link_url = ?, link_name = ?, created_by = ?, resource_type = ?
-                ");
-                $stmt->execute([
-                    $item_id, $params->clientId, $upload->course_id, $lesson_ids, 
-                    $upload->description, $fileName, $upload->file_name, $params->userId, "file"
-                ]);    
-                # set the output to return when successful
-                $return = ["code" => 200, "data" => "Resource File successfully uploaded.", "refresh" => 2000];
+                if(isset($upload->resource_id) && !empty($upload->resource_id)) {
+                    // insert the link record
+                    $stmt = $this->db->prepare("
+                        UPDATE courses_resource_links 
+                        SET course_id = ?, lesson_id = ?, description = ?, link_url = ?, 
+                            link_name = ?, created_by = ?, resource_type = ?
+                        WHERE item_id = ? AND client_id = ?
+                    ");
+                    $stmt->execute([$upload->course_id, $lesson_ids, $upload->description, $fileName, 
+                        $upload->file_name, $params->userId, "file", $item_id, $params->clientId
+                    ]);    
+                    # set the output to return when successful
+                    $return = ["code" => 200, "data" => "Resource File successfully updated.", "refresh" => 2000];
+                } else {
+                    // insert the link record
+                    $stmt = $this->db->prepare("
+                        INSERT INTO courses_resource_links 
+                        SET item_id = ?, client_id = ?, course_id = ?, lesson_id = ?,
+                        description = ?, link_url = ?, link_name = ?, created_by = ?, resource_type = ?
+                    ");
+                    $stmt->execute([$item_id, $params->clientId, $upload->course_id, $lesson_ids, 
+                        $upload->description, $fileName, $upload->file_name, $params->userId, "file"
+                    ]);    
+                    # set the output to return when successful
+                    $return = ["code" => 200, "data" => "Resource File successfully uploaded.", "refresh" => 2000];
+                }
             }
 
 			# append to the response
-			$return["additional"] = ["clear" => true];
+			$return["additional"] = [
+                "clear" => true, 
+                "data" => load_class("courses", "controllers")->resources_list($params->clientId, $upload->course_id)
+            ];
             
             return $return;
 
         } catch(PDOException $e) {}
 
     }
+
 }
 ?>

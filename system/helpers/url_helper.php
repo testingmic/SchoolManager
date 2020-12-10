@@ -425,3 +425,23 @@ if ( ! function_exists('create_slug')) {
 		return ($ext) ? $str.$ext : $str; 
 	}
 }
+
+// -------------------------------------------------------------------
+if ( ! function_exists('jump_to_main')) {
+	
+	/**
+	 * Jump to the main page
+	 * 
+	 * If no referer was parsed or the request method is not post then redirect the page
+	 * 
+	 * @return header
+	 */
+	function jump_to_main($baseUrl = null) {
+		global $config, $_SERVER;
+		if(!isset($_SERVER["HTTP_REFERER"]) || $_SERVER["REQUEST_METHOD"] !== "POST") {
+			header("location: {$baseUrl}main");
+			exit;
+		}
+	}
+
+}

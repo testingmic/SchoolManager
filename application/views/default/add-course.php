@@ -12,10 +12,7 @@ $appName = config_item("site_name");
 $baseUrl = $config->base_url();
 
 // if no referer was parsed
-if(!isset($_SERVER["HTTP_REFERER"])) {
-    header("location: {$baseUrl}main");
-    exit;
-}
+jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];

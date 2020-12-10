@@ -183,17 +183,30 @@ class Forms extends Myschoolgh {
                     return;
                 }
                 /** Set the course id */
-                $item_id = $params->module["item_id"];
+                $item_id = explode("_", $params->module["item_id"]);
+
+                // get the course
+                $course = $this->pushQuery("id, item_id", "courses", "item_id = '{$item_id[0]}' AND client_id='{$params->clientId}'");
+                $course_id = $course[0]->id;
 
                 /** If a second item was parsed then load the lesson unit information */
-                $data = $this->pushQuery("id, item_id, name, description, course_code", "courses", "client_id='{$params->clientId}' AND id='{$item_id[0]}' LIMIT 1");
-                if(empty($data)) {
-                    return ["code" => 201, "data" => "An invalid id was parsed"];
+                if(isset($item_id[1])) {
+
+                    /** Load the course resource  */
+                    $data = $this->pushQuery("a.*, (SELECT b.id FROM courses b WHERE b.item_id = a.course_id) AS the_course_id", 
+                    "courses_resource_links a", 
+                    "a.client_id='{$params->clientId}' AND a.course_id='{$item_id[0]}' AND a.item_id='{$item_id[1]}' LIMIT 1");
+                    
+                    // if no record was found then end the query
+                    if(empty($data)) {
+                        return ["code" => 201, "data" => "An invalid id was parsed"];
+                    }
+                    $course_id = $item_id[0];
+                    $params->data = $data[0];
                 }
-                $params->data = $data[0];
 
                 // load the class
-                $result = $this->course_upload_item($params, $item_id, $the_form);
+                $result = $this->course_upload_item($params, $course_id, $item_id[0], $the_form);
             }
 
         }
@@ -749,25 +762,14 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function course_upload_item(stdClass $params, $course_id = null, $item_type = "course_link_upload") {
+    public function course_upload_item(stdClass $params, $course_id = null, $item_id = null, $item_type = "course_link_upload") {
 
         // description
         $html_content = "";
         $link_file = $item_type == "course_file_upload" ? false : true;
-        $item_id = isset($params->data->id) ? $params->data->id : null;
-
-        $item_label = [
-            "course_link_upload" => [
-                "title" => "Link",
-                "name" => "link_name",
-            ],
-            "course_file_upload" => [
-                "title" => "File",
-                "name" => "file_name"
-            ]
-        ];
-
-        $lessons_list = $this->pushQuery("id, item_id, course_id, unit_id, name", "courses_plan", "course_id = '{$item_id}' AND client_id='{$params->clientId}'");
+        $lesson_ids = isset($params->data->lesson_id) ? json_decode($params->data->lesson_id, true) : [];
+        
+        $lessons_list = $this->pushQuery("id, item_id, course_id, unit_id, name", "courses_plan", "course_id = '".($params->data->the_course_id ?? $course_id)."' AND client_id='{$params->clientId}' AND plan_type='lesson'");
         
         $html_content = "
         <form id='ajax-data-form-content' class='ajax-data-form' enctype=\"multipart/form-data\" action=\"{$this->baseUrl}api/resources/upload_4courses\" method=\"POST\">
@@ -775,27 +777,27 @@ class Forms extends Myschoolgh {
                 <div class=\"col-lg-12 pt-0 mt-0\">
                     <div class=\"form-group pb-1 pt-0 mb-2 mt-0\">
                         <label for=\"upload[description]\">Description</label>
-                        <textarea name=\"upload[description]\" id=\"upload[description]\" class=\"form-control\"></textarea>
+                        <textarea name=\"upload[description]\" id=\"upload[description]\" class=\"form-control\">".($params->data->description ?? null)."</textarea>
                     </div>
                 </div>
                 ".($link_file ? 
                     "<div class=\"col-lg-12 pt-0 mt-0\">
                         <div class=\"form-group pb-1 mb-2 pt-0 mt-0\">
                             <label for=\"upload[link_name]\">Link Name</label>
-                            <input name=\"upload[link_name]\" id=\"upload[link_name]\" class=\"form-control\">
+                            <input name=\"upload[link_name]\" value=\"".($params->data->link_name ?? null)."\" id=\"upload[link_name]\" class=\"form-control\">
                         </div>
                     </div>
                     <div class=\"col-lg-12 pt-0 mt-0\">
                         <div class=\"form-group pb-1 mb-2 pt-0 mt-0\">
                             <label for=\"upload[link_url]\">URL</label>
-                            <input name=\"upload[link_url]\" id=\"upload[link_url]\" class=\"form-control\">
+                            <input name=\"upload[link_url]\" value=\"".($params->data->link_url ?? null)."\" id=\"upload[link_url]\" class=\"form-control\">
                         </div>
                     </div>" : 
                     "
                     <div class=\"col-lg-12 pt-0 mt-0\">
                         <div class=\"form-group pb-1 mb-2 pt-0 mt-0\">
                             <label for=\"upload[file_name]\">File Name</label>
-                            <input name=\"upload[file_name]\" id=\"upload[file_name]\" class=\"form-control\">
+                            <input name=\"upload[file_name]\" value=\"".($params->data->link_name ?? null)."\" id=\"upload[file_name]\" class=\"form-control\">
                         </div>
                     </div>
                     <div class=\"col-lg-12 pt-0 mt-0   \">
@@ -821,7 +823,7 @@ class Forms extends Myschoolgh {
                                     $html_content .= "
                                         <tr class=\"pt-0 pb-0\">
                                             <td style=\"height:40px\">
-                                                <input type=\"checkbox\" class=\"form-control\" value=\"{$each->item_id}\" name=\"upload[lesson_id][]\" id=\"lesson_id[{$each->item_id}][]\">
+                                                <input type=\"checkbox\" ".(in_array($each->item_id, $lesson_ids) ? "checked" : "")." class=\"form-control\" value=\"{$each->item_id}\" name=\"upload[lesson_id][]\" id=\"lesson_id[{$each->item_id}][]\">
                                             </td>
                                             <td style=\"height:40px\">
                                                 <label for=\"lesson_id[{$each->item_id}][]\">{$each->name}</label>
@@ -834,7 +836,8 @@ class Forms extends Myschoolgh {
                         </div>
                     </div>
                     <input type='hidden' name='upload[upload_type]' value='".($link_file ? "is_link" : "is_file")."' id='upload[upload_type]'>
-                    <input type='hidden' name='upload[course_id]' value='{$params->data->item_id}' id='upload[course_id]'>
+                    <input type='hidden' name='upload[course_id]' value='{$item_id}' id='upload[course_id]'>
+                    <input type='hidden' name='upload[resource_id]' value=\"".($params->data->item_id ?? null)."\" id='upload[resource_id]'>
                 </div>
                 <div class=\"col-md-6 text-left\">
                     <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
@@ -1845,17 +1848,6 @@ class Forms extends Myschoolgh {
             </div>
             <div class="row mb-4 border-bottom pb-4">
                 <div class="col-lg-12"><h5>ACADEMICS</h5></div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="class_id">Class</label>
-                        <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
-                            <option value="null">Select Class</option>';
-                            foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->id == $userData->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
-                            }
-                        $response .= '</select>
-                    </div>
-                </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="department">Department <span class="required">*</span></label>

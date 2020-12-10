@@ -72,7 +72,7 @@ class Models {
         $this->user_roles_list = [
             "teacher" => "Teacher",
             "employee" => "Employee",
-            "finance" => "Accountant",
+            "accountant" => "Accountant",
             "admin" => "Admin"
         ];
 

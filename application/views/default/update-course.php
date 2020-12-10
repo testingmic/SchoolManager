@@ -12,10 +12,7 @@ $appName = config_item("site_name");
 $baseUrl = $config->base_url();
 
 // if no referer was parsed
-if(!isset($_SERVER["HTTP_REFERER"])) {
-    header("location: {$baseUrl}main");
-    exit;
-}
+jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
@@ -77,18 +74,19 @@ if(!empty($item_id)) {
                 $link = (object) $link;
 
                 $links_list .= "
-                <div id=\"accordion\" data-unit_id=\"{$link->item_id}\">
+                <div id=\"accordion\" data-row_id=\"{$link->item_id}\">
                     <div class=\"accordion\">
-                        <div class=\"accordion-header collapsed\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\"\">
+                        <div class=\"accordion-header collapsed\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\">
                             <div class=\"d-flex justify-content-between\">
                                 <div><h4>{$key}. {$link->link_name}</h4></div>
                                 <div><i class=\"fa fa-calendar-check\"></i> {$link->date_created}</div>
                             </div>
                         </div>
-                        <div class=\"accordion-body collapse\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
+                        <div class=\"accordion-body collapse\" data-row_id=\"{$link->item_id}\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
                             <div class='d-flex justify-content-between'>
                                 <div>
-                                    <a href='{$link->link_url}' class='anchor' targe='_blank'>Visit Link</a>
+                                    <strong>{$link->link_url}</strong> <br>
+                                    <a href='{$link->link_url}' class='anchor' target='_blank'>Visit Link</a>
                                 </div>
                                 ".($hasPlanner ? "
                                 <div>
@@ -157,7 +155,7 @@ if(!empty($item_id)) {
             }
 
             $lessons_list .= "
-                <div id=\"accordion\" data-unit_id=\"{$plan->id}\">
+                <div id=\"accordion\" data-row_id=\"{$plan->id}\">
                     <div class=\"accordion\">
                     <div class=\"accordion-header ".($plan->id == $session->thisLast_UnitId ? null : "collapsed")."\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\" ".($plan->id == $session->thisLast_UnitId ? "aria-expanded=\"true\"" : null)."\">
                         <div class=\"d-flex justify-content-between\">
@@ -278,9 +276,12 @@ if(!empty($item_id)) {
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
                             <div class="d-flex justify-content-between">
                                 <div><h5>COURSE LESSONS</h5></div>
-                                '.($hasPlanner ? '
-                                    <div><button  onclick="return load_quick_form(\'course_unit_form\',\''.$item_id.'\');" class="btn  btn-sm btn-primary" type="button"><i class="fa fa-plus"></i> New Unit</button></div>' 
-                                : null ).'
+                                <div>
+                                    <a target="_blank" class="btn btn-sm btn-outline-success" href="'.$baseUrl.'download?course='.base64_encode($data->id."_".$data->item_id).'"><i class="fa fa-download"></i> Download</a>
+                                    '.($hasPlanner ? '
+                                        <button  onclick="return load_quick_form(\'course_unit_form\',\''.$item_id.'\');" class="btn btn-sm btn-outline-primary" type="button"><i class="fa fa-plus"></i> New Unit</button>'
+                                    : null ).'
+                                </div>
                             </div>
                             '.$lessons_list.'
                         </div>
@@ -289,14 +290,14 @@ if(!empty($item_id)) {
                             <div class="d-flex justify-content-between">
                                 <div><h5>COURSE MATERIALS</h5></div>
                                 '.($hasPlanner ? 
-                                    add_new_item($item_id) 
+                                    add_new_item($data->item_id) 
                                 : null ).'
                             </div>
                             <div class="slim-scroll p-0 m-0" style="max-height:400px; overflow-y:auto;">
                                 '.$attachments_list.'
                             </div>
                             <div class="mt-4"><h5>RESOURCE LINKS</h5></div>
-                            <div class="slim-scroll p-0 m-0" style="max-height:400px; overflow-y:auto;">
+                            <div class="slim-scroll p-0 m-0" id="resource_link_list" style="max-height:400px; overflow-y:auto;">
                                 '.$links_list.'
                             </div>
                         </div>

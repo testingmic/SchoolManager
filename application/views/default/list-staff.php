@@ -13,10 +13,7 @@ $appName = config_item("site_name");
 $baseUrl = $config->base_url();
 
 // if no referer was parsed
-if(!isset($_SERVER["HTTP_REFERER"])) {
-    header("location: {$baseUrl}main");
-    exit;
-}
+jump_to_main($baseUrl);
 
 $response = (object) [];
 $response->title = "Staff List : {$appName}";
@@ -27,28 +24,46 @@ $staff_param = (object) [
     "user_type" => "employee,teacher,admin"
 ];
 
-$student_list = load_class("users", "controllers")->list($staff_param);
+$api_staff_list = load_class("users", "controllers")->list($staff_param);
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
-$hasDelete = $accessObject->hasAccess("delete", "staff");
-$hasUpdate = $accessObject->hasAccess("update", "staff");
+
+// the query parameter to load the user information
+$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "userId" => $session->userId];
+
+// get the user data
+$userData = $usersClass->list($i_params)["data"][0];
+$accessObject->userPermits = $userData->user_permissions;
 
 $staff_list = "";
-foreach($student_list["data"] as $key => $each) {
+
+$color = [
+    "admin" => "success",
+    "employee" => "primary",
+    "accountant" => "danger",
+    "teacher" => "warning"
+];
+
+foreach($api_staff_list["data"] as $key => $each) {
     
     $action = "<a href='{$baseUrl}update-staff/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
-    if($hasUpdate) {
+    if($accessObject->hasAccess("update", $each->user_type)) {
         $action .= "&nbsp;<a href='{$baseUrl}update-staff/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
-    if($hasDelete) {
+
+    if($accessObject->hasAccess("delete", $each->user_type)) {
         $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
     $staff_list .= "<td>".($key+1)."</td>";
-    $staff_list .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
+    $staff_list .= "<td>
+        <div class='d-flex justify-content-start'>
+            <div class='mr-2'><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
+            <div>{$each->name} <br><span class='text-uppercase badge badge-{$color[$each->user_type]} p-2'>{$each->user_type}</span></div>
+        </div></td>";
     $staff_list .= "<td>{$each->position}</td>";
     $staff_list .= "<td>{$each->gender}</td>";
     $staff_list .= "<td>{$each->date_of_birth}</td>";
@@ -82,7 +97,7 @@ $response->html = '
                                         <th>Date of Birth</th>
                                         <th>Date Employed</th>
                                         <th>Department</th>
-                                        <th width="10%">Action</th>
+                                        <th width="10%" align="center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$staff_list.'</tbody>

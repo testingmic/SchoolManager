@@ -12,12 +12,14 @@ class Courses extends Myschoolgh {
      * 
      * @return Array
      */
-    public function resources_list($client_id, $item_id) {
+    public function resources_list($client_id, $item_id, $resource_id = null) {
+
+        $query = !empty($resource_id) ? " AND a.item_id = '{$resource_id}'" : null;
 
         $list = $this->pushQuery(
             "a.item_id, a.lesson_id, a.course_id, a.description, a.resource_type, a.link_name, a.link_url, a.date_created", 
             "courses_resource_links a", 
-            "a.client_id ='{$client_id}' AND a.course_id='{$item_id}' AND a.status='1'"
+            "a.client_id ='{$client_id}' AND a.course_id='{$item_id}' AND a.status='1' {$query}"
         );
         $the_list = [];
         foreach($list as $each) {

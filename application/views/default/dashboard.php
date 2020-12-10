@@ -5,15 +5,12 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-// if no referer was parsed
-if(!isset($_SERVER["HTTP_REFERER"])) {
-    header("location: {$config->base_url("main")}");
-    exit;
-}
-
 // initial variables
 $appName = config_item("site_name");
 $baseUrl = $config->base_url();
+
+// if no referer was parsed OR the request_method is not POST
+jump_to_main($baseUrl);
 
 // initial variables
 global $accessObject;

@@ -373,7 +373,7 @@ var loadPage = (loc, callback, pushstate) => {
     let progress = moveProgress();
     $.ajax({
         url: loc,
-        method: "GET",
+        method: "POST",
         dataType: "JSON",
         beforeSend: () => {
             $.mainprogress.show()
@@ -1200,7 +1200,7 @@ $(`div[id="ajaxFormSubmitModal"] button[class~="btn-outline-success"]`).on("clic
 
                 if (response.data.additional) {
 
-                    if (response.data.additional.clear) {
+                    if (response.data.additional.clear !== undefined) {
                         if ($(`textarea[name="faketext"]`).length) {
                             CKEDITOR.instances['ajax-form-content'].setData("");
                         }
@@ -1212,10 +1212,10 @@ $(`div[id="ajaxFormSubmitModal"] button[class~="btn-outline-success"]`).on("clic
                         $(`form[class="ajax-data-form"] select`).val("null").change();
                         $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
                     }
-                    if (response.data.additional.append) {
+                    if (response.data.additional.append !== undefined) {
                         $(`div[id="${response.data.additional.append.div_id}"]`).html(response.data.additional.append.data);
                     }
-                    if (response.data.additional.record) {
+                    if (response.data.additional.record !== undefined) {
                         $.each(response.data.additional.record, function(ie, iv) {
                             $(`form[class="ajax-data-form"] input[name="${ie}"]`).val(iv);
                             $(`[data-record="${ie}"]`).html(iv);
@@ -1225,6 +1225,9 @@ $(`div[id="ajaxFormSubmitModal"] button[class~="btn-outline-success"]`).on("clic
                         setTimeout(() => {
                             loadPage(response.data.additional.href);
                         }, 2000);
+                    }
+                    if (response.data.additional.data !== undefined) {
+                        preload_AjaxData(response.data.additional.data);
                     }
                 }
 
