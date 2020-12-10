@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Student Details";
+$pageTitle = "Staff Details";
 $response->title = "{$pageTitle} : {$appName}";
 
 // the query parameter to load the user information
@@ -32,34 +32,43 @@ $response->scripts = [
     "assets/js/page/index.js"
 ];
 
-// student id
+// staff id
 $user_id = confirm_url_id(2) ? xss_clean($SITEURL[1]) : null;
 $pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty
 if(!empty($user_id)) {
 
-    $student_param = (object) [
+    $staff_param = (object) [
         "clientId" => $clientId,
         "user_id" => $user_id,
         "limit" => 1,
         "full_details" => true,
         "no_limit" => 1,
-        "user_type" => "student"
+        "user_type" => "employee,teacher,admin,accountant"
     ];
 
-    $data = load_class("users", "controllers")->list($student_param);
+    $data = load_class("users", "controllers")->list($staff_param);
     
     // if no record was found
     if(empty($data["data"])) {
         $response->html = page_not_found();
     } else {
-
+        
         // load the incidents
-        $incidents = load_class("incidents", "controllers")->list($student_param);
+        $incidents = load_class("incidents", "controllers")->list($staff_param);
+
+        // course list parameter
+        $courses_param = (object) [
+            "clientId" => $session->clientId,
+            "userId" => $session->userId,
+            "course_tutor" => $data["data"][0]->user_id,
+            "limit" => 99999
+        ];
+        $item_list = load_class("courses", "controllers")->list($courses_param);
         
         // user permissions
-        $hasUpdate = $accessObject->hasAccess("update", "student");
+        $hasUpdate = $accessObject->hasAccess("update", $data["data"][0]->user_type);
         $hasIncident = $accessObject->hasAccess("add", "incident");
         $updateIncident = $accessObject->hasAccess("update", "incident");
         $deleteIncident = $accessObject->hasAccess("delete", "incident");
@@ -127,7 +136,6 @@ if(!empty($user_id)) {
                     </div>
                 </div>";
             }
-
             $incidents_list .= "</div>";
             $response->client_auto_save = ["incidents_array" => $incidents["data"]];
         }
@@ -141,21 +149,7 @@ if(!empty($user_id)) {
         $data = $data["data"][0];
 
         // guardian information
-        $user_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl, $data);
-
-        $guardian = "";
-        if(!empty($data->guardian_information)) {
-            $guardian .= '<div><h5>GUARDIAN INFORMATION</h5></div>';
-            foreach($data->guardian_information as $each) {
-                $guardian .= "<div class='row mb-4'>";
-                $guardian .= "<div class='col-lg-3'><strong>Fullname:</strong><br> {$each->guardian_fullname}</div>";
-                $guardian .= "<div class='col-lg-2'><strong>Relation:</strong><br> {$each->guardian_relation}</div>";
-                $guardian .= "<div class='col-lg-3'><strong>Contact:</strong><br> {$each->guardian_contact}</div>";
-                $guardian .= "<div class='col-lg-4'><strong>Email:</strong><br> {$each->guardian_email}</div>";
-                $guardian .= "<div class='col-lg-12'><strong>Address:</strong><br> {$each->guardian_address}</div>";
-                $guardian .= "</div>";
-            }
-        }
+        $user_form = load_class("forms", "controllers")->staff_form($clientId, $baseUrl, $data);
 
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
@@ -167,7 +161,7 @@ if(!empty($user_id)) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-student">Students List</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-staff">List Staff</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>
@@ -244,6 +238,10 @@ if(!empty($user_id)) {
                         aria-selected="true">Other Information</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#course_list" role="tab"
+                        aria-selected="true">Course List</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab"
                         aria-selected="true">Timetable</a>
                     </li>
@@ -276,7 +274,9 @@ if(!empty($user_id)) {
                                     </div>
                                 </div>
                             " : "").'
-                            '.$guardian.'
+                        </div>
+                        <div class="tab-pane fade" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
+                            
                         </div>
                         <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">
                             

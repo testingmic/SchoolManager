@@ -21,7 +21,7 @@ $response->scripts = [];
 
 $staff_param = (object) [
     "clientId" => $session->clientId,
-    "user_type" => "employee,teacher,admin"
+    "user_type" => "employee,teacher,admin,accountant"
 ];
 
 $api_staff_list = load_class("users", "controllers")->list($staff_param);
