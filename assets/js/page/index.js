@@ -5,11 +5,21 @@ var removeRow = () => {
     });
 }
 
+async function randomInt(length = 12) {
+    var result = '',
+        characters = '0123456789',
+        charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
 
-$(`div[id="student_guardian_list"] button[class~="append-row"]`).on('click', function(e) {
+$(`div[id="student_guardian_list"] button[class~="append-row"]`).on('click', async function(e) {
 
     let htmlData = $('div[id="student_guardian_list"] div[data-row]:last select').html(),
         lastRowId = $(`div[id="student_guardian_list"] div[data-row]`).length;
+    let random_int = await randomInt();
 
     lastRowId++;
 
@@ -20,9 +30,10 @@ $(`div[id="student_guardian_list"] button[class~="append-row"]`).on('click', fun
     }
 
     $(`div[id="student_guardian_list"] div[data-row]:last`).after(`
-        <div class="row mt-2" data-row="${lastRowId}">
+        <div class="row mb-3 pb-3" data-row="${lastRowId}">
             <div class="col-lg-4 col-md-4">
                 <label for="guardian_info[guardian_fullname][${lastRowId}]">Fullname</label>
+                <input type="hidden" name="guardian_info[guardian_id][${lastRowId}]" id="guardian_info[guardian_id][${lastRowId}]" value="${random_int}">
                 <input type="text" name="guardian_info[guardian_fullname][${lastRowId}]" id="guardian_info[guardian_fullname][${lastRowId}]" class="form-control">
             </div>            
             <div class="col-lg-4 col-md-4">

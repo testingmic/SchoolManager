@@ -263,8 +263,8 @@ if(!empty($user_id)) {
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
                         <div class="clearfix"></div>
                         <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
-                        <div class="author-box-job">'.$data->class_name.'</div>
-                        <div class="author-box-job">('.$data->department_name.')</div>
+                        '.($data->class_name ? '<div class="author-box-job">'.$data->class_name.'</div>' : '').'
+                        '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : '').'
                     </div>
                     <div class="text-center">
                         <div class="author-box-description">'.$data->description.'</div>

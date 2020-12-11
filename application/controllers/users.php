@@ -107,7 +107,6 @@ class Users extends Myschoolgh {
 					(SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
 					(SELECT name FROM departments WHERE departments.id = a.department LIMIT 1) AS department_name,
 					(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name,
-					(SELECT guardian_information FROM users_guardian WHERE users_guardian.user_id = a.item_id LIMIT 1) AS guardian_information,
 					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name,
 					(SELECT phone_number FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_phone
 				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions
@@ -130,7 +129,10 @@ class Users extends Myschoolgh {
 					// unset the id
 					unset($result->id);
 					$result->action = "";
-					$result->guardian_information = json_decode($result->guardian_information);
+
+					if($result->user_type == "student") {
+						$result->guardian_list = $this->guardian_list($result->guardian_id, $result->client_id);
+					}
 
 					// if not a remote 
 					if(!$params->remote) {
@@ -199,6 +201,26 @@ class Users extends Myschoolgh {
 			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
 		}
 
+	}
+
+	/**
+	 * Get the list of guardian information
+	 * 
+	 * @param String $guardian_ids
+	 * @param String $client_id
+	 * 
+	 * @return Array
+	 */
+	public function guardian_list($guardian_ids, $client_id) {
+		$guardian_id = $this->stringToArray($guardian_ids);
+		$data = [];
+		if(!empty($guardian_id)) {
+			foreach($guardian_id as $user_id) {
+				$query = $this->pushQuery("user_id, fullname, contact, email, relationship, address", "users_guardian", "status='1' AND user_id='{$user_id}' AND client_id='{$client_id}'");
+				$data[] = !empty($query) ? $query[0] : [];
+			}
+		}
+		return $data;
 	}
 
 	/**
@@ -425,6 +447,19 @@ class Users extends Myschoolgh {
 			// insert the user guardian information
 			$stmt = $this->db->prepare("INSERT INTO users_guardian SET user_id = ?, guardian_information = ?");
 			$stmt->execute([$params->user_id, json_encode($guardian)]);
+
+			if(!empty($guardian)) {
+				foreach($guardian as $key => $value) {
+					$stmt = $this->db->prepare("INSERT INTO users_guardian SET 
+						fullname = ?, contact = ?, `email` = ?, `relationship` = ?, 
+						`address` = ?, `user_id` = ?, `client_id` = ?
+					");
+					$stmt->execute([
+						$value["guardian_fullname"], $value["guardian_contact"], $value["guardian_email"], 
+						$value["guardian_relation"], $value["guardian_address"], $value["guardian_id"], $params->clientId
+					]);
+				}
+			}
 			
 			// if the email address was parsed
 			if(isset($params->email) && filter_var($params->email, FILTER_VALIDATE_EMAIL)) {
@@ -622,9 +657,42 @@ class Users extends Myschoolgh {
 			// execute the insert user data
 			$stmt->execute([$params->user_id]);
 
+			$guardian_ids = [];
+
 			// update the user guardian information
-			$stmt = $this->db->prepare("UPDATE users_guardian SET guardian_information = ? WHERE user_id = ? LIMIT 1");
-			$stmt->execute([json_encode($guardian), $params->user_id]);
+			if(!empty($guardian)) {
+
+				// loop through the guardian list
+				foreach($guardian as $key => $value) {
+
+					// confirm that the guardian information does not already exist
+					if(empty($this->pushQuery("id", "users_guardian", "user_id='{$value["guardian_id"]}' AND status='1'"))) {
+						// insert the new record
+						$stmt = $this->db->prepare("INSERT INTO users_guardian SET 
+							fullname = ?, contact = ?, email = ?, `relationship` = ?, 
+							`address` = ?, `user_id` = ?, `client_id` = ?
+						");
+						$stmt->execute([
+							$value["guardian_fullname"], $value["guardian_contact"], $value["guardian_email"], 
+							$value["guardian_relation"], $value["guardian_address"], $value["guardian_id"], $params->clientId
+						]);
+					}
+					// update the guardian record if the information already exist
+					else {
+						$stmt = $this->db->prepare("UPDATE users_guardian SET 
+							fullname = ?, contact = ?, email = ?, `relationship` = ?, `address` = ? 
+							WHERE `user_id` = ? AND `client_id` = ? LIMIT 1
+						");
+						$stmt->execute([
+							$value["guardian_fullname"], $value["guardian_contact"], $value["guardian_email"], 
+							$value["guardian_relation"], $value["guardian_address"], $value["guardian_id"], $params->clientId
+						]);
+					}
+					$guardian_ids[] = $value["guardian_id"];
+
+					$this->db->query("UPDATE users SET guardian_id='".implode(",", $guardian_ids)."' WHERE item_id='{$params->user_id}' LIMIT 1");
+				}
+			}
 
 			// save the name change
             if(isset($params->fullname) && ($prevData->name !== $params->fullname)) {

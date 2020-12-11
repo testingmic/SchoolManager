@@ -144,15 +144,18 @@ if(!empty($user_id)) {
         $user_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl, $data);
 
         $guardian = "";
-        if(!empty($data->guardian_information)) {
+        // if the guardian information is not empty
+        if(!empty($data->guardian_list)) {
+            // header
             $guardian .= '<div><h5>GUARDIAN INFORMATION</h5></div>';
-            foreach($data->guardian_information as $each) {
-                $guardian .= "<div class='row mb-4'>";
-                $guardian .= "<div class='col-lg-3'><strong>Fullname:</strong><br> {$each->guardian_fullname}</div>";
-                $guardian .= "<div class='col-lg-2'><strong>Relation:</strong><br> {$each->guardian_relation}</div>";
-                $guardian .= "<div class='col-lg-3'><strong>Contact:</strong><br> {$each->guardian_contact}</div>";
-                $guardian .= "<div class='col-lg-4'><strong>Email:</strong><br> {$each->guardian_email}</div>";
-                $guardian .= "<div class='col-lg-12'><strong>Address:</strong><br> {$each->guardian_address}</div>";
+            // loop through the guardian list
+            foreach($data->guardian_list as $each) {
+                $guardian .= "<div class='row mb-3 border-bottom pb-3'>";
+                $guardian .= "<div class='col-lg-3'><strong>Fullname:</strong><br> {$each->fullname}</div>";
+                $guardian .= "<div class='col-lg-2'><strong>Relation:</strong><br> {$each->relationship}</div>";
+                $guardian .= "<div class='col-lg-3'><strong>Contact:</strong><br> {$each->contact}</div>";
+                $guardian .= "<div class='col-lg-4'><strong>Email:</strong><br> {$each->email}</div>";
+                $guardian .= "<div class='col-lg-12'><strong>Address:</strong><br> {$each->address}</div>";
                 $guardian .= "</div>";
             }
         }

@@ -1156,25 +1156,24 @@ class Forms extends Myschoolgh {
         $guardian = "";
 
         // if the guardian information is parsed
-        if(!empty($userData->guardian_information)) {
-            // user id
-            $guardian .= '<input type="hidden" id="user_id" value="'.$userData->user_id.'" name="user_id" value="student">';
+        if(!empty($userData->guardian_list)) {
             // loop through the information
-            foreach($userData->guardian_information as $key => $eachItem) {
-                $key_id = $key;
+            foreach($userData->guardian_list as $key => $eachItem) {
+                $key_id = $key+1;
                 $guardian .= '
-                <div class="row" data-row="'.$key_id.'">
+                <div class="row mb-3 pb-3" data-row="'.$key_id.'">
                     <div class="col-lg-4 col-md-4">
                         <label for="guardian_info[guardian_fullname]['.$key_id.']">Fullname</label>
-                        <input type="text" value="'.$eachItem->guardian_fullname.'" name="guardian_info[guardian_fullname]['.$key_id.']" id="guardian_info[guardian_fullname]['.$key_id.']" class="form-control">
+                        <input type="hidden" name="guardian_info[guardian_id]['.$key_id.']" id="guardian_info[guardian_id]['.$key_id.']" value="'.$eachItem->user_id.'">
+                        <input type="text" value="'.$eachItem->fullname.'" name="guardian_info[guardian_fullname]['.$key_id.']" id="guardian_info[guardian_fullname]['.$key_id.']" class="form-control">
                     </div>
                     <div class="col-lg-4 col-md-4">
                         <label for="guardian_info[guardian_contact]['.$key_id.']">Contact Number</label>
-                        <input type="text" value="'.$eachItem->guardian_contact.'" name="guardian_info[guardian_contact]['.$key_id.']" id="guardian_info[guardian_contact]['.$key_id.']" class="form-control">
+                        <input type="text" value="'.$eachItem->contact.'" name="guardian_info[guardian_contact]['.$key_id.']" id="guardian_info[guardian_contact]['.$key_id.']" class="form-control">
                     </div>
                     <div class="col-lg-3 col-md-3">
                         <label for="guardian_info[guardian_email]['.$key_id.']">Email Address</label>
-                        <input type="email" value="'.$eachItem->guardian_email.'" name="guardian_info[guardian_email]['.$key_id.']" id="guardian_info[guardian_email]['.$key_id.']" class="form-control">
+                        <input type="email" value="'.$eachItem->email.'" name="guardian_info[guardian_email]['.$key_id.']" id="guardian_info[guardian_email]['.$key_id.']" class="form-control">
                     </div>
                     <div class="col-lg-1 col-md-1 text-right">
                         <div class="d-flex justify-content-end">';
@@ -1197,13 +1196,13 @@ class Forms extends Myschoolgh {
                         <select data-width="100%" name="guardian_info[guardian_relation]['.$key_id.']" id="guardian_info[guardian_relation]['.$key_id.']" class="form-control selectpicker">
                             <option value="null">Select Relation</option>';
                             foreach($this->pushQuery("id, name", "guardian_relation", "status='1' AND client_id='{$clientId}'") as $each) {
-                                $guardian .= "<option ".($each->name == $eachItem->guardian_relation ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
+                                $guardian .= "<option ".($each->name == $eachItem->relationship ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
                     $guardian .= '</select>
                     </div>
                     <div class="col-lg-8 col-md-8 mt-2">
                         <label for="guardian_info[guardian_address]['.$key_id.']">Address</label>
-                        <input type="text" value="'.($eachItem->guardian_address ?? null).'" name="guardian_info[guardian_address]['.$key_id.']" id="guardian_info[guardian_address]['.$key_id.']" class="form-control">
+                        <input type="text" value="'.($eachItem->address ?? null).'" name="guardian_info[guardian_address]['.$key_id.']" id="guardian_info[guardian_address]['.$key_id.']" class="form-control">
                     </div>
                 </div>';
             }
@@ -1328,13 +1327,14 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12" id="student_guardian_list">';
                 
                 // if the data
-                if($isData) {
+                if($isData && !empty($guardian)) {
                     $response .= $guardian;
                 } else {
                     $response .= '
                     <div class="row" data-row="1">
                         <div class="col-lg-4 col-md-4">
                             <label for="guardian_info[guardian_fullname][1]">Fullname</label>
+                            <input type="hidden" name="guardian_info[guardian_id][1]" id="guardian_info[guardian_id][1]" value="'.random_string("nozero", 12).'">
                             <input type="text" name="guardian_info[guardian_fullname][1]" id="guardian_info[guardian_fullname][1]" class="form-control">
                         </div>                        
                         <div class="col-lg-4 col-md-4">
@@ -1407,7 +1407,7 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>
-
+            <input type="hidden" id="user_id" value="'.($userData->user_id ?? null).'" name="user_id" value="student">
             <div class="row">
                 <div class="col-lg-12 text-right">
                     <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
