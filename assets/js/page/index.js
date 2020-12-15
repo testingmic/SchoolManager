@@ -7,7 +7,7 @@ var removeRow = () => {
 
 async function randomInt(length = 12) {
     var result = '',
-        characters = '0123456789',
+        characters = '123456789',
         charactersLength = characters.length;
     for (var i = 0; i < length; i++) {
         result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -19,7 +19,7 @@ $(`div[id="student_guardian_list"] button[class~="append-row"]`).on('click', asy
 
     let htmlData = $('div[id="student_guardian_list"] div[data-row]:last select').html(),
         lastRowId = $(`div[id="student_guardian_list"] div[data-row]`).length;
-    let random_int = await randomInt();
+    let random_int = await randomInt(8);
 
     lastRowId++;
 

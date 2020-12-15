@@ -1334,7 +1334,7 @@ class Forms extends Myschoolgh {
                     <div class="row" data-row="1">
                         <div class="col-lg-4 col-md-4">
                             <label for="guardian_info[guardian_fullname][1]">Fullname</label>
-                            <input type="hidden" name="guardian_info[guardian_id][1]" id="guardian_info[guardian_id][1]" value="'.random_string("nozero", 12).'">
+                            <input type="hidden" name="guardian_info[guardian_id][1]" id="guardian_info[guardian_id][1]" value="'.random_string("nozero", 8).'">
                             <input type="text" name="guardian_info[guardian_fullname][1]" id="guardian_info[guardian_fullname][1]" class="form-control">
                         </div>                        
                         <div class="col-lg-4 col-md-4">

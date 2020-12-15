@@ -181,7 +181,7 @@ function save_form_data() {
 }
 
 function page_not_found() {
-    global $baseUrl;
+    global $baseUrl, $_SERVER;
     return '
     <section class="section">
         <div class="container mt-5">
@@ -208,7 +208,8 @@ function page_not_found() {
                     </div>
                 </form>
                 <div class="mt-3">
-                    <a href="'.$baseUrl.'">Back to Home</a>
+                    <a href="'.$baseUrl.'">Back to Home</a> | 
+                    <a href="'.$_SERVER["REQUEST_URI"].'">Reload Page</a>
                 </div>
                 </div>
             </div>

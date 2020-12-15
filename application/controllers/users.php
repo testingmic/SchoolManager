@@ -206,20 +206,57 @@ class Users extends Myschoolgh {
 	/**
 	 * Get the list of guardian information
 	 * 
-	 * @param String $guardian_ids
+	 * @param Mixed $guardian_ids
 	 * @param String $client_id
 	 * 
 	 * @return Array
 	 */
-	public function guardian_list($guardian_ids, $client_id) {
-		$guardian_id = $this->stringToArray($guardian_ids);
+	public function guardian_list($guardian_ids = null, $client_id = null) {
+		
+		// assign a variable
 		$data = [];
+		$guardian_id = !empty($guardian_ids) && !isset($guardian_ids->clientId) ? $this->stringToArray($guardian_ids) : [];
+
+		// if the guardian id is not empty
 		if(!empty($guardian_id)) {
+			// loop through the guardian ids submitted
 			foreach($guardian_id as $user_id) {
-				$query = $this->pushQuery("user_id, fullname, contact, email, relationship, address", "users_guardian", "status='1' AND user_id='{$user_id}' AND client_id='{$client_id}'");
+				$query = $this->pushQuery("user_id, image, fullname, contact, email, relationship, address", "users_guardian", "status='1' AND user_id='{$user_id}' AND client_id='{$client_id}'");
 				$data[] = !empty($query) ? $query[0] : [];
 			}
 		}
+		// load all the guardian list and submit in the response
+		else {
+			// set the client id and confirm load wards
+			$guardianId = isset($guardian_ids->guardian_id) ? "AND user_id='{$guardian_ids->guardian_id}' LIMIT 1" : null; 
+			$clientId = isset($guardian_ids->clientId) ? $guardian_ids->clientId : $client_id;
+			$loadWards = isset($guardian_ids->append_wards) ? true : false;
+
+			$query = $this->pushQuery("a.*,
+				(SELECT b.country_name FROM country b WHERE b.id = a.country LIMIT 1) AS country_name", 
+				"users_guardian a", "a.status='1' AND a.client_id='{$clientId}' {$guardianId}");
+
+			// loop through the users list
+			foreach($query as $value) {
+				// unset the id
+				unset($value->id);
+				unset($value->status);
+
+				// if the user wants to load wards as well
+				if($loadWards) {
+					$value->wards_list = $this->pushQuery("
+						a.item_id AS student_guid, a.unique_id, a.firstname, a.lastname, a.othername,
+						a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
+						(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
+						(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
+						", 
+						"users a", "a.status='1' AND a.guardian_id IN ({$value->user_id})");
+				}
+				$data[] = $value;
+			}
+			
+		}
+
 		return $data;
 	}
 

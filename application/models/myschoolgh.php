@@ -318,10 +318,10 @@ class Myschoolgh extends Models {
 	 */
 	final function stringToArray($string, $delimiter = ",", $key_name = [], $allowEmpty = false) {
 		// if its already an array then return the data
-		if(is_array($string)) {
+		if(is_array($string) || empty($string)) {
 			return $string;
 		}
-
+		
 		$array = [];
 		$expl = explode($delimiter, $string);
 		foreach($expl as $key => $each) {
