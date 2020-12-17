@@ -310,6 +310,22 @@ class Courses extends Myschoolgh {
 
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Course successfully updated.", "refresh" => 2000];
+
+            if(isset($params->name) && ($prevData[0]->name !== $params->name)) {
+                $this->userLogs("courses", $params->course_id, $prevData[0]->name, "Course name was changed from {$prevData[0]->name}", $params->userId);
+            }
+
+            if(isset($params->credit_hours) && ($prevData[0]->credit_hours !== $params->credit_hours)) {
+                $this->userLogs("courses", $params->course_id, $prevData[0]->credit_hours, "Course credit hours was changed from {$prevData[0]->credit_hours}", $params->userId);
+            }
+
+            if(isset($params->description) && ($prevData[0]->description !== $params->description)) {
+                $this->userLogs("courses", $params->course_id, $prevData[0]->description, "Course description was changed from {$prevData[0]->description}", $params->userId);
+            }
+
+            if(isset($params->course_code) && ($prevData[0]->course_code !== $params->course_code)) {
+                $this->userLogs("courses", $params->course_id, $prevData[0]->course_code, "Course code was changed from {$prevData[0]->course_code}", $params->userId);
+            }
 			
 			# append to the response
 			$return["additional"] = ["href" => "{$this->baseUrl}update-course/{$params->course_id}/update"];
@@ -408,6 +424,22 @@ class Courses extends Myschoolgh {
             
             // log the user activity
             $this->userLogs("courses_plan", $params->unit_id, $prevData[0], "{$params->userData->name} Updated Course Unit: {$params->name}", $params->userId);
+
+            if(isset($params->name) && ($prevData[0]->name !== $params->name)) {
+                $this->userLogs("courses_plan", $params->unit_id, $prevData[0]->name, "Unit Name was changed from {$prevData[0]->name}", $params->userId);
+            }
+
+            if(isset($params->start_date) && ($prevData[0]->start_date !== $params->start_date)) {
+                $this->userLogs("courses_plan", $params->unit_id, $prevData[0]->start_date, "Unit Start Date was changed from {$prevData[0]->start_date}", $params->userId);
+            }
+
+            if(isset($params->end_date) && ($prevData[0]->end_date !== $params->end_date)) {
+                $this->userLogs("courses_plan", $params->unit_id, $prevData[0]->end_date, "Unit End Date was changed from {$prevData[0]->end_date}", $params->userId);
+            }
+
+            if(isset($params->description) && ($prevData[0]->description !== $params->description)) {
+                $this->userLogs("courses_plan", $params->unit_id, $prevData[0]->description, "Unit description was changed from {$prevData[0]->description}", $params->userId);
+            }
 
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Unit successfully updated.", "refresh" => 2000];
@@ -557,6 +589,22 @@ class Courses extends Myschoolgh {
 
             // log the user activity
             $this->userLogs("courses_plan", $params->unit_id, $prevData[0], "{$params->userData->name} Updated Course Unit: {$params->name}", $params->userId);
+            
+            if(isset($params->name) && ($prevData[0]->name !== $params->name)) {
+                $this->userLogs("courses_plan", $params->lesson_id, $prevData[0]->name, "Lesson Name was changed from {$prevData[0]->name}", $params->userId);
+            }
+
+            if(isset($params->start_date) && ($prevData[0]->start_date !== $params->start_date)) {
+                $this->userLogs("courses_plan", $params->lesson_id, $prevData[0]->start_date, "Lesson Start Date was changed from {$prevData[0]->start_date}", $params->userId);
+            }
+
+            if(isset($params->end_date) && ($prevData[0]->end_date !== $params->end_date)) {
+                $this->userLogs("courses_plan", $params->lesson_id, $prevData[0]->end_date, "Lesson End Date was changed from {$prevData[0]->end_date}", $params->userId);
+            }
+
+            if(isset($params->description) && ($prevData[0]->description !== $params->description)) {
+                $this->userLogs("courses_plan", $params->lesson_id, $prevData[0]->description, "Lesson description was changed from {$prevData[0]->description}", $params->userId);
+            }
 
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Lesson successfully updated.", "refresh" => 2000];

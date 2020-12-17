@@ -66,12 +66,9 @@ if(!empty($user_id)) {
         $updateItem = confirm_url_id(2, "update") ? true : false;
 
         // wards_list
-        $wards_list = "";
-
+        $wards_list = "<div class='row mb-3' id='guardian_ward_listing'>";
         // if the wards_list is not empty
         if(!empty($data->wards_list)) {
-
-            $wards_list = "<div class='row mb-3'>";
 
             foreach($data->wards_list as $ward) {
                 $wards_list .= "
@@ -106,8 +103,8 @@ if(!empty($user_id)) {
                 ";
             }
 
-            $wards_list .= "</div>";
         }
+        $wards_list .= "</div>";
         
         // append the html content
         $response->html = '
@@ -148,17 +145,28 @@ if(!empty($user_id)) {
                             <span class="float-right text-muted">'.$data->occupation.'</span>
                         </p>
                         <p class="clearfix">
-                            <span class="float-left">Birthday</span>
+                            <span class="float-left">Employer</span>
                             <span class="float-right text-muted">'.$data->employer.'</span>
+                        </p>
+                        <p class="clearfix">
+                            <span class="float-left">Date of Birth</span>
+                            <span class="float-right text-muted">'.$data->date_of_birth.'</span>
                         </p>
                         <p class="clearfix">
                             <span class="float-left">Gender</span>
                             <span class="float-right text-muted">'.$data->gender.'</span>
                         </p>
                         <p class="clearfix">
-                            <span class="float-left">Phone</span>
+                            <span class="float-left">Primary Contact</span>
                             <span class="float-right text-muted">'.$data->contact.'</span>
                         </p>
+                        '.($data->contact_2 ? 
+                            '<p class="clearfix">
+                                <span class="float-left">Secondary Contact</span>
+                                <span class="float-right text-muted">'.$data->contact_2.'</span>
+                            </p>
+                            ' : ''
+                        ).'
                         <p class="clearfix">
                             <span class="float-left">E-Mail</span>
                             <span class="float-right text-muted">'.$data->email.'</span>
@@ -196,10 +204,13 @@ if(!empty($user_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
-                            '.($data->wards_list ? "
+                            '.($data ? "
                                 <div class='mb-3'>
                                     <div class='card-body p-2 pl-0'>
-                                        <div><h5>WARDS LIST</h5></div>
+                                        <div class='d-flex justify-content-between'>
+                                            <div><h5>WARDS LIST</h5></div>
+                                            ".($hasUpdate ? "<div><button onclick='return load_quick_form(\"modify_guardian_ward\",\"{$data->user_id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-user'></i> Add Ward</button></div>" : "")."
+                                        </div>
                                         {$wards_list}
                                     </div>
                                 </div>

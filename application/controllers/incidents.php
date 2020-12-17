@@ -219,6 +219,22 @@ class Incidents extends Myschoolgh {
             // log the user activity
             $this->userLogs("incidents", $params->incident_id, null, "{$params->userData->name} updated the incident record.", $params->userId);
 
+            if(isset($params->subject) && ($prevData[0]->subject !== $params->subject)) {
+                $this->userLogs("incidents", $params->incident_id, $prevData[0]->subject, "Incident subject was changed from {$prevData[0]->subject}", $params->userId);
+            }
+
+            if(isset($params->incident_date) && ($prevData[0]->incident_date !== $params->incident_date)) {
+                $this->userLogs("incidents", $params->incident_id, $prevData[0]->incident_date, "Incident date was changed from {$prevData[0]->incident_date}", $params->userId);
+            }
+
+            if(isset($params->location) && ($prevData[0]->location !== $params->location)) {
+                $this->userLogs("incidents", $params->incident_id, $prevData[0]->location, "Incident location was changed from {$prevData[0]->location}", $params->userId);
+            }
+
+            if(isset($params->description) && ($prevData[0]->description !== $params->description)) {
+                $this->userLogs("incidents", $params->incident_id, $prevData[0]->description, "Incident description was changed from {$prevData[0]->description}", $params->userId);
+            }
+
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Incident successfully updated.", "refresh" => 2000];
 			

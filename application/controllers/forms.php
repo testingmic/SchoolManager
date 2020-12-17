@@ -209,6 +209,33 @@ class Forms extends Myschoolgh {
                 $result = $this->course_upload_item($params, $course_id, $item_id[0], $the_form);
             }
 
+            /** Modify Guardian Ward */
+            elseif($the_form == "modify_guardian_ward") {
+                // return if no policy id was parsed
+                if(!isset($params->module["item_id"])) {
+                    return;
+                }
+                /** Set the course id */
+                $item_id = explode("_", $params->module["item_id"]);
+
+                /** Guardian information paramater */
+                $guardian_param = (object) [
+                    "limit" => 1,
+                    "clientId" => $params->clientId,
+                    "guardian_id" => $item_id[0],
+                    "append_wards" => true,
+                ];
+
+                $data = load_class("users", "controllers")->guardian_list($guardian_param);
+                if(empty($data)) {
+                    return ["code" => 201, "data" => "An invalid id was parsed"];
+                }
+                $data = $data[0];
+
+                /** Load the function */
+                $result = $this->modify_guardian_ward($params, $data);
+            }
+
         }
 
         // the result set to return
@@ -557,6 +584,33 @@ class Forms extends Myschoolgh {
 
         return $html_content;
         
+    }
+
+    /**
+     * Guardian Ward Modification
+     * 
+     * @return String
+     */
+    public function modify_guardian_ward($params, $data) {
+
+        $html_content = "<div class='row'>";
+        $html_content .= "<div class='col-md-10'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Student Name</label>";
+        $html_content .= "<input type='text' placeholder='Search student name' name='user_name_search' id='user_name_search' class='form-control'>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+        $html_content .= "<div class='col-md-2'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Filter</label>";
+        $html_content .= "<button onclick='return search_usersList(\"student\")' class='btn btn-outline-success btn-block'><i class='fa fa-filter'></i></button>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+        $html_content .= "<div class='col-md-12 mt-2' id='user_search_list'>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+
+        return $html_content;
     }
 
     /**
@@ -1407,7 +1461,7 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>
-            <input type="hidden" id="user_id" value="'.($userData->user_id ?? null).'" name="user_id" value="student">
+            <input type="hidden" id="user_id" value="'.($userData->user_id ?? null).'" name="user_id">
             <div class="row">
                 <div class="col-lg-12 text-right">
                     <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
@@ -1429,7 +1483,7 @@ class Forms extends Myschoolgh {
      */
     public function guardian_form($clientId, $baseUrl, $userData = null) {
 
-        $isData = !empty($userData) && isset($userData->country) ? true : false;
+        $isData = !empty($userData) && isset($userData->user_id) ? true : false;
 
         $guardian = "";
 
@@ -1439,16 +1493,16 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12">
                     <h5>BIO INFORMATION</h5>
                 </div>
-                <div class="col-lg-5 col-md-6">
+                <div class="col-lg-'.(!empty($userData) ? 6 : 4 ).' col-md-5">
                     <div class="form-group">
                         <label for="image">Guardian Image</label>
                         <input type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-6">
+                <div class="col-lg-'.(!empty($userData) ? 4 : 4 ).' col-md-5">
                     <div class="form-group">
-                        <label for="user_id">Guardian ID (optional)</label>
-                        <input type="text" readonly value="'.($userData->user_id ?? random_string("nozero", 8)).'" name="user_id" id="user_id" class="form-control">
+                        <label for="guardian_id">Guardian ID (optional)</label>
+                        <input type="text" readonly value="'.($userData->user_id ?? random_string("nozero", 10)).'" name="guardian_id" id="guardian_id" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-4">
@@ -1470,7 +1524,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
+                        <label for="date_of_birth">Date of Birth</label>
                         <input type="date" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control">
                     </div>
                 </div>
@@ -1534,7 +1588,6 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>
-            <input type="hidden" id="user_id" value="'.($userData->user_id ?? null).'" name="user_id" value="student">
             <div class="row">
                 <div class="col-lg-12 text-right">
                     <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
