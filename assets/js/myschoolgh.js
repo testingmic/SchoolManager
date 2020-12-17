@@ -1,6 +1,16 @@
 var client_auto_save;
 var initDashboard = () => {}
 
+var redirect_btnClicked = (href, modal_id = "") => {
+    $.pageoverlay.show();
+    if ($(`div[class~="${modal_id}"]`).length) {
+        $(`div[class~="${modal_id}"]`).modal("hide");
+    }
+    setTimeout(() => {
+        loadPage(href);
+    }, 300);
+}
+
 var preload_AjaxData = (data) => {
     if (data.link !== undefined) {
         let resource_links = "";

@@ -44,12 +44,14 @@ class Users extends Myschoolgh {
 
 		// boolean value
         $params->remote = (bool) (isset($params->remote) && $params->remote);
-		$params->query .= (isset($params->user_id)) ? (preg_match("/^[0-9]+$/", $params->user_id) ? " AND a.id='{$params->user_id}'" : " AND a.item_id='{$params->user_id}'") : null;
 		
+		$params->query .= (isset($params->user_id)) ? (preg_match("/^[0-9]+$/", $params->user_id) ? " AND a.id='{$params->user_id}'" : " AND a.item_id='{$params->user_id}'") : null;
+		$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
+		$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
+
 		// if the field is null (dont perform all these checks if minified was parsed)
 		if(!isset($params->minified)) {
 			$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-			$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 			$params->query .= (isset($params->email)) ? " AND a.email='{$params->email}'" : null;
 			$params->query .= (isset($params->or_clause) && !empty($params->or_clause)) ? $params->or_clause : null;
 			$params->query .= (isset($params->date_of_birth) && !empty($params->date_of_birth)) ? " AND a.date_of_birth='{$params->date_of_birth}'" : null;
@@ -60,7 +62,6 @@ class Users extends Myschoolgh {
 			$params->query .= (isset($params->lastname) && !empty($params->lastname)) ? " AND a.lastname LIKE '%{$params->lastname}%'" : null;
 			$params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department='{$params->department_id}'" : null;
 			$params->query .= (isset($params->section_id) && !empty($params->section_id)) ? " AND a.section='{$params->section_id}'" : null;
-			$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
 			$params->query .= (isset($params->username)) ? " AND a.username='{$params->username}'" : null;
 			$params->query .= (isset($params->gender)) ? " AND a.gender='{$params->gender}'" : null;
 		}
@@ -79,7 +80,9 @@ class Users extends Myschoolgh {
 
 			// if minified list was requested
 			if(isset($params->minified)) {
-				$params->columns = "a.item_id AS user_id, a.name, a.email, a.image";
+
+				// set the columns to load
+				$params->columns = "a.item_id AS user_id, a.name, a.email, a.image, a.phone_number";
 
 				// exempt current user
 				if(($params->minified == "chat_list_users")) {
@@ -159,6 +162,16 @@ class Users extends Myschoolgh {
 					$row++;
 					$result->row_id = $row;
 				}
+
+				// unset the permissions
+				if(isset($params->no_permissions)) {
+					unset($result->user_permissions);
+				}
+
+				// append the was present
+				if(isset($params->append_waspresent)) {
+					$result->is_present = false;
+				}
 				
 				// online algorithm (user is online if last activity is at most 5minutes ago)
 				if(isset($result->online)) {
@@ -197,7 +210,6 @@ class Users extends Myschoolgh {
 			];
 
 		} catch(PDOException $e) {
-			print_r($e->getMessage());
 			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
 		}
 

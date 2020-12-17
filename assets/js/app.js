@@ -388,8 +388,12 @@ var loadPage = (loc, callback, pushstate) => {
             }
 
             if (result.scripts !== undefined) {
+                let timer = 200;
                 $.each(result.scripts, function(ii, ie) {
-                    $.cachedScript(`${baseUrl}${ie}`);
+                    setTimeout(() => {
+                        $.cachedScript(`${baseUrl}${ie}`);
+                    }, timer);
+                    timer += 1000;
                 });
             }
 
@@ -698,6 +702,14 @@ var initPlugins = () => {
         $('.datepicker').daterangepicker({
             locale: { format: 'YYYY-MM-DD' },
             singleDatePicker: true,
+            drops: 'down',
+            opens: 'right'
+        });
+    }
+
+    if (('.daterange').length > 0) {
+        $('.daterange').daterangepicker({
+            locale: { format: 'YYYY-MM-DD', separator: ':' },
             drops: 'down',
             opens: 'right'
         });

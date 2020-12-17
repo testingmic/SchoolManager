@@ -31,11 +31,12 @@ class Classes extends Myschoolgh {
         try {
 
             $stmt = $this->db->prepare("
-                SELECT a.*,
+                SELECT ".(isset($params->columns) ? $params->columns : " a.*,
                     (SELECT COUNT(*) FROM users b WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' AND b.class_id = a.id AND b.client_id = a.client_id) AS students_count,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.class_assistant LIMIT 1) AS class_assistant_info,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.class_teacher LIMIT 1) AS class_teacher_info
+                    ")."
                 FROM classes a
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
             ");
@@ -46,8 +47,11 @@ class Classes extends Myschoolgh {
 
                 // loop through the information
                 foreach(["class_teacher_info", "class_assistant_info", "created_by_info"] as $each) {
-                    // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                    // confirm that it is set
+                    if(isset($result->{$each})) {
+                        // convert the created by string into an object
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                    }
                 }
 
                 $data[] = $result;

@@ -291,7 +291,7 @@ class Myschoolgh extends Models {
 		if(date("Y-m-d", strtotime($sCheck['date'])) == "1970-01-01") {
 			
 			// set a new start date and call the function again
-			return $this->listDays(date("Y-m-d", strtotime("first day of this month")), date("Y-m-d", strtotime("yesterday")));
+			return $this->listDays(date("Y-m-d", strtotime("first day of this week")), date("Y-m-d", strtotime("today")));
 
 			// exit the query
 			exit;
@@ -300,8 +300,11 @@ class Myschoolgh extends Models {
 		// fetch the days to display
 		foreach ($period as $key => $value) {
 
-			$days[] = $value->format($format);
-
+			// exempt weekends from the list
+			if(!$weekends || !in_array(date("l", strtotime($value->format($format))), ['Saturday', 'Sunday'])) {
+				$days[] = $value->format($format);
+			}
+			
 		}
 		
 		return $days;

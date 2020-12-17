@@ -63,6 +63,7 @@
     <script src="<?= $baseUrl; ?>assets/js/notify.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/trix/trix.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/bootstrap-daterangepicker/daterangepicker.js"></script>
+    <script src="<?= $baseUrl; ?>assets/bundles/fullcalendar/fullcalendar.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
     
     <script src="<?= $baseUrl; ?>assets/js/myschoolgh.js"></script>
