@@ -94,7 +94,7 @@ if(!empty($user_id)) {
                                         <a href=\"{$baseUrl}update-student/{$ward->student_guid}/view\" class=\"btn btn-sm btn-outline-success\" title=\"View ward details\"><i class=\"fa fa-eye\"></i> View</a>
                                     </div>
                                     <div>
-                                        <a href=\"#\" onclick='return delete_record(\"{$data->user_id}_{$ward->student_guid}\", \"guardian_ward\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Remove</a>
+                                        <a href=\"#\" onclick='return modifyGuardianWard(\"{$data->user_id}_{$ward->student_guid}\", \"remove\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Remove</a>
                                     </div>
                                 </div>
                             </div>

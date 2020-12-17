@@ -46,6 +46,19 @@ var preload_AjaxData = (data) => {
     }
 }
 
+var modifyGuardianWard = (user_id, todo) => {
+    $.post(`${baseUrl}api/users/modify_guardianward`, { user_id, todo }).then((response) => {
+        if (response.code == 200) {
+            if (todo == "remove") {
+                $.each(response.data.result.removed_list, function(i, e) {
+                    $(`div[class~="load_ward_information"][data-id="${e}"]`).remove();
+                });
+            }
+            search_usersList("student");
+        }
+    });
+}
+
 var search_usersList = (user_type = "") => {
     let user_name = $(`input[name='user_name_search']`).val();
     $(`div[id='user_search_list']`).html(`<div class='text-center'>Processing request <i class='fa fa-spinner fa-spin'></i></div>`);
@@ -54,23 +67,28 @@ var search_usersList = (user_type = "") => {
             if (response.code !== 200) {
                 $(`div[id='user_search_list']`).html(`<div class='text-center text-danger font-italic'>No ${user_type} found for the specified search term</div>`);
             } else {
-                let users_list = "";
+                let users_list = "<div class='row'>",
+                    guardian_id = $(`div[id='user_search_list']`).attr("data-guardian_id");
                 $.each(response.data.result, function(i, e) {
+                    let is_found = e.guardian_id.length && ($.inArray(guardian_id, e.guardian_id) !== -1) ? true : false;
                     users_list += `
-                    <div>
+                    <div class="col-lg-6 mb-4">
                         <div class="d-flex justify-content-start">
                             <div class="mr-2">
                                 <img src="${baseUrl}${e.image}" class="rounded-circle cursor author-box-picture" width="50px">
                             </div>
                             <div> 
                                 <i class="fa fa-user"></i> ${e.name}
-                                <br>CLASS: <i class="fa fa-home"></i> ${e.class_name}
-                                <br>DOB: <i class="fa fa-calendar-check"></i> ${e.date_of_birth}
+                                <br><strong>CLASS:</strong> <i class="fa fa-home"></i> ${e.class_name}
+                                <br><strong>DOB:</strong> <i class="fa fa-calendar-check"></i> ${e.dob_clean}
                             </div> 
                         </div>
-                    </div>
-                    `;
+                        <div class="mt-2 text-right">
+                        ${is_found ? "<a onclick='return modifyGuardianWard(\""+e.guardian_id+"_"+e.user_id+"\",\"remove\");' href='#' class='btn btn-outline-danger btn-sm'>Remove</a>": "<a onclick='return modifyGuardianWard(\""+e.guardian_id+"_"+e.user_id+"\",\"append\");' class='btn btn-outline-success btn-sm' href='#'>Append Ward</a>"}
+                        </div>
+                    </div>`;
                 });
+                users_list += "</div>";
                 $(`div[id='user_search_list']`).html(users_list);
             }
         }).catch(() => {

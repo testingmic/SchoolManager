@@ -168,8 +168,11 @@ class Users extends Myschoolgh {
 				}
 
 				// if the guardian id was parsed
-				if(isset($result->guardian_id)) {
-					$result->guardian_id = $this->stringToArray($result->guardian_id);
+				$result->guardian_id = isset($result->guardian_id) && !empty($result->guardian_id) ? $this->stringToArray($result->guardian_id) : [];
+
+				// clean date of birth
+				if(isset($result->date_of_birth)) {
+					$result->dob_clean = date("jS F Y", strtotime($result->date_of_birth));
 				}
 
 				// unset the permissions
@@ -437,14 +440,9 @@ class Users extends Myschoolgh {
 		
 		global $accessObject;
 		
-		/** Check the contact number if not empty */
-		if(!isset($params->phone)) {
-			return ["code" => 203, "data" => "Sorry! Provide a valid contact number."];
-		}
-
 		// clean the contact number
-		$params->phone = str_ireplace(["(", ")", "-", "_"], "", $params->phone);
-		$params->phone = preg_replace("/[\s]/", "", $params->phone);
+		$params->phone = isset($params->phone) ? str_ireplace(["(", ")", "-", "_"], "", $params->phone) : null;
+		$params->phone = !empty($params->phone) ? preg_replace("/[\s]/", "", $params->phone) : null;
 
 		// client id
 		$params->client_id = isset($params->clientId) ? strtoupper($params->clientId) : null;
@@ -512,7 +510,7 @@ class Users extends Myschoolgh {
 		}
 
 		/** Check the contact number if not empty */
-		if(!isset($params->phone) || (isset($params->phone) && !preg_match("/^[0-9+]+$/", $params->phone))) {
+		if((isset($params->phone) && !empty($params->phone) && !preg_match("/^[0-9+]+$/", $params->phone))) {
 			return ["code" => 203, "data" => "Sorry! Provide a valid contact number."];
 		}
 
@@ -591,7 +589,7 @@ class Users extends Myschoolgh {
 			$encrypt_password = password_hash($params->password, PASSWORD_DEFAULT);
 			
 			// usertype and fullname
-			$params->fullname = $params->firstname . " " . $params->lastname ?? null. " " . $params->othername ?? null;
+			$params->fullname = $params->firstname . " " .( $params->lastname ?? null). " " . ($params->othername ?? null);
 			$params->created_by = $params->created_by ?? $params->user_id;
 
 			// load the access level permissions
@@ -737,8 +735,8 @@ class Users extends Myschoolgh {
 		}
 
 		// clean the contact number
-		$params->phone = str_ireplace(["(", ")", "-", "_"], "", $params->phone);
-		$params->phone = preg_replace("/[\s]/", "", $params->phone);
+		$params->phone = isset($params->phone) ? str_ireplace(["(", ")", "-", "_"], "", $params->phone) : null;
+		$params->phone = !empty($params->phone) ? preg_replace("/[\s]/", "", $params->phone) : null;
 
 		/** Check the email address if not empty */
 		if(!isset($params->email) || (isset($params->email) && !filter_var($params->email, FILTER_VALIDATE_EMAIL))) {
@@ -746,7 +744,7 @@ class Users extends Myschoolgh {
 		}
 
 		/** Check the contact number if not empty */
-		if(!isset($params->phone) || (isset($params->phone) && !preg_match("/^[0-9+]+$/", $params->phone))) {
+		if((isset($params->phone) && !empty($params->phone) && !preg_match("/^[0-9+]+$/", $params->phone))) {
 			return ["code" => 201, "data" => "Sorry! Provide a valid contact number."];
 		}
 		
@@ -810,7 +808,7 @@ class Users extends Myschoolgh {
 			
 			// usertype and fullname
 			$params->client_id = isset($params->clientId) ? strtoupper($params->clientId) : null;
-			$params->fullname = $params->firstname . " " . $params->lastname ?? null . " " . $params->othername ?? null;
+			$params->fullname = $params->firstname . " " .( $params->lastname ?? null). " " . ($params->othername ?? null);
 			
 			// convert the user type to lowercase
 			$params->user_type = strtolower($the_user[0]->user_type);

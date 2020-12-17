@@ -606,7 +606,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<button onclick='return search_usersList(\"student\")' class='btn btn-outline-success btn-block'><i class='fa fa-filter'></i></button>";
         $html_content .= "</div>";
         $html_content .= "</div>";
-        $html_content .= "<div class='col-md-12 mt-2' id='user_search_list'>";
+        $html_content .= "<div class='col-md-12 mt-2' data-guardian_id='{$data->user_id}' id='user_search_list'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
 
