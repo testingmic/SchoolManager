@@ -1420,6 +1420,133 @@ class Forms extends Myschoolgh {
     }
 
     /**
+     * Guardian form
+     * 
+     * @param String $clientId
+     * @param String $baseUrl
+     * 
+     * return String
+     */
+    public function guardian_form($clientId, $baseUrl, $userData = null) {
+
+        $isData = !empty($userData) && isset($userData->country) ? true : false;
+
+        $guardian = "";
+
+        $response = '
+        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "guardian_update" : "guardian_add").'" method="POST">
+            <div class="row mb-4 border-bottom pb-3">
+                <div class="col-lg-12">
+                    <h5>BIO INFORMATION</h5>
+                </div>
+                <div class="col-lg-5 col-md-6">
+                    <div class="form-group">
+                        <label for="image">Guardian Image</label>
+                        <input type="file" name="image" id="image" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label for="user_id">Guardian ID (optional)</label>
+                        <input type="text" readonly value="'.($userData->user_id ?? random_string("nozero", 8)).'" name="user_id" id="user_id" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4">
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
+                            <option value="null">Select Gender</option>';
+                            foreach($this->pushQuery("*", "users_gender") as $each) {
+                                $response .= "<option ".($isData && ($each->name == $userData->gender) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
+                            }
+                    $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-8">
+                    <div class="form-group">
+                        <label for="fullname">Fullname <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->fullname ?? null).'" name="fullname" id="fullname" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
+                        <input type="date" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-6">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" value="'.($userData->email ?? null).'" name="email" id="email" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="contact">Primary Contact</label>
+                        <input type="text" name="contact" value="'.($userData->contact ?? null).'" id="contact" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="contact_2">Secondary Contact</label>
+                        <input type="text" name="contact_2" value="'.($userData->contact_2 ?? null).'" id="contact_2" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select data-width="100%" name="country" id="country" class="form-control selectpicker">
+                            <option value="null">Select Country</option>';
+                            foreach($this->pushQuery("*", "country") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $userData->country) ? "selected" : null)." value=\"{$each->id}\">{$each->country_name}</option>";                            
+                            }
+                    $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label for="residence">Place of Residence <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->residence ?? null).'" name="residence" id="residence" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label for="address">Postal Address <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->address ?? null).'" name="address" id="address" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label for="employer">Name of Employer</label>
+                        <input type="text" value="'.($userData->employer ?? null).'" name="employer" id="employer" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label for="occupation">Occupation</label>
+                        <input type="text" value="'.($userData->occupation ?? null).'" name="occupation" id="occupation" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea type="text" name="description" id="description" class="form-control">'.($userData->description ?? null).'</textarea>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="user_id" value="'.($userData->user_id ?? null).'" name="user_id" value="student">
+            <div class="row">
+                <div class="col-lg-12 text-right">
+                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>
+        </form>';
+
+        return $response;
+
+    }
+
+    /**
      * Department form
      * 
      * @param String $clientId

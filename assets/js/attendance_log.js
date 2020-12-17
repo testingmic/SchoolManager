@@ -1,8 +1,10 @@
+var attendance_content = $(`div[id="attendance_log_list"]`);
+
 var list_userAttendance = (query = "") => {
     let date_range = $(`input[name="attendance_date"]`).val();
     $.get(`${baseUrl}api/attendance/display_attendance?${query}date_range=${date_range}`).then((response) => {
         if (response.code == 200) {
-
+            attendance_content.html(response.data.result.table_content);
         }
     });
 }
@@ -26,5 +28,7 @@ $(`select[id="attendance_category"]`).on("change", function() {
 
 $(`select[id="attendance_class"]`).on("change", function() {
     let value = $(this).val();
-    list_userAttendance(`class_id=${value}&user_type=student&`);
+    if (value !== "null") {
+        list_userAttendance(`class_id=${value}&user_type=student&`);
+    }
 });

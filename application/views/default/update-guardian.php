@@ -60,7 +60,7 @@ if(!empty($user_id)) {
         $data = $data[0];
 
         // guardian information
-        $user_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl, $data);
+        $user_form = load_class("forms", "controllers")->guardian_form($clientId, $baseUrl, $data);
 
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
@@ -77,7 +77,30 @@ if(!empty($user_id)) {
                 $wards_list .= "
                     <div class=\"col-12 col-md-6 load_ward_information col-lg-6\" data-id=\"{$ward->student_guid}\">
                         <div class=\"card card-success\">
-                            <div class=\"card-header pr-2 pl-2\"><h4>{$ward->name}</h4></div>
+                            <div class=\"card-header pr-2 pl-2\" style=\"border-bottom:0px;\">
+                                <div class=\"d-flex justify-content-start\">
+                                    <div class='mr-2'>
+                                        <img src=\"{$baseUrl}{$ward->image}\" class='rounded-circle cursor author-box-picture' width='50px'>
+                                    </div>
+                                    <div>
+                                        <h4>{$ward->name}</h4>
+                                        ({$ward->unique_id})<br>
+                                        ".(!empty($ward->class_name) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-home'></i> {$ward->class_name}</p>" : "")."
+                                        ".(!empty($ward->gender) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-user'></i> {$ward->gender}</p>" : "")."
+                                        ".(!empty($ward->date_of_birth) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-calendar-check'></i> {$ward->date_of_birth}</p>" : "")."
+                                    </div>
+                                </div>
+                            </div>
+                            <div class=\"border-top p-2\">
+                                <div class=\"d-flex justify-content-between\">
+                                    <div>
+                                        <a href=\"{$baseUrl}update-student/{$ward->student_guid}/view\" class=\"btn btn-sm btn-outline-success\" title=\"View ward details\"><i class=\"fa fa-eye\"></i> View</a>
+                                    </div>
+                                    <div>
+                                        <a href=\"#\" onclick='return delete_record(\"{$data->user_id}_{$ward->student_guid}\", \"guardian_ward\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Remove</a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ";
@@ -159,10 +182,6 @@ if(!empty($user_id)) {
                     <li class="nav-item">
                         <a class="nav-link '.(!$updateItem ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab"
                         aria-selected="true">Other Information</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab"
-                        aria-selected="true">Attendance</a>
                     </li>';
 
                     if($hasUpdate) {
@@ -178,17 +197,13 @@ if(!empty($user_id)) {
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
                             '.($data->wards_list ? "
-                                <div class='mb-3 border-bottom'>
+                                <div class='mb-3'>
                                     <div class='card-body p-2 pl-0'>
                                         <div><h5>WARDS LIST</h5></div>
                                         {$wards_list}
                                     </div>
                                 </div>
                             " : "").'
-                        </div>
-                        <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">
-                            
-
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                         

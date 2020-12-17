@@ -44,9 +44,19 @@ class Attendance extends Myschoolgh {
         // append some few query
         $attendance = [];
         
-
         $query = isset($params->user_type) ? " AND user_type='{$params->user_type}'" : null;
         $query .= isset($params->class_id) ? " AND class_id='{$params->class_id}'" : null;
+        
+        // set the table content
+        $table_content = "<table class='table table-bordered'>";
+        $table_content .= "<thead>";
+        $table_content .= "<th>Name/Date</th>";
+        foreach($list_days as $each_day) {
+            $table_content .= "<th>{$each_day}</th>";
+        }
+        $table_content .= "</thead>";
+        $table_content .= "<tbody>";
+        // $table_content .= "<tr>";
         
         // loop through the days range list
         foreach($list_days as $each_day) {
@@ -69,8 +79,12 @@ class Attendance extends Myschoolgh {
                 $the_list = json_decode($check[0]->users_list, true);
                 $present = count(array_intersect($the_list, $users_ids));
 
-                $attendance[] = [
-                    "{$each_day}" => [
+                $attendance["attendance"][] = [
+                    "record" => [
+                        "date" => [
+                            "raw" => "{$each_day}",
+                            "clean" => date("jS M", strtotime($each_day))
+                        ],
                         "counter" => [
                             "present" => $present,
                             "absent" => $total_count - $present
@@ -79,8 +93,12 @@ class Attendance extends Myschoolgh {
                     ]
                 ];
             } else {
-                $attendance[] = [
-                    "{$each_day}" => [
+                $attendance["attendance"][] = [
+                    "record" => [
+                        "date" => [
+                            "raw" => "{$each_day}",
+                            "clean" => date("jS M", strtotime($each_day))
+                        ],
                         "counter" => [
                             "present" => 0,
                             "absent" => $total_count
@@ -90,6 +108,11 @@ class Attendance extends Myschoolgh {
                 ];
             }
         }
+        $table_content .= "<tbody>";
+        $table_content .= "</table>";
+        
+        // append the users list to the results to display
+        $attendance["table_content"] = $table_content;
 
         return $attendance;
     }

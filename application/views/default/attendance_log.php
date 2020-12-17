@@ -76,8 +76,8 @@ if(!empty($session->clientId)) {
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-9">
-
+                                <div class="col-md-9" id="attendance_log_list">
+                                    <div class="text-center font-italic">Users list is displayed here.</div>
                                 </div>
                             </div>
                         </div>
