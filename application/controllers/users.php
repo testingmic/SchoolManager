@@ -1553,18 +1553,18 @@ class Users extends Myschoolgh {
 	 * 
 	 * @return Array
 	 */
-	public function save_permissions(stdClass $params) {
+	public function save_permission(stdClass $params) {
 
 		/** Global variables */
 		global $accessObject;
 		
 		/** Confirm the user permissions */
-		if(!$accessObject->hasAccess("permissions", "users")) {
+		if(!$accessObject->hasAccess("update", "permissions")) {
 			return ["code" => 201, "data" => $this->permission_denied];
 		}
 
-		/** Confirm that the permissions_list parameter has an array value */
-		if(!is_array($params->permissions_list)) {
+		/** Confirm that the access_level parameter has an array value */
+		if(!is_array($params->access_level)) {
 			return ["code" => 201, "response" => "Sorry! Permissions list must be a valid array format."];
 		}
 
@@ -1578,46 +1578,32 @@ class Users extends Myschoolgh {
 		}
 
 		// get the first key
+		$accessLevel = [];
+		$permissions = [];
 		$the_user = $the_user[0];
 		$user_permissions = json_decode($the_user->user_permissions)->permissions	;
 
-		// initialiate
-		$bugs = [];
-		$permissions_list = [];
-
-		// clean the access permissions well
-		foreach($params->permissions_list as $eachValue) {
-			$explode = explode(",", $eachValue);
-			$permissions_list[$explode[0]][$explode[1]] = $explode[2];
-		}
-
-		// loop through the user permissions and confirm that all matches
-		foreach($permissions_list as $key => $value) {
-			if(!isset($user_permissions->$key)) {
-				$bugs[] =  1;
-			}
-			// ensure that the permission exist in the array list as well
-			foreach($value as $kkey => $vvalue) {
-				if(!isset($user_permissions->$key->$kkey)) {
-					$bugs[] = $kkey;
+		// run this section if the access level permissions were parsed
+		if(!empty($params->access_level)) {
+			// initialiate
+			// clean the access permissions well
+			foreach($params->access_level as $eachKey => $eachValue) {
+				foreach($eachValue as $key => $value) {
+					foreach($value as $i => $e) {
+						$accessLevel[$eachKey][$key] = ($e == "on") ? 1 : 0;
+					}
 				}
 			}
+			$permissions["permissions"] = $accessLevel;
 		}
-
-		// get the user data
-		if(!empty($bugs)) {
-			return ["code" => 201, "response" => "Sorry! An invalid permission was parsed."];
-		}
-
-		$permissions["permissions"] = (object) $permissions_list;
 
 		try {	
 			// update the user permissions
-			$stmt = $this->db->prepare("UPDATE users_roles SET permissions = ? WHERE user_id=? LIMIT 1");
-			$stmt->execute([json_encode($permissions), $params->user_id]);
+			$stmt = $this->db->prepare("UPDATE users_roles SET permissions = ? WHERE user_id=? AND client_id = ? LIMIT 1");
+			$stmt->execute([json_encode($permissions), $params->user_id, $params->clientId]);
 
 			// log user activity
-			$this->userLogs("user-permissions", $params->user_id, $user_permissions, "User permissions was successfully updated.", $params->userId);
+			// $this->userLogs("user-permissions", $params->user_id, $user_permissions, "User permissions was successfully updated.", $params->userId);
 
 			// return the success response
 			return [
@@ -1625,7 +1611,9 @@ class Users extends Myschoolgh {
 				"data" => "User permissions successfully updated."
 			];
 
-		} catch(PDOException $e) {}
+		} catch(PDOException $e) {
+			return $e->getMessage();
+		}
 
 	}
 	

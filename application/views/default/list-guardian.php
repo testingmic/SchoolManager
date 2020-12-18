@@ -32,7 +32,7 @@ $hasDelete = $accessObject->hasAccess("delete", "guardian");
 $hasUpdate = $accessObject->hasAccess("update", "guardian");
 
 $guardians = "";
-foreach($guardian_list as $key => $each) {
+foreach($guardian_list as $kkey => $each) {
 
     $action = "<a href='{$baseUrl}update-guardian/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
@@ -66,7 +66,7 @@ foreach($guardian_list as $key => $each) {
 
     // append to the list of all guardians
     $guardians .= "<tr data-row_id=\"{$each->user_id}\">";
-    $guardians .= "<td>".($key+1)."</td>";
+    $guardians .= "<td>".($kkey+1)."</td>";
     $guardians .= "<td><img title=\"Click to view full details\" onclick=\"return loadPage('{$baseUrl}update-guardian/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->fullname}</td>";
     $guardians .= "<td>{$each->relationship}</td>";
     $guardians .= "<td>{$each->email}</td>";
