@@ -33,13 +33,6 @@ var calendar = $('#attendance_calendar').fullCalendar({
                 </div>
             `);
         }
-        // $.post(`\${baseUrl}api/calendar/show_loggedlist`, {date: this_date}).then((response) => {
-            
-        //     if(response.code == 200) {
-
-        //     }    
-        // }).catch(() => {
-        // });
     }
 });";
 

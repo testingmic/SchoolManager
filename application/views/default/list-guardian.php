@@ -57,7 +57,7 @@ foreach($guardian_list as $key => $each) {
                     </div>
                     <div> 
                         <a href='{$baseUrl}update-student/{$ward->student_guid}/view' title='Click to view the full details of {$ward->name}'>{$ward->name} </a>
-                        <br>".(!empty($ward->class_name) ? "<i class='fa fa-home'></i> {$ward->class_name}" : "")."
+                        <br>".(!empty($ward->class_name) ? "<span class='font-size:9px!important'><i class='fa fa-home'></i> {$ward->class_name}</span>" : "")."
                     </div>
                 </div>
             ";

@@ -69,40 +69,8 @@ if(!empty($user_id)) {
         $wards_list = "<div class='row mb-3' id='guardian_ward_listing'>";
         // if the wards_list is not empty
         if(!empty($data->wards_list)) {
-
-            foreach($data->wards_list as $ward) {
-                $wards_list .= "
-                    <div class=\"col-12 col-md-6 load_ward_information col-lg-6\" data-id=\"{$ward->student_guid}\">
-                        <div class=\"card card-success\">
-                            <div class=\"card-header pr-2 pl-2\" style=\"border-bottom:0px;\">
-                                <div class=\"d-flex justify-content-start\">
-                                    <div class='mr-2'>
-                                        <img src=\"{$baseUrl}{$ward->image}\" class='rounded-circle cursor author-box-picture' width='50px'>
-                                    </div>
-                                    <div>
-                                        <h4>{$ward->name}</h4>
-                                        ({$ward->unique_id})<br>
-                                        ".(!empty($ward->class_name) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-home'></i> {$ward->class_name}</p>" : "")."
-                                        ".(!empty($ward->gender) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-user'></i> {$ward->gender}</p>" : "")."
-                                        ".(!empty($ward->date_of_birth) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-calendar-check'></i> {$ward->date_of_birth}</p>" : "")."
-                                    </div>
-                                </div>
-                            </div>
-                            <div class=\"border-top p-2\">
-                                <div class=\"d-flex justify-content-between\">
-                                    <div>
-                                        <a href=\"{$baseUrl}update-student/{$ward->student_guid}/view\" class=\"btn btn-sm btn-outline-success\" title=\"View ward details\"><i class=\"fa fa-eye\"></i> View</a>
-                                    </div>
-                                    <div>
-                                        <a href=\"#\" onclick='return modifyGuardianWard(\"{$data->user_id}_{$ward->student_guid}\", \"remove\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Remove</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ";
-            }
-
+            // append the guardian wards list
+            $wards_list .= $usersClass->guardian_wardlist($data->wards_list, $data->user_id);
         }
         $wards_list .= "</div>";
         

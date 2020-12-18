@@ -53,6 +53,8 @@ var modifyGuardianWard = (user_id, todo) => {
                 $.each(response.data.result.removed_list, function(i, e) {
                     $(`div[class~="load_ward_information"][data-id="${e}"]`).remove();
                 });
+            } else {
+                $(`div[id='guardian_ward_listing']`).html(response.data.result.wards_list);
             }
             search_usersList("student");
         }
@@ -71,6 +73,8 @@ var search_usersList = (user_type = "") => {
                     guardian_id = $(`div[id='user_search_list']`).attr("data-guardian_id");
                 $.each(response.data.result, function(i, e) {
                     let is_found = e.guardian_id.length && ($.inArray(guardian_id, e.guardian_id) !== -1) ? true : false;
+                    let the_link = is_found ? `<a onclick='return modifyGuardianWard("${guardian_id}_${e.user_id}","remove");' href='javascript:void(0);' class='btn btn-outline-danger btn-sm'>Remove</a>` : `<a onclick='return modifyGuardianWard("${guardian_id}_${e.user_id}","append");' class='btn btn-outline-success btn-sm' href='javascript:void(0);'>Append Ward</a>`;
+
                     users_list += `
                     <div class="col-lg-6 mb-4">
                         <div class="d-flex justify-content-start">
@@ -83,9 +87,7 @@ var search_usersList = (user_type = "") => {
                                 <br><strong>DOB:</strong> <i class="fa fa-calendar-check"></i> ${e.dob_clean}
                             </div> 
                         </div>
-                        <div class="mt-2 text-right">
-                        ${is_found ? "<a onclick='return modifyGuardianWard(\""+e.guardian_id+"_"+e.user_id+"\",\"remove\");' href='#' class='btn btn-outline-danger btn-sm'>Remove</a>": "<a onclick='return modifyGuardianWard(\""+e.guardian_id+"_"+e.user_id+"\",\"append\");' class='btn btn-outline-success btn-sm' href='#'>Append Ward</a>"}
-                        </div>
+                        <div class="mt-2 text-right">${the_link}</div>
                     </div>`;
                 });
                 users_list += "</div>";

@@ -268,13 +268,16 @@ class Users extends Myschoolgh {
 
 				// if the user wants to load wards as well
 				if($loadWards) {
-					$value->wards_list = $this->pushQuery("
-						a.item_id AS student_guid, a.unique_id, a.firstname, a.lastname, a.othername,
-						a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
-						(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
-						(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
-						", 
-						"users a", "a.status='1' AND a.guardian_id IN ({$value->user_id})");
+					$qr = $this->db->prepare("
+						SELECT 
+							a.item_id AS student_guid, a.unique_id, a.firstname, a.lastname, a.othername,
+							a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
+							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
+							(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
+						FROM users a WHERE a.status='1' AND a.guardian_id LIKE '%{$value->user_id}%'
+					");
+					$qr->execute();
+					$value->wards_list = $qr->fetchAll(PDO::FETCH_OBJ);
 				}
 				$data[] = $value;
 			}
@@ -426,6 +429,142 @@ class Users extends Myschoolgh {
             return $return;
 
 		} catch(PDOException $e) {}
+
+	}
+
+	/**
+	 * Guardian Wards Listing
+	 * 
+	 * @param Array 	$wards
+	 * @param String 	$guardian_id
+	 * 
+	 * @return String
+	 */
+	public function guardian_wardlist(array $wards, $guardian_id) {
+
+		// initialize
+		$wards_list = "";
+
+		// loop through the array list
+		foreach($wards as $ward) {
+			$wards_list .= "
+				<div class=\"col-12 col-md-6 load_ward_information col-lg-6\" data-id=\"{$ward->student_guid}\">
+					<div class=\"card card-success\">
+						<div class=\"card-header pr-2 pl-2\" style=\"border-bottom:0px;\">
+							<div class=\"d-flex justify-content-start\">
+								<div class='mr-2'>
+									<img src=\"{$this->baseUrl}{$ward->image}\" class='rounded-circle cursor author-box-picture' width='50px'>
+								</div>
+								<div>
+									<h4>{$ward->name}</h4>
+									({$ward->unique_id})<br>
+									".(!empty($ward->class_name) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-home'></i> {$ward->class_name}</p>" : "")."
+									".(!empty($ward->gender) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-user'></i> {$ward->gender}</p>" : "")."
+									".(!empty($ward->date_of_birth) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-calendar-check'></i> {$ward->date_of_birth}</p>" : "")."
+								</div>
+							</div>
+						</div>
+						<div class=\"border-top p-2\">
+							<div class=\"d-flex justify-content-between\">
+								<div>
+									<a href=\"#\" onclick=\"return loadPage('{$this->baseUrl}update-student/{$ward->student_guid}/view')\" class=\"btn btn-sm btn-outline-success\" title=\"View ward details\"><i class=\"fa fa-eye\"></i> View</a>
+								</div>
+								<div>
+									<a href=\"#\" onclick='return modifyGuardianWard(\"{$guardian_id}_{$ward->student_guid}\", \"remove\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Remove</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			";
+		}
+
+		return $wards_list;
+	}
+
+	/**
+	 * Append/Remove a student to the Guardian
+	 * 
+	 * @param String $params->user_id		This is a combination of the guardian id and the student id
+	 * @param String $params->todo			This is the action to perform (append / remove)
+	 * 
+	 * @return Array
+	 */
+	public function modify_guardianward(stdClass $params) {
+
+		// split the user id
+		$expl = explode("_", $params->user_id);
+		
+		// if there is no second key then end the query
+		if(!isset($expl[1])) {
+			return ["code" => "Sorry! The student id is required."];
+		}
+		
+		// confirm that a valid parent id was parsed
+		$p_data = $this->pushQuery("a.id", "users_guardian a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.user_id = '{$expl[0]}' LIMIT 1");
+		if(empty($p_data)) {
+			return ["code" => 203, "data" => "Sorry! An invalid guardian id was parsed"];
+		}
+
+		// confirm that a valid student id was parsed
+		$p_data = $this->pushQuery("a.guardian_id", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[1]}' LIMIT 1");
+		if(empty($p_data)) {
+			return ["code" => 203, "data" => "Sorry! An invalid student id was parsed"];
+		}
+
+		// convert the guardian id into an array
+		$guardian_id = !empty($p_data[0]->guardian_id) ? $this->stringToArray($p_data[0]->guardian_id) : [];
+
+		// if in the array then remove the value
+		if(in_array($expl[0], $guardian_id)) {
+			foreach($guardian_id as $key => $value) {
+				if($value == $expl[0]) {
+					unset($guardian_id[$key]);
+					break;
+				}
+			}
+		}
+		
+		// append to the array list
+		else {
+			array_push($guardian_id, $expl[0]);
+		}
+
+		// update the user guardian id information
+		$stmt = $this->db->prepare("UPDATE users SET guardian_id = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
+		$stmt->execute([implode(",", $guardian_id), $expl[1], $params->clientId]);
+
+
+		// return the success response
+		if($params->todo == "remove") {
+			return [
+				"data" => [
+					"info" => "Guardian ward was successfully removed",
+					"removed_list" => [$expl[1]]
+				],
+				"code" => 200
+			];
+		} else if($params->todo == "append") {
+			// get the list of guardian wards
+			$guardian_param = (object) [
+				"limit" => 1,
+				"append_wards" => true,
+				"guardian_id" => $expl[0],
+				"clientId" => $params->clientId,
+			];
+			$data = $this->guardian_list($guardian_param);
+
+			// format the list
+			$wards_list = $this->guardian_wardlist($data[0]->wards_list, $expl[0]);
+
+			// return the results
+			return [
+				"data" => [
+					"info" => "Student successfully appended to the Guardian Ward's List.",
+					"wards_list" => $wards_list
+				]
+			];
+		}
 
 	}
 

@@ -320,6 +320,7 @@ class Myschoolgh extends Models {
 	 * @return Array
 	 */
 	final function stringToArray($string, $delimiter = ",", $key_name = [], $allowEmpty = false) {
+		
 		// if its already an array then return the data
 		if(is_array($string) || empty($string)) {
 			return $string;
@@ -327,6 +328,7 @@ class Myschoolgh extends Models {
 		
 		$array = [];
 		$expl = explode($delimiter, $string);
+		
 		foreach($expl as $key => $each) {
 			if(!empty($each) || $allowEmpty) {
 				if(!empty($key_name)) {
