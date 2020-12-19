@@ -437,7 +437,15 @@ if ( ! function_exists('jump_to_main')) {
 	 * @return header
 	 */
 	function jump_to_main($baseUrl = null) {
-		global $config, $_SERVER;
+		global $_SERVER, $session;
+		if(!$session->clientId) {
+			$response = (object) [
+				"title" => "Session Expired!",
+				"html" => session_logout()
+			];
+			echo json_encode($response);
+			exit;
+		}
 		if(!isset($_SERVER["HTTP_REFERER"]) || $_SERVER["REQUEST_METHOD"] !== "POST") {
 			header("location: {$baseUrl}main");
 			exit;

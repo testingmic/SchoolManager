@@ -36,7 +36,9 @@ class Models {
             "incident_log_followup_form" => "Incident: Followups",
             "modify_guardian_ward" => "Modify Guardian Ward",
             "course_link_upload" => "Lesson Planner: Course Link Upload",
-            "course_file_upload" => "Lesson Planner: Course File Upload"
+            "course_file_upload" => "Lesson Planner: Course File Upload",
+            "upload_assignment" => "Create Assignment",
+            "update_assignment" => "Update Assignment Details",
         ];
 
 		$this->favicon_array = [

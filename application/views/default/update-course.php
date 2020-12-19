@@ -46,7 +46,7 @@ if(!empty($item_id)) {
     $data = load_class("courses", "controllers")->list($item_param);
     
     // if no record was found
-    if(empty($data["data"])) {
+    if(!empty($data["data"])) {
         $response->html = page_not_found();
     } else {
 
@@ -321,6 +321,7 @@ if(!empty($item_id)) {
     }
 
 }
+
 // print out the response
 echo json_encode($response);
 ?>

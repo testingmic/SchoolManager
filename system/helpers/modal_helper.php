@@ -180,6 +180,11 @@ function save_form_data() {
     </div>";
 }
 
+/**
+ * Page not found html
+ * 
+ * @return String
+ */
 function page_not_found() {
     global $baseUrl, $_SERVER;
     return '
@@ -216,6 +221,39 @@ function page_not_found() {
             </div>
         </div>
     </section>';
+}
+
+/**
+ * Session Logged Out
+ * 
+ * @return String
+ */
+function session_logout() {
+    global $baseUrl, $_SERVER;
+    return '
+        <div class="text-center">
+            <div class="col-lg-3 col-md-3 col-sm-12"></div>
+            <div class="col-lg-6 col-md-6 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                    <h4>Session Expired</h4>
+                    </div>
+                    <div class="card-body">
+                    <div class="empty-state" data-height="400">
+                        <div class="empty-state-icon bg-danger">
+                        <i class="fas fa-times"></i>
+                        </div>
+                        <h2>Current Session Expired</h2>
+                        <p class="lead">
+                            Sorry! You have been logged out of the system due to inactivity.
+                        </p>
+                        <a href="'.$baseUrl.'login" class="btn anchor btn-warning mt-4">Login</a>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    ';
 }
 
 /**

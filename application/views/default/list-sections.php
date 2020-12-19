@@ -49,7 +49,7 @@ foreach($department_list["data"] as $key => $each) {
     $sections .= "<td>{$each->section_code}</td>";
     $sections .= "<td>{$each->students_count}</td>";
     $sections .= "<td><span class='underline'>".($each->section_leader_info->name ?? null)."</span></td>";
-    $sections .= "<td>{$action}</td>";
+    $sections .= "<td align='center'>{$action}</td>";
     $sections .= "</tr>";
 }
 
@@ -75,7 +75,7 @@ $response->html = '
                                         <th>Section Code</th>
                                         <th width="15%">Students Count</th>
                                         <th>Section Leader</th>
-                                        <th width="10%"></th>
+                                        <th align="center" width="10%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$sections.'</tbody>

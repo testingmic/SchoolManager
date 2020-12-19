@@ -235,6 +235,35 @@ class Forms extends Myschoolgh {
                 /** Load the function */
                 $result = $this->modify_guardian_ward($params, $data);
             }
+            
+            /** Management Assignments */
+            elseif(in_array($the_form, ["upload_assignment", "update_assignment"])) {
+
+                /** Assign a variable to the item id */
+                $item_id = isset($params->module["item_id"]) ? $params->module["item_id"] : null;
+
+                /** Make a request for the data is the item_id was parsed */
+                if(!empty($item_id)) {
+                    // object parameter
+                    $assignments_param = (object) [
+                        "clientId" => $params->clientId,
+                        "assignment_id" => $item_id,
+                        "limit" => 1
+                    ];
+                    $data = load_class("assignments", "controllers")->list($assignments_param);
+                    
+                    // ensure the request is not empty
+                    if(empty($data["data"])) {
+                        return ["code" => 201, "data" => "An invalid id was parsed"];
+                    }
+
+                    // append the data to the parameters request
+                    $params->data = $data[0];
+                }
+
+                /** Call the function to process the request */
+                $result = $this->{$the_form}($params);
+            }
 
         }
 

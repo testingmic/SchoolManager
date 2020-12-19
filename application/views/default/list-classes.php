@@ -50,7 +50,7 @@ foreach($item_list["data"] as $key => $each) {
     $classes .= "<td>{$each->students_count}</td>";
     $classes .= "<td><span class='underline'>".($each->class_teacher_info->name ?? null)."</span></td>";
     $classes .= "<td><span class='underline'>".($each->class_assistant_info->name ?? null)."</span></td>";
-    $classes .= "<td>{$action}</td>";
+    $classes .= "<td align='center'>{$action}</td>";
     $classes .= "</tr>";
 }
 
@@ -77,7 +77,7 @@ $response->html = '
                                         <th width="15%">Students Count</th>
                                         <th>Class Teacher</th>
                                         <th>Class Assistant</th>
-                                        <th width="10%"></th>
+                                        <th align="center" width="10%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$classes.'</tbody>
