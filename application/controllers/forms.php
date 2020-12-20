@@ -240,6 +240,7 @@ class Forms extends Myschoolgh {
             elseif(in_array($the_form, ["upload_assignment", "update_assignment"])) {
 
                 /** Assign a variable to the item id */
+                $resources = ["assets/js/upload.js", "assets/js/assignments.js"];
                 $item_id = isset($params->module["item_id"]) ? $params->module["item_id"] : null;
 
                 /** Make a request for the data is the item_id was parsed */
@@ -262,7 +263,7 @@ class Forms extends Myschoolgh {
                 }
 
                 /** Call the function to process the request */
-                $result = $this->{$the_form}($params);
+                $result = $this->create_assignment($params, $the_form);
             }
 
         }
@@ -284,6 +285,145 @@ class Forms extends Myschoolgh {
             "code" => !empty($result) ? 200 : 201,
             "data" => $result_set
         ];
+    }
+
+    /**
+     * Assignment Template
+     * 
+     * This is a common form fields that are present in all forms of assignments
+     * 
+     * @return String
+     */
+    private function assignment_template(stdClass $params) {
+        
+        /** Set parameters for the data to attach */
+        $file_params = (object) [
+            "module" => "assignments",
+            "userData" => $this->thisUser,
+            "item_id" => $params->data->item_id ?? null
+        ];
+
+        $html_content = "<div class='col-lg-12'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Title</label>";
+        $html_content .= "<input class='form-control' name='question_title' id='question_title'>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+        $html_content .= "<div class='col-md-6'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Select Class</label>";
+        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='class_id'>";
+        $html_content .= "<option value='null'>Select Class</option>";
+        foreach($this->pushQuery("name, id", "classes", "client_id='{$params->clientId}' AND status='1'") as $class) {
+            $html_content .= "<option value='{$class->id}'>{$class->name}</option>";
+        }
+        $html_content .= "</select>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+        $html_content .= "<div class='col-md-6'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Select Course</label>";
+        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='course_id'>";
+        $html_content .= "<option value='null'>Select Course</option>";
+        $html_content .= "</select>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+        $html_content .= "<div class='col-md-6'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Date Due</label>";
+        $html_content .= "<input type='date' class='form-control' name='date_due' id='date_due'>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+        $html_content .= "<div class='col-md-6'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Time Due</label>";
+        $html_content .= "<input type='time' class='form-control' name='time_due' id='time_due'>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+
+        $html_content .= "
+            <div class='col-md-12'>
+                <div class='form-group'>
+                    <label>Additional Instructions</label>
+                    {$this->textarea_editor()}</div>
+            </div>";
+        
+        $html_content .= "
+            <div class='col-lg-12' id='upload_question_set_template'>
+                <div class='form-group text-center mb-1'><div class='row'>{$this->form_attachment_placeholder($file_params)}</div></div>
+            </div>";
+
+        $html_content .= "<div class='col-md-6'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Grade</label>";
+        $html_content .= "<input type='number' min='1' max='100' class='form-control' name='grade' id='grade'>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+        $html_content .= "<div class='col-md-6'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Assign To</label>";
+        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='assign_to'>";
+        $html_content .= "<option value='all_students'>All Students</option>";
+        $html_content .= "<option value='selected_students'>Selected Students</option>";
+        $html_content .= "</select>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+
+        $html_content .= "<div class='col-lg-12 hidden' id='assign_to_students_list'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Select Students List</label>";
+        $html_content .= "<select data-width='100%' multiple class='selectpicker form-control' name='assign_to_list' id='assign_to_list'>";
+        $html_content .= "<option value=''>Select Students</option>";
+        $html_content .= "</select>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+
+        return $html_content;
+    }
+
+    /**
+     * Create a New Assignment
+     * 
+     * @param stdClass  $params
+     * @param String    $mode       This determines whether to upload_assignment or update_assignment
+     * @return String
+     */
+    public function create_assignment(stdClass $params, $mode) {
+
+        $html_content = "
+        <style>
+        .ajax-data-form trix-editor {
+            min-height: 150px;
+            max-height: 150px;
+        }
+        </style>
+        <div class='ajax-data-form'>";
+        $html_content .= "<div class='row' id='create_assignment'>";
+        
+        $html_content .= "<div class='col-lg-12'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Select Question Type</label>";
+        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='question_set_type'>";
+        $html_content .= "<option value='file_attachment'>Upload Question Set</option>";
+        $html_content .= "<option value='multiple_choice'>Multiple Choice Questions</option>";
+        $html_content .= "</select>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+
+        $html_content .= $this->assignment_template($params);
+        
+        $html_content .= "
+            <div class=\"col-md-6 text-right\">
+                <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+            </div>
+            <div class=\"col-md-6 text-left\">
+                <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
+            </div>";
+
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+
+        return $html_content;
     }
 
     /**

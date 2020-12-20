@@ -8,7 +8,7 @@ var list_userAttendance = (query = "") => {
         }
     });
 }
-$(`select[id="attendance_category"]`).on("change", function() {
+$(`select[id="attendance_category"]`).on("change", () => {
     let value = $(this).val();
     if (value == "student") {
         $.get(`${baseUrl}api/classes/list?columns=id,item_id,name`).then((response) => {
@@ -16,7 +16,7 @@ $(`select[id="attendance_category"]`).on("change", function() {
                 $(`div[class~="attendance_category_list"]`).removeClass("hidden");
                 $(`select[name="attendance_class"]`).find('option').remove().end();
                 $(`select[name="attendance_class"]`).append(`<option value="null" selected="selected">Select Class</option>`);
-                $.each(response.data.result, function(i, e) {
+                $.each(response.data.result, (_, e) => {
                     $(`select[name="attendance_class"]`).append(`<option data-item_id="${e.item_id}" value='${e.id}'>${e.name}</option>'`);
                 });
             }
@@ -26,7 +26,7 @@ $(`select[id="attendance_category"]`).on("change", function() {
     }
 });
 
-$(`select[id="attendance_class"]`).on("change", function() {
+$(`select[id="attendance_class"]`).on("change", () => {
     let value = $(this).val();
     if (value !== "null") {
         list_userAttendance(`class_id=${value}&user_type=student&`);
