@@ -258,6 +258,9 @@ class Assignments extends Myschoolgh {
             return ["code" => 203, "data" => "Sorry! Please ensure that the marks assigned student does not exceed the grading value of: {$data->grading}."];
         }
 
+        $graded_count = 0;
+        $student_marks = [];
+
         // now loop through the list again and insert the user record
         foreach($params->student_list as $student) {
             // explode each student record
@@ -266,6 +269,9 @@ class Assignments extends Myschoolgh {
             $student_id = $exp[0];
             // insert the data into the database
             if(!empty($mark)) {
+                // push into the array list
+                $graded_count += 1;
+                $student_marks[$student_id] = $mark;
                 // check if the record exits
                 $mark_check = $this->confirm_student_marked($params->assignment_id, $student_id);
                 if($mark_check) {
@@ -287,7 +293,13 @@ class Assignments extends Myschoolgh {
             }
         }
 
-        return ["data" => "Marks were successfully awarded to the list of students specified."];
+        return [
+            "data" => "Marks were successfully awarded to the list of students specified.",
+            "additional" => [
+                "marks" => $student_marks,
+                "graded_count" => $graded_count
+            ]
+        ];
     }
 
     /**

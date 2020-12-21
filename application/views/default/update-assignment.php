@@ -109,13 +109,13 @@ if(!empty($item_id)) {
                         $grading_info .= '
                             <tr>
                                 <td width="65%">
-                                    <a style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return load_singleStudentData(\''.$student->item_id.'\',\''.$data->grading.'\')" data-value="'.$student->item_id.'" data-function="single-view" data-student_id="'.$data->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">
+                                    <a style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return load_singleStudentData(\''.$student->item_id.'\',\''.$data->grading.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">
                                         <div><img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt=""> &nbsp; '.$student->name.'</div>
                                     </a>
                                 </td>
                                 <td>
                                     <div class="input-group">
-                                        <input name="test_grading" data-value="'.$student->item_id.'" type="number" autocomplete="Off" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" class="form-control"> <span>/ '.$data->grading.'</span>
+                                        <input name="test_grading" value="'.$student->score.'" data-value="'.$student->item_id.'" type="number" autocomplete="Off" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" class="form-control"> <span>/ '.$data->grading.'</span>
                                     </div>
                                 </td>
                             </tr>';
@@ -192,7 +192,7 @@ if(!empty($item_id)) {
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Marked</span>
-                                <span class="float-right text-muted">'.$data->students_graded.' Students</span>
+                                <span class="float-right text-muted"><span class="graded_count">'.$data->students_graded.' Students</span>
                             </p>
                             ' : null).'
                             <p class="clearfix">
