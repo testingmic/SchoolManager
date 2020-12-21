@@ -45,11 +45,13 @@ foreach($item_list["data"] as $key => $each) {
 
     $assignments .= "<tr data-row_id=\"{$each->id}\">";
     $assignments .= "<td>".($key+1)."</td>";
-    $assignments .= "<td>{$each->name}</td>";
-    $assignments .= "<td>{$each->class_code}</td>";
-    $assignments .= "<td>{$each->students_count}</td>";
-    $assignments .= "<td><span class='underline'>".($each->class_teacher_info->name ?? null)."</span></td>";
-    $assignments .= "<td><span class='underline'>".($each->class_assistant_info->name ?? null)."</span></td>";
+    $assignments .= "<td>{$each->assignment_title}</td>";
+    $assignments .= "<td>{$each->due_date}</td>";
+    $assignments .= "<td>{$each->students_assigned}</td>";
+    $assignments .= "<td>{$each->students_handed_in}</td>";
+    $assignments .= "<td>{$each->students_graded}</td>";
+    $assignments .= "<td>{$each->date_created}</td>";
+    $assignments .= "<td>{$each->state}</td>";
     $assignments .= "<td align='center'>{$action}</td>";
     $assignments .= "</tr>";
 }

@@ -205,11 +205,7 @@ class Courses extends Myschoolgh {
             $counter = $this->append_zeros(($this->itemsCount("courses", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
             $params->course_code = $this->client_data($params->clientId)->client_preferences->labels->{"course_label"}.$counter;
         }
-
-        // set the academic_term and the academic_year
-        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->client_data($params->clientId)->client_preferences->academics->academic_term;
-        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->client_data($params->clientId)->client_preferences->academics->academic_year;
-
+        
         // convert the code to uppercase
         $params->course_code = strtoupper($params->course_code);
 

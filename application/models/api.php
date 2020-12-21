@@ -70,7 +70,7 @@ class Api {
         $this->myClass = $myClass;
 
         // set the global variables
-        $myClass->userId = $this->userId;  
+        $this->myClass->userId = $this->userId;
     }
 
     /**
@@ -197,6 +197,11 @@ class Api {
         $code = 203;
 
         $this->requestPayload = $params;
+        
+        // get the client data
+        $client_data = $this->myClass->client_data($this->clientId);
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $client_data->client_preferences->academics->academic_term;
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $client_data->client_preferences->academics->academic_year;
 
         // set additional parameters
         $params->userId = $this->userId;

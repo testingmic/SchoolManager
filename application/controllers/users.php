@@ -48,6 +48,7 @@ class Users extends Myschoolgh {
 		$params->query .= (isset($params->user_id)) ? (preg_match("/^[0-9]+$/", $params->user_id) ? " AND a.id='{$params->user_id}'" : " AND a.item_id='{$params->user_id}'") : null;
 		$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
 		$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
+		$params->query .= (isset($params->user_status) && !empty($params->user_status)) ? " AND a.user_status ='{$params->user_status}'" : " AND a.user_status ='Active'";
 
 		// if the field is null (dont perform all these checks if minified was parsed)
 		if(!isset($params->minified)) {

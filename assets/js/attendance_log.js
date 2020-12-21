@@ -8,7 +8,7 @@ var list_userAttendance = (query = "") => {
         }
     });
 }
-$(`select[id="attendance_category"]`).on("change", () => {
+$(`select[id="attendance_category"]`).on("change", function() {
     let value = $(this).val();
     if (value == "student") {
         $.get(`${baseUrl}api/classes/list?columns=id,item_id,name`).then((response) => {
@@ -26,7 +26,7 @@ $(`select[id="attendance_category"]`).on("change", () => {
     }
 });
 
-$(`select[id="attendance_class"]`).on("change", () => {
+$(`select[id="attendance_class"]`).on("change", function() {
     let value = $(this).val();
     if (value !== "null") {
         list_userAttendance(`class_id=${value}&user_type=student&`);

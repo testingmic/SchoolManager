@@ -94,6 +94,14 @@ var init_image_popup = () => {
     });
 }
 
+var serializeSelect = (select) => {
+    var array = [];
+    select.each(function() {
+        array.push($(this).val())
+    });
+    return array;
+}
+
 $("#lock-system").on("click", function(e) {
     e.preventDefault();
     if ($(this).hasClass("disabled")) {
@@ -1290,6 +1298,11 @@ var trigger_form_submit = () => {
 
         let button = theButton.attr("data-function");
         theFormData.append("the_button", button);
+
+        if ($(`select[name='assigned_to_list']`).length) {
+            theFormData.delete("assigned_to_list");
+            theFormData.append("assigned_to_list", serializeSelect($(`select[name="assigned_to_list"]`)));
+        }
 
         if ($(`textarea[name="faketext"]`).length) {
             theFormData.delete("faketext");

@@ -443,6 +443,10 @@ if ( ! function_exists('jump_to_main')) {
 				"title" => "Session Expired!",
 				"html" => session_logout()
 			];
+			if(!isset($_SERVER["HTTP_REFERER"]) || $_SERVER["REQUEST_METHOD"] !== "POST") {
+				header("location: {$baseUrl}main");
+				exit;
+			}
 			echo json_encode($response);
 			exit;
 		}

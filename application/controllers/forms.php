@@ -242,6 +242,7 @@ class Forms extends Myschoolgh {
                 /** Assign a variable to the item id */
                 $resources = ["assets/js/upload.js", "assets/js/assignments.js"];
                 $item_id = isset($params->module["item_id"]) ? $params->module["item_id"] : null;
+                $params->data = null;
 
                 /** Make a request for the data is the item_id was parsed */
                 if(!empty($item_id)) {
@@ -305,14 +306,14 @@ class Forms extends Myschoolgh {
 
         $html_content = "<div class='col-lg-12'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Title</label>";
+        $html_content .= "<label>Title <span class='required'>*</span></label>";
         $html_content .= "<input class='form-control' name='question_title' id='question_title'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Select Class</label>";
-        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='class_id'>";
+        $html_content .= "<label>Select Class <span class='required'>*</span></label>";
+        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='class_id' id='class_id'>";
         $html_content .= "<option value='null'>Select Class</option>";
         foreach($this->pushQuery("name, id", "classes", "client_id='{$params->clientId}' AND status='1'") as $class) {
             $html_content .= "<option value='{$class->id}'>{$class->name}</option>";
@@ -322,15 +323,15 @@ class Forms extends Myschoolgh {
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Select Course</label>";
-        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='course_id'>";
+        $html_content .= "<label>Select Course <span class='required'>*</span></label>";
+        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='course_id' id='course_id'>";
         $html_content .= "<option value='null'>Select Course</option>";
         $html_content .= "</select>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Date Due</label>";
+        $html_content .= "<label>Submission Date <span class='required'>*</span></label>";
         $html_content .= "<input type='date' class='form-control' name='date_due' id='date_due'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
@@ -355,14 +356,14 @@ class Forms extends Myschoolgh {
 
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Grade</label>";
+        $html_content .= "<label>Grade <span class='required'>*</span></label>";
         $html_content .= "<input type='number' min='1' max='100' class='form-control' name='grade' id='grade'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Assign To</label>";
-        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='assign_to'>";
+        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='assigned_to' id='assigned_to'>";
         $html_content .= "<option value='all_students'>All Students</option>";
         $html_content .= "<option value='selected_students'>Selected Students</option>";
         $html_content .= "</select>";
@@ -372,7 +373,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<div class='col-lg-12 hidden' id='assign_to_students_list'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Students List</label>";
-        $html_content .= "<select data-width='100%' multiple class='selectpicker form-control' name='assign_to_list' id='assign_to_list'>";
+        $html_content .= "<select data-width='100%' multiple class='selectpicker form-control' name='assigned_to_list' id='assigned_to_list'>";
         $html_content .= "<option value=''>Select Students</option>";
         $html_content .= "</select>";
         $html_content .= "</div>";
@@ -397,31 +398,34 @@ class Forms extends Myschoolgh {
             max-height: 150px;
         }
         </style>
-        <div class='ajax-data-form'>";
+        <form class='ajax-data-form' action='{$this->baseUrl}api/assignments/".(!$params->data ? "add" : "update")."' method='post' id='ajax-data-form-content'>";
         $html_content .= "<div class='row' id='create_assignment'>";
         
         $html_content .= "<div class='col-lg-12'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Question Type</label>";
-        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='question_set_type'>";
+        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='question_set_type' id='question_set_type'>";
         $html_content .= "<option value='file_attachment'>Upload Question Set</option>";
-        $html_content .= "<option value='multiple_choice'>Multiple Choice Questions</option>";
+        $html_content .= "<option value='multiple_choice'>Multiple Choice Questions (Quiz)</option>";
         $html_content .= "</select>";
         $html_content .= "</div>";
         $html_content .= "</div>";
 
         $html_content .= $this->assignment_template($params);
-        
-        $html_content .= "
-            <div class=\"col-md-6 text-right\">
-                <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
-            </div>
-            <div class=\"col-md-6 text-left\">
-                <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
-            </div>";
 
         $html_content .= "</div>";
-        $html_content .= "</div>";
+
+        $html_content .= "
+            <div class=\"row border-top\">
+                <div class=\"col-md-6 mt-4 text-left\">
+                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                </div>
+                <div class=\"col-md-6 mt-4 text-right\">
+                    <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Assignment</button>
+                </div>
+            </div>";
+            
+        $html_content .= "</form>";
 
         return $html_content;
     }
