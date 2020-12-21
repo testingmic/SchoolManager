@@ -83,7 +83,7 @@ class Users extends Myschoolgh {
 			if(isset($params->minified)) {
 
 				// set the columns to load
-				$params->columns = "a.item_id AS user_id, a.name, a.email, a.image, a.phone_number";
+				$params->columns = "a.item_id AS user_id, a.name, a.email, a.image, a.phone_number, a.user_type";
 
 				// exempt current user
 				if(($params->minified == "chat_list_users")) {

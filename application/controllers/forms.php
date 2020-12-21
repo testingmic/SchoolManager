@@ -300,14 +300,56 @@ class Forms extends Myschoolgh {
         /** Set parameters for the data to attach */
         $file_params = (object) [
             "module" => "assignments",
-            "userData" => $this->thisUser,
+            "userData" => $params->userData,
             "item_id" => $params->data->item_id ?? null
         ];
 
-        $html_content = "<div class='col-lg-12'>";
+        $preloaded_attachments = null;
+        $description = $params->data->assignment_description ?? null;
+        
+        $class_id = $params->data->class_id ?? null;
+        $assigned_to = $params->data->assigned_to ?? null;
+
+        // if the class id is not empty
+        if(!empty($class_id)) {
+
+            // append to the parameters list
+            $course_id = $params->data->course_id ?? null;
+            $params->data->clientId = $params->clientId;
+
+            // convert the students list into an array list
+            $assigned_list = $this->stringToArray($params->data->assigned_to_list);
+
+            // load the courses and students list using the class id as the filter
+            $ass_data = load_class("assignments", "controllers")->load_course_students($params->data);
+
+            // get the information list
+            if(isset($ass_data["data"])) {
+                $ass_data = $ass_data["data"];
+            }
+
+            // set a new parameter for the items
+            $files_param = (object) [
+                "userData" => $params->userData,
+                "label" => "list",
+                "is_deletable" => true,
+                "module" => "assignments",
+                "item_id" => $params->data->item_id,
+                "attachments_list" => $params->data->attachment
+            ];
+
+            // create a new object
+            $attachments = load_class("files", "controllers")->attachments($files_param);
+        
+            // get the attachments list
+            $preloaded_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
+
+        }
+
+        $html_content = "<div class='col-lg-8'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Title <span class='required'>*</span></label>";
-        $html_content .= "<input class='form-control' name='question_title' id='question_title'>";
+        $html_content .= "<input class='form-control' value='".($params->data->assignment_title ?? null)."' name='assignment_title' id='assignment_title'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
@@ -316,7 +358,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<select data-width='100%' class='selectpicker form-control' name='class_id' id='class_id'>";
         $html_content .= "<option value='null'>Select Class</option>";
         foreach($this->pushQuery("name, id", "classes", "client_id='{$params->clientId}' AND status='1'") as $class) {
-            $html_content .= "<option value='{$class->id}'>{$class->name}</option>";
+            $html_content .= "<option ".($class_id == $class->id ? "selected" : null)." value='{$class->id}'>{$class->name}</option>";
         }
         $html_content .= "</select>";
         $html_content .= "</div>";
@@ -326,19 +368,27 @@ class Forms extends Myschoolgh {
         $html_content .= "<label>Select Course <span class='required'>*</span></label>";
         $html_content .= "<select data-width='100%' class='selectpicker form-control' name='course_id' id='course_id'>";
         $html_content .= "<option value='null'>Select Course</option>";
+        
+        // display the courses list
+        if(isset($ass_data)) {
+            foreach($ass_data["courses_list"] as $course) {
+                $html_content .= "<option ".($course_id == $course->id ? "selected" : null)." value='{$course->id}'>{$course->name}</option>";
+            }
+        }
+
         $html_content .= "</select>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Submission Date <span class='required'>*</span></label>";
-        $html_content .= "<input type='date' class='form-control' name='date_due' id='date_due'>";
+        $html_content .= "<input type='date' class='form-control' value='".($params->data->due_date ?? null)."' name='date_due' id='date_due'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Time Due</label>";
-        $html_content .= "<input type='time' class='form-control' name='time_due' id='time_due'>";
+        $html_content .= "<input type='time' class='form-control' value='".($params->data->due_time ?? null)."' name='time_due' id='time_due'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
 
@@ -346,35 +396,44 @@ class Forms extends Myschoolgh {
             <div class='col-md-12'>
                 <div class='form-group'>
                     <label>Additional Instructions</label>
-                    {$this->textarea_editor()}</div>
+                    {$this->textarea_editor($description)}</div>
             </div>";
         
         $html_content .= "
             <div class='col-lg-12' id='upload_question_set_template'>
                 <div class='form-group text-center mb-1'><div class='row'>{$this->form_attachment_placeholder($file_params)}</div></div>
-            </div>";
+            </div>
+            <div class='form-group text-center mb-1'>{$preloaded_attachments}</div>";
 
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Grade <span class='required'>*</span></label>";
-        $html_content .= "<input type='number' min='1' max='100' class='form-control' name='grade' id='grade'>";
+        $html_content .= "<input type='number' value='".($params->data->grading ?? null)."' min='1' max='100' class='form-control' name='grade' id='grade'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Assign To</label>";
+        $html_content .= "<label>Assigned To</label>";
         $html_content .= "<select data-width='100%' class='selectpicker form-control' name='assigned_to' id='assigned_to'>";
-        $html_content .= "<option value='all_students'>All Students</option>";
-        $html_content .= "<option value='selected_students'>Selected Students</option>";
+        $html_content .= "<option ".($assigned_to == "all_students" ? "selected" : null)." value='all_students'>All Students</option>";
+        $html_content .= "<option ".($assigned_to == "selected_students" ? "selected" : null)." value='selected_students'>Selected Students</option>";
         $html_content .= "</select>";
         $html_content .= "</div>";
         $html_content .= "</div>";
 
-        $html_content .= "<div class='col-lg-12 hidden' id='assign_to_students_list'>";
+        $html_content .= "<div class='col-lg-12 ".($assigned_to == "selected_students" ? "" : "hidden")."' id='assign_to_students_list'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Students List</label>";
         $html_content .= "<select data-width='100%' multiple class='selectpicker form-control' name='assigned_to_list' id='assigned_to_list'>";
         $html_content .= "<option value=''>Select Students</option>";
+
+        // display the courses list
+        if(isset($ass_data)) {
+            foreach($ass_data["students_list"] as $student) {
+                $html_content .= "<option ".(in_array($student->item_id, $assigned_list) ? "selected" : null)." value='{$student->item_id}'>{$student->name}</option>";
+            }
+        }
+
         $html_content .= "</select>";
         $html_content .= "</div>";
         $html_content .= "</div>";
@@ -389,7 +448,7 @@ class Forms extends Myschoolgh {
      * @param String    $mode       This determines whether to upload_assignment or update_assignment
      * @return String
      */
-    public function create_assignment(stdClass $params, $mode) {
+    public function create_assignment(stdClass $params, $mode = null) {
 
         $html_content = "
         <style>
@@ -401,10 +460,10 @@ class Forms extends Myschoolgh {
         <form class='ajax-data-form' action='{$this->baseUrl}api/assignments/".(!$params->data ? "add" : "update")."' method='post' id='ajax-data-form-content'>";
         $html_content .= "<div class='row' id='create_assignment'>";
         
-        $html_content .= "<div class='col-lg-12'>";
+        $html_content .= "<div class='col-lg-4'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Question Type</label>";
-        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='question_set_type' id='question_set_type'>";
+        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='assignment_type' id='assignment_type'>";
         $html_content .= "<option value='file_attachment'>Upload Question Set</option>";
         $html_content .= "<option value='multiple_choice'>Multiple Choice Questions (Quiz)</option>";
         $html_content .= "</select>";
@@ -652,20 +711,23 @@ class Forms extends Myschoolgh {
         
         // set the file content
         $html_content = "
+        <div class=\"col-lg-12\">
             <div class='post-attachment'>
-                <div class=\"col-lg-12\" id=\"".($params->module ?? null)."\">
-                    <div class=\"file_attachment_url\" data-url=\"{$this->baseUrl}api/files/attachments\"></div>
-                </div>
-                <div class=\"".(isset($params->class) ? $params->class : "col-md-12")." text-left\">
-                    <div class='form-group row justify-content-start'>";
-                    if(!isset($params->no_title)) {
-                        $html_content .= "<label>Attach a Document <small class='text-danger'>(Maximum size <strong>{$this->max_attachment_size}MB</strong>)</small></label><br>";
-                    }
-                $html_content .= "
-                        <div class=\"ml-3\">
-                            <input class='form-control cursor attachment_file_upload' data-form_item_id=\"".($params->item_id ?? "temp_attachment")."\" data-form_module=\"".($params->module ?? null)."\" type=\"file\" name=\"attachment_file_upload\" id=\"attachment_file_upload\">
+                <div class='row'>
+                    <div class=\"col-lg-12\" id=\"".($params->module ?? null)."\">
+                        <div class=\"file_attachment_url\" data-url=\"{$this->baseUrl}api/files/attachments\"></div>
+                    </div>
+                    <div class=\"".(isset($params->class) ? $params->class : "col-md-12")." text-left\">
+                        <div class='d-flex justify-content-start'>";
+                        if(!isset($params->no_title)) {
+                            $html_content .= "<label>Attach a Document <small class='text-danger'>(Maximum size <strong>{$this->max_attachment_size}MB</strong>)</small></label><br>";
+                        }
+                    $html_content .= "
+                            <div class=\"ml-3\">
+                                <input class='form-control cursor attachment_file_upload' data-form_item_id=\"".($params->item_id ?? "temp_attachment")."\" data-form_module=\"".($params->module ?? null)."\" type=\"file\" name=\"attachment_file_upload\" id=\"attachment_file_upload\">
+                            </div>
+                            <div class=\"upload-document-loader hidden\"><span class=\"float-right\">Uploading <i class=\"fa fa-spin fa-spinner\"></i></span></div>
                         </div>
-                        <div class=\"upload-document-loader hidden\"><span class=\"float-right\">Uploading <i class=\"fa fa-spin fa-spinner\"></i></span></div>
                     </div>
                 </div>
             </div>
@@ -675,6 +737,7 @@ class Forms extends Myschoolgh {
                 <div class='form-group text-center mb-1'>{$preloaded_attachments}</div>
             </div>";
             $html_content .= !isset($params->no_footer) ? "<div class=\"col-lg-12 mb-3 border-bottom mt-3\"></div>" : null;
+        $html_content .= "</div>";
 
         return $html_content;
         

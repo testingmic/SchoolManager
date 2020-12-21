@@ -19,8 +19,13 @@ $response = (object) [];
 $response->title = "Assignments List : {$appName}";
 $response->scripts = [];
 
+// the query parameter to load the user information
+$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "userId" => $session->userId];
+$userData = $usersClass->list($i_params)["data"][0];
+
 $assignments_param = (object) [
     "clientId" => $session->clientId,
+    "userData" => $userData,
     "limit" => 99999
 ];
 
@@ -28,17 +33,15 @@ $item_list = load_class("assignments", "controllers")->list($assignments_param);
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
+$accessObject->userPermits = $userData->user_permissions;
 $hasDelete = $accessObject->hasAccess("delete", "assignments");
 $hasUpdate = $accessObject->hasAccess("update", "assignments");
 
 $assignments = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a href='{$baseUrl}update-assignments/{$each->id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a href='{$baseUrl}update-assignment/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
-    if($hasUpdate) {
-        $action .= "&nbsp;<a href='{$baseUrl}update-assignments/{$each->id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-    }
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"assignments\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }

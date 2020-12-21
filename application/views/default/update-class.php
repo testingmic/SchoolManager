@@ -196,7 +196,7 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
-                            <div class="col-lg-12 pl-0><h5>CLASS STUDENTS LIST</h5></div>
+                            <div class="col-lg-12 pl-0"><h5>CLASS STUDENTS LIST</h5></div>
                             '.$student_listing.'
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';

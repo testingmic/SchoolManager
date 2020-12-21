@@ -20,13 +20,15 @@ class Assignments extends Myschoolgh {
 
         $params->query = "1";
 
+        $filesObject = load_class("forms", "controllers");
         $client_data = $this->client_data($params->clientId);
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
-        
-        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $client_data->client_preferences->academics->academic_year;
-        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $client_data->client_preferences->academics->academic_term;
 
+        $client_data = $this->client_data($this->clientId);
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $client_data->client_preferences->academics->academic_term;
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $client_data->client_preferences->academics->academic_year;
+        
         // append the course tutor if the user_type is teacher
         if($params->userData->user_type == "teacher") {
             $params->course_tutor = $params->userId;
@@ -40,18 +42,22 @@ class Assignments extends Myschoolgh {
         $params->query .= " AND a.academic_year='{$params->academic_year}'";
         $params->query .= " AND a.academic_term='{$params->academic_term}'";
         $params->query .= (isset($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->course_tutor)) ? " AND a.course_tutor LIKE '%{$params->course_tutor}%'" : null;
         $params->query .= (isset($params->due_date)) ? " AND a.due_date='{$params->due_date}'" : null;
-        $params->query .= (isset($params->assignment_id)) ? " AND a.assignment_id='{$params->assignment_id}'" : null;
+        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->course_id)) ? " AND a.course_id='{$params->course_id}'" : null;
+        $params->query .= (isset($params->assignment_id)) ? " AND a.item_id='{$params->assignment_id}'" : null;
+        $params->query .= (isset($params->course_tutor)) ? " AND a.course_tutor LIKE '%{$params->course_tutor}%'" : null;
 
         try {
 
             $stmt = $this->db->prepare("
-                SELECT a.*, (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
+                SELECT a.*, 
+                (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
+                (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
+                (SELECT name FROM courses WHERE courses.id = a.course_id LIMIT 1) AS course_name,
                 (SELECT COUNT(*) FROM users c WHERE c.client_id=a.client_id AND a.class_id=c.class_id AND c.user_type='student' AND c.user_status='Active' AND c.status='1') AS students_assigned,
-                (SELECT COUNT(*) FROM assignments_submitted c WHERE c.assignment_id=a.assignment_id AND c.graded='1') AS students_graded,
-                (SELECT COUNT(*) FROM assignments_submitted	c WHERE c.assignment_id=a.assignment_id AND c.graded='0') AS students_handed_in,
+                (SELECT COUNT(*) FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.graded='1') AS students_graded,
+                (SELECT COUNT(*) FROM assignments_submitted	c WHERE c.assignment_id=a.item_id AND c.graded='0') AS students_handed_in,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.course_tutor LIMIT 1) AS course_tutor_info,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM assignments a
@@ -62,8 +68,15 @@ class Assignments extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
+                // clean the assignment description
+                $result->assignment_description = custom_clean(htmlspecialchars_decode($result->assignment_description));
+
                 // count the number of students assigned to
                 $result->students_assigned = ($result->assigned_to === "selected_students") ? count($this->stringToArray($result->assigned_to_list)) : $result->students_assigned;
+
+                // if attachment variable was parsed
+                $result->attachment = json_decode($result->attachment);
+                $result->attachment_html = $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false);
 
                 // loop through the information
                 foreach(["created_by_info", "course_tutor_info"] as $each) {
@@ -140,8 +153,9 @@ class Assignments extends Myschoolgh {
 
             /** Insert the record */
             $stmt = $this->db->prepare("
-                INSERT INTO assignments SET client_id = ?, created_by = ?, assignment_id = '{$item_id}'
-                ".(isset($params->question_title) ? ", assignment_title = '{$params->question_title}'" : null)."
+                INSERT INTO assignments SET client_id = ?, created_by = ?, item_id = '{$item_id}'
+                ".(isset($params->assignment_type) ? ", assignment_type = '{$params->assignment_type}'" : null)."
+                ".(isset($params->assignment_title) ? ", assignment_title = '{$params->assignment_title}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
                 ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
                 ".(isset($params->grade) ? ", grading = '{$params->grade}'" : null)."
@@ -157,7 +171,7 @@ class Assignments extends Myschoolgh {
             $stmt->execute([$params->clientId, $params->userId]);
 
             // log the user activity
-            $this->userLogs("assignments", $item_id, null, "{$params->userData->name} created a new Assignment: {$params->question_title}", $params->userId);
+            $this->userLogs("assignments", $item_id, null, "{$params->userData->name} created a new Assignment: {$params->assignment_title}", $params->userId);
 
             # set the output to return when successful
             $return = ["code" => 200, "data" => "Assignment successfully created.", "refresh" => 2000];
@@ -196,5 +210,55 @@ class Assignments extends Myschoolgh {
         ];
         
     }
+
+    /**
+     * Display student assignment submission information
+     * 
+     * @param String        $params->student_id
+     * @param String        $params->assignment_id
+     * @param String        $params->preview
+     */
+    public function student_info(stdClass $params) {
+
+        // load the file attachments
+        $stmt = $this->db->prepare("SELECT description FROM files_attachment WHERE resource = ? AND record_id = ? AND created_by = ? LIMIT 1");
+        $stmt->execute(["assignment_doc", $params->assignment_id, $params->student_id]);
+        $counter = $stmt->rowCount();
+
+        // data
+        $data = "<div class='alert mt-3 alert-info'>No attached files</div>";
+        
+        // if results was found
+        if($counter) {
+            // get the result
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+            }
+        }
+
+        return [
+            "data" => $data
+        ];
+    }
+
+    /**
+     * Confirm if the student record already exists
+     * 
+     * @param String        $assignmentId
+     * @param String        $student_id
+     * 
+     * @return Bool
+     */
+	public function confirm_student_marked($assignmentId, $student_id) {
+		// call the global function
+		global $score;
+
+		// execute the statement by making the query
+		$stmt = $score->prepare("SELECT student_id, assignment_id FROM assignments_submitted WHERE student_id = ? AND assignment_id=? LIMIT 1");
+		$stmt->execute([$student_id, $assignmentId]);
+
+		// count the number of rows found
+		return ($stmt->rowCount() > 0) ? true : false;
+	}
 }
 ?>

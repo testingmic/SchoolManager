@@ -1,4 +1,4 @@
-$(`div[id='create_assignment'] select[name='question_set_type']`).on("change", function() {
+$(`div[id='create_assignment'] select[name='assignment_type']`).on("change", function() {
     let value = $(this).val();
     if (value === "multiple_choice") {
         $(`button[type="button-submit"]`).html("Add Questions");
@@ -39,3 +39,61 @@ $(`div[id='create_assignment'] select[name='class_id']`).on("change", function()
         });
     }
 });
+
+$(`button[class~="save-marks"]`).on("click", function() {
+    var student_marks = [];
+    if (confirm("Do you want to proceed to award the marks?")) {
+        $("#assignment-content :input[name='test_grading']").each(function() {
+            let student_id = $(this).attr("data-value"),
+                grading = $(this).attr("data-grading"),
+                student_marks = $(this).val();
+            student_marks.push(student_id + "||" + student_marks + "||" + grading);
+        });
+
+        $.post(`${baseUrl}api/assignments/award_marks`, { student_marks, assignment_id }).then((response) => {
+            let the_icon = "error";
+            if (response.code == 200) {
+                the_icon = "success";
+            }
+            swal({
+                position: 'top',
+                text: response.data.result,
+                icon: the_icon,
+            });
+        })
+    }
+});
+
+var load_studentInfo = async(student_id, assignment_id) => {
+    let returnVal = await $.ajax({
+        method: "GET",
+        url: `${baseUrl}api/assignments/student_info`,
+        data: { student_id, assignment_id, preview: 1 }
+    }).then(resp => resp);
+
+    return returnVal;
+}
+
+var load_singleStudentData = async(assignment_id, grading) => {
+    let the_data = $(`a[data-function="single-view"][data-value="${assignment_id}"]`).data(),
+        results_page = $(".student-assignment-details"),
+        htmlData = "";
+
+    htmlData += "<table class='table'>";
+    htmlData += "<thead><tr>";
+    htmlData += "<th width='100%' style='font-weight:bolder; font-size:16px'>";
+    htmlData += the_data.name;
+    htmlData += "</th>";
+    htmlData += `<th align='right'>${the_data.score}/${grading}</th>`;
+    htmlData += "</tr></thead>";
+    htmlData += "<tbody>";
+    htmlData += "<tr><td colspan='2'>";
+
+    let the_n_data = await load_studentInfo(the_data.student_id, assignment_id);
+
+    htmlData += the_n_data.data.result;
+
+    results_page.html(htmlData).css('display', 'block');
+    $(".grading-history-div").css('display', 'block');
+    $(`input[name="data-student-id"]`).val(the_data.student_id);
+}
