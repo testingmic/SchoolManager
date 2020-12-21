@@ -41,16 +41,17 @@ $(`div[id='create_assignment'] select[name='class_id']`).on("change", function()
 });
 
 $(`button[class~="save-marks"]`).on("click", function() {
-    var student_marks = [];
+    var student_list = [],
+        assignment_id = $(`input[name='data-student-id']`).attr("data-assignment_id"),
+        grading = $(`input[name='data-student-id']`).attr("data-grading");
     if (confirm("Do you want to proceed to award the marks?")) {
         $("#assignment-content :input[name='test_grading']").each(function() {
             let student_id = $(this).attr("data-value"),
-                grading = $(this).attr("data-grading"),
-                student_marks = $(this).val();
-            student_marks.push(student_id + "||" + student_marks + "||" + grading);
+                student_mark = $(this).val();
+            student_list.push(student_id + "|" + student_mark);
         });
 
-        $.post(`${baseUrl}api/assignments/award_marks`, { student_marks, assignment_id }).then((response) => {
+        $.post(`${baseUrl}api/assignments/award_marks`, { student_list, assignment_id }).then((response) => {
             let the_icon = "error";
             if (response.code == 200) {
                 the_icon = "success";

@@ -115,7 +115,7 @@ if(!empty($item_id)) {
                                 </td>
                                 <td>
                                     <div class="input-group">
-                                        <input name="test_grading" data-value="'.$student->item_id.'" type="number" autocomplete="Off" data-grading="'.$data->grading.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" class="form-control"> <span>/ '.$data->grading.'</span>
+                                        <input name="test_grading" data-value="'.$student->item_id.'" type="number" autocomplete="Off" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" class="form-control"> <span>/ '.$data->grading.'</span>
                                     </div>
                                 </td>
                             </tr>';
@@ -132,7 +132,7 @@ if(!empty($item_id)) {
                                 <tr>
                                     <td align="right">
                                         <span data-function="grading-history" class="text-primary cursor" title="View Grading History">Grading History</span>
-                                        <input type="hidden" name="data-student-id" class="data-student-id">
+                                        <input data-grading="'.$data->grading.'" data-assignment_id="'.$data->item_id.'" type="hidden" name="data-student-id" class="data-student-id">
                                     </td>
                                 </tr>
                             </tbody>

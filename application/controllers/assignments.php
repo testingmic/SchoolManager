@@ -212,6 +212,85 @@ class Assignments extends Myschoolgh {
     }
 
     /**
+     * Award students marks
+     * 
+     * @return Array
+     */
+    public function award_marks(stdClass $params) {
+        // global variable
+        global $accessObject;
+
+        // ensure the user has the necessary permissions
+        if(!$accessObject->hasAccess("update", "assignments")) {
+            return ["code" => 400, "data" => $this->permission_denied];
+        }
+
+        // get the assignment information
+        $the_data = $this->pushQuery("id, grading", "assignments", "client_id='{$params->clientId}' AND item_id='{$params->assignment_id}' LIMIT 1");
+
+        // validate the record
+        if(empty($the_data)) {
+            return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+        }
+        $bug = false;
+        $data = $the_data[0];
+
+        // validate the record parsed
+        if(!is_array($params->student_list)) {
+            return ["code" => 203, "data" => "Sorry! The student_list variable accepts an array value."];
+        }
+
+        // loop through the list
+        foreach($params->student_list as $student) {
+            // explode each student record
+            $exp = explode("|", $student);
+
+            // break the loop if error found
+            if(!isset($exp[1])) { $bug = true; break; }
+            
+            // check the grading marks
+            if(($exp[1] > $data->grading) || ($exp[1] < 0)) { $bug = true; break; }
+
+        }
+
+        // return error if a bug was found
+        if($bug) {
+            return ["code" => 203, "data" => "Sorry! Please ensure that the marks assigned student does not exceed the grading value of: {$data->grading}."];
+        }
+
+        // now loop through the list again and insert the user record
+        foreach($params->student_list as $student) {
+            // explode each student record
+            $exp = explode("|", $student);
+            $mark = $exp[1];
+            $student_id = $exp[0];
+            // insert the data into the database
+            if(!empty($mark)) {
+                // check if the record exits
+                $mark_check = $this->confirm_student_marked($params->assignment_id, $student_id);
+                if($mark_check) {
+                    // update the record if it already exists
+                    $stmt = $this->db->prepare("UPDATE assignments_submitted SET score=?, graded=?, date_graded=now() WHERE student_id=? AND assignment_id = ? LIMIT 1");
+                    $stmt->execute([$mark, 1, $student_id, $params->assignment_id]);
+                    // log the user activity
+                    if($mark_check->score !== $mark) {
+                        // Record the user activity
+                        $this->userLogs("assignment-grade", "{$params->assignment_id}_{$student_id}", null, "{$params->userData->name} graded the student: {$mark}", $params->userId);
+                    }
+                } else {
+                    // insert the new record since it does not exist
+                    $stmt = $this->db->prepare("INSERT INTO assignments_submitted SET client_id = ?, score=?, graded=?, date_graded=now(), student_id=?, assignment_id = ?");
+                    $stmt->execute([$params->clientId, $mark, 1, $student_id, $params->assignment_id]);
+                    // Record the user activity
+                    $this->userLogs("assignment-grade", "{$params->assignment_id}_{$student_id}", null, "{$params->userData->name} graded the student: {$mark}", $params->userId);
+                }
+            }
+        }
+
+        return ["data" => "Marks were successfully awarded to the list of students specified."];
+    }
+
+    /**
      * Display student assignment submission information
      * 
      * @param String        $params->student_id
@@ -247,18 +326,16 @@ class Assignments extends Myschoolgh {
      * @param String        $assignmentId
      * @param String        $student_id
      * 
-     * @return Bool
+     * @return Object
      */
 	public function confirm_student_marked($assignmentId, $student_id) {
-		// call the global function
-		global $score;
-
-		// execute the statement by making the query
-		$stmt = $score->prepare("SELECT student_id, assignment_id FROM assignments_submitted WHERE student_id = ? AND assignment_id=? LIMIT 1");
+		
+        // execute the statement by making the query
+		$stmt = $this->db->prepare("SELECT score FROM assignments_submitted WHERE student_id = ? AND assignment_id=? LIMIT 1");
 		$stmt->execute([$student_id, $assignmentId]);
 
 		// count the number of rows found
-		return ($stmt->rowCount() > 0) ? true : false;
+		return ($stmt->rowCount() > 0) ? $stmt->fetch(PDO::FETCH_OBJ) : false;
 	}
 }
 ?>
