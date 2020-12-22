@@ -259,3 +259,30 @@ textarea.form-control {
     border-radius: 24px;
     position: relative;
 }
+
+.replies-item .fullname:hover {
+    text-decoration: underline;
+}
+
+.replies-item .replies-timestamp:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.replies-item img.user-image {
+    width: 80px;
+    height: 70px;
+    border-radius: 6px;
+}
+
+.replies-item .attachments_list img {
+    height: 158px;
+    width: 100%;
+}
+
+.replies-item .reply-options {
+    display: flex;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+}

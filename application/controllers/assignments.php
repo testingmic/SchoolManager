@@ -32,7 +32,7 @@ class Assignments extends Myschoolgh {
         
         // append the course tutor if the user_type is teacher
         if($params->userData->user_type == "teacher") {
-            $params->course_tutor = $params->userId;
+            $params->course_tutor = $params->userData->user_id;
         }
 
         // append the class_id if the user type is student

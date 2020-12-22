@@ -335,7 +335,7 @@ class Forms extends Myschoolgh {
             $files_param = (object) [
                 "userData" => $params->userData,
                 "label" => "list",
-                "is_deletable" => true,
+                "is_deletable" => (bool) !$disabled,
                 "module" => "assignments",
                 "item_id" => $params->data->item_id,
                 "attachments_list" => $params->data->attachment

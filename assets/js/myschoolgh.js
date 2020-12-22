@@ -100,3 +100,85 @@ var search_usersList = (user_type = "") => {
         $(`div[id='user_search_list']`).html(`<div class='text-center text-danger font-italic'>Sorry! The search term must be at least 3 characters long.</div>`);
     }
 }
+
+var formatThreadComment = (rv) => {
+        return `<div class="col-md-12 p-1 grid-margin" id="comment-listing" data-reply-container="${rv.item_id}">
+        <div class="card rounded replies-item">
+            <div class="card-header">
+                <div class="col-lg-12 p-0">
+                    <div class="d-flex justify-content-start">
+                        <div>
+                            <img width="50px" class="img-xs rounded-circle" src="${baseUrl}${rv.replied_by.image}" alt="">
+                        </div>
+                        <div class="ml-2">
+                            <p class="cursor underline mb-0" title="Click to view summary information about ${rv.replied_by.fullname}" data-id="${rv.user_id}">${rv.replied_by.fullname}</p>
+                            <p title="${rv.modified_date}" class="tx-11 mb-0 replies-timestamp text-muted">${rv.time_ago}</p>
+                        </div>
+                    </div>
+                    ${rv.delete_button}
+                </div>
+            </div>
+            <div class="card-body pt-2 pb-0">
+                <div class="tx-14">${rv.message}</div>
+                <div class="${rv.attachment.files.length ? `border-top mt-2 pt-2` : ""}">
+                    <p>
+                        <span ${rv.attachment.files.length ? `data-function="toggle-comments-files-attachment-list" data-reply-id="${rv.item_id}" class="cursor" data-toggle="tooltip" title="Hide Attachments"` : ""}>
+                        ${rv.attachment.files.length ? `${rv.attachment.files.length} files (${rv.attachment.files_size})<span class="ml-2"><i class="fa fa-arrow-alt-circle-right"></i></span>` : ""}
+                        </span>
+                    </p>
+                </div>
+                <div class="attachments_list" style="display:none" data-reply-id="${rv.item_id}">${rv.attachment_html}</div>
+            </div>
+        </div>
+    </div>`;
+}
+
+
+var share_Comment = (resource, item_id) => {
+
+    let content = $(`trix-editor[id="leave_comment_content"]`),
+        theLoader = $(`div[class="leave-comment-wrapper"] div[class~="absolute-content-loader"]`);
+
+    let comment = {
+        item_id: item_id,
+        resource: resource,
+        comment: htmlEntities(content.html())
+    };
+
+    $.pageoverlay.show();
+
+    $.post(`${baseUrl}api/replies/comment`, comment).then((response) => {
+        $.pageoverlay.hide();
+        if (response.code == 200) {
+            content.html("");
+            $(`div[class="leave-comment-wrapper"] div[class~="file-preview"]`).html("");
+            swal({
+                text: response.data.result,
+                icon: "success",
+            });
+            if (response.data.additional.record) {
+                $.each(response.data.additional.record, function(ie, iv) {
+                    $(`[data-record="${ie}"]`).html(iv);
+                });
+                let comment = formatThreadComment(response.data.additional.data);
+                if ($(`div[id="comments-container"] div[id="comment-listing"]:first`).length) {
+                    $(`div[id="comments-container"] div[id="comment-listing"]:first`).before(comment);
+                } else {
+                    $(`div[id="comments-container"]`).append(comment);
+                }
+            }
+        } else {
+            swal({
+                text: response.data.result,
+                icon: "error",
+            });
+        }
+        // apply_comment_click_handlers();
+    }).catch(() => {
+        $.pageoverlay.hide();
+        swal({
+            text: "Sorry! Error processing request.",
+            icon: "error",
+        });
+    });
+}

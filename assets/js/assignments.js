@@ -89,19 +89,21 @@ var close_Assignment = () => {
         icon: 'warning',
         buttons: true,
         dangerMode: true,
-    }).then(() => {
-        $.post(`${baseUrl}api/assignments/close`, { assignment_id }).then((response) => {
-            if (response.code == 200) {
-                $(`div[class="initial_assignment_buttons"]`).remove();
-                $(`input[name="test_grading"]`).attr("disabled", "disabled");
-                $(`span[id="assignment_state"]`).html(`<span class="badge badge-danger">Closed</span>`);
-                swal({
-                    position: "top",
-                    text: response.data.result,
-                    icon: "success",
-                });
-            }
-        });
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/assignments/close`, { assignment_id }).then((response) => {
+                if (response.code == 200) {
+                    $(`div[class="initial_assignment_buttons"]`).remove();
+                    $(`input[name="test_grading"]`).attr("disabled", "disabled");
+                    $(`span[id="assignment_state"]`).html(`<span class="badge badge-danger">Closed</span>`);
+                    swal({
+                        position: "top",
+                        text: response.data.result,
+                        icon: "success",
+                    });
+                }
+            });
+        }
     });
 }
 

@@ -314,6 +314,36 @@ var linkHandler = (target, pushstate) => {
     loadPage(target, callback, pushstate)
 }
 
+var deleteReply = function() {
+    $(`a[class~="delete-reply"]`).on("click", function() {
+        let reply_id = $(this).attr("data-reply-id");
+        $.post(`${baseUrl}api/replies/delete`, { reply_id: reply_id }).then((response) => {
+            if (response.code == 200) {
+                $(`div[data-reply-container="${reply_id}"] div[class="card-body"] [class="tx-14"]`).html(`<div class="font-italic text-">This message was deleted</div>`);
+                $(`div[data-reply-container="${reply_id}"] [id="reply-option"]`).remove();
+            }
+        });
+    });
+}
+
+var apply_comment_click_handlers = () => {
+    $(`span[data-function="toggle-comments-files-attachment-list"]`).on("click", function() {
+        let reply_id = $(this).attr("data-reply-id");
+        $(`div[class~="attachments_list"][data-reply-id="${reply_id}"]`).slideToggle("slow");
+    });
+
+    $(".attachment-container .attachment-item").mouseenter(function() {
+        let item = $(this).attr("data-attachment_item");
+        $(`span[data-attachment_options='${item}']`).css("display", "block");
+    }).mouseleave(function() {
+        let item = $(this).attr("data-attachment_item");
+        $(`span[data-attachment_options='${item}']`).css("display", "none");
+    });
+
+    init_image_popup();
+    deleteReply();
+}
+
 let getCallback = (target) => {
 
     var splitlink = String(target).split("/")

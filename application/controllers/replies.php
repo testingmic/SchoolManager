@@ -193,25 +193,14 @@ class Replies extends Myschoolgh {
 
         /** Validate the request */
         if(!in_array($params->resource, [
-            'claims','licenses','company_policy','complaints','policies', 'adverts',
-            'user_policy','reports','payments','announcements','insurance_company'
+            'assignments'
         ])) {
             return ["code" => 203, "data" => "Invalid request parsed"];
         }
 
         // table names
         $table_pages = [
-            "user_policy" => ["page" => "policies-view"],
-            "policies" => ["page" => "policies-view"],
-            "claims" => ["page" => "claims-view"],
-            "licenses" => ["page" => "licenses-view"],
-            "complaints" => ["page" => "complaints-view"],
-            "company_policy" => ["page" => "policy-view"],
-            "reports" => ["page" => "reports-view"],
-            "adverts" => ["page" => "adverts-view"],
-            "announcements" => ["page" => "announcements"],
-            "insurance_company" => ["page" => "configuration"],
-            "payments" => ["page" => "payments-view"],
+            "assignments" => ["page" => "update-assignment"]
         ];
 
         /** Process the data parsed */
@@ -265,45 +254,6 @@ class Replies extends Myschoolgh {
 
                 // set the table name
                 $table_name = $this->resource_parameters[$params->resource]["table"];
-
-                // get the table name
-                if(!in_array($params->resource, ['company_policy'])) {
-
-                    // get the one who created the record
-                    $creator_id = $this->columnValue("user_id", $table_name, "item_id='{$params->record_id}'")->user_id;
-                    $assigned_to = $this->columnValue("assigned_to", $table_name, "item_id='{$params->record_id}'")->assigned_to;
-
-                    // if the one replying is not the creator, then notify the creator of a new reply
-                    if($creator_id !== $params->userId) {
-                        
-                        // form the notification parameters
-                        $notice_param = (object) [
-                            '_item_id' => random_string("alnum", 32),
-                            'user_id' => $creator_id,
-                            'subject' => "Thread Reply",
-                            'username' => $params->userData->username,
-                            'remote' => false, 
-                            'message' => "<strong>{$params->userData->name}</strong> left a new reply on your <a title=\"Click to view {$this->resource_parameters[$params->resource]["message"]}\" href=\"{{APPURL}}{$table_pages[$params->resource]["page"]}/{$params->record_id}\">{$this->resource_parameters[$params->resource]["message"]}</a>.",
-                            'notice_type' => 5,
-                            'userId' => $params->userId,
-                            'initiated_by' => 'system'
-                        ];
-                        // add a new notification
-                        $noticeClass->add($notice_param);
-
-                        // if the assigned_to is empty then set the assigned_to to the one replying
-                        $assigned_to = empty($assigned_to) ? ", assigned_to='{$params->userId}'" : null;
-                        // set the new status
-                        if(in_array($table_name, ["users_complaints"])) {
-                            $this->db->query("UPDATE {$table_name} SET status='Answered' {$assigned_to} WHERE item_id='{$params->record_id}' LIMIT 1");
-                        }
-                    } else {
-                        // update the status and set it to waiting
-                        if(in_array($table_name, ["users_complaints"])) {
-                            $this->db->query("UPDATE {$table_name} SET status='Waiting' WHERE item_id='{$params->record_id}' LIMIT 1");
-                        }
-                    }
-                }
 
                 // get the count
                 $counter = $this->columnValue("replies_count", $table_name, "item_id='{$params->record_id}'");
@@ -371,8 +321,8 @@ class Replies extends Myschoolgh {
         $resource = explode("_", $params->resource)[0];
 
         /** If the resource is not in the array */
-        if(!in_array($resource, ["complaint", "policy", "claim", "cancel", "licenses", "adverts"])) {
-            return ["code" => 203, "data" => "Invalid request parsed: complaint, policy, claim, cancel, licenses, adverts"];
+        if(!in_array($resource, ["assignments"])) {
+            return ["code" => 203, "data" => "Invalid request parsed: assignments"];
         }
 
         // append the attachments
@@ -381,22 +331,10 @@ class Replies extends Myschoolgh {
 
         // table names
         $table_name = [
-            "policy" => [
-                "table" => "users_policy",
-                "page" => "policies-view"
-            ],
-            "claim" => [
-                "table" => "users_policy_claims",
-                "page" => "claims-view"
-            ],
-            "licenses" => [
-                "table" => "companies_licenses",
-                "page" => "licenses-view"
-            ],
-            "complaint" => [
-                "table" => "users_complaints",
-                "page" => "complaints-view"
-            ],
+            "assignments" => [
+                "table" => "assignments",
+                "page" => "update-assignment"
+            ]
         ];
         
         try {
@@ -446,47 +384,6 @@ class Replies extends Myschoolgh {
                     // get the one who created the record
                     $client_id = $this->columnValue("user_id, created_by", $table_name[$resource]["table"], "item_id='{$params->item_id}'");
 
-                    // if the one replying is not the creator, then notify the creator of a new reply
-                    if(isset($client_id->user_id) && ($client_id->user_id !== $params->userId)) {
-                        
-                        // form the notification parameters
-                        $notice_param = (object) [
-                            '_item_id' => random_string("alnum", 32),
-                            'user_id' => $client_id->user_id,
-                            'subject' => "Thread Comment",
-                            'username' => $params->userData->username,
-                            'remote' => false, 
-                            'message' => "<strong>{$params->userData->name}</strong> left a comment on your <a title=\"Click to view {$resource}\" href=\"{{APPURL}}{$table_name[$resource]["page"]}/{$params->item_id}\">{$resource}</a>.",
-                            'notice_type' => 5,
-                            'userId' => $params->userId,
-                            'initiated_by' => 'system'
-                        ];
-
-                        // add a new notification
-                        $noticeClass->add($notice_param);
-
-                        // notify the person who created the item as well (agent, broker or bancassurance)
-                        if(isset($client_id->created_by) && ($client_id->created_by !== $params->userId)) {
-
-                            // form the notification parameters
-                            $notice_param = (object) [
-                                '_item_id' => random_string("alnum", 32),
-                                'user_id' => $client_id->created_by,
-                                'subject' => "Thread Comment",
-                                'username' => $params->userData->username,
-                                'remote' => false, 
-                                'message' => "<strong>{$params->userData->name}</strong> left a comment on your <a title=\"Click to view {$resource}\" href=\"{{APPURL}}{$table_name[$resource]["page"]}/{$params->item_id}\">{$resource}</a>.",
-                                'notice_type' => 5,
-                                'userId' => $params->userId,
-                                'initiated_by' => 'system'
-                            ];
-
-                            // add a new notification
-                            $noticeClass->add($notice_param);
-                        }
-
-                    }
-
                     // get the count
                     $counter = $this->columnValue("comments_count", $table_name[$resource]["table"], "item_id='{$params->item_id}'");
 
@@ -501,33 +398,6 @@ class Replies extends Myschoolgh {
 
                 }
                 
-                // if resource is cancel_policy_comments then notify the user
-                if($params->resource == "cancel_policy_comments") {
-                    // get the one who created the record
-                    $client_id = $this->columnValue("user_id, created_by, policy_id", "users_policy_cancellation_request", "slug='{$params->item_id}'");
-                    
-                    // if the user is not the same as the person submitting the comment
-                    if(isset($client_id->user_id) && ($client_id->user_id !== $params->userId)) {
-                        
-                        // form the notification parameters
-                        $notice_param = (object) [
-                            '_item_id' => random_string("alnum", 32),
-                            'user_id' => $client_id->user_id,
-                            'subject' => "Thread Comment",
-                            'username' => $params->userData->username,
-                            'remote' => false, 
-                            'message' => "<strong>{$params->userData->name}</strong> left a comment on your request to cancel the policy <a title=\"Click to view {$resource}\" href=\"{{APPURL}}policies-view/{$params->item_id}\">{$client_id->policy_id}</a>.",
-                            'notice_type' => 5,
-                            'userId' => $params->userId,
-                            'initiated_by' => 'system'
-                        ];
-                        
-                        // add a new notification
-                        $noticeClass->add($notice_param);
-                    }
-                    
-                }
-
             } else {
                 $data = "Sorry! There was an error while processing the request.";
             }

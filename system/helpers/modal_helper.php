@@ -301,3 +301,56 @@ function add_new_item($item_id = null) {
 
 	return $buttons;
 }
+
+
+/**
+ * Leave comment container
+ * 
+ * @param Strig $resource           This is the resource name.
+ * @param String $recordId          The unique id of the record on which the comment is been shared on
+ * @param String $comment           The default comment to show on the form.
+ * 
+ * @return String
+ */
+function leave_comments_builder($resource, $recordId, $upload = true, $comment = null) {
+    // global variable
+    global $userData;
+
+    // create a new object of the forms class
+    $formsObj = load_class("forms", "controllers");
+    
+    /** Set parameters for the data to attach */
+    $form_params = (object) [
+        "module" => "{$resource}_{$recordId}",
+        "userData" => $userData,
+        "item_id" => $recordId
+    ];
+
+    // create the html form
+    $html = "
+        <style>
+        .leave-comment-wrapper trix-editor {
+            min-height: 100px;
+            max-height: 100px;
+        }
+        </style>
+        <div class=\"leave-comment-wrapper\" data-id=\"{$recordId}\">
+            ".absolute_loader()."
+            <div class=\"form-group mt-1\">
+                <label for=\"leave_comment_content\" title=\"Click to display comment form\" class=\"cursor\">
+                    ( <i class=\"fa fa-comments\"></i> <strong><span data-id=\"{$recordId}\" data-record=\"comments_count\">0</span> comments</strong> ) ".(!empty($comment) ? $comment : "Leave a comment below")." <small class=\"text-danger\">(cannot be modified once posted)</small>
+                </label>
+            </div>
+            <div class=\"hidden_\" id=\"leave-comment-content\">
+                <div class=\"form-group mb-2\">
+                    <trix-editor class=\"slim-scroll\" id=\"leave_comment_content\" name=\"leave_comment_content\"></trix-editor>
+                </div>
+                <div class=\"form-group mt-0 text-right\">
+                    <button type=\"button\" onclick=\"return share_Comment('{$resource}', '{$recordId}')\" class=\"btn share-comment btn-sm btn-outline-success\">Post Comment <i class=\"fa fa-angle-double-right\"></i></button>
+                </div>
+                ".($upload ? "<div>{$formsObj->comments_form_attachment_placeholder($form_params)}</div>" : "")."
+            </div>
+        </div>";
+
+    return $html;
+}

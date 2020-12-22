@@ -21,7 +21,9 @@ $pageTitle = "Assignment Details";
 $response->title = "{$pageTitle} : {$appName}";
 
 $response->scripts = [
-    "assets/js/assignments.js"
+    "assets/js/assignments.js",
+    "assets/js/comments.js",
+    // "assets/js/comments_upload.js"
 ];
 
 // access permission variables
@@ -65,10 +67,14 @@ if(!empty($item_id)) {
 
         // get the list of students
         if(in_array($defaultUser->user_type, ["teacher", "admin"])) {
-            
-            // append the upload script
-            $response->scripts[] = "assets/js/upload.js";
 
+            // append the upload script
+            if(in_array($data->state, ["Pending", "Graded"])) {
+                $response->scripts[] = "assets/js/upload.js";
+            } else {
+                unset($response->scripts[0]);
+            }
+            
             /** Get the students list */
             $students_list = ($data->assigned_to == "selected_students") ? $myClass->stringToArray($data->assigned_to_list) 
                 : array_column($myClass->pushQuery("item_id, unique_id, name, email, phone_number, gender", "users", 
@@ -176,18 +182,15 @@ if(!empty($item_id)) {
 
             // check if the use has handed in the assignment
             $nothanded_in = (bool) ($data->handed_in === "Pending");
+
+            if($nothanded_in) {
+                // append the upload script
+                $response->scripts[] = "assets/js/upload.js";
+            }
             
             // display the content if the assignment type is a file_attachment
             if($data->assignment_type == "file_attachment") {
                 
-                // append to the scripts if not already submitted
-                if($nothanded_in) {
-                    $response->scripts[] = "assets/js/upload.js";
-                } else {
-                    // unset the scripts variable
-                    $response->scripts = [];
-                }
-
                 // display the file upload option
                 $grading_info .= '
                 '.($nothanded_in ?
@@ -326,8 +329,14 @@ if(!empty($item_id)) {
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" id="comments-tab2" data-toggle="tab" href="#comments" role="tab" aria-selected="true">
+                            Comments
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
-                            '.($hasUpdate ? "Grade Students" : "Handin Assignment").'</a>
+                            '.($hasUpdate ? "Grade Students" : "Handin Assignment").'
+                        </a>
                     </li>';
 
                     if($hasUpdate) {
@@ -350,6 +359,11 @@ if(!empty($item_id)) {
                                     '.$data->attachment_html.'
                                 </div>
                             </div>
+                        </div>
+                        <div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab2">
+                            '.leave_comments_builder("assignments", $item_id, false).'
+                            <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
+                            <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary">Loading comments</button></div>
                         </div>
                         <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
                             '.$grading_info.'
