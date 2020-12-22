@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL;
+global $myClass, $defaultUser, $SITEURL;
 
 // initial variables
 $appName = config_item("site_name");
@@ -38,15 +38,16 @@ if(!empty($item_id)) {
         "clientId" => $clientId,
         "userId" => $session->userId,
         "course_id" => $item_id,
+        "userData" => $defaultUser,
         "full_attachments" => true,
         "full_details" => true,
         "limit" => 1
     ];
 
     $data = load_class("courses", "controllers")->list($item_param);
-    
+
     // if no record was found
-    if(!empty($data["data"])) {
+    if(empty($data["data"])) {
         $response->html = page_not_found();
     } else {
 
@@ -107,8 +108,13 @@ if(!empty($item_id)) {
         $updateItem = confirm_url_id(2, "update") ? true : false;
 
         // lesson planner display
+        $unit_lessons = "";
         $attachments_list = "";
-        $lessons_list = "<div class='mb-2'>&nbsp;</div>";
+        $lessons_list = "";
+
+        if(!empty($data->lesson_plan)) {
+            $lessons_list = "<div class='mb-2'>&nbsp;</div>";
+        }
 
         // if the attachment parameter is not empty
         if(!empty($data->attachment)) {
@@ -116,7 +122,6 @@ if(!empty($item_id)) {
             $formsObj = load_class("forms", "controllers");
             // convert the attachment 
             $attachments = (array) $data->attachment;
-            // print_r($attachments);
             $attachments_list = $formsObj->list_attachments($attachments["files_list"], $session->userId, "col-lg-4 col-md-6", false);
         }
 
@@ -124,7 +129,6 @@ if(!empty($item_id)) {
         foreach($data->lesson_plan as $key => $plan) {
 
             $key++;
-            $unit_lessons = "";
 
             // if the lesson is not empty
             if(!empty($plan->lessons_list)) {
@@ -186,7 +190,7 @@ if(!empty($item_id)) {
                                 <th>Lesson Title</th>
                                 <th>Start Date</th>
                                 <th>End Date</th>
-                                <th>Action</th>
+                                <th align='center'>Action</th>
                             </thead>
                             <tbody>{$unit_lessons}</tbody>
                         </table>
@@ -279,13 +283,15 @@ if(!empty($item_id)) {
                             <div class="d-flex justify-content-between">
                                 <div><h5>COURSE LESSONS</h5></div>
                                 <div>
-                                    <a target="_blank" class="btn btn-sm btn-outline-success" href="'.$baseUrl.'download?course='.base64_encode($data->id."_".$data->item_id).'"><i class="fa fa-download"></i> Download</a>
+                                    '.($unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success" href="'.$baseUrl.'download?course='.base64_encode($data->id."_".$data->item_id).'"><i class="fa fa-download"></i> Download</a>' : '').'
                                     '.($hasPlanner ? '
                                         <button  onclick="return load_quick_form(\'course_unit_form\',\''.$item_id.'\');" class="btn btn-sm btn-outline-primary" type="button"><i class="fa fa-plus"></i> New Unit</button>'
                                     : null ).'
                                 </div>
                             </div>
-                            '.$lessons_list.'
+                            '.(!empty($lessons_list) ? $lessons_list : 
+                                '<div class="text-left font-italic">No lessons have been uploaded under this course.</div>'
+                            ).'
                         </div>
                         
                         <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab2">
@@ -296,11 +302,15 @@ if(!empty($item_id)) {
                                 : null ).'
                             </div>
                             <div class="slim-scroll p-0 m-0" style="max-height:400px; overflow-y:auto;">
-                                '.$attachments_list.'
+                                '.($attachments_list ? $attachments_list : 
+                                    '<div class="text-left font-italic">There are you attachments uploaded under this course</div>'
+                                ).'
                             </div>
                             <div class="mt-4"><h5>RESOURCE LINKS</h5></div>
                             <div class="slim-scroll p-0 m-0" id="resource_link_list" style="max-height:400px; overflow-y:auto;">
-                                '.$links_list.'
+                                '.($links_list ? $links_list : 
+                                    '<div class="text-left font-italic">Course Tutor has not uploaded any resource links to this course.</div>'
+                                ).'
                             </div>
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';

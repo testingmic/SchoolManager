@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL;
+global $myClass, $SITEURL, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -21,12 +21,9 @@ $pageTitle = "Staff Details";
 $response->title = "{$pageTitle} : {$appName}";
 
 // the query parameter to load the user information
-$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "userId" => $session->userId];
-$userData = $usersClass->list($i_params)["data"][0];
-
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $userData->user_permissions;
+$accessObject->userPermits = $defaultUser->user_permissions;
 
 $response->scripts = [
     "assets/js/page/index.js"
@@ -80,7 +77,8 @@ if(!empty($user_id)) {
             // course list parameter
             $courses_param = (object) [
                 "clientId" => $session->clientId,
-                "userId" => $session->userId,
+                "userId" => $defaultUser->user_id,
+                "userData" => $defaultUser,
                 "course_tutor" => $data["data"][0]->user_id,
                 "limit" => 99999
             ];

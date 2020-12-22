@@ -60,7 +60,7 @@ class Assignments extends Myschoolgh {
         if(in_array($params->userData->user_type, ["teacher", "admin"])) {
             $query = ",
             (SELECT COUNT(*) FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.graded='1') AS students_graded,
-            (SELECT COUNT(*) FROM assignments_submitted	c WHERE c.assignment_id=a.item_id AND c.graded='0') AS students_handed_in,
+            (SELECT COUNT(*) FROM assignments_submitted	c WHERE c.assignment_id=a.item_id AND c.handed_in='Submitted') AS students_handed_in,
             (SELECT COUNT(*) FROM users c WHERE c.client_id=a.client_id AND a.class_id=c.class_id AND c.user_type='student' AND c.user_status='Active' AND c.status='1') AS students_assigned
             ";
         }
@@ -91,7 +91,7 @@ class Assignments extends Myschoolgh {
                 if(isset($result->handed_in)) {
                     $result->handedin_label = $this->the_status_label($result->handed_in);
                     $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
-                    $result->attached_attachment_html = isset($result->attached_document->files) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-4", false, false) : null;
+                    $result->attached_attachment_html = isset($result->attached_document->files) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
                 }
 
                 // clean the assignment description
@@ -102,7 +102,7 @@ class Assignments extends Myschoolgh {
 
                 // if attachment variable was parsed
                 $result->attachment = json_decode($result->attachment);
-                $result->attachment_html = $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false);
+                $result->attachment_html = $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false);
 
                 // loop through the information
                 foreach(["created_by_info", "course_tutor_info"] as $each) {
@@ -125,9 +125,9 @@ class Assignments extends Myschoolgh {
     /**
      * Add a new assignment
      * 
-     * @param stdClass $params
+     *@param stdClass $params
      * 
-     * @return Array
+     * @return Array 
      */
     public function add(stdClass $params) {
         /** Confirm the class id */
@@ -155,6 +155,7 @@ class Assignments extends Myschoolgh {
         if($params->grade < 1) {
             return ["code" => 203, "data" => "Sorry! The grade's value must be at least '1'"];
         }
+
         /** Confirm that the user is using the file attachment module */
         $item_id = random_string("alnum", 32);
         $is_attach = (bool) ($params->assignment_type == "file_attachment");
@@ -210,6 +211,127 @@ class Assignments extends Myschoolgh {
 
         } catch(PDOException $e) {}
 
+    }
+
+    /**
+     * Update the assignment details
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array 
+     */
+    public function update(stdClass $params) {
+
+        /** Confirm the assignment id */
+        $prevData = $this->pushQuery("a.*, (SELECT b.description FROM files_attachment b WHERE b.resource='assignments' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment", 
+            "assignments a", "a.item_id='{$params->assignment_id}' AND a.client_id='{$params->clientId}' AND a.status='1'");
+
+        if(empty($prevData)) {
+            return ["code" => 203, "data" => "Sorry! An invalid assignment id was submitted"];
+        }
+
+        /** Confirm the class id */
+        if(empty($this->pushQuery("id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1'"))) {
+            return ["code" => 203, "data" => "Sorry! An invalid class id was submitted"];
+        }
+
+        /** Confirm the selected course */
+        $course_data = $this->pushQuery("id, course_tutor", "courses", "id='{$params->course_id}' AND class_id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1'");
+        if(empty($course_data)) {
+            return ["code" => 203, "data" => "Sorry! An invalid course id was submitted"];
+        }
+
+        /** Confirm if the submission date is valid */
+        if(!$this->validDate($params->date_due)) {
+            return ["code" => 203, "data" => "Sorry! A valid submission date is required"];
+        }
+
+        /** Confirm the grade */
+        if($params->grade < 1) {
+            return ["code" => 203, "data" => "Sorry! The grade's value must be at least '1'"];
+        }
+
+        /** Append to the previous assignment documents */
+        $prevData = $prevData[0];
+        $initial_attachment = [];
+
+        /** Confirm that there is an attached document */
+        if(!empty($prevData->attachment)) {
+            // decode the json string
+            $db_attachments = json_decode($prevData->attachment);
+            // get the files
+            if(isset($db_attachments->files)) {
+                $initial_attachment = $db_attachments->files;
+            }
+        }
+        
+        // append the attachments
+        $filesObj = load_class("files", "controllers");
+        $module = "assignments";
+        $attachments = $filesObj->prep_attachments($module, $params->userId, $prevData->item_id, $initial_attachment);
+
+        // update the assignment attachments
+        $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? AND resource='assignments' LIMIT 1");
+        $files->execute([json_encode($attachments), $attachments["raw_size_mb"], $prevData->item_id]);
+
+        try {
+            /** Insert the record */
+            $stmt = $this->db->prepare("
+                UPDATE assignments SET date_updated = now()
+                ".(isset($params->assignment_type) ? ", assignment_type = '{$params->assignment_type}'" : null)."
+                ".(isset($params->assignment_title) ? ", assignment_title = '{$params->assignment_title}'" : null)."
+                ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
+                ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
+                ".(isset($params->grade) ? ", grading = '{$params->grade}'" : null)."
+                ".(isset($course_data[0]->course_tutor) ? ", course_tutor = '{$course_data[0]->course_tutor}'" : null)."
+                ".(isset($params->date_due) ? ", due_date = '{$params->date_due}'" : null)."
+                ".(isset($params->time_due) ? ", due_time = '{$params->time_due}'" : null)."
+                ".(isset($params->assigned_to) ? ", assigned_to = '{$params->assigned_to}'" : null)."
+                ".(isset($params->assigned_to_list) ? ", assigned_to_list = '{$params->assigned_to_list}'" : null)."
+                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
+                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(isset($params->description) ? ", assignment_description = '".addslashes($params->description)."'" : null)."
+                WHERE client_id = ? AND item_id = ? LIMIT 1
+            ");
+            $stmt->execute([$params->clientId, $params->assignment_id]);
+
+            // log the user activity
+            $this->userLogs("assignments", $params->assignment_id, null, "{$params->userData->name} updated the assignment details", $params->userId);
+
+            if(isset($params->assignment_title) && ($prevData->assignment_title !== $params->assignment_title)) {
+                $this->userLogs("assignments", $params->assignment_id, $prevData->assignment_title, "Assignment Title has been changed.", $params->userId);
+            }
+
+            if(isset($params->date_due) && ($prevData->due_date !== $params->date_due)) {
+                $this->userLogs("assignments", $params->assignment_id, $prevData->due_date, "Due Date has been changed.", $params->userId);
+            }
+
+            if(isset($params->time_due) && ($prevData->due_time !== $params->time_due)) {
+                $this->userLogs("assignments", $params->assignment_id, $prevData->due_time, "Due Time has been changed.", $params->userId);
+            }
+
+            if(isset($params->grading) && ($prevData->grading !== $params->grading)) {
+                $this->userLogs("assignments", $params->assignment_id, $prevData->grading, "Assignment Grade has been changed.", $params->userId);
+            }
+
+            if(isset($params->description) && ($prevData->assignment_description !== $params->description)) {
+                $this->userLogs("assignments", $params->assignment_id, $prevData->assignment_description, "Assignment description has been changed.", $params->userId);
+            }
+
+            if(isset($params->assigned_to) && ($prevData->assigned_to !== $params->assigned_to)) {
+                $this->userLogs("assignments", $params->assignment_id, $prevData->assigned_to, "Assignment assigned to has been changed.", $params->userId);
+            }
+
+            // set the value
+			$additional = ["href" => "{$this->baseUrl}update-assignment/{$params->assignment_id}/view"];
+
+            # set the output to return when successful
+            $return = ["code" => 200, "data" => "Assignment successfully updated.", "refresh" => 2000, "additional" => $additional];
+			
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {}
     }
 
     /**
@@ -320,7 +442,7 @@ class Assignments extends Myschoolgh {
         }
 
         // update the assignment state
-        $this->db->query("UPDATE assignments SET state='Graded' WHERE assignment_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+        $this->db->query("UPDATE assignments SET state='Graded' WHERE item_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
 
         // return the success response
         return [
@@ -351,7 +473,7 @@ class Assignments extends Myschoolgh {
         }
 
         // update the status of the assignment
-        $this->db->query("UPDATE assignments SET state='Closed', date_closed=now() WHERE assignment_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+        $this->db->query("UPDATE assignments SET state='Closed', date_closed=now() WHERE item_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
 
         return [
             "data" => "Assignment was successfully closed."

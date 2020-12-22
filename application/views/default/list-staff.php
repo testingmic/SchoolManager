@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject;
+global $myClass, $accessObject, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -29,12 +29,8 @@ $api_staff_list = load_class("users", "controllers")->list($staff_param);
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
 
-// the query parameter to load the user information
-$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "userId" => $session->userId];
-
 // get the user data
-$userData = $usersClass->list($i_params)["data"][0];
-$accessObject->userPermits = $userData->user_permissions;
+$accessObject->userPermits = $defaultUser->user_permissions;
 
 $staff_list = "";
 

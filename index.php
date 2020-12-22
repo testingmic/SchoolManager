@@ -86,6 +86,13 @@ $accessObject = load_class('accesslevel', 'controllers');
 $noticeClass = load_class('notification', 'controllers');
 $announcementClass = load_class('announcements', 'controllers');
 
+// if the session is set
+if(!empty($session->userId)) {
+	// the query parameter to load the user information
+	$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "userId" => $session->userId];
+	$defaultUser = $usersClass->list($i_params)["data"][0];
+}
+
 // To be used for inserting additional scripts
 $loadedCSS = [];
 $loadedJS = [];

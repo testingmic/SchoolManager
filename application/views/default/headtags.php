@@ -102,12 +102,9 @@ if(!isset($userPrefs->messages)) {
             <nav class="navbar navbar-expand-lg main-navbar">
                 <div class="form-inline mr-auto">
                 <ul class="navbar-nav mr-3">
-                    <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg collapse-btn"><i
-                        class="fas fa-bars"></i></a></li>
-                    <li><a href="#" class="nav-link nav-link-lg fullscreen-btn">
-                        <i class="fas fa-expand"></i>
-                    </a>
-                    </li>
+                    <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg collapse-btn"><i class="fas fa-bars"></i></a></li>
+                    <li><a href="#" class="nav-link nav-link-lg fullscreen-btn"><i class="fas fa-expand"></i></a></li>
+                    <li><a href="#" class="nav-link nav-link-lg hidden" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
                 </ul>
                 </div>
                 <ul class="navbar-nav navbar-right">

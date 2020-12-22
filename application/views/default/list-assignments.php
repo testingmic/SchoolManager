@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject;
+global $myClass, $accessObject, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -20,12 +20,9 @@ $response->title = "Assignments List : {$appName}";
 $response->scripts = [];
 
 // the query parameter to load the user information
-$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "userId" => $session->userId];
-$userData = $usersClass->list($i_params)["data"][0];
-
 $assignments_param = (object) [
     "clientId" => $session->clientId,
-    "userData" => $userData,
+    "userData" => $defaultUser,
     "limit" => 99999
 ];
 
@@ -33,7 +30,7 @@ $item_list = load_class("assignments", "controllers")->list($assignments_param);
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $userData->user_permissions;
+$accessObject->userPermits = $defaultUser->user_permissions;
 $hasDelete = $accessObject->hasAccess("delete", "assignments");
 $hasUpdate = $accessObject->hasAccess("update", "assignments");
 

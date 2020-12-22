@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject;
+global $myClass, $accessObject, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -22,6 +22,7 @@ $response->scripts = [];
 $courses_param = (object) [
     "clientId" => $session->clientId,
     "userId" => $session->userId,
+    "userData" => $defaultUser,
     "limit" => 99999
 ];
 

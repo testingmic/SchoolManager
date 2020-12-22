@@ -1,0 +1,10 @@
+<br />
+<b>Warning</b>:  copy(assets/documents/download/PJ5um): failed to open stream: No such file or directory in <b>C:\xampp\htdocs\analitica_innovare\score\v1\application\models\downloads.php</b> on line <b>26</b><br />
+<br />
+<b>Warning</b>:  copy(assets/documents/download/PJ5um): failed to open stream: No such file or directory in <b>C:\xampp\htdocs\analitica_innovare\score\v1\application\models\downloads.php</b> on line <b>29</b><br />
+<br />
+<b>Warning</b>:  filesize(): stat failed for assets/documents/download/THE METHODIST CHURCH GHANA.docx in <b>C:\xampp\htdocs\analitica_innovare\score\v1\application\models\downloads.php</b> on line <b>52</b><br />
+<br />
+<b>Warning</b>:  readfile(assets/documents/download/THE METHODIST CHURCH GHANA.docx): failed to open stream: No such file or directory in <b>C:\xampp\htdocs\analitica_innovare\score\v1\application\models\downloads.php</b> on line <b>53</b><br />
+<br />
+<b>Warning</b>:  unlink(assets/documents/download/THE METHODIST CHURCH GHANA.docx): No such file or directory in <b>C:\xampp\htdocs\analitica_innovare\score\v1\application\models\downloads.php</b> on line <b>54</b><br />

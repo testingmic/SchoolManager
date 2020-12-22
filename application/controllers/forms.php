@@ -293,9 +293,12 @@ class Forms extends Myschoolgh {
      * 
      * This is a common form fields that are present in all forms of assignments
      * 
+     * @param stdClass     $params
+     * @param String       $disabled
+     * 
      * @return String
      */
-    private function assignment_template(stdClass $params) {
+    private function assignment_template(stdClass $params, $disabled = null) {
         
         /** Set parameters for the data to attach */
         $file_params = (object) [
@@ -349,13 +352,13 @@ class Forms extends Myschoolgh {
         $html_content = "<div class='col-lg-8'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Title <span class='required'>*</span></label>";
-        $html_content .= "<input class='form-control' value='".($params->data->assignment_title ?? null)."' name='assignment_title' id='assignment_title'>";
+        $html_content .= "<input {$disabled} class='form-control' value='".($params->data->assignment_title ?? null)."' name='assignment_title' id='assignment_title'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Class <span class='required'>*</span></label>";
-        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='class_id' id='class_id'>";
+        $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='class_id' id='class_id'>";
         $html_content .= "<option value='null'>Select Class</option>";
         foreach($this->pushQuery("name, id", "classes", "client_id='{$params->clientId}' AND status='1'") as $class) {
             $html_content .= "<option ".($class_id == $class->id ? "selected" : null)." value='{$class->id}'>{$class->name}</option>";
@@ -366,7 +369,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Course <span class='required'>*</span></label>";
-        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='course_id' id='course_id'>";
+        $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='course_id' id='course_id'>";
         $html_content .= "<option value='null'>Select Course</option>";
         
         // display the courses list
@@ -382,13 +385,13 @@ class Forms extends Myschoolgh {
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Submission Date <span class='required'>*</span></label>";
-        $html_content .= "<input type='date' class='form-control' value='".($params->data->due_date ?? null)."' name='date_due' id='date_due'>";
+        $html_content .= "<input {$disabled} type='date' class='form-control' value='".($params->data->due_date ?? null)."' name='date_due' id='date_due'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Time Due</label>";
-        $html_content .= "<input type='time' class='form-control' value='".($params->data->due_time ?? null)."' name='time_due' id='time_due'>";
+        $html_content .= "<input {$disabled} type='time' class='form-control' value='".($params->data->due_time ?? null)."' name='time_due' id='time_due'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
 
@@ -396,25 +399,30 @@ class Forms extends Myschoolgh {
             <div class='col-md-12'>
                 <div class='form-group'>
                     <label>Additional Instructions</label>
-                    {$this->textarea_editor($description)}</div>
+                    ".( !$disabled ? $this->textarea_editor($description) : $description )."</div>
             </div>";
         
-        $html_content .= "
+        // append the assignment id if the data parameter is not empty
+        if(!$disabled) {
+            // show the file upload content
+            $html_content .= "
             <div class='col-lg-12' id='upload_question_set_template'>
                 <div class='form-group text-center mb-1'><div class='row'>{$this->form_attachment_placeholder($file_params)}</div></div>
-            </div>
-            <div class='form-group text-center mb-1'>{$preloaded_attachments}</div>";
+            </div>";
+        }
+        
+        $html_content .= "<div class='form-group text-center mb-1'>{$preloaded_attachments}</div>";
 
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Grade <span class='required'>*</span></label>";
-        $html_content .= "<input type='number' value='".($params->data->grading ?? null)."' min='1' max='100' class='form-control' name='grade' id='grade'>";
+        $html_content .= "<input {$disabled} type='number' value='".($params->data->grading ?? null)."' min='1' max='100' class='form-control' name='grade' id='grade'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Assigned To</label>";
-        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='assigned_to' id='assigned_to'>";
+        $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='assigned_to' id='assigned_to'>";
         $html_content .= "<option ".($assigned_to == "all_students" ? "selected" : null)." value='all_students'>All Students</option>";
         $html_content .= "<option ".($assigned_to == "selected_students" ? "selected" : null)." value='selected_students'>Selected Students</option>";
         $html_content .= "</select>";
@@ -424,7 +432,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<div class='col-lg-12 ".($assigned_to == "selected_students" ? "" : "hidden")."' id='assign_to_students_list'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Students List</label>";
-        $html_content .= "<select data-width='100%' multiple class='selectpicker form-control' name='assigned_to_list' id='assigned_to_list'>";
+        $html_content .= "<select {$disabled} data-width='100%' multiple class='selectpicker form-control' name='assigned_to_list' id='assigned_to_list'>";
         $html_content .= "<option value=''>Select Students</option>";
 
         // display the courses list
@@ -451,41 +459,51 @@ class Forms extends Myschoolgh {
     public function create_assignment(stdClass $params, $mode = null) {
         
         // readonly state
-        $readonly = isset($params->data->state) && ($params->data->state == "Closed") ? "readonly='readonly'" : null;
+        $disabled = isset($params->data->state) && (!in_array($params->data->state, ["Pending", "Graded"])) ? "disabled='disabled'" : null;
 
         $html_content = "
         <style>
-        .ajax-data-form trix-editor {
+        #create_assignment trix-editor {
             min-height: 150px;
             max-height: 150px;
         }
         </style>
-        <form class='ajax-data-form' action='{$this->baseUrl}api/assignments/".(!$params->data ? "add" : "update")."' method='post' id='ajax-data-form-content'>";
+        <form ".(!$disabled ? "class='ajax-data-form' id='ajax-data-form-content' action='{$this->baseUrl}api/assignments/".(!$params->data ? "add" : "update")."'": "")." method='post'>";
         $html_content .= "<div class='row' id='create_assignment'>";
         
         $html_content .= "<div class='col-lg-4'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Question Type</label>";
-        $html_content .= "<select data-width='100%' class='selectpicker form-control' name='assignment_type' id='assignment_type'>";
+        $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='assignment_type' id='assignment_type'>";
         $html_content .= "<option value='file_attachment'>Upload Question Set</option>";
         $html_content .= "<option value='multiple_choice'>Multiple Choice Questions (Quiz)</option>";
         $html_content .= "</select>";
         $html_content .= "</div>";
         $html_content .= "</div>";
 
-        $html_content .= $this->assignment_template($params);
+        $html_content .= $this->assignment_template($params, $disabled);
 
         $html_content .= "</div>";
+        
+        // show the submit buttons if the assignment is still active
+        if(!$disabled) {
 
-        $html_content .= "
-            <div class=\"row border-top\">
-                <div class=\"col-md-6 mt-4 text-left\">
-                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
-                </div>
-                <div class=\"col-md-6 mt-4 text-right\">
-                    <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Assignment</button>
-                </div>
-            </div>";
+            // append the assignment id if the data parameter is not empty
+            if($params->data) {
+                $html_content .= "<input hidden type='hidden' {$disabled} class='form-control' id='assignment_id' name='assignment_id' value='{$params->data->item_id}'>";
+            }
+            
+            // append the submit and cancel buttons
+            $html_content .= "
+                <div class=\"row border-top\">
+                    <div class=\"col-md-6 mt-4 text-left\">
+                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                    </div>
+                    <div class=\"col-md-6 mt-4 text-right\">
+                        <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Assignment</button>
+                    </div>
+                </div>";
+        }
             
         $html_content .= "</form>";
 
@@ -2106,7 +2124,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="course_tutor">Course Tutor</label>
                         <select data-width="100%" name="course_tutor" id="course_tutor" class="form-control selectpicker">
-                            <option value="null">Select Section Leader</option>';
+                            <option value="null">Select Course Tutor</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->item_id == $itemData->course_tutor) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }

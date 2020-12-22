@@ -1,4 +1,4 @@
-$(`div[id='create_assignment'] select[name='assignment_type']`).on("change", () => {
+$(`div[id='create_assignment'] select[name='assignment_type']`).on("change", function() {
     let value = $(this).val();
     if (value === "multiple_choice") {
         $(`button[type="button-submit"]`).html("Add Questions");
@@ -9,7 +9,7 @@ $(`div[id='create_assignment'] select[name='assignment_type']`).on("change", () 
     }
 });
 
-$(`div[id='create_assignment'] select[name='assigned_to']`).on("change", () => {
+$(`div[id='create_assignment'] select[name='assigned_to']`).on("change", function() {
     let value = $(this).val();
     if (value === "all_students") {
         $(`div[id='assign_to_students_list']`).addClass("hidden");
@@ -18,7 +18,7 @@ $(`div[id='create_assignment'] select[name='assigned_to']`).on("change", () => {
     }
 });
 
-$(`div[id='create_assignment'] select[name='class_id']`).on("change", () => {
+$(`div[id='create_assignment'] select[name='class_id']`).on("change", function() {
     let class_id = $(this).val();
     if (class_id !== "null") {
         $.get(`${baseUrl}api/assignments/load_course_students`, { class_id }).then((response) => {
@@ -92,6 +92,9 @@ var close_Assignment = () => {
     }).then(() => {
         $.post(`${baseUrl}api/assignments/close`, { assignment_id }).then((response) => {
             if (response.code == 200) {
+                $(`div[class="initial_assignment_buttons"]`).remove();
+                $(`input[name="test_grading"]`).attr("disabled", "disabled");
+                $(`span[id="assignment_state"]`).html(`<span class="badge badge-danger">Closed</span>`);
                 swal({
                     position: "top",
                     text: response.data.result,
@@ -151,9 +154,10 @@ var submit_Answers = (assignment_id) => {
                     $(`div[id="handin_upload"]`).remove();
                     $(`div[id="handin_documents"]`).removeClass("col-lg-4").addClass("col-lg-12");
                     $(`div[id="handin_documents"]`).html(response.data.additional);
-                    // loadPage(`${baseUrl}update-assignment/${assignment_id}/view`);
                 }
             });
         }
     });
 }
+
+trigger_form_submit();

@@ -3,6 +3,7 @@
  */
 
 // Links
+$.current_page = "";
 $.protocol = window.location.protocol;
 $.host = window.location.host;
 $.baseurl = $.protocol + "//" + $.host + "/myschool_gh";
@@ -125,6 +126,11 @@ $("#history-back").on("click", function() {
 
 $("#history-forward").on("click", function() {
     window.history.forward();
+});
+
+
+$("#history-refresh").on("click", function() {
+    loadPage($.current_page);
 });
 
 var require = require || undefined
@@ -376,7 +382,15 @@ var loadPage = (loc, callback, pushstate) => {
     devlog("loadPage(", loc, ") I called =>")
 
     if (appxhr.length > 0) abortscripts();
-    if (callback === undefined) callback = getCallback(loc)
+    if (callback === undefined) callback = getCallback(loc);
+
+    $.current_page = loc;
+
+    if (loc == `${$.baseurl}` || loc == `${$.baseurl}/dashboard`) {
+        $(`[id="history-refresh"]`).addClass("hidden");
+    } else {
+        $(`[id="history-refresh"]`).removeClass("hidden");
+    }
 
     let progress = moveProgress();
     $.ajax({
@@ -477,7 +491,7 @@ var loadFormAction = (form) => {
                 });
                 if (result.data.additional !== undefined) {
                     if (result.data.additional.clear !== undefined) {
-                        $(`form[class~="ajaxform"] input`).val("");
+                        $(`form[class~="ajaxform"] input, form[class~="ajaxform"] textarea`).val("");
                         $(`form[class~="ajaxform"] select`).val("null").change();
                     }
                     if (result.data.additional.href !== undefined) {

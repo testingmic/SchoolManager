@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL;
+global $myClass, $SITEURL, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -24,14 +24,10 @@ $response->scripts = [
     "assets/js/assignments.js"
 ];
 
-// the query parameter to load the user information
-$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "userId" => $session->userId];
-$userData = $usersClass->list($i_params)["data"][0];
-
 // access permission variables
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $userData->user_permissions;
+$accessObject->userPermits = $defaultUser->user_permissions;
 
 // update the assignment permission
 $hasUpdate = $accessObject->hasAccess("update", "assignments");
@@ -46,7 +42,7 @@ if(!empty($item_id)) {
     $item_param = (object) [
         "clientId" => $clientId,
         "assignment_id" => $item_id,
-        "userData" => $userData,
+        "userData" => $defaultUser,
         "limit" => 1
     ];
 
@@ -68,8 +64,11 @@ if(!empty($item_id)) {
         $grading_info = "<div class='row'>";
 
         // get the list of students
-        if(in_array($userData->user_type, ["teacher", "admin"])) {
+        if(in_array($defaultUser->user_type, ["teacher", "admin"])) {
             
+            // append the upload script
+            $response->scripts[] = "assets/js/upload.js";
+
             /** Get the students list */
             $students_list = ($data->assigned_to == "selected_students") ? $myClass->stringToArray($data->assigned_to_list) 
                 : array_column($myClass->pushQuery("item_id, unique_id, name, email, phone_number, gender", "users", 
@@ -101,7 +100,7 @@ if(!empty($item_id)) {
                 $grading_info .= '
                 <div class="col-lg-6" id="assignment-content">
                     '.( $isActive ?
-                        '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="separator">
+                        '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
                             <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
                             <button class="btn btn-outline-success" onclick="return save_AssignmentMarks();"><i class="fa fa-save"></i> Save</button>
                         </div>' : (
@@ -159,7 +158,7 @@ if(!empty($item_id)) {
         }
 
         // if student or parent
-        elseif(in_array($userData->user_type, ["student", "parent"])) {
+        elseif(in_array($defaultUser->user_type, ["student", "parent"])) {
 
             // init
             $preloaded = "";
@@ -171,7 +170,7 @@ if(!empty($item_id)) {
             // file upload parameter
             $file_params = (object) [
                 "module" => $module,
-                "userData" => $userData,
+                "userData" => $defaultUser,
                 "item_id" => $item_id,
             ];
 
@@ -228,7 +227,6 @@ if(!empty($item_id)) {
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'">Dashboard</a></div>
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-assignments">Assignments List</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
-                    <div class="breadcrumb-item"><a href="'.$baseUrl.'update-assignment/'.$item_id.'/view">Reload</a></div>
                 </div>
             </div>
             <div class="section-body">
@@ -261,7 +259,7 @@ if(!empty($item_id)) {
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Handed In</span>
-                                <span class="float-right text-muted">'.$data->students_handed_in.' Students</span>
+                                <span class="float-right text-muted">'.$data->students_handed_in . ($data->students_handed_in > 1 ? " Students" : " Student" ).'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Marked</span>
@@ -286,21 +284,8 @@ if(!empty($item_id)) {
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Status</span>
-                                <span class="float-right text-muted">'.$myClass->the_status_label($data->state).'</span>
+                                <span class="float-right text-muted" id="assignment_state">'.$myClass->the_status_label($data->state).'</span>
                             </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Additional Details</h4>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="py-3 pt-0">
-                            '.$data->assignment_description.'
-                        </div>
-                        <div class="py-3 pt-0">
-                            '.$data->attachment_html.'
                         </div>
                     </div>
                 </div>
@@ -336,7 +321,12 @@ if(!empty($item_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
+                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
+                            Additional Details
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
                             '.($hasUpdate ? "Grade Students" : "Handin Assignment").'</a>
                     </li>';
 
@@ -351,7 +341,17 @@ if(!empty($item_id)) {
                     $response->html .= '
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
-                        <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
+                        <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="details" role="tabpanel" aria-labelledby="details-tab2">
+                            <div class="pt-0">
+                                <div class="py-3 pt-0">
+                                    '.$data->assignment_description.'
+                                </div>
+                                <div class="py-1 pt-0">
+                                    '.$data->attachment_html.'
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
                             '.$grading_info.'
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
