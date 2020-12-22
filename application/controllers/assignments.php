@@ -17,7 +17,8 @@ class Assignments extends Myschoolgh {
      * @return Array
      */
     public function list(stdClass $params) {
-
+        
+        $query = "";
         $params->query = "1";
 
         $filesObject = load_class("forms", "controllers");
@@ -48,25 +49,40 @@ class Assignments extends Myschoolgh {
         $params->query .= (isset($params->assignment_id)) ? " AND a.item_id='{$params->assignment_id}'" : null;
         $params->query .= (isset($params->course_tutor)) ? " AND a.course_tutor LIKE '%{$params->course_tutor}%'" : null;
 
+        // if the user is a parent or student
+        if(in_array($params->userData->user_type, ["parent", "student"])) {
+            $query = ",
+            (SELECT handed_in FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$params->userData->user_id}') AS handed_in,
+            (SELECT score FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$params->userData->user_id}') AS awarded_mark,
+            (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id AND a.created_by = '{$params->userData->user_id}' ORDER BY b.id DESC LIMIT 1) AS attached_document";
+        }
+        
         try {
 
             $stmt = $this->db->prepare("
-                SELECT a.*, 
-                (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
+                SELECT a.*,
                 (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
                 (SELECT name FROM courses WHERE courses.id = a.course_id LIMIT 1) AS course_name,
-                (SELECT COUNT(*) FROM users c WHERE c.client_id=a.client_id AND a.class_id=c.class_id AND c.user_type='student' AND c.user_status='Active' AND c.status='1') AS students_assigned,
                 (SELECT COUNT(*) FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.graded='1') AS students_graded,
                 (SELECT COUNT(*) FROM assignments_submitted	c WHERE c.assignment_id=a.item_id AND c.graded='0') AS students_handed_in,
+                (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
+                (SELECT COUNT(*) FROM users c WHERE c.client_id=a.client_id AND a.class_id=c.class_id AND c.user_type='student' AND c.user_status='Active' AND c.status='1') AS students_assigned,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.course_tutor LIMIT 1) AS course_tutor_info,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
-                FROM assignments a
+                {$query} FROM assignments a
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
             ");
             $stmt->execute([1]);
 
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // handedin label
+                if(isset($result->handed_in)) {
+                    $result->handedin_label = $this->the_status_label($result->handed_in);
+                    $result->attached_document = json_decode($result->attached_document);
+                    $result->attached_attachment_html = isset($result->attached_document) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-12", false, false) : null;
+                }
 
                 // clean the assignment description
                 $result->assignment_description = custom_clean(htmlspecialchars_decode($result->assignment_description));
@@ -131,7 +147,7 @@ class Assignments extends Myschoolgh {
         }
         /** Confirm that the user is using the file attachment module */
         $item_id = random_string("alnum", 32);
-        $is_attach = (bool) ($params->question_set_type == "file_attachment");
+        $is_attach = (bool) ($params->assignment_type == "file_attachment");
 
         try {
             

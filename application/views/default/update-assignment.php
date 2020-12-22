@@ -21,7 +21,6 @@ $pageTitle = "Assignment Details";
 $response->title = "{$pageTitle} : {$appName}";
 
 $response->scripts = [
-    "assets/js/upload.js", 
     "assets/js/assignments.js"
 ];
 
@@ -142,6 +141,60 @@ if(!empty($item_id)) {
                 </div>';
             }
         }
+
+        // if student or parent
+        elseif(in_array($userData->user_type, ["student", "parent"])) {
+
+            // init
+            $preloaded = "";
+            $session->attachAssignmentDocs = true;
+
+            // module
+            $module = "assignments_handin_{$item_id}";
+
+            // file upload parameter
+            $file_params = (object) [
+                "module" => $module,
+                "userData" => $userData,
+                "item_id" => $item_id,
+            ];
+
+            // check if the use has handed in the assignment
+            $handed_in = (bool) ($data->handed_in === "Pending");
+            
+            // display the content if the assignment type is a file_attachment
+            if($data->assignment_type == "file_attachment") {
+                
+                // append to the scripts if not already submitted
+                if($handed_in) {
+                    $response->scripts[] = "assets/js/upload.js";
+                }
+
+                // display the file upload option
+                $grading_info .= '
+                '.($handed_in ?
+                    '<div class="col-lg-'.($handed_in ? 8 : 4).'" id="handin_upload">
+                        <div><h5 class="text-uppercase">Upload Document</h5></div>
+                        <div class="col-lg-12" id="upload_question_set_template">
+                            <div class="form-group text-center mb-1">
+                                <div class="row">'.load_class("forms", "controllers")->form_attachment_placeholder($file_params).'</div>
+                            </div>
+                        </div>
+                        '.(!empty($session->{$module}) ?
+                            '<div class="text-right">
+                                <a href="javascript:void(0)" onclick="submit_Answers(\''.$item_id.'\');" class="btn anchor btn-outline-primary">
+                                    <i class="fa fa-save"></i> Submit Answer
+                                </a>
+                            </div>' : ''
+                        ).'
+                    </div>' : ''
+                ).'
+                <div class="col-lg-'.($handed_in ? 12 : 4).'" id="handin_documents">
+                    '.$data->attached_attachment_html.'
+                </div>';
+            }
+        }
+
         $grading_info .= '</div>';
 
         // if the request is to view the student information
@@ -228,9 +281,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
                 <div class="card">
-                    <div class="card-header">
-                        <h4>Course Tutor Details</h4>
-                    </div>
+                    <div class="card-header"><h4>Course Tutor Details</h4></div>
                     <div class="card-body pt-0 pb-0">
                         <div class="py-3 pt-0">
                             <div class="d-flex justify-content-start">
@@ -261,7 +312,8 @@ if(!empty($item_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Grade Students</a>
+                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
+                            '.($hasUpdate ? "Grade Students" : "Handin Assignment").'</a>
                     </li>';
 
                     if($hasUpdate) {

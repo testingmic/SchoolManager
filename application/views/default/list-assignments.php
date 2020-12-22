@@ -49,12 +49,20 @@ foreach($item_list["data"] as $key => $each) {
     $assignments .= "<tr data-row_id=\"{$each->id}\">";
     $assignments .= "<td>".($key+1)."</td>";
     $assignments .= "<td>{$each->assignment_title}</td>";
-    $assignments .= "<td>{$each->due_date}</td>";
-    $assignments .= "<td>{$each->students_assigned}</td>";
-    $assignments .= "<td>{$each->students_handed_in}</td>";
-    $assignments .= "<td>{$each->students_graded}</td>";
+    $assignments .= "<td>{$each->due_date} @ {$each->due_time}</td>";
+    // show this section if the user has the necessary permissions
+    if($hasUpdate) {
+        $assignments .= "<td>{$each->students_assigned}</td>";
+        $assignments .= "<td>{$each->students_handed_in}</td>";
+        $assignments .= "<td>{$each->students_graded}</td>";
+    }
+    
+    if(!$hasUpdate) {
+        $assignments .= "<td>{$each->awarded_mark}</td>";
+    }
+
     $assignments .= "<td>{$each->date_created}</td>";
-    $assignments .= "<td>{$each->state}</td>";
+    $assignments .= "<td>".($hasUpdate ? $each->state : $each->handedin_label)."</td>";
     $assignments .= "<td align='center'>{$action}</td>";
     $assignments .= "</tr>";
 }
@@ -79,9 +87,11 @@ $response->html = '
                                         <th width="5%" class="text-center">#</th>
                                         <th>Title</th>
                                         <th>Due Date</th>
-                                        <th width="10%">Assigned</th>
-                                        <th>Handed In</th>
-                                        <th>Marked</th>
+                                        '.($hasUpdate ? '
+                                            <th width="10%">Assigned</th>
+                                            <th>Handed In</th>
+                                            <th>Marked</th>' : '<th>Awarded Mark</th>'
+                                        ).'
                                         <th>Date Created</th>
                                         <th>Status</th>
                                         <th align="center" width="10%"></th>

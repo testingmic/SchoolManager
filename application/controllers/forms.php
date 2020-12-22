@@ -677,7 +677,7 @@ class Forms extends Myschoolgh {
         
         // set a new parameter for the items
         $files_param = (object) [
-            "userData" => $this->thisUser ?? null,
+            "userData" => $params->userData ?? $this->thisUser,
             "label" => "list",
             "module" => $params->module ?? null,
             "item_id" => $params->item_id ?? "temp_attachment",

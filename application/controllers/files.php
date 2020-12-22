@@ -417,7 +417,7 @@ class Files extends Myschoolgh {
      * 
      * @return Array
      */
-    private function list_temp_attachments($module, $tmp_dir) {
+    public function list_temp_attachments($module, $tmp_dir) {
 
         // attachments list
         $attachments_list = $this->session->$module;

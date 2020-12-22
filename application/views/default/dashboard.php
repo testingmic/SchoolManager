@@ -67,31 +67,38 @@ $response->scripts = [
 
 // get the list of users
 $student_param = (object) ["clientId" => $session->clientId,"user_type" => "student"];
-$student_list = load_class("users", "controllers")->list($student_param);
 
 $students = "";
-foreach($student_list["data"] as $key => $each) {
-    
-    $action = "<a href='{$baseUrl}update-student/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+$viewStudents = (bool) in_array($userData->user_type, ["teacher", "admin"]);
+// get the list of students
+if($viewStudents) {
 
-    if($hasUpdate) {
-        $action .= "&nbsp;<a href='{$baseUrl}update-student/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-    }
-    if($hasDelete) {
-        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
-    }
+    // get the list of students
+    $student_list = load_class("users", "controllers")->list($student_param);
 
-    $students .= "<tr data-row_id=\"{$each->user_id}\">";
-    $students .= "<td>".($key+1)."</td>";
-    $students .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
-    $students .= "<td>{$each->class_name}</td>";
-    $students .= "<td>{$each->gender}</td>";
-    $students .= "<td>{$each->date_of_birth}</td>";
-    $students .= "<td>{$each->department_name}</td>";
-    $students .= "<td class='text-center'>{$action}</td>";
-    $students .= "</tr>";
+    // loop through the students list
+    foreach($student_list["data"] as $key => $each) {
+        
+        $action = "<a href='{$baseUrl}update-student/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+
+        if($hasUpdate) {
+            $action .= "&nbsp;<a href='{$baseUrl}update-student/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        }
+        if($hasDelete) {
+            $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        }
+
+        $students .= "<tr data-row_id=\"{$each->user_id}\">";
+        $students .= "<td>".($key+1)."</td>";
+        $students .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
+        $students .= "<td>{$each->class_name}</td>";
+        $students .= "<td>{$each->gender}</td>";
+        $students .= "<td>{$each->date_of_birth}</td>";
+        $students .= "<td>{$each->department_name}</td>";
+        $students .= "<td class='text-center'>{$action}</td>";
+        $students .= "</tr>";
+    }
 }
-
 
 // set the response dataset
 $response->html = '
@@ -219,6 +226,7 @@ $response->html .= '</select>
             </div>
         </div>
         <div class="row">
+        '.($viewStudents ? '
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="mt-3 pr-3 pl-3">
@@ -244,7 +252,8 @@ $response->html .= '</select>
                             </table>
                         </div>
                     </div>
-                </div>
+                </div>' : ''
+            ).'
             </div>
         </div>
 
