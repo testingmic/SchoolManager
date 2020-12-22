@@ -42,7 +42,7 @@ foreach($item_list["data"] as $key => $each) {
     
     $action = "<a href='{$baseUrl}update-assignment/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
-    if($hasDelete) {
+    if($hasDelete && $each->state == "Pending") {
         $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"assignments\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
@@ -62,7 +62,7 @@ foreach($item_list["data"] as $key => $each) {
     }
 
     $assignments .= "<td>{$each->date_created}</td>";
-    $assignments .= "<td>".($hasUpdate ? $each->state : $each->handedin_label)."</td>";
+    $assignments .= "<td>".($hasUpdate ? $myClass->the_status_label($each->state) : $each->handedin_label)."</td>";
     $assignments .= "<td align='center'>{$action}</td>";
     $assignments .= "</tr>";
 }

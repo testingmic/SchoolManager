@@ -1,4 +1,4 @@
-$(`div[id='create_assignment'] select[name='assignment_type']`).on("change", function() {
+$(`div[id='create_assignment'] select[name='assignment_type']`).on("change", () => {
     let value = $(this).val();
     if (value === "multiple_choice") {
         $(`button[type="button-submit"]`).html("Add Questions");
@@ -9,7 +9,7 @@ $(`div[id='create_assignment'] select[name='assignment_type']`).on("change", fun
     }
 });
 
-$(`div[id='create_assignment'] select[name='assigned_to']`).on("change", function() {
+$(`div[id='create_assignment'] select[name='assigned_to']`).on("change", () => {
     let value = $(this).val();
     if (value === "all_students") {
         $(`div[id='assign_to_students_list']`).addClass("hidden");
@@ -18,7 +18,7 @@ $(`div[id='create_assignment'] select[name='assigned_to']`).on("change", functio
     }
 });
 
-$(`div[id='create_assignment'] select[name='class_id']`).on("change", function() {
+$(`div[id='create_assignment'] select[name='class_id']`).on("change", () => {
     let class_id = $(this).val();
     if (class_id !== "null") {
         $.get(`${baseUrl}api/assignments/load_course_students`, { class_id }).then((response) => {
@@ -40,7 +40,7 @@ $(`div[id='create_assignment'] select[name='class_id']`).on("change", function()
     }
 });
 
-$(`button[class~="save-marks"]`).on("click", function() {
+var save_AssignmentMarks = () => {
     var student_list = [],
         assignment_id = $(`input[name='data-student-id']`).attr("data-assignment_id");
 
@@ -50,8 +50,8 @@ $(`button[class~="save-marks"]`).on("click", function() {
         icon: 'warning',
         buttons: true,
         dangerMode: true,
-    }).then((willDelete) => {
-        if (willDelete) {
+    }).then((proceed) => {
+        if (proceed) {
             $("#assignment-content :input[name='test_grading']").each(function() {
                 let student_id = $(this).attr("data-value"),
                     student_mark = $(this).val();
@@ -78,7 +78,29 @@ $(`button[class~="save-marks"]`).on("click", function() {
             })
         }
     });
-});
+}
+
+var close_Assignment = () => {
+    var assignment_id = $(`input[name='data-student-id']`).attr("data-assignment_id");
+
+    swal({
+        title: "Close Assignment",
+        text: "Are you sure you want to close this Assignment? You cannot award marks once it has been closed.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then(() => {
+        $.post(`${baseUrl}api/assignments/close`, { assignment_id }).then((response) => {
+            if (response.code == 200) {
+                swal({
+                    position: "top",
+                    text: response.data.result,
+                    icon: "success",
+                });
+            }
+        });
+    });
+}
 
 var load_studentInfo = async(student_id, assignment_id) => {
     let returnVal = await $.ajax({
@@ -128,6 +150,7 @@ var submit_Answers = (assignment_id) => {
                 if (response.code == 200) {
                     $(`div[id="handin_upload"]`).remove();
                     $(`div[id="handin_documents"]`).removeClass("col-lg-4").addClass("col-lg-12");
+                    $(`div[id="handin_documents"]`).html(response.data.additional);
                     // loadPage(`${baseUrl}update-assignment/${assignment_id}/view`);
                 }
             });

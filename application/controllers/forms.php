@@ -449,6 +449,9 @@ class Forms extends Myschoolgh {
      * @return String
      */
     public function create_assignment(stdClass $params, $mode = null) {
+        
+        // readonly state
+        $readonly = isset($params->data->state) && ($params->data->state == "Closed") ? "readonly='readonly'" : null;
 
         $html_content = "
         <style>

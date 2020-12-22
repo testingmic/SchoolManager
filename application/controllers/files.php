@@ -519,62 +519,68 @@ class Files extends Myschoolgh {
             // set the list to the existing record... 
             $files_list = $existing_data;
 
-            // loop through the list of attached files
-            foreach($attachments_list as $each_file) {
-
-                //: get the file size
-                $n_FileSize = file_size_convert("{$tmp_dir}{$each_file['first']}");
-                $n_FileSize_KB = file_size("{$tmp_dir}{$each_file['first']}");
-                $totalFileSize += $n_FileSize_KB;
+            try {
                 
-                // default
-                $color = 'danger';
-                //: Background color of the icon
-                if(in_array($each_file["fifth"], ['doc', 'docx'])) {
-                    $color = 'primary';
-                } elseif(in_array($each_file["fifth"], ['xls', 'xlsx', 'csv'])) {
-                    $color = 'success';
-                } elseif(in_array($each_file["fifth"], ['txt', 'json', 'rtf', 'sql', 'css', 'php'])) {
-                    $color = 'default';
+                // loop through the list of attached files
+                foreach($attachments_list as $each_file) {
+
+                    //: get the file size
+                    $n_FileSize = file_size_convert("{$tmp_dir}{$each_file['first']}");
+                    $n_FileSize_KB = file_size("{$tmp_dir}{$each_file['first']}");
+                    $totalFileSize += $n_FileSize_KB;
+                    
+                    // default
+                    $color = 'danger';
+                    //: Background color of the icon
+                    if(in_array($each_file["fifth"], ['doc', 'docx'])) {
+                        $color = 'primary';
+                    } elseif(in_array($each_file["fifth"], ['xls', 'xlsx', 'csv'])) {
+                        $color = 'success';
+                    } elseif(in_array($each_file["fifth"], ['txt', 'json', 'rtf', 'sql', 'css', 'php'])) {
+                        $color = 'default';
+                    }
+
+                    // set the filename
+                    $file_name = $each_file["second"];
+                    $file_name = (preg_replace("/[\s]/", "_", $file_name));
+                    $file_to_download = "{$docs_dir}{$file_name}.{$each_file["fifth"]}";
+
+                    // confirm that there is no existing file with the name.
+                    if(is_file($file_to_download) && file_exists($file_to_download)) {
+                        $file_to_download = "{$docs_dir}{$file_name}"."_".mt_rand(1, 20).".{$each_file["fifth"]}";
+                    }
+
+                    // create the document for download
+                    copy("{$tmp_dir}{$each_file["first"]}", $file_to_download);
+                    
+                    // append to the list
+                    $files_list[] = [
+                        "unique_id" => $each_file["first"],
+                        "name" => $each_file["second"].".{$each_file["fifth"]}",
+                        "path" => "{$docs_dir}{$file_name}.{$each_file["fifth"]}",
+                        "type" => $each_file["fifth"],
+                        "size" => $each_file["forth"],
+                        "size_raw" => $n_FileSize_KB,
+                        "is_deleted" => 0,
+                        "record_id" => $record_id,
+                        "datetime" => date("l, jS F Y \\a\\t h:i:sA"),
+                        "favicon" => "{$this->favicon_array[$each_file["fifth"]]} fa-1x",
+                        "color" => $color,
+                        "uploaded_by" => $this->session->userName,
+                        "uploaded_by_id" => $this->session->userId
+                    ];
+
+                    // remove the file
+                    unlink("{$tmp_dir}{$each_file["first"]}");
                 }
-
-                // set the filename
-                $file_name = $each_file["second"];
-                $file_name = (preg_replace("/[\s]/", "_", $file_name));
-                $file_to_download = "{$docs_dir}{$file_name}.{$each_file["fifth"]}";
-
-                // confirm that there is no existing file with the name.
-                if(is_file($file_to_download) && file_exists($file_to_download)) {
-                    $file_to_download = "{$docs_dir}{$file_name}"."_".mt_rand(1, 20).".{$each_file["fifth"]}";
-                }
-
-                // create the document for download
-                copy("{$tmp_dir}{$each_file["first"]}", $file_to_download);
-                
-                // append to the list
-                $files_list[] = [
-                    "unique_id" => $each_file["first"],
-                    "name" => $each_file["second"].".{$each_file["fifth"]}",
-                    "path" => "{$docs_dir}{$file_name}.{$each_file["fifth"]}",
-                    "type" => $each_file["fifth"],
-                    "size" => $each_file["forth"],
-                    "size_raw" => $n_FileSize_KB,
-                    "is_deleted" => 0,
-                    "record_id" => $record_id,
-                    "datetime" => date("l, jS F Y \\a\\t h:i:sA"),
-                    "favicon" => "{$this->favicon_array[$each_file["fifth"]]} fa-1x",
-                    "color" => $color,
-                    "uploaded_by" => $this->session->userName,
-                    "uploaded_by_id" => $this->session->userId
-                ];
-
-                // remove the file
-                unlink("{$tmp_dir}{$each_file["first"]}");
 
                 // unset the session
                 $this->session->remove($module);
-            }
-            $n_FileSize = round(($totalFileSize / 1024), 2);
+                
+                // set the file size
+                $n_FileSize = round(($totalFileSize / 1024), 2);
+
+            } catch(\Exception $e) {}
 
         } else {
             // set the files list as the existing record which by default is an empty list

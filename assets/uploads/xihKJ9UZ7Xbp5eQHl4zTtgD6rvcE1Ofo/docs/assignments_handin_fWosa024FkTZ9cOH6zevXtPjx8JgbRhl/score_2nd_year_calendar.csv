@@ -1,0 +1,88 @@
+DATE,START TIME,END TIME,COURSE CODE/SLUG,PROGRAMME CODE,LECTURER,LOCATION,CLINICAL,RECURRENCE
+2020-12-18,16:31,19:31,PHL 205,PRG27816,15216,West Wing E14,no,repeat
+,,,,,,,,
+,,,,,,,,,,,,,PROGRAMME TITLE,,,,PROGRAMME CODE
+,,,,,,,,,,,,,Bsc. Mental Health Nursing (Clinical),,,,PRG27816
+,,,,,,,,,,,,,Bsc. Mental Health Nursing (Community),,,,PRG38421
+,,,,,,,,,,,,,Bsc. Nursing ,,,,PRG91243
+,,,,,,,,,,,,,Master Of Nursing,,,,PRG74681
+,,,,,,,,,,,,,Msc. Advanced Nursing Practice,,,,PRG53479
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,COURSE TITLE,,,,COURSE CODE
+,,,,,,,,,,,,,Critical Thinking And Practical Reasoning,,,,PHL 205
+,,,,,,,,,,,,,Fundamentals Of Professional Nursing,,,,NUR219
+,,,,,,,,,,,,,Fundamental Nursing Practice,,,,NUR 221
+,,,,,,,,,,,,,Basic Emergency And Disaster Care,,,,NUR 223
+,,,,,,,,,,,,,Theoretical Basis Of Professional Nursing,,,,NUR 225
+,,,,,,,,,,,,,Therapeutic Communication,,,,NUR 227
+,,,,,,,,,,,,,Microbiology And Infection Prevention,,,,NUR 229
+,,,,,,,,,,,,,Sociology Of Health,,,,NUR 231
+,,,,,,,,,,,,,Clinical Nursing Practice I,,,,NUR 232
+,,,,,,,,,,,,,Clinical Practical,,,,
+,,,,,,,,,,,,,Pathology,,,,NUR 202
+,,,,,,,,,,,,,Crisis Intervention I,,,,NUR 218
+,,,,,,,,,,,,,Nursing Practice I,,,,NUR 220
+,,,,,,,,,,,,,Teaching And Learning In Health Care,,,,NUR 226
+,,,,,,,,,,,,,Introduction To Community Health,,,,NUR 228
+,,,,,,,,,,,,,Nutrition And Dietetics,,,,NUR 230
+,,,,,,,,,,,,,Clinical Nursing Practice I,,,,NUR 323
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,RECURRENCE
+,,,,,,,,,,,,,Repeat, To repeat class weekly
+,,,,,,,,,,,,,Single, This set the class to a single day only
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,Content for Clinical Class should either by 'yes (y)' OR 'no(n)'
+,,,,,,,,,,,,,
+,,,,,,,,,,,,,LECTURER NAME,,,,STAFF ID
+,,,,,,,,,,,,,Dr. Evelyn Asamoah Ampofo,,,,15216
+,,,,,,,,,,,,,Mrs. Gifty Osei Berchie,,,,13516
+,,,,,,,,,,,,,Ms. Theodora Dedo Azu,,,,13918
+,,,,,,,,,,,,,Ms. Anna Hayfron-benjamin,,,,13825
+,,,,,,,,,,,,,Ms. Catherine Kroamah Dwumfour ,,,,LEC26413
+,,,,,,,,,,,,,Mrs. Margaret Nyarko-sampson ,,,,LEC32415
+,,,,,,,,,,,,,Dr. Paul  Narh Doku,,,,15747
+,,,,,,,,,,,,,Dr. Nancy Innocentia Ebu Enyan,,,,13817
+,,,,,,,,,,,,,Dr. Jerry Paul K. Ninonni,,,,15355
+,,,,,,,,,,,,,Dr. Peter Robert Biney,,,,LEC79623
+,,,,,,,,,,,,,Fr. Dr.  Anthony Nkyi,,,,LEC85241
+,,,,,,,,,,,,,Mr. Isaac Budu Hayford,,,,LEC28964
+,,,,,,,,,,,,,Dr. Mate Siakwa,,,,11266
+,,,,,,,,,,,,,Dr. Andrews Adjei Druye,,,,13203
+,,,,,,,,,,,,,Ms. Patience F. Doe,,,,13744
+,,,,,,,,,,,,,Ms. Anita Afua Davis,,,,12756
+,,,,,,,,,,,,,Dr.  Susana Aba Abraham,,,,14502
+,,,,,,,,,,,,,Mrs. Christiana Okantey,,,,14501
+,,,,,,,,,,,,,Mr. Seth Selassie Dzah,,,,13826
+,,,,,,,,,,,,,Mrs. Dorothy Addo-mensah,,,,14966
+,,,,,,,,,,,,,Ms. Yaa Boahemaa Gyasi,,,,15277
+,,,,,,,,,,,,,Mr. Richard Safo-walters,,,,13828
+,,,,,,,,,,,,,Mrs. Comfort Nsiah,,,,15701
+,,,,,,,,,,,,,Dorcas Agyare,,,,14829
+,,,,,,,,,,,,,Mr. Christian Makafui Boso,,,,13797
+,,,,,,,,,,,,,Mr.  Ankobil Amandus,,,,12885
+,,,,,,,,,,,,,Mr. Patrick Ayande,,,,12735
+,,,,,,,,,,,,,Dr. Irene Aboh,,,,13830
+,,,,,,,,,,,,,Dr. Christina Asiedu,,,,15169
+,,,,,,,,,,,,,Mrs Rita Opoku Danso,,,,13235
+,,,,,,,,,,,,,Prof Martin Ekor,,,,15004
+,,,,,,,,,,,,,Dr. Jacob Setorglo,,,,LEC29348
+,,,,,,,,,,,,,Dr. Listowel Ferka,,,,LEC61423
+,,,,,,,,,,,,,Mr. Elliot Attipoe,,,,12324
+,,,,,,,,,,,,,Dr. Michael Anim,,,,12095
+,,,,,,,,,,,,,Mr. Alex Afrifa Darteh,,,,11456
+,,,,,,,,,,,,,Mr. Atta Yeboah-sarpong,,,,13159
+,,,,,,,,,,,,,Dr. Eric Koka,,,,LEC47356
+,,,,,,,,,,,,,Dr. Peter Robert Biney,,,,LEC35718
+,,,,,,,,,,,,,Mr Frederick Nsatimba,,,,93766
+,,,,,,,,,,,,,Ernestina Jeffrey,,,,LEC23651
+,,,,,,,,,,,,,Esther Nketia,,,,LEC43786
+,,,,,,,,,,,,,Margaret Nyarko Sampson,,,,LEC16735
+,,,,,,,,,,,,,Elizabeth M. Quarston,,,,LEC36714
+,,,,,,,,,,,,,Bertha Ellen Wryter,,,,LEC73964
+,,,,,,,,,,,,,Joyce Oppong,,,,LEC65419
+,,,,,,,,,,,,,Sarah Ama Amoo,,,,LEC85672
+,,,,,,,,,,,,,Catherine K. Dwumfour,,,,LEC29768
+,,,,,,,,,,,,,Isaac Commey Tetteh,,,,LEC19786
+,,,,,,,,,,,,,Debrah Preachad Timothy,,,,LEC39456
+,,,,,,,,,,,,,Opoku Agyemang Sampson,,,,LEC38592
+,,,,,,,,,,,,,Dr Dorcas Obiri-yeboah,,,,LEC37169

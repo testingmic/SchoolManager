@@ -33,6 +33,9 @@ $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $userData->user_permissions;
 
+// update the assignment permission
+$hasUpdate = $accessObject->hasAccess("update", "assignments");
+
 // item id
 $item_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
 $pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
@@ -60,7 +63,6 @@ if(!empty($item_id)) {
 
         // guardian information
         $the_form = load_class("forms", "controllers")->create_assignment($item_param, "update_assignment");
-        $hasUpdate = $accessObject->hasAccess("update", "assignments");
 
         // student update permissions
         $grading_info = "<div class='row'>";
@@ -92,36 +94,49 @@ if(!empty($item_id)) {
 
             // ensure the result is not empty
             if(!empty($result)) {
+
+                // confirm action
+                $isActive = in_array($data->state, ["Graded", "Pending"]);
+
                 $grading_info .= '
                 <div class="col-lg-6" id="assignment-content">
-                    <div style="margin-top: 10px;margin-bottom: 10px" align="right" class="separator">
-                        <button class="btn btn-outline-success save-marks"><i class="fa fa-save"></i> Save</button>
-                    </div>
-                    <table width="100%" class="table-hover table">
+                    '.( $isActive ?
+                        '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="separator">
+                            <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
+                            <button class="btn btn-outline-success" onclick="return save_AssignmentMarks();"><i class="fa fa-save"></i> Save</button>
+                        </div>' : (
+                            ''
+                        )
+                    ).'
+                    <table width="100%" class="table-hover table mb-0">
                         <thead>
                             <th>Assigned Students List</th>
                             <th></th>
                         </thead>
-                    <tbody>';
-                    // loop through the list of students
-                    foreach($result as $student) {
-                        $grading_info .= '
-                            <tr>
-                                <td width="65%">
-                                    <a style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return load_singleStudentData(\''.$student->item_id.'\',\''.$data->grading.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">
-                                        <div><img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt=""> &nbsp; '.$student->name.'</div>
-                                    </a>
-                                </td>
-                                <td>
-                                    <div class="input-group">
-                                        <input name="test_grading" value="'.$student->score.'" data-value="'.$student->item_id.'" type="number" autocomplete="Off" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" class="form-control"> <span>/ '.$data->grading.'</span>
-                                    </div>
-                                </td>
-                            </tr>';
-                    }
-                    $grading_info .= '
-                        </tbody>
                     </table>
+                    <div class="slim-scroll" style="max-height: 500px; overflow-y:auto;">
+                        <table width="100%" class="table-bordered table mt-0">
+                        <tbody>';
+                        // loop through the list of students
+                        foreach($result as $student) {
+                            $grading_info .= '
+                                <tr>
+                                    <td width="65%">
+                                        <a style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return load_singleStudentData(\''.$student->item_id.'\',\''.$data->grading.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">
+                                            <div><img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt=""> &nbsp; '.$student->name.'</div>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <input '.(!$isActive ? 'disabled="disabled"' : 'name="test_grading" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" class="form-control"> <span>/ '.$data->grading.'</span>
+                                        </div>
+                                    </td>
+                                </tr>';
+                        }
+                        $grading_info .= '
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="col-lg-6">
                     <div class="details-content-save"></div>
@@ -140,6 +155,7 @@ if(!empty($item_id)) {
                     <div class="card card-default student-assignment-details"></div>
                 </div>';
             }
+
         }
 
         // if student or parent
@@ -160,20 +176,23 @@ if(!empty($item_id)) {
             ];
 
             // check if the use has handed in the assignment
-            $handed_in = (bool) ($data->handed_in === "Pending");
+            $nothanded_in = (bool) ($data->handed_in === "Pending");
             
             // display the content if the assignment type is a file_attachment
             if($data->assignment_type == "file_attachment") {
                 
                 // append to the scripts if not already submitted
-                if($handed_in) {
+                if($nothanded_in) {
                     $response->scripts[] = "assets/js/upload.js";
+                } else {
+                    // unset the scripts variable
+                    $response->scripts = [];
                 }
 
                 // display the file upload option
                 $grading_info .= '
-                '.($handed_in ?
-                    '<div class="col-lg-'.($handed_in ? 8 : 4).'" id="handin_upload">
+                '.($nothanded_in ?
+                    '<div class="col-lg-'.($nothanded_in ? 12 : 4).'" id="handin_upload">
                         <div><h5 class="text-uppercase">Upload Document</h5></div>
                         <div class="col-lg-12" id="upload_question_set_template">
                             <div class="form-group text-center mb-1">
@@ -189,7 +208,7 @@ if(!empty($item_id)) {
                         ).'
                     </div>' : ''
                 ).'
-                <div class="col-lg-'.($handed_in ? 12 : 4).'" id="handin_documents">
+                <div class="col-lg-'.($nothanded_in ? 4 : 12).'" id="handin_documents">
                     '.$data->attached_attachment_html.'
                 </div>';
             }
@@ -220,6 +239,7 @@ if(!empty($item_id)) {
                     <div class="author-box-center">
                         <div class="clearfix"></div>
                         <div class="author-box-name"><a href="#">'.$data->assignment_title.'</a></div>
+                        <div class="author-box-name">'.$data->class_name.'</div>
                         <div class="author-box-job">('.$data->students_assigned.' Students)</div>
                     </div>
                 </div>
@@ -264,6 +284,10 @@ if(!empty($item_id)) {
                                 <span class="float-left">Date Created</span>
                                 <span class="float-right text-muted">'.date("jS F Y h:iA", strtotime($data->date_created)).'</span>
                             </p>
+                            <p class="clearfix">
+                                <span class="float-left">Status</span>
+                                <span class="float-right text-muted">'.$myClass->the_status_label($data->state).'</span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -285,10 +309,10 @@ if(!empty($item_id)) {
                     <div class="card-body pt-0 pb-0">
                         <div class="py-3 pt-0">
                             <div class="d-flex justify-content-start">
-                                <div class="mr-2">
-                                    <img src="'.$baseUrl.''.$data->course_tutor_info->image.'" class="rounded-circle cursor author-box-picture" width="30px">
+                                <div class="mr-0">
+                                    <img src="'.$baseUrl.''.$data->course_tutor_info->image.'" class="rounded-circle cursor author-box-picture" width="50px">
                                 </div>
-                                <div>
+                                <div class="col-11">
                                     <div class="clearfix">
                                         <span class="mr-2 float-left">Fullname: </span>
                                         <span class="mr-2 float-right text-muted">'.($data->course_tutor_info->name ?? null).'</span>

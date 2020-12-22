@@ -53,8 +53,21 @@ class Assignments extends Myschoolgh {
         if(in_array($params->userData->user_type, ["parent", "student"])) {
             $query = ",
             (SELECT handed_in FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$params->userData->user_id}') AS handed_in,
-            (SELECT score FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$params->userData->user_id}') AS awarded_mark,
-            (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id AND a.created_by = '{$params->userData->user_id}' ORDER BY b.id DESC LIMIT 1) AS attached_document";
+            (SELECT score FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$params->userData->user_id}') AS awarded_mark";
+        }
+
+        // if the user type is an admin or teacher
+        if(in_array($params->userData->user_type, ["teacher", "admin"])) {
+            $query = ",
+            (SELECT COUNT(*) FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.graded='1') AS students_graded,
+            (SELECT COUNT(*) FROM assignments_submitted	c WHERE c.assignment_id=a.item_id AND c.graded='0') AS students_handed_in,
+            (SELECT COUNT(*) FROM users c WHERE c.client_id=a.client_id AND a.class_id=c.class_id AND c.user_type='student' AND c.user_status='Active' AND c.status='1') AS students_assigned
+            ";
+        }
+        
+        // if the user is a parent, student or teacher
+        if(in_array($params->userData->user_type, ["parent", "student"])) {
+            $query .= ", (SELECT b.description FROM files_attachment b WHERE b.resource='assignment_doc' AND b.record_id = a.item_id AND b.created_by = '{$params->userData->user_id}' ORDER BY b.id DESC LIMIT 1) AS attached_document";
         }
         
         try {
@@ -63,10 +76,7 @@ class Assignments extends Myschoolgh {
                 SELECT a.*,
                 (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
                 (SELECT name FROM courses WHERE courses.id = a.course_id LIMIT 1) AS course_name,
-                (SELECT COUNT(*) FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.graded='1') AS students_graded,
-                (SELECT COUNT(*) FROM assignments_submitted	c WHERE c.assignment_id=a.item_id AND c.graded='0') AS students_handed_in,
-                (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
-                (SELECT COUNT(*) FROM users c WHERE c.client_id=a.client_id AND a.class_id=c.class_id AND c.user_type='student' AND c.user_status='Active' AND c.status='1') AS students_assigned,
+                (SELECT b.description FROM files_attachment b WHERE b.resource='assignments' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.course_tutor LIMIT 1) AS course_tutor_info,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 {$query} FROM assignments a
@@ -80,8 +90,8 @@ class Assignments extends Myschoolgh {
                 // handedin label
                 if(isset($result->handed_in)) {
                     $result->handedin_label = $this->the_status_label($result->handed_in);
-                    $result->attached_document = json_decode($result->attached_document);
-                    $result->attached_attachment_html = isset($result->attached_document) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-12", false, false) : null;
+                    $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
+                    $result->attached_attachment_html = isset($result->attached_document->files) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-4", false, false) : null;
                 }
 
                 // clean the assignment description
@@ -309,6 +319,10 @@ class Assignments extends Myschoolgh {
             }
         }
 
+        // update the assignment state
+        $this->db->query("UPDATE assignments SET state='Graded' WHERE assignment_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+        // return the success response
         return [
             "data" => "Marks were successfully awarded to the list of students specified.",
             "additional" => [
@@ -316,6 +330,113 @@ class Assignments extends Myschoolgh {
                 "graded_count" => $graded_count
             ]
         ];
+    }
+    
+    /**
+     * Close Assignment
+     * 
+     * Upload the assignment data
+     * 
+     * @param String        $params->assignment_id
+     * 
+     * @return Array
+     */
+    public function close(stdClass $params) {
+        // get the assignment information
+        $the_data = $this->pushQuery("id, grading", "assignments", "client_id='{$params->clientId}' AND item_id='{$params->assignment_id}' LIMIT 1");
+
+        // validate the record
+        if(empty($the_data)) {
+            return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+        }
+
+        // update the status of the assignment
+        $this->db->query("UPDATE assignments SET state='Closed', date_closed=now() WHERE assignment_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+        return [
+            "data" => "Assignment was successfully closed."
+        ];
+    }
+
+    /**
+     * Handin Assignment
+     * 
+     * Upload the assignment data
+     * 
+     * @param String        $params->assignment_id
+     * 
+     * @return Array
+     */
+    public function handin(stdClass $params) {
+        // get the assignment information
+        $the_data = $this->pushQuery("id, grading", "assignments", "client_id='{$params->clientId}' AND item_id='{$params->assignment_id}' LIMIT 1");
+
+        // validate the record
+        if(empty($the_data)) {
+            return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+        }
+
+        // initial values
+        $files = "";
+        $item_id = $params->assignment_id;
+        $module = "assignments_handin_{$item_id}";
+        $data = "Sorry! You have already handed in your assignment.";
+
+        // catch all errors
+        try {
+
+            // run this section if the session is not empty
+            if(!empty($this->session->{$module})) {
+            
+                // prepare the user documents
+                $attachments = load_class("files", "controllers")->prep_attachments($module, $params->userId, $item_id);
+                
+                // insert the record if not already existing
+                $stmt = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
+                $stmt->execute(["assignment_doc", "{$item_id}_{$params->userId}", json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
+
+                // change the user information detail
+                $check = $this->confirm_student_marked($params->assignment_id, $params->userId);
+                
+                // insert a record if empty
+                if(empty($check) || (isset($check->handed_in) && ($check->handed_in === "Pending"))) {
+
+                    // insert the new record since it does not exist
+                    if(empty($check)) {
+                        $stmt = $this->db->prepare("INSERT INTO assignments_submitted SET client_id = ?, student_id=?, assignment_id = ?, handed_in = ?");
+                        $stmt->execute([$params->clientId, $params->userId, $item_id, "Submitted"]);
+                    }
+                    // update the record if the handed in is still pending
+                    else {
+                        $this->db->query("UPDATE assignments_submitted SET handed_in = 'Submitted' WHERE student_id='{$params->userId}' AND assignment_id = '{$item_id}' LIMIT 1");
+                    }
+
+                    // Record the user activity
+                    $this->userLogs("assignment_doc", "{$item_id}_{$params->userId}", null, "{$params->userData->name} handed in the assignment for grading.", $params->userId);
+
+                    // load the attachments
+                    $data = "Congrats, your assignment was successfully submitted.";
+
+                    // load the file attachments
+                    $stmt = $this->db->prepare("SELECT description, created_by FROM files_attachment WHERE resource='assignment_doc' AND record_id = ? AND created_by = ? ORDER BY id DESC LIMIT 1");
+                    $stmt->execute([$item_id, $params->userId]);
+                    $result = $stmt->fetch(PDO::FETCH_OBJ);
+
+                    $the_files = json_decode($result->description);
+                    $files = isset($the_files->files) ? load_class("forms", "controllers")->list_attachments($the_files->files, $result->created_by, "col-lg-6", false, false) : null;
+                }
+
+                // remove the session variable
+                $this->session->remove("attachAssignmentDocs");
+
+            }
+
+            return [
+                "data" => $data,
+                "additional" => $files
+            ];
+
+        } catch(PDOException $e) {}
     }
 
     /**
@@ -328,19 +449,17 @@ class Assignments extends Myschoolgh {
     public function student_info(stdClass $params) {
 
         // load the file attachments
-        $stmt = $this->db->prepare("SELECT description FROM files_attachment WHERE resource = ? AND record_id = ? AND created_by = ? LIMIT 1");
-        $stmt->execute(["assignment_doc", $params->assignment_id, $params->student_id]);
-        $counter = $stmt->rowCount();
+        $stmt = $this->db->prepare("SELECT description, created_by FROM files_attachment WHERE resource='assignment_doc' AND record_id = ? AND created_by = ? ORDER BY id DESC LIMIT 1");
+        $stmt->execute([$params->assignment_id, $params->student_id]);
+        $result = $stmt->fetch(PDO::FETCH_OBJ);
 
-        // data
+        // initial value
         $data = "<div class='alert mt-3 alert-info'>No attached files</div>";
-        
-        // if results was found
-        if($counter) {
-            // get the result
-            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
-            }
+        // if the description parameter is not empty
+        if(isset($result->description)) {
+            $the_files = json_decode($result->description);
+            $data = isset($the_files->files) ? load_class("forms", "controllers")->list_attachments($the_files->files, $result->created_by, "col-lg-12", false, false) : null;
         }
 
         return [
@@ -359,7 +478,7 @@ class Assignments extends Myschoolgh {
 	public function confirm_student_marked($assignmentId, $student_id) {
 		
         // execute the statement by making the query
-		$stmt = $this->db->prepare("SELECT score FROM assignments_submitted WHERE student_id = ? AND assignment_id=? LIMIT 1");
+		$stmt = $this->db->prepare("SELECT score, handed_in FROM assignments_submitted WHERE student_id = ? AND assignment_id=? LIMIT 1");
 		$stmt->execute([$student_id, $assignmentId]);
 
 		// count the number of rows found
