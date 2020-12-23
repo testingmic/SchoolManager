@@ -54,6 +54,10 @@ if(!empty($item_id)) {
         // set the first key
         $data = $data["data"][0];
 
+        // append is admin to the query string
+        $isAdmin = (bool) ($defaultUser->user_type == "admin");
+        $data->isAdmin = $isAdmin;
+
         // guardian information
         $the_form = load_class("forms", "controllers")->course_form($clientId, $baseUrl, $data);
         $hasUpdate = $accessObject->hasAccess("update", "course");

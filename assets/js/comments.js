@@ -1,5 +1,5 @@
+$(`div[class~="trix-button-row"] span[class~="trix-button-group--file-tools"], div[class~="trix-button-row"] span[class~="trix-button-group-spacer"]`).remove();
 var comments_container = $(`div[id="comments-container"]`);
-
 var commentsLoader = async(data) => {
     await $.get(`${baseUrl}api/replies/list?feedback_type=comment`, data).then((response) => {
         if (response.code == 200) {

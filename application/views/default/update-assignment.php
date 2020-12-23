@@ -60,13 +60,17 @@ if(!empty($item_id)) {
         $item_param->data = $data;
 
         // guardian information
+        $isGraded = isset($data->awarded_mark) ? true : false;
+        $isTutor = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
+        $isWardParent = (bool) in_array($defaultUser->user_type, ["student", "parent"]);
+
         $the_form = load_class("forms", "controllers")->create_assignment($item_param, "update_assignment");
 
         // student update permissions
         $grading_info = "<div class='row'>";
 
         // get the list of students
-        if(in_array($defaultUser->user_type, ["teacher", "admin"])) {
+        if($isTutor) {
 
             // append the upload script
             if(in_array($data->state, ["Pending", "Graded"])) {
@@ -74,6 +78,9 @@ if(!empty($item_id)) {
             } else {
                 unset($response->scripts[0]);
             }
+
+            // not handed in
+            $nothanded_in = false;
             
             /** Get the students list */
             $students_list = ($data->assigned_to == "selected_students") ? $myClass->stringToArray($data->assigned_to_list) 
@@ -164,7 +171,7 @@ if(!empty($item_id)) {
         }
 
         // if student or parent
-        elseif(in_array($defaultUser->user_type, ["student", "parent"])) {
+        elseif($isWardParent) {
 
             // init
             $preloaded = "";
@@ -192,8 +199,8 @@ if(!empty($item_id)) {
             if($data->assignment_type == "file_attachment") {
                 
                 // display the file upload option
-                $grading_info .= '
-                '.($nothanded_in ?
+                $grading_info .= 
+                ($nothanded_in ?
                     '<div class="col-lg-'.($nothanded_in ? 12 : 4).'" id="handin_upload">
                         <div><h5 class="text-uppercase">Upload Document</h5></div>
                         <div class="col-lg-12" id="upload_question_set_template">
@@ -268,6 +275,10 @@ if(!empty($item_id)) {
                                 <span class="float-left">Marked</span>
                                 <span class="float-right text-muted"><span class="graded_count">'.$data->students_graded.' Students</span>
                             </p>
+                            <p class="clearfix">
+                                <span class="float-left">Grade</span>
+                                <span class="float-right text-muted">'.($data->grading ?? null).'</span>
+                            </p>
                             ' : null).'
                             <p class="clearfix">
                                 <span class="float-left">Submission Date</span>
@@ -278,10 +289,6 @@ if(!empty($item_id)) {
                                 <span class="float-right text-muted">'.date("h:iA", strtotime($data->due_time)).'</span>
                             </p>
                             <p class="clearfix">
-                                <span class="float-left">Grade</span>
-                                <span class="float-right text-muted">'.($data->grading ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
                                 <span class="float-left">Date Created</span>
                                 <span class="float-right text-muted">'.date("jS F Y h:iA", strtotime($data->date_created)).'</span>
                             </p>
@@ -289,6 +296,13 @@ if(!empty($item_id)) {
                                 <span class="float-left">Status</span>
                                 <span class="float-right text-muted" id="assignment_state">'.$myClass->the_status_label($data->state).'</span>
                             </p>
+
+                            '.($isGraded ? 
+                                '<p class="clearfix">
+                                    <span class="float-left font-weight-bold">Awarded Mark:</span>
+                                    <span class="float-right"><span style="font-size:30px">'.$data->awarded_mark.'</span>/<sub style="font-size:30px">'.$data->grading.'</sub></span>
+                                </p>' : ''
+                            ).'
                         </div>
                     </div>
                 </div>
@@ -329,13 +343,8 @@ if(!empty($item_id)) {
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="comments-tab2" data-toggle="tab" href="#comments" role="tab" aria-selected="true">
-                            Comments
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
-                            '.($hasUpdate ? "Grade Students" : "Handin Assignment").'
+                            '.($isTutor ? "Grade Students" : "Handin Assignment").'
                         </a>
                     </li>';
 
@@ -348,6 +357,13 @@ if(!empty($item_id)) {
                     }
                     
                     $response->html .= '
+                    '.(!$nothanded_in || $isGraded ? 
+                        '<li class="nav-item">
+                            <a class="nav-link" id="comments-tab2" data-toggle="tab" href="#comments" role="tab" aria-selected="true">
+                                Comments
+                            </a>
+                        </li>' : ''
+                    ).'
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="details" role="tabpanel" aria-labelledby="details-tab2">
@@ -360,11 +376,6 @@ if(!empty($item_id)) {
                                 </div>
                             </div>
                         </div>
-                        <div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab2">
-                            '.leave_comments_builder("assignments", $item_id, false).'
-                            <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
-                            <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary">Loading comments</button></div>
-                        </div>
                         <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
                             '.$grading_info.'
                         </div>
@@ -376,6 +387,13 @@ if(!empty($item_id)) {
 
                         $response->html .= '
                         </div>
+                        '.(!$nothanded_in || $isGraded ? 
+                            '<div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab2">
+                                '.leave_comments_builder("assignments", $item_id, false).'
+                                <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
+                                <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary">Loading comments</button></div>
+                            </div>' : ''
+                        ).'
                     </div>
                 </div>
                 </div>

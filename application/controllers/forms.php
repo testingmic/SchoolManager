@@ -2084,6 +2084,7 @@ class Forms extends Myschoolgh {
     public function course_form($clientId, $baseUrl, $itemData = null) {
 
         $isData = !empty($itemData) && isset($itemData->id) ? true : false;
+        $isAdmin = !empty($itemData) && !$itemData->isAdmin ? "disabled='disabled'" : "";
 
         $response = '
         <form class="ajaxform" id="ajaxform" action="'.$baseUrl.'api/courses/'.( $isData ? "update" : "add").'" method="POST">
@@ -2094,7 +2095,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="course_code">Course Code (optional)</label>
-                        <input type="text" value="'.($itemData->course_code ?? null).'" name="course_code" id="course_code" class="form-control text-uppercase">
+                        <input '.$isAdmin.' type="text" value="'.($itemData->course_code ?? null).'" name="course_code" id="course_code" class="form-control text-uppercase">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2106,7 +2107,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="class_id">Class</label>
-                        <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
+                        <select '.$isAdmin.' data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
                             <option value="null">Select Class</option>';
                             foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $itemData->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
@@ -2123,7 +2124,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="course_tutor">Course Tutor</label>
-                        <select data-width="100%" name="course_tutor" id="course_tutor" class="form-control selectpicker">
+                        <select data-width="100%" '.$isAdmin.' name="course_tutor" id="course_tutor" class="form-control selectpicker">
                             <option value="null">Select Course Tutor</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->item_id == $itemData->course_tutor) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
