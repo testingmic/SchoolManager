@@ -662,5 +662,120 @@ class Assignments extends Myschoolgh {
 		// count the number of rows found
 		return ($stmt->rowCount() > 0) ? $stmt->fetch(PDO::FETCH_OBJ) : false;
 	}
+
+    /**
+     * Return the list of Assignment Questions
+     * 
+     * @param String    $params->assignment_id
+     * @param String    $params->clientId
+     * 
+     * @return Array
+     */
+    public function questions_list(stdClass $params) {
+
+        $questions = $this->pushQuery(
+            "a.id, a.item_id, a.question", "assignments_questions a", 
+            "a.assignment_id='{$params->assignment_id}' AND a.client_id = '{$params->clientId}' AND a.deleted='0'"
+        );
+
+        return $questions;
+
+    }
+
+    /**
+     * Add Assignment Question
+     * 
+     * This method first checks if the question id was parsed. If so then the question will 
+     * be updated. If not then a new record will be inserted into the table
+     * 
+     * As part of the success response, parse the full list of all questions under this assignment record
+     * 
+     * @return Array
+     */
+    public function add_question(stdClass $params) {
+        
+        // confirm if the answer_type is in the array
+        if(!in_array($params->answer_type, ["option", "multiple", "numeric", "input"])) {
+            return ["code" => 203, "data" => "Sorry! An invalid answer type was parsed. Accepted values are: option, multiple, numeric, input"];
+        }
+
+        // get the assignment information
+        $the_data = $this->pushQuery("id, grading", "assignments", "client_id='{$params->clientId}' AND item_id='{$params->assignment_id}' LIMIT 1");
+
+        // validate the record
+        if(empty($the_data)) {
+            return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+        }
+
+        $found = false;
+        $data = $the_data[0];
+        $item_id = random_string("alnum", 32);
+        $answers = isset($params->answers) && is_array($params->answers) ? implode(",", $params->answers) : "";
+
+        // get the question information
+        if(isset($params->question_id)) {
+            // get the assignment information
+            $the_data = $this->pushQuery("id, grading", "assignments_questions", "assignment_id='{$params->assignment_id}' AND item_id='{$params->question_id}' LIMIT 1");
+            // validate the record
+            if(empty($the_data)) {
+                return ["code" => 203, "data" => "Sorry! An invalid question id was parsed."];
+            }
+            $found = true;
+        }
+
+        // insert the record if not existing
+        if(!$found) {
+            // statement to be executed
+            $stmt = $this->db->prepare("
+                INSERT INTO assignments_questions SET item_id = ?, assignment_id = ?, 
+                question = ?, correct_answer = ?, created_by = ?, client_id = ?
+                ".(isset($params->option_a) ? ",option_a='{$params->option_a}'" : null)."
+                ".(isset($params->option_b) ? ",option_b='{$params->option_b}'" : null)."
+                ".(isset($params->option_c) ? ",option_c='{$params->option_c}'" : null)."
+                ".(isset($params->option_d) ? ",option_d='{$params->option_d}'" : null)."
+                ".(isset($params->option_e) ? ",option_e='{$params->option_e}'" : null)."
+                ".(isset($params->answer_type) ? ",answer_type='{$params->answer_type}'" : null)."
+                ".(isset($params->difficulty) ? ",difficulty='{$params->difficulty}'" : null)."
+                ".(isset($params->correct_answer_description) ? ",correct_answer_description='{$params->correct_answer_description}'" : null)."
+            ");
+            $stmt->execute([$item_id, $params->assignment_id, $params->question, $answers, $params->userId, $params->clientId]);
+
+            return [
+                "data" => "Assignment Question successfully created",
+                "additional" => [
+                    "questions" => $this->questions_list($params)
+                ]
+            ];
+
+        } else {
+            
+            // statement to be executed
+            $stmt = $this->db->prepare("
+                UPDATE assignments_questions SET question = ?, correct_answer = ?
+                ".(isset($params->option_a) ? ",option_a='{$params->option_a}'" : null)."
+                ".(isset($params->option_b) ? ",option_b='{$params->option_b}'" : null)."
+                ".(isset($params->option_c) ? ",option_c='{$params->option_c}'" : null)."
+                ".(isset($params->option_d) ? ",option_d='{$params->option_d}'" : null)."
+                ".(isset($params->option_e) ? ",option_e='{$params->option_e}'" : null)."
+                ".(isset($params->answer_type) ? ",answer_type='{$params->answer_type}'" : null)."
+                ".(isset($params->difficulty) ? ",difficulty='{$params->difficulty}'" : null)."
+                ".(isset($params->correct_answer_description) ? ",correct_answer_description='{$params->correct_answer_description}'" : null)."
+                WHERE item_id = ? AND assignment_id = ? AND client_id = ? LIMIT 1
+            ");
+            $stmt->execute([$params->question, $answers, $item_id, $params->assignment_id, $params->clientId]);
+
+            return [
+                "data" => "Assignment Question successfully updated",
+                "additional" => [
+                    "questions" => $this->questions_list($params)
+                ]
+            ];
+        }
+
+
+
+
+    }
+
 }
 ?>

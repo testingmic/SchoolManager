@@ -543,17 +543,18 @@ class Forms extends Myschoolgh {
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <div class="input-group-text">
-                            Question
+                            Question <span class="required">*</span>
                         </div>
                     </div>
+                    <input type="hidden" name="question_id" id="question_id" value="'.($data->item_id ?? null).'" class="form-control">
                     <input type="hidden" name="assignment_id" id="assignment_id" value="'.$assignment_id.'" class="form-control">
-                    <input type="text" name="question" id="question" class="form-control">
+                    <textarea type="text" placeholder="Enter the question here" name="question" id="question" class="form-control">'.($data->question ?? null).'</textarea>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group" style="max-width:300px">
-                        <label class="custom-label">Answer Type</label>
+                        <label class="custom-label">Answer Type <span class="required">*</span></label>
                         <select class="form-control selectpicker" name="answer_type" id="answer_type">';
 
                         foreach($answer_types as $key => $value) {
@@ -578,20 +579,23 @@ class Forms extends Myschoolgh {
             </div>
             <div class="numeric-answer" style="display:none">
                 <div class="form-group">
-                    <label for="numeric-answer">Enter the answer</label>
+                    <label for="numeric-answer">Enter the answer <span class="required">*</span></label>
                     <input type="number" value="'.($data->correct_answer ??  null).'" name="numeric_answer" placeholder="Please type the answer" step="2" class="form-control">
                 </div>
             </div>
             <div class="answers-div">
                 <div class="form-group">
                     <table class="table">';
-
+                    $i = 0;
                     foreach($options_array as $option => $value) {
+                        
+                        $i++;
+
                         $html_content .= '
                         <tr>
-                            <td width="10%">'.$value.'</td>
+                            <td width="13%">'.$value.' '.($i < 4 ? " <span class='required'>*</span>" : "").'</td>
                             <td><input type="text" name="'.$option.'" id="'.$option.'" value="'.($data->{$option} ?? null).'" class="col-lg-12 objective_question form-control"></td>
-                            <td><input type="checkbox" '.(isset($data->correct_answer) ? "checked" : null).' value="'.$option.'" name="answer_option" style="height:20px; width:20px" class="checkbox"></td>
+                            <td width="7%"><input type="checkbox" '.(isset($data->correct_answer) ? "checked" : null).' value="'.$option.'" name="answer_option" style="height:20px; width:20px" class="checkbox cursor"></td>
                         </tr>';
                     }
 
@@ -601,7 +605,7 @@ class Forms extends Myschoolgh {
             </div>
             <div class="form-group text-center">
                 <button onclick="return cancel_AssignmentQuestion()" class="btn btn-outline-danger btn-sm"><i class="fa fa-save"></i> Cancel</button>
-                <button onclick="return save_AssignmentQuestion()" class="btn btn-outline-success btn-sm"><i class="fa fa-save"></i> Save Question</button>
+                <button onclick="return save_AssignmentQuestion(\''.$assignment_id.'\')" class="btn btn-outline-success btn-sm"><i class="fa fa-save"></i> Save Question</button>
             </div>';
         
 

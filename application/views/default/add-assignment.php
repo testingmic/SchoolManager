@@ -59,28 +59,34 @@ if(isset($_GET["qid"]) && !empty($_GET["qid"]) || !empty($session->assignment_up
     $questions_list = "<table class='table table-bordered'>";
     $questions_list .= "<thead>";
     $questions_list .= "<tr>";
-    $questions_list .= "<th width='5%'>#</th>";
-    $questions_list .= "<th width='80%'>Question Content</th>";
+    $questions_list .= "<th width='8%'>#</th>";
+    $questions_list .= "<th width='75%'>Question Content</th>";
     $questions_list .= "<th></th>";
     $questions_list .= "</tr>";
     $questions_list .= "</thead>";
-    $questions_list .= "<tbody>";
+    $questions_list .= "<tbody id='added_questions'>";
+
+    // parameters to load the assignment information
+    $params = (object) [
+        "clientId" => $clientId,
+        "assignment_id" => $assignment_id
+    ];
 
     // make a query for the questions list
-    $questions_query = $myClass->pushQuery("id, item_id, question", "assignments_questions", "assignment_id='{$assignment_id}' AND deleted='0'");
+    $questions_query = load_class("assignments", "controllers")->questions_list($params);
 
     // loop through the questions list
     if(!empty($questions_query)) {
         foreach($questions_query as $key => $question) {
+            $ii = $key+1;
             $questions_list .= "
             <tr data-row_id='{$question->item_id}'>
-                <td>{($key+1)}</td>
+                <td>{$ii}</td>
                 <td>{$question->question}</td>
                 <td>
                     <button class='btn btn-outline-success btn-sm' onclick='return review_AssignmentQuestion(\"{$question->item_id}\")'><i class='fa fa-edit'></i></button>
                     <button class='btn btn-outline-danger btn-sm' onclick='return remove_AssignmentQuestion(\"{$question->item_id}\")'><i class='fa fa-trash'></i></button>
-                </td>
-                
+                </td>                
             </tr>";
         }
     } else {
@@ -94,14 +100,14 @@ if(isset($_GET["qid"]) && !empty($_GET["qid"]) || !empty($session->assignment_up
     // the form
     $the_form = '
         <div class="row" id="add_question_container">
-            <div class="col-md-5">
+            <div class="col-md-5 mb-4">
                 <h6>Questions List</h6>
-                <div id="added_questions_list">
+                <div id="added_questions_list" class="table-responsive">
                     '.$questions_list.'
                 </div>
             </div>
             <div class="col-md-7">
-                <div id="full_question_detail" data-question_id="'.($data->id ?? null).'">
+                <div id="full_question_detail" data-question_id="'.($data->item_id ?? null).'">
                     '.$formClass->add_question_form($assignment_id, $data).'
                 </div>
             </div>
