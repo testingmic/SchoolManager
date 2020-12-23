@@ -88,9 +88,17 @@ $announcementClass = load_class('announcements', 'controllers');
 
 // if the session is set
 if(!empty($session->userId)) {
+	
 	// the query parameter to load the user information
 	$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "userId" => $session->userId];
 	$defaultUser = $usersClass->list($i_params)["data"][0];
+
+	$isAdmin = (bool) ($defaultUser->user_type == "admin");
+	$isTutor = (bool) ($defaultUser->user_type == "teacher");
+	$isParent = (bool) ($defaultUser->user_type == "parent");
+	$isStudent = (bool) ($defaultUser->user_type == "student");
+	$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
+    $isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
 }
 
 // To be used for inserting additional scripts

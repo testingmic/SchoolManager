@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser;
+global $myClass, $SITEURL, $defaultUser, $isTutorAdmin, $isWardParent, $isAdmin;
 
 // initial variables
 $appName = config_item("site_name");
@@ -61,8 +61,6 @@ if(!empty($item_id)) {
 
         // guardian information
         $isGraded = isset($data->awarded_mark) ? true : false;
-        $isTutor = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
-        $isWardParent = (bool) in_array($defaultUser->user_type, ["student", "parent"]);
 
         $the_form = load_class("forms", "controllers")->create_assignment($item_param, "update_assignment");
 
@@ -70,7 +68,7 @@ if(!empty($item_id)) {
         $grading_info = "<div class='row'>";
 
         // get the list of students
-        if($isTutor) {
+        if($isTutorAdmin) {
 
             // append the upload script
             if(in_array($data->state, ["Pending", "Graded"])) {
@@ -117,7 +115,9 @@ if(!empty($item_id)) {
                             <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
                             <button class="btn btn-outline-success" onclick="return save_AssignmentMarks();"><i class="fa fa-save"></i> Save</button>
                         </div>' : (
-                            ''
+                            $isAdmin ? '
+                                <button class="btn btn-outline-danger" onclick="return reopen_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Reopen</button>
+                            ' : ''
                         )
                     ).'
                     <table width="100%" class="table-hover table mb-0">
@@ -344,7 +344,7 @@ if(!empty($item_id)) {
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
-                            '.($isTutor ? "Grade Students" : "Handin Assignment").'
+                            '.($isTutorAdmin ? "Grade Students" : "Handin Assignment").'
                         </a>
                     </li>';
 

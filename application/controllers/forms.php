@@ -421,7 +421,7 @@ class Forms extends Myschoolgh {
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Assigned To</label>";
+        $html_content .= "<label>Assigned To <span class='required'>*</span></label>";
         $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='assigned_to' id='assigned_to'>";
         $html_content .= "<option ".($assigned_to == "all_students" ? "selected" : null)." value='all_students'>All Students</option>";
         $html_content .= "<option ".($assigned_to == "selected_students" ? "selected" : null)." value='selected_students'>Selected Students</option>";
@@ -473,7 +473,7 @@ class Forms extends Myschoolgh {
         
         $html_content .= "<div class='col-lg-4'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Select Question Type</label>";
+        $html_content .= "<label>Select Question Type <span class='required'>*</span></label>";
         $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='assignment_type' id='assignment_type'>";
         $html_content .= "<option value='file_attachment'>Upload Question Set</option>";
         $html_content .= "<option value='multiple_choice'>Multiple Choice Questions (Quiz)</option>";
@@ -508,6 +508,106 @@ class Forms extends Myschoolgh {
         $html_content .= "</form>";
 
         return $html_content;
+    }
+
+    /**
+     * Add Question Form
+     * 
+     * @param stdClass  $data
+     * @param String    $assignment_id
+     * 
+     * @return String
+     */
+    public function add_question_form($assignment_id = null, $data = null) {
+
+        // initial variables
+        $options_array = [
+            "option_a" => "Option A", "option_b" => "Option B",
+            "option_c" => "Option C","option_d" => "Option D",
+            "option_e" => "Option E",
+        ];
+        $answer_types = [
+            "option" => "Single Answer Option",
+            "multiple" => "Multiple Select Answers",
+            "numeric" => "Numeric",
+            "input" => "Text Input"
+        ];
+        $difficulty = [
+            "easy" => "Easy",
+            "medium" => "Medium",
+            "advanced" => "Advanced",
+        ];
+
+        $html_content = '
+            <div class="form-group">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <div class="input-group-text">
+                            Question
+                        </div>
+                    </div>
+                    <input type="hidden" name="assignment_id" id="assignment_id" value="'.$assignment_id.'" class="form-control">
+                    <input type="text" name="question" id="question" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group" style="max-width:300px">
+                        <label class="custom-label">Answer Type</label>
+                        <select class="form-control selectpicker" name="answer_type" id="answer_type">';
+
+                        foreach($answer_types as $key => $value) {
+                            $html_content .= '<option '.(isset($data->answer_type) && ($data->answer_type == $key) ? "selected" : null).' value="'.$key.'">'.$value.'</option>';
+                        }
+
+                        $html_content .= '</select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group" style="max-width:300px">
+                        <label class="custom-label">Difficulty Level</label>
+                        <select class="form-control selectpicker" name="difficulty" id="difficulty">';
+
+                        foreach($difficulty as $key => $value) {
+                            $html_content .= '<option '.(isset($data->difficulty) && ($data->difficulty == $key) ? "selected" : null).' value="'.$key.'">'.$value.'</option>';
+                        }
+
+                        $html_content .= '</select>
+                    </div>
+                </div>
+            </div>
+            <div class="numeric-answer" style="display:none">
+                <div class="form-group">
+                    <label for="numeric-answer">Enter the answer</label>
+                    <input type="number" value="'.($data->correct_answer ??  null).'" name="numeric_answer" placeholder="Please type the answer" step="2" class="form-control">
+                </div>
+            </div>
+            <div class="answers-div">
+                <div class="form-group">
+                    <table class="table">';
+
+                    foreach($options_array as $option => $value) {
+                        $html_content .= '
+                        <tr>
+                            <td width="10%">'.$value.'</td>
+                            <td><input type="text" name="'.$option.'" id="'.$option.'" value="'.($data->{$option} ?? null).'" class="col-lg-12 objective_question form-control"></td>
+                            <td><input type="checkbox" '.(isset($data->correct_answer) ? "checked" : null).' value="'.$option.'" name="answer_option" style="height:20px; width:20px" class="checkbox"></td>
+                        </tr>';
+                    }
+
+            $html_content .= '
+                    </table>
+                </div>                  
+            </div>
+            <div class="form-group text-center">
+                <button onclick="return cancel_AssignmentQuestion()" class="btn btn-outline-danger btn-sm"><i class="fa fa-save"></i> Cancel</button>
+                <button onclick="return save_AssignmentQuestion()" class="btn btn-outline-success btn-sm"><i class="fa fa-save"></i> Save Question</button>
+            </div>';
+        
+
+        return $html_content;
+
+        
     }
 
     /**

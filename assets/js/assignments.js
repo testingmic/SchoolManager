@@ -107,6 +107,32 @@ var close_Assignment = () => {
     });
 }
 
+var reopen_Assignment = () => {
+    var assignment_id = $(`input[name='data-student-id']`).attr("data-assignment_id");
+
+    swal({
+        title: "Reopen Assignment",
+        text: "Are you sure you want to reopen this Assignment? Once opened, marks awarded can be altered to reflect the changes.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/assignments/reopen`, { assignment_id }).then((response) => {
+                if (response.code == 200) {
+                    $(`input[name="test_grading"]`).prop("disabled", false);
+                    $(`span[id="assignment_state"]`).html(`<span class="badge badge-success">Graded</span>`);
+                    swal({
+                        position: "top",
+                        text: response.data.result,
+                        icon: "success",
+                    });
+                }
+            });
+        }
+    });
+}
+
 var load_studentInfo = async(student_id, assignment_id) => {
     let returnVal = await $.ajax({
         method: "GET",

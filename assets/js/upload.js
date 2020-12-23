@@ -1,4 +1,5 @@
 var the_file;
+$(`div[class~="trix-button-row"] span[class~="trix-button-group--file-tools"], div[class~="trix-button-row"] span[class~="trix-button-group-spacer"]`).remove();
 $(function() {
     'use strict';
 

@@ -30,6 +30,30 @@ class Assignments extends Myschoolgh {
         $params->academic_term = isset($params->academic_term) ? $params->academic_term : $client_data->client_preferences->academics->academic_term;
         $params->academic_year = isset($params->academic_year) ? $params->academic_year : $client_data->client_preferences->academics->academic_year;
         
+        // variables
+        global $isTutorAdmin, $isWardParent;
+
+        // if the user is a parent or student
+        if($isWardParent) {
+            $query = ",
+            (SELECT handed_in FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$params->userData->user_id}') AS handed_in,
+            (SELECT score FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$params->userData->user_id}') AS awarded_mark";
+        }
+
+        // if the user type is an admin or teacher
+        if($isTutorAdmin) {
+            $query = ",
+            (SELECT COUNT(*) FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.graded='1') AS students_graded,
+            (SELECT COUNT(*) FROM assignments_submitted	c WHERE c.assignment_id=a.item_id AND c.handed_in='Submitted') AS students_handed_in,
+            (SELECT COUNT(*) FROM users c WHERE c.client_id=a.client_id AND a.class_id=c.class_id AND c.user_type='student' AND c.user_status='Active' AND c.status='1') AS students_assigned
+            ";
+        }
+        
+        // if the user is a parent, student or teacher
+        if($isWardParent) {
+            $query .= ", (SELECT b.description FROM files_attachment b WHERE b.resource='assignment_doc' AND b.record_id = a.item_id AND b.created_by = '{$params->userData->user_id}' ORDER BY b.id DESC LIMIT 1) AS attached_document";
+        }
+
         // append the course tutor if the user_type is teacher
         if($params->userData->user_type == "teacher") {
             $params->course_tutor = $params->userData->user_id;
@@ -38,6 +62,7 @@ class Assignments extends Myschoolgh {
         // append the class_id if the user type is student
         if($params->userData->user_type == "student") {
             $params->class_id = $params->userData->class_id;
+            $params->query .= " AND a.state NOT IN ('Cancelled', 'Draft')";
         }
 
         $params->query .= " AND a.academic_year='{$params->academic_year}'";
@@ -49,26 +74,6 @@ class Assignments extends Myschoolgh {
         $params->query .= (isset($params->assignment_id)) ? " AND a.item_id='{$params->assignment_id}'" : null;
         $params->query .= (isset($params->course_tutor)) ? " AND a.course_tutor LIKE '%{$params->course_tutor}%'" : null;
 
-        // if the user is a parent or student
-        if(in_array($params->userData->user_type, ["parent", "student"])) {
-            $query = ",
-            (SELECT handed_in FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$params->userData->user_id}') AS handed_in,
-            (SELECT score FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$params->userData->user_id}') AS awarded_mark";
-        }
-
-        // if the user type is an admin or teacher
-        if(in_array($params->userData->user_type, ["teacher", "admin"])) {
-            $query = ",
-            (SELECT COUNT(*) FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.graded='1') AS students_graded,
-            (SELECT COUNT(*) FROM assignments_submitted	c WHERE c.assignment_id=a.item_id AND c.handed_in='Submitted') AS students_handed_in,
-            (SELECT COUNT(*) FROM users c WHERE c.client_id=a.client_id AND a.class_id=c.class_id AND c.user_type='student' AND c.user_status='Active' AND c.status='1') AS students_assigned
-            ";
-        }
-        
-        // if the user is a parent, student or teacher
-        if(in_array($params->userData->user_type, ["parent", "student"])) {
-            $query .= ", (SELECT b.description FROM files_attachment b WHERE b.resource='assignment_doc' AND b.record_id = a.item_id AND b.created_by = '{$params->userData->user_id}' ORDER BY b.id DESC LIMIT 1) AS attached_document";
-        }
         
         try {
 
@@ -87,22 +92,35 @@ class Assignments extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
+                // is an attachment assignment
+                $isAttachment = (bool) ($result->assignment_type == "file_attachment");
+                
+                $result->handedin_label = $this->the_status_label("Pending");
+
                 // handedin label
                 if(isset($result->handed_in)) {
                     $result->handedin_label = $this->the_status_label($result->handed_in);
-                    $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
-                    $result->attached_attachment_html = isset($result->attached_document->files) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
+
+                    // if the assignment is an attachment type
+                    if($isAttachment) {
+                        $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
+                        $result->attached_attachment_html = isset($result->attached_document->files) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
+                    }
                 }
 
                 // clean the assignment description
                 $result->assignment_description = custom_clean(htmlspecialchars_decode($result->assignment_description));
 
                 // count the number of students assigned to
-                $result->students_assigned = ($result->assigned_to === "selected_students") ? count($this->stringToArray($result->assigned_to_list)) : $result->students_assigned;
+                if(isset($result->students_assigned)) {
+                    $result->students_assigned = ($result->assigned_to === "selected_students") ? count($this->stringToArray($result->assigned_to_list)) : $result->students_assigned;
+                }
 
                 // if attachment variable was parsed
-                $result->attachment = json_decode($result->attachment);
-                $result->attachment_html = $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false);
+                if($isAttachment) {
+                    $result->attachment = json_decode($result->attachment);
+                    $result->attachment_html = $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false);
+                }
 
                 // loop through the information
                 foreach(["created_by_info", "course_tutor_info"] as $each) {
@@ -130,6 +148,12 @@ class Assignments extends Myschoolgh {
      * @return Array 
      */
     public function add(stdClass $params) {
+
+        /** Confirm that the assignment_type is valid */
+        if(!in_array($params->assignment_type, ["file_attachment", "multiple_choice"])) {
+            return ["code" => 203, "data" => "Sorry! An invalid assignment type was parsed."];
+        }
+
         /** Confirm the class id */
         if(empty($this->pushQuery("id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1'"))) {
             return ["code" => 203, "data" => "Sorry! An invalid class id was submitted"];
@@ -158,12 +182,15 @@ class Assignments extends Myschoolgh {
 
         /** Confirm that the user is using the file attachment module */
         $item_id = random_string("alnum", 32);
-        $is_attach = (bool) ($params->assignment_type == "file_attachment");
+        $is_attached = (bool) ($params->assignment_type == "file_attachment");
 
         try {
             
             /** Move any uploaded files */
-            if($is_attach) {
+            if($is_attached) {
+                // state
+                $state = "Pending";
+
                 // unset the session if already set
                 $this->session->remove("assignment_uploadID");
                 
@@ -174,13 +201,14 @@ class Assignments extends Myschoolgh {
                 $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
                 $files->execute(["assignments", $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
             } else {
+                $state = "Draft";
                 // set the assignment id into a session
                 $this->session->assignment_uploadID = $item_id;
             }
 
             /** Insert the record */
             $stmt = $this->db->prepare("
-                INSERT INTO assignments SET client_id = ?, created_by = ?, item_id = '{$item_id}'
+                INSERT INTO assignments SET client_id = ?, created_by = ?, item_id = '{$item_id}', state = '{$state}'
                 ".(isset($params->assignment_type) ? ", assignment_type = '{$params->assignment_type}'" : null)."
                 ".(isset($params->assignment_title) ? ", assignment_title = '{$params->assignment_title}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
@@ -200,11 +228,17 @@ class Assignments extends Myschoolgh {
             // log the user activity
             $this->userLogs("assignments", $item_id, null, "{$params->userData->name} created a new Assignment: {$params->assignment_title}", $params->userId);
 
-            # set the output to return when successful
+            // set the output to return when successful
             $return = ["code" => 200, "data" => "Assignment successfully created.", "refresh" => 2000];
 			
-			# append to the response
+			// append to the response
 			$return["additional"] = ["clear" => true];
+
+            // if the request is to add a quiz
+            if(!$is_attached) {
+                $return["data"] = "Assignment successfully created. Proceeding to add the questions";
+                $return["additional"]["href"] = "{$this->baseUrl}add-assignment/add_question?qid={$item_id}";
+            }
 
 			// return the output
             return $return;
@@ -457,8 +491,6 @@ class Assignments extends Myschoolgh {
     /**
      * Close Assignment
      * 
-     * Upload the assignment data
-     * 
      * @param String        $params->assignment_id
      * 
      * @return Array
@@ -477,6 +509,30 @@ class Assignments extends Myschoolgh {
 
         return [
             "data" => "Assignment was successfully closed."
+        ];
+    }
+    
+    /**
+     * Reopen a closed Assignment
+     * 
+     * @param String        $params->assignment_id
+     * 
+     * @return Array
+     */
+    public function reopen(stdClass $params) {
+        // get the assignment information
+        $the_data = $this->pushQuery("id, grading", "assignments", "client_id='{$params->clientId}' AND item_id='{$params->assignment_id}' LIMIT 1");
+
+        // validate the record
+        if(empty($the_data)) {
+            return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+        }
+
+        // update the status of the assignment
+        $this->db->query("UPDATE assignments SET state='Graded', date_closed=NULL WHERE item_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+        return [
+            "data" => "Assignment was successfully reopened for grading."
         ];
     }
 
