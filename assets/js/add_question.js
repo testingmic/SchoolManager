@@ -115,14 +115,12 @@ var save_AssignmentQuestion = (assignment_id) => {
     }).then((proceed) => {
         if (proceed) {
             $.post(`${baseUrl}api/assignments/add_question`, question_data).then((response) => {
-                swal({
-                    text: response.data.result,
-                    icon: "success",
-                });
+                let the_icon = "error";
                 if (response.code == 200) {
                     clear_questionForm();
                     let questions_list = "",
                         count = 0;
+                    the_icon = "success";
                     $.each(response.data.additional.questions, function(i, e) {
                         count++;
                         questions_list += `
@@ -137,6 +135,10 @@ var save_AssignmentQuestion = (assignment_id) => {
                     });
                     $(`tbody[id='added_questions']`).html(questions_list);
                 }
+                swal({
+                    text: response.data.result,
+                    icon: the_icon,
+                });
             });
         }
     });

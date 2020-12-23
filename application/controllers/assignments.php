@@ -100,7 +100,6 @@ class Assignments extends Myschoolgh {
                 // handedin label
                 if(isset($result->handed_in)) {
                     $result->handedin_label = $this->the_status_label($result->handed_in);
-
                     // if the assignment is an attachment type
                     if($isAttachment) {
                         $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
@@ -712,6 +711,19 @@ class Assignments extends Myschoolgh {
         $item_id = random_string("alnum", 32);
         $answers = isset($params->answers) && is_array($params->answers) ? implode(",", $params->answers) : "";
 
+        // ensure that the answers parameter is not empty
+        if(empty($answers) && in_array($params->answer_type, ["option", "multiple"])) {
+            return ["code" => 203, "data" => "Sorry! Please select at least one option as the answer."];
+        }
+
+        // if the answer type is a numeric variable
+        if(in_array($params->answer_type, ["numeric"])) {
+            if(!isset($params->numeric_answer)) {
+                return ["code" => 203, "data" => "Sorry! Please enter the answer for this question in the provided space."];
+            }
+            $params->answers = $params->numeric_answer;
+        }
+
         // get the question information
         if(isset($params->question_id)) {
             // get the assignment information
@@ -777,5 +789,65 @@ class Assignments extends Myschoolgh {
 
     }
 
+    /**
+     * Quick assignment data
+     * 
+     * @return String
+     */
+    public function quick_data(stdClass $data) {
+        $html_content = '
+        <div class="card-body pt-0 pb-0">
+            <div class="py-3 pt-0">
+                <p class="clearfix">
+                    <span class="float-left">Course Name</span>
+                    <span class="float-right text-muted">'.($data->course_name ?? null).'</span>
+                </p>
+                '.($data->hasUpdate ? '
+                <p class="clearfix">
+                    <span class="float-left">Assigned To</span>
+                    <span class="float-right text-muted">'.($data->assigned_to == "selected_students" ? "{$data->students_assigned} Students" : "Entire Class").'</span>
+                </p>
+                <p class="clearfix">
+                    <span class="float-left">Handed In</span>
+                    <span class="float-right text-muted">'.$data->students_handed_in . ($data->students_handed_in > 1 ? " Students" : " Student" ).'</span>
+                </p>
+                <p class="clearfix">
+                    <span class="float-left">Marked</span>
+                    <span class="float-right text-muted"><span class="graded_count">'.$data->students_graded.' Students</span>
+                </p>
+                <p class="clearfix">
+                    <span class="float-left">Grade</span>
+                    <span class="float-right text-muted">'.($data->grading ?? null).'</span>
+                </p>
+                ' : null).'
+                <p class="clearfix">
+                    <span class="float-left">Submission Date</span>
+                    <span class="float-right text-muted">'.date("jS F Y", strtotime($data->due_date)).'</span>
+                </p>
+                <p class="clearfix">
+                    <span class="float-left">Submission Time</span>
+                    <span class="float-right text-muted">'.date("h:iA", strtotime($data->due_time)).'</span>
+                </p>
+                <p class="clearfix">
+                    <span class="float-left">Date Created</span>
+                    <span class="float-right text-muted">'.date("jS F Y h:iA", strtotime($data->date_created)).'</span>
+                </p>
+                <p class="clearfix">
+                    <span class="float-left">Status</span>
+                    <span class="float-right text-muted" id="assignment_state">'.$this->the_status_label($data->state).'</span>
+                </p>
+
+                '.($data->isGraded ? 
+                    '<p class="clearfix">
+                        <span class="float-left font-weight-bold">Awarded Mark:</span>
+                        <span class="float-right"><span style="font-size:30px">'.$data->awarded_mark.'</span>/<sub style="font-size:30px">'.$data->grading.'</sub></span>
+                    </p>' : ''
+                ).'
+            </div>
+        </div>';
+
+        return $html_content;
+
+    }
 }
 ?>

@@ -321,7 +321,7 @@ class Forms extends Myschoolgh {
             $params->data->clientId = $params->clientId;
 
             // convert the students list into an array list
-            $assigned_list = $this->stringToArray($params->data->assigned_to_list);
+            $assigned_list = !empty($params->data->assigned_to_list) ? $this->stringToArray($params->data->assigned_to_list) : [];
 
             // load the courses and students list using the class id as the filter
             $ass_data = load_class("assignments", "controllers")->load_course_students($params->data);
@@ -543,7 +543,7 @@ class Forms extends Myschoolgh {
                 <div class="input-group">
                     <div class="input-group-prepend">
                         <div class="input-group-text">
-                            Question <span class="required">*</span>
+                            <strong>Question</strong> <span class="required">*</span>
                         </div>
                     </div>
                     <input type="hidden" name="question_id" id="question_id" value="'.($data->item_id ?? null).'" class="form-control">
@@ -554,7 +554,7 @@ class Forms extends Myschoolgh {
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group" style="max-width:300px">
-                        <label class="custom-label">Answer Type <span class="required">*</span></label>
+                        <label class="custom-label"><strong>Answer Type</strong> <span class="required">*</span></label>
                         <select class="form-control selectpicker" name="answer_type" id="answer_type">';
 
                         foreach($answer_types as $key => $value) {
@@ -566,7 +566,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-md-6">
                     <div class="form-group" style="max-width:300px">
-                        <label class="custom-label">Difficulty Level</label>
+                        <label class="custom-label"><strong>Difficulty Level</strong></label>
                         <select class="form-control selectpicker" name="difficulty" id="difficulty">';
 
                         foreach($difficulty as $key => $value) {
@@ -593,7 +593,7 @@ class Forms extends Myschoolgh {
 
                         $html_content .= '
                         <tr>
-                            <td width="13%">'.$value.' '.($i < 4 ? " <span class='required'>*</span>" : "").'</td>
+                            <td width="13%"><strong>'.$value.'</strong> '.($i < 4 ? " <span class='required'>*</span>" : "").'</td>
                             <td><input type="text" name="'.$option.'" id="'.$option.'" value="'.($data->{$option} ?? null).'" class="col-lg-12 objective_question form-control"></td>
                             <td width="7%"><input type="checkbox" '.(isset($data->correct_answer) ? "checked" : null).' value="'.$option.'" name="answer_option" style="height:20px; width:20px" class="checkbox cursor"></td>
                         </tr>';

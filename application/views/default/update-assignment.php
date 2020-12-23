@@ -48,7 +48,8 @@ if(!empty($item_id)) {
         "limit" => 1
     ];
 
-    $data = load_class("assignments", "controllers")->list($item_param);
+    $assignmentClass = load_class("assignments", "controllers");
+    $data = $assignmentClass->list($item_param);
     
     // if no record was found
     if(empty($data["data"])) {
@@ -61,7 +62,13 @@ if(!empty($item_id)) {
 
         // guardian information
         $isGraded = isset($data->awarded_mark) ? true : false;
+        $isActive = in_array($data->state, ["Graded", "Pending"]);
+        $isMultipleChoice =  (bool) ($data->assignment_type == "multiple_choice");
 
+        $data->isGraded = $isGraded;
+        $data->hasUpdate = $hasUpdate;
+
+        // get the assignment form
         $the_form = load_class("forms", "controllers")->create_assignment($item_param, "update_assignment");
 
         // student update permissions
@@ -71,10 +78,62 @@ if(!empty($item_id)) {
         if($isTutorAdmin) {
 
             // append the upload script
-            if(in_array($data->state, ["Pending", "Graded"])) {
+            if($isActive) {
                 $response->scripts[] = "assets/js/upload.js";
             } else {
                 unset($response->scripts[0]);
+            }
+
+            // if the question is a multiple choice question set
+            if($isMultipleChoice) {
+
+                // parameters to load the assignment information
+                $params = (object) [
+                    "clientId" => $clientId,
+                    "assignment_id" => $item_id
+                ];
+
+                // append to the scripts
+                $response->scripts[] = "assets/js/add_question.js";
+
+                // get the questions list for this assignment
+                $questions_list = "<table class='table table-bordered'>";
+                $questions_list .= "<thead>";
+                $questions_list .= "<tr>";
+                $questions_list .= "<th width='5%'>#</th>";
+                $questions_list .= "<th width='82%'>Question Content</th>";
+                $questions_list .= "<th></th>";
+                $questions_list .= "</tr>";
+                $questions_list .= "</thead>";
+                $questions_list .= "<tbody id='added_questions'>";
+
+                // make a query for the questions list
+                $questions_query = load_class("assignments", "controllers")->questions_list($params);
+
+                // loop through the questions list
+                if(!empty($questions_query)) {
+                    foreach($questions_query as $key => $question) {
+                        $ii = $key+1;
+                        $questions_list .= "
+                        <tr data-row_id='{$question->item_id}'>
+                            <td>{$ii}</td>
+                            <td>{$question->question}</td>
+                            <td align='center'>
+                                <button class='btn btn-outline-success btn-sm' onclick='return review_AssignmentQuestion(\"{$question->item_id}\")'><i class='fa fa-eye'></i></button>&nbsp;";
+                                if(!$isActive) {
+                                    $questions_list .= "<button class='btn btn-outline-danger btn-sm' onclick='return remove_AssignmentQuestion(\"{$question->item_id}\")'><i class='fa fa-trash'></i></button>";
+                                }
+                            $questions_list .= "</td>
+                        </tr>";
+                    }
+                } else {
+                    $questions_list .= "<tr>
+                        <td colspan='3' class='font-italic text-center'>No questions have been uploaded for this assignment</td>
+                    </tr>";
+                }
+                $questions_list .= "</tbody>";
+                $questions_list .= "</table>";
+
             }
 
             // not handed in
@@ -104,9 +163,6 @@ if(!empty($item_id)) {
 
             // ensure the result is not empty
             if(!empty($result)) {
-
-                // confirm action
-                $isActive = in_array($data->state, ["Graded", "Pending"]);
 
                 $grading_info .= '
                 <div class="col-lg-6" id="assignment-content">
@@ -248,7 +304,7 @@ if(!empty($item_id)) {
                         <div class="clearfix"></div>
                         <div class="author-box-name"><a href="#">'.$data->assignment_title.'</a></div>
                         <div class="author-box-name">'.$data->class_name.'</div>
-                        <div class="author-box-job">('.$data->students_assigned.' Students)</div>
+                        '.(isset($data->students_assigned) ? '<div class="author-box-job">('.$data->students_assigned.' Students)</div>' : null).'
                     </div>
                 </div>
                 </div>
@@ -256,55 +312,7 @@ if(!empty($item_id)) {
                     <div class="card-header">
                         <h4>Assignment Details</h4>
                     </div>
-                    <div class="card-body pt-0 pb-0">
-                        <div class="py-3 pt-0">
-                            <p class="clearfix">
-                                <span class="float-left">Course Name</span>
-                                <span class="float-right text-muted">'.($data->course_name ?? null).'</span>
-                            </p>
-                            '.($hasUpdate ? '
-                            <p class="clearfix">
-                                <span class="float-left">Assigned To</span>
-                                <span class="float-right text-muted">'.($data->assigned_to == "selected_students" ? "{$data->students_assigned} Students" : "Entire Class").'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Handed In</span>
-                                <span class="float-right text-muted">'.$data->students_handed_in . ($data->students_handed_in > 1 ? " Students" : " Student" ).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Marked</span>
-                                <span class="float-right text-muted"><span class="graded_count">'.$data->students_graded.' Students</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Grade</span>
-                                <span class="float-right text-muted">'.($data->grading ?? null).'</span>
-                            </p>
-                            ' : null).'
-                            <p class="clearfix">
-                                <span class="float-left">Submission Date</span>
-                                <span class="float-right text-muted">'.date("jS F Y", strtotime($data->due_date)).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Submission Time</span>
-                                <span class="float-right text-muted">'.date("h:iA", strtotime($data->due_time)).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Date Created</span>
-                                <span class="float-right text-muted">'.date("jS F Y h:iA", strtotime($data->date_created)).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Status</span>
-                                <span class="float-right text-muted" id="assignment_state">'.$myClass->the_status_label($data->state).'</span>
-                            </p>
-
-                            '.($isGraded ? 
-                                '<p class="clearfix">
-                                    <span class="float-left font-weight-bold">Awarded Mark:</span>
-                                    <span class="float-right"><span style="font-size:30px">'.$data->awarded_mark.'</span>/<sub style="font-size:30px">'.$data->grading.'</sub></span>
-                                </p>' : ''
-                            ).'
-                        </div>
-                    </div>
+                    '.$assignmentClass->quick_data($data).'
                 </div>
                 <div class="card">
                     <div class="card-header"><h4>Course Tutor Details</h4></div>
@@ -337,11 +345,25 @@ if(!empty($item_id)) {
                 <div class="card">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
-                            Additional Details
-                        </a>
-                    </li>
+                    '.($isTutorAdmin && $isMultipleChoice ? 
+                        '<li class="nav-item">
+                            <a class="nav-link '.(!$updateItem ? "active" : null).'" id="questions-tab2" data-toggle="tab" href="#questions" role="tab" aria-selected="true">
+                                Questions Set
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
+                                Additional Details
+                            </a>
+                        </li>
+                        ' : '
+                        <li class="nav-item">
+                            <a class="nav-link '.(!$updateItem ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
+                                Additional Details
+                            </a>
+                        </li>
+                        '    
+                    ).'
                     <li class="nav-item">
                         <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
                             '.($isTutorAdmin ? "Grade Students" : "Handin Assignment").'
@@ -357,7 +379,7 @@ if(!empty($item_id)) {
                     }
                     
                     $response->html .= '
-                    '.(!$nothanded_in || $isGraded ? 
+                    '.((!$nothanded_in || $isGraded) ? 
                         '<li class="nav-item">
                             <a class="nav-link" id="comments-tab2" data-toggle="tab" href="#comments" role="tab" aria-selected="true">
                                 Comments
@@ -366,16 +388,33 @@ if(!empty($item_id)) {
                     ).'
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
-                        <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="details" role="tabpanel" aria-labelledby="details-tab2">
-                            <div class="pt-0">
-                                <div class="py-3 pt-0">
-                                    '.$data->assignment_description.'
-                                </div>
-                                <div class="py-1 pt-0">
-                                    '.$data->attachment_html.'
+                        '.($isTutorAdmin && $isMultipleChoice ? 
+                            '<div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="questions" role="tabpanel" aria-labelledby="questions-tab2">
+                                <div class="pt-0">
+                                    '.$questions_list.'
                                 </div>
                             </div>
-                        </div>
+                            <div class="tab-pane fade" id="details" role="tabpanel" aria-labelledby="details-tab2">
+                                <div class="pt-0">
+                                    <div class="py-3 pt-0">
+                                        '.$data->assignment_description.'
+                                    </div>
+                                    <div class="py-1 pt-0">
+                                        '.($data->attachment_html ?? null).'
+                                    </div>
+                                </div>
+                            </div>' : 
+                            '<div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="details" role="tabpanel" aria-labelledby="details-tab2">
+                                <div class="pt-0">
+                                    <div class="py-3 pt-0">
+                                        '.$data->assignment_description.'
+                                    </div>
+                                    <div class="py-1 pt-0">
+                                        '.($data->attachment_html ?? null).'
+                                    </div>
+                                </div>
+                            </div>'
+                        ).'
                         <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
                             '.$grading_info.'
                         </div>
@@ -387,7 +426,7 @@ if(!empty($item_id)) {
 
                         $response->html .= '
                         </div>
-                        '.(!$nothanded_in || $isGraded ? 
+                        '.((!$nothanded_in || $isGraded) ? 
                             '<div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab2">
                                 '.leave_comments_builder("assignments", $item_id, false).'
                                 <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
