@@ -33,6 +33,7 @@ $.panelIconClosed = 'icon-arrow-down';
 
 $.minTimetableTime = '7:00 AM';
 $.maxTimetableTime = '6:00 PM';
+$.array_stream = "";
 
 'use strict';
 var devlog = $.env == "development" ? console.log : () => {}
@@ -453,6 +454,10 @@ var loadPage = (loc, callback, pushstate) => {
 
             if (result.client_auto_save !== undefined) {
                 client_auto_save = result.client_auto_save;
+            }
+
+            if (result.array_stream !== undefined) {
+                $.array_stream = result.array_stream;
             }
 
             document.title = result.title

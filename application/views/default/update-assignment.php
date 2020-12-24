@@ -23,7 +23,6 @@ $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [
     "assets/js/assignments.js",
     "assets/js/comments.js",
-    // "assets/js/comments_upload.js"
 ];
 
 // access permission variables
@@ -78,10 +77,8 @@ if(!empty($item_id)) {
         if($isTutorAdmin) {
 
             // append the upload script
-            if($isActive) {
+            if($isActive && !$isMultipleChoice) {
                 $response->scripts[] = "assets/js/upload.js";
-            } else {
-                unset($response->scripts[0]);
             }
 
             // if the question is a multiple choice question set
@@ -93,9 +90,6 @@ if(!empty($item_id)) {
                     "columns" => "a.*",
                     "assignment_id" => $item_id
                 ];
-
-                // append to the scripts
-                $response->scripts[] = "assets/js/assignments.js";
 
                 // get the questions list for this assignment
                 $questions_list = "<table class='table table-bordered'>";
@@ -110,11 +104,13 @@ if(!empty($item_id)) {
 
                 // make a query for the questions list
                 $questions_query = load_class("assignments", "controllers")->questions_list($params);
-
+                $questions_array = [];
                 // loop through the questions list
                 if(!empty($questions_query)) {
                     foreach($questions_query as $key => $question) {
                         $ii = $key+1;
+                        $questions_array[$question->item_id] = $question;
+
                         $questions_list .= "
                         <tr data-row_id='{$question->item_id}'>
                             <td>{$ii}</td>
@@ -123,7 +119,7 @@ if(!empty($item_id)) {
                                 if(!$isActive) {
                                     $questions_list .= "<a href='{$baseUrl}add-assignment/add_question?qid={$item_id}&q_id={$question->item_id}' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>&nbsp;";
                                 }
-                                $questions_list .= "<button class='btn btn-outline-primary btn-sm' onclick='return view_AssignmentQuestion(\"{$item_id}\",\"{$question->item_id}\")'><i class='fa fa-eye'></i></button>&nbsp;";
+                                $questions_list .= "<button class='btn btn-outline-primary btn-sm' onclick='return view_AssignmentQuestion(\"{$question->item_id}\")'><i class='fa fa-eye'></i></button>&nbsp;";
                                 if(!$isActive) {
                                     $questions_list .= "<button class='btn btn-outline-danger btn-sm' onclick='return remove_AssignmentQuestion(\"{$item_id}\",\"{$question->item_id}\")'><i class='fa fa-trash'></i></button>";
                                 }
@@ -137,7 +133,9 @@ if(!empty($item_id)) {
                 }
                 $questions_list .= "</tbody>";
                 $questions_list .= "</table>";
-
+                
+                // append the questions list to the array to be returned
+                $response->array_stream["questions_array"] = $questions_array;
             }
 
             // not handed in
@@ -157,7 +155,8 @@ if(!empty($item_id)) {
              */
             $the_students_list = $myschoolgh->prepare("
 				SELECT item_id, unique_id, name, email, phone_number, gender, image,
-                (SELECT score FROM assignments_submitted WHERE assignment_id = '{$data->item_id}' AND student_id = users.item_id) AS score
+                (SELECT score FROM assignments_submitted WHERE assignment_id = '{$data->item_id}' AND student_id = users.item_id) AS score,
+                (SELECT b.handed_in FROM assignments_submitted b WHERE b.assignment_id = '{$data->item_id}' AND b.student_id = users.item_id) AS handed_in
                 FROM users WHERE 
                 client_id='{$clientId}' AND class_id='{$data->class_id}' AND user_type='student' 
                 AND user_status='Active' AND status='1' AND item_id IN ('".implode("', '", $students_list)."')
@@ -173,7 +172,7 @@ if(!empty($item_id)) {
                     '.( $isActive ?
                         '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
                             <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
-                            <button class="btn btn-outline-success" onclick="return save_AssignmentMarks();"><i class="fa fa-save"></i> Save</button>
+                            '.(!$isMultipleChoice ? '<button class="btn btn-outline-success" onclick="return save_AssignmentMarks();"><i class="fa fa-save"></i> Save</button>' : '').'
                         </div>' : (
                             $isAdmin ? '
                                 <button class="btn btn-outline-danger" onclick="return reopen_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Reopen</button>
@@ -191,16 +190,33 @@ if(!empty($item_id)) {
                         <tbody>';
                         // loop through the list of students
                         foreach($result as $student) {
+                            
+                            $student->handed_in = !empty($student->handed_in) ? $student->handed_in : "Pending";
+                            $isSubmitted = (bool) ($student->handed_in == "Submitted");
+
                             $grading_info .= '
                                 <tr>
                                     <td width="65%">
-                                        <a style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return load_singleStudentData(\''.$student->item_id.'\',\''.$data->grading.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">
-                                            <div><img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt=""> &nbsp; '.$student->name.'</div>
-                                        </a>
+                                        <div class="d-flex justify-content-start">
+                                            <div class="mr-2">
+                                                '.($isSubmitted ?
+                                                    '<a title="Click to view document submitted by '.$student->name.'" style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return load_singleStudentData(\''.$student->item_id.'\',\''.$data->grading.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">
+                                                        <img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt="">
+                                                    </a>' : 
+                                                    '<img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt="">'
+                                                ).'
+                                            </div>
+                                            <div>
+                                                <p class="p-0 m-0">
+                                                    '.($isSubmitted ? '<a style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return load_singleStudentData(\''.$student->item_id.'\',\''.$data->grading.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'"><strong>'.$student->name.'</strong></a>' : "<strong>{$student->name}</strong>").'
+                                                </p>
+                                                <p class="p-0 m-0">'.$myClass->the_status_label($student->handed_in).'</p>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>
                                         <div class="input-group">
-                                            <input '.(!$isActive ? 'disabled="disabled"' : 'name="test_grading" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" class="form-control"> <span>/ '.$data->grading.'</span>
+                                            <input '.(!$isActive || $isMultipleChoice ? 'disabled="disabled"' : 'name="test_grading" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" class="form-control"> <span>/ '.$data->grading.'</span>
                                         </div>
                                     </td>
                                 </tr>';
@@ -400,7 +416,11 @@ if(!empty($item_id)) {
                                     <div class="mb-2 text-right">
                                         <a href="#" onclick="return publish_AssignmentQuestion(\''.$item_id.'\',\''.count($questions_query).'\');" class="anchor btn btn-outline-success"><i class="fa fa-send"></i> Publish Questions</a>
                                         <a href="'.$baseUrl.'add-assignment/add_question?qid='.$item_id.'" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Add Question</a>
-                                    </div>' : '').'
+                                    </div>' : 
+                                    '<div class="mb-2 text-right">
+                                        <a href="'.$baseUrl.'add-assignment/add_question?qid='.$item_id.'" class="btn btn-outline-primary"><i class="fa fa-eye"></i> Review Questions</a>
+                                    </div>'
+                                    ).'
                                     '.$questions_list.'
                                 </div>
                             </div>

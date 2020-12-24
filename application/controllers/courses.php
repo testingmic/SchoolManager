@@ -113,7 +113,9 @@ class Courses extends Myschoolgh {
                 "data" => $data
             ];
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
 
     }
 
@@ -177,7 +179,9 @@ class Courses extends Myschoolgh {
             return $data;
 
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
         
     }
 
@@ -245,7 +249,9 @@ class Courses extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
 
     }
 
@@ -336,7 +342,9 @@ class Courses extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
 
     }
 
@@ -386,7 +394,9 @@ class Courses extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
 
     }
 
@@ -453,7 +463,9 @@ class Courses extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
 
     }
 
@@ -517,7 +529,9 @@ class Courses extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
 
     }
 
@@ -618,7 +632,9 @@ class Courses extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {print $e->getMessage();} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
 
     }
 

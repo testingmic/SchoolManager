@@ -27,6 +27,22 @@
     <?= general_modal(); ?>
     <?= save_form_data(); ?>
     <?= ajax_form_button(); ?>
+
+    <div class="modal fade" id="viewOnlyModal" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-top modal-lg" style="width:100%;" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title pt-2">QUESTION DETAILS</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="announcement_preview"></div>
 </div>
 

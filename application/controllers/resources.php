@@ -152,7 +152,9 @@ class Resources extends Myschoolgh {
             
             return $return;
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
 
     }
 

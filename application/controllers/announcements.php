@@ -150,7 +150,9 @@ class Announcements extends Myschoolgh {
                 ]
             ];
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
 
     }
 
@@ -308,6 +310,7 @@ class Announcements extends Myschoolgh {
 
         } catch(PDOException $e) {
             $this->db->rollBack();
+            return $this->unexpected_error;
         }
     }
 
@@ -414,7 +417,7 @@ class Announcements extends Myschoolgh {
 
         } catch(PDOException $e) {
             $this->db->rollBack();  
-            return $e->getMessage()."\n";
+            return $this->unexpected_error;
         }
 
     }

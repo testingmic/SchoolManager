@@ -62,7 +62,9 @@ class Classes extends Myschoolgh {
                 "data" => $data
             ];
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
 
     }
 
@@ -120,7 +122,9 @@ class Classes extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
 
     }
 
@@ -187,7 +191,9 @@ class Classes extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
         
     }
 

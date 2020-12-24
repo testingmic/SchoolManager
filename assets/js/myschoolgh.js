@@ -133,7 +133,6 @@ var formatThreadComment = (rv) => {
     </div>`;
 }
 
-
 var share_Comment = (resource, item_id) => {
 
     let content = $(`trix-editor[id="leave_comment_content"]`),

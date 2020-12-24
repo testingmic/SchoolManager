@@ -55,7 +55,7 @@ class Sections extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            print $e->getMessage();
+            return $this->unexpected_error;
         } 
 
     }
@@ -130,7 +130,9 @@ class Sections extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
 
     }
 
@@ -213,7 +215,9 @@ class Sections extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {} 
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
         
     }
 

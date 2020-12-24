@@ -77,8 +77,89 @@ var save_AssignmentMarks = () => {
     });
 }
 
-var view_AssignmentQuestion = (assignment_id, question_id) => {
+var view_AssignmentQuestion = (question_id) => {
+        if ($.array_stream["questions_array"] !== undefined) {
+            let questions = $.array_stream["questions_array"];
+            if (questions[question_id] !== undefined) {
+                let question = questions[question_id];
 
+                console.log(question);
+
+                $(`div[id="viewOnlyModal"]`).modal("show");
+                $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html(`
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group mb-2">
+                            <label><strong>Question</strong></label>
+                            <div>${question.question}</div>
+                        </div>    
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="form-group mb-2">
+                            <label><strong>Answer Type</strong></label>
+                            <div>${question.answer_type}</div>
+                        </div>    
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="form-group mb-2">
+                            <label><strong>Difficulty</strong></label>
+                            <div>${question.difficulty}</div>
+                        </div>    
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="form-group mb-2">
+                            <label><strong>Correct Answer(s)</strong></label>
+                            <div>${question.correct_answer}</div>
+                        </div>    
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="form-group mb-2">
+                            <label class="pb-0 mb-0"><strong>Option A</strong></label>
+                            <div>${question.option_a}</div>
+                        </div>    
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="form-group mb-2">
+                            <label class="pb-0 mb-0"><strong>Option B</strong></label>
+                            <div>${question.option_b}</div>
+                        </div>    
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="form-group mb-2">
+                            <label class="pb-0 mb-0"><strong>Option C</strong></label>
+                            <div>${question.option_c}</div>
+                        </div>    
+                    </div>
+                    ${question.option_d ? `
+                        <div class="col-lg-4 col-md-6">
+                            <div class="form-group mb-2">
+                                <label class="pb-0 mb-0"><strong>Option D</strong></label>
+                                <div>${question.option_d}</div>
+                            </div>    
+                        </div>` : ""}
+                    ${question.option_e ? `
+                        <div class="col-lg-4 col-md-6">
+                            <div class="form-group mb-2">
+                                <label class="pb-0 mb-0"><strong>Option E</strong></label>
+                                <div>${question.option_e}</div>
+                            </div>    
+                        </div>` : ""}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="form-group mb-2">
+                            <label class="pb-0 mb-0"><strong>Marks</strong></label>
+                            <div>${question.marks}</div>
+                        </div>    
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="form-group mb-2">
+                            <label class="pb-0 mb-0"><strong>Date Created</strong></label>
+                            <div>${question.date_created}</div>
+                        </div>    
+                    </div>
+                </div>
+            `);
+        }
+    }
 }
 
 var remove_AssignmentQuestion = (assignment_id, question_id) => {
@@ -235,4 +316,5 @@ var submit_Answers = (assignment_id) => {
     });
 }
 
+trigger_form_submit();
 trigger_form_submit();

@@ -52,8 +52,14 @@ foreach($item_list["data"] as $key => $each) {
 
     $assignments .= "<tr data-row_id=\"{$each->id}\">";
     $assignments .= "<td>".($key+1)."</td>";
-    $assignments .= "<td>{$each->assignment_title}</td>";
+    $assignments .= "<td>{$each->assignment_title} ".(
+        $hasUpdate ? 
+            "<br><strong>Class:</strong> <a href=\"{$baseUrl}update-class/{$each->class_id}/view\">{$each->class_name}</a>
+            <br><strong>Course:</strong> <a href=\"{$baseUrl}update-course/{$each->course_id}/view\">{$each->course_name}</a>" : 
+            "<br><strong>Course:</strong> <a href=\"{$baseUrl}update-course/{$each->course_id}/view\">{$each->course_name}</a>"
+        )."</td>";
     $assignments .= "<td>{$each->due_date} @ {$each->due_time}</td>";
+
     // show this section if the user has the necessary permissions
     if($hasUpdate) {
         $assignments .= "<td>{$each->students_assigned}</td>";

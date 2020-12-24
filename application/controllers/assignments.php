@@ -242,7 +242,9 @@ class Assignments extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
 
     }
 
@@ -364,7 +366,9 @@ class Assignments extends Myschoolgh {
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
     }
 
     /**
@@ -637,7 +641,9 @@ class Assignments extends Myschoolgh {
                 "additional" => $files
             ];
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
     }
 
     /**
@@ -817,7 +823,7 @@ class Assignments extends Myschoolgh {
             }
 
         } catch(PDOException $e) {
-            print $e->getMessage();
+            return $this->unexpected_error;
         }
 
     }
