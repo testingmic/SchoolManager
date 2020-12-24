@@ -43,24 +43,50 @@ $the_form = "";
 if(isset($_GET["qid"]) && !empty($_GET["qid"]) || !empty($session->assignment_uploadID)) {
     // append to the question
     $pageTitle .= " - Review Questions";
+    
+    // assignment id
+    $assignment_id = isset($_GET["qid"]) ? xss_clean($_GET["qid"]) : $session->assignment_uploadID;
 
     // data object values
     $data = (object) [];
 
-    // assignment id
-    $assignment_id = xss_clean($_GET["qid"]);
+    // confirm if the question id was parsed
+    if(isset($_GET["q_id"]) && !empty($_GET["q_id"])) {
+        // assignment id
+        $question_id = xss_clean($_GET["q_id"]);
 
+        // get the question data
+        $question_info = $myClass->pushQuery(
+            "*", "assignments_questions", 
+            "item_id='{$question_id}' AND assignment_id='{$assignment_id}' LIMIT 1"
+        );
+
+        // if the question information is not empty
+        if(!empty($question_info)) {
+            $data = $question_info[0];
+        }
+        
+    }
+    
     // get the assignment details
     $item_param->assignment_id = $assignment_id;
     $ass_data = $assignmentClass->list($item_param);
 
     // if empty then show the error page
     if(empty($ass_data["data"])) {
+        // unset the session
+        $session->remove("assignment_uploadID");
+        // print an error message
         $response->html = page_not_found();
     } else {
         
         // get the item
         $ass_data = $ass_data["data"][0];
+        $isActive = (bool) ($ass_data->state == "Draft");
+
+        // append active state to the form
+        $data->theState = $ass_data->state;
+        $data->isActive = $isActive ? "active" : "not_active";
 
         // append to the scripts
         $response->scripts = ["assets/js/add_question.js"];
@@ -96,9 +122,9 @@ if(isset($_GET["qid"]) && !empty($_GET["qid"]) || !empty($session->assignment_up
                 <tr data-row_id='{$question->item_id}'>
                     <td>{$ii}</td>
                     <td>{$question->question}</td>
-                    <td>
-                        <button class='btn btn-outline-success btn-sm' onclick='return review_AssignmentQuestion(\"{$question->item_id}\")'><i class='fa fa-edit'></i></button>
-                        <button class='btn btn-outline-danger btn-sm' onclick='return remove_AssignmentQuestion(\"{$question->item_id}\")'><i class='fa fa-trash'></i></button>
+                    <td align='center'>
+                        <button class='btn btn-outline-success btn-sm' onclick='return review_AssignmentQuestion(\"{$assignment_id}\",\"{$question->item_id}\")'><i class='fa ".($isActive ? "fa-edit" : "fa-eye")."'></i></button>
+                        ".($isActive ? "<button class='btn btn-outline-danger btn-sm' onclick='return remove_AssignmentQuestion(\"{$assignment_id}\",\"{$question->item_id}\")'><i class='fa fa-trash'></i></button>" : "")."
                     </td>                
                 </tr>";
             }
@@ -137,8 +163,11 @@ if(isset($_GET["qid"]) && !empty($_GET["qid"]) || !empty($session->assignment_up
                                 <span class="float-right text-muted">'.date("jS F Y", strtotime($ass_data->due_date)).'</span>
                             </p>
                         </div>
-                        <div class="text-right mb-4 border-bottom pb-3">
-                            <a href="'.$baseUrl.'update-assignment/'.$assignment_id.'/view" class="btn btn-outline-success btn-sm"><i class="fa fa-edit"></i> Update</a>
+                        <div class="mb-4 border-bottom pb-3 row">
+                            <div class="col-lg-12">
+                                <span class="float-left"><a href="'.$baseUrl.'update-assignment/'.$assignment_id.'/view" class="btn btn-outline-success btn-sm"><i class="fa fa-edit"></i> Update</a></span>
+                                '.($isActive ? '<span class="float-right"><button onclick="return clear_questionForm()" class="btn btn-sm btn-outline-primary">New Question</button></span>' : '').'
+                            </div>
                         </div>
                     </div>
                     <h6>QUESTIONS LIST</h6>

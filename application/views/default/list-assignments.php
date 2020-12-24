@@ -26,6 +26,9 @@ $assignments_param = (object) [
     "limit" => 99999
 ];
 
+// unset the session
+$session->remove("assignment_uploadID");
+
 $item_list = load_class("assignments", "controllers")->list($assignments_param);
 
 $accessObject->userId = $session->userId;

@@ -461,8 +461,8 @@ var loadPage = (loc, callback, pushstate) => {
             init();
             initDataTables();
             init_image_popup();
-            linkClickStopper($.pagecontent)
-            formSubmitStopper($.pagecontent)
+            linkClickStopper($.pagecontent);
+            formSubmitStopper($.pagecontent);
             var prev = window.history.state === null ? null : window.history.state.current
             if (pushstate !== false) window.history.pushState({ previous: prev, current: loc }, "", loc)
 
@@ -1401,7 +1401,6 @@ var form_processing = () => {
     });
 
     trigger_form_submit();
-
 }
 
 var form_loader = async(form_module, module_item_id) => {

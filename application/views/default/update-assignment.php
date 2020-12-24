@@ -90,18 +90,19 @@ if(!empty($item_id)) {
                 // parameters to load the assignment information
                 $params = (object) [
                     "clientId" => $clientId,
+                    "columns" => "a.*",
                     "assignment_id" => $item_id
                 ];
 
                 // append to the scripts
-                $response->scripts[] = "assets/js/add_question.js";
+                $response->scripts[] = "assets/js/assignments.js";
 
                 // get the questions list for this assignment
                 $questions_list = "<table class='table table-bordered'>";
                 $questions_list .= "<thead>";
                 $questions_list .= "<tr>";
                 $questions_list .= "<th width='5%'>#</th>";
-                $questions_list .= "<th width='82%'>Question Content</th>";
+                $questions_list .= "<th width='80%'>Question Content</th>";
                 $questions_list .= "<th></th>";
                 $questions_list .= "</tr>";
                 $questions_list .= "</thead>";
@@ -118,10 +119,13 @@ if(!empty($item_id)) {
                         <tr data-row_id='{$question->item_id}'>
                             <td>{$ii}</td>
                             <td>{$question->question}</td>
-                            <td align='center'>
-                                <button class='btn btn-outline-success btn-sm' onclick='return review_AssignmentQuestion(\"{$question->item_id}\")'><i class='fa fa-eye'></i></button>&nbsp;";
+                            <td align='center'>";
                                 if(!$isActive) {
-                                    $questions_list .= "<button class='btn btn-outline-danger btn-sm' onclick='return remove_AssignmentQuestion(\"{$question->item_id}\")'><i class='fa fa-trash'></i></button>";
+                                    $questions_list .= "<a href='{$baseUrl}add-assignment/add_question?qid={$item_id}&q_id={$question->item_id}' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>&nbsp;";
+                                }
+                                $questions_list .= "<button class='btn btn-outline-primary btn-sm' onclick='return view_AssignmentQuestion(\"{$item_id}\",\"{$question->item_id}\")'><i class='fa fa-eye'></i></button>&nbsp;";
+                                if(!$isActive) {
+                                    $questions_list .= "<button class='btn btn-outline-danger btn-sm' onclick='return remove_AssignmentQuestion(\"{$item_id}\",\"{$question->item_id}\")'><i class='fa fa-trash'></i></button>";
                                 }
                             $questions_list .= "</td>
                         </tr>";
@@ -386,11 +390,17 @@ if(!empty($item_id)) {
                             </a>
                         </li>' : ''
                     ).'
+                    
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         '.($isTutorAdmin && $isMultipleChoice ? 
                             '<div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="questions" role="tabpanel" aria-labelledby="questions-tab2">
                                 <div class="pt-0">
+                                    '.(!$isActive ? '
+                                    <div class="mb-2 text-right">
+                                        <a href="#" onclick="return publish_AssignmentQuestion(\''.$item_id.'\',\''.count($questions_query).'\');" class="anchor btn btn-outline-success"><i class="fa fa-send"></i> Publish Questions</a>
+                                        <a href="'.$baseUrl.'add-assignment/add_question?qid='.$item_id.'" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Add Question</a>
+                                    </div>' : '').'
                                     '.$questions_list.'
                                 </div>
                             </div>

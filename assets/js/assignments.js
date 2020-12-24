@@ -34,7 +34,6 @@ $(`div[id='create_assignment'] select[name='class_id']`).on("change", function()
                 $.each(response.data.result.students_list, (_, e) => {
                     $(`div[id='create_assignment'] select[name='assigned_to_list']`).append(`<option data-item_id="${e.item_id}" value='${e.item_id}'>${e.name}</option>'`);
                 });
-
             }
         });
     }
@@ -43,7 +42,6 @@ $(`div[id='create_assignment'] select[name='class_id']`).on("change", function()
 var save_AssignmentMarks = () => {
     var student_list = [],
         assignment_id = $(`input[name='data-student-id']`).attr("data-assignment_id");
-
     swal({
         title: "Save Marks",
         text: "Do you want to proceed to award the marks?",
@@ -57,7 +55,6 @@ var save_AssignmentMarks = () => {
                     student_mark = $(this).val();
                 student_list.push(student_id + "|" + student_mark);
             });
-
             $.post(`${baseUrl}api/assignments/award_marks`, { student_list, assignment_id }).then((response) => {
                 let the_icon = "error";
                 if (response.code == 200) {
@@ -80,9 +77,65 @@ var save_AssignmentMarks = () => {
     });
 }
 
+var view_AssignmentQuestion = (assignment_id, question_id) => {
+
+}
+
+var remove_AssignmentQuestion = (assignment_id, question_id) => {
+    swal({
+        title: "Delete Question",
+        text: "Are you sure you want to delete this question? You cannot reverse this action once confirmed.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/assignments/delete_question`, { assignment_id, question_id }).then((response) => {
+                if (response.code == 200) {
+                    $(`tr[data-row_id="${question_id}"]`).remove();
+                    swal({
+                        text: response.data.result,
+                        icon: "success",
+                    });
+                }
+            });
+        }
+    });
+}
+
+var publish_AssignmentQuestion = (assignment_id, questions_count) => {
+    if (questions_count < 1) {
+        swal({
+            position: "top",
+            text: "Sorry! You can only publish an assignment once at least one question has been added.",
+            icon: "error",
+        });
+        return false;
+    }
+    swal({
+        title: "Publish Assignment",
+        text: "Are you sure you want to publish this Assignment? You cannot update the question set once it has been published.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/assignments/publish`, { assignment_id }).then((response) => {
+                if (response.code == 200) {
+                    swal({
+                        position: "top",
+                        text: "Congrats! The assignment was successfully published.",
+                        icon: "success",
+                    });
+                    loadPage(`${baseUrl}update-assignment/${assignment_id}/view`);
+                }
+            });
+        }
+    });
+}
+
 var close_Assignment = () => {
     var assignment_id = $(`input[name='data-student-id']`).attr("data-assignment_id");
-
     swal({
         title: "Close Assignment",
         text: "Are you sure you want to close this Assignment? You cannot award marks once it has been closed.",
@@ -105,11 +158,11 @@ var close_Assignment = () => {
             });
         }
     });
+
 }
 
 var reopen_Assignment = () => {
     var assignment_id = $(`input[name='data-student-id']`).attr("data-assignment_id");
-
     swal({
         title: "Reopen Assignment",
         text: "Are you sure you want to reopen this Assignment? Once opened, marks awarded can be altered to reflect the changes.",
@@ -139,7 +192,6 @@ var load_studentInfo = async(student_id, assignment_id) => {
         url: `${baseUrl}api/assignments/student_info`,
         data: { student_id, assignment_id, preview: 1 }
     }).then(resp => resp);
-
     return returnVal;
 }
 
@@ -147,9 +199,7 @@ var load_singleStudentData = async(student_id, grading) => {
     let the_data = $(`a[data-function="single-view"][data-student_id="${student_id}"]`).data(),
         results_page = $(".student-assignment-details"),
         htmlData = "";
-
     $(`input[name="data-student-id"]`).val(the_data.student_id);
-
     htmlData += "<table class='table'>";
     htmlData += "<thead><tr>";
     htmlData += "<th width='100%' style='font-weight:bolder; font-size:16px'>";
@@ -159,11 +209,8 @@ var load_singleStudentData = async(student_id, grading) => {
     htmlData += "</tr></thead>";
     htmlData += "<tbody>";
     htmlData += "<tr><td colspan='2'>";
-
     let the_n_data = await load_studentInfo(the_data.student_id, the_data.assignment_id);
-
     htmlData += the_n_data.data.result;
-
     results_page.html(htmlData).css('display', 'block');
     $(".grading-history-div").css('display', 'block');
 }

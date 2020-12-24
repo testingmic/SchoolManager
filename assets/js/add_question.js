@@ -1,6 +1,20 @@
-$(`div[id="add_question_container"] select[id="answer_type"]`).on('change', function(e) {
-    question_typeProcessor($(this).val());
-});
+var quick_formHandler = () => {
+    $(`div[id="add_question_container"] select[id="answer_type"]`).on('change', function(e) {
+        question_typeProcessor($(this).val());
+    });
+
+    $(`div[id="add_question_container"] input[name="answer_option"]:checkbox`).on('change', function() {
+        let selected_option = $(this).val();
+        let question_type = $(`div[id="add_question_container"] select[id="answer_type"]`).val();
+        let all_selected = $("input[name='answer_option']:checkbox:checked").length;
+        if (question_type == "option") {
+            if (all_selected > 1) {
+                $(`input[name="answer_option"]:checkbox`).prop('checked', false);
+                $(`input[name="answer_option"]:checkbox[value='${selected_option}']`).prop('checked', 'checked');
+            }
+        }
+    });
+}
 
 var question_typeProcessor = (value, answer_value = null) => {
     let entry_points = ["option", "multiple"];
@@ -23,23 +37,19 @@ var question_typeProcessor = (value, answer_value = null) => {
     }
 }
 
-$(`div[id="add_question_container"] input[name="answer_option"]:checkbox`).on('change', function() {
-    let selected_option = $(this).val();
-    let question_type = $(`div[id="add_question_container"] select[id="answer_type"]`).val();
-    let all_selected = $("input[name='answer_option']:checkbox:checked").length;
-    if (question_type == "option") {
-        if (all_selected > 1) {
-            $(`input[name="answer_option"]:checkbox`).prop('checked', false);
-            $(`input[name="answer_option"]:checkbox[value='${selected_option}']`).prop('checked', 'checked');
+var review_AssignmentQuestion = (assignment_id, question_id) => {
+    $.get(`${baseUrl}api/assignments/review_question`, { assignment_id, question_id }).then((response) => {
+        if (response.code == 200) {
+            $(`div[id="full_question_detail"]`).html(response.data.result);
+            quick_formHandler();
+            $(`textarea[name="question"]`).focus();
+            let loc = `${baseUrl}add-assignment/add_question?qid=${assignment_id}&q_id=${question_id}`;
+            window.history.pushState({ current: loc }, "", loc);
         }
-    }
-});
-
-var review_AssignmentQuestion = (assignment_id) => {
-
+    });
 }
 
-var remove_AssignmentQuestion = (question_id) => {
+var remove_AssignmentQuestion = (assignment_id, question_id) => {
     swal({
         title: "Delete Question",
         text: "Are you sure you want to delete this question? You cannot reverse this action once confirmed.",
@@ -48,7 +58,7 @@ var remove_AssignmentQuestion = (question_id) => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-            $.post(`${baseUrl}api/assignments/delete_question`, { question_id }).then((response) => {
+            $.post(`${baseUrl}api/assignments/delete_question`, { assignment_id, question_id }).then((response) => {
                 if (response.code == 200) {
                     $(`tr[data-row_id="${question_id}"]`).remove();
                     swal({
@@ -62,10 +72,13 @@ var remove_AssignmentQuestion = (question_id) => {
 }
 
 var clear_questionForm = () => {
+    $(`input[name="question_id"]`).val("");
+    $(`textarea[name="question"]`).focus();
     $(`select[name="difficulty"]`).val("medium").change();
     $(`select[name="answer_type"]`).val("option").change();
     $(`input[name="answer_option"]:checkbox`).prop('checked', false);
     $(`input[class~="objective_question"], [name="question"]`).val("");
+    window.history.pushState({ current: `${baseUrl}add-assignment/add_question` }, "", `${baseUrl}add-assignment/add_question`);
 }
 
 var cancel_AssignmentQuestion = () => {
@@ -128,8 +141,8 @@ var save_AssignmentQuestion = (assignment_id) => {
                             <td>${count}</td>
                             <td>${e.question}</td>
                             <td>
-                                <button class="btn btn-outline-success btn-sm" onclick="return review_AssignmentQuestion('${e.item_id}')"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-outline-danger btn-sm" onclick="return remove_AssignmentQuestion('${e.item_id}')"><i class="fa fa-trash"></i></button>
+                                <button class="btn btn-outline-success btn-sm" onclick="return review_AssignmentQuestion('${assignment_id}','${e.item_id}')"><i class="fa fa-edit"></i></button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="return remove_AssignmentQuestion('${assignment_id}','${e.item_id}')"><i class="fa fa-trash"></i></button>
                             </td>
                         </tr>`;
                     });
@@ -143,3 +156,5 @@ var save_AssignmentQuestion = (assignment_id) => {
         }
     });
 }
+
+quick_formHandler();
