@@ -74,6 +74,7 @@ var remove_AssignmentQuestion = (assignment_id, question_id) => {
 var clear_questionForm = () => {
     $(`input[name="question_id"]`).val("");
     $(`textarea[name="question"]`).focus();
+    $(`input[name="marks"]`).val("1");
     $(`select[name="difficulty"]`).val("medium").change();
     $(`select[name="answer_type"]`).val("option").change();
     $(`input[name="answer_option"]:checkbox`).prop('checked', false);

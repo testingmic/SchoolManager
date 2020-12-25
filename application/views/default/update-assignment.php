@@ -71,7 +71,7 @@ if(!empty($item_id)) {
         $the_form = load_class("forms", "controllers")->create_assignment($item_param, "update_assignment");
 
         // student update permissions
-        $grading_info = "<div class='row'>";
+        $grading_info = "<div class='row' id='assignment_question_detail'>";
 
         // get the list of students
         if($isTutorAdmin) {
@@ -272,7 +272,7 @@ if(!empty($item_id)) {
             }
             
             // display the content if the assignment type is a file_attachment
-            if($data->assignment_type == "file_attachment") {
+            if(!$isMultipleChoice) {
                 
                 // display the file upload option
                 $grading_info .= 
@@ -297,6 +297,33 @@ if(!empty($item_id)) {
                     '.$data->attached_attachment_html.'
                 </div>';
             }
+
+            // display the questions using an algorithm specified in the assignment class
+            elseif($isMultipleChoice) {
+
+                // parameters to load the assignment information
+                $params = (object) [
+                    "clientId" => $clientId,
+                    "columns" => "a.*",
+                    "assignment_id" => $item_id
+                ];
+
+                // set the scripts to load for this user
+                $response->scripts = ["assets/js/multichoice.js"];
+                
+                // get the questions array list
+                $questions_array_list = load_class("assignments", "controllers")->questions_list($params);
+                $questions_array = [];
+
+                // set the previous question id and the current question Id
+                $questions_ids = array_column($questions_array_list, "item_id");
+                $session->previousQuestionId = !empty($session->previousQuestionId) ? $session->previousQuestionId : null;
+                $session->currentQuestionId = !empty($session->currentQuestionId) ? $session->currentQuestionId : $questions_ids[0];
+
+                $grading_info .= $assignmentClass->current_question($questions_array_list);
+
+            }
+
         }
 
         $grading_info .= '</div>';
@@ -447,15 +474,15 @@ if(!empty($item_id)) {
                         ).'
                         <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
                             '.$grading_info.'
-                        </div>
-                        <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
+                        </div>';
                         
                         if($hasUpdate) {
+                            $response->html .= '<div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                             $response->html .= $the_form;
+                            $response->html .= '</div>';
                         }
 
                         $response->html .= '
-                        </div>
                         '.((!$nothanded_in || $isGraded) ? 
                             '<div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab2">
                                 '.leave_comments_builder("assignments", $item_id, false).'

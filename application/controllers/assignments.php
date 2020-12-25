@@ -779,6 +779,7 @@ class Assignments extends Myschoolgh {
                 $stmt = $this->db->prepare("
                     INSERT INTO assignments_questions SET item_id = ?, assignment_id = ?, 
                     question = ?, correct_answer = ?, created_by = ?, client_id = ?
+                    ".(isset($params->marks) ? ",marks='{$params->marks}'" : null)."
                     ".(isset($params->option_a) ? ",option_a='{$params->option_a}'" : null)."
                     ".(isset($params->option_b) ? ",option_b='{$params->option_b}'" : null)."
                     ".(isset($params->option_c) ? ",option_c='{$params->option_c}'" : null)."
@@ -803,6 +804,7 @@ class Assignments extends Myschoolgh {
                 $stmt = $this->db->prepare("
                     UPDATE assignments_questions SET question = ?, correct_answer = ?
                     ".(isset($params->option_a) ? ",option_a='{$params->option_a}'" : null)."
+                    ".(isset($params->marks) ? ",marks='{$params->marks}'" : null)."
                     ".(isset($params->option_b) ? ",option_b='{$params->option_b}'" : null)."
                     ".(isset($params->option_c) ? ",option_c='{$params->option_c}'" : null)."
                     ".(isset($params->option_d) ? ",option_d='{$params->option_d}'" : null)."
@@ -921,6 +923,142 @@ class Assignments extends Myschoolgh {
             "data" => $form
         ];
 
+    }
+
+    /**
+     * Get the Current Question to Display
+     * 
+     * Format the question data and submit the html content for display
+     * 
+     * @param Array     $questions_list
+     * 
+     * @return String
+     */
+    public function current_question(array $questions_list) {
+        global $session;
+
+        $questions_ids = array_column($questions_list, "item_id");
+        $data = $this->question_content($questions_list, $session->currentQuestionId);
+        
+        // if the question data is not empty
+        if(!empty($data)) {
+
+            // unset the show submit button
+            $session->showSubmitButton = false;
+            $question = $data["question"];
+            
+            $question_id = $question->item_id;
+            $answer_type = $question->answer_type;
+
+            $number = !empty($session->questionNumber) ? $session->questionNumber + 1 : 1;
+            
+            // set the previous question id
+            if($data["key"] == 0 && count($questions_ids) > 1) {
+                $session->previousQuestionId = null;
+                $session->currentQuestionId = $questions_list[$data["key"]+1]->item_id;
+            }
+            elseif($data["key"] == (count($questions_ids) -1)) {
+                // set the previous and current question ids
+                $session->previousQuestionId = $questions_list[$data["key"]-1]->item_id;
+                $session->currentQuestionId = $questions_list[count($questions_ids)-1]->item_id;
+                // show the submit button
+                $session->showSubmitButton = true;
+            }
+            else {
+                // set the previous question id to the current key minus one
+                $session->previousQuestionId = isset($questions_list[$data["key"]-1]) ? $questions_list[$data["key"]-1]->item_id : $questions_list[0]->item_id;
+
+                // confirm that there is a next question after this question
+                if(isset($questions_list[$data["key"]+1])) {
+                    $session->currentQuestionId = $questions_list[$data["key"]+1]->item_id;
+                } else {
+                    // set the current question id to the last question
+                    $session->currentQuestionId = $questions_list[count($questions_ids)-1]->item_id;
+                    // show the submit button
+                    $session->showSubmitButton = true;
+                }
+            }
+
+            // options array list
+            $options_array = [
+                "option_a" => "A", "option_b" => "B",
+                "option_c" => "C","option_d" => "D",
+                "option_e" => "E",
+            ];
+
+            // process the question data and return the processed information
+            $question_html = "
+            <div class='col-lg-12'>
+                <table class='table table-bordered' id='multichoice_question' data-answer_type='{$answer_type}' data-question_id='{$question_id}'>
+                <tr>
+                    <td width='5%'>{$number}</td>
+                    <td>{$question->question}</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>";
+                    // loop through the array list
+                    foreach($options_array as $key => $option) {
+                        if(isset($question->{$key})) {
+                            $question_html .= "
+                            <div class='pt-2'>
+                                <input name='answer_option' value='{$key}' id='{$key}' class='cursor checkbox' type='checkbox' style='height:20px; width:20px'>
+                                <label class='cursor' for='{$key}'><strong>{$option}.</strong> {$question->{$key}}</label>
+                            </div>";
+                        }
+                    }
+                $question_html .= "
+                    </td>
+                </tr>";
+                $question_html .= "
+                </table>
+                <div class='d-flex justify-content-between'>
+                    <div>
+                        ".(!$session->previousQuestionId ? "<button onclick='return loadQuestionInfo(\"{$session->previousQuestionId}\");' class='btn-sm btn-outline-primary btn'><i class='fa fa-fast-backward'></i> Previous Question</button>" : "")."
+                    </div>
+                    <div>
+                        <button onclick='return loadQuestionInfo(\"{$session->currentQuestionId}\");' class='btn-sm btn-outline-primary btn'>Next Question <i class='fa fa-fast-forward'></i></button>
+                    </div>
+                </div>
+            </div>";
+
+            return $question_html;
+            
+        }
+    }
+
+
+    /**
+     * Question Content
+     * 
+     * Loop through the questions array and confirm which one matches the id parsed
+     * 
+     * Return the array key and question details in the response
+     * 
+     * @param Array     $questions_list
+     * @param String    $question_id
+     * 
+     * @return Array
+     */
+    public function question_content(array $questions_list, $question_id) {
+
+        if(empty($questions_list)) {
+            return;
+        }
+
+        $data = [];
+
+        foreach($questions_list as $key => $question) {
+            if($question->item_id == $question_id) {
+                $data = [
+                    "key" => $key,
+                    "question" => $question
+                ];
+                break;
+            }
+        }
+
+        return $data;
     }
 
 }

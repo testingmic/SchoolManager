@@ -317,4 +317,3 @@ var submit_Answers = (assignment_id) => {
 }
 
 trigger_form_submit();
-trigger_form_submit();

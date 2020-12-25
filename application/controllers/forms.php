@@ -558,7 +558,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group" style="max-width:300px">
                         <label class="custom-label"><strong>Answer Type</strong> <span class="required">*</span></label>
                         <select '.$disabled.' class="form-control selectpicker" name="answer_type" id="answer_type">';
@@ -570,7 +570,7 @@ class Forms extends Myschoolgh {
                         $html_content .= '</select>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group" style="max-width:300px">
                         <label class="custom-label"><strong>Difficulty Level</strong></label>
                         <select '.$disabled.' class="form-control selectpicker" name="difficulty" id="difficulty">';
@@ -580,6 +580,12 @@ class Forms extends Myschoolgh {
                         }
 
                         $html_content .= '</select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="marks"><strong>Question Mark</strong> <span class="required">*</span></label>
+                        <input '.$disabled.' type="number" id="marks" value="'.($data->marks ??  1).'" max="100" name="marks" placeholder="Please enter the mark" step="2" class="form-control">
                     </div>
                 </div>
             </div>
