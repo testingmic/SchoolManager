@@ -531,7 +531,7 @@ class Forms extends Myschoolgh {
             "option" => "Single Answer Option",
             "multiple" => "Multiple Select Answers",
             "numeric" => "Numeric",
-            "input" => "Text Input"
+            // "input" => "Text Input"
         ];
         $difficulty = [
             "easy" => "Easy",

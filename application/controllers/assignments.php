@@ -997,15 +997,34 @@ class Assignments extends Myschoolgh {
                 <tr>
                     <td></td>
                     <td>";
-                    // loop through the array list
-                    foreach($options_array as $key => $option) {
-                        if(isset($question->{$key})) {
-                            $question_html .= "
-                            <div class='pt-2'>
-                                <input name='answer_option' value='{$key}' id='{$key}' class='cursor checkbox' type='checkbox' style='height:20px; width:20px'>
-                                <label class='cursor' for='{$key}'><strong>{$option}.</strong> {$question->{$key}}</label>
-                            </div>";
+                    // if the answer type is option or multiple
+                    if(in_array($question->answer_type, ["multiple", "option"])) {
+                        // loop through the array list
+                        foreach($options_array as $key => $option) {
+                            if(isset($question->{$key})) {
+                                $question_html .= "
+                                <div class='pt-2'>
+                                    <input name='answer_option' value='{$key}' id='{$key}' class='cursor checkbox' type='checkbox' style='height:20px; width:20px'>
+                                    <label class='cursor' for='{$key}'><strong>{$option}.</strong> {$question->{$key}}</label>
+                                </div>";
+                            }
                         }
+                    }
+                    // if the answer must be a numeric value
+                    elseif($question->answer_type == "numeric") {
+                        $question_html .= "
+                        <div class='pt-2'>
+                            <label>Enter correct answer</label>
+                            <input name='answer_option' id='answer_option' class='form-control' type='number'>
+                        </div>";
+                    }
+                    // if the answer requires a text
+                    elseif($question->answer_type == "input") {
+                        $question_html .= "
+                        <div class='pt-2'>
+                            <label>Enter correct answer</label>
+                            <text_area name='answer_option' id='answer_option' class='form-control'></textarea>
+                        </div>";
                     }
                 $question_html .= "
                     </td>
@@ -1061,5 +1080,78 @@ class Assignments extends Myschoolgh {
         return $data;
     }
 
+    /**
+     * Save the user answer and get the next question
+     * 
+     * Load the existing information (if any) in assignments_answers table. Append to the array list
+     * 
+     * Once done, get the details of the next question to display on the page.
+     * 
+     * @param String    $params->question_id
+     * @param Array     $answers
+     * 
+     * @return Array
+     */
+    public function save_answer(stdClass $params) {
+        
+        // get the question data
+        $question_info = $this->pushQuery(
+            "a.*", "assignments_questions a", 
+            "a.item_id='{$params->question_id}' AND a.client_id='{$params->clientId}' LIMIT 1"
+        );
+
+        // if the question information is not empty
+        if(empty($question_info)) {
+           return ["code" => 203, "data" => "Sorry! An invalid question id was parsed."];
+        }
+        $data = $question_info[0];
+
+        // convert the answers into an array
+        $answers = $this->stringToArray($params->answers);
+
+        // get the answer type
+        if($data->answer_type == "option" && count($answers) > 1) {
+            return ["code" => 203, "data" => "Sorry! This question requires a single answer. Multiple answers were given"];
+        }
+
+        // load the existing user record (if any)
+        $answer_info = $this->pushQuery(
+            "*", "assignments_answers", 
+            "assignment_id='{$data->item_id}' AND student_id = '{$params->userId}' AND client_id='{$params->clientId}' LIMIT 1"
+        );
+
+        // create a new object of the answers mechanism
+        $answerClass = load_class("answers", "controllers");
+        $clean_answer = implode(",", $answers);
+
+        // if empty the form a new string of data
+        if(empty($answer_info)) {
+            $the_answer = [
+                [
+                    "question_id" => $params->question_id,
+                    "answer" => $clean_answer,
+                    "data_answered" => date("Y-m-d h:iA"),
+                    "marking" => $answerClass->answerMechanism($clean_answer, $data->correct_answer)
+                ]
+            ];
+        } else {
+            // convert the answers into an array
+            $existing_answer = json_decode($answer_info[0]->answers, true);
+
+            $the_answer = [
+                "question_id" => $params->question_id,
+                "answer" => $clean_answer,
+                "data_answered" => date("Y-m-d h:iA"),
+                "marking" => $answerClass->answerMechanism($clean_answer, $data->correct_answer)
+            ];
+
+            // append to the array list
+            array_push($existing_answer, $the_answer);
+        }
+
+        // update the database record
+        return $the_answer;
+
+    }
 }
 ?>

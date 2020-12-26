@@ -15,9 +15,15 @@ quiz_answerHandler();
 
 var loadQuestionInfo = (question_id) => {
     let answers = {};
-    $.each($(`table[id="multichoice_question"] input[name='answer_option']:checked`), function(i, e) {
-        answers[i] = $(this).val();
-    });
+    if ($(`input[name='answer_option'][type='checkbox']`).length) {
+        $.each($(`table[id="multichoice_question"] input[name='answer_option']:checked`), function(i, e) {
+            answers[i] = $(this).val();
+        });
+    } else if ($(`input[name='answer_option'][type='number']`).length) {
+        answers[0] = $(`input[name='answer_option'][type='number']`).val();
+    } else if ($(`textarea[name='answer_option']`).length) {
+        answers[0] = $(`input[name='answer_option'][type='number']`).val();
+    }
 
     $.post(`${baseUrl}api/assignments/save_answer`, { question_id, answers }).then((response) => {
         if (response.code == 200) {
