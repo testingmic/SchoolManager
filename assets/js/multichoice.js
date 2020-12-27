@@ -13,8 +13,9 @@ var quiz_answerHandler = () => {
 }
 quiz_answerHandler();
 
-var loadQuestionInfo = (question_id) => {
-    let answers = {};
+var loadQuestionInfo = (previous_id = "") => {
+    let answers = {},
+        question_id = $(`table[id="multichoice_question"]`).attr("data-question_id");
     if ($(`input[name='answer_option'][type='checkbox']`).length) {
         $.each($(`table[id="multichoice_question"] input[name='answer_option']:checked`), function(i, e) {
             answers[i] = $(this).val();
@@ -25,7 +26,7 @@ var loadQuestionInfo = (question_id) => {
         answers[0] = $(`input[name='answer_option'][type='number']`).val();
     }
 
-    $.post(`${baseUrl}api/assignments/save_answer`, { question_id, answers }).then((response) => {
+    $.post(`${baseUrl}api/assignments/save_answer`, { question_id, answers, previous_id }).then((response) => {
         if (response.code == 200) {
             $(`div[id='assignment_question_detail']`).html(response.data.result);
             quiz_answerHandler();

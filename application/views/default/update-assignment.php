@@ -320,7 +320,7 @@ if(!empty($item_id)) {
                 $session->previousQuestionId = !empty($session->previousQuestionId) ? $session->previousQuestionId : null;
                 $session->currentQuestionId = !empty($session->currentQuestionId) ? $session->currentQuestionId : $questions_ids[0];
 
-                $grading_info .= $assignmentClass->current_question($questions_array_list);
+                $grading_info .= $assignmentClass->current_question($questions_array_list, $session->userId);
 
             }
 
