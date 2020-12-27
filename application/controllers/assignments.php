@@ -982,7 +982,7 @@ class Assignments extends Myschoolgh {
                 }
             }
 
-            $number = !empty($session->questionNumber) ? $session->questionNumber + 1 : 1;
+            $number = $data["key"] + 1;
             
             // set the previous question id
             if($data["key"] == 0 && count($questions_ids) > 1) {
@@ -1065,12 +1065,15 @@ class Assignments extends Myschoolgh {
                     </div>
                     <div>
                         <button onclick='return loadQuestionInfo();' class='btn-sm btn-outline-primary btn'>Next Question <i class='fa fa-fast-forward'></i></button>
+                        ".($session->showSubmitButton && $number == count($questions_ids) ? "
+                            <button onclick='return submitQuizAssignment(\"{$question->assignment_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i> Sumit Answers</button>
+                        " : "")."
                     </div>
                 </div>
             </div>";
 
             // add one to the question number
-            $session->questionNumber = ($session->questionNumber == count($questions_ids)) ? count($questions_ids) : $number;
+            $session->questionNumber = $number;
 
             return $question_html;
             
@@ -1232,14 +1235,14 @@ class Assignments extends Myschoolgh {
         $this->session->currentQuestionId = isset($params->previous_id) ? $params->previous_id : $this->session->nextQuestionId;
 
         // parameters to load the assignment information
-        $params = (object) [
+        $para = (object) [
             "clientId" => $params->clientId,
             "columns" => "a.*",
             "assignment_id" => $data->assignment_id
         ];
         
         // get the questions array list
-        $questions_array_list = $this->questions_list($params);
+        $questions_array_list = $this->questions_list($para);
         
         // return the response
         return [
