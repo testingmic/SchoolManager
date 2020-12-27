@@ -978,6 +978,11 @@ class Assignments extends Myschoolgh {
                     if($quest_key !== "not_found") {
                         $this_answer = $existing_answer[$quest_key]["answer"];
                         $this_answer = in_array($answer_type, ["multiple", "option"]) ? $this->stringToArray($this_answer) : $this_answer;
+                        
+                        // if the answer is empty but yet a multiple or option then replace with empty array
+                        if(in_array($answer_type, ["multiple", "option"]) && empty($this_answer)) {
+                            $this_answer = [];
+                        }
                     }
                 }
             }
