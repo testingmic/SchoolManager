@@ -100,11 +100,14 @@ class Attendance extends Myschoolgh {
     /**
      * Attendance Radio Buttons
      * 
+     * Check if the state parsed matches the key, if so then auto check that radio button
+     * 
      * @param String    $userId
+     * @param String    $user_state
      * 
      * @return String
      */
-    public function attendance_radios($userId = null) {
+    public function attendance_radios($userId = null, $user_state = null) {
         
         $html = "";
         $statuses = ["Present", "Absent", "Holiday", "Late"];
@@ -113,13 +116,37 @@ class Attendance extends Myschoolgh {
             $the_key = strtolower($status);
             $html .= "
             <span class='mr-2'>
-                <input type='radio' data-user_id='{$userId}' value='{$the_key}' name='attendance_status[{$userId}][]' id='{$userId}_{$the_key}'>
+                <input type='radio' ".($user_state == $the_key ? "checked" : "")." data-user_id='{$userId}' value='{$the_key}' name='attendance_status[{$userId}][]' id='{$userId}_{$the_key}'>
                 <label class='cursor' for='{$userId}_{$the_key}'>{$status}</label>
             </span>
             ";
         }
 
         return $html;
+    }
+
+    /**
+     * Get the User State
+     * 
+     * Loop through the attendance log and get the value for the user
+     * 
+     * @param String    $userId
+     * @param Array     $attendance_log
+     */
+    public function the_user_state($userId, $attendance_log) {
+        
+        // init the state
+        $state = "";
+
+        // loop through the list
+        foreach($attendance_log as $key => $attendance) {
+            if($attendance->item_id == $userId) {
+                $state = $attendance_log[$key]->state;
+                break;
+            }
+        }
+        // return the state
+        return $state;
     }
 
     /**
@@ -230,7 +257,9 @@ class Attendance extends Myschoolgh {
             }
         }
 
-        return $attendance;
+        // confirm existing record
+        $check = $this->pushQuery("users_list, users_data", "users_attendance_log", "log_date='{$list_days[0]}' {$query} LIMIT 1");
+        $attendance_log = !empty($check) ? json_decode($check[0]->users_data) : [];
 
         // set the table content
         $table_content = "
@@ -256,11 +285,17 @@ class Attendance extends Myschoolgh {
             <th><span class='float-left'>Status</span></th>
         </thead>
         <tbody>";
+
         foreach ($attendance["attendance"] as $key => $item) {
             $numb = 0;
             foreach ($item["record"]["users_list"] as $user){
                 $numb++;
-                $table_content .= "<tr>
+                // get the user state
+                $user_state = $this->the_user_state($user->user_id, $attendance_log);
+
+                // append to the list
+                $table_content .= "
+                <tr>
                     <td>
                         {$numb}
                     </td>
@@ -268,7 +303,7 @@ class Attendance extends Myschoolgh {
                         <img src=\"{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\"> {$user->name}
                     </td>
                     <td>{$user->unique_id}</td>
-                    <td>".$this->attendance_radios($user->user_id, $item["record"]["users_data"])."</td>
+                    <td>".$this->attendance_radios($user->user_id, $user_state)."</td>
                 </tr>";
             }
         }
