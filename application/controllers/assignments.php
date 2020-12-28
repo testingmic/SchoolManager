@@ -939,6 +939,7 @@ class Assignments extends Myschoolgh {
         global $session;
 
         $questions_ids = array_column($questions_list, "item_id");
+        $questions_count = count($questions_ids);
         $data = $this->question_content($questions_list, $session->currentQuestionId);
         
         // if the question data is not empty
@@ -990,14 +991,14 @@ class Assignments extends Myschoolgh {
             $number = $data["key"] + 1;
             
             // set the previous question id
-            if($data["key"] == 0 && count($questions_ids) > 1) {
+            if($data["key"] == 0 && $questions_count > 1) {
                 $session->previousQuestionId = null;
                 $session->nextQuestionId = $questions_list[$data["key"]+1]->item_id;
             }
-            elseif($data["key"] == (count($questions_ids) -1)) {
+            elseif($data["key"] == ($questions_count -1)) {
                 // set the previous and current question ids
                 $session->previousQuestionId = $questions_list[$data["key"]-1]->item_id;
-                $session->nextQuestionId = $questions_list[count($questions_ids)-1]->item_id;
+                $session->nextQuestionId = $questions_list[$questions_count-1]->item_id;
                 // show the submit button
                 $session->showSubmitButton = true;
             }
@@ -1010,7 +1011,7 @@ class Assignments extends Myschoolgh {
                     $session->nextQuestionId = $questions_list[$data["key"]+1]->item_id;
                 } else {
                     // set the current question id to the last question
-                    $session->nextQuestionId = $questions_list[count($questions_ids)-1]->item_id;
+                    $session->nextQuestionId = $questions_list[$questions_count-1]->item_id;
                     // show the submit button
                     $session->showSubmitButton = true;
                 }
@@ -1023,6 +1024,9 @@ class Assignments extends Myschoolgh {
             $question_html = "
             <div class='col-lg-12'>
                 <table class='table table-bordered' id='multichoice_question' data-answer_type='{$answer_type}' data-question_id='{$question_id}'>
+                <tr>
+                    <td colspan='2'><h6 class='mb-0 pb-0'>{$questions_count} Objective test questions was found under this Assignment.</h6></td>
+                </tr>
                 <tr>
                     <td width='5%'>{$number}</td>
                     <td>{$question->question}</td>
@@ -1069,10 +1073,10 @@ class Assignments extends Myschoolgh {
                         ".($session->previousQuestionId && $number !== 1 ? "<button onclick='return loadQuestionInfo(\"{$session->previousQuestionId}\");' class='btn-sm btn-outline-primary btn'><i class='fa fa-fast-backward'></i> Previous Question</button>" : "")."
                     </div>
                     <div>
-                        <button onclick='return loadQuestionInfo();' class='btn-sm btn-outline-primary btn'>Next Question <i class='fa fa-fast-forward'></i></button>
-                        ".($session->showSubmitButton && $number == count($questions_ids) ? "
-                            <button onclick='return submitQuizAssignment(\"{$question->assignment_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i> Sumit Answers</button>
-                        " : "")."
+                        ".($session->showSubmitButton && $number == $questions_count ? "
+                            <button onclick='return reviewQuizAssignment(\"{$question->assignment_id}\")' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i> Review Answers</button>
+                            <button onclick='return submitQuizAssignment(\"{$question->assignment_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i> Sumit Assignment</button>
+                        " : "<button onclick='return loadQuestionInfo();' class='btn-sm btn-outline-primary btn'>Next Question <i class='fa fa-fast-forward'></i></button>")."
                     </div>
                 </div>
             </div>";
@@ -1085,6 +1089,105 @@ class Assignments extends Myschoolgh {
         }
     }
 
+    /**
+     * Review Answers
+     * 
+     * This method loads all the questions for the specified assignment id and then appends the user
+     * answers to it
+     * 
+     * @param String        $params->assignment_id
+     * 
+     * @return
+     */
+    public function review_answers($params) {
+        // get the questions array list
+        $params->columns = "a.*";
+        $questions_array_list = $this->questions_list($params);
+        $questions_count = count($questions_array_list);
+
+        // load the existing user record (if any)
+        $answer_info = $this->pushQuery(
+            "*", "assignments_answers", 
+            "assignment_id='{$params->assignment_id}' AND student_id = '{$params->userId}' AND client_id='{$params->clientId}' LIMIT 1"
+        );
+        // convert to array
+        $answers_list = !empty($answer_info) ? json_decode($answer_info[0]->answers, true) : [];
+
+        // options array list
+        $options_array = ["option_a" => "A", "option_b" => "B", "option_c" => "C","option_d" => "D", "option_e" => "E"];
+
+        // init the information to parse
+        $question_html = "
+        <div class='col-lg-12 p-0 mb-0'>
+        <table class='table table-bordered'>
+        <tr>
+            <td colspan='2'><h6 class='mb-0 pb-0'>{$questions_count} Objective test questions under this Assignment.</h6></td>
+        </tr>";
+
+        // loop through the questions list
+        foreach($questions_array_list as $qkey => $question) {
+            
+            // set the answer type and the number
+            $number = $qkey + 1;
+            $answer_type = $question->answer_type;
+
+            // answer mechanism
+            $this_answer = $answers_list[$qkey]["answer"];
+            $this_answer = in_array($answer_type, ["multiple", "option"]) ? $this->stringToArray($this_answer) : $this_answer;
+            
+            // if the answer is empty but yet a multiple or option then replace with empty array
+            if(in_array($answer_type, ["multiple", "option"]) && empty($this_answer)) {
+                $this_answer = [];
+            }
+
+            // process the question data and return the processed information
+            $question_html .= "
+                <tr>
+                    <td width='5%'>{$number}</td>
+                    <td>{$question->question}</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>";
+                    // if the answer type is option or multiple
+                    if(in_array($answer_type, ["multiple", "option"])) {
+                        // loop through the array list
+                        foreach($options_array as $key => $option) {
+                            if(isset($question->{$key})) {
+                                $question_html .= "
+                                <div class='pt-2'>
+                                    <input disabled='disabled' ".(in_array($key, $this_answer) ? "checked" : null)." name='answer_option' value='{$key}' id='{$key}' class='cursor checkbox' type='checkbox' style='height:20px; width:20px'>
+                                    <label class='cursor' for='{$key}'><strong>{$option}.</strong> {$question->{$key}}</label>
+                                </div>";
+                            }
+                        }
+                    }
+                    // if the answer must be a numeric value
+                    elseif($answer_type == "numeric") {
+                        $question_html .= "
+                        <div class='pt-2'>
+                            <label>Enter correct answer</label>
+                            <input disabled='disabled' value='{$this_answer}' name='answer_option' id='answer_option' class='form-control' type='number'>
+                        </div>";
+                    }
+                    // if the answer requires a text
+                    elseif($answer_type == "input") {
+                        $question_html .= "
+                        <div class='pt-2'>
+                            <label>Enter correct answer</label>
+                            <textarea disabled='disabled' name='answer_option' id='answer_option' class='form-control'>{$this_answer}</textarea>
+                        </div>";
+                    }
+                $question_html .= "
+                    </td>
+                </tr>";
+        }
+        $question_html .= "</table></div>";
+
+        return ["data" => $question_html];
+
+
+    }
 
     /**
      * Question Content

@@ -33,3 +33,13 @@ var loadQuestionInfo = (previous_id = "") => {
         }
     });
 }
+
+var reviewQuizAssignment = (assignment_id) => {
+    $(`div[id="viewOnlyModal"]`).modal("show");
+    $(`div[id="viewOnlyModal"] [class="modal-title pt-2"]`).html(`Review Selected Answers`);
+    $.get(`${baseUrl}api/assignments/review_answers`, { assignment_id }).then((response) => {
+        if (response.code = 200) {
+            $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html(response.data.result);
+        }
+    }).catch(() => {});
+}

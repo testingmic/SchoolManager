@@ -36,7 +36,7 @@
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
                 <div class="modal-body"></div>
-                <div class="modal-footer">
+                <div class="modal-footer mt-0 pt-0">
                     <button class="btn btn-outline-danger" data-dismiss="modal">Close</button>
                 </div>
             </div>
