@@ -303,8 +303,8 @@ var submit_Answers = (assignment_id) => {
         icon: 'warning',
         buttons: true,
         dangerMode: true,
-    }).then((willDelete) => {
-        if (willDelete) {
+    }).then((proceed) => {
+        if (proceed) {
             $.post(`${baseUrl}api/assignments/handin`, { assignment_id }).then((response) => {
                 if (response.code == 200) {
                     $(`div[id="handin_upload"]`).remove();

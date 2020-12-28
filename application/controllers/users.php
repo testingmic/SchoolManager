@@ -40,7 +40,7 @@ class Users extends Myschoolgh {
 	 */
 	public function list(stdClass $params = null) {
 
-		$params->query = "1 ";
+		$params->query = " 1 ";
 
 		// boolean value
         $params->remote = (bool) (isset($params->remote) && $params->remote);

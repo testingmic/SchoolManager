@@ -20,6 +20,30 @@ var list_userAttendance = (query = "") => {
         }
     });
 }
+
+var save_AttendanceLog = (date, user_type = "", class_id = "") => {
+    let attendance = {};
+    $.each($(`table[id="attendance_logger"] input[type='radio']`), function(i, e) {
+        let user_id = $(this).attr("data-user_id");
+        attendance[user_id] = $(`input[type='radio'][data-user_id='${user_id}']:checked`).val();
+    });
+    swal({
+        title: "Log Attendance",
+        text: "Are you sure you want to log attendance?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/attendance/log`, { date, attendance, user_type, class_id }).then((response) => {
+                if (response.code == 200) {
+
+                }
+            });
+        }
+    });
+}
+
 $(`select[id="attendance_category"]`).on("change", function() {
     let value = $(this).val();
     if (value == "student") {

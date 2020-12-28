@@ -8,6 +8,96 @@ class Attendance extends Myschoolgh {
     }
 
     /**
+     * Log Attendance
+     * 
+     * Loop through the attendance array list and log the attendance for the specified date
+     * 
+     * @return Array
+     */
+    public function log(stdClass $params) {
+
+        // confirm a valid list of array for the attendance parameter
+        if(!is_array($params->attendance)) {
+            return ["code" => 203, "data" => "Sorry! The attendance parameter must be an array with the user id as the key."];
+        }
+
+        // confirm valid date
+        if(!$this->validDate($params->date)) {
+            return ["code" => 203, "data" => "Sorry! A valid date is required."];
+        }
+
+        // validate the class id
+        $prevData = $this->pushQuery("*", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+
+        // if empty then return
+        if(empty($prevData)) {
+            return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+        }
+
+        // init
+        $user_data = [];
+        $present_list = [];
+
+        // loop through the array list 
+        foreach($params->attendance as $key => $value) {
+            // append to the list of present users array
+            if($value == "present") {
+                $present_list[] = $key;
+            }
+            // load the user data using the key
+            $data = $this->pushQuery("item_id, unique_id, name, email, phone_number", "users", "item_id = '{$key}' AND user_type ='{$params->user_type}' LIMIT 1");
+            
+            // end the query if the result is empty
+            if(empty($data)) {
+                return ["code" => 203, "data" => "Sorry! The user with GUID {$key} does not fall within the specified user_type."];
+            }
+
+            // append the attendance status to the query
+            $data[0]->state = $value;
+
+            // append to the array list
+            $user_data[] = $data[0];
+        }
+
+        // confirm existing record
+        $check = $this->pushQuery("users_list, users_data", "users_attendance_log", "log_date='{$params->date}' AND user_type='{$params->user_type}' LIMIT 1");
+
+        // insert the record into the database
+        if(empty($check)) {
+            // prepare and execute the statement
+            $stmt = $this->db->prepare("
+                INSERT INTO users_attendance_log SET user_type = ?, users_list = ?, users_data = ?, log_date = ?,
+                created_by = ?, academic_year = ?, academic_term = ?
+                ".(isset($params->class_id) ? ", class_id='{$params->class_id}'" : "")."
+            ");
+            $stmt->execute([
+                $params->user_type, json_encode($present_list), json_encode($user_data),
+                $params->date, $params->userId, $params->academic_year, $params->academic_term
+            ]);
+
+            // set the success message
+            $data = "Attendance was sucessfully logged for {$params->date}.";
+
+            //log the user activity
+        } else {
+            // prepare and execute the statement
+            $stmt = $this->db->prepare("
+                UPDATE users_attendance_log SET users_list = ?, users_data = ?
+                WHERE user_type = ? AND log_date = ? ".(isset($params->class_id) ? " AND class_id='{$params->class_id}'" : "")."
+            ");
+            $stmt->execute([
+                json_encode($present_list), json_encode($user_data), $params->user_type, $params->date
+            ]);
+
+            // set the success message
+            $data = "Attendance log for {$params->date} was successfully updated.";
+
+            //log the user activity
+        }
+
+    }
+
+    /**
      * Attendance Radio Buttons
      * 
      * @param String    $userId
@@ -23,8 +113,8 @@ class Attendance extends Myschoolgh {
             $the_key = strtolower($status);
             $html .= "
             <span class='mr-2'>
-                <input type='radio' value='{$the_key}' name='attendance_status[{$userId}][]' id='{$userId}_{$the_key}'>
-                <label for='{$userId}_{$the_key}'>{$status}</label>
+                <input type='radio' data-user_id='{$userId}' value='{$the_key}' name='attendance_status[{$userId}][]' id='{$userId}_{$the_key}'>
+                <label class='cursor' for='{$userId}_{$the_key}'>{$status}</label>
             </span>
             ";
         }
@@ -69,6 +159,9 @@ class Attendance extends Myschoolgh {
         // append some few query
         $attendance = [];
         
+        $user_type = isset($params->user_type) ? $params->user_type : null;
+        $class_id = isset($params->class_id) ? $params->class_id : null;
+
         $query = isset($params->user_type) ? " AND user_type='{$params->user_type}'" : null;
         $query .= isset($params->class_id) ? " AND class_id='{$params->class_id}'" : null;
         
@@ -76,8 +169,15 @@ class Attendance extends Myschoolgh {
         foreach($list_days as $each_day) {
 
             // get the attendance log for the day
-            $check = $this->pushQuery("users_list, users_data", "users_attendance_log", "log_date='{$each_day}' {$query} LIMIT 1");
-
+            $check = $this->pushQuery("users_list, users_data, user_type, class_id", "users_attendance_log", "log_date='{$each_day}' {$query} LIMIT 1");
+            
+            // append the user type is there is a record but the user_type was not initially appended
+            if(!empty($check)) {
+                // append the parameters
+                $params->class_id = $check[0]->class_id;
+                $params->user_type = $check[0]->user_type;
+            }
+            
             // load the students list
             $users_list = load_class("users", "controllers")->list($params)["data"];
             
@@ -130,6 +230,8 @@ class Attendance extends Myschoolgh {
             }
         }
 
+        return $attendance;
+
         // set the table content
         $table_content = "
         <div class='row'>
@@ -163,8 +265,7 @@ class Attendance extends Myschoolgh {
                         {$numb}
                     </td>
                     <td>
-                        <img src=\"{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\">
-                        <a href=\"{$this->baseUrl}update-student/{$user->user_id}/view\">{$user->name}</a>
+                        <img src=\"{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\"> {$user->name}
                     </td>
                     <td>{$user->unique_id}</td>
                     <td>".$this->attendance_radios($user->user_id, $item["record"]["users_data"])."</td>
@@ -176,7 +277,7 @@ class Attendance extends Myschoolgh {
             $table_content .= "
             <tr>
                 <td align='right' colspan='4'>
-                    <button onclick='return save_AttendanceLog(\"{$list_days[0]}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i> Save Attendance</button>
+                    <button onclick='return save_AttendanceLog(\"{$list_days[0]}\",\"{$user_type}\",\"{$class_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i> Save Attendance</button>
                 </td>        
             </tr>";
         } else {
