@@ -1173,9 +1173,7 @@ class Assignments extends Myschoolgh {
             $answer_type = $question->answer_type;
 
             // answer mechanism
-            if(isset($params->show_answer)) {
-                $correct = (bool) ($answers_list[$qkey]["status"] == "correct");
-            }
+            $correct = (bool) ($answers_list[$qkey]["status"] == "correct");
 
             $this_answer = $answers_list[$qkey]["answer"];
             $this_answer = in_array($answer_type, ["multiple", "option"]) ? $this->stringToArray($this_answer) : $this_answer;
@@ -1196,13 +1194,17 @@ class Assignments extends Myschoolgh {
                     <td>";
                     // if the answer type is option or multiple
                     if(in_array($answer_type, ["multiple", "option"])) {
+                        // start the html content
                         $question_html .= "<div class='col-lg-12'>";
-                        // if the answer is correct
-                        $question_html .= "
-                            <span style='position:absolute;right:5px;top:5px;'>
-                                ".($correct ? "<span class='badge badge-success'>Correct</span>" : "<span class='badge badge-danger'>Wrong</span>")."
-                            </span>
-                        ";
+
+                        // if the show_answer parameter was parsed
+                        if(isset($params->show_answer)) {
+                            // if the answer is correct
+                            $question_html .= "
+                                <span style='position:absolute;right:5px;top:5px;'>
+                                    ".($correct ? "<span class='badge badge-success'>Correct</span>" : "<span class='badge badge-danger'>Wrong</span>")."
+                                </span>";
+                        }
                         // loop through the array list
                         foreach($options_array as $key => $option) {
                             if(isset($question->{$key})) {

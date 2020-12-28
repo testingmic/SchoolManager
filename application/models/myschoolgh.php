@@ -596,7 +596,7 @@ class Myschoolgh extends Models {
 
         try {
 
-            $stmt = $this->db->prepare("SELECT name AS fullname, email, phone_number, image, user_type, position, description FROM users WHERE item_id = ? LIMIT 1");
+            $stmt = $this->db->prepare("SELECT name AS fullname, email, phone_number, image, user_type, position, description, username FROM users WHERE item_id = ? LIMIT 1");
             $stmt->execute([$user_id]);
 
             return $stmt->fetch(PDO::FETCH_OBJ);

@@ -1,10 +1,22 @@
 var attendance_content = $(`div[id="attendance_log_list"]`);
 
+var checkAllState = () => {
+    $(`select[id='select_for_all']`).on("change", function() {
+        let value = $(this).val();
+        if (value !== "null") {
+            $(`table[id="attendance_logger"] input[type='radio'][value='${value}']`).prop("checked", true);
+        } else {
+            $(`table[id="attendance_logger"] input[type='radio']`).prop("checked", false);
+        }
+    });
+}
+
 var list_userAttendance = (query = "") => {
     let date_range = $(`input[name="attendance_date"]`).val();
     $.get(`${baseUrl}api/attendance/display_attendance?${query}date_range=${date_range}`).then((response) => {
         if (response.code == 200) {
             attendance_content.html(response.data.result.table_content);
+            checkAllState();
         }
     });
 }

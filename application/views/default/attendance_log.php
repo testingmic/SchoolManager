@@ -58,7 +58,7 @@ if(!empty($session->clientId)) {
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Selected Date</label>
-                                        <input type="text" value="'.$selected_date.':'.$selected_date.'" class="daterange form-control" name="attendance_date" id="attendance_date">
+                                        <input type="text" value="'.$selected_date.':'.$selected_date.'" class="datepicker form-control" name="attendance_date" id="attendance_date">
                                     </div>
                                     <div class="form-group">
                                         <label>Select Category</label>

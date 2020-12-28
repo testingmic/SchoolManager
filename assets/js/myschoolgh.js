@@ -111,7 +111,9 @@ var formatThreadComment = (rv) => {
                             <img width="50px" class="img-xs rounded-circle" src="${baseUrl}${rv.replied_by.image}" alt="">
                         </div>
                         <div class="ml-2">
-                            <p class="cursor underline mb-0" title="Click to view summary information about ${rv.replied_by.fullname}" data-id="${rv.user_id}">${rv.replied_by.fullname}</p>
+                            <p class="cursor mb-0" data-id="${rv.user_id}">
+                                ${rv.replied_by.fullname} <span class="ml-2 text-primary" data-username="@${rv.replied_by.username}">@${rv.replied_by.username}</span>
+                            </p>
                             <p title="${rv.modified_date}" class="tx-11 mb-0 replies-timestamp text-muted">${rv.time_ago}</p>
                         </div>
                     </div>
