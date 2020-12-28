@@ -17,7 +17,7 @@ class Attendance extends Myschoolgh {
     public function log(stdClass $params) {
 
         // confirm a valid list of array for the attendance parameter
-        if(!is_array($params->attendance)) {
+        if(!isset($params->finalize) && !is_array($params->attendance)) {
             return ["code" => 203, "data" => "Sorry! The attendance parameter must be an array with the user id as the key."];
         }
 
@@ -26,74 +26,131 @@ class Attendance extends Myschoolgh {
             return ["code" => 203, "data" => "Sorry! A valid date is required."];
         }
 
-        // validate the class id
-        $prevData = $this->pushQuery("*", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        // confirm if the user_type was parsed if the finalize parameter was not set
+        if(!isset($params->finalize) && !isset($params->user_type)) {
+            return ["code" => 203, "data" => "Sorry! Please the user_type is required."];
+        }
 
-        // if empty then return
-        if(empty($prevData)) {
-            return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+        // validate the class id if parsed
+        if(isset($params->class_id) && !empty($params->class_id)) {
+
+            // run the query for the class details
+            $prevData = $this->pushQuery("*", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+
+            // if empty then return
+            if(empty($prevData)) {
+                return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+            }
+
+        }
+
+        // init
+        $the_query = "";
+
+        // append additional query
+        if(isset($params->user_type)) {
+            $the_query .= " AND user_type='{$params->user_type}'";
+        }
+
+        // append to the query string
+        if(isset($params->finalize)) {
+            $the_query .= " AND id='{$params->finalize}'";
         }
 
         // init
         $user_data = [];
         $present_list = [];
 
-        // loop through the array list 
-        foreach($params->attendance as $key => $value) {
-            // append to the list of present users array
-            if($value == "present") {
-                $present_list[] = $key;
-            }
-            // load the user data using the key
-            $data = $this->pushQuery("item_id, unique_id, name, email, phone_number", "users", "item_id = '{$key}' AND user_type ='{$params->user_type}' LIMIT 1");
-            
-            // end the query if the result is empty
-            if(empty($data)) {
-                return ["code" => 203, "data" => "Sorry! The user with GUID {$key} does not fall within the specified user_type."];
+        // if the attendance parameter was parsed
+        if(isset($params->attendance)) {
+
+            // loop through the array list
+            foreach($params->attendance as $key => $value) {
+                // append to the list of present users array
+                if($value == "present") {
+                    $present_list[] = $key;
+                }
+                // load the user data using the key
+                $data = $this->pushQuery("item_id, unique_id, name, email, phone_number", "users", "item_id = '{$key}' AND user_type ='{$params->user_type}' LIMIT 1");
+                
+                // end the query if the result is empty
+                if(empty($data)) {
+                    return ["code" => 203, "data" => "Sorry! The user with GUID {$key} does not fall within the specified user_type."];
+                }
+
+                // append the attendance status to the query
+                $data[0]->state = $value;
+
+                // append to the array list
+                $user_data[] = $data[0];
             }
 
-            // append the attendance status to the query
-            $data[0]->state = $value;
-
-            // append to the array list
-            $user_data[] = $data[0];
         }
 
         // confirm existing record
-        $check = $this->pushQuery("users_list, users_data", "users_attendance_log", "log_date='{$params->date}' AND user_type='{$params->user_type}' LIMIT 1");
+        $check = $this->pushQuery("users_list, users_data, finalize", 
+            "users_attendance_log", 
+            "log_date='{$params->date}' AND client_id = '{$params->clientId}' {$the_query} ".(isset($params->class_id) ? " AND class_id='{$params->class_id}'" : "")." LIMIT 1"
+        );
+
+        // Return error message if finalize was parsed and yet no results was found
+        if(isset($params->finalize) && empty($check)) {
+            return ["code" => 203, "data" => "Sorry! An invalid record id was supplied."];
+        }
 
         // insert the record into the database
         if(empty($check)) {
+
             // prepare and execute the statement
             $stmt = $this->db->prepare("
                 INSERT INTO users_attendance_log SET user_type = ?, users_list = ?, users_data = ?, log_date = ?,
-                created_by = ?, academic_year = ?, academic_term = ?
+                created_by = ?, academic_year = ?, academic_term = ?, client_id = ?
                 ".(isset($params->class_id) ? ", class_id='{$params->class_id}'" : "")."
             ");
             $stmt->execute([
-                $params->user_type, json_encode($present_list), json_encode($user_data),
-                $params->date, $params->userId, $params->academic_year, $params->academic_term
+                $params->user_type, json_encode($present_list), json_encode($user_data), $params->date, 
+                $params->userId, $params->academic_year, $params->academic_term, $params->clientId
             ]);
 
             // set the success message
             $data = "Attendance was sucessfully logged for {$params->date}.";
 
             //log the user activity
+
         } else {
+
+            // confirm that the user has not finalize the attendance log
+            if($check[0]->finalize == 1) {
+                return ["code" => 203, "data" => "Sorry! The attendance log the specified date has already been finalized and cannot be updated."];
+            }
+
             // prepare and execute the statement
             $stmt = $this->db->prepare("
                 UPDATE users_attendance_log SET users_list = ?, users_data = ?
-                WHERE user_type = ? AND log_date = ? ".(isset($params->class_id) ? " AND class_id='{$params->class_id}'" : "")."
+                WHERE user_type = ? AND log_date = ? AND client_id = ? ".(isset($params->class_id) ? " AND class_id='{$params->class_id}'" : "")."
             ");
             $stmt->execute([
-                json_encode($present_list), json_encode($user_data), $params->user_type, $params->date
+                json_encode($present_list), json_encode($user_data), $params->user_type, $params->date, $params->clientId
             ]);
 
             // set the success message
             $data = "Attendance log for {$params->date} was successfully updated.";
 
+            // if the query was parsed
+            if(isset($params->finalize)) {
+
+                // execute the statement
+                $this->db->query("UPDATE users_attendance_log SET date_finalized = now(), finalize = '1' WHERE id='{$params->finalize}' LIMIT 1");
+
+                // set a new message
+                $data = "Attendance log for {$params->date} was successfully finalized.";
+            }
+
             //log the user activity
+
         }
+
+        return ["data" => $data];
 
     }
 
@@ -107,17 +164,18 @@ class Attendance extends Myschoolgh {
      * 
      * @return String
      */
-    public function attendance_radios($userId = null, $user_state = null) {
+    public function attendance_radios($userId = null, $user_state = null, $final = false) {
         
         $html = "";
-        $statuses = ["Present", "Absent", "Holiday", "Late"];
+        $statuses = ["success" => "Present", "danger" => "Absent", "primary" => "Holiday", "warning" => "Late"];
+        $disabled = $final ? "disabled" : "data-user_id='{$userId}' name='attendance_status[{$userId}][]'";
 
-        foreach($statuses as $key => $status) {
+        foreach($statuses as $color => $status) {
             $the_key = strtolower($status);
             $html .= "
             <span class='mr-2'>
-                <input type='radio' ".($user_state == $the_key ? "checked" : "")." data-user_id='{$userId}' value='{$the_key}' name='attendance_status[{$userId}][]' id='{$userId}_{$the_key}'>
-                <label class='cursor' for='{$userId}_{$the_key}'>{$status}</label>
+                <input {$disabled} type='radio' ".($user_state == $the_key ? "checked" : "")." value='{$the_key}' id='{$userId}_{$the_key}'>
+                <label class='cursor' for='{$userId}_{$the_key}'>".($user_state == $the_key ? "<strong class='text-{$color}'>{$status}</strong>" : "{$status}")."</label>
             </span>
             ";
         }
@@ -258,13 +316,14 @@ class Attendance extends Myschoolgh {
         }
 
         // confirm existing record
-        $check = $this->pushQuery("users_list, users_data", "users_attendance_log", "log_date='{$list_days[0]}' {$query} LIMIT 1");
+        $check = $this->pushQuery("id, users_list, users_data, finalize", "users_attendance_log", "log_date='{$list_days[0]}' {$query} LIMIT 1");
         $attendance_log = !empty($check) ? json_decode($check[0]->users_data) : [];
+        $final = !empty($check) ? $check[0]->finalize : null;
 
         // set the table content
-        $table_content = "
+        $table_content = (!$final && !empty($attendance["attendance"][0]["record"]["users_list"]) ? "
         <div class='row'>
-            <div class='col-lg-12 text-right mb-2'>
+            <div class='col-lg-12 text-right mb-2 attendance_control_buttons'>
                 <span class='float-right'>
                     <label>Select for Everyone</label>
                     <select class='form-control selectpicker' id='select_for_all'>
@@ -276,12 +335,12 @@ class Attendance extends Myschoolgh {
                     </select>
                 </span>
             </div>
-        </div>
+        </div>" : "")."
         <table class='table table-bordered mt-2' id='attendance_logger'>
         <thead>
             <th width='5%'>&#8470;</th>
-            <th width='30%'>Name</th>
-            <th width='12%'>Unique ID</th>
+            <th width='35%'>Name</th>
+            <th width='15%'>Unique ID</th>
             <th><span class='float-left'>Status</span></th>
         </thead>
         <tbody>";
@@ -303,18 +362,29 @@ class Attendance extends Myschoolgh {
                         <img src=\"{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\"> {$user->name}
                     </td>
                     <td>{$user->unique_id}</td>
-                    <td>".$this->attendance_radios($user->user_id, $user_state)."</td>
+                    <td>".$this->attendance_radios($user->user_id, $user_state, $final)."</td>
                 </tr>";
             }
         }
+
         // append to this list if students were found for this class
         if(!empty($attendance["attendance"][0]["record"]["users_list"])) {
-            $table_content .= "
-            <tr>
-                <td align='right' colspan='4'>
-                    <button onclick='return save_AttendanceLog(\"{$list_days[0]}\",\"{$user_type}\",\"{$class_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i> Save Attendance</button>
-                </td>        
-            </tr>";
+
+            // show this section if the finalize is empty
+            if(!$final) {
+
+                // append the buttons to the table
+                $table_content .= "
+                <tr class='attendance_control_buttons'>
+                    <td align='right' colspan='4'>
+                        <button onclick='return save_AttendanceLog(\"{$list_days[0]}\",\"{$user_type}\",\"{$class_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i> Save Attendance</button>
+                        ".(!empty($attendance_log) && !$check[0]->finalize ? 
+                            "<button onclick='return finalize_AttendanceLog(\"{$list_days[0]}\",\"{$user_type}\",\"{$class_id}\", \"{$check[0]->id}\")' class='btn btn-sm btn-outline-primary'><i class='fa'></i> Finalize</button>" : 
+                            ""
+                        )."
+                    </td>
+                </tr>";
+            }
         } else {
             $table_content .= "
             <tr>

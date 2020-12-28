@@ -36,9 +36,51 @@ var save_AttendanceLog = (date, user_type = "", class_id = "") => {
     }).then((proceed) => {
         if (proceed) {
             $.post(`${baseUrl}api/attendance/log`, { date, attendance, user_type, class_id }).then((response) => {
+                let m_icon = "error"
                 if (response.code == 200) {
+                    m_icon = "success";
 
+                    if ($(`select[id="attendance_class"]`).length) {
+                        $(`select[id="attendance_class"]`).trigger("change");
+                    }
                 }
+                swal({
+                    position: "top",
+                    text: response.data.result,
+                    icon: m_icon,
+                });
+            });
+        }
+    });
+}
+
+var finalize_AttendanceLog = (date, user_type = "", class_id = "", finalize) => {
+    let attendance = {};
+    $.each($(`table[id="attendance_logger"] input[type='radio']`), function(i, e) {
+        let user_id = $(this).attr("data-user_id");
+        attendance[user_id] = $(`input[type='radio'][data-user_id='${user_id}']:checked`).val();
+    });
+    swal({
+        title: "Finalize Attendance Log",
+        text: "Are you sure you want to finalize attendance log? \n \
+        Note that you cannot change the information once it has been finalized",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/attendance/log`, { date, attendance, user_type, class_id, finalize }).then((response) => {
+                let m_icon = "error"
+                if (response.code == 200) {
+                    m_icon = "success";
+                    $(`table[id="attendance_logger"] input[type='radio']`).prop("disabled", true);
+                    $(`div[class~='attendance_control_buttons'], tr[class~='attendance_control_buttons']`).html("");
+                }
+                swal({
+                    position: "top",
+                    text: response.data.result,
+                    icon: m_icon,
+                });
             });
         }
     });
@@ -46,6 +88,7 @@ var save_AttendanceLog = (date, user_type = "", class_id = "") => {
 
 $(`select[id="attendance_category"]`).on("change", function() {
     let value = $(this).val();
+    attendance_content.html(`<div class="text-center font-italic">Users list is displayed here.</div>`);
     if (value == "student") {
         $.get(`${baseUrl}api/classes/list?columns=id,item_id,name`).then((response) => {
             if (response.code == 200) {
