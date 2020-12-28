@@ -573,6 +573,7 @@ class Assignments extends Myschoolgh {
      * @return Array
      */
     public function handin(stdClass $params) {
+
         // get the assignment information
         $the_data = $this->pushQuery("id, grading", "assignments", "client_id='{$params->clientId}' AND item_id='{$params->assignment_id}' LIMIT 1");
 
@@ -633,6 +634,49 @@ class Assignments extends Myschoolgh {
 
                 // remove the session variable
                 $this->session->remove("attachAssignmentDocs");
+
+            }
+
+            // handin assignment for quiz like mode
+            elseif(!empty($this->session->currentQuestionId) && $this->session->showSubmitButton) {
+                
+                // load the user answers list
+                $answer_info = $this->pushQuery(
+                    "*", "assignments_answers", 
+                    "assignment_id='{$item_id}' AND student_id = '{$params->userId}' AND client_id='{$params->clientId}' LIMIT 1"
+                );
+
+                // check if the answers list is empty
+                if(empty($answer_info)) {
+                    $data = "Sorry! You have not yet attempted to solve the questions";
+                } else {
+                    // get the answers parameter
+                    $the_answers = json_decode($answer_info[0]->answers);
+                    $score = 0;
+
+                    // get the total marks obtained by the user
+                    foreach($the_answers as $answer) {
+                        if($answer->status == "correct") {
+                            $score += $answer->assigned_mark;
+                        }
+                    }
+
+                    // update the score for the user
+                    $this->db->query("UPDATE assignments_answers SET scores = '{$score}' WHERE assignment_id='{$item_id}' AND student_id = '{$params->userId}' LIMIT 1");
+
+                    // insert the record into the assignments_submitted table
+                    $stmt = $this->db->prepare("INSERT INTO assignments_submitted SET client_id = ?, assignment_id = ?, student_id = ?, score = ?, graded = ?, handed_in = ?, date_graded = now()");
+                    $stmt->execute([$params->clientId, $item_id, $params->userId, $score, 1, "Submitted"]);
+
+                    // Record the user activity
+                    $this->userLogs("assignment_doc", "{$item_id}_{$params->userId}", null, "{$params->userData->name} handed in the assignment for auto grading by the system.", $params->userId);
+
+                    // set the success message
+                    $data = "Congrats, your assignment was successfully submitted.";
+
+                    // unset all the sessions that are not needed
+                    $this->session->remove(["currentQuestionId","previousQuestionId","showSubmitButton", "attachAssignmentDocs", "nextQuestionId", "questionNumber"]);
+                }
 
             }
 
@@ -1099,11 +1143,10 @@ class Assignments extends Myschoolgh {
      * 
      * @return
      */
-    public function review_answers($params) {
+    public function review_answers($params, $class = "p-0 mb-0") {
         // get the questions array list
         $params->columns = "a.*";
         $questions_array_list = $this->questions_list($params);
-        $questions_count = count($questions_array_list);
 
         // load the existing user record (if any)
         $answer_info = $this->pushQuery(
@@ -1117,12 +1160,10 @@ class Assignments extends Myschoolgh {
         $options_array = ["option_a" => "A", "option_b" => "B", "option_c" => "C","option_d" => "D", "option_e" => "E"];
 
         // init the information to parse
+        $correct = null;
         $question_html = "
-        <div class='col-lg-12 p-0 mb-0'>
-        <table class='table table-bordered'>
-        <tr>
-            <td colspan='2'><h6 class='mb-0 pb-0'>{$questions_count} Objective test questions under this Assignment.</h6></td>
-        </tr>";
+        <div class='col-lg-12 {$class}'>
+        <table class='table table-bordered'>";
 
         // loop through the questions list
         foreach($questions_array_list as $qkey => $question) {
@@ -1132,6 +1173,10 @@ class Assignments extends Myschoolgh {
             $answer_type = $question->answer_type;
 
             // answer mechanism
+            if(isset($params->show_answer)) {
+                $correct = (bool) ($answers_list[$qkey]["status"] == "correct");
+            }
+
             $this_answer = $answers_list[$qkey]["answer"];
             $this_answer = in_array($answer_type, ["multiple", "option"]) ? $this->stringToArray($this_answer) : $this_answer;
             
@@ -1151,16 +1196,26 @@ class Assignments extends Myschoolgh {
                     <td>";
                     // if the answer type is option or multiple
                     if(in_array($answer_type, ["multiple", "option"])) {
+                        $question_html .= "<div class='col-lg-12'>";
+                        // if the answer is correct
+                        $question_html .= "
+                            <span style='position:absolute;right:5px;top:5px;'>
+                                ".($correct ? "<span class='badge badge-success'>Correct</span>" : "<span class='badge badge-danger'>Wrong</span>")."
+                            </span>
+                        ";
                         // loop through the array list
                         foreach($options_array as $key => $option) {
                             if(isset($question->{$key})) {
                                 $question_html .= "
                                 <div class='pt-2'>
                                     <input disabled='disabled' ".(in_array($key, $this_answer) ? "checked" : null)." name='answer_option' value='{$key}' id='{$key}' class='cursor checkbox' type='checkbox' style='height:20px; width:20px'>
-                                    <label class='cursor' for='{$key}'><strong>{$option}.</strong> {$question->{$key}}</label>
+                                    <label class='cursor' for='{$key}'>
+                                        <strong>{$option}.</strong> {$question->{$key}}
+                                    </label>
                                 </div>";
                             }
                         }
+                        $question_html .= "</div>";
                     }
                     // if the answer must be a numeric value
                     elseif($answer_type == "numeric") {
@@ -1185,7 +1240,6 @@ class Assignments extends Myschoolgh {
         $question_html .= "</table></div>";
 
         return ["data" => $question_html];
-
 
     }
 

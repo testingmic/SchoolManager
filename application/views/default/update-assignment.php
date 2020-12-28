@@ -300,27 +300,37 @@ if(!empty($item_id)) {
 
             // display the questions using an algorithm specified in the assignment class
             elseif($isMultipleChoice) {
-
                 // parameters to load the assignment information
                 $params = (object) [
                     "clientId" => $clientId,
                     "columns" => "a.*",
+                    "show_answer" => true,
+                    "userId" => $session->userId,
                     "assignment_id" => $item_id
                 ];
-
-                // set the scripts to load for this user
-                $response->scripts = ["assets/js/multichoice.js"];
                 
-                // get the questions array list
-                $questions_array_list = load_class("assignments", "controllers")->questions_list($params);
-                $questions_array = [];
+                // if the assignment has not yet been handed in
+                if($data->handed_in === "Pending") {
 
-                // set the previous question id and the current question Id
-                $questions_ids = array_column($questions_array_list, "item_id");
-                $session->previousQuestionId = !empty($session->previousQuestionId) ? $session->previousQuestionId : null;
-                $session->currentQuestionId = !empty($session->currentQuestionId) ? $session->currentQuestionId : $questions_ids[0];
+                    // set the scripts to load for this user
+                    $response->scripts = ["assets/js/multichoice.js"];
+                    
+                    // get the questions array list
+                    $questions_array_list = load_class("assignments", "controllers")->questions_list($params);
+                    $questions_array = [];
 
-                $grading_info .= $assignmentClass->current_question($questions_array_list, $session->userId);
+                    // set the previous question id and the current question Id
+                    $questions_ids = array_column($questions_array_list, "item_id");
+                    $session->previousQuestionId = !empty($session->previousQuestionId) ? $session->previousQuestionId : null;
+                    $session->currentQuestionId = !empty($session->currentQuestionId) ? $session->currentQuestionId : $questions_ids[0];
+
+                    $grading_info .= $assignmentClass->current_question($questions_array_list, $session->userId);
+                
+                } elseif($data->handed_in === "Submitted") {
+                    
+                    $grading_info .= $assignmentClass->review_answers($params, "p-3")["data"];
+
+                }
 
             }
 

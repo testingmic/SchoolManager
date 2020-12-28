@@ -43,3 +43,25 @@ var reviewQuizAssignment = (assignment_id) => {
         }
     }).catch(() => {});
 }
+
+var submitQuizAssignment = (assignment_id) => {
+    swal({
+        title: "Handin Assignment",
+        text: "Are you sure you want to handin your assignment? Please note, you cannot revert the action once submitted.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/assignments/handin`, { assignment_id }).then((response) => {
+                if (response.code == 200) {
+                    swal({
+                        position: "top",
+                        text: response.data.result,
+                        icon: "success",
+                    });
+                }
+            });
+        }
+    });
+}
