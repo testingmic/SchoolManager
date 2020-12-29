@@ -47,16 +47,53 @@ var preload_AjaxData = (data) => {
 }
 
 var modifyGuardianWard = (user_id, todo) => {
-    $.post(`${baseUrl}api/users/modify_guardianward`, { user_id, todo }).then((response) => {
-        if (response.code == 200) {
-            if (todo == "remove") {
-                $.each(response.data.result.removed_list, function(i, e) {
-                    $(`div[class~="load_ward_information"][data-id="${e}"]`).remove();
-                });
-            } else {
-                $(`div[id='guardian_ward_listing']`).html(response.data.result.wards_list);
-            }
-            search_usersList("student");
+    let the_text = (todo == "remove") ? "Are you sure you to remove ward from Guardian? You cannot reverse this action once confirmed." : "Add this student to the list of guardian wards.";
+    swal({
+        title: "Modify Ward",
+        text: the_text,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/users/modify_guardianward`, { user_id, todo }).then((response) => {
+                if (response.code == 200) {
+                    if (todo == "remove") {
+                        $.each(response.data.result.removed_list, function(i, e) {
+                            $(`div[class~="load_ward_information"][data-id="${e}"]`).remove();
+                        });
+                    } else {
+                        $(`div[id='guardian_ward_listing']`).html(response.data.result.wards_list);
+                    }
+                    search_usersList("student");
+                }
+            });
+        }
+    });
+}
+
+var modifyWardGuardian = (user_id, todo) => {
+    let the_text = (todo == "remove") ? "Are you sure you to remove guardian attached to this Ward? You cannot reverse this action once confirmed." : "Add this guardian to the list of student guardians.";
+    swal({
+        title: "Modify Guardian",
+        text: the_text,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/users/modify_wardguardian`, { user_id, todo }).then((response) => {
+                if (response.code == 200) {
+                    $(`div[id='user_search_list']`).html(``);
+                    if (todo == "remove") {
+                        $.each(response.data.result.removed_list, function(i, e) {
+                            $(`div[id="ward_guardian_information"] div[data-ward_guardian_id="${e}"]`).remove();
+                        });
+                    } else {
+                        loadPage(`${baseUrl}update-student/${response.data.result.user_id}/view`);
+                    }
+                }
+            });
         }
     });
 }
@@ -69,13 +106,14 @@ var search_usersList = (user_type = "") => {
             if (response.code !== 200) {
                 $(`div[id='user_search_list']`).html(`<div class='text-center text-danger font-italic'>No ${user_type} found for the specified search term</div>`);
             } else {
-                let users_list = "<div class='row'>",
-                    guardian_id = $(`div[id='user_search_list']`).attr("data-guardian_id");
-                $.each(response.data.result, function(i, e) {
-                    let is_found = e.guardian_id.length && ($.inArray(guardian_id, e.guardian_id) !== -1) ? true : false;
-                    let the_link = is_found ? `<a onclick='return modifyGuardianWard("${guardian_id}_${e.user_id}","remove");' href='javascript:void(0);' class='btn btn-outline-danger btn-sm'>Remove</a>` : `<a onclick='return modifyGuardianWard("${guardian_id}_${e.user_id}","append");' class='btn btn-outline-success btn-sm' href='javascript:void(0);'>Append Ward</a>`;
+                let users_list = "<div class='row'>";
 
-                    users_list += `
+                if (user_type == "student") {
+                    let guardian_id = $(`div[id='user_search_list']`).attr("data-guardian_id");
+                    $.each(response.data.result, function(i, e) {
+                        let is_found = e.guardian_id.length && ($.inArray(guardian_id, e.guardian_id) !== -1) ? true : false;
+                        let the_link = is_found ? `<a onclick='return modifyGuardianWard("${guardian_id}_${e.user_id}","remove");' href='javascript:void(0);' class='btn btn-outline-danger btn-sm'>Remove</a>` : `<a onclick='return modifyGuardianWard("${guardian_id}_${e.user_id}","append");' class='btn btn-outline-success btn-sm' href='javascript:void(0);'>Append Ward</a>`;
+                        users_list += `
                     <div class="col-lg-6 mb-4">
                         <div class="d-flex justify-content-start">
                             <div class="mr-2">
@@ -83,13 +121,35 @@ var search_usersList = (user_type = "") => {
                             </div>
                             <div> 
                                 <i class="fa fa-user"></i> ${e.name}
-                                <br><strong>CLASS:</strong> <i class="fa fa-home"></i> ${e.class_name}
-                                <br><strong>DOB:</strong> <i class="fa fa-calendar-check"></i> ${e.dob_clean}
+                                <br><i class="fa fa-home"></i> ${e.class_name}
+                                <br><i class="fa fa-calendar-check"></i> ${e.dob_clean}
                             </div> 
                         </div>
                         <div class="mt-2 text-right">${the_link}</div>
                     </div>`;
-                });
+                    });
+                } else if (user_type == "guardian") {
+                    let student_id = $(`div[id='user_search_list']`).attr("data-student_id");
+
+                    $.each(response.data.result, function(i, e) {
+                        let is_found = $.array_stream[`student_guardian_array_${student_id}`].length && ($.inArray(e.user_id, $.array_stream[`student_guardian_array_${student_id}`]) !== -1) ? true : false;
+                        let the_link = is_found ? `<a onclick='return modifyWardGuardian("${e.user_id}_${student_id}","remove");' href='javascript:void(0);' class='btn btn-outline-danger btn-sm'>Remove</a>` : `<a onclick='return modifyWardGuardian("${e.user_id}_${student_id}","append");' class='btn btn-outline-success btn-sm' href='javascript:void(0);'>Append Guardian</a>`;
+                        users_list += `
+                    <div class="col-lg-6 mb-4">
+                        <div class="d-flex justify-content-start">
+                            <div class="mr-2">
+                                <img src="${baseUrl}${e.image}" class="rounded-circle cursor author-box-picture" width="50px">
+                            </div>
+                            <div> 
+                                <i class="fa fa-user"></i> ${e.name}
+                                <br><i class="fa fa-phone"></i> ${e.phone_number}
+                                <br><i class="fa fa-envelope"></i> ${e.email}
+                            </div> 
+                        </div>
+                        <div class="mt-2 text-right">${the_link}</div>
+                    </div>`;
+                    });
+                }
                 users_list += "</div>";
                 $(`div[id='user_search_list']`).html(users_list);
             }

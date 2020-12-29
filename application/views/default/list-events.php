@@ -129,34 +129,75 @@ if(!empty($session->clientId)) {
                 </div>
             </div>
         </div>
-        <div id="createEventModal" class="modal fade">
-            <div class="modal-dialog modal-dialog-centered">
+        <div id="createEventModal" class="modal fade" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-lg modal-dialog-top">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 id="modalTitle2" class="modal-title">Add event</h4>
+                        <h4 class="modal-title">Add Event</h4>
                         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
                     </div>
-                    <div id="modalBody2" class="modal-body">
-                        <form>
-                            <div class="form-group">
-                                <label for="formGroupExampleInput">Example label</label>
-                                <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Example input">
+                    <style>
+                    #ajax-data-form-content trix-editor {
+                        min-height: 150px;
+                        max-height: 150px;
+                    }
+                    </style>
+                    <form class="ajax-data-form" action="'.$baseUrl.'api/events/add" method="POST" id="ajax-data-form-content">
+                        <div id="modalBody2" class="modal-body">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Title <span class="required">*</span></label>
+                                        <input type="text" name="title" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Type<span class="required">*</span></label>
+                                        <select name="type" id="type" class="form-control selectpicker">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Audience<span class="required">*</span></label>
+                                        <select name="audience" id="audience" class="form-control selectpicker">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Date <span class="required">*</span></label>
+                                        <input type="text" name="title" class="daterange form-control">
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <input type="hidden" hidden id="trix-editor-input" value="">
+                                        <trix-editor name="description" input="trix-editor-input" class="trix-slim-scroll" id="description"></trix-editor>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <div class="form-group">
+                                        <label>Event Image</label>
+                                        <input type="file" class="form-control" id="event_image">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="formGroupExampleInput2">Another label</label>
-                                <input type="text" class="form-control" id="formGroupExampleInput2" placeholder="Another input">
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button class="btn btn-primary">Add</button>
-                    </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button-submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
         <div id="createEventTypeModal" class="modal fade">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-top">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 id="modalTitle2" class="modal-title">Add Event Type</h4>

@@ -177,7 +177,7 @@ class Scripts extends Myschoolgh {
         eventClick:  function(event, jsEvent, view) {
             $('#modalTitle1').html(event.title);
             $('#modalBody1').html(event.description);
-            $('#eventUrl').attr('href',event.url);
+            $('#eventUrl').attr('href', event.url);
             $('#fullCalModal').modal();
         },
         dayClick: function(date, jsEvent, view) {

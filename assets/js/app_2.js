@@ -33,7 +33,7 @@ $.panelIconClosed = 'icon-arrow-down';
 
 $.minTimetableTime = '7:00 AM';
 $.maxTimetableTime = '6:00 PM';
-$.array_stream = {};
+$.array_stream = "";
 
 'use strict';
 var devlog = $.env == "development" ? console.log : () => {}
@@ -457,9 +457,7 @@ var loadPage = (loc, callback, pushstate) => {
             }
 
             if (result.array_stream !== undefined) {
-                $.each(result.array_stream, function(i, e) {
-                    $.array_stream[i] = e;
-                });
+                $.array_stream = result.array_stream;
             }
 
             document.title = result.title
@@ -471,7 +469,6 @@ var loadPage = (loc, callback, pushstate) => {
             linkClickStopper($.pagecontent);
             formSubmitStopper($.pagecontent);
             trigger_form_submit();
-
             var prev = window.history.state === null ? null : window.history.state.current
             if (pushstate !== false) window.history.pushState({ previous: prev, current: loc }, "", loc)
 
@@ -827,8 +824,6 @@ var initPlugins = () => {
     if ($(".lightbox").length) {
         $(".lightbox").nivoLightbox()
     }
-
-    $(`div[class~="trix-button-row"] span[class~="trix-button-group--file-tools"], div[class~="trix-button-row"] span[class~="trix-button-group-spacer"]`).remove();
 }
 
 var setActiveNavLink = () => {
@@ -1254,6 +1249,94 @@ var randomInt = (min, max) => {
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
+$(`div[id="ajaxFormSubmitModal"] button[class~="btn-outline-success"]`).on("click", async function(evt) {
+
+    let formLoader = $(`form[class="ajax-data-form"] div[class="form-content-loader"]`),
+        submitLoader = $(`div[id="ajaxFormSubmitModal"] div[class="form-content-loader"]`),
+        formButton = $(`form[class="app-data-form"] button[type="button-submit"]`);
+
+    formLoader.css({ "display": "flex", "position": "fixed" });
+    submitLoader.css({ "display": "flex", "position": "fixed" });
+
+    await $.ajax({
+        url: `${ajaxFormAction}`,
+        data: ajaxFormData,
+        contentType: false,
+        cache: false,
+        type: `POST`,
+        processData: false,
+        success: function(response) {
+
+            formButton.prop("disabled", false);
+
+            if (response.code == 200) {
+
+                swal({
+                    position: 'top',
+                    text: response.data.result,
+                    icon: "success",
+                });
+
+                if (response.data.additional) {
+
+                    if (response.data.additional.clear !== undefined) {
+                        if ($(`textarea[name="faketext"]`).length) {
+                            CKEDITOR.instances['ajax-form-content'].setData("");
+                        }
+                        if ($(`trix-editor[name="faketext"][id="ajax-form-content"]`).length) {
+                            $(`trix-editor[name="faketext"][id="ajax-form-content"]`).html("");
+                        }
+                        $replies_loaded.attr("value", "0");
+                        $replies_loaded.attr("data-form", "none");
+                        $(`form[class="ajax-data-form"] select`).val("null").change();
+                        $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
+                    }
+                    if (response.data.additional.append !== undefined) {
+                        $(`div[id="${response.data.additional.append.div_id}"]`).html(response.data.additional.append.data);
+                    }
+                    if (response.data.additional.record !== undefined) {
+                        $.each(response.data.additional.record, function(ie, iv) {
+                            $(`form[class="ajax-data-form"] input[name="${ie}"]`).val(iv);
+                            $(`[data-record="${ie}"]`).html(iv);
+                        });
+                    }
+                    if (response.data.additional.href !== undefined) {
+                        setTimeout(() => {
+                            loadPage(response.data.additional.href);
+                        }, 2000);
+                    }
+                    if (response.data.additional.data !== undefined) {
+                        preload_AjaxData(response.data.additional.data);
+                    }
+                }
+
+                $form_modal.modal("hide");
+                $(`form[class="ajax-data-form"] div[class~="file-preview"]`).html("");
+            } else {
+                if (response.data.result !== undefined) {
+                    notify(response.data.result);
+                } else {
+                    notify("Sorry! Error processing request.");
+                }
+            }
+        },
+        complete: function() {
+            formLoader.css({ "display": "none" });
+            submitLoader.css({ "display": "none" });
+            formButton.prop("disabled", false);
+            $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+        },
+        error: function() {
+            formLoader.css({ "display": "none" });
+            submitLoader.css({ "display": "none" });
+            formButton.prop("disabled", false);
+            $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+            notify("Sorry! Error processing request.");
+        }
+    });
+
+});
+
 var trigger_form_submit = () => {
     $(`form[class="ajax-data-form"] button[type="button-submit"]`).on("click", async function(evt) {
 
@@ -1264,6 +1347,8 @@ var trigger_form_submit = () => {
             formButton = $(`form[class="app-data-form"] button[type="button-submit"]`);
 
         let optional_flow = "We recommend that you save the form as a draft, and review it before submitting. Do you wish to proceed with this action?";
+
+        $(`div[id="ajaxFormSubmitModal"] div[class="modal-body"]`).html(`Are you sure you want to Submit this form? ${draftButton.length ? optional_flow : ""}`);
 
         formButton.prop("disabled", true);
 
@@ -1302,93 +1387,10 @@ var trigger_form_submit = () => {
             theFormData.append("reason", htmlEntities(content));
         }
 
-        swal({
-            title: "Submit Form",
-            text: `Are you sure you want to Submit this form? ${draftButton.length ? optional_flow : ""}`,
-            icon: 'warning',
-            buttons: true,
-            dangerMode: true,
-        }).then((proceed) => {
-            if (proceed) {
-                $.ajax({
-                    url: `${formAction}`,
-                    data: theFormData,
-                    contentType: false,
-                    cache: false,
-                    type: `POST`,
-                    processData: false,
-                    success: function(response) {
-                        if (response.code == 200) {
-                            swal({
-                                position: 'top',
-                                text: response.data.result,
-                                icon: "success",
-                            });
-                            if (response.data.additional) {
-                                if (response.data.additional.clear !== undefined) {
-                                    if ($(`textarea[name="faketext"]`).length) {
-                                        CKEDITOR.instances['ajax-form-content'].setData("");
-                                    }
-                                    if ($(`trix-editor[name="faketext"][id="ajax-form-content"]`).length) {
-                                        $(`trix-editor[name="faketext"][id="ajax-form-content"]`).html("");
-                                    }
-                                    $replies_loaded.attr("value", "0");
-                                    $replies_loaded.attr("data-form", "none");
-                                    $(`form[class="ajax-data-form"] select`).val("null").change();
-                                    $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
-                                }
-                                if (response.data.additional.append !== undefined) {
-                                    $(`div[id="${response.data.additional.append.div_id}"]`).html(response.data.additional.append.data);
-                                }
-                                if (response.data.additional.record !== undefined) {
-                                    $.each(response.data.additional.record, function(ie, iv) {
-                                        $(`form[class="ajax-data-form"] input[name="${ie}"]`).val(iv);
-                                        $(`[data-record="${ie}"]`).html(iv);
-                                    });
-                                }
-                                if (response.data.additional.href !== undefined) {
-                                    setTimeout(() => {
-                                        loadPage(response.data.additional.href);
-                                    }, 2000);
-                                }
-                                if (response.data.additional.data !== undefined) {
-                                    preload_AjaxData(response.data.additional.data);
-                                }
-                            }
+        ajaxFormAction = formAction,
+            ajaxFormData = theFormData;
 
-                            $form_modal.modal("hide");
-                            $(`form[class="ajax-data-form"] div[class~="file-preview"]`).html("");
-                        } else {
-                            if (response.data.result !== undefined) {
-                                swal({
-                                    position: 'top',
-                                    text: response.data.result,
-                                    icon: "error",
-                                });
-                            } else {
-                                swal({
-                                    position: 'top',
-                                    text: "Sorry! Error processing request.",
-                                    icon: "error",
-                                });
-                            }
-                        }
-                    },
-                    complete: function() {
-                        $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
-                    },
-                    error: function() {
-                        $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
-                        swal({
-                            position: 'top',
-                            text: "Sorry! Error processing request.",
-                            icon: "error",
-                        });
-                    }
-                });
-            }
-        });
-
+        $(`div[id="ajaxFormSubmitModal"]`).modal("show");
     });
 }
 

@@ -35,6 +35,7 @@ class Models {
             "incident_log_form_view" => "Incident Details",
             "incident_log_followup_form" => "Incident: Followups",
             "modify_guardian_ward" => "Modify Guardian Ward",
+            "modify_ward_guardian" => "Modify Ward Guardian", 
             "course_link_upload" => "Lesson Planner: Course Link Upload",
             "course_file_upload" => "Lesson Planner: Course File Upload",
             "upload_assignment" => "Create Assignment",

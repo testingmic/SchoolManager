@@ -118,6 +118,10 @@ if(!empty($user_id)) {
                             <span class="float-right text-muted">'.$data->date_of_birth.'</span>
                         </p>
                         <p class="clearfix">
+                            <span class="float-left">Blood Group</span>
+                            <span class="float-right text-muted">'.$data->blood_group.'</span>
+                        </p>                        
+                        <p class="clearfix">
                             <span class="float-left">Gender</span>
                             <span class="float-right text-muted">'.$data->gender.'</span>
                         </p>

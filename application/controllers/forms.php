@@ -210,11 +210,13 @@ class Forms extends Myschoolgh {
             }
 
             /** Modify Guardian Ward */
-            elseif($the_form == "modify_guardian_ward") {
+            elseif(in_array($the_form, ["modify_guardian_ward", "modify_ward_guardian"])) {
+
                 // return if no policy id was parsed
                 if(!isset($params->module["item_id"])) {
                     return;
                 }
+
                 /** Set the course id */
                 $item_id = explode("_", $params->module["item_id"]);
 
@@ -226,14 +228,28 @@ class Forms extends Myschoolgh {
                     "append_wards" => true,
                 ];
 
-                $data = load_class("users", "controllers")->guardian_list($guardian_param);
+                // load this information if the guardian was parsed
+                if($the_form == "modify_guardian_ward") {
+                    $data = load_class("users", "controllers")->guardian_list($guardian_param);
+                } else {
+                    $data = $this->pushQuery("guardian_id, item_id AS user_id", "users", "item_id='{$item_id[0]}' LIMIT 1");
+                }
+
                 if(empty($data)) {
                     return ["code" => 201, "data" => "An invalid id was parsed"];
                 }
                 $data = $data[0];
 
                 /** Load the function */
-                $result = $this->modify_guardian_ward($params, $data);
+                if($the_form == "modify_guardian_ward") {
+                    $data->user_type = "guardian";
+                } else {
+                    $data->user_type = "student";
+                    $data->guardian_id = !empty($data->guardian_id) ? (object) $this->stringToArray($data->guardian_id) : (object) [];
+                }
+                
+                /** Load the form to search for the user */
+                $result = $this->modify_guardian_ward($data);
             }
             
             /** Management Assignments */
@@ -966,22 +982,35 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function modify_guardian_ward($params, $data) {
+    public function modify_guardian_ward($data) {
+
+        $array = [
+            "guardian" => [
+                "title" => "Student Name",
+                "type" => "student",
+                "attr" => "guardian_id"
+            ],
+            "student" => [
+                "title" => "Guardian Name",
+                "type" => "guardian",
+                "attr" => "student_id"
+            ]
+        ];
 
         $html_content = "<div class='row'>";
         $html_content .= "<div class='col-md-10'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Student Name</label>";
-        $html_content .= "<input type='text' placeholder='Search student name' name='user_name_search' id='user_name_search' class='form-control'>";
+        $html_content .= "<label>{$array[$data->user_type]["title"]}</label>";
+        $html_content .= "<input type='text' placeholder='Search {$array[$data->user_type]["title"]} name' name='user_name_search' id='user_name_search' class='form-control'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-2'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Filter</label>";
-        $html_content .= "<button onclick='return search_usersList(\"student\")' class='btn btn-outline-success btn-block'><i class='fa fa-filter'></i></button>";
+        $html_content .= "<button onclick='return search_usersList(\"{$array[$data->user_type]["type"]}\")' class='btn btn-outline-success btn-block'><i class='fa fa-filter'></i></button>";
         $html_content .= "</div>";
         $html_content .= "</div>";
-        $html_content .= "<div class='col-md-12 mt-2' data-guardian_id='{$data->user_id}' id='user_search_list'>";
+        $html_content .= "<div class='col-md-12 mt-2' data-{$array[$data->user_type]["attr"]}='{$data->user_id}' id='user_search_list'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
 
@@ -1751,7 +1780,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
 
-            <div class="row mb-4 border-bottom pb-4">
+            <div class="row mb-3 pb-4">
                 <div class="col-lg-12"><h5>GUARDIAN INFORMATION</h5></div>
                 <div class="col-lg-12" id="student_guardian_list">';
                 
@@ -1833,6 +1862,25 @@ class Forms extends Myschoolgh {
                                 $response .= "<option ".($isData && ($each->id == $userData->section) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-12 mt-3"><h5>PREVIOUS SCHOOL DETAILS</h5></div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label for="previous_school">Previous School</label>
+                        <input type="text" value="'.($userData->previous_school ?? null).'" name="previous_school" id="previous_school" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="form-group">
+                        <label for="previous_school_qualification">Qualification</label>
+                        <input type="text" value="'.($userData->previous_school_qualification ?? null).'" name="previous_school_qualification" id="previous_school_qualification" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
+                    <div class="form-group">
+                        <label for="previous_school_remarks">Remarks</label>
+                        <textarea type="text" name="previous_school_remarks" id="previous_school_remarks" class="form-control">'.($userData->previous_school_remarks ?? null).'</textarea>
                     </div>
                 </div>
             </div>
@@ -1930,6 +1978,18 @@ class Forms extends Myschoolgh {
                                 $response .= "<option ".($isData && ($each->id == $userData->country) ? "selected" : null)." value=\"{$each->id}\">{$each->country_name}</option>";                            
                             }
                     $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="blood_group">Blood Broup</label>
+                        <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
+                            <option value="null">Select Blood Group</option>';
+                            foreach($this->pushQuery("id, name", "blood_groups") as $each) {
+                                $response .= "<option ".($isData && ($each->name == $userData->blood_group) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                        <input type="hidden" id="user_type" name="user_type" value="'.(!$isData ? "student" : null).'">
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">

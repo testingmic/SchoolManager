@@ -101,7 +101,20 @@ class Users extends Myschoolgh {
 				}
 
 				if($params->minified == "simplied_load_withclass") {
-					$params->columns .= ", a.date_of_birth, a.guardian_id, (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name";
+
+					// if the user type was parsed and the type is guardian
+					if($params->user_type == "guardian") {
+						// make a query for the guardian list
+						$query = $this->pushQuery("a.fullname AS name, a.user_id, a.image, a.email, a.contact AS phone_number, a.residence,
+							(SELECT b.country_name FROM country b WHERE b.id = a.country LIMIT 1) AS country_name", 
+							"users_guardian a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.fullname LIKE '%{$params->q}%'");
+						
+						// return the response
+						return ["data" => $query];
+
+					} else {
+						$params->columns .= ", a.date_of_birth, a.guardian_id, (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name";
+					}
 				}
 			}
 
@@ -322,6 +335,7 @@ class Users extends Myschoolgh {
 				".(isset($params->description) ? ", description='{$params->description}'" : null)."
 				".(isset($params->date_of_birth) ? ", date_of_birth='{$params->date_of_birth}'" : null)."
 				".(isset($params->contact) ? ", contact='{$params->contact}'" : null)."
+				".(isset($params->blood_group) ? ", blood_group='{$params->blood_group}'" : null)."
 				".(isset($params->contact_2) ? ", contact_2='{$params->contact_2}'" : null)."
 				".(isset($params->residence) ? ", residence='{$params->residence}'" : null)."
 				".(isset($params->address) ? ", address='{$params->address}'" : null)."
@@ -378,6 +392,7 @@ class Users extends Myschoolgh {
 				".(isset($params->description) ? ", description='{$params->description}'" : null)."
 				".(isset($params->date_of_birth) ? ", date_of_birth='{$params->date_of_birth}'" : null)."
 				".(isset($params->contact) ? ", contact='{$params->contact}'" : null)."
+				".(isset($params->blood_group) ? ", blood_group='{$params->blood_group}'" : null)."
 				".(isset($params->contact_2) ? ", contact_2='{$params->contact_2}'" : null)."
 				".(isset($params->residence) ? ", residence='{$params->residence}'" : null)."
 				".(isset($params->address) ? ", address='{$params->address}'" : null)."
@@ -563,6 +578,93 @@ class Users extends Myschoolgh {
 				"data" => [
 					"info" => "Student successfully appended to the Guardian Ward's List.",
 					"wards_list" => $wards_list
+				]
+			];
+		}
+
+	}
+
+	/**
+	 * Append/Remove a Guardian attached to a ward
+	 * 
+	 * @param String $params->user_id		This is a combination of the guardian id and the student id
+	 * @param String $params->todo			This is the action to perform (append / remove)
+	 * 
+	 * @return Array
+	 */
+	public function modify_wardguardian(stdClass $params) {
+
+		// split the user id
+		$expl = explode("_", $params->user_id);
+		
+		// if there is no second key then end the query
+		if(!isset($expl[1])) {
+			return ["code" => "Sorry! The student id is required."];
+		}
+		
+		// confirm that a valid parent id was parsed
+		$p_data = $this->pushQuery("a.id", "users_guardian a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.user_id = '{$expl[0]}' LIMIT 1");
+		if(empty($p_data)) {
+			return ["code" => 203, "data" => "Sorry! An invalid guardian id was parsed"];
+		}
+
+		// confirm that a valid student id was parsed
+		$p_data = $this->pushQuery("a.guardian_id", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[1]}' LIMIT 1");
+		if(empty($p_data)) {
+			return ["code" => 203, "data" => "Sorry! An invalid student id was parsed"];
+		}
+
+		// convert the guardian id into an array
+		$guardian_id = !empty($p_data[0]->guardian_id) ? $this->stringToArray($p_data[0]->guardian_id) : [];
+
+		// if in the array then remove the value
+		if(in_array($expl[0], $guardian_id)) {
+			foreach($guardian_id as $key => $value) {
+				if($value == $expl[0]) {
+					unset($guardian_id[$key]);
+					break;
+				}
+			}
+		}
+		
+		// append to the array list
+		else {
+			array_push($guardian_id, $expl[0]);
+		}
+
+		// update the user guardian id information
+		$stmt = $this->db->prepare("UPDATE users SET guardian_id = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
+		$stmt->execute([implode(",", $guardian_id), $expl[1], $params->clientId]);
+
+
+		// return the success response
+		if($params->todo == "remove") {
+			return [
+				"data" => [
+					"info" => "Ward Guardian was successfully removed",
+					"removed_list" => [$expl[0]]
+				],
+				"code" => 200
+			];
+		} else if($params->todo == "append") {
+			// get the list of guardian wards
+			// $guardian_param = (object) [
+			// 	"limit" => 1,
+			// 	"append_wards" => true,
+			// 	"guardian_id" => $expl[0],
+			// 	"clientId" => $params->clientId,
+			// ];
+			// $data = $this->guardian_list($guardian_param);
+
+			// format the list
+			// $wards_list = $this->guardian_wardlist($data[0]->wards_list, $expl[0]);
+
+			// return the results
+			return [
+				"data" => [
+					"info" => "Guardian successfully appended to the Student Guardian's List.",
+					"user_id" => $expl[1]
+					// "wards_list" => $wards_list
 				]
 			];
 		}
@@ -756,6 +858,9 @@ class Users extends Myschoolgh {
 				".(isset($encrypt_password) ? ", password='{$encrypt_password}'" : null)."
 
 				".(isset($fileName) ? ", image='{$fileName}'" : null)."
+				".(isset($params->previous_school) ? ", previous_school='{$params->previous_school}'" : null)."
+				".(isset($params->previous_school_remarks) ? ", previous_school_remarks='{$params->previous_school_remarks}'" : null)."
+				".(isset($params->previous_school_qualification) ? ", previous_school_qualification='{$params->previous_school_qualification}'" : null)."
 
 				".(isset($params->enrollment_date) ? ", enrollment_date='{$params->enrollment_date}'" : null)."
 				".(isset($params->class_id) ? ", class_id='{$params->class_id}'" : null)."
@@ -964,8 +1069,11 @@ class Users extends Myschoolgh {
 				".(isset($params->email) ? ", email='{$params->email}'" : null)."
 				".(isset($params->residence) ? ", residence='{$params->residence}'" : null)."
 				".(isset($params->gender) ? ", gender='{$params->gender}'" : null)."
-
 				".(isset($fileName) ? ", image='{$fileName}'" : null)."
+
+				".(isset($params->previous_school) ? ", previous_school='{$params->previous_school}'" : null)."
+				".(isset($params->previous_school_remarks) ? ", previous_school_remarks='{$params->previous_school_remarks}'" : null)."
+				".(isset($params->previous_school_qualification) ? ", previous_school_qualification='{$params->previous_school_qualification}'" : null)."
 
 				".(isset($params->unique_id) ? ", unique_id='{$params->unique_id}'" : null)."
 				".(isset($params->class_id) ? ", class_id='{$params->class_id}'" : null)."

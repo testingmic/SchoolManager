@@ -140,14 +140,18 @@ if(!empty($user_id)) {
         // guardian information
         $user_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl, $data);
 
-        $guardian = "";
+        $guardian = "
+            <div class='card-body p-2 pl-0' id='ward_guardian_information'>
+                <div class='d-flex justify-content-between'>
+                    <div><h5>GUARDIAN INFORMATION</h5></div>
+                    ".($hasUpdate ? "<div><button onclick='return load_quick_form(\"modify_ward_guardian\",\"{$data->user_id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-user'></i> Add Guardian</button></div>" : "")."
+                </div>";
+
         // if the guardian information is not empty
         if(!empty($data->guardian_list)) {
-            // header
-            $guardian .= '<div><h5>GUARDIAN INFORMATION</h5></div>';
             // loop through the guardian list
             foreach($data->guardian_list as $each) {
-                $guardian .= "<div class='row mb-3 border-bottom pb-3'>";
+                $guardian .= "<div class='row mb-3 border-bottom pb-3' data-ward_guardian_id='{$each->user_id}'>";
                 $guardian .= "<div class='col-lg-3'><strong>Fullname:</strong><br> {$each->fullname}</div>";
                 $guardian .= "<div class='col-lg-2'><strong>Relation:</strong><br> {$each->relationship}</div>";
                 $guardian .= "<div class='col-lg-3'><strong>Contact:</strong><br> {$each->contact}</div>";
@@ -155,10 +159,18 @@ if(!empty($user_id)) {
                 $guardian .= "<div class='col-lg-12'><strong>Address:</strong><br> {$each->address}</div>";
                 $guardian .= "<div class='col-lg-12 text-right'>
                     <a href=\"{$baseUrl}update-guardian/{$each->user_id}/view\" class=\"btn btn-sm btn-outline-success\" title=\"View guardian full details\"><i class=\"fa fa-eye\"></i> View</a>
+                    <a onclick=\"return modifyWardGuardian('{$each->user_id}_{$data->user_id}','remove');\" href=\"javascript:void(0);\" class=\"btn btn-outline-danger anchor btn-sm\">Remove</a>
                 </div>";
                 $guardian .= "</div>";
             }
+        } else {
+            $guardian .= "<div class='font-italic'>No guardian has been attached to this Student</div>";
         }
+
+        $guardian .= "</div>";
+
+        // push the guardian ids into an array
+        $response->array_stream["student_guardian_array_{$user_id}"] = $data->guardian_id;
 
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
@@ -272,13 +284,32 @@ if(!empty($user_id)) {
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
                             '.($data->description ? "
-                                <div class='mb-3 border-bottom'>
+                                <div class='mb-3'>
                                     <div class='card-body p-2 pl-0'>
                                         <div><h5>DESCRIPTION</h5></div>
                                         {$data->description}
                                     </div>
                                 </div>
                             " : "").'
+                            <div class="mb-3">
+                                <div class="card-body p-2 pl-0">
+                                    <div><h5>PREVIOUS SCHOOL DETAILS</h5></div>
+                                    <table width="100%" class="table-bordered">
+                                        <tr>
+                                            <td class="p-2" width="20%">School Name</td>
+                                            <td class="p-2">'.$data->previous_school.'</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2" width="20%">Qualification</td>
+                                            <td class="p-2">'.$data->previous_school_qualification.'</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="p-2" width="20%">Remarks</td>
+                                            <td class="p-2">'.$data->previous_school_remarks.'</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
                             '.$guardian.'
                         </div>
                         <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">
