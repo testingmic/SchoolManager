@@ -2530,4 +2530,75 @@ class Forms extends Myschoolgh {
 
     }
 
+    /**
+     * Event Forms
+     * 
+     */
+    public function event_form($data = null) {
+
+        $html_content = '
+        <form enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/events/'.(isset($data->event_id) ? "update" : "add").'" method="POST" id="ajax-data-form-content">
+            <div id="modalBody2" class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label>Title <span class="required">*</span></label>
+                            <input type="text" name="title" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Type<span class="required">*</span></label>
+                            <select name="type" id="type" class="form-control selectpicker">
+                                <option value="">Select</option>';
+                                if(isset($data->event_types)) {
+                                    foreach($data->event_types as $key => $value) {
+                                        $html_content .= "<option value='{$value->item_id}'>{$value->name}</option>";
+                                    }
+                                }
+                            $html_content .= '
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Audience<span class="required">*</span></label>
+                            <select name="audience" id="audience" class="form-control selectpicker">
+                                <option value="">Select</option>';
+                                foreach($this->event_audience as $key => $value) {
+                                    $html_content .= "<option value='{$key}'>{$value}</option>";
+                                }
+                            $html_content .= '</select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Date <span class="required">*</span></label>
+                            <input type="text" name="title" class="daterange form-control">
+                        </div>
+                    </div>
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="hidden" hidden id="trix-editor-input" value="">
+                            <trix-editor name="description" input="trix-editor-input" class="trix-slim-scroll" id="description"></trix-editor>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="form-group">
+                            <label>Event Image</label>
+                            <input type="file" name="event_image" class="form-control" id="event_image">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button-submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>';
+
+        return $html_content;
+    }
+
 }

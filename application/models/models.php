@@ -42,6 +42,13 @@ class Models {
             "update_assignment" => "Update Assignment Details",
         ];
 
+        $this->event_audience = [
+            "all" => "All Users",
+            "students" => "Students",
+            "teachers" => "Teaching Staff",
+            "parent" => "Parents"
+        ];
+
 		$this->favicon_array = [
 			'jpg' => 'fa fa-file-image', 'png' => 'fa fa-file-image',
 			'jpeg' => 'fa fa-file-image', 'gif' => 'fa fa-file-image',
