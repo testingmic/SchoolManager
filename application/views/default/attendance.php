@@ -25,46 +25,12 @@ if(!empty($session->clientId)) {
     // convert to lowercase
     $client_id = strtolower($session->clientId);
     
-    // set the parameters
-    $params = (object) [
-        "baseUrl" => $baseUrl,
-        "clientId" => $clientId,
-        "userId" => $session->userId
-    ];
-
-    // generate a new script for this client
-    $filename = "assets/js/scripts/{$client_id}_attendance.js";
-    
-    // get the data
-    $data = load_class("scripts", "controllers")->attendance($params);
-    
-    // create a new file handler
-    $file = fopen($filename, "w");
-    
-    // write the content to the file
-    fwrite($file, $data);
-    
-    // close the opened file
-    fclose($file);
-
     // load the scripts
     $response->scripts = [
-        "assets/js/scripts/{$client_id}_attendance.js"
+        "assets/js/attendance_log.js"
     ];
 
     $response->html = '
-        <div class="modal globalModalAction fade" id="pickCalendarActionModal" data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog modal-md" style="width:100%;height:100%;" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title"></h5>
-                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                    </div>
-                    <input hidden class="ajax-form-loaded" value="0" data-form="none">
-                    <div class="modal-body"></div>
-                </div>
-            </div>
-        </div>
         <section class="section">
             <div class="section-header">
                 <h1>'.$pageTitle.'</h1>
