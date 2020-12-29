@@ -15,14 +15,15 @@ class Events extends Myschoolgh {
      * 
      * @return Array
      */
-    public function list(stdClass $params) {
+    public function types_list(stdClass $params) {
 
         // columns to load
-        $query = isset($params->type_id) && !empty($params->type_id) ? "AND a.item_id='{$params->type_id}'" : "";
+        $query = isset($params->type_id) && !empty($params->type_id) ? " AND item_id='{$params->type_id}'" : "";
 
         // make the request
-        $events_types = $this->pushQuery("a.*", "events_types a", "a.client_id = '{$params->clientId}' AND a.status='0' {$query}");
+        $events_types = $this->pushQuery("*", "events_types", "client_id = '{$params->clientId}' AND status='1' {$query}");
 
+        // return the list
         return $events_types;
 
     }
@@ -41,7 +42,7 @@ class Events extends Myschoolgh {
 
         /** Insert */
         $stmt = $this->db->prepare("INSERT INTO events_types SET client_id = ?, item_id = ?, name = ?, description = ?, icon = ?");
-        $stmt->execute([$params->clientId, $item_id, $params->name, $params->description ?? null, $params->icon ?? null]);
+        $stmt->execute([$params->clientId, $item_id, $params->name, $params->description ?? "", $params->icon ?? null]);
 
         /** Log the user activity */
         $this->userLogs("events_type", $item_id, null, "{$params->userData->name} created a new Event Type: {$params->name}", $params->userId);
@@ -50,7 +51,7 @@ class Events extends Myschoolgh {
         return [
             "data" => "Event type was successfully created",
             "additional" => [
-                "event_types" => $this->list($params)
+                "event_types" => $this->types_list($params)
             ]
         ];
     }
@@ -93,7 +94,7 @@ class Events extends Myschoolgh {
         return [
             "data" => "Event type was successfully updated",
             "additional" => [
-                "event_types" => $this->list($params)
+                "event_types" => $this->types_list($params)
             ]
         ];
 

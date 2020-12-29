@@ -66,6 +66,32 @@ if(!empty($session->clientId)) {
         "userId" => $session->userId
     ];
 
+    // create new event class
+    $eventClass = load_class("events", "controllers");
+
+    // load the event types
+    $event_types_list = "";
+    $event_types_array = [];
+    $event_types = $eventClass->types_list($params);
+
+    // loop through the list
+    foreach($event_types as $type) {
+        $event_types_array[$type->item_id] = $type;
+        $event_types_list .= "
+            <div class='card mb-2'>
+                <div class='card-header p-2 text-uppercase'>{$type->name}</div>
+                ".(!empty($type->description) ? "<div class='card-body p-2'>{$type->description}</div>" : "")."
+                <div class='card-footer p-2'>
+                    <div class='d-flex justify-content-between'>
+                        <div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</button></div>
+                        <div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a></div>
+                    </div>
+                </div>
+            </div>";
+    }
+    // append the questions list to the array to be returned
+    $response->array_stream["event_types_array"] = $event_types_array;
+
     // generate a new script for this client
     // $filename = "assets/js/scripts/{$client_id}_events.js";
     
@@ -151,7 +177,7 @@ if(!empty($session->clientId)) {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button onclick="return saveEventType()" class="btn btn-primary">Add</button>
+                        <button onclick="return save_Event_Type()" class="btn btn-primary">Add</button>
                     </div>
                 </div>
             </div>
@@ -176,6 +202,7 @@ if(!empty($session->clientId)) {
                 </div>
                 <div class="col-sm-12 col-lg-3">
                     <h5>EVENT TYPES <span class="float-right"><button onclick="return add_Event_Type()" class="btn btn-sm btn-outline-primary"><i class="fa fa-plus"></i> Add New</button></span></h5>
+                    <div class="mt-3" id="events_types_list">'.$event_types_list.'</div>
                 </div>
             </div>
         </section>';
