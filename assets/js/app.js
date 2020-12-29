@@ -764,6 +764,15 @@ var initPlugins = () => {
         });
     }
 
+    if ($('.att_datepicker').length > 0) {
+        $('.att_datepicker').daterangepicker({
+            locale: { format: 'YYYY-MM-DD' },
+            singleDatePicker: true,
+            drops: 'down',
+            opens: 'right'
+        });
+    }
+
     if (('.daterange').length > 0) {
         $('.daterange').daterangepicker({
             locale: { format: 'YYYY-MM-DD', separator: ':' },

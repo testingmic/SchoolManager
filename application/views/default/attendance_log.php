@@ -58,12 +58,12 @@ if(!empty($session->clientId)) {
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Selected Date</label>
-                                        <input type="text" value="'.$selected_date.':'.$selected_date.'" class="datepicker form-control" name="attendance_date" id="attendance_date">
+                                        <input type="text" value="'.$selected_date.'" class="att_datepicker form-control" name="attendance_date" id="attendance_date">
                                     </div>
                                     <div class="form-group">
                                         <label>Select Category</label>
                                         <select data-width="100%" class="form-control selectpicker" name="attendance_category" id="attendance_category">
-                                            <option value="">Please select group</option>
+                                            <option value="null">Please select group</option>
                                             <option value="student">Students</option>
                                             <option value="teacher">Teaching Staff</option>
                                             <option value="employee">Non-Teaching Staff</option>
@@ -74,6 +74,9 @@ if(!empty($session->clientId)) {
                                         <select data-width="100%" class="form-control selectpicker" name="attendance_class" id="attendance_class">
                                             <option value="">Please select Class</option>
                                         </select>
+                                    </div>
+                                    <div class="form-group refresh_attendance_list text-right hidden">
+                                        <button onclick="return refresh_AttendanceLog()" class="btn refresh btn-sm btn-outline-primary"><i class="fa fa-circle-notch"></i> Refresh</button>
                                     </div>
                                 </div>
                                 <div class="col-md-9" id="attendance_log_list">

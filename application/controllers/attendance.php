@@ -239,7 +239,16 @@ class Attendance extends Myschoolgh {
             return [
                 "data" => "Sorry! The maximum days range but be at most 22."
             ];
-        }       
+        }
+
+        // return error message if the start date is greater than today
+        if(strtotime($start_date) > strtotime(date("Y-m-d"))) {
+            return [
+                "data" => [
+                        "table_content" => "<div class='mt-3 text-danger text-center font-italic'>Sorry! The date must not be greater than current date.</div>"
+                    ]
+                ];
+        }  
 
         // append some few query
         $attendance = [];
