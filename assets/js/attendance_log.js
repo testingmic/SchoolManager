@@ -18,7 +18,10 @@ var list_userAttendance = (query = "") => {
             attendance_content.html(response.data.result.table_content);
             checkAllState();
         }
+        $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "none" });
         $(`button[class~="refresh"]`).html(`<i class='fa fa-notch'></i> Refresh`).prop("disabled", false);
+    }).catch(() => {
+        $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "none" });
     });
 }
 
@@ -104,6 +107,7 @@ $(`select[id="attendance_category"]`).on("change", function() {
             }
         });
     } else {
+        $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "flex" });
         $(`div[class~="refresh_attendance_list"]`).removeClass("hidden");
         $(`div[class~="attendance_category_list"]`).addClass("hidden");
         list_userAttendance(`user_type=${value}&`);
@@ -115,6 +119,7 @@ $(`select[id="attendance_class"]`).on("change", function() {
         category = $(`select[name="attendance_category"]`).val();
     if (value !== "null") {
         $(`button[class~="refresh"]`).html(`Refreshing record <i class='fa fa-spin fa-spinner'></i>`).prop("disabled", true);
+        $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "flex" });
         list_userAttendance(`class_id=${value}&user_type=${category}&`);
     } else {
         $(`div[class~="refresh_attendance_list"]`).addClass("hidden");
@@ -124,6 +129,7 @@ $(`select[id="attendance_class"]`).on("change", function() {
 var refresh_AttendanceLog = () => {
     let class_id = $(`select[id="attendance_class"]`).val(),
         category = $(`select[name="attendance_category"]`).val();
+    $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "flex" });
     $(`button[class~="refresh"]`).html(`Refreshing record <i class='fa fa-spin fa-spinner'></i>`).prop("disabled", true);
     list_userAttendance(`class_id=${class_id}&user_type=${category}&`);
 }

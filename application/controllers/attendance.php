@@ -234,10 +234,11 @@ class Attendance extends Myschoolgh {
         // get the list of days 
         $list_days = $this->listDays($start_date, $end_date, "Y-m-d", true);
 
+        // if no date was parsed
         if(!isset($list_days[0])) {
             return [
                 "data" => [
-                    "table_content" => "<div class='mt-3 text-danger text-center font-italic'>Sorry! The date must not be a weekend.</div>"
+                    "table_content" => "<div class='mt-3 text-danger text-center font-italic'>Sorry! The date must not be a Sunday.</div>"
                 ]
             ];
         }

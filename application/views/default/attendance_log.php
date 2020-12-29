@@ -81,8 +81,11 @@ if(!empty($session->clientId)) {
                                         <button onclick="return refresh_AttendanceLog()" class="btn refresh btn-sm btn-outline-primary"><i class="fa fa-circle-notch"></i> Refresh</button>
                                     </div>
                                 </div>
-                                <div class="col-md-9" id="attendance_log_list">
-                                    <div class="text-center font-italic">Users list is displayed here.</div>
+                                <div class="col-md-9" id="attendance">
+                                    '.form_loader().'
+                                    <div id="attendance_log_list">
+                                        <div class="text-center font-italic">Users list is displayed here.</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
