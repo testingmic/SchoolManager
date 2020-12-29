@@ -324,8 +324,18 @@ class Attendance extends Myschoolgh {
             }
         }
 
+        // init
+        $summary = [];
+
+        // summation of the summary
+        foreach($attendance["attendance"] as $ikey => $each) {
+            foreach($each["record"]["users_data"] as $key => $value) {
+                $summary[$value["state"]] = isset($summary[$value["state"]]) ? $summary[$value["state"]] + 1 : 1;
+            }
+        }
+
         // confirm existing record
-        $check = $this->pushQuery("id, users_list, users_data, finalize", "users_attendance_log", "log_date='{$list_days[0]}' {$query} LIMIT 1");
+        $check = $this->pushQuery("id, users_list, users_data, finalize, date_finalized", "users_attendance_log", "log_date='{$list_days[0]}' {$query} LIMIT 1");
         $attendance_log = !empty($check) ? json_decode($check[0]->users_data) : [];
         $final = !empty($check) ? $check[0]->finalize : null;
 
@@ -393,13 +403,32 @@ class Attendance extends Myschoolgh {
                         )."
                     </td>
                 </tr>";
+            } else {
+                $table_content .= "
+                <tr>
+                    <td align='center' colspan='2'>
+                        <div class='text-left'>
+                            <p class='p-0 pt-2 m-0'><label class='p-0 m-0 font-weight-bold'><i class='fa fa-chart-bar'></i> Summary:</label></p>";
+                            foreach($summary as $key => $value) {
+                                $table_content .= "<div class='p-0 m-0'><strong class='mr-3'>".ucwords($key).":</strong> {$value}</div>";
+                            }
+                $table_content .= "</div>
+                    </td>
+                    <td colspan='2' valign='top'>
+                        <div class='text-right'>
+                            <span class='p-0 m-0'><label class='p-0 m-0 font-weight-bold'>Date Finalized:</label></span>
+                            <p class='p-0 m-0'><i class='fa fa-calendar-check'></i> {$check[0]->date_finalized}</p>
+                        </div>
+                    </td>
+                </tr>";    
             }
+
         } else {
             $table_content .= "
             <tr>
                 <td align='center' colspan='4'>
                     <div class='font-italic'>Sorry! No students found under the selected class.</div>
-                </td>        
+                </td>
             </tr>";
         }
 
