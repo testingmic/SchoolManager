@@ -88,9 +88,8 @@ var finalize_AttendanceLog = (date, user_type = "", class_id = "", finalize) => 
 }
 
 $(`select[id="attendance_category"]`).on("change", function() {
-    let value = $(this).val(),
-        attendance_content = $(`div[id="attendance_log_list"]`);
-    attendance_content.html(`<div class="text-center font-italic">Users list is displayed here.</div>`);
+    let value = $(this).val();
+    $(`div[id="attendance_log_list"]`).html(`<div class="text-center font-italic">Users list is displayed here.</div>`);
     if (value == "null") {
         $(`div[class~="attendance_category_list"], div[class~="refresh_attendance_list"]`).addClass("hidden");
     } else if (value == "student") {
@@ -105,15 +104,18 @@ $(`select[id="attendance_category"]`).on("change", function() {
             }
         });
     } else {
+        $(`div[class~="refresh_attendance_list"]`).removeClass("hidden");
         $(`div[class~="attendance_category_list"]`).addClass("hidden");
+        list_userAttendance(`user_type=${value}&`);
     }
 });
 
 $(`select[id="attendance_class"]`).on("change", function() {
-    let value = $(this).val();
+    let value = $(this).val(),
+        category = $(`select[name="attendance_category"]`).val();
     if (value !== "null") {
         $(`button[class~="refresh"]`).html(`Refreshing record <i class='fa fa-spin fa-spinner'></i>`).prop("disabled", true);
-        list_userAttendance(`class_id=${value}&user_type=student&`);
+        list_userAttendance(`class_id=${value}&user_type=${category}&`);
     } else {
         $(`div[class~="refresh_attendance_list"]`).addClass("hidden");
     }

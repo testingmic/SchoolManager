@@ -67,6 +67,8 @@ if(!empty($session->clientId)) {
                                             <option value="student">Students</option>
                                             <option value="teacher">Teaching Staff</option>
                                             <option value="employee">Non-Teaching Staff</option>
+                                            <option value="accountant">Accountant</option>
+                                            <option value="admin">Admin</option>
                                         </select>
                                     </div>
                                     <div class="form-group attendance_category_list hidden">

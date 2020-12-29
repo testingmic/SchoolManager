@@ -234,6 +234,14 @@ class Attendance extends Myschoolgh {
         // get the list of days 
         $list_days = $this->listDays($start_date, $end_date, "Y-m-d", true);
 
+        if(!isset($list_days[0])) {
+            return [
+                "data" => [
+                    "table_content" => "<div class='mt-3 text-danger text-center font-italic'>Sorry! The date must not be a weekend.</div>"
+                ]
+            ];
+        }
+
         // confirm that the days range is a maximum of 14 days
         if(count($list_days) > 22) {
             return [
@@ -245,19 +253,19 @@ class Attendance extends Myschoolgh {
         if(strtotime($start_date) > strtotime(date("Y-m-d"))) {
             return [
                 "data" => [
-                        "table_content" => "<div class='mt-3 text-danger text-center font-italic'>Sorry! The date must not be greater than current date.</div>"
-                    ]
-                ];
+                    "table_content" => "<div class='mt-3 text-danger text-center font-italic'>Sorry! The date must not be greater than current date.</div>"
+                ]
+            ];
         }  
 
         // append some few query
         $attendance = [];
         
         $user_type = isset($params->user_type) ? $params->user_type : null;
-        $class_id = isset($params->class_id) ? $params->class_id : null;
+        $class_id = isset($params->class_id) && ($params->class_id !== "null") ? $params->class_id : null;
 
-        $query = isset($params->user_type) ? " AND user_type='{$params->user_type}'" : null;
-        $query .= isset($params->class_id) ? " AND class_id='{$params->class_id}'" : null;
+        $query = !empty($params->user_type) ? " AND user_type='{$params->user_type}'" : null;
+        $query .= !empty($class_id) ? " AND class_id='{$params->class_id}'" : null;
         
         // loop through the days range list
         foreach($list_days as $each_day) {
@@ -327,13 +335,6 @@ class Attendance extends Myschoolgh {
         // init
         $summary = [];
 
-        // summation of the summary
-        foreach($attendance["attendance"] as $ikey => $each) {
-            foreach($each["record"]["users_data"] as $key => $value) {
-                $summary[$value["state"]] = isset($summary[$value["state"]]) ? $summary[$value["state"]] + 1 : 1;
-            }
-        }
-
         // confirm existing record
         $check = $this->pushQuery("id, users_list, users_data, finalize, date_finalized", "users_attendance_log", "log_date='{$list_days[0]}' {$query} LIMIT 1");
         $attendance_log = !empty($check) ? json_decode($check[0]->users_data) : [];
@@ -364,25 +365,38 @@ class Attendance extends Myschoolgh {
         </thead>
         <tbody>";
 
-        foreach ($attendance["attendance"] as $key => $item) {
-            $numb = 0;
-            foreach ($item["record"]["users_list"] as $user){
-                $numb++;
-                // get the user state
-                $user_state = $this->the_user_state($user->user_id, $attendance_log);
+        // if attendance was parsed and an array
+        if(isset($attendance["attendance"]) && is_array($attendance["attendance"])) {
+            
+            // summation of the summary
+            foreach($attendance["attendance"] as $ikey => $each) {
+                foreach($each["record"]["users_data"] as $key => $value) {
+                    $summary[$value["state"]] = isset($summary[$value["state"]]) ? $summary[$value["state"]] + 1 : 1;
+                }
+            }
+        
+            // loop through the attendance value
+            foreach ($attendance["attendance"] as $key => $item) {
+                $numb = 0;
+                // loop through the users list
+                foreach ($item["record"]["users_list"] as $user){
+                    $numb++;
+                    // get the user state
+                    $user_state = $this->the_user_state($user->user_id, $attendance_log);
 
-                // append to the list
-                $table_content .= "
-                <tr>
-                    <td>
-                        {$numb}
-                    </td>
-                    <td>
-                        <img src=\"{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\"> {$user->name}
-                    </td>
-                    <td>{$user->unique_id}</td>
-                    <td>".$this->attendance_radios($user->user_id, $user_state, $final)."</td>
-                </tr>";
+                    // append to the list
+                    $table_content .= "
+                    <tr>
+                        <td>
+                            {$numb}
+                        </td>
+                        <td>
+                            <img src=\"{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\"> {$user->name}
+                        </td>
+                        <td>{$user->unique_id}</td>
+                        <td>".$this->attendance_radios($user->user_id, $user_state, $final)."</td>
+                    </tr>";
+                }
             }
         }
 
