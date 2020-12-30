@@ -13,60 +13,22 @@ class Scripts extends Myschoolgh {
     // Calendar Event Source
     var calendarEvents = {
         id: 1,
-        backgroundColor: 'rgba(1,104,250, .15)',
+        backgroundColor: '#136ae3bf',
         borderColor: '#0168fa',
-        events: [
-        {
-            id: '1',
-            start: curYear+'-'+curMonth+'-08T08:30:00',
-            end: curYear+'-'+curMonth+'-08T13:00:00',
-            title: 'Google Developers Meetup',
-            description: 'In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis az pede mollis...'
-        },{
-            id: '2',
-            start: curYear+'-'+curMonth+'-10T09:00:00',
-            end: curYear+'-'+curMonth+'-10T17:00:00',
-            title: 'Design/Code Review',
-            description: 'In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis az pede mollis...'
-        },{
-            id: '3',
-            start: curYear+'-'+curMonth+'-13T12:00:00',
-            end: curYear+'-'+curMonth+'-13T18:00:00',
-            title: 'Lifestyle Conference',
-            description: 'Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi...'
-        },{
-            id: '4',
-            start: curYear+'-'+curMonth+'-15T07:30:00',
-            end: curYear+'-'+curMonth+'-15T15:30:00',
-            title: 'Team Weekly Trip',
-            description: 'In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis az pede mollis...'
-        },{
-            id: '5',
-            start: curYear+'-'+curMonth+'-17T10:00:00',
-            end: curYear+'-'+curMonth+'-19T15:00:00',
-            title: 'DJ Festival',
-            description: 'In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis az pede mollis...'
-        },{
-            id: '6',
-            start: curYear+'-'+curMonth+'-08T13:00:00',
-            end: curYear+'-'+curMonth+'-08T18:30:00',
-            title: 'Carl Henson\'s Wedding',
-            description: 'In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis az pede mollis...'
-        }
-        ]
+        events: {$params->events_list->calendar_events_list}
     };
 
     // Birthday Events Source
     var birthdayEvents = {
         id: 2,
-        backgroundColor: 'rgba(16,183,89, .25)',
+        backgroundColor: '#128b10d9',
         borderColor: '#10b759',
         events: {$params->events_list->birthday_list}
     };
 
     var holidayEvents = {
         id: 3,
-        backgroundColor: 'rgba(241,0,117,.25)',
+        backgroundColor: '#f10075b0',
         borderColor: '#f10075',
         events: {$params->events_list->holidays_list}
     };

@@ -25,11 +25,17 @@ class Events extends Myschoolgh {
         // append the user type to the list of audience
         $params->audience = "all,{$params->userData->user_type}";
 
+        // append the audience
+        if($params->userData->user_type == "admin") {
+            // list all events
+            $params->audience = "all,student,teacher,parent";
+        }
+
         $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
-        $params->query .= (isset($params->audience)) ? " AND a.audience IN {$this->inList($params->audience)}" : null;
-        $params->query .= (isset($params->event_type)) ? " AND a.event_type='{$params->event_type}'" : null;
-        $params->query .= (isset($params->holiday)) ? " AND a.is_holiday='{$params->holiday}'" : null;
-        $params->query .= (isset($params->event_date)) ? " AND a.start_date='{$params->event_date}'" : null;
+        $params->query .= (isset($params->audience) && !empty($params->audience)) ? " AND a.audience IN {$this->inList($params->audience)}" : null;
+        $params->query .= (isset($params->event_type) && !empty($params->event_type)) ? " AND a.event_type='{$params->event_type}'" : null;
+        $params->query .= (isset($params->holiday) && !empty($params->holiday)) ? " AND a.is_holiday='{$params->holiday}'" : "";
+        $params->query .= (isset($params->event_date) && !empty($params->holiday)) ? " AND a.start_date='{$params->event_date}'" : null;
         $params->query .= (isset($params->event_id)) ? " AND a.item_id='{$params->event_id}'" : null;
 
         try {
@@ -124,7 +130,7 @@ class Events extends Myschoolgh {
         ");
         $stmt->execute([
             $params->clientId, $item_id, $params->title, $params->description ?? null, 
-            $start_date, $end_date, $image ?? null, $params->audience, $params->holiday ?? null, 
+            $start_date, $end_date, $image ?? null, $params->audience, $params->holiday ?? "not", 
             $params->userId, $params->is_mailable ?? null, $params->type
         ]);
 
@@ -355,6 +361,9 @@ class Events extends Myschoolgh {
                         <div class='col-md-2'>
                             <img class='rounded-circle cursor author-box-picture' width='60px' src='{$this->baseUrl}{$user->image}'>
                         </div>
+                    </div>
+                    <div class='modal-footer p-0'>
+                        <button type='button' class='btn btn-outline-secondary' data-dismiss='modal'>Close</button>
                     </div>"
             ];
         }
@@ -367,42 +376,60 @@ class Events extends Myschoolgh {
         $result->birthday_list = json_encode($birthday_list);
 
         // append the holidays list
-        $holidays_list = [];
-        $params->holiday = "on";
-        $params->columns = "title, description, start_date, end_date, event_image, audience, is_holiday, event_type";
-        $hol_list = $this->list($params)["data"];
+        $array_list = [
+            "holidays_list" => ["holiday" => "on"], 
+            "calendar_events_list" => ["holiday" => "not"]
+        ];
 
-        // confirm if admin
-        $isAdmin = (bool) ($data->user_type == "admin");
+        // loop through the query to use
+        foreach($array_list as $key => $each) {
 
-        // loop through the holidays list
-        foreach($hol_list as $event) {
+            // set the initial parameters
+            $query_array = [];
+            $params->holiday = $each["holiday"];
+            $hol_list = $this->list($params)["data"];
 
-            // set the description
-            $description = "
-            <div class='row'>
-                <div class='col-md-12'>
-                    ".(!empty($event->event_image) ? "<div><img width='100%' src='{$this->baseUrl}{$event->event_image}'></div>" : "")."
-                    <div>
-                        $event->description
+            // confirm if admin
+            $isAdmin = (bool) ($data->user_type == "admin");
+
+            // loop through the holidays list
+            foreach($hol_list as $event) {
+
+                // set the description
+                $description = "
+                <div class='row'>
+                    <div class='col-md-12'>
+                        ".(!empty($event->event_image) ? "<div><img width='100%' src='{$this->baseUrl}{$event->event_image}'></div>" : "")."
+                        <div>
+                            $event->description
+                        </div>
+                        <div class='mt-3'>
+                            ".(!empty($event->start_date) ? "<p class='p-0 m-0'><i class='fa fa-calendar'></i> Start Date: ".date("jS F Y", strtotime($event->start_date))."</p>" : "")."
+                            ".(!empty($event->end_date) ? "<p class='p-0 m-0'><i class='fa fa-calendar-check'></i> End Date: ".date("jS F Y", strtotime($event->end_date))."</p>" : "")."
+                            ".($isAdmin ? "<p class='p-0 m-0'><i class='fa fa-users'></i>  Audience: ".strtoupper($event->audience)."</p>" : "")."
+                            ".(!empty($event->type_name) ? "<p class='p-0 m-0'><i class='fa fa-home'></i> Type: ".$event->type_name."</p>" : "")."
+                        </div>    
                     </div>
-                    <div class='mt-3'>
-                        ".(!empty($event->start_date) ? "<p class='p-0 m-0'><i class='fa fa-calendar'></i> Start Date: ".date("jS F Y", strtotime($event->start_date))."</p>" : "")."
-                        ".(!empty($event->end_date) ? "<p class='p-0 m-0'><i class='fa fa-calendar-check'></i> End Date: ".date("jS F Y", strtotime($event->end_date))."</p>" : "")."
-                        ".($isAdmin ? "<p class='p-0 m-0'><i class='fa fa-users'></i>  Audience: ".strtoupper($event->audience)."</p>" : "")."
-                    </div>    
                 </div>
-            </div>";
-            // append the array list
-            $holidays_list[] = [
-                "title" => "{$event->title}",
-                "start" => "{$event->start_date}T06:00:00",
-                "end" => "{$event->end_date}T18:00:00",
-                "description" => $description
-            ];
-        }
+                <div class='modal-footer p-0'>
+                    <button type='button' class='btn btn-outline-secondary' data-dismiss='modal'>Close</button>
+                    ".($data->hasDelete ? "<button class='btn btn-outline-success'><i class='fa fa-edit'></i> Update Event</button>": "")."
+                </div>";
 
-        $result->holidays_list = json_encode($holidays_list);
+                // append the array list
+                $query_array[] = [
+                    "title" => "{$event->title}",
+                    "start" => "{$event->start_date}T06:00:00",
+                    "end" => "{$event->end_date}T18:00:00",
+                    "description" => $description,
+                    "is_editable" => true,
+                    "item_id" => $event->item_id
+                ];
+            }
+
+            $result->{$key} = json_encode($query_array);
+
+        }
 
         return $result;
         

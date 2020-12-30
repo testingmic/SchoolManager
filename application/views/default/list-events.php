@@ -22,6 +22,7 @@ $response->title = "{$pageTitle} : {$appName}";
 
 // if the client information is not empty
 if(!empty($session->clientId)) {
+
     // convert to lowercase
     $client_id = strtolower($session->clientId);
 
@@ -42,6 +43,13 @@ if(!empty($session->clientId)) {
     $event_types_array = [];
     $event_types = $eventClass->types_list($params);
 
+    $accessObject->userId = $session->userId;
+    $accessObject->clientId = $session->clientId;
+    $accessObject->userPermits = $defaultUser->user_permissions;
+    $hasDelete = $accessObject->hasAccess("delete", "events");
+    $hasUpdate = $accessObject->hasAccess("update", "events");
+
+
     // loop through the list
     foreach($event_types as $type) {
         $event_types_array[$type->item_id] = $type;
@@ -51,17 +59,21 @@ if(!empty($session->clientId)) {
                 ".(!empty($type->description) ? "<div class='card-body p-2'>{$type->description}</div>" : "")."
                 <div class='card-footer p-2'>
                     <div class='d-flex justify-content-between'>
-                        <div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</button></div>
-                        <div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a></div>
+                        ".($hasUpdate ? "<div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</button></div>": "")."
+                        ".($hasDelete ? "<div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a></div>" : "")."
                     </div>
                 </div>
             </div>";
     }
 
+    // append the permissions to the default user object
+    $defaultUser->hasDelete = $hasDelete;
+    $defaultUser->hasUpdate = $hasUpdate;
+
     $params = (object) [
         "container" => "events_management",
         "events_list" => $eventClass->events_list($defaultUser),
-        "event_Sources" => "birthdayEvents,holidayEvents"
+        "event_Sources" => "birthdayEvents,holidayEvents,calendarEvents"
     ];
 
     // append the questions list to the array to be returned
@@ -89,10 +101,6 @@ if(!empty($session->clientId)) {
                         <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
                     </div>
                     <div id="modalBody1" class="modal-body"></div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button class="btn btn-primary">Event Page</button>
-                    </div>
                 </div>
             </div>
         </div>
