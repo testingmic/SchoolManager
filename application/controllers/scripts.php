@@ -61,33 +61,14 @@ class Scripts extends Myschoolgh {
         id: 2,
         backgroundColor: 'rgba(16,183,89, .25)',
         borderColor: '#10b759',
-        events: {$params->birthday_list}
+        events: {$params->events_list->birthday_list}
     };
 
     var holidayEvents = {
         id: 3,
         backgroundColor: 'rgba(241,0,117,.25)',
         borderColor: '#f10075',
-        events: [
-        {
-            id: '10',
-            start: curYear+'-'+curMonth+'-04',
-            end: curYear+'-'+curMonth+'-06',
-            title: 'Feast Day'
-        },
-        {
-            id: '11',
-            start: curYear+'-'+curMonth+'-26',
-            end: curYear+'-'+curMonth+'-27',
-            title: 'Memorial Day'
-        },
-        {
-            id: '12',
-            start: curYear+'-'+curMonth+'-28',
-            end: curYear+'-'+curMonth+'-29',
-            title: 'Veteran\'s Day'
-        }
-        ]
+        events: {$params->events_list->holidays_list}
     };
 
     // initialize the external events

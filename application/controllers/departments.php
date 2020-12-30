@@ -16,7 +16,6 @@ class Departments extends Myschoolgh {
      */
     public function list(stdClass $params) {
 
-
         $params->query = "1";
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;

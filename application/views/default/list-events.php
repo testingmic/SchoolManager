@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL;
+global $myClass, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -24,52 +24,18 @@ $response->title = "{$pageTitle} : {$appName}";
 if(!empty($session->clientId)) {
     // convert to lowercase
     $client_id = strtolower($session->clientId);
-    
-    // load user birthdays
-    $birth_list = $myClass->pushQuery("name, phone_number, email, image, item_id, unique_id, DAY(date_of_birth) AS the_day, MONTH(date_of_birth) AS the_month", "users", "user_status='Active' AND status='1' AND deleted='0' LIMIT 200");
-    $birthday_list = [];
-    
-    // loop through the users list
-    // foreach($birth_list as $user) {
-    //     $dob = date("Y")."-".$myClass->append_zeros($user->the_month,2)."-".$myClass->append_zeros($user->the_day,2);
-    //     $birthday_list[] = [
-    //         "title" => "{$user->name}",
-    //         "start" => "{$dob}T06:00:00",
-    //         "end" => "{$dob}T18:00:00",
-    //         "description" => "
-    //             <div class='row'>
-    //                 <div class='col-md-10'>
-    //                     <div>
-    //                         This is the birthday of <strong>{$user->name}</strong>. 
-    //                         <a href='javascript:void(0)' class='anchor' onclick='loadPage(\"{$baseUrl}compose?user_id={$user->item_id}&name={$user->name}\")'>Click Here</a> 
-    //                         to send a Email or SMS message to the user.
-    //                     </div>
-    //                     <div class='mt-3'>
-    //                         ".(!empty($user->phone_number) ? "<p class='p-0 m-0'><i class='fa fa-phone'></i> {$user->phone_number}</p>" : "")."
-    //                         ".(!empty($user->email) ? "<p class='p-0 m-0'><i class='fa fa-envelope'></i> {$user->email}</p>" : "")."
-    //                     </div>    
-    //                 </div>
-    //                 <div class='col-md-2'>
-    //                     <img class='rounded-circle cursor author-box-picture' width='60px' src='{$baseUrl}{$user->image}'>
-    //                 </div>
-    //             </div>"
-    //     ];
-    // }
-
-    // set the parameters
-    $params = (object) [
-        "container" => "events_management",
-        "birthday_list" => json_encode($birthday_list),
-        "baseUrl" => $baseUrl,
-        "clientId" => $clientId,
-        "event_Sources" => "birthdayEvents",
-        "userId" => $session->userId
-    ];
 
     // create new event class
     $data = (object) [];
     $eventClass = load_class("events", "controllers");
     $formsClass = load_class("forms", "controllers");
+
+    // set the parameters
+    $params = (object) [
+        "baseUrl" => $baseUrl,
+        "clientId" => $clientId,
+        "userId" => $session->userId
+    ];
 
     // load the event types
     $event_types_list = "";
@@ -91,34 +57,32 @@ if(!empty($session->clientId)) {
                 </div>
             </div>";
     }
+
+    $params = (object) [
+        "container" => "events_management",
+        "events_list" => $eventClass->events_list($defaultUser),
+        "event_Sources" => "birthdayEvents,holidayEvents"
+    ];
+
     // append the questions list to the array to be returned
     $response->array_stream["event_types_array"] = $event_types_array;
-    $data->event_types = $event_types;
     
     // generate a new script for this client
-    // $filename = "assets/js/scripts/{$client_id}_events.js";
-    
-    // // get the data
-    // $data = load_class("scripts", "controllers")->attendance($params);
-    
-    // // create a new file handler
-    // $file = fopen($filename, "w");
-    
-    // // write the content to the file
-    // fwrite($file, $data);
-    
-    // // close the opened file
-    // fclose($file);
+    $filename = "assets/js/scripts/{$client_id}_{$defaultUser->user_type}_events.js";
+    $data = load_class("scripts", "controllers")->attendance($params);
+    $file = fopen($filename, "w");
+    fwrite($file, $data);
+    fclose($file);
 
     // load the scripts
     $response->scripts = [
-        "assets/js/scripts/{$client_id}_events.js",
+        "assets/js/scripts/{$client_id}_{$defaultUser->user_type}_events.js",
         "assets/js/events.js",
     ];
 
     $response->html = '
         <div id="fullCalModal" class="modal fade">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-top">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 id="modalTitle1" class="modal-title"></h4>

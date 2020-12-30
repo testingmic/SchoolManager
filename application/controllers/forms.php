@@ -2550,7 +2550,7 @@ class Forms extends Myschoolgh {
                         <div class="form-group">
                             <label>Type<span class="required">*</span></label>
                             <select name="type" id="type" class="form-control selectpicker">
-                                <option value="">Select</option>';
+                                <option value="null">Select</option>';
                                 if(isset($data->event_types)) {
                                     foreach($data->event_types as $key => $value) {
                                         $html_content .= "<option value='{$value->item_id}'>{$value->name}</option>";
@@ -2564,7 +2564,7 @@ class Forms extends Myschoolgh {
                         <div class="form-group">
                             <label>Audience<span class="required">*</span></label>
                             <select name="audience" id="audience" class="form-control selectpicker">
-                                <option value="">Select</option>';
+                                <option value="null">Select</option>';
                                 foreach($this->event_audience as $key => $value) {
                                     $html_content .= "<option value='{$key}'>{$value}</option>";
                                 }
