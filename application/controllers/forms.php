@@ -2574,20 +2574,26 @@ class Forms extends Myschoolgh {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Date <span class="required">*</span></label>
-                            <input type="text" name="title" class="daterange form-control">
+                            <input type="text" name="date" class="daterange form-control">
                         </div>
                     </div>
                     <div class="col-lg-12">
                         <div class="form-group">
                             <label>Description</label>
                             <input type="hidden" hidden id="trix-editor-input" value="">
-                            <trix-editor name="description" input="trix-editor-input" class="trix-slim-scroll" id="description"></trix-editor>
+                            <trix-editor name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
                         </div>
                     </div>
                     <div class="col-lg-5">
                         <div class="form-group">
                             <label>Event Image</label>
                             <input type="file" name="event_image" class="form-control" id="event_image">
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="form-group pt-4">
+                            <input type="checkbox" name="holiday" class="checkbox" id="holiday">
+                            <label for="holiday">Holiday</label>
                         </div>
                     </div>
                 </div>

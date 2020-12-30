@@ -44,8 +44,8 @@ class Models {
 
         $this->event_audience = [
             "all" => "All Users",
-            "students" => "Students",
-            "teachers" => "Teaching Staff",
+            "student" => "Students",
+            "teacher" => "Teaching Staff",
             "parent" => "Parents"
         ];
 

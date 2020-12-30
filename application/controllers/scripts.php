@@ -90,60 +90,6 @@ class Scripts extends Myschoolgh {
         ]
     };
 
-    var discoveredEvents = {
-        id: 4,
-        backgroundColor: 'rgba(0,204,204,.25)',
-        borderColor: '#00cccc',
-        events: [
-            {
-                id: '13',
-                start: curYear+'-'+curMonth+'-17T08:00:00',
-                end: curYear+'-'+curMonth+'-18T11:00:00',
-                title: 'Web Design Workshop Seminar'
-            }
-        ]
-    };
-
-    var meetupEvents = {
-        id: 5,
-        backgroundColor: 'rgba(91,71,251,.2)',
-        borderColor: '#5b47fb',
-        events: [
-            {
-                id: '14',
-                start: curYear+'-'+curMonth+'-03',
-                end: curYear+'-'+curMonth+'-05',
-                title: 'UI/UX Meetup Conference'
-            },
-            {
-                id: '15',
-                start: curYear+'-'+curMonth+'-18',
-                end: curYear+'-'+curMonth+'-20',
-                title: 'Angular Conference Meetup'
-            }
-        ]
-    };
-
-    var otherEvents = {
-        id: 6,
-        backgroundColor: 'rgba(253,126,20,.25)',
-        borderColor: '#fd7e14',
-        events: [
-            {
-                id: '16',
-                start: curYear+'-'+curMonth+'-06',
-                end: curYear+'-'+curMonth+'-08',
-                title: 'My Rest Day'
-            },
-            {
-                id: '17',
-                start: curYear+'-'+curMonth+'-29',
-                end: curYear+'-'+curMonth+'-31',
-                title: 'My Rest Day'
-            }
-        ]
-    };
-    
     // initialize the external events
     $('#external-events .fc-event').each(function() {
         // store data so the calendar knows to render an event upon drop
@@ -184,6 +130,7 @@ class Scripts extends Myschoolgh {
             $(\"#createEventModal\").modal(\"show\");
         }
     });
+
 });";
 
     }

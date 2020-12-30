@@ -44,7 +44,13 @@ var save_Event_Type = () => {
                     $(`div[id="createEventTypeModal"]`).modal("hide");
                     $(`div[id="createEventTypeModal"] input, div[id="createEventTypeModal"] textarea`).val("")
 
+                    $(`div[id='createEventModal'] select[name='type']`).find('option').remove().end();
+                    $(`div[id='createEventModal'] select[name='type']`).append(`<option value="null">Select</option>`);
+
                     $.each(response.data.additional.event_types, function(i, type) {
+
+                        $(`div[id='createEventModal'] select[name='type']`).append(`<option value='${type.item_id}'>${type.name}</option>'`);
+
                         event_type_list += `
                             <div class="card mb-2">
                                 <div class="card-header p-2 text-uppercase">${type.name}</div>

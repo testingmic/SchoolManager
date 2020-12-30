@@ -35,10 +35,10 @@ class Attendance extends Myschoolgh {
         if(isset($params->class_id) && !empty($params->class_id)) {
 
             // run the query for the class details
-            $prevData = $this->pushQuery("*", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+            $classData = $this->pushQuery("*", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
             // if empty then return
-            if(empty($prevData)) {
+            if(empty($classData)) {
                 return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
             }
 
@@ -116,7 +116,7 @@ class Attendance extends Myschoolgh {
             $data = "Attendance was sucessfully logged for {$params->date}.";
 
             //log the user activity
-
+            $this->userLogs("attendance_log", $this->lastRowId("users_attendance_log"), null, "{$params->userData->name} logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}.", $params->userId);
         } else {
 
             // confirm that the user has not finalize the attendance log
@@ -147,7 +147,7 @@ class Attendance extends Myschoolgh {
             }
 
             //log the user activity
-
+            $this->userLogs("attendance_log", $params->finalize, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}.", $params->userId);
         }
 
         return ["data" => $data];

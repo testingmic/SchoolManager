@@ -8,6 +8,78 @@ class Events extends Myschoolgh {
     }
 
     /**
+     * Add a new Event
+     * 
+     * @return Array
+     */
+    public function add(stdClass $params) {
+
+        /** Date mechanism */
+        $date = explode(":", $params->date);
+        $start_date = $date[0];
+        $item_id = random_string("alnum", 32);
+        $end_date = isset($date[1]) ? $date[1] : $date[0];
+
+        /** Audience check */
+        if(!in_array($params->audience, ["all", "teacher", "student", "parent"])) {
+            return ["code" => 203, "Sorry! Invalid audience was parsed."];
+        }
+        
+        // confirm that a logo was parsed
+        if(isset($params->event_image)) {
+            // set the upload directory
+            $uploadDir = "assets/img/events/";
+
+            // File path config 
+            $file_name = basename($params->event_image["name"]); 
+            $targetFilePath = $uploadDir . $file_name; 
+            $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+
+            // Allow certain file formats 
+            $allowTypes = array('jpg', 'png', 'jpeg');
+
+            // check if its a valid image
+            if(!empty($file_name) && in_array($fileType, $allowTypes)){
+                // set a new file_name
+                $image = $uploadDir . random_string('alnum', 10)."__{$file_name}";
+                // Upload file to the server 
+                if(move_uploaded_file($params->event_image["tmp_name"], $file_name)){}
+            } else {
+                return ["code" => 203, "Sorry! The event file must be a valid image."];
+            }
+        }
+
+        /** Insert the record */
+        $stmt = $this->db->prepare("INSERT INTO events SET 
+            client_id = ?, item_id = ?, title = ?, description = ?, start_date = ?, end_date = ?,
+            event_image = ?, audience = ?, is_holiday = ?, created_by = ?
+        ");
+        $stmt->execute([
+            $params->clientId, $item_id, $params->title, $params->description ?? null, 
+            $start_date, $end_date, $image ?? null, $params->audience, $params->holiday ?? null, $params->userId
+        ]);
+
+        /** log the user activity */
+        $this->userLogs("events", $item_id, null, "{$params->userData->name} created a new Event with title <strong>{$params->title}</strong> to be held on {$start_date}.", $params->userId);
+
+        return [
+            "data" => "Event was successfully created.",
+            "additional" => [
+                "clear" => true
+            ]
+        ];
+    }
+
+    /**
+     * Update an Event
+     * 
+     * @return Array
+     */
+    public function update(stdClass $params) {
+
+    }
+
+    /**
      * Return the list of event types
      * 
      * @param String    $params->type_id
