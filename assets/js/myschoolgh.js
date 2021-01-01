@@ -243,3 +243,30 @@ var share_Comment = (resource, item_id) => {
         });
     });
 }
+
+var delete_record = (record_id, resource) => {
+    swal({
+        title: "Delete Record",
+        text: "Are you sure you want to delete this record? You cannot reverse the action once it has been confirmed.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/record/remove`, { resource, record_id }).then((response) => {
+                let s_icon = "error";
+                if (response.code == 200) {
+                   s_icon = "success";
+                   if (typeof initiateCalendar === "function") {
+                        initiateCalendar();
+                    }
+                }
+                swal({
+                    position: "top",
+                    text: response.data.result,
+                    icon: s_icon,
+                });
+            });
+        }
+    });
+}

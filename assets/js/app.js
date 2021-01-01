@@ -1356,6 +1356,10 @@ var trigger_form_submit = () => {
                                 }
                             }
 
+                            if (typeof initiateCalendar === "function") {
+                                initiateCalendar();
+                            }
+
                             $form_modal.modal("hide");
                             $(`form[class="ajax-data-form"] div[class~="file-preview"]`).html("");
                         } else {

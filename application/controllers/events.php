@@ -145,17 +145,18 @@ class Events extends Myschoolgh {
         ]);
 
         /** Refresh the JavaScript file */
-        $this->preload($params);
+        if($this->preload($params)) {
+            /** log the user activity */
+            $this->userLogs("events", $item_id, null, "{$params->userData->name} created a new Event with title <strong>{$params->title}</strong> to be held on {$start_date}.", $params->userId);
 
-        /** log the user activity */
-        $this->userLogs("events", $item_id, null, "{$params->userData->name} created a new Event with title <strong>{$params->title}</strong> to be held on {$start_date}.", $params->userId);
+            return [
+                "data" => "Event was successfully created.",
+                "additional" => [
+                    "clear" => true
+                ]
+            ];
+        }
 
-        return [
-            "data" => "Event was successfully created.",
-            "additional" => [
-                "clear" => true
-            ]
-        ];
     }
 
     /**
@@ -238,17 +239,15 @@ class Events extends Myschoolgh {
         ]);
 
         /** Refresh the JavaScript file */
-        $this->preload($params);
-
-        /** log the user activity */
-        $this->userLogs("events", $item_id, null, "{$params->userData->name} updated the event details.", $params->userId);
-
-        /** Save the changes applied to each column of the table */
-
-        return [
-            "data" => "Event was successfully updated.",
-            "additional" => []
-        ];
+        if($this->preload($params)) {
+            /** log the user activity */
+            $this->userLogs("events", $item_id, null, "{$params->userData->name} updated the event details.", $params->userId);
+            /** Save the changes applied to each column of the table */
+            return [
+                "data" => "Event was successfully updated.",
+                "additional" => []
+            ];
+        }
 
     }
 
@@ -328,6 +327,15 @@ class Events extends Myschoolgh {
         /** Push the record into the database */
         $item_id = $params->type_id;
 
+        // global variables
+        global $accessObject;
+        $accessObject->userId = $params->userId;
+        $accessObject->clientId = $params->clientId;
+        $accessObject->userPermits = $params->userData->user_permissions;
+        
+        $params->hasEventDelete = $accessObject->hasAccess("delete", "events");
+        $params->hasEventUpdate = $accessObject->hasAccess("update", "events");
+
         /** Insert */
         $stmt = $this->db->prepare("UPDATE events_types SET name = ?
             ".(isset($params->description) ? ",description = '{$params->description}'" : "")."
@@ -337,19 +345,23 @@ class Events extends Myschoolgh {
         ");
         $stmt->execute([$params->name, $params->clientId, $item_id]);
 
-        /** Log the user activity */
-        $this->userLogs("events_type", $item_id, $prevData[0], "{$params->userData->name} successfully updated the event type: {$params->name}", $params->userId);
+        /** Refresh the JavaScript file */
+        if($this->preload($params)) {
+            
+            /** Log the user activity */
+            $this->userLogs("events_type", $item_id, $prevData[0], "{$params->userData->name} successfully updated the event type: {$params->name}", $params->userId);
 
-        // unset the type id
-        $params->type_id = null;
+            // unset the type id
+            $params->type_id = null;
 
-        // return the response together with the types list
-        return [
-            "data" => "Event type was successfully updated",
-            "additional" => [
-                "event_types" => $this->types_list($params)
-            ]
-        ];
+            // return the response together with the types list
+            return [
+                "data" => "Event type was successfully updated",
+                "additional" => [
+                    "event_types" => $this->types_list($params)
+                ]
+            ];
+        }
 
     }
 
@@ -450,8 +462,11 @@ class Events extends Myschoolgh {
                     </div>
                 </div>
                 <div class='modal-footer p-0'>
-                    <button type='button' class='btn btn-outline-secondary' data-dismiss='modal'>Close</button>
-                    ".($data->hasEventDelete ? "<button class='btn btn-outline-success'><i class='fa fa-edit'></i> Update Event</button>": "")."
+                    <button type='button' class='btn btn-sm btn-outline-secondary' data-dismiss='modal'>Close</button>
+                    ".($isAdmin ? "
+                        <a href='#' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</a>
+                        <a href='#' onclick='return delete_record(\"{$event->item_id}\", \"event\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>
+                    ": "")."
                 </div>";
 
                 // append the array list

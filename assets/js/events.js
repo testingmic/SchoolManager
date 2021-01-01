@@ -68,6 +68,7 @@ var save_Event_Type = () => {
                     });
                     $(`div[id="events_types_list"]`).html(event_type_list);
                     $.array_stream["event_types_array"] = response.data.additional.event_types;
+                    initiateCalendar();
                 }
                 swal({
                     position: "top",

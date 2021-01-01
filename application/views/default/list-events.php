@@ -58,7 +58,7 @@ if(!empty($session->clientId)) {
                 <div class='card-footer p-2'>
                     <div class='d-flex justify-content-between'>
                         ".($hasEventUpdate ? "<div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</button></div>": "")."
-                        ".($hasEventDelete ? "<div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a></div>" : "")."
+                        ".($hasEventDelete ? "<div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a></div>" : "")."
                     </div>
                 </div>
             </div>";
@@ -78,7 +78,7 @@ if(!empty($session->clientId)) {
     ];
 
     $response->html = '
-        <div id="fullCalModal" class="modal fade">
+        <div id="fullCalModal" class="modal fade" data-backdrop="static" data-keyboard="false">
             <div class="modal-dialog modal-dialog-top">
                 <div class="modal-content">
                     <div class="modal-header">
