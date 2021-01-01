@@ -2553,7 +2553,7 @@ class Forms extends Myschoolgh {
                                 <option value="null">Select</option>';
                                 if(isset($data->event_types)) {
                                     foreach($data->event_types as $key => $value) {
-                                        $html_content .= "<option value='{$value->item_id}'>{$value->name}</option>";
+                                        $html_content .= "<option data-row_id='{$value->item_id}' value='{$value->item_id}'>{$value->name}</option>";
                                     }
                                 }
                             $html_content .= '

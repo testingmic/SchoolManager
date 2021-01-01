@@ -51,7 +51,7 @@ var save_Event_Type = () => {
 
                     $.each(response.data.additional.event_types, function(i, type) {
 
-                        $(`div[id='createEventModal'] select[name='type']`).append(`<option value='${type.item_id}'>${type.name}</option>'`);
+                        $(`div[id='createEventModal'] select[name='type']`).append(`<option data-row_id='${type.item_id}' value='${type.item_id}'>${type.name}</option>'`);
 
                         event_type_list += `
                             <div class="card mb-2">
@@ -68,7 +68,9 @@ var save_Event_Type = () => {
                     });
                     $(`div[id="events_types_list"]`).html(event_type_list);
                     $.array_stream["event_types_array"] = response.data.additional.event_types;
-                    initiateCalendar();
+                    setTimeout(() => {
+                        initiateCalendar();
+                    }, 1000);
                 }
                 swal({
                     position: "top",

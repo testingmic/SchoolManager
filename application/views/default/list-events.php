@@ -52,7 +52,7 @@ if(!empty($session->clientId)) {
     // loop through the list
     foreach($event_types as $type) {
         $event_types_list .= "
-            <div class='card mb-2'>
+            <div class='card mb-2' data-row_id='{$type->item_id}'>
                 <div class='card-header p-2 text-uppercase'>{$type->name}</div>
                 ".(!empty($type->description) ? "<div class='card-body p-2'>{$type->description}</div>" : "")."
                 <div class='card-footer p-2'>

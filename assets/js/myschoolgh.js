@@ -253,13 +253,14 @@ var delete_record = (record_id, resource) => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-            $.post(`${baseUrl}api/record/remove`, { resource, record_id }).then((response) => {
+            $.post(`${baseUrl}api/records/remove`, { resource, record_id }).then((response) => {
                 let s_icon = "error";
                 if (response.code == 200) {
                    s_icon = "success";
-                   if (typeof initiateCalendar === "function") {
+                    if (typeof initiateCalendar === "function") {
                         initiateCalendar();
                     }
+                    $(`[data-row_id='${record_id}']`).remove();
                 }
                 swal({
                     position: "top",
