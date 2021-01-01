@@ -99,6 +99,7 @@ class Events extends Myschoolgh {
         global $accessObject;
         $accessObject->userId = $params->userId;
         $accessObject->clientId = $params->clientId;
+        $accessObject->userPermits = $params->userData->user_permissions;
 
         $params->hasEventDelete = $accessObject->hasAccess("delete", "events");
         $params->hasEventUpdate = $accessObject->hasAccess("update", "events");
@@ -119,14 +120,14 @@ class Events extends Myschoolgh {
             $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
 
             // Allow certain file formats 
-            $allowTypes = array('jpg', 'png', 'jpeg');
+            $allowTypes = array('jpg', 'png', 'jpeg','gif');
 
             // check if its a valid image
             if(!empty($file_name) && in_array($fileType, $allowTypes)){
                 // set a new file_name
-                $image = $uploadDir . random_string('alnum', 10)."__{$file_name}";
+                $image = $uploadDir . random_string('alnum', 32).".{$fileType}";
                 // Upload file to the server 
-                if(move_uploaded_file($params->event_image["tmp_name"], $file_name)){}
+                if(move_uploaded_file($params->event_image["tmp_name"], $image)){}
             } else {
                 return ["code" => 203, "Sorry! The event file must be a valid image."];
             }
@@ -174,6 +175,7 @@ class Events extends Myschoolgh {
         global $accessObject;
         $accessObject->userId = $params->userId;
         $accessObject->clientId = $params->clientId;
+        $accessObject->userPermits = $params->userData->user_permissions;
         
         $params->hasEventDelete = $accessObject->hasAccess("delete", "events");
         $params->hasEventUpdate = $accessObject->hasAccess("update", "events");
@@ -208,12 +210,12 @@ class Events extends Myschoolgh {
             $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
 
             // Allow certain file formats 
-            $allowTypes = array('jpg', 'png', 'jpeg');
+            $allowTypes = array('jpg', 'png', 'jpeg','gif');
 
             // check if its a valid image
             if(!empty($file_name) && in_array($fileType, $allowTypes)){
                 // set a new file_name
-                $image = $uploadDir . random_string('alnum', 32)."__{$file_name}";
+                $image = $uploadDir . random_string('alnum', 32).".{$fileType}";
                 // Upload file to the server 
                 if(move_uploaded_file($params->event_image["tmp_name"], $image)){}
             } else {
@@ -415,7 +417,7 @@ class Events extends Myschoolgh {
         ];
 
         // init the parameters for the events (holidays and other events)
-        $params = (object) ["userData" => $data, "clientId" => $data->client_id];
+        $params = (object) ["userData" => $data, "clientId" => $data->client_id, "the_user_type" => $data->the_user_type];
 
         // loop through the query to use
         foreach($array_list as $key => $each) {
@@ -426,10 +428,10 @@ class Events extends Myschoolgh {
             $hol_list = $this->list($params)["data"];
 
             // confirm if admin
-            $isAdmin = (bool) ($data->user_type == "admin");
+            $isAdmin = (bool) (in_array($data->the_user_type, ["admin", "accountant"]));
 
             // loop through the holidays list
-            foreach($hol_list as $event) {
+            foreach($hol_list as $ekey => $event) {
 
                 // set the description
                 $description = "
@@ -453,16 +455,19 @@ class Events extends Myschoolgh {
                 </div>";
 
                 // append the array list
-                $query_array[] = [
+                $query_array[$ekey] = [
                     "title" => "{$event->title}",
                     "start" => "{$event->start_date}T06:00:00",
                     "end" => "{$event->end_date}T18:00:00",
                     "description" => $description,
                     "backgroundColor" => "{$event->color_code}",
                     "borderColor" => "{$event->color_code}",
-                    "is_editable" => true,
-                    "item_id" => $event->item_id
                 ];
+
+                if($isAdmin) {
+                    $query_array[$ekey]["is_editable"] = true;
+                    $query_array[$ekey]["item_id"] = $event->item_id; 
+                }
             }
 
             $result->{$key} = json_encode($query_array);

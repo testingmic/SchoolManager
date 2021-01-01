@@ -21,6 +21,7 @@ $userData = $usersClass->list($i_params)["data"][0];
 
 // get the variables for the accessobject
 $accessObject->userId = $loggedUserId;
+$accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $userData->user_permissions;
 $userPrefs = $userData->preferences;
 $userPrefs->userId = $loggedUserId;

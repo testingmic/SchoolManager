@@ -4,9 +4,7 @@ class Scripts extends Myschoolgh {
     
     public function attendance(stdClass $params) {
 
-        return "$(function() {
-
-    // Calendar Event Source
+        return "// Calendar Event Source
     var calendarEvents = {
         id: 1,
         backgroundColor: '#136ae3bf',
@@ -29,6 +27,7 @@ class Scripts extends Myschoolgh {
         events: {$params->events_list->holidays_list}
     };
 
+    function initiateCalendar() {
     // initialize the calendar
     $('#{$params->container}').fullCalendar({
         header: {
@@ -54,8 +53,8 @@ class Scripts extends Myschoolgh {
             $(`#createEventModal input[name=\"date\"]`).val(`\${date.format()}:\${date.format()}`);
         }
     });
-
-});";
+}
+initiateCalendar();";
 
     }
 
