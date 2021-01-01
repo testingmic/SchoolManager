@@ -13,6 +13,7 @@ var update_Event_Type = (item_id) => {
             $(`div[id="createEventTypeModal"] [class="modal-title"]`).html("Update Event Type");
             $(`div[id="createEventTypeModal"] input[name="name"]`).val(type.name);
             $(`div[id="createEventTypeModal"] input[name="type_id"]`).val(item_id);
+            $(`div[id="createEventTypeModal"] input[name="color_code"]`).val(type.color_code);
             $(`div[id="createEventTypeModal"] textarea[name="description"]`).val(type.description);
         }
     }
@@ -20,8 +21,9 @@ var update_Event_Type = (item_id) => {
 
 var save_Event_Type = () => {
     let url = "",
-        type_id = $(`div[id="createEventTypeModal"] input[name="type_id"]`).val(),
         name = $(`div[id="createEventTypeModal"] input[name="name"]`).val(),
+        type_id = $(`div[id="createEventTypeModal"] input[name="type_id"]`).val(),
+        color_code = $(`div[id="createEventTypeModal"] input[name="color_code"]`).val(),
         description = $(`div[id="createEventTypeModal"] textarea[name="description"]`).val();
     if (type_id.length > 30) {
         url = `${baseUrl}api/events/update_type`;
@@ -36,7 +38,7 @@ var save_Event_Type = () => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-            $.post(`${url}`, { type_id, name, description }).then((response) => {
+            $.post(`${url}`, { type_id, name, description, color_code }).then((response) => {
                 let s_icon = "error",
                     event_type_list = "";
                 if (response.code == 200) {
@@ -65,6 +67,7 @@ var save_Event_Type = () => {
                         `;
                     });
                     $(`div[id="events_types_list"]`).html(event_type_list);
+                    $.array_stream["event_types_array"] = response.data.additional.event_types;
                 }
                 swal({
                     position: "top",

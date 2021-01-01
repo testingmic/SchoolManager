@@ -30,7 +30,7 @@ if(!empty($session->clientId)) {
     $data = (object) [];
     $eventClass = load_class("events", "controllers");
     $formsClass = load_class("forms", "controllers");
-
+    
     // set the parameters
     $params = (object) [
         "baseUrl" => $baseUrl,
@@ -40,51 +40,36 @@ if(!empty($session->clientId)) {
 
     // load the event types
     $event_types_list = "";
-    $event_types_array = [];
     $event_types = $eventClass->types_list($params);
+    $data->event_types = $event_types;
 
     $accessObject->userId = $session->userId;
     $accessObject->clientId = $session->clientId;
     $accessObject->userPermits = $defaultUser->user_permissions;
-    $hasDelete = $accessObject->hasAccess("delete", "events");
-    $hasUpdate = $accessObject->hasAccess("update", "events");
-
+    $hasEventDelete = $accessObject->hasAccess("delete", "events");
+    $hasEventUpdate = $accessObject->hasAccess("update", "events");
 
     // loop through the list
     foreach($event_types as $type) {
-        $event_types_array[$type->item_id] = $type;
         $event_types_list .= "
             <div class='card mb-2'>
                 <div class='card-header p-2 text-uppercase'>{$type->name}</div>
                 ".(!empty($type->description) ? "<div class='card-body p-2'>{$type->description}</div>" : "")."
                 <div class='card-footer p-2'>
                     <div class='d-flex justify-content-between'>
-                        ".($hasUpdate ? "<div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</button></div>": "")."
-                        ".($hasDelete ? "<div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a></div>" : "")."
+                        ".($hasEventUpdate ? "<div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</button></div>": "")."
+                        ".($hasEventDelete ? "<div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a></div>" : "")."
                     </div>
                 </div>
             </div>";
     }
 
     // append the permissions to the default user object
-    $defaultUser->hasDelete = $hasDelete;
-    $defaultUser->hasUpdate = $hasUpdate;
-
-    $params = (object) [
-        "container" => "events_management",
-        "events_list" => $eventClass->events_list($defaultUser),
-        "event_Sources" => "birthdayEvents,holidayEvents,calendarEvents"
-    ];
+    $defaultUser->hasEventDelete = $hasEventDelete;
+    $defaultUser->hasEventUpdate = $hasEventUpdate;
 
     // append the questions list to the array to be returned
-    $response->array_stream["event_types_array"] = $event_types_array;
-    
-    // generate a new script for this client
-    $filename = "assets/js/scripts/{$client_id}_{$defaultUser->user_type}_events.js";
-    $data = load_class("scripts", "controllers")->attendance($params);
-    $file = fopen($filename, "w");
-    fwrite($file, $data);
-    fclose($file);
+    $response->array_stream["event_types_array"] = $data->event_types;
 
     // load the scripts
     $response->scripts = [
@@ -121,7 +106,7 @@ if(!empty($session->clientId)) {
                 </div>
             </div>
         </div>
-        <div id="createEventTypeModal" class="modal fade">
+        <div id="createEventTypeModal" class="modal fade" data-backdrop="static" data-keyboard="false">
             <div class="modal-dialog modal-dialog-top">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -134,6 +119,10 @@ if(!empty($session->clientId)) {
                                 <label>Event Type Name <span class="required">*</span></label>
                                 <input type="text" class="form-control" name="name">
                                 <input type="hidden" class="form-control" id="type_id" hidden name="type_id">
+                            </div>
+                            <div class="form-group">
+                                <label>Color Code</label>
+                                <input type="color" class="form-control" id="color_code" name="color_code">
                             </div>
                             <div class="form-group">
                                 <label for="formGroupExampleInput2">Description</label>
@@ -168,7 +157,9 @@ if(!empty($session->clientId)) {
                 </div>
                 <div class="col-sm-12 col-lg-3">
                     <h5>EVENT TYPES <span class="float-right"><button onclick="return add_Event_Type()" class="btn btn-sm btn-outline-primary"><i class="fa fa-plus"></i> Add New</button></span></h5>
-                    <div class="mt-3" id="events_types_list">'.$event_types_list.'</div>
+                    <div class="mt-3 slim-scroll p-2" style="max-height:700px;overflow-y:auto;" id="events_types_list">
+                        '.$event_types_list.'
+                    </div>
                 </div>
             </div>
         </section>';

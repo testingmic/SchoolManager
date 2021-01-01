@@ -6,10 +6,6 @@ class Scripts extends Myschoolgh {
 
         return "$(function() {
 
-    // sample calendar events data
-    var curYear = moment().format('YYYY');
-    var curMonth = moment().format('MM');
-
     // Calendar Event Source
     var calendarEvents = {
         id: 1,
@@ -33,22 +29,6 @@ class Scripts extends Myschoolgh {
         events: {$params->events_list->holidays_list}
     };
 
-    // initialize the external events
-    $('#external-events .fc-event').each(function() {
-        // store data so the calendar knows to render an event upon drop
-        $(this).data('event', {
-            title: $.trim($(this).text()), // use the element's text as the event title
-            stick: true // maintain when user navigates (see docs on the renderEvent method)
-        });
-        // make the event draggable using jQuery UI
-        $(this).draggable({
-            zIndex: 999,
-            revert: true,      // will cause the event to go back to its
-            revertDuration: 0  //  original position after the drag
-        });
-
-    });
-
     // initialize the calendar
     $('#{$params->container}').fullCalendar({
         header: {
@@ -71,6 +51,7 @@ class Scripts extends Myschoolgh {
         },
         dayClick: function(date, jsEvent, view) {
             $(\"#createEventModal\").modal(\"show\");
+            $(`#createEventModal input[name=\"date\"]`).val(`\${date.format()}:\${date.format()}`);
         }
     });
 
