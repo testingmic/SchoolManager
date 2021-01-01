@@ -47,6 +47,12 @@ class Records extends Myschoolgh {
                 "where" => "id='{$record_id}'",
                 "query" => "SELECT id FROM departments WHERE id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
             ],
+            "course" => [
+                "table" => "courses",
+                "update" => "status='0'",
+                "where" => "id='{$record_id}'",
+                "query" => "SELECT id FROM courses WHERE id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+            ],
             "incident" => [
                 "table" => "incidents",
                 "update" => "deleted='0'",
@@ -101,7 +107,8 @@ class Records extends Myschoolgh {
                 $result = $stmt->fetch(PDO::FETCH_OBJ);
             } catch(PDOException $e) {
                 // quit the execution of the file
-                return ["code" => 203, "data" => "Sorry! There was an error while processing the request."];
+                // return ["code" => 203, "data" => "Sorry! There was an error while processing the request."];
+                return ["code" => 203, "data" => $e->getMessage()];
             }
 
             // return if no result was found
@@ -110,8 +117,9 @@ class Records extends Myschoolgh {
             }
 
             // if the result is in this list
-            if(in_array($params->resource, ["event_type"])) {
-
+            if(in_array($params->resource, [
+                "event_type", "event", "class", "department", "course", "incident", "user", "guardian"
+            ])) {
                 // update the database record
                 $this->db->query("UPDATE {$featured["table"]} SET {$featured["update"]} WHERE {$featured["where"]} LIMIT 1");
                 

@@ -81,3 +81,28 @@ var save_Event_Type = () => {
         }
     });
 }
+
+var load_Event = (url) => {
+    $(`div[id="fullCalModal"]`).modal("hide");
+    setTimeout(() => {
+        loadPage(url);
+    }, 500);
+}
+
+var remove_Event_Cover_Image = (event_id) => {
+    swal({
+        title: "Delete Cover Image",
+        text: "Are you sure you want to remove the event cover image?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/events/remove_cimage`, { event_id }).then((response) => {
+                if (response.code == 200) {
+                    $(`div[class="event_cover_image_${item_id}"]`).html("");
+                }
+            });
+        }
+    });
+}

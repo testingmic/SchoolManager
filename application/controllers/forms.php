@@ -2537,13 +2537,13 @@ class Forms extends Myschoolgh {
     public function event_form($data = null) {
 
         $html_content = '
-        <form enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/events/'.(isset($data->event_id) ? "update" : "add").'" method="POST" id="ajax-data-form-content">
+        <form enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/events/'.(isset($data->item_id) ? "update" : "add").'" method="POST" id="ajax-data-form-content">
             <div id="modalBody2" class="modal-body">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="form-group">
                             <label>Title <span class="required">*</span></label>
-                            <input type="text" name="title" class="form-control">
+                            <input type="text" value="'.($data->title ?? null).'" name="title" class="form-control">
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -2553,7 +2553,7 @@ class Forms extends Myschoolgh {
                                 <option value="null">Select</option>';
                                 if(isset($data->event_types)) {
                                     foreach($data->event_types as $key => $value) {
-                                        $html_content .= "<option data-row_id='{$value->item_id}' value='{$value->item_id}'>{$value->name}</option>";
+                                        $html_content .= "<option ".(isset($data->item_id) && ($data->event_type == $value->item_id) ? "selected='selected'" : "")." data-row_id='{$value->item_id}' value='{$value->item_id}'>{$value->name}</option>";
                                     }
                                 }
                             $html_content .= '
@@ -2566,7 +2566,7 @@ class Forms extends Myschoolgh {
                             <select name="audience" id="audience" class="form-control selectpicker">
                                 <option value="null">Select</option>';
                                 foreach($this->event_audience as $key => $value) {
-                                    $html_content .= "<option value='{$key}'>{$value}</option>";
+                                    $html_content .= "<option ".(isset($data->item_id) && ($data->audience == $key) ? "selected='selected'" : "")." value='{$key}'>{$value}</option>";
                                 }
                             $html_content .= '</select>
                         </div>
@@ -2574,25 +2574,37 @@ class Forms extends Myschoolgh {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Date <span class="required">*</span></label>
-                            <input type="text" name="date" class="daterange form-control">
+                            <input type="text" value="'.(isset($data->start_date) ? "{$data->start_date}:{$data->end_date}" : "").'" name="date" class="daterange form-control">
                         </div>
                     </div>
                     <div class="col-lg-12">
                         <div class="form-group">
                             <label>Description</label>
-                            <input type="hidden" hidden id="trix-editor-input" value="">
+                            <input type="hidden" hidden id="trix-editor-input" value="'.($data->description ?? null).'">
                             <trix-editor name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
                         </div>
                     </div>
                     <div class="col-lg-5">
                         <div class="form-group">
                             <label>Event Image</label>
+                            <input type="hidden" hidden name="event_id" class="form-control" value="'.($data->item_id ?? null).'">
                             <input type="file" name="event_image" class="form-control" id="event_image">
+                        </div>';
+                    // confirm that the event cover image was parsed and file is found
+                    if(isset($data->event_image) && file_exists($data->event_image)) {
+                        $html_content .= "
+                        <div class='form-group' id='event_cover_image_{$data->item_id}'>
+                            <img src='{$this->baseUrl}{$data->event_image}' width='100%'>
                         </div>
-                    </div>
+                        <div class='form-group text-right'>
+                            <button title='Remove event cover image' onclick='return remove_Event_Cover_Image(\"{$data->item_id}\")' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>
+                        </div>
+                        ";
+                    }
+                    $html_content .= '</div>
                     <div class="col-lg-5">
                         <div class="form-group pt-4">
-                            <input type="checkbox" name="holiday" class="checkbox" id="holiday">
+                            <input type="checkbox" '.(isset($data->is_holiday) && ($data->is_holiday == "on") ? "checked='checked'" : "").' name="holiday" class="checkbox" id="holiday">
                             <label for="holiday">Holiday</label>
                         </div>
                     </div>

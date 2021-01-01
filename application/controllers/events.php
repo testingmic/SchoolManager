@@ -347,7 +347,7 @@ class Events extends Myschoolgh {
 
         /** Refresh the JavaScript file */
         if($this->preload($params)) {
-            
+
             /** Log the user activity */
             $this->userLogs("events_type", $item_id, $prevData[0], "{$params->userData->name} successfully updated the event type: {$params->name}", $params->userId);
 
@@ -464,7 +464,7 @@ class Events extends Myschoolgh {
                 <div class='modal-footer p-0'>
                     <button type='button' class='btn btn-sm btn-outline-secondary' data-dismiss='modal'>Close</button>
                     ".($isAdmin ? "
-                        <a href='#' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</a>
+                        <a href='javascript:void(0)' onclick='return load_Event(\"{$this->baseUrl}update-event/{$event->item_id}\");' class='btn anchor btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</a>
                         <a href='#' onclick='return delete_record(\"{$event->item_id}\", \"event\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>
                     ": "")."
                 </div>";
