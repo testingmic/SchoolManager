@@ -109,32 +109,29 @@ if(!empty($item_id)) {
 
                 </div>
             </div>
-        </section>';
-        if(isset($data->item_id)) {
-            $response->html .= '
-            <div class="modal fade modal-dialog-right right" id="rightModal_Content" data-backdrop="static" data-keyboard="false">
-                <div class="modal-dialog" style="width:100%;height:100%;" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"></h5>
-                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                        </div>
-                        <div class="modal-body p-0">
+        </section>
+        <div class="modal fade modal-dialog-right right" id="rightModal_Content" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog" style="width:100%;height:100%;" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="p-2 pt-0">
                             <div class="p-2 pt-0">
-                                <div class="p-2 pt-0">
-                                    <div><strong>EVENT COMMENTS</strong></div>
-                                    <div>
-                                        '.leave_comments_builder("events", $data->item_id, true).'
-                                        <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
-                                        <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary">Loading comments</button></div>    
-                                    </div>
+                                <div><strong>EVENT COMMENTS</strong></div>
+                                <div>
+                                    '.leave_comments_builder("events", $data->item_id, true).'
+                                    <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
+                                    <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary">Loading comments</button></div>    
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>';
-        }
+            </div>
+        </div>';
 
     }
 

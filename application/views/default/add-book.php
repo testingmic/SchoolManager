@@ -18,9 +18,7 @@ $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Add Book";
 $response->title = "{$pageTitle} : {$appName}";
-$response->scripts = [
-    "assets/js/library.js"
-];
+$response->scripts = [];
 
 $params = (object) [
     "clientId" => $clientId

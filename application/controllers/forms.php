@@ -912,7 +912,7 @@ class Forms extends Myschoolgh {
         
         // set a new parameter for the items
         $files_param = (object) [
-            "userData" => $this->thisUser ?? null,
+            "userData" => $params->userData ?? $this->thisUser,
             "label" => "list",
             "module" => $params->module ?? null,
             "item_id" => $params->item_id ?? "temp_attachment",
@@ -2740,7 +2740,7 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
                 <div class="col-md-12 text-right">
-                    <input type="hidden" value="'.($data->id ?? null).'" name="book_id" readonly>
+                    <input type="hidden" value="'.($data->item_id ?? null).'" name="book_id" readonly>
                     <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>

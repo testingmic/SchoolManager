@@ -29,7 +29,7 @@ class Library extends Myschoolgh {
         // set the filters
         $filters = "";
         $filters .= isset($params->class_id) ? " AND bk.class_id='{$params->class_id}'" : "";
-        $filters .= isset($params->book_id) ? " AND bk.id='{$params->book_id}'" : "";
+        $filters .= isset($params->book_id) ? " AND bk.item_id='{$params->book_id}'" : "";
         $filters .= isset($params->category_id) ? " AND bk.category_id='{$params->category_id}'" : "";
         $filters .= isset($params->department_id) ? " AND bk.department_id='{$params->department_id}'" : "";
         $filters .= isset($params->isbn) ? " AND bk.isbn='{$params->isbn}'" : "";
@@ -42,7 +42,7 @@ class Library extends Myschoolgh {
                 (SELECT name FROM departments WHERE departments.id = bk.department_id LIMIT 1) AS department_name,
                 bt.name AS category_name,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = bk.created_by LIMIT 1) AS created_by_info,
-                (SELECT b.description FROM files_attachment b WHERE b.resource='library_book' AND b.record_id = bk.id ORDER BY b.id DESC LIMIT 1) AS attachment
+                (SELECT b.description FROM files_attachment b WHERE b.resource='library_book' AND b.record_id = bk.item_id ORDER BY b.id DESC LIMIT 1) AS attachment
 			FROM books bk
 			LEFT JOIN books_type bt ON bt.id = bk.category_id
 			WHERE bk.deleted= ? AND bk.client_id = ? {$filters} ORDER BY bk.id DESC
@@ -493,7 +493,7 @@ class Library extends Myschoolgh {
 	public function update_book(stdClass $params) {
 
         // old record
-        $prevData = $this->pushQuery("*", "books", "id='{$params->book_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        $prevData = $this->pushQuery("*", "books", "item_id='{$params->book_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
         // if empty then return
         if(empty($prevData)) {
@@ -508,7 +508,7 @@ class Library extends Myschoolgh {
                     class_id = ?, category_id = ?, department_id = ? 
                     ".(isset($params->quantity) ? ",quantity = '{$params->quantity}'" : "")."
                     ".(isset($params->code) ? ",code = '{$params->code}'" : "")."",
-				"id = ? AND client_id = ?",
+				"item_id = ? AND client_id = ?",
 				array(
 					$params->isbn, $params->title, $params->description ?? null, 
                     $params->author, $params->rack_no ?? null, 
@@ -547,27 +547,42 @@ class Library extends Myschoolgh {
 	 **/
 	public function add_book(stdClass $params) {
 
+        // generate a random string for the book
+        $item_id = random_string("alnum", 32);
+
 		$query = $this->auto_insert(
 			array(
 				"books",
 				"client_id = ?, isbn = ?, title = ?, description = ?, author = ?, rack_no = ?, 
                 row_no = ?, class_id = ?, category_id = ?, department_id = ?, quantity = ?, code = ?,
-                created_by = ?",
+                created_by = ?, item_id = ?",
 				array(
 					$params->clientId, $params->isbn, $params->title, $params->description ?? null, $params->author, 
                     $params->rack_no ?? null, $params->row_no ?? null, $params->class_id ?? null, $params->category_id ?? null,  
-                    $params->department_id ?? null, $params->quantity, $params->code ?? null, $params->userId
+                    $params->department_id ?? null, $params->quantity, $params->code ?? null, $params->userId, $item_id
 				)
 			)
 		);
 		$lastRowId = $this->lastRowId("books");
 
 		/** Record the user activity **/
-		$this->userLogs("library_book", $lastRowId, null, "{$params->userData->name} added the Book: {$params->title}", $params->userId);
+		$this->userLogs("library_book", $item_id, null, "{$params->userData->name} added the Book: {$params->title}", $params->userId);
 
         $return = ["code" => 200, "data" => "Library Book successfully added.", "refresh" => 2000];
-		$return["additional"] = ["href" => "{$this->baseUrl}update-book/{$lastRowId}/view", "clear" => true];
+		$return["additional"] = ["href" => "{$this->baseUrl}update-book/{$item_id}/view", "clear" => true];
 
         return $return;
 	}
+    
+    /**
+     * Upload Resource
+     * 
+     * Upload e-version of the resources attached to this resource
+     * 
+     * @return Array 
+     */
+    public function upload_resource(stdClass $params) {
+        
+    }
+
 }

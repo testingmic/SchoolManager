@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL;
+global $myClass, $SITEURL, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -25,6 +25,7 @@ $accessObject->clientId = $session->clientId;
 
 $response->scripts = [
     "assets/js/comments.js",
+    "assets/js/library.js",
     "assets/js/comments_upload.js"
 ];
 
@@ -53,12 +54,25 @@ if(!empty($item_id)) {
         $item_param = $data;
         $item_param->clientId = $clientId;
 
+        // create a new object of the forms class
+        $formsObj = load_class("forms", "controllers");
+
         // guardian information
-        $the_form = load_class("forms", "controllers")->library_book_form($item_param);
+        $the_form = $formsObj->library_book_form($item_param);
         $hasUpdate = $accessObject->hasAccess("update", "library");
 
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
+        
+        /** Set the module */
+        $module = "ebook_{$item_id}";
+
+        /** Set parameters for the data to attach */
+        $form_params = (object) [
+            "module" => $module,
+            "userData" => $defaultUser,
+            "item_id" => $item_id,
+        ];
 
         // append the html content
         $response->html = '
@@ -158,10 +172,14 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="resources" role="tabpanel" aria-labelledby="resources-tab2">
-                            <div class="col-lg-12 pl-0"><h5>E-Resources List</h5></div>
-                            '.(!empty($data->attachment_html) ? $data->attachment_html : "<div class='font-italic'>No E-Resources have been uploaded under this book.</div>").'
+                            <div class="d-flex justify-content-between">
+                                <div><h5>E-Resources List</h5></div>
+                                '.($hasUpdate ? "<div><button onclick='return show_EResource_Modal();' class='btn btn-outline-primary btn-sm'><i class='fa fa-plus'></i> Upload</button></div>" : null).'
+                            </div>
+                            '.(!empty($data->attachment_html) ? "<div data-ebook_resource_list='{$item_id}'>{$data->attachment_html}</div>" : "<div class='font-italic'>No E-Resources have been uploaded under this book.</div>").'
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
+                        
                         // if the user has the permissions to update the book details
                         if($hasUpdate) {
                             $response->html .= $the_form;
@@ -183,7 +201,27 @@ if(!empty($item_id)) {
             </div>
             </div>
         </div>
-        </section>';
+        </section>
+        <div class="modal fade" id="ebook_Resource_Modal_Content" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog modal-lg" style="width:100%;height:100%;" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><div><strong>Upload E-Resource</strong></div></h5>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div class="p-2">
+                            <div class="p-3">
+                                '.$formsObj->comments_form_attachment_placeholder($form_params).'
+                                <div class="text-right">
+                                    <button onclick="return upload_EBook_Resource(\''.$item_id.'\');" class="btn btn-outline-success btn-sm"><i class="fa fa-upload"></i> Upload Files</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>';
     }
 
 }
