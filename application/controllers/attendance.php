@@ -407,7 +407,7 @@ class Attendance extends Myschoolgh {
                             <img src=\"{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\"> {$user->name}
                         </td>
                         <td>{$user->unique_id}</td>
-                        <td>".$this->attendance_radios($user->user_id, $user_state, $final)."</td>
+                        <td>".$this->attendance_radios($user->user_id, $user_state, $final, "")."</td>
                     </tr>";
                 }
             }
@@ -492,5 +492,93 @@ class Attendance extends Myschoolgh {
         return $new_list;
     }
     
+    /**
+     * Summary Insight
+     * 
+     * This gives a brief insight into attendance log for current and previous day
+     * 
+     * @return Array
+     */
+    public function summary(stdClass $params) {
+
+        // get the attendance log for the day
+        $days = [
+            "today" => $this->get_date("today"),
+            "yesterday" => $this->get_date("yesterday")
+        ];
+        $users = ["student", "teacher", "admin"];
+        
+        // users counter
+        $totals = [];
+        $users_count = [];
+
+        // attendance log algo
+        // loop through the days for the record
+        foreach($days as $key => $day) {
+            // loop through the users for each day
+            foreach($users as $user) {
+                // set a parameter for the user_type
+                $user_type = ($user == "admin") ? "('admin','accountant','employee')" : "('{$user}')";
+                
+                // run a query for the information
+                $theQuery = $this->pushQuery("users_list", "users_attendance_log", "log_date='{$day}' AND user_type IN {$user_type} AND client_id='{$params->clientId}'");
+                
+                // if the query is not empty
+                if(!empty($theQuery)) {
+                    // convert the users list into an array
+                    $present = json_decode($theQuery[0]->users_list, true);
+                    $users_count["summary"][$user] = isset($users_count["summary"][$user]) ? ($users_count["summary"][$user] + count($present)) : count($present);
+                    $users_count[$key][$user] = isset($users_count[$key][$user]) ? ($users_count[$key][$user] + count($present)) : count($present);
+                }
+            }
+        }
+        $users_count = (object) $users_count;
+        $today_summary = isset($users_count->today) ? array_sum($users_count->today) : 0;
+        
+        $result = [
+            "users_count" => $users_count,
+            "today_summary" => $today_summary
+        ];
+
+        return $result;
+
+    }
+
+    /**
+     * Get the Current and Previous Dates
+     * 
+     * This calculates the current and previous date
+     * This will ensure it doesnt fall on a Saturday or a Sunday
+     * 
+     * @param   String  $request
+     * 
+     * @return String
+     */
+    public function get_date($request) {
+
+		$fix = date('D');
+		if ($fix === 'Sat'){
+			$today = date('Y-m-d', strtotime("-1 days"));
+		} elseif ($fix === 'Sun'){
+			$today = date('Y-m-d', strtotime("-2 days"));
+		} elseif (($fix !== 'Sat') && ($fix !== 'Sun')){
+			$today = date('Y-m-d');
+		}
+
+		$fix = date('D', strtotime("-1 days"));
+		if ($fix === 'Sat'){
+			$yesterday = date('Y-m-d',strtotime("-2 days"));
+		}elseif ($fix === 'Sun'){
+			$yesterday = date('Y-m-d',strtotime("-3 days"));
+		}elseif(($fix !== 'Sat') && ($fix !== 'Sun')){
+			$yesterday = date('Y-m-d',strtotime("-1 days"));
+		}
+
+		if($request == "today")
+			return $today;
+		elseif($request == "yesterday")
+			return $yesterday;
+	}
+
 }
 ?>

@@ -1605,7 +1605,7 @@ class Forms extends Myschoolgh {
      * @param String $clientId
      * @param String $baseUrl
      * 
-     * return String
+     * @return String
      */
     public function student_form($clientId, $baseUrl, $userData = null) {
 
@@ -1902,7 +1902,7 @@ class Forms extends Myschoolgh {
      * @param String $clientId
      * @param String $baseUrl
      * 
-     * return String
+     * @return String
      */
     public function guardian_form($clientId, $baseUrl, $userData = null) {
 
@@ -2040,7 +2040,7 @@ class Forms extends Myschoolgh {
      * @param String $clientId
      * @param String $baseUrl
      * 
-     * return String
+     * @return String
      */
     public function department_form($clientId, $baseUrl, $itemData = null) {
 
@@ -2107,7 +2107,7 @@ class Forms extends Myschoolgh {
      * @param String $clientId
      * @param String $baseUrl
      * 
-     * return String
+     * @return String
      */
     public function section_form($clientId, $baseUrl, $itemData = null) {
 
@@ -2174,7 +2174,7 @@ class Forms extends Myschoolgh {
      * @param String $clientId
      * @param String $baseUrl
      * 
-     * return String
+     * @return String
      */
     public function class_form($clientId, $baseUrl, $itemData = null) {
 
@@ -2257,7 +2257,7 @@ class Forms extends Myschoolgh {
      * @param String $clientId
      * @param String $baseUrl
      * 
-     * return String
+     * @return String
      */
     public function course_form($clientId, $baseUrl, $itemData = null) {
 
@@ -2335,7 +2335,7 @@ class Forms extends Myschoolgh {
      * @param String $clientId
      * @param String $baseUrl
      * 
-     * return String
+     * @return String
      */
     public function staff_form($clientId, $baseUrl, $userData = null) {
 
@@ -2533,6 +2533,9 @@ class Forms extends Myschoolgh {
     /**
      * Event Forms
      * 
+     * @param stdClass $data
+     * 
+     * @return String
      */
     public function event_form($data = null) {
 
@@ -2637,6 +2640,113 @@ class Forms extends Myschoolgh {
                     <button type="button-submit" class="btn btn-primary">Save</button>
                 </div></form>' : ''
             ).'';
+
+        return $html_content;
+    }
+
+    /**
+     * Library Book Forms
+     * 
+     * @param stdClass $data
+     * 
+     * @return String
+     */
+    public function library_book_form($data = null) {
+
+        $html_content = '
+        <form enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/library/'.(isset($data->item_id) ? "update_book" : "add_book").'" method="POST" id="ajax-data-form-content">    
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="">BOOK TITLE <span class="required">*</span></label>
+                        <input type="text" placeholder="Book Title" value="" class="form-control" name="title">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">ISBN <span class="required">*</span></label>
+                        <input type="text" style="text-transform:uppercase" placeholder="ISBN" value="" class="form-control" name="isbn">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">CODE</label>
+                        <input type="text" style="text-transform:uppercase" placeholder="Book Code" value="" class="form-control" name="code">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="">AUTHOR <span class="required">*</span></label>
+                        <input type="text" placeholder="Book Author" value="" class="form-control" name="author">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">RACK NO.</label>
+                        <input type="text" placeholder="Rack Number" value="" class="form-control" name="rack_no">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">ROW NO.</label>
+                        <input type="number" name="row_no" placeholder="Row Number" value="" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="">QUANTITY <span class="required">*</span></label>
+                        <input type="number" max="200" placeholder="Quantity Available" value="" name="quantity" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="">DEPARTMENT</label>
+                        <select id="department_id" class="form-control selectpicker" name="department_id">
+                            <option value="">Please Select</option>';
+                            foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$data->clientId}'") as $each) {
+                                $html_content .= "<option ".(isset($data->department_id) && ($each->id == $data->department_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $html_content .= '</select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="">CLASS</label>
+                        <select name="class_id" id="class_id" class="form-control programme selectpicker">
+                            <option value="">Please Select</option>';
+                            foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$data->clientId}'") as $each) {
+                                $html_content .= "<option ".(isset($data->class_id) && ($each->id == $data->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $html_content .= '
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="">BOOK CATEGORY</label>
+                        <select name="category_id" id="category" class="form-control category selectpicker">
+                            <option value="">Please Select</option>';
+                            foreach($this->pushQuery("id, name", "books_type", "status='1' AND client_id='{$data->clientId}'") as $each) {
+                                $html_content .= "<option ".(isset($data->category_id) && ($each->id == $data->category_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $html_content .= '
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label for="">DESCRIPTION</label>
+                        <textarea style="height:70px" name="description" placeholder="Book Description" id="description" cols="30" rows="10" class="form-control description"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="save-book-details"></div>
+                </div>
+                <div class="col-md-12 text-right">
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>
+        </form>';
 
         return $html_content;
     }

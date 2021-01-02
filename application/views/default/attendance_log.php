@@ -34,7 +34,7 @@ if(!empty($session->clientId)) {
 
     // load the scripts
     $response->scripts = [
-        "assets/js/attendance_log.js"
+        "assets/js/attendance.js"
     ];
 
     // set the selected date

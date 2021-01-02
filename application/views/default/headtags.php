@@ -260,9 +260,10 @@ if(!isset($userPrefs->messages)) {
                         <li class="dropdown">
                             <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Library</span></a>
                             <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-books">List Books</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>add-book">Add New Book</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>add-category">Add New Category</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>issue-book">Issue Book</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>return-book">Return Book</a></li>
                             </ul>

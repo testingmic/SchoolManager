@@ -69,6 +69,45 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * @method itemById
+	 * @param string $table
+	 * @param string $field
+	 * @param string $value
+	 * @param string $column_to_return
+	 * @return return the number of rows counted
+	 **/
+	public function itemById($table, $column, $value, $column_to_return) {
+		
+		$stmt = $this->db->query("SELECT * FROM $table WHERE $column='{$value}' AND status='1' LIMIT 1");
+
+		if($stmt->rowCount() > 0) {
+			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+				return $result->$column_to_return ?? null;
+			}
+		}
+	}
+	
+	/**
+	 * @method itemByIdNoStatus
+	 * @param string $table
+	 * @param string $field
+	 * @param string $value
+	 * @param string $column_to_return
+	 * @return return the number of rows counted
+	 **/
+	public function itemByIdNoStatus($table, $column, $value, $column_to_return) {
+		
+		$stmt = $this->db->query("SELECT * FROM $table WHERE $column='$value' LIMIT 1");
+
+		if($stmt->rowCount() > 0) {
+			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+				return $result->$column_to_return ?? null;
+			}
+		}
+
+	}
+
+	/**
 	 * @method lastRowId()
 	 * @param $tableName The user needs to specify the table name for the query
 	 * @return $rowId
@@ -612,6 +651,97 @@ class Myschoolgh extends Models {
 	public function user_is_online($last_seen) {
 		// online algorithm (user is online if last activity is at most 3 minutes ago)
         return (bool) (raw_time_diff($last_seen) < 0.05);
+	}
+
+	/**
+	 * @method auto_update
+	 * @param associative array()
+	 * @param 0 => table_name
+	 * @param 1 => columns
+	 * @param 2 => where_clause
+	 * @param array 3 => where_values
+	 * @return json
+	 **/
+	public function auto_update(array $queryString) {
+		
+		try {
+			
+			/** Set the Application Type Header **/
+			if(is_array($queryString)) {
+
+				/** assign variable **/
+				$tableName = xss_clean($queryString[0]);
+				$tableColumns = xss_clean($queryString[1]);
+				$whereClause = xss_clean($queryString[2]);
+				$whereValues = array_map('xss_clean', $queryString[3]);
+
+				/** check if all the 3 keys are present **/
+				if(isset($tableName)) {
+
+					/** Prepare the statement **/
+					$stmt = $this->db->prepare("UPDATE $tableName SET $tableColumns WHERE $whereClause");
+					
+					/** Using for to loop through the values**/
+					for($x = 1; $x <= count($whereValues); $x++) {
+						$y = $x - 1;
+						$stmt->bindParam($x, $whereValues[$y]);
+					}
+					
+					/** Confirm if the transaction was successful **/
+					return $stmt->execute();
+				}
+			}
+		} catch(PDOException $e) {
+			print $e->getMessage();
+			return false;
+		}
+	}
+
+	/**
+	 * @method auto_insert
+	 * @param associative array()
+	 * @param 0 => table_name
+	 * @param 1 => columns
+	 * @param 2 => where_clause
+	 * @return json
+	 **/
+	public function auto_insert(array $queryString) {
+		
+		try {
+			
+			/** Set the Application Type Header **/
+			if(is_array($queryString)) {
+
+				/** assign variable **/
+				$tableName = xss_clean($queryString[0]);
+				$tableColumns = xss_clean($queryString[1]);
+				$whereValues = array_map('xss_clean', $queryString[2]);
+
+				/** check if all the 3 keys are present **/
+				if(isset($tableName)) {
+
+					/** Prepare the statement **/
+					$stmt = $this->db->prepare("INSERT INTO $tableName SET $tableColumns");
+					
+					/** Using for to loop through the values**/
+					for($x = 1; $x <= count($whereValues); $x++) {
+						$y = $x - 1;
+						$stmt->bindParam($x, $whereValues[$y]);
+					}
+					/** Confirm if the transaction was successful **/
+					if($stmt->execute()) {
+						/** Return true if all went well **/
+						return true;
+					} else {
+						return false;
+					}
+					
+				}
+			}
+		} catch(PDOException $e) {
+			print $e->getMessage();
+			return false;
+		}
 	}
 
 }

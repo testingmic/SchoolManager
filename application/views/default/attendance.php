@@ -12,7 +12,7 @@ $appName = config_item("site_name");
 $baseUrl = $config->base_url();
 
 // if no referer was parsed
-// jump_to_main($baseUrl);
+jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
@@ -27,38 +27,18 @@ if(!empty($clientId)) {
     
     // load the scripts
     $response->scripts = [
-        "assets/js/attendance_log.js"
+        "assets/js/attendance.js"
     ];
 
-    // get the attendance log for the day
-    $days = [
-        "today" => date("Y-m-d"),
-        "yesterday" => date("Y-m-d", strtotime("yesterday"))
+    // params
+    $params = (object) [
+        "clientId" => $clientId
     ];
-    $users = ["student", "teacher", "admin"];
 
-    // users counter
-    $users_count = [];
-
-    // attendance log algo
-    // loop through the days for the record
-    foreach($days as $key => $day) {
-        // loop through the users for each day
-        foreach($users as $user) {
-            // set a parameter for the user_type
-            $user_type = ($user == "admin") ? "('admin','accountant','employee')" : "('{$user}')";
-            
-            // run a query for the information
-            $theQuery = $myClass->pushQuery("users_list", "users_attendance_log", "log_date='{$day}' AND user_type IN {$user_type} AND client_id='{$clientId}'");
-            
-            // if the query is not empty
-            if(!empty($theQuery)) {
-                // convert the users list into an array
-                $present = json_decode($theQuery[0]->users_list, true);
-                $users_count[$key][$user] = isset($users_count[$key][$user]) ? ($users_count[$key][$user] + count($present)) : count($present);
-            }
-        }
-    }
+    // load the summary information
+    $attendance = load_class("attendance", "controllers")->summary($params);
+    $users_count = $attendance["users_count"];
+    $today_summary = $attendance["today_summary"];
 
     // set the html text to display
     $response->html = '
@@ -78,7 +58,7 @@ if(!empty($clientId)) {
                             <div class="padding-20">
                                 <div class="text-right">
                                     <h3 class="font-light mb-0">
-                                        <i class="ti-arrow-up text-success"></i> 0
+                                        <i class="ti-arrow-up text-success"></i> '.($users_count->today["student"] ?? 0).'
                                     </h3>
                                     <span class="text-muted">Students</span>
                                 </div>
@@ -97,7 +77,7 @@ if(!empty($clientId)) {
                             <div class="padding-20">
                                 <div class="text-right">
                                     <h3 class="font-light mb-0">
-                                        <i class="ti-arrow-up text-success"></i> 0
+                                        <i class="ti-arrow-up text-success"></i> '.($users_count->today["teacher"] ?? 0).'
                                     </h3>
                                     <span class="text-muted">Teachers</span>
                                 </div>
@@ -116,7 +96,7 @@ if(!empty($clientId)) {
                             <div class="padding-20">
                                 <div class="text-right">
                                     <h3 class="font-light mb-0">
-                                        <i class="ti-arrow-up text-success"></i> 0
+                                        <i class="ti-arrow-up text-success"></i> '.($users_count->today["admin"] ?? 0).'
                                     </h3>
                                     <span class="text-muted">Employees</span>
                                 </div>
@@ -135,7 +115,7 @@ if(!empty($clientId)) {
                             <div class="padding-20">
                                 <div class="text-right">
                                     <h3 class="font-light mb-0">
-                                        <i class="ti-arrow-up text-success"></i> 0
+                                        <i class="ti-arrow-up text-success"></i> '.($today_summary ?? 0).'
                                     </h3>
                                     <span class="text-muted">All Logs</span>
                                 </div>
