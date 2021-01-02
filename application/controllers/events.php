@@ -137,6 +137,7 @@ class Events extends Myschoolgh {
         $stmt = $this->db->prepare("INSERT INTO events SET 
             client_id = ?, item_id = ?, title = ?, description = ?, start_date = ?, end_date = ?,
             event_image = ?, audience = ?, is_holiday = ?, created_by = ?, is_mailable = ?, event_type = ?
+            ".(isset($params->status) ? ",state = '{$params->status}'" : "")."
         ");
         $stmt->execute([
             $params->clientId, $item_id, $params->title, $params->description ?? null, 
@@ -152,7 +153,8 @@ class Events extends Myschoolgh {
             return [
                 "data" => "Event was successfully created.",
                 "additional" => [
-                    "clear" => true
+                    "clear" => true,
+                    "href" => "{$this->baseUrl}update-event/{$item_id}"
                 ]
             ];
         }
@@ -187,12 +189,12 @@ class Events extends Myschoolgh {
         }
 
         // get the assignment information
-        $prev = $this->pushQuery("title,start_date,end_date,description,audience,type,event_type,is_holiday", 
+        $prev = $this->pushQuery("title,start_date,end_date,description,audience,event_type,is_holiday", 
             "events", "client_id='{$params->clientId}' AND item_id='{$item_id}' LIMIT 1");
 
         // validate the record
         if(empty($prev)) {
-            return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+            return ["code" => 203, "data" => "Sorry! An invalid event id was parsed."];
         }
 
         /** Audience check */
@@ -224,14 +226,18 @@ class Events extends Myschoolgh {
             }
         }
 
+        // if the holiday parameter was parsed
+        $params->holiday = isset($params->holiday) ? $params->holiday : "not";
+
         /** Insert the record */
         $stmt = $this->db->prepare("UPDATE events SET title = ?, start_date = ?, end_date = ?
             ".(isset($params->description) ? ",description = '{$params->description}'" : "")."
-            ".(isset($image) ? ",event_image = '{$image}'" : "")."
+            ".(isset($params->is_mailable) ? ",is_mailable = '{$params->is_mailable}'" : "")."
             ".(isset($params->audience) ? ",audience = '{$params->audience}'" : "")."
             ".(isset($params->holiday) ? ",is_holiday = '{$params->holiday}'" : "")."
+            ".(isset($image) ? ",event_image = '{$image}'" : "")."
+            ".(isset($params->status) ? ",state = '{$params->status}'" : "")."
             ".(isset($params->type) ? ",event_type = '{$params->type}'" : "")."
-            ".(isset($params->is_mailable) ? ",is_mailable = '{$params->is_mailable}'" : "")."
             WHERE client_id = ? AND item_id = ? LIMIT 1
         ");
         $stmt->execute([

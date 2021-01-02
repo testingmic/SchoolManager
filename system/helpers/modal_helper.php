@@ -112,8 +112,8 @@ function ajax_forms_modal($auto_close_modal) {
  * 
  * @return String
  */
-function replies_modal($auto_close_modal) {
-    $html = "<div class=\"modal fade modal-dialog-right right\" id=\"repliesModal\" ".(!$auto_close_modal ? null :  'data-backdrop="static" data-keyboard="false"').">
+function replies_modal($auto_close_modal, $modal_id = "repliesModal") {
+    $html = "<div class=\"modal fade modal-dialog-right right\" id=\"{$modal_id}\" ".(!$auto_close_modal ? null :  'data-backdrop="static" data-keyboard="false"').">
         <div class=\"modal-dialog modal-dialog-centered modal-md\" style=\"width:100%;height:100%;\" role=\"document\">
             <div class=\"modal-content\">
                 <div class=\"modal-header\">

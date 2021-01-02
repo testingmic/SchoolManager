@@ -200,7 +200,8 @@ class Replies extends Myschoolgh {
 
         // table names
         $table_pages = [
-            "assignments" => ["page" => "update-assignment"]
+            "assignments" => ["page" => "update-assignment"],
+            "events" => ["page" => "update-event"]
         ];
 
         /** Process the data parsed */
@@ -321,7 +322,7 @@ class Replies extends Myschoolgh {
         $resource = explode("_", $params->resource)[0];
 
         /** If the resource is not in the array */
-        if(!in_array($resource, ["assignments"])) {
+        if(!in_array($resource, ["assignments", "events"])) {
             return ["code" => 203, "data" => "Invalid request parsed: assignments"];
         }
 
@@ -334,6 +335,9 @@ class Replies extends Myschoolgh {
             "assignments" => [
                 "table" => "assignments",
                 "page" => "update-assignment"
+            ],"events" => [
+                "table" => "events",
+                "page" => "update-event"
             ]
         ];
         

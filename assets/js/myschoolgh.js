@@ -234,7 +234,7 @@ var share_Comment = (resource, item_id) => {
                 icon: "error",
             });
         }
-        // apply_comment_click_handlers();
+        apply_comment_click_handlers();
     }).catch(() => {
         $.pageoverlay.hide();
         swal({

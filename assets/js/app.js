@@ -1334,6 +1334,7 @@ var trigger_form_submit = () => {
                                     }
                                     $replies_loaded.attr("value", "0");
                                     $replies_loaded.attr("data-form", "none");
+                                    $(".modal").modal("hide");
                                     $(`form[class="ajax-data-form"] select`).val("null").change();
                                     $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
                                 }

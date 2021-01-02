@@ -52,6 +52,8 @@ if(!empty($item_id)) {
         // load the scripts
         $response->scripts = [
             "assets/js/events.js",
+            "assets/js/comments.js",
+            "assets/js/comments_upload.js",
         ];
 
         // set the first key
@@ -74,21 +76,65 @@ if(!empty($item_id)) {
             <div class="section-body">
                 <style>
                 #ajax-data-form-content trix-editor {
-                    min-height: 150px;
-                    max-height: 150px;
+                    min-height: 120px;
+                    max-height: 120px;
                 }
                 </style>
                 <div class="row mt-sm-4">
-                    <div class="col-lg-12">
+                    <div class="'.(isset($data->item_id) ? "col-md-9" : "col-lg-12").'">
                         <div class="card">
-                            <div class="card-body">
+                            <div class="card-body p-0">
                                 '.$formsClass->event_form($data).'
                             </div>
                         </div>
                     </div>
+                    '.(isset($data->item_id) ? '
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div><strong class="text-uppercase">Event Summary Information</strong></div>
+                                <div>
+                                    <p class="mb-0"><i class="fa fa-user"></i> '.$data->created_by_info->name.'</p>
+                                    <p class="mb-0"><i class="fa fa-calendar-check"></i> '.$data->date_created.'</p>
+                                </div>
+                                <div class="text-left mt-3 mb-3">
+                                Click on the button below to upload images with comments for this event.
+                                </div>
+                                <div class="text-right">
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#rightModal_Content">Comments</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>' : "").'
+
                 </div>
             </div>
         </section>';
+        if(isset($data->item_id)) {
+            $response->html .= '
+            <div class="modal fade modal-dialog-right right" id="rightModal_Content" data-backdrop="static" data-keyboard="false">
+                <div class="modal-dialog" style="width:100%;height:100%;" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"></h5>
+                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <div class="p-2 pt-0">
+                                <div class="p-2 pt-0">
+                                    <div><strong>EVENT COMMENTS</strong></div>
+                                    <div>
+                                        '.leave_comments_builder("events", $data->item_id, true).'
+                                        <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
+                                        <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary">Loading comments</button></div>    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>';
+        }
 
     }
 

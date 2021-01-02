@@ -2549,7 +2549,7 @@ class Forms extends Myschoolgh {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Type<span class="required">*</span></label>
-                            <select name="type" id="type" class="form-control selectpicker">
+                            <select name="type" id="type" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
                                 <option value="null">Select</option>';
                                 if(isset($data->event_types)) {
                                     foreach($data->event_types as $key => $value) {
@@ -2563,7 +2563,7 @@ class Forms extends Myschoolgh {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Audience<span class="required">*</span></label>
-                            <select name="audience" id="audience" class="form-control selectpicker">
+                            <select name="audience" id="audience" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
                                 <option value="null">Select</option>';
                                 foreach($this->event_audience as $key => $value) {
                                     $html_content .= "<option ".(isset($data->item_id) && ($data->audience == $key) ? "selected='selected'" : "")." value='{$key}'>{$value}</option>";
@@ -2602,16 +2602,34 @@ class Forms extends Myschoolgh {
                         ";
                     }
                     $html_content .= '</div>
-                    <div class="col-lg-5">
+                    <div class="col-lg-3">
                         <div class="form-group pt-4">
                             <input type="checkbox" '.(isset($data->is_holiday) && ($data->is_holiday == "on") ? "checked='checked'" : "").' name="holiday" class="checkbox" id="holiday">
                             <label for="holiday">Holiday</label>
                         </div>
+                    </div>';
+                // show the status modification selector for this event
+                $state = isset($data->state) ? $data->state : null;
+                $isActive = (bool) ($state == "Pending");
+
+                $html_content .= '
+                <div class="col-lg-4">
+                    <div class="form-group pt-0">
+                        <label for="">Event Status</label>
+                        <select class="form-control selectpicker" id="status" name="status">
+                            <option '.($state == "Pending" ? "selected" : null).' value="Pending">Pending</option>
+                            <option '.($state == "Held" ? "selected" : null).' value="Held">Held</option>
+                            <option '.($state == "Ongoing" ? "selected" : null).' value="Ongoing">Ongoing</option>
+                            '.($state ? '<option '.($state == "Cancelled" ? "selected" : null).' value="Cancelled">Cancelled</option>' : '').'
+                        </select>
                     </div>
+                </div>';
+
+                $html_content .= '
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                '.(!$state ? '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>' : "").'
                 <button type="button-submit" class="btn btn-primary">Save</button>
             </div>
         </form>';
