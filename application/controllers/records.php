@@ -53,6 +53,12 @@ class Records extends Myschoolgh {
                 "where" => "id='{$record_id}'",
                 "query" => "SELECT id FROM courses WHERE id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
             ],
+            "book" => [
+                "table" => "books",
+                "update" => "status='0', deleted='1'",
+                "where" => "id='{$record_id}'",
+                "query" => "SELECT id FROM books WHERE id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+            ],
             "incident" => [
                 "table" => "incidents",
                 "update" => "deleted='0'",
@@ -118,7 +124,7 @@ class Records extends Myschoolgh {
 
             // if the result is in this list
             if(in_array($params->resource, [
-                "event_type", "event", "class", "department", "course", "incident", "user", "guardian"
+                "event_type", "event", "class", "department", "course", "incident", "user", "guardian", "book"
             ])) {
                 // update the database record
                 $this->db->query("UPDATE {$featured["table"]} SET {$featured["update"]} WHERE {$featured["where"]} LIMIT 1");
