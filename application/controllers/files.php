@@ -542,6 +542,7 @@ class Files extends Myschoolgh {
 
                     // set the filename
                     $file_name = $each_file["second"];
+                    $file_name = preg_replace("/[^a-z0-9_\s-]/", "", $file_name);
                     $file_name = (preg_replace("/[\s]/", "_", $file_name));
                     $file_to_download = "{$docs_dir}{$file_name}.{$each_file["fifth"]}";
 
@@ -571,11 +572,11 @@ class Files extends Myschoolgh {
                     ];
 
                     // remove the file
-                    // unlink("{$tmp_dir}{$each_file["first"]}");
+                    unlink("{$tmp_dir}{$each_file["first"]}");
                 }
 
                 // unset the session
-                // $this->session->remove($module);
+                $this->session->remove($module);
                 
                 // set the file size
                 $n_FileSize = round(($totalFileSize / 1024), 2);

@@ -56,15 +56,15 @@ class Models {
 			'pdf' => 'fa fa-file-pdf', 'doc' => 'fa fa-file-word',
 			'docx' => 'fa fa-file-word', 'mp3' => 'fa fa-file-audio',
 			'mpeg' => 'fa fa-file-video', 'mpg' => 'fa fa-file-video',
-			'mov' => 'fa fa-file-video', 'movie' => 'fa fa-file-video',
-			'webm' => 'fa fa-file-video', 'flv' => 'fa fa-file-video',
+            'mp4' => 'fa fa-file-video', 'mov' => 'fa fa-file-video', 
+            'movie' => 'fa fa-file-video', 'webm' => 'fa fa-file-video',
 			'qt' => 'fa fa-file-video', 'zip' => 'fa fa-archive',
 			'txt' => 'fa fa-file-alt', 'csv' => 'fa fa-file-csv',
 			'rtf' => 'fa fa-file-alt', 'xls' => 'fa fa-file-excel',
 			'xlsx' => 'fa fa-file-excel', 'php' => 'fa fa-file-alt',
 			'css' => 'fa fa-file-alt', 'ppt' => 'fa fa-file-powerpoint',
 			'pptx' => 'fa fa-file-powerpoint', 'sql' => 'fa fa-file-alt',
-			'json' => 'fa fa-file-alt', 
+             'flv' => 'fa fa-file-video', 'json' => 'fa fa-file-alt'
 		];
 
         $this->unexpected_error = ["code" => 203, "data" => "Sorry! An unexpected error occured.\nPlease contact the admin if problem persists"];
@@ -72,7 +72,7 @@ class Models {
 		$this->accepted_attachment_file_types = [
 			'jpg', 'png', 'jpeg', 'txt', 'pdf', 'sql', 'docx', 'doc', 'xls', 'xlsx', 'mpeg',
 			'ppt', 'pptx', 'php', 'css', 'csv', 'rtf', 'gif', 'pub', 'json', 'zip', 
-			'mpg', 'flv', 'webm', 'movie', 'mov', 'qt', 'pjpeg', 'webp'
+			'mpg', 'flv', 'webm', 'movie', 'mov', 'qt', 'pjpeg', 'webp', 'mp4'
 		];
 
         $this->fake_files = [

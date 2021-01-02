@@ -132,7 +132,7 @@ class Auth extends Myschoolgh {
                             }
 
                             // remove all temporary files uploaded before a logout
-                            $this->clearTempFiles($results->user_id);
+                            $this->clear_temp_files($results->user_id);
                             
                             #update the table
                             $ip = ip_address();
@@ -198,7 +198,7 @@ class Auth extends Myschoolgh {
      * 
      * @return Bool
      */
-    public function clearTempFiles($user_id) {
+    public function clear_temp_files($user_id) {
         // if the directory is active
         if(is_dir("assets/uploads/{$user_id}/tmp/")) {
             // file travessing

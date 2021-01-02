@@ -684,6 +684,7 @@ class Forms extends Myschoolgh {
         // images mimetypes for creating thumbnails
         $image_mime = ["jpg", "jpeg", "png", "gif"];
         $docs_mime = ["pdf", "doc", "docx", "txt", "rtf", "jpg", "jpeg", "png", "gif"];
+        $video_mime = ["mp4", "mpeg", "movie", "webm", "mov", "mpg", "mpeg", "qt"];
 
         // set the thumbnail path
         $tmp_path = "assets/uploads/{$user_id}/tmp/thumbnail/";
@@ -717,18 +718,14 @@ class Forms extends Myschoolgh {
                     
                     $files_list .= "";
 
-                    // $files_list .= "<div class=\"{$list_class} attachment-container text-center p-3\">
-                    //         <div class=\"col-lg-12 p-2 font-italic border\">
-                    //             This file is deleted
-                    //         </div>
-                    //     </div>";
-
                 } else {
+
                     // if the file exists
                     if(is_file($eachFile->path) && file_exists($eachFile->path)) {
 
                         // is image check
                         $isImage = in_array($eachFile->type, $image_mime);
+                        $isVideo = in_array($eachFile->type, $video_mime);
 
                         // set the file to download
                         $record_id = isset($eachFile->record_id) ? $eachFile->record_id : null;
@@ -750,26 +747,16 @@ class Forms extends Myschoolgh {
                         $image_desc = "";
                         $delete_btn = "";
 
-                        // if document list the show the view button
-                        if($show_view) {
-                            // if the type is in the array list
-                            if(in_array($eachFile->type, $docs_mime)) {
-                                // $view_option .= "
-                                // <a title=\"Click to Click\" {$preview_link} class=\"btn btn-sm btn-primary\" style=\"padding:5px\" href=\"javascript:void(0)\">
-                                //     <i style=\"font-size:12px\" class=\"fa fa-eye fa-1x\"></i>
-                                // </a>";
-                            }
-                        }
-
                         // display this if the object is deletable.
                         if($is_deletable) {
                             $delete_btn = "&nbsp;<a href=\"javascript:void(0)\" onclick=\"return delete_existing_file_attachment('{$record_id}_{$eachFile->unique_id}');\" style=\"padding:5px\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
-
                         }
+                        $the_class = "attachment-item";
+                        $padding = "style='padding:10px'";
                         
                         // if the file is an type
                         if($isImage) {
-
+                            $list_class = $list_class;
                             // get the file name
                             $filename = "{$tmp_path}{$eachFile->unique_id}.{$eachFile->type}";
                             
@@ -787,13 +774,20 @@ class Forms extends Myschoolgh {
                                         <i class=\"fa fa-search\"></i>
                                     </a>
                                 </div>";
+                        } else if($isVideo) {
+                            // get the file name
+                            $filename = "{$eachFile->path}";
+                            $padding = "style='padding:0px'";
+                            // set the video file
+                            $thumbnail = "<video  style='display: block; cursor:pointer; width:100%' controls='true' src='{$this->baseUrl}{$filename}'></video>";
                         }
+                        
 
                         // append to the list
                         $files_list .= "<div data-file_container='{$record_id}_{$eachFile->unique_id}' class=\"{$list_class} attachment-container text-center p-3\">";
                         $files_list .= $isImage ? "<div class=\"gallery-item\">" : null;
                             $files_list .= "
-                                <div class=\"col-lg-12 attachment-item border\" data-attachment_item='{$record_id}_{$eachFile->unique_id}'>
+                                <div class=\"col-lg-12 {$the_class} border\" {$padding} data-attachment_item='{$record_id}_{$eachFile->unique_id}'>
                                     <span style=\"display:none\" class=\"file-options\" data-attachment_options='{$record_id}_{$eachFile->unique_id}'>
                                         {$view_option}
                                         <a title=\"Click to Download\" target=\"_blank\" class=\"btn btn-sm btn-success\" style=\"padding:5px\" href=\"{$this->baseUrl}download?file={$file_to_download}\">

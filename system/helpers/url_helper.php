@@ -410,7 +410,7 @@ if ( ! function_exists('create_slug')) {
 		
 		//replace / and . with white space     
 		$str = preg_replace("/[\/\.]/", " ", $str);     
-		$str = preg_replace("/[^a-z0-9_\s-]/", "", $str);     
+		$str = preg_replace("/[^a-z0-9_\s-]/", "", $str);  
 		
 		//remove multiple dashes or whitespaces     
 		$str = preg_replace("/[\s-]+/", " ", $str);
