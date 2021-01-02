@@ -221,7 +221,13 @@ if(!isset($userPrefs->messages)) {
                                 <li><a class="nav-link" href="<?= $baseUrl ?>add-staff">Add Staff</a></li>
                             </ul>
                         </li>
-                        <li><a href="<?= $baseUrl ?>attendance" class="nav-link"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a></li>
+                        <li class="dropdown">
+                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
+                            <ul class="dropdown-menu">
+                                <li><a class="nav-link" href="<?= $baseUrl ?>attendance">List Attendance</a></li>
+                                <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
+                            </ul>
+                        </li>                        
                         <li class="menu-header">Academics</li>
                         <li class="dropdown">
                             <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Academics</span></a>

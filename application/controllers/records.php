@@ -129,14 +129,15 @@ class Records extends Myschoolgh {
                 // return the success response
                 $code = 200;
                 $data = "Record set successfully deleted";
-                $additional = $params->record_id;
             }
 
             // if a full result was found
             return [
                 "code" => $code,
                 "data" => $data, 
-                "additional" => $additional
+                "additional" => [
+                    "record_id" => $params->record_id
+                ]
             ];
 
         } else {

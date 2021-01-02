@@ -189,7 +189,7 @@ class Events extends Myschoolgh {
         }
 
         // get the assignment information
-        $prev = $this->pushQuery("title,start_date,end_date,description,audience,event_type,is_holiday", 
+        $prev = $this->pushQuery("title,start_date,end_date,description,audience,event_type,is_holiday,state", 
             "events", "client_id='{$params->clientId}' AND item_id='{$item_id}' LIMIT 1");
 
         // validate the record
@@ -248,10 +248,25 @@ class Events extends Myschoolgh {
         if($this->preload($params)) {
             /** log the user activity */
             $this->userLogs("events", $item_id, null, "{$params->userData->name} updated the event details.", $params->userId);
+            
+            if(isset($start_date) && ($prev[0]->start_date !== $start_date)) {
+                $this->userLogs("events", $item_id, $prev[0]->start_date, "The Start Date was changed from {$prev[0]->start_date}", $params->userId);
+            }
+
+            if(isset($end_date) && ($prev[0]->end_date !== $end_date)) {
+                $this->userLogs("events", $item_id, $prev[0]->end_date, "The End Date was changed from {$prev[0]->end_date}", $params->userId);
+            }
+
+            if(isset($params->status) && ($prev[0]->state !== $params->status)) {
+                $this->userLogs("events", $item_id, $prev[0]->state, "Event Status was changed from {$prev[0]->state}", $params->userId);
+            }
+
             /** Save the changes applied to each column of the table */
             return [
                 "data" => "Event was successfully updated.",
-                "additional" => []
+                "additional" => [
+                    "href" => "{$this->baseUrl}update-event/{$item_id}"
+                ]
             ];
         }
 
@@ -464,6 +479,7 @@ class Events extends Myschoolgh {
                             ".(!empty($event->end_date) ? "<p class='p-0 m-0'><i class='fa fa-calendar-check'></i> <strong>End Date:</strong> ".date("jS F Y", strtotime($event->end_date))."</p>" : "")."
                             ".($isAdmin ? "<p class='p-0 m-0'><i class='fa fa-users'></i>  <strong>Audience:</strong> ".strtoupper($event->audience)."</p>" : "")."
                             ".(!empty($event->type_name) ? "<p class='p-0 m-0'><i class='fa fa-home'></i> <strong>Type:</strong> ".$event->type_name."</p>" : "")."
+                            ".(!empty($event->state) ? "<p class='p-0 m-0'><i class='fa fa-air-freshener'></i> <strong>Status:</strong> ".$this->the_status_label($event->state)."</p>" : "")."
                         </div>    
                     </div>
                 </div>

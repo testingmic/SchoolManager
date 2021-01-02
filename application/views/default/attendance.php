@@ -40,18 +40,93 @@ if(!empty($session->clientId)) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-sm-12 col-lg-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="fc-overflow">
-                                <div id="attendance_calendar"></div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                    <div class="card card-statistic-1">
+                        <i class="fas fa-hiking card-icon col-green"></i>
+                        <div class="card-wrap">
+                            <div class="padding-20">
+                                <div class="text-right">
+                                    <h3 class="font-light mb-0">
+                                        <i class="ti-arrow-up text-success"></i> 0
+                                    </h3>
+                                    <span class="text-muted">Students</span>
+                                </div>
+                                <div class="mb-0 text-right text-muted text-sm">
+                                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
+                                    <span class="text-nowrap">Since Yesterday</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                    <div class="card card-statistic-1">
+                        <i class="fas fa-user card-icon col-orange"></i>
+                        <div class="card-wrap">
+                            <div class="padding-20">
+                                <div class="text-right">
+                                    <h3 class="font-light mb-0">
+                                        <i class="ti-arrow-up text-success"></i> 0
+                                    </h3>
+                                    <span class="text-muted">Teachers</span>
+                                </div>
+                                <div class="mb-0 text-right text-muted text-sm">
+                                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
+                                    <span class="text-nowrap">Since Yesterday</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                    <div class="card card-statistic-1">
+                        <i class="fas fa-users card-icon col-cyan"></i>
+                        <div class="card-wrap">
+                            <div class="padding-20">
+                                <div class="text-right">
+                                    <h3 class="font-light mb-0">
+                                        <i class="ti-arrow-up text-success"></i> 0
+                                    </h3>
+                                    <span class="text-muted">Employees</span>
+                                </div>
+                                <div class="mb-0 text-right text-muted text-sm">
+                                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
+                                    <span class="text-nowrap">Since Yesterday</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                    <div class="card card-statistic-1">
+                        <i class="fas fa-chart-line card-icon col-orange"></i>
+                        <div class="card-wrap">
+                            <div class="padding-20">
+                                <div class="text-right">
+                                    <h3 class="font-light mb-0">
+                                        <i class="ti-arrow-up text-success"></i> 0
+                                    </h3>
+                                    <span class="text-muted">All Logs</span>
+                                </div>
+                                <div class="mb-0 text-right text-muted text-sm">
+                                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
+                                    <span class="text-nowrap">Since Yesterday</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                    <div class="card">
+                        <div class="card-header"><h4>Attendance Record</h4></div>
+                        <div class="card-body">
+                            <div id="attendance_chart"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>';
-    // print out the response
 }
 
 echo json_encode($response);

@@ -116,7 +116,13 @@ class Attendance extends Myschoolgh {
             $data = "Attendance was sucessfully logged for {$params->date}.";
 
             //log the user activity
-            $this->userLogs("attendance_log", $this->lastRowId("users_attendance_log"), null, "{$params->userData->name} logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}.", $params->userId);
+            if(isset($classData)) {
+                // update the for the class
+                $this->userLogs("attendance_log", $this->lastRowId("users_attendance_log"), null, "{$params->userData->name} logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}.", $params->userId);
+            } else {
+                // update the for user_type
+                $this->userLogs("attendance_log", $this->lastRowId("users_attendance_log"), null, "{$params->userData->name} logged attendance for <strong>{$params->user_type}</strong> on {$params->date}.", $params->userId);
+            }
         } else {
 
             // confirm that the user has not finalize the attendance log
@@ -147,7 +153,13 @@ class Attendance extends Myschoolgh {
             }
 
             //log the user activity
-            $this->userLogs("attendance_log", $params->finalize, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}.", $params->userId);
+            if(isset($classData)) {
+                // if the class data was parsed and set
+                $this->userLogs("attendance_log", $params->finalize, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}.", $params->userId);
+            } else {
+                // update the for user type
+                $this->userLogs("attendance_log", $params->finalize, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$params->user_type}</strong> on {$params->date}.", $params->userId);
+            }
         }
 
         return ["data" => $data];
@@ -174,7 +186,7 @@ class Attendance extends Myschoolgh {
             $the_key = strtolower($status);
             $html .= "
             <span class='mr-2'>
-                <input {$disabled} type='radio' ".($user_state == $the_key ? "checked" : "")." value='{$the_key}' id='{$userId}_{$the_key}'>
+                <input {$disabled} type='radio' ".($user_state == $the_key ? "checked" : "")." class='cursor' value='{$the_key}' id='{$userId}_{$the_key}'>
                 <label class='cursor' for='{$userId}_{$the_key}'>".($user_state == $the_key ? "<strong class='text-{$color}'>{$status}</strong>" : "{$status}")."</label>
             </span>
             ";

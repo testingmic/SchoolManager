@@ -2536,20 +2536,21 @@ class Forms extends Myschoolgh {
      */
     public function event_form($data = null) {
 
-        $html_content = '
-        <form enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/events/'.(isset($data->item_id) ? "update" : "add").'" method="POST" id="ajax-data-form-content">
+        $disabled = isset($data->state) && in_array($data->state, ["Held", "Cancelled"]) ? "disabled='disabled'" : null;
+
+        $html_content = (!$disabled ? '<form enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/events/'.(isset($data->item_id) ? "update" : "add").'" method="POST" id="ajax-data-form-content">': '').'
             <div id="modalBody2" class="modal-body">
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="form-group">
                             <label>Title <span class="required">*</span></label>
-                            <input type="text" value="'.($data->title ?? null).'" name="title" class="form-control">
+                            <input type="text" '.$disabled.' value="'.($data->title ?? null).'" name="title" class="form-control">
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Type<span class="required">*</span></label>
-                            <select name="type" id="type" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
+                            <select '.$disabled.' name="type" id="type" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
                                 <option value="null">Select</option>';
                                 if(isset($data->event_types)) {
                                     foreach($data->event_types as $key => $value) {
@@ -2563,7 +2564,7 @@ class Forms extends Myschoolgh {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Audience<span class="required">*</span></label>
-                            <select name="audience" id="audience" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
+                            <select '.$disabled.' name="audience" id="audience" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
                                 <option value="null">Select</option>';
                                 foreach($this->event_audience as $key => $value) {
                                     $html_content .= "<option ".(isset($data->item_id) && ($data->audience == $key) ? "selected='selected'" : "")." value='{$key}'>{$value}</option>";
@@ -2574,21 +2575,23 @@ class Forms extends Myschoolgh {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Date <span class="required">*</span></label>
-                            <input type="text" value="'.(isset($data->start_date) ? "{$data->start_date}:{$data->end_date}" : "").'" name="date" class="daterange form-control">
+                            <input '.$disabled.' type="text" value="'.(isset($data->start_date) ? "{$data->start_date}:{$data->end_date}" : "").'" name="date" class="daterange form-control">
                         </div>
                     </div>
                     <div class="col-lg-12">
                         <div class="form-group">
                             <label>Description</label>
-                            <input type="hidden" hidden id="trix-editor-input" value="'.($data->description ?? null).'">
-                            <trix-editor name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
+                            '.(!$disabled ? '
+                                <input type="hidden" hidden id="trix-editor-input" value="'.($data->description ?? null).'">
+                                <trix-editor '.$disabled.' name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
+                            ' : "<div>{$data->description}</div>").'
                         </div>
                     </div>
                     <div class="col-lg-5">
                         <div class="form-group">
                             <label>Event Image</label>
                             <input type="hidden" hidden name="event_id" class="form-control" value="'.($data->item_id ?? null).'">
-                            <input type="file" name="event_image" class="form-control" id="event_image">
+                            <input '.$disabled.' type="file" name="event_image" class="form-control" id="event_image">
                         </div>';
                     // confirm that the event cover image was parsed and file is found
                     if(isset($data->event_image) && file_exists($data->event_image)) {
@@ -2596,15 +2599,15 @@ class Forms extends Myschoolgh {
                         <div class='form-group' id='event_cover_image_{$data->item_id}'>
                             <img src='{$this->baseUrl}{$data->event_image}' width='100%'>
                         </div>
+                        ".(!$disabled ? "
                         <div class='form-group text-right'>
                             <button title='Remove event cover image' onclick='return remove_Event_Cover_Image(\"{$data->item_id}\")' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>
-                        </div>
-                        ";
+                        </div>":"");
                     }
                     $html_content .= '</div>
                     <div class="col-lg-3">
                         <div class="form-group pt-4">
-                            <input type="checkbox" '.(isset($data->is_holiday) && ($data->is_holiday == "on") ? "checked='checked'" : "").' name="holiday" class="checkbox" id="holiday">
+                            <input '.$disabled.' type="checkbox" '.(isset($data->is_holiday) && ($data->is_holiday == "on") ? "checked='checked'" : "").' name="holiday" class="checkbox" id="holiday">
                             <label for="holiday">Holiday</label>
                         </div>
                     </div>';
@@ -2616,10 +2619,10 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4">
                     <div class="form-group pt-0">
                         <label for="">Event Status</label>
-                        <select class="form-control selectpicker" id="status" name="status">
+                        <select '.$disabled.' class="form-control selectpicker" id="status" name="status">
                             <option '.($state == "Pending" ? "selected" : null).' value="Pending">Pending</option>
-                            <option '.($state == "Held" ? "selected" : null).' value="Held">Held</option>
                             <option '.($state == "Ongoing" ? "selected" : null).' value="Ongoing">Ongoing</option>
+                            <option '.($state == "Held" ? "selected" : null).' value="Held">Held</option>
                             '.($state ? '<option '.($state == "Cancelled" ? "selected" : null).' value="Cancelled">Cancelled</option>' : '').'
                         </select>
                     </div>
@@ -2628,11 +2631,12 @@ class Forms extends Myschoolgh {
                 $html_content .= '
                 </div>
             </div>
-            <div class="modal-footer">
-                '.(!$state ? '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>' : "").'
-                <button type="button-submit" class="btn btn-primary">Save</button>
-            </div>
-        </form>';
+            '.(!$disabled ? '
+                <div class="modal-footer">
+                    '.(!$state ? '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>' : "").'
+                    <button type="button-submit" class="btn btn-primary">Save</button>
+                </div></form>' : ''
+            ).'';
 
         return $html_content;
     }
