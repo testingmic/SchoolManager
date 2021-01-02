@@ -2654,48 +2654,48 @@ class Forms extends Myschoolgh {
     public function library_book_form($data = null) {
 
         $html_content = '
-        <form enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/library/'.(isset($data->item_id) ? "update_book" : "add_book").'" method="POST" id="ajax-data-form-content">    
+        <form enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/library/'.(isset($data->title) ? "update_book" : "add_book").'" method="POST" id="ajax-data-form-content">    
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="">BOOK TITLE <span class="required">*</span></label>
-                        <input type="text" placeholder="Book Title" value="" class="form-control" name="title">
+                        <input type="text" placeholder="Book Title" value="'.($data->title ?? null).'" class="form-control" name="title">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="">ISBN <span class="required">*</span></label>
-                        <input type="text" style="text-transform:uppercase" placeholder="ISBN" value="" class="form-control" name="isbn">
+                        <input type="text" style="text-transform:uppercase" placeholder="ISBN" value="'.($data->isbn ?? null).'" class="form-control" name="isbn">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="">CODE</label>
-                        <input type="text" style="text-transform:uppercase" placeholder="Book Code" value="" class="form-control" name="code">
+                        <input type="text" style="text-transform:uppercase" placeholder="Book Code" value="'.($data->code ?? null).'" class="form-control" name="code">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="">AUTHOR <span class="required">*</span></label>
-                        <input type="text" placeholder="Book Author" value="" class="form-control" name="author">
+                        <input type="text" placeholder="Book Author" value="'.($data->author ?? null).'" class="form-control" name="author">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="">RACK NO.</label>
-                        <input type="text" placeholder="Rack Number" value="" class="form-control" name="rack_no">
+                        <input type="text" placeholder="Rack Number" value="'.($data->rack_no ?? null).'" class="form-control" name="rack_no">
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="">ROW NO.</label>
-                        <input type="number" name="row_no" placeholder="Row Number" value="" class="form-control">
+                        <input type="text" name="row_no" placeholder="Row Number" value="'.($data->row_no ?? null).'" class="form-control">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="">QUANTITY <span class="required">*</span></label>
-                        <input type="number" max="200" placeholder="Quantity Available" value="" name="quantity" class="form-control">
+                        <input type="number" '.(isset($data->quantity) ? "disabled" : "").' max="200" placeholder="Quantity Available" value="'.($data->quantity ?? null).'" name="quantity" class="form-control">
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -2736,13 +2736,11 @@ class Forms extends Myschoolgh {
                 <div class="col-md-8">
                     <div class="form-group">
                         <label for="">DESCRIPTION</label>
-                        <textarea style="height:70px" name="description" placeholder="Book Description" id="description" cols="30" rows="10" class="form-control description"></textarea>
+                        <textarea style="height:70px" name="description" placeholder="Book Description" id="description" cols="30" rows="10" class="form-control description">'.($data->description ?? null).'</textarea>
                     </div>
                 </div>
-                <div class="col-md-12">
-                    <div class="save-book-details"></div>
-                </div>
                 <div class="col-md-12 text-right">
+                    <input type="hidden" value="'.($data->id ?? null).'" name="book_id" readonly>
                     <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>

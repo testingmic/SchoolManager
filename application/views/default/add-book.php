@@ -19,7 +19,7 @@ $response = (object) [];
 $pageTitle = "Add Book";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [
-    "assets/js/page/index.js"
+    "assets/js/library.js"
 ];
 
 $params = (object) [

@@ -23,6 +23,9 @@ class Library extends Myschoolgh {
      */
     public function list(stdClass $params) {
 
+        // create a new object
+        $filesObject = load_class("forms", "controllers");
+
         // set the filters
         $filters = "";
         $filters .= isset($params->class_id) ? " AND bk.class_id='{$params->class_id}'" : "";
@@ -34,9 +37,12 @@ class Library extends Myschoolgh {
         // query the database
 		$stmt = $this->db->prepare("
 			SELECT 
-				bk.id, bk.code, bk.title, bk.author, bk.quantity, bt.name AS category_name, bk.isbn,
-				(SELECT quantity FROM books_stock WHERE books_id = bk.id) AS books_stock,
-				bk.status, bk.description, bk.date_added
+				bk.*, (SELECT quantity FROM books_stock WHERE books_id = bk.id) AS books_stock,
+                (SELECT name FROM classes WHERE classes.id = bk.class_id LIMIT 1) AS class_name,
+                (SELECT name FROM departments WHERE departments.id = bk.department_id LIMIT 1) AS department_name,
+                bt.name AS category_name,
+                (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = bk.created_by LIMIT 1) AS created_by_info,
+                (SELECT b.description FROM files_attachment b WHERE b.resource='library_book' AND b.record_id = bk.id ORDER BY b.id DESC LIMIT 1) AS attachment
 			FROM books bk
 			LEFT JOIN books_type bt ON bt.id = bk.category_id
 			WHERE bk.deleted= ? AND bk.client_id = ? {$filters} ORDER BY bk.id DESC
@@ -47,6 +53,19 @@ class Library extends Myschoolgh {
 
         // loop through the list of books
         while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+            
+            // loop through the information
+            foreach(["created_by_info"] as $each) {
+                // convert the created by string into an object
+                $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+            }
+
+            // if attachment variable was parsed
+            $result->attachment = json_decode($result->attachment);
+
+            // if the files is set
+            $result->attachment_html = !empty($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
+            
             $data[] = $result;
         }
         
@@ -461,8 +480,8 @@ class Library extends Myschoolgh {
 	 * @param $bookTitle 	This is the title of the Book
 	 * @param $bookISBN 	The ISBN for the Book to be recorded
 	 * @param $bookAuthor 	The name of the Book Author
-	 * @param $rackNo 		The number on the Rack where the book can be found
-	 * @param $rowNo 		The row on which rack that the book can be found
+	 * @param $rack_no 		The number on the Rack where the book can be found
+	 * @param $row_no 		The row on which rack that the book can be found
 	 * @param $programme_id	The programme offered
 	 * @param $departmentId The department of the Book
 	 * @param $description 	The decription of the Book
@@ -485,15 +504,16 @@ class Library extends Myschoolgh {
 		$query = $this->auto_update(
 			array(
 				"books",
-				"isbn = ?, title = ?, description = ?, author = ?, rackNo = ?, rowNo = ?, 
-                class_id = ?, category_id = ?, department_id = ?, quantity = ?, code = ?",
+				"isbn = ?, title = ?, description = ?, author = ?, rack_no = ?, row_no = ?, 
+                    class_id = ?, category_id = ?, department_id = ? 
+                    ".(isset($params->quantity) ? ",quantity = '{$params->quantity}'" : "")."
+                    ".(isset($params->code) ? ",code = '{$params->code}'" : "")."",
 				"id = ? AND client_id = ?",
 				array(
 					$params->isbn, $params->title, $params->description ?? null, 
                     $params->author, $params->rack_no ?? null, 
                     $params->row_no ?? null, $params->class_id ?? null, $params->category_id ?? null, 
-                    $params->department_id ?? null, $params->quantity, $params->code ?? null, 
-                    $params->book_id, $params->clientId
+                    $params->department_id ?? null, $params->book_id, $params->clientId
 				)
 			)
 		);
@@ -516,8 +536,8 @@ class Library extends Myschoolgh {
 	 * @param $bookTitle 	This is the title of the Book
 	 * @param $bookISBN 	The ISBN for the Book to be recorded
 	 * @param $bookAuthor 	The name of the Book Author
-	 * @param $rackNo 		The number on the Rack where the book can be found
-	 * @param $rowNo 		The row on which rack that the book can be found
+	 * @param $rack_no 		The number on the Rack where the book can be found
+	 * @param $row_no 		The row on which rack that the book can be found
 	 * @param $class_id	The programme offered
 	 * @param $departmentId The department of the Book
 	 * @param $description 	The decription of the Book
@@ -530,12 +550,13 @@ class Library extends Myschoolgh {
 		$query = $this->auto_insert(
 			array(
 				"books",
-				"client_id = ?, isbn = ?, title = ?, description = ?, author = ?, rackNo = ?, 
-                rowNo = ?, class_id = ?, category_id = ?, department_id = ?, quantity = ?, code = ?",
+				"client_id = ?, isbn = ?, title = ?, description = ?, author = ?, rack_no = ?, 
+                row_no = ?, class_id = ?, category_id = ?, department_id = ?, quantity = ?, code = ?,
+                created_by = ?",
 				array(
 					$params->clientId, $params->isbn, $params->title, $params->description ?? null, $params->author, 
                     $params->rack_no ?? null, $params->row_no ?? null, $params->class_id ?? null, $params->category_id ?? null,  
-                    $params->department_id ?? null, $params->quantity, $params->code ?? null
+                    $params->department_id ?? null, $params->quantity, $params->code ?? null, $params->userId
 				)
 			)
 		);

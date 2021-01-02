@@ -135,7 +135,7 @@ class Courses extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
+                    (SELECT b.description FROM files_attachment b WHERE b.resource='courses_plan' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM courses_plan a
                 WHERE client_id=? AND course_id = ? AND plan_type = ? AND a.status = ? {$query} ORDER BY a.id

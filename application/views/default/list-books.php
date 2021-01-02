@@ -17,7 +17,6 @@ jump_to_main($baseUrl);
 
 $response = (object) [];
 $response->title = "Books List : {$appName}";
-$response->scripts = [];
 
 $department_param = (object) [
     "clientId" => $session->clientId,
