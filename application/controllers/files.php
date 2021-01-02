@@ -571,11 +571,11 @@ class Files extends Myschoolgh {
                     ];
 
                     // remove the file
-                    unlink("{$tmp_dir}{$each_file["first"]}");
+                    // unlink("{$tmp_dir}{$each_file["first"]}");
                 }
 
                 // unset the session
-                $this->session->remove($module);
+                // $this->session->remove($module);
                 
                 // set the file size
                 $n_FileSize = round(($totalFileSize / 1024), 2);
@@ -663,7 +663,7 @@ class Files extends Myschoolgh {
             return $files_list;
 
         } catch(PDOException $e) {
-            return $e->getMessage();
+            return [];
         } 
     }
 

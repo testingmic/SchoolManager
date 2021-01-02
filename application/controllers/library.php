@@ -583,6 +583,64 @@ class Library extends Myschoolgh {
      */
     public function upload_resource(stdClass $params) {
         
+        // old record
+        $module = "ebook_{$params->book_id}";
+        $prevData = $this->pushQuery("a.*, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment", 
+            "books a", "a.item_id='{$params->book_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1");
+
+        // if empty then return
+        if(empty($prevData)) {
+            return ["code" => 203, "data" => "Sorry! An invalid book id was supplied."];
+        }
+
+        // return error message if no attachments has been uploaded
+        if(empty($this->session->{$module})) {
+            return ["code" => 203, "data" => "Sorry! Please upload files to be uploaded."];
+        }
+
+        // initialize
+        $initial_attachment = [];
+
+        /** Confirm that there is an attached document */
+        if(!empty($prevData[0]->attachment)) {
+            // decode the json string
+            $db_attachments = json_decode($prevData[0]->attachment);
+            // get the files
+            if(isset($db_attachments->files)) {
+                $initial_attachment = $db_attachments->files;
+            }
+        }
+
+        // prepare the attachments
+        $filesObj = load_class("files", "controllers");
+        $attachments = $filesObj->prep_attachments($module, $params->userId, $params->book_id, $initial_attachment);
+        
+        // update attachment if already existing
+        if(isset($db_attachments)) {
+            $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? AND resource = ? LIMIT 1");
+            $files->execute([json_encode($attachments), $attachments["raw_size_mb"], $params->book_id, "library_book"]);
+        } else {
+            // insert the record if not already existing
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
+            $files->execute(["library_book", $params->book_id, json_encode($attachments), $params->book_id, $params->userId, $attachments["raw_size_mb"]]);
+        }
+        
+        // fetch the files again
+        $prevData = $this->pushQuery("a.id, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment", 
+            "books a", "a.item_id='{$params->book_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1");
+        
+        // decode the json string
+        $db_attachments = json_decode($prevData[0]->attachment);
+        $attachment_html = load_class("forms", "controllers")->list_attachments($db_attachments->files, $params->userId, "col-lg-4 col-md-6", false, false);
+
+        return [
+            "code" => 200,
+            "data" => "Files successfully uploaded",
+            "additional" => [
+                "files_list" => $attachment_html
+            ]
+        ];
+
     }
 
 }
