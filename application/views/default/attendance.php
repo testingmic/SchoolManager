@@ -12,7 +12,7 @@ $appName = config_item("site_name");
 $baseUrl = $config->base_url();
 
 // if no referer was parsed
-jump_to_main($baseUrl);
+// jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
@@ -21,15 +21,46 @@ $pageTitle = "Attendance Log";
 $response->title = "{$pageTitle} : {$appName}";
 
 // if the client information is not empty
-if(!empty($session->clientId)) {
+if(!empty($clientId)) {
     // convert to lowercase
-    $client_id = strtolower($session->clientId);
+    $client_id = strtolower($clientId);
     
     // load the scripts
     $response->scripts = [
         "assets/js/attendance_log.js"
     ];
 
+    // get the attendance log for the day
+    $days = [
+        "today" => date("Y-m-d"),
+        "yesterday" => date("Y-m-d", strtotime("yesterday"))
+    ];
+    $users = ["student", "teacher", "admin"];
+
+    // users counter
+    $users_count = [];
+
+    // attendance log algo
+    // loop through the days for the record
+    foreach($days as $key => $day) {
+        // loop through the users for each day
+        foreach($users as $user) {
+            // set a parameter for the user_type
+            $user_type = ($user == "admin") ? "('admin','accountant','employee')" : "('{$user}')";
+            
+            // run a query for the information
+            $theQuery = $myClass->pushQuery("users_list", "users_attendance_log", "log_date='{$day}' AND user_type IN {$user_type} AND client_id='{$clientId}'");
+            
+            // if the query is not empty
+            if(!empty($theQuery)) {
+                // convert the users list into an array
+                $present = json_decode($theQuery[0]->users_list, true);
+                $users_count[$key][$user] = isset($users_count[$key][$user]) ? ($users_count[$key][$user] + count($present)) : count($present);
+            }
+        }
+    }
+
+    // set the html text to display
     $response->html = '
         <section class="section">
             <div class="section-header">
