@@ -263,7 +263,7 @@ if(!isset($userPrefs->messages)) {
                                 <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>add-book">Add New Book</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-category">Add New Category</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>add-book-category">Add New Category</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>issue-book">Issue Book</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>return-book">Return Book</a></li>
                             </ul>

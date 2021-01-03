@@ -124,6 +124,93 @@ class Library extends Myschoolgh {
 	}
 
 	/**
+     * Add Books Category
+     * 
+	 * @param stdClass $params
+	 *  
+     * @return Array
+     */
+	public function add_category(stdClass $params) {
+
+		try {
+
+			# create a new unique id
+			$item_id = random_string("alnum", 32);
+
+            # execute the statement
+            $stmt = $this->db->prepare("
+                INSERT INTO books_type SET client_id = ?, item_id = ?, created_by = ?
+                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
+                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+            ");
+            $stmt->execute([$params->clientId, $item_id, $params->userId]);
+            
+            # log the user activity
+            $this->userLogs("library_category", $item_id, null, "{$params->userData->name} created a new category: {$params->name}", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Book Category successfully created.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["clear" => true];
+
+			# return the output
+            return $return;
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+	}
+
+	/**
+     * Update Books Category
+     * 
+	 * @param stdClass $params
+	 *  
+     * @return Array
+     */
+	public function update_category(stdClass $params) {
+
+		try {
+
+			# old record
+            $prevData = $this->pushQuery("*", "books_type", "item_id='{$params->category_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+
+            # if empty then return
+            if(empty($prevData)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            # execute the statement
+            $stmt = $this->db->prepare("
+                UPDATE books_type SET name = '{$params->name}'
+                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
+                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+				WHERE client_id = ? AND item_id = ?
+            ");
+            $stmt->execute([$params->clientId, $params->category_id]);
+            
+            # log the user activity
+            $this->userLogs("library_category", $params->category_id, null, "{$params->userData->name} updated the category.", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Book Category successfully updated."];
+			
+			# append to the response
+			$return["additional"] = ["href" => "{$this->baseUrl}update-book-category/{$params->category_id}/update"];
+
+			# return the output
+            return $return;
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+	}
+
+	/**
 	 * @method checkBorrowedState
 	 * @param stdClass $params 
 	 *
