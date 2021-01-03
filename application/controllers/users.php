@@ -853,7 +853,7 @@ class Users extends Myschoolgh {
 				".(isset($params->username) ? ", username='{$params->username}'" : null)."
 				".(isset($params->position) ? ", position='{$params->position}'" : null)."
 				".(isset($params->created_by) ? ", created_by='{$params->created_by}'" : null)."
-				
+
 				".(isset($params->status) ? ", status='{$params->status}'" : null)."
 				".(isset($encrypt_password) ? ", password='{$encrypt_password}'" : null)."
 

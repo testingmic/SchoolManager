@@ -1766,6 +1766,12 @@ class Forms extends Myschoolgh {
                         <input type="hidden" id="user_type" name="user_type" value="'.(!$isData ? "student" : null).'">
                     </div>
                 </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="religion">Religion <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->religion ?? null).'" name="religion" id="religion" class="form-control">
+                    </div>
+                </div>
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
                         <label for="description">Description</label>
@@ -2735,6 +2741,51 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-md-12 text-right">
                     <input type="hidden" value="'.($data->item_id ?? null).'" name="book_id" readonly>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>
+        </form>';
+
+        return $html_content;
+    }
+
+    /**
+     * Library Book Forms
+     * 
+     * @param stdClass $data
+     * 
+     * @return String
+     */
+    public function library_category_form($data = null) {
+
+        $html_content = '
+        <form class="ajax-data-form" action="'.$this->baseUrl.'api/library/'.(isset($data->name) ? "update_category" : "add_category").'" method="POST" id="ajax-data-form-content">    
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label for="">CATEGORY NAME <span class="required">*</span></label>
+                        <input type="text" placeholder="Category Enter" value="'.($data->name ?? null).'" class="form-control" name="name">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="">DEPARTMENT</label>
+                        <select id="department_id" class="form-control selectpicker" name="department_id">
+                            <option value="">Please Select</option>';
+                            foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$data->clientId}'") as $each) {
+                                $html_content .= "<option ".(isset($data->department_id) && ($each->id == $data->department_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $html_content .= '</select>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="">DESCRIPTION</label>
+                        <textarea style="height:70px" name="description" placeholder="Book Description" id="description" cols="30" rows="10" class="form-control description">'.($data->description ?? null).'</textarea>
+                    </div>
+                </div>
+                <div class="col-md-12 text-right">
+                    <input type="hidden" value="'.($data->item_id ?? null).'" name="category_id" readonly>
                     <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>

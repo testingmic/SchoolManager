@@ -242,6 +242,12 @@ if(!empty($user_id)) {
                             <span class="float-left">Residence</span>
                             <span class="float-right text-muted">'.$data->residence.'</span>
                         </p>
+                        '.($data->religion ? 
+                            '<p class="clearfix">
+                                <span class="float-left">Religion</span>
+                                <span class="float-right text-muted">'.$data->religion.'</span>
+                            </p>' : ''
+                        ).'
                         <p class="clearfix">
                             <span class="float-left">Country</span>
                             <span class="float-right text-muted">'.$data->country_name.'</span>

@@ -163,7 +163,7 @@ var search_usersList = (user_type = "") => {
 
 var formatThreadComment = (rv) => {
         return `<div class="col-md-12 p-1 grid-margin" id="comment-listing" data-reply-container="${rv.item_id}">
-        <div class="card rounded replies-item">
+        <div class="card rounded pb-2 mb-2 replies-item">
             <div class="card-header">
                 <div class="col-lg-12 p-0">
                     <div class="d-flex justify-content-start">

@@ -322,7 +322,7 @@ class Replies extends Myschoolgh {
         $resource = explode("_", $params->resource)[0];
 
         /** If the resource is not in the array */
-        if(!in_array($resource, ["assignments", "events"])) {
+        if(!in_array($resource, ["assignments", "events", "ebook"])) {
             return ["code" => 203, "data" => "Invalid request parsed: assignments"];
         }
 

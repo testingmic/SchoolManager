@@ -415,8 +415,6 @@ var loadPage = (loc, callback, pushstate) => {
     if (appxhr.length > 0) abortscripts();
     if (callback === undefined) callback = getCallback(loc);
 
-    $.current_page = loc;
-
     if (loc == `${$.baseurl}` || loc == `${$.baseurl}/dashboard`) {
         $(`[id="history-refresh"]`).addClass("hidden");
     } else {
@@ -439,6 +437,8 @@ var loadPage = (loc, callback, pushstate) => {
                 window.location = redirectUrl
                 return false;
             }
+
+            $.current_page = loc;
 
             if (result.scripts !== undefined) {
                 let timer = 200;

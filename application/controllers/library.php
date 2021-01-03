@@ -19,12 +19,16 @@ class Library extends Myschoolgh {
     /**
      * List library books
      * 
+	 * @param stdClass $params
+	 *  
      * @return Array
      */
     public function list(stdClass $params) {
 
         // create a new object
         $filesObject = load_class("forms", "controllers");
+
+		$params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
 
         // set the filters
         $filters = "";
@@ -45,7 +49,7 @@ class Library extends Myschoolgh {
                 (SELECT b.description FROM files_attachment b WHERE b.resource='library_book' AND b.record_id = bk.item_id ORDER BY b.id DESC LIMIT 1) AS attachment
 			FROM books bk
 			LEFT JOIN books_type bt ON bt.id = bk.category_id
-			WHERE bk.deleted= ? AND bk.client_id = ? {$filters} ORDER BY bk.id DESC
+			WHERE bk.deleted= ? AND bk.client_id = ? {$filters} ORDER BY bk.id DESC LIMIT {$params->limit} 
 		");
 		$stmt->execute([0, $params->clientId]);
 
@@ -61,7 +65,8 @@ class Library extends Myschoolgh {
             }
 
             // if attachment variable was parsed
-            $result->attachment = json_decode($result->attachment);
+            $result->isbn = strtoupper($result->isbn);
+			$result->attachment = json_decode($result->attachment);
 
             // if the files is set
             $result->attachment_html = !empty($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
@@ -73,6 +78,50 @@ class Library extends Myschoolgh {
             "data" => $data
         ];
     }
+
+	/**
+     * List library books category
+     * 
+	 * @param stdClass $params
+	 *  
+     * @return Array
+     */
+	public function category_list(stdClass $params) {
+
+		$params->query = "1";
+
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+        $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
+        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->category_id)) ? " AND a.item_id='{$params->category_id}'" : null;
+
+        try {
+
+            $stmt = $this->db->prepare("
+                SELECT a.*,
+                    (SELECT COUNT(*) FROM books b WHERE b.category_id = a.id AND b.client_id = a.client_id LIMIT 1) AS books_count,
+					(SELECT name FROM departments WHERE departments.id = a.department_id LIMIT 1) AS department_name
+                FROM books_type a
+                WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
+            ");
+            $stmt->execute([1]);
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                $data[] = $result;
+            }
+
+            return [
+                "code" => 200,
+                "data" => $data
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+	}
 
 	/**
 	 * @method checkBorrowedState
@@ -549,6 +598,9 @@ class Library extends Myschoolgh {
 
         // generate a random string for the book
         $item_id = random_string("alnum", 32);
+		
+		$counter = $this->append_zeros(($this->itemsCount("books", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+        $code = $this->client_data($params->clientId)->client_preferences->labels->book.$counter;
 
 		$query = $this->auto_insert(
 			array(
@@ -559,11 +611,10 @@ class Library extends Myschoolgh {
 				array(
 					$params->clientId, $params->isbn, $params->title, $params->description ?? null, $params->author, 
                     $params->rack_no ?? null, $params->row_no ?? null, $params->class_id ?? null, $params->category_id ?? null,  
-                    $params->department_id ?? null, $params->quantity, $params->code ?? null, $params->userId, $item_id
+                    $params->department_id ?? null, $params->quantity, $code, $params->userId, $item_id
 				)
 			)
 		);
-		$lastRowId = $this->lastRowId("books");
 
 		/** Record the user activity **/
 		$this->userLogs("library_book", $item_id, null, "{$params->userData->name} added the Book: {$params->title}", $params->userId);
