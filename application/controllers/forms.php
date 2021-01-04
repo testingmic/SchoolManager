@@ -2794,4 +2794,103 @@ class Forms extends Myschoolgh {
         return $html_content;
     }
 
+    /**
+     * Library Book Issue Form
+     * 
+     * @return String
+     */
+    public function library_book_issue_form($data = null) {
+        
+        // init
+        $html_content = "";
+
+        // if the request includes search_form
+        if(isset($data->search_form)) {
+            // set the html_content to display
+            $html_content .= '
+                <div class="form-group">
+                    <label>Book Category</label>
+                    <select name="category_id" id="category_id" class="form-control selectpicker">
+                        <option value="">Please Select</option>';
+                        foreach($this->pushQuery("id, name", "books_type", "status='1' AND client_id='{$data->clientId}'") as $each) {
+                            $html_content .= "<option ".(isset($data->category_id) && ($each->id == $data->category_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                        }
+                    $html_content .= '
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Book Title</label>
+                    <select name="book_id" id="book_id" class="form-control selectpicker">
+                        <option value="">Please Select</option>
+                    </select>
+                </div>';
+        }
+
+        // if the request includes the issue_form
+        if(isset($data->issue_form)) {
+            // set the html_content to display
+            $html_content .= '
+            <form class="ajax-data-form" action="'.$this->baseUrl.'api/library/issue_book" method="POST" id="ajax-data-form-content">    
+                <div class="form-group">
+                    <label>User Role</label>
+                    <select name="user_role" id="user_role" class="form-control selectpicker">
+                        <option value="">Please Select</option>';
+                        foreach($this->all_user_roles_list as $key => $value) {
+                            $html_content .= "<option ".(isset($data->user_role) && ($key == $data->user_role) ? "selected" : null)." value=\"{$key}\">{$value}</option>";                            
+                        }
+                    $html_content .= '
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Fullname <span class="required">*</span></label>
+                    <select name="user_id" id="user_id" class="form-control selectpicker">
+                        <option value="">Please Select</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Return Date <span class="required">*</span></label>
+                    <input type="text" name="return_date" id="return_date" class="form-control datepicker">
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <label>Overdue Fine</label>
+                            <input type="number" name="overdue_rate" id="overdue_rate" class="form-control">
+                        </div>
+                        <div class="col-lg-6">
+                            <label>Apply Overdue</label>
+                            <select name="overdue_apply" id="overdue_apply" class="form-control selectpicker">
+                                <option value="entire">Entire Order</option>
+                                <option value="single">Each Book</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <input type="hidden" value="'.($data->issue_id ?? null).'" name="issue_id" readonly>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </form>';
+        }
+
+        // if the request includes the request_form
+        if(isset($data->request_form)) {
+            // set the html_content to display
+            $html_content .= '
+            <form class="ajax-data-form" action="'.$this->baseUrl.'api/library/issue_book" method="POST" id="ajax-data-form-content">    
+                <input type="hidden" readonly name="user_id" id="user_id" value="'.$data->user_id.'">
+                <div class="form-group">
+                    <label>Return Date <span class="required">*</span></label>
+                    <input type="text" name="return_date" id="return_date" class="form-control datepicker">
+                </div>
+                <div class="text-right">
+                    <input type="hidden" value="'.($data->issue_id ?? null).'" name="issue_id" readonly>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Place Request</button>
+                </div>
+            </form>';
+        }
+
+        return $html_content;
+    }
+
 }

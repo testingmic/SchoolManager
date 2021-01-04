@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject;
+global $myClass, $accessObject, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -28,6 +28,9 @@ $item_list = load_class("library", "controllers")->category_list($department_par
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
+$accessObject->userPermits = $defaultUser->user_permissions;
+
+$hasAdd = $accessObject->hasAccess("add", "library");
 $hasDelete = $accessObject->hasAccess("delete", "library");
 $hasUpdate = $accessObject->hasAccess("update", "library");
 
@@ -63,6 +66,11 @@ $response->html = '
         </div>
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
+                '.($hasAdd ? '
+                    <div class="text-right mb-2">
+                        <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'add-book-category"><i class="fa fa-plus"></i> Add Category</a>
+                    </div>' : ''
+                ).'
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">

@@ -89,6 +89,14 @@ class Models {
             "admin" => "Admin"
         ];
 
+        $this->all_user_roles_list = [
+            "student" => "Student",
+            "teacher" => "Teacher",
+            "employee" => "Employee",
+            "accountant" => "Accountant",
+            "admin" => "Admin"
+        ];
+
         $this->user_status_list = [
             "0" => "Active",
             "1" => "Inactive"
