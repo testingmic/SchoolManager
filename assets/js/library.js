@@ -48,7 +48,7 @@ $(`div[id="library_form"] select[name="category_id"]`).on("change", function() {
                 $(`div[id='library_form'] select[name='book_id']`).find('option').remove().end();
                 $(`div[id='library_form'] select[name='book_id']`).append(`<option value="null">Please Select</option>`);
                 $.each(response.data.result, function(i, book) {
-                    $(`div[id='library_form'] select[name='book_id']`).append(`<option data-row_no='${book.row_no}' data-rack_no='${book.rack_no}' data-item_id='${book.item_id}' data-isbn='${book.isbn}' data-books_stock='${book.books_stock}' data-book_image='${book.book_image}' data-book_author='${book.author}' data-book_title='${book.title}' value='${book.item_id}'>${book.title}</option>'`);
+                    $(`div[id='library_form'] select[name='book_id']`).append(`<option data-in_session='${book.in_session}' data-row_no='${book.row_no}' data-rack_no='${book.rack_no}' data-item_id='${book.item_id}' data-isbn='${book.isbn}' data-books_stock='${book.books_stock}' data-book_image='${book.book_image}' data-book_author='${book.author}' data-book_title='${book.title}' value='${book.item_id}'>${book.title}</option>'`);
                 });
             }
             selected_books.addClass("hidden");
@@ -60,11 +60,13 @@ $(`div[id="library_form"] select[name="category_id"]`).on("change", function() {
 var issue_Request_Handler = (todo, book_id) => {
     let label = {
         "todo": todo,
+        "mode": selected_books.attr("data-mode"),
         "book_id": book_id
     };
-    $.post(`${baseUrl}api/issue_request_handler`, { label }).then((response) => {
+    $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
         if (response.code == 200) {
-
+            selected_books.addClass("hidden");
+            selected_books.html("");
         }
     });
 }
@@ -90,8 +92,8 @@ $(`div[id='library_form'] select[name='book_id']`).on("change", function() {
                             <span><strong>Row:</strong>  ${book.row_no}</span>
                         </p>
                         <p class="mb-0">
-                            <button onclick="return issue_Request_Handler('add', '${book.item_id}');" class="btn-sm btn-outline-success btn"><i class="fa fa-plus"></i> Add</button>
-                            <button onclick="return issue_Request_Handler('remove', '${book.item_id}');" class="btn-sm btn-outline-danger btn"><i class="fa fa-trash"></i> Remove</button>
+                            ${book.in_session !== true ? `<button onclick="return issue_Request_Handler('add', '${book.item_id}');" class="btn-sm btn-outline-success btn"><i class="fa fa-plus"></i> Add</button>` 
+                            : `<button onclick="return issue_Request_Handler('remove', '${book.item_id}');" class="btn-sm btn-outline-danger btn"><i class="fa fa-trash"></i> Remove</button>`}
                         </p>
                     </div>
                 </div>

@@ -245,6 +245,37 @@ class Library extends Myschoolgh {
 	}
 
 	/**
+	 * Issue or Request Handler
+	 * 
+	 * Use the label parameter to ascertain the action to perform
+	 * 
+	 * @return Array
+	 */
+	public function issue_request_handler(stdClass $params) {
+		
+		/** Return false if an array was not parsed */
+		if(!is_array($params->label) || !isset($params->label["todo"]) || !isset($params->label["mode"])) {
+			return ["code" => 203, "data" => "Sorry! The label parameter must be an array. Also ensure 'todo' and 'mode' was parsed"];
+		}
+
+		/** Assign variables */
+		$todo = $params->label["todo"];
+		$mode = $params->label["mode"];
+		$book_id = $params->label["book_id"] ?? null;
+
+		/** Switch through the label */
+		if($params->label["todo"] == "add") {
+			$this->add_book_to_session("{$mode}_session", $book_id, 1);
+		}
+
+		/** Remove book from session */
+		elseif($params->label["todo"] == "remove") {
+			$this->remove_book_from_session("{$mode}_session", $book_id);
+		}
+
+	}
+
+	/**
 	 * In Array List
 	 * 
 	 * Confirm that the book id is in the list of the session parameter parsed
@@ -279,13 +310,17 @@ class Library extends Myschoolgh {
 				 	break;
 				}				
 			}
-			$book_id = array_column($_SESSION[$the_session], "book_id");
-            if (!in_array($book_id, $book_id)) {
-            	$_SESSION[$the_session][] = ['book_id'=>$book_id, 'quantity' => $quantity];
+			$book_ids = array_column($_SESSION[$the_session], "book_id");
+            if (!in_array($book_id, $book_ids)) {
+            	$_SESSION[$the_session][] = ['book_id' => $book_id, 'quantity' => $quantity];
             }
 		} else {
 			$_SESSION[$the_session][] = ['book_id' => $book_id, 'quantity' => $quantity];
 		}
+
+		$this->session->set($the_session, $_SESSION[$the_session]);
+		
+		return true;
 	}
 
 	/**
@@ -305,6 +340,9 @@ class Library extends Myschoolgh {
 				}				
 			}
 		}
+		$this->session->set($the_session, $_SESSION[$the_session]);
+
+		return true;
 	}
 
 	/**
@@ -315,7 +353,7 @@ class Library extends Myschoolgh {
 	 * @return Bool
 	 */
     public function count_session_data($the_session) {
-		return (isset($_SESSION[$the_session]) and count($_SESSION[$the_session]) > 0) ? true : false;
+		return !empty($this->session->{$the_session}) ? true : false;
 	}
 
 	public function categoryBooksCounting() {
