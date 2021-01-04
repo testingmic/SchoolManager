@@ -2656,6 +2656,13 @@ class Forms extends Myschoolgh {
         $html_content = '
         <form enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/library/'.(isset($data->title) ? "update_book" : "add_book").'" method="POST" id="ajax-data-form-content">    
             <div class="row">
+                <div class="col-lg-5 col-md-5">
+                    <div class="form-group">
+                        <label for="book_image">Cover Image</label>
+                        <input type="file" name="book_image" id="book_image" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-7 col-md-7"></div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="">BOOK TITLE <span class="required">*</span></label>

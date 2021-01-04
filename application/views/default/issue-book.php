@@ -50,14 +50,18 @@ if(!$hasIssue) {
             </div>
             <div class="row" id="library_form">
                 <div class="col-12 col-sm-12 col-md-5">
-                    <div class="card">
+                    <div class="card mb-3">
                         <div class="card-body">
                             '.$search_form.'
                         </div>
                     </div>
-                    <div class="card">
+                    <div class="card hidden mb-3" id="selected_book_details" data-mode="issue"></div>
+                    <div class="card mb-3">
                         <div class="card-body">
-                            <div class="form-group" id="selected_book_details"></div>
+                            <h6>SELECTED BOOKS LIST</h6>
+                            <div id="selected_book_list">
+                                <div class="font-italic">No books has been selected yet.</div>
+                            </div>
                         </div>
                     </div>
                 </div>

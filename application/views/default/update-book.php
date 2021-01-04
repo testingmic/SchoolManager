@@ -90,11 +90,11 @@ if(!empty($item_id)) {
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
                 <div class="card-body">
-                    <div class="author-box-center">
-                        <div class="clearfix"></div>
-                        <div class="author-box-name"><a href="#">'.$data->title.'</a></div>
-                        <div class="author-box-job">('.$data->category_name.')</div>
-                    </div>
+                    <div><h3>'.$data->title.'</h3></div>
+                    '.(!empty($data->book_image) ? 
+                    '<div>
+                        <div><img width="100%" style="max-height:350px" src="'.$baseUrl.''.$data->book_image.'"></div>
+                    </div>' : '').'
                 </div>
                 </div>
                 <div class="card">
@@ -113,6 +113,10 @@ if(!empty($item_id)) {
                     </div>
                     <div class="card-body pt-0 pb-0">
                         <div class="py-3 pt-0">
+                            <p class="clearfix">
+                                <span class="float-left">Category</span>
+                                <span class="float-right text-muted">'.($data->category_name ?? null).'</span>
+                            </p>
                             <p class="clearfix">
                                 <span class="float-left">Class</span>
                                 <span class="float-right text-muted">'.($data->class_name ?? null).'</span>
@@ -135,7 +139,7 @@ if(!empty($item_id)) {
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Stock Quantity</span>
-                                <span class="float-right text-muted">'.($data->quantity ?? null).'</span>
+                                <span class="float-right text-muted">'.($data->books_stock ?? null).'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Rack Number</span>

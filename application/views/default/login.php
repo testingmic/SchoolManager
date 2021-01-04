@@ -14,7 +14,7 @@ if($usersClass->loggedIn()) {
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title>Ality - Admin Dashboard Template</title>
+  <title>Login - <?= config_item("site_name") ?></title>
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-social/bootstrap-social.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">

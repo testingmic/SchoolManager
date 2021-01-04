@@ -41,12 +41,15 @@ class Library extends Myschoolgh {
         // query the database
 		$stmt = $this->db->prepare("
 			SELECT 
-				bk.*, (SELECT quantity FROM books_stock WHERE books_id = bk.id) AS books_stock,
+				".(isset($params->minified) ? 
+					" 	bk.id, bk.item_id, bk.title, bk.description, bk.rack_no, bk.row_no, bk.book_image, bk.isbn, 
+						bk.author, (SELECT quantity FROM books_stock WHERE books_id = bk.item_id) AS books_stock " : 
+					" bk.*, (SELECT quantity FROM books_stock WHERE books_id = bk.item_id) AS books_stock,
                 (SELECT name FROM classes WHERE classes.id = bk.class_id LIMIT 1) AS class_name,
                 (SELECT name FROM departments WHERE departments.id = bk.department_id LIMIT 1) AS department_name,
                 bt.name AS category_name,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = bk.created_by LIMIT 1) AS created_by_info,
-                (SELECT b.description FROM files_attachment b WHERE b.resource='library_book' AND b.record_id = bk.item_id ORDER BY b.id DESC LIMIT 1) AS attachment
+                (SELECT b.description FROM files_attachment b WHERE b.resource='library_book' AND b.record_id = bk.item_id ORDER BY b.id DESC LIMIT 1) AS attachment ")."
 			FROM books bk
 			LEFT JOIN books_type bt ON bt.id = bk.category_id
 			WHERE bk.deleted= ? AND bk.client_id = ? {$filters} ORDER BY bk.id DESC LIMIT {$params->limit} 
@@ -57,19 +60,28 @@ class Library extends Myschoolgh {
 
         // loop through the list of books
         while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-            
-            // loop through the information
-            foreach(["created_by_info"] as $each) {
-                // convert the created by string into an object
-                $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
-            }
 
             // if attachment variable was parsed
             $result->isbn = strtoupper($result->isbn);
-			$result->attachment = json_decode($result->attachment);
 
-            // if the files is set
-            $result->attachment_html = !empty($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
+			// if created_by_info is set
+			if(isset($result->created_by_info)) {
+
+				// convert the attachment into an object
+				$result->attachment = json_decode($result->attachment);
+            	$result->attachment_html = !empty($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
+
+				// loop through the information
+				foreach(["created_by_info"] as $each) {
+					// convert the created by string into an object
+					$result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+				}
+			}
+
+			// if show_in_list was parsed
+			if(isset($params->show_in_list)) {
+				$result->in_session = $this->in_session_list($result->item_id, "{$params->show_in_list}_session");
+			}
             
             $data[] = $result;
         }
@@ -211,12 +223,12 @@ class Library extends Myschoolgh {
 	}
 
 	/**
-	 * @method checkBorrowedState
+	 * @method check_borrowed_state
 	 * @param stdClass $params 
 	 *
 	 * @return Bool
 	 **/
-	public function checkBorrowedState(stdClass $params) {
+	public function check_borrowed_state(stdClass $params) {
 
 		try {
 
@@ -230,6 +242,80 @@ class Library extends Myschoolgh {
 		} catch(PDOException $e) {
 			return false;
 		}
+	}
+
+	/**
+	 * In Array List
+	 * 
+	 * Confirm that the book id is in the list of the session parameter parsed
+	 * 
+	 * @param	String	$book_id
+	 * @param 	String	$the_session
+	 * 
+	 * @return Bool
+	 */
+	public function in_session_list($book_id, $the_session) {
+		if($this->count_session_data($the_session)) {
+			$book = array_column($_SESSION[$the_session], "book_id");
+			return (bool) in_array($book_id, $book);
+		}
+		return false;
+	}
+
+	/**
+	 * Add Book To Session
+	 * 
+	 * @param 	String	$quantity
+	 * @param	String	$book_id
+	 * @param 	String	$the_session
+	 * 
+	 * @return Bool
+	 */
+	public function add_book_to_session($the_session, $book_id, $quantity) {
+		if($this->count_session_data($the_session)) {
+			foreach($_SESSION[$the_session] as $key => $value) {				
+				if($value['book_id'] == $book_id) {
+				 	$_SESSION[$the_session][$key]['quantity'] = $quantity;
+				 	break;
+				}				
+			}
+			$book_id = array_column($_SESSION[$the_session], "book_id");
+            if (!in_array($book_id, $book_id)) {
+            	$_SESSION[$the_session][] = ['book_id'=>$book_id, 'quantity' => $quantity];
+            }
+		} else {
+			$_SESSION[$the_session][] = ['book_id' => $book_id, 'quantity' => $quantity];
+		}
+	}
+
+	/**
+	 * Remove Book from session
+	 * 
+	 * @param	String	$book_id
+	 * @param 	String	$the_session
+	 * 
+	 * @return Bool
+	 */
+	public function remove_book_from_session($the_session, $book_id) {
+		if($this->count_session_data($the_session)) {
+			foreach($_SESSION[$the_session] as $key => $value) {					
+				if($value['book_id'] == $book_id) {
+				 	unset($_SESSION[$the_session][$key]);
+				 	break;
+				}				
+			}
+		}
+	}
+
+	/**
+	 * Count Session
+	 * 
+	 * @param String $session_name
+	 * 
+	 * @return Bool
+	 */
+    public function count_session_data($the_session) {
+		return (isset($_SESSION[$the_session]) and count($_SESSION[$the_session]) > 0) ? true : false;
 	}
 
 	public function categoryBooksCounting() {
@@ -308,7 +394,6 @@ class Library extends Myschoolgh {
 	 *
 	 * @return bookName
 	 **/
-	
 	public function bookBorrowedBooksTitles($booksList, $linkType = 'link') {
 		
 		try {
@@ -398,11 +483,6 @@ class Library extends Myschoolgh {
 		}
 	}
 
-    public function countSessionData() {
-
-		return (isset($_SESSION['borrowedBookSession']) and count($_SESSION['borrowedBookSession']) > 0) ? true : false;
-	}
-
 	/**
 	 * @method issueBooksToStudent
 	 *
@@ -418,7 +498,7 @@ class Library extends Myschoolgh {
 	 **/
 	public function issueBooksToStudent($issueDate, $returnDate, $studentId, $overdueRate, $overdueApply) {
 
-		if($this->countSessionData()) {
+		if($this->count_session_data()) {
 			
 			if($overdueApply != "each-book") {
 				$eachBookRate = ($overdueRate / count($_SESSION['borrowedBookSession']));
@@ -636,6 +716,26 @@ class Library extends Myschoolgh {
             return ["code" => 203, "data" => "Sorry! An invalid book id was supplied."];
         }
 
+		// confirm that a logo was parsed
+        if(isset($params->book_image)) {
+            // set the upload directory
+            $uploadDir = "assets/img/library/";
+            // File path config 
+            $fileName = basename($params->book_image["name"]); 
+            $targetFilePath = $uploadDir . $fileName; 
+            $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+
+            // Allow certain file formats 
+            $allowTypes = array('jpg', 'png', 'jpeg');            
+            // check if its a valid image
+            if(!empty($fileName) && in_array($fileType, $allowTypes)){
+                // set a new filename
+                $book_image = $uploadDir . random_string('alnum', 10)."__{$fileName}";
+                // Upload file to the server 
+                if(move_uploaded_file($params->book_image["tmp_name"], $book_image)){}
+            }
+        }
+
 		/** Record the user activity **/
 		$query = $this->auto_update(
 			array(
@@ -643,6 +743,7 @@ class Library extends Myschoolgh {
 				"isbn = ?, title = ?, description = ?, author = ?, rack_no = ?, row_no = ?, 
                     class_id = ?, category_id = ?, department_id = ? 
                     ".(isset($params->quantity) ? ",quantity = '{$params->quantity}'" : "")."
+					".(isset($book_image) ? ",book_image = '{$book_image}'" : "")."
                     ".(isset($params->code) ? ",code = '{$params->code}'" : "")."",
 				"item_id = ? AND client_id = ?",
 				array(
@@ -654,13 +755,17 @@ class Library extends Myschoolgh {
 			)
 		);
 
-        /** Record the user activity **/
-		$this->userLogs("library_book", $params->book_id, null, "{$params->userData->name} updated the Book: {$params->title}", $params->userId);
+		// if the query was successful
+		if($query) {
 
-        $return = ["code" => 200, "data" => "Library Book successfully updated.", "refresh" => 2000];
-		$return["additional"] = ["href" => "{$this->baseUrl}update-book/{$params->book_id}/update"];
+			/** Record the user activity **/
+			$this->userLogs("library_book", $params->book_id, null, "{$params->userData->name} updated the Book: {$params->title}", $params->userId);
 
-        return $return;
+			$return = ["code" => 200, "data" => "Library Book successfully updated.", "refresh" => 2000];
+			$return["additional"] = ["href" => "{$this->baseUrl}update-book/{$params->book_id}/update"];
+
+			return $return;
+		}
 
 	}
 
@@ -689,27 +794,53 @@ class Library extends Myschoolgh {
 		$counter = $this->append_zeros(($this->itemsCount("books", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
         $code = $this->client_data($params->clientId)->client_preferences->labels->book.$counter;
 
+		// confirm that a logo was parsed
+        if(isset($params->book_image)) {
+            // set the upload directory
+            $uploadDir = "assets/img/library/";
+            // File path config 
+            $fileName = basename($params->book_image["name"]); 
+            $targetFilePath = $uploadDir . $fileName; 
+            $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+            // Allow certain file formats 
+            $allowTypes = array('jpg', 'png', 'jpeg');            
+            // check if its a valid image
+            if(!empty($fileName) && in_array($fileType, $allowTypes)){
+                // set a new filename
+                $book_image = $uploadDir . random_string('alnum', 10)."__{$fileName}";
+                // Upload file to the server 
+                if(move_uploaded_file($params->book_image["tmp_name"], $book_image)){}
+            }
+        }
+
 		$query = $this->auto_insert(
 			array(
 				"books",
 				"client_id = ?, isbn = ?, title = ?, description = ?, author = ?, rack_no = ?, 
                 row_no = ?, class_id = ?, category_id = ?, department_id = ?, quantity = ?, code = ?,
-                created_by = ?, item_id = ?",
+                created_by = ?, item_id = ?, book_image = ?",
 				array(
 					$params->clientId, $params->isbn, $params->title, $params->description ?? null, $params->author, 
                     $params->rack_no ?? null, $params->row_no ?? null, $params->class_id ?? null, $params->category_id ?? null,  
-                    $params->department_id ?? null, $params->quantity, $code, $params->userId, $item_id
+                    $params->department_id ?? null, $params->quantity, $code, $params->userId, $item_id, $book_image ?? null
 				)
 			)
 		);
 
-		/** Record the user activity **/
-		$this->userLogs("library_book", $item_id, null, "{$params->userData->name} added the Book: {$params->title}", $params->userId);
+		// if the query was successful
+		if($query) {
 
-        $return = ["code" => 200, "data" => "Library Book successfully added.", "refresh" => 2000];
-		$return["additional"] = ["href" => "{$this->baseUrl}update-book/{$item_id}/view", "clear" => true];
+			/** Create a new stock of the book  */
+			$this->db->query("INSERT INTO books_stock SET books_id = '{$item_id}', quantity = '{$params->quantity}'");
 
-        return $return;
+			/** Record the user activity **/
+			$this->userLogs("library_book", $item_id, null, "{$params->userData->name} added the Book: {$params->title}", $params->userId);
+
+			$return = ["code" => 200, "data" => "Library Book successfully added.", "refresh" => 2000];
+			$return["additional"] = ["href" => "{$this->baseUrl}update-book/{$item_id}/view", "clear" => true];
+
+			return $return;
+		}
 	}
     
     /**

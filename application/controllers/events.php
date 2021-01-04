@@ -209,7 +209,7 @@ class Events extends Myschoolgh {
 
             // File path config 
             $file_name = basename($params->event_image["name"]); 
-            $targetFilePath = $uploadDir . str_ireplace("/[\s]/", "", $file_name); 
+            $targetFilePath = $uploadDir . str_ireplace("/[\s]/", "", $file_name);
             $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
 
             // Allow certain file formats 
