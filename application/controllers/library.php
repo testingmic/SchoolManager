@@ -315,7 +315,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** Issue the book out to the user */
-		elseif($params->label["todo"] == "issue") {
+		elseif(in_array($params->label["todo"], ["issue", "request"])) {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
@@ -330,6 +330,7 @@ class Library extends Myschoolgh {
 			// append more values
 			$params->label["data"]["userId"] = $params->userId;
 			$params->label["data"]["clientId"] = $params->clientId;
+			$params->label["data"]["request"] = $params->label["todo"];
 			$params->label["data"]["fullname"] = $params->userData->name;
 			
 			// issue book from session
@@ -337,34 +338,7 @@ class Library extends Myschoolgh {
 
 			// return the session list as the response
 			return [
-				"data" => $request ? "The books were successfully issued out to the user" : "Sorry! There was an error while processing the request"
-			];
-		}
-
-		/** Issue the book out to the user */
-		elseif($params->label["todo"] == "request") {
-
-			// if the data is not parsed
-			if(!isset($params->label["data"])) {
-				return ["code" => 203, "data" => "Sorry! The data to be processed"];
-			}
-
-			// the books list
-			if(!isset($params->label["data"]["books_list"])) {
-				return ["code" => 203, "data" => "Sorry! You have not selected any books yet"];
-			}
-
-			// append more values
-			$params->label["data"]["userId"] = $params->userId;
-			$params->label["data"]["clientId"] = $params->clientId;
-			$params->label["data"]["fullname"] = $params->userData->name;
-			
-			// issue book from session
-			$request = $this->issue_book_to_user($params->label["data"], $the_session, $params->userId);
-
-			// return the session list as the response
-			return [
-				"data" => $request ? "The request for selected books was successfully placed." : "Sorry! There was an error while processing the request"
+				"data" => $request ? "The request successfully processed." : "Sorry! There was an error while processing the request"
 			];
 		}
 
@@ -452,33 +426,91 @@ class Library extends Myschoolgh {
 		return !empty($this->session->{$the_session}) ? true : false;
 	}
 
-	public function categoryBooksCounting() {
+	/**
+	 * @method issue_book_to_user
+	 *
+	 * This handles the issuance of a book to the student
+	 *
+	 * @param $issueDate 	The date that the book is been given out
+	 * @param $return_date 	The date that the student is supposed to return the book
+	 * @param $studentId 	The Student ID Number
+	 * @param $overdueRate	This is the fine for overdue
+	 * @param $overdueApply	This is to check whether fine applies to all books or just the order
+	 *
+	 * @return bookName
+	 **/
+	public function issue_book_to_user($params, $the_session, $userId) {
+		
+		// convert the data parameter to an object
+		$data = (object) $params;
 
+		// confirm that the return date is not empty
+		if(!isset($data->return_date)) {
+			return ["code" => 203, "data" => "Sorry! The return date for this request must be set."];
+		}
+
+		// rate for overdue
+		if(isset($data->overdue_apply) && ($data->overdue_apply !== "single") && !empty($data->overdue_rate)) {
+			$eachBookRate = ($data->overdue_rate / count($data->books_list));
+		} else {
+			$eachBookRate = isset($data->overdue_rate) ? $data->overdue_rate : 0;
+		}
+
+		$books_list = [];
+		foreach($data->books_list as $key => $value) {
+			$books_list[] = $key;
+		}
+
+		$this->db->beginTransaction();
+		
 		try {
 
+			$item_id = random_string("alnum", 32);
+
 			$stmt = $this->db->prepare("
-				SELECT
-					bt.*, 
-					(SELECT COUNT(*) FROM _books WHERE _books.category_id = bt.id AND _books.status = 1) AS books_counted,
-					dept.name AS department_name
-				FROM books_type bt
-				LEFT JOIN departments dept ON dept.id = bt.department_id
-				WHERE bt.status = ? AND bt.client_id = ?
+				INSERT INTO 
+					books_borrowed
+				SET
+					client_id = ?, item_id = ?, user_id = ?, user_role = ?, books_id = ?, 
+					issue_date = ?, return_date = ?, fine = ?, issued_by = ?, the_type = ?
 			");
-			$stmt->execute([1, $params->clientId]);
+			$stmt->execute([
+				$data->clientId, $item_id, $data->user_id, $data->user_role ?? null, json_encode($books_list), 
+				date("Y-m-d"), $data->return_date, $data->overdue_rate ?? 0, $userId, $data->request
+			]);
 
-			$results = array();
+			foreach($data->books_list as $key => $value) {
+				$stmt = $this->db->prepare("
+					INSERT INTO 
+						books_borrowed_details
+					SET
+						borrowed_id = ?, book_id = ?, quantity = ?,
+						return_date = ?, fine = ?, issued_by = ?, received_by = ?
+				");
+				$stmt->execute([$item_id, $key, $value, $data->return_date, $eachBookRate, $userId, $data->user_id]);
 
-			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-				$results[] = $result;
+				// reduce the books stock quantity
+				$this->db->query("UPDATE books_stock SET quantity = (quantity - {$value}) WHERE books_id = '{$key}' LIMIT 1");
 			}
 
-			return $results;
+			/** The Message */
+			$message = $data->request == "issue" ? "Issued Books out to a User" : "Made a request for a list of Books.";
 
+			/** Record the user activity **/
+			$this->userLogs("books_borrowed", $item_id, null, "{$data->fullname} {$message}.", $data->userId);
+
+			$this->session->{$the_session} = null;
+
+			$this->db->commit();
+
+			return true;
 		} catch(PDOException $e) {
-			return $e->getMessage();
+			$this->db->rollback();
+			return [];
 		}
+
 	}
+	
 
 	/**
 	 * @method booksFiltered
@@ -616,101 +648,6 @@ class Library extends Myschoolgh {
 			return $e->getMessage();
 		}
 	}
-
-	/**
-	 * @method issue_book_to_user
-	 *
-	 * This handles the issuance of a book to the student
-	 *
-	 * @param $issueDate 	The date that the book is been given out
-	 * @param $return_date 	The date that the student is supposed to return the book
-	 * @param $studentId 	The Student ID Number
-	 * @param $overdueRate	This is the fine for overdue
-	 * @param $overdueApply	This is to check whether fine applies to all books or just the order
-	 *
-	 * @return bookName
-	 **/
-	public function issue_book_to_user($params, $the_session, $userId) {
-		
-		// convert the data parameter to an object
-		$data = (object) $params;
-
-		// confirm that the return date is not empty
-		if(!isset($data->return_date)) {
-			return ["code" => 203, "data" => "Sorry! The return date for this request must be set."];
-		}
-
-		// rate for overdue
-		if(($data->overdue_apply !== "single") && !empty($data->overdue_rate)) {
-			$eachBookRate = ($data->overdue_rate / count($data->books_list));
-		} else {
-			$eachBookRate = isset($data->overdue_rate) ? $data->overdue_rate : 0;
-		}
-
-		$books_list = [];
-		foreach($data->books_list as $key => $value) {
-			$books_list[] = $key;
-		}
-
-		$this->db->beginTransaction();
-		
-		try {
-
-			$item_id = random_string("alnum", 32);
-
-			$stmt = $this->db->prepare("
-				INSERT INTO 
-					books_borrowed
-				SET
-					client_id = ?,
-					item_id = ?,
-					user_id = ?,
-					user_role = ?,
-					books_id = ?,
-					issue_date = ?,
-					return_date = ?,
-					fine = ?,
-					issued_by = ?
-			");
-			$stmt->execute([
-				$data->clientId, $item_id, $data->user_id, $data->user_role ?? null, json_encode($books_list), 
-				date("Y-m-d"), $data->return_date, $data->overdue_rate ?? 0, $userId
-			]);
-
-			foreach($data->books_list as $key => $value) {
-				$stmt = $this->db->prepare("
-					INSERT INTO 
-						books_borrowed_details
-					SET
-						borrowed_id = ?,
-						book_id = ?,
-						quantity = ?,
-						return_date = ?,
-						fine = ?,
-						issued_by = ?,
-						received_by = ?
-				");
-				$stmt->execute([$item_id, $key, $value, $data->return_date,$eachBookRate, $userId, $data->user_id]);
-
-				// reduce the books stock quantity
-				$this->db->query("UPDATE books_stock SET quantity = (quantity - {$value}) WHERE books_id = '{$key}' LIMIT 1");
-			}
-
-			/** Record the user activity **/
-			$this->userLogs("books_borrowed", $item_id, null, "{$data->fullname} Issued Books out to a User.", $data->userId);
-
-			$this->session->{$the_session} = null;
-
-			$this->db->commit();
-
-			return true;
-		} catch(PDOException $e) {
-			$this->db->rollback();
-			return [];
-		}
-
-	}
-
 
 	/**
 	 * @method returnBorrowedBook
