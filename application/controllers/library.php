@@ -263,14 +263,82 @@ class Library extends Myschoolgh {
 		$mode = $params->label["mode"];
 		$book_id = $params->label["book_id"] ?? null;
 
+		$the_session = "{$mode}_session";
+
 		/** Switch through the label */
 		if($params->label["todo"] == "add") {
-			$this->add_book_to_session("{$mode}_session", $book_id, 1);
+			// quantity
+			$quantity = $params->label["quantity"] ?? 1;
+
+			// get the book details
+			$param = (object) [
+				"limit" => 1,
+				"minified" => true,
+				"book_id" => $book_id,
+				"clientId" => $params->clientId
+			];
+			$book_info = $this->list($param)["data"];
+
+			// confirm that the book exists
+			if(empty($book_info)) {
+				return ["code" => 203, "data" => "Sorry! Invalid book id was supplied"];
+			}
+
+			// add to session
+			$this->add_book_to_session($the_session, $book_id, $quantity, $book_info[0]);
+
+			// return the session list as the response
+			return [
+				"data" => [
+					"books_list" => $this->session->$the_session
+				]
+			];
 		}
 
 		/** Remove book from session */
 		elseif($params->label["todo"] == "remove") {
-			$this->remove_book_from_session("{$mode}_session", $book_id);
+			// remove book from session
+			$this->remove_book_from_session($the_session, $book_id);
+			
+			// return the session list as the response
+			return [
+				"data" => ["books_list" => $this->session->$the_session]
+			];
+		}
+
+		/** List the books list in session */
+		elseif($params->label["todo"] == "list") {
+			// return the session list as the response
+			return [
+				"data" => ["books_list" => $this->session->$the_session]
+			];
+		}
+
+		/** Issue the book out to the user */
+		elseif($params->label["todo"] == "issue") {
+
+			// if the data is not parsed
+			if(!isset($params->label["data"])) {
+				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+			}
+
+			// the books list
+			if(!isset($params->label["data"]["books_list"])) {
+				return ["code" => 203, "data" => "Sorry! You have not selected any books yet"];
+			}
+
+			// append more values
+			$params->label["data"]["userId"] = $params->userId;
+			$params->label["data"]["clientId"] = $params->clientId;
+			$params->label["data"]["fullname"] = $params->userData->name;
+			
+			// issue book from session
+			$request = $this->issue_book_to_user($params->label["data"], $the_session, $params->userId);
+
+			// return the session list as the response
+			return [
+				"data" => $request ? "The books were successfully issued out to the user" : "Sorry! There was an error while processing the request"
+			];
 		}
 
 	}
@@ -299,10 +367,11 @@ class Library extends Myschoolgh {
 	 * @param 	String	$quantity
 	 * @param	String	$book_id
 	 * @param 	String	$the_session
+	 * @param	stdClass	$info	The summary details of the book
 	 * 
 	 * @return Bool
 	 */
-	public function add_book_to_session($the_session, $book_id, $quantity) {
+	public function add_book_to_session($the_session, $book_id, $quantity, $info) {
 		if($this->count_session_data($the_session)) {
 			foreach($_SESSION[$the_session] as $key => $value) {				
 				if($value['book_id'] == $book_id) {
@@ -312,10 +381,10 @@ class Library extends Myschoolgh {
 			}
 			$book_ids = array_column($_SESSION[$the_session], "book_id");
             if (!in_array($book_id, $book_ids)) {
-            	$_SESSION[$the_session][] = ['book_id' => $book_id, 'quantity' => $quantity];
+            	$_SESSION[$the_session][] = ['book_id' => $book_id, 'quantity' => $quantity, 'info' => $info];
             }
 		} else {
-			$_SESSION[$the_session][] = ['book_id' => $book_id, 'quantity' => $quantity];
+			$_SESSION[$the_session][] = ['book_id' => $book_id, 'quantity' => $quantity, 'info' => $info];
 		}
 
 		$this->session->set($the_session, $_SESSION[$the_session]);
@@ -522,84 +591,91 @@ class Library extends Myschoolgh {
 	}
 
 	/**
-	 * @method issueBooksToStudent
+	 * @method issue_book_to_user
 	 *
 	 * This handles the issuance of a book to the student
 	 *
 	 * @param $issueDate 	The date that the book is been given out
-	 * @param $returnDate 	The date that the student is supposed to return the book
+	 * @param $return_date 	The date that the student is supposed to return the book
 	 * @param $studentId 	The Student ID Number
 	 * @param $overdueRate	This is the fine for overdue
 	 * @param $overdueApply	This is to check whether fine applies to all books or just the order
 	 *
 	 * @return bookName
 	 **/
-	public function issueBooksToStudent($issueDate, $returnDate, $studentId, $overdueRate, $overdueApply) {
+	public function issue_book_to_user($params, $the_session, $userId) {
+		
+		// convert the data parameter to an object
+		$data = (object) $params;
 
-		if($this->count_session_data()) {
-			
-			if($overdueApply != "each-book") {
-				$eachBookRate = ($overdueRate / count($_SESSION['borrowedBookSession']));
-			} else {
-				$eachBookRate = $overdueRate;
-			}
 
-			$books_list = '';
-			foreach($_SESSION['borrowedBookSession'] as $key => $value) {
-				$books_list .= $value['book_id'].'||';
-			}
+		if($data->overdue_apply !== "single") {
+			$eachBookRate = ($data->overdue_rate / count($data->books_list));
+		} else {
+			$eachBookRate = $data->overdue_rate;
+		}
 
-			$books_list = substr($books_list, 0, -2);
+		$books_list = [];
+		foreach($data->books_list as $key => $value) {
+			$books_list[] = $key;
+		}
 
-			$this->db->beginTransaction();
-			
-			try {
+		$this->db->beginTransaction();
+		
+		try {
 
+			$item_id = random_string("alnum", 32);
+
+			$stmt = $this->db->prepare("
+				INSERT INTO 
+					books_borrowed
+				SET
+					client_id = ?,
+					item_id = ?,
+					user_id = ?,
+					user_role = ?,
+					books_id = ?,
+					issue_date = ?,
+					return_date = ?,
+					fine = ?,
+					issued_by = ?
+			");
+			$stmt->execute([
+				$data->clientId, $item_id, $data->user_id, $data->user_role, json_encode($books_list), 
+				date("Y-m-d"), $data->return_date, $data->overdue_rate, $userId
+			]);
+
+			foreach($data->books_list as $key => $value) {
 				$stmt = $this->db->prepare("
 					INSERT INTO 
-						books_borrowed
+						books_borrowed_details
 					SET
-						client_id = ?,
-						student_id = ?,
-						books_id = ?,
-						issueDate = ?,
-						returnDate = ?,
+						borrowed_id = ?,
+						book_id = ?,
+						quantity = ?,
+						return_date = ?,
 						fine = ?,
-						issued_by = ?
+						issued_by = ?,
+						received_by = ?
 				");
-				$stmt->execute([$params->clientId, $studentId, $books_list, $issueDate, $returnDate, $overdueRate, $this->session->userId]);
-
-				$lastRowId = $this->lastRowId("books_borrowed", "id");
-
-				foreach($_SESSION['borrowedBookSession'] as $key => $value) {
-					$stmt = $this->db->prepare("
-						INSERT INTO 
-							books_borrowed_details
-						SET
-							borrowed_id = ?,
-							book_id = ?,
-							quantity = ?,
-							return_date = ?,
-							fine = ?,
-							issued_by = ?,
-							received_by = ?
-					");
-					$stmt->execute([$lastRowId, $value['book_id'], $value['quantity'], $returnDate, $eachBookRate, $this->session->userId, $studentId]);
-				}
-
-				/** Record the user activity **/
-                $this->userLogs("books_borrowed", $lastRowId, null, "{$params->userData->name} Issued Books out to a Student.", $params->userId);
-
-				unset($_SESSION['borrowedBookSession']);
-
-				$this->db->commit();
-
-				return true;
-			} catch(PDOException $e) {
-				$this->db->rollback();
-				return $e->getMessage();
+				$stmt->execute([
+					$item_id, $key, $value, $data->return_date,
+					$eachBookRate, $userId, $data->user_id
+				]);
 			}
 
+			/** Record the user activity **/
+			$this->userLogs("books_borrowed", $item_id, null, "{$data->fullname} Issued Books out to a User.", $data->userId);
+
+			$this->session->{$the_session} = null;
+
+			$this->db->commit();
+
+			return true;
+		} catch(PDOException $e) {
+			$this->db->rollback();
+			print $e->getMessage();
+			return [];
 		}
 
 	}
@@ -760,6 +836,7 @@ class Library extends Myschoolgh {
             $uploadDir = "assets/img/library/";
             // File path config 
             $fileName = basename($params->book_image["name"]); 
+			$fileName = preg_replace("/[^a-zA-Z0-9._]/", "", $fileName);
             $targetFilePath = $uploadDir . $fileName; 
             $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
 
@@ -837,7 +914,8 @@ class Library extends Myschoolgh {
             // set the upload directory
             $uploadDir = "assets/img/library/";
             // File path config 
-            $fileName = basename($params->book_image["name"]); 
+            $fileName = basename($params->book_image["name"]);
+			$fileName = preg_replace("/[^a-zA-Z0-9._]/", "", $fileName);
             $targetFilePath = $uploadDir . $fileName; 
             $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
             // Allow certain file formats 

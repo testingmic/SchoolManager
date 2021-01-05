@@ -39,14 +39,117 @@ var upload_EBook_Resource = (book_id) => {
     });
 }
 
+var issue_Request_Handler = (todo, book_id = "") => {
+    let label = {
+        "todo": todo,
+        "mode": selected_books.attr("data-mode"),
+        "book_id": book_id
+    };
+    $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
+        if (response.code == 200) {
+            selected_books.addClass("hidden");
+            selected_books.html("");
+            if (response.data.result.books_list !== undefined) {
+                let books_list = `<div class="table-responsive"><table class="table table-bordered">`;
+                $.each(response.data.result.books_list, function(i, book) {
+                    i++;
+                    books_list += `<tr data-row_id="${book.book_id}" class="each_book_item">
+                        <td>
+                            <div class="pt-2 pb-1">
+                                <span class="text-primary text-uppercase">${book.info.title}</span><br>
+                                <i class="fa fa-book-reader"></i> <strong>${book.info.isbn}</strong><br>
+                                <i class="fa fa-user"></i> ${book.info.author}
+                                <p class="mb-0">
+                                    <span class="mr-4"><i class="fa fa-table"></i> <strong>Rack:</strong>  ${book.info.rack_no}</span> 
+                                    <span><strong>Row:</strong>  ${book.info.row_no}</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td><input type="number" max="${book.info.books_stock}" value="${book.quantity}" name="book_quantity" data-book_id="${book.book_id}" class="form-control" style="width:90px"></td>
+                        <td><button onclick="return issue_Request_Handler('remove', '${book.book_id}');" class="btn-sm btn-outline-danger btn"><i class="fa fa-trash"></i></button></td>
+                    </tr>`;
+                });
+                books_list += `</table></div>`;
+                if (response.data.result.books_list) {
+                    selected_books_list.html(books_list);
+                }
+                $(`option[data-item_id='${book_id}']`).remove();
+            }
+        }
+    });
+}
+
+var save_Issue_Request = (issue_id) => {
+    swal({
+        title: "Issue Books",
+        text: "Are you sure you want to issue these books to the selected user?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            let user_role = $(`div[id='library_form'] select[name="user_role"]`),
+                user_id = $(`div[id='library_form'] select[name="user_id"]`),
+                return_date = $(`div[id='library_form'] input[name="return_date"]`),
+                overdue_rate = $(`div[id='library_form'] input[name="overdue_rate"]`),
+                overdue_apply = $(`div[id='library_form'] select[name="overdue_apply"]`).val(),
+                books_list = {};
+
+            $.each($(`div[id='library_form'] table tr[class="each_book_item"] input`), function(i, e) {
+                let book_id = $(this).attr("data-book_id"),
+                    quantity = $(this).val();
+                books_list[book_id] = parseInt(quantity);
+            });
+
+            let label = {
+                "todo": "issue",
+                "mode": selected_books.attr("data-mode"),
+                "data": {
+                    "books_list": books_list,
+                    "user_id": user_id.val(),
+                    "user_role": user_role.val(),
+                    "return_date": return_date.val(),
+                    "overdue_rate": overdue_rate.val(),
+                    "overdue_apply": overdue_apply
+                }
+            };
+
+            $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
+                if (response.code == 200) {
+                    selected_books.html("");
+                    selected_books_list.html(`<div class="font-italic">No books has been selected yet.</div>`),
+                        user_role.val("").change(),
+                        user_id.val("").change(),
+                        overdue_rate.val(""),
+                        return_date.val("");
+
+                    swal({
+                        position: "top",
+                        text: response.data.result,
+                        icon: "success",
+                    });
+                } else {
+                    swal({
+                        position: "top",
+                        text: response.data.result,
+                        icon: "error",
+                    });
+                }
+            });
+        }
+    });
+}
+
 $(`div[id="library_form"] select[name="category_id"]`).on("change", function() {
     let category_id = $(this).val(),
         mode = selected_books.attr("data-mode");
+
+    $(`div[id='library_form'] select[name='book_id']`).find('option').remove().end();
+    $(`div[id='library_form'] select[name='book_id']`).append(`<option value="null">Please Select</option>`);
+
     if (category_id.length) {
         $.get(`${baseUrl}api/library/list?show_in_list=${mode}&minified=true`, { category_id }).then((response) => {
             if (response.code == 200) {
-                $(`div[id='library_form'] select[name='book_id']`).find('option').remove().end();
-                $(`div[id='library_form'] select[name='book_id']`).append(`<option value="null">Please Select</option>`);
                 $.each(response.data.result, function(i, book) {
                     $(`div[id='library_form'] select[name='book_id']`).append(`<option data-in_session='${book.in_session}' data-row_no='${book.row_no}' data-rack_no='${book.rack_no}' data-item_id='${book.item_id}' data-isbn='${book.isbn}' data-books_stock='${book.books_stock}' data-book_image='${book.book_image}' data-book_author='${book.author}' data-book_title='${book.title}' value='${book.item_id}'>${book.title}</option>'`);
                 });
@@ -57,19 +160,22 @@ $(`div[id="library_form"] select[name="category_id"]`).on("change", function() {
     }
 });
 
-var issue_Request_Handler = (todo, book_id) => {
-    let label = {
-        "todo": todo,
-        "mode": selected_books.attr("data-mode"),
-        "book_id": book_id
-    };
-    $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
-        if (response.code == 200) {
-            selected_books.addClass("hidden");
-            selected_books.html("");
-        }
-    });
-}
+$(`div[id="library_form"] select[name="user_role"]`).on("change", function() {
+    let user_type = $(this).val();
+
+    $(`div[id='library_form'] select[name='user_id']`).find('option').remove().end();
+    $(`div[id='library_form'] select[name='user_id']`).append(`<option value="null">Please Select</option>`);
+
+    if (user_type.length) {
+        $.get(`${baseUrl}api/users/list?minified=simplied_load_with&user_type=${user_type}`).then((response) => {
+            if (response.code == 200) {
+                $.each(response.data.result, function(i, user) {
+                    $(`div[id='library_form'] select[name='user_id']`).append(`<option value='${user.user_id}'>${user.name} (${user.unique_id})</option>'`);
+                });
+            }
+        });
+    }
+});
 
 $(`div[id='library_form'] select[name='book_id']`).on("change", function() {
             let book = $(`div[id='library_form'] select[name='book_id'] > option:selected`).data();
@@ -79,7 +185,7 @@ $(`div[id='library_form'] select[name='book_id']`).on("change", function() {
             } else {
                 selected_books.removeClass("hidden");
                 selected_books.html(`
-            <div class="card-body">
+            <div class="card-body pb-1">
                 <div class="d-flex justify-content-start">
                     ${book.book_image ? `<div class="mr-2"><img src="${book.book_image}" width="180px"></div>` : ""}
                     <div>
@@ -87,17 +193,21 @@ $(`div[id='library_form'] select[name='book_id']`).on("change", function() {
                         <p class="mb-0"><i class="fa fa-book-reader"></i> <strong>ISBN:</strong> ${book.isbn}</p>
                         <p class="mb-0"><i class="fa fa-user"></i> <strong>Author:</strong> ${book.book_author}</p>
                         <p class="mb-0"><i class="fa fa-baby-carriage"></i> <strong>Quantity:</strong>  ${book.books_stock}</p>
-                        <p class="mb-3">
+                        <p class="mb-2">
                             <span class="mr-4"><i class="fa fa-table"></i> <strong>Rack:</strong>  ${book.rack_no}</span> 
                             <span><strong>Row:</strong>  ${book.row_no}</span>
                         </p>
+                        ${book.books_stock !== 0 ? `
                         <p class="mb-0">
                             ${book.in_session !== true ? `<button onclick="return issue_Request_Handler('add', '${book.item_id}');" class="btn-sm btn-outline-success btn"><i class="fa fa-plus"></i> Add</button>` 
                             : `<button onclick="return issue_Request_Handler('remove', '${book.item_id}');" class="btn-sm btn-outline-danger btn"><i class="fa fa-trash"></i> Remove</button>`}
                         </p>
+                        ` : `<p class="text-danger font-weight-600 mb-0">Sorry! This book is out of Stock</p>`}
                     </div>
                 </div>
             </div>
         `);
     }
 });
+
+issue_Request_Handler("list");
