@@ -39,6 +39,19 @@ var upload_EBook_Resource = (book_id) => {
     });
 }
 
+var book_quantity_Checker = () => {
+    $(`div[id='library_form'] table tr[class="each_book_item"] input[type="number"]`).on("keyup", function() {
+        let input = $(this),
+            value = parseInt(input.val()),
+            max = parseInt(input.attr("max"));
+        if (value < 1) {
+            input.val(1);
+        } else if (value > max) {
+            input.val(max);
+        }
+    });
+}
+
 var issue_Request_Handler = (todo, book_id = "") => {
     let label = {
         "todo": todo,
@@ -65,7 +78,7 @@ var issue_Request_Handler = (todo, book_id = "") => {
                                 </p>
                             </div>
                         </td>
-                        <td><input type="number" max="${book.info.books_stock}" value="${book.quantity}" name="book_quantity" data-book_id="${book.book_id}" class="form-control" style="width:90px"></td>
+                        <td><input type="number" min="1" max="${book.info.books_stock}" value="${book.quantity}" name="book_quantity" data-book_id="${book.book_id}" class="form-control" style="width:95px"></td>
                         <td><button onclick="return issue_Request_Handler('remove', '${book.book_id}');" class="btn-sm btn-outline-danger btn"><i class="fa fa-trash"></i></button></td>
                     </tr>`;
                 });
@@ -73,27 +86,38 @@ var issue_Request_Handler = (todo, book_id = "") => {
                 if (response.data.result.books_list) {
                     selected_books_list.html(books_list);
                 }
+                book_quantity_Checker();
                 $(`option[data-item_id='${book_id}']`).remove();
             }
         }
     });
 }
 
-var save_Issue_Request = (issue_id) => {
+var save_Issue_Request = (issue_id, request) => {
+    let t_title = (request === "issue") ? "Issue Books" : "Request for Books",
+        t_message = (request === "issue") ? "Are you sure you want to issue these books to the selected user?" : "Are you sure you want to request for these Books.";
+
     swal({
-        title: "Issue Books",
-        text: "Are you sure you want to issue these books to the selected user?",
+        title: t_title,
+        text: t_message,
         icon: 'warning',
         buttons: true,
         dangerMode: true,
     }).then((proceed) => {
+
         if (proceed) {
-            let user_role = $(`div[id='library_form'] select[name="user_role"]`),
-                user_id = $(`div[id='library_form'] select[name="user_id"]`),
-                return_date = $(`div[id='library_form'] input[name="return_date"]`),
-                overdue_rate = $(`div[id='library_form'] input[name="overdue_rate"]`),
-                overdue_apply = $(`div[id='library_form'] select[name="overdue_apply"]`).val(),
+
+            var return_date = $(`div[id='library_form'] input[name="return_date"]`),
                 books_list = {};
+
+            if (request === "issue") {
+                var user_role = $(`div[id='library_form'] select[name="user_role"]`),
+                    user_id = $(`div[id='library_form'] select[name="user_id"]`),
+                    overdue_rate = $(`div[id='library_form'] input[name="overdue_rate"]`),
+                    overdue_apply = $(`div[id='library_form'] select[name="overdue_apply"]`).val();
+            } else if (request === "request") {
+                user_id = $(`div[id='library_form'] input[name="user_id"]`);
+            }
 
             $.each($(`div[id='library_form'] table tr[class="each_book_item"] input`), function(i, e) {
                 let book_id = $(this).attr("data-book_id"),
@@ -102,9 +126,12 @@ var save_Issue_Request = (issue_id) => {
             });
 
             let label = {
-                "todo": "issue",
-                "mode": selected_books.attr("data-mode"),
-                "data": {
+                "todo": request,
+                "mode": selected_books.attr("data-mode")
+            };
+
+            if (request === "issue") {
+                label["data"] = {
                     "books_list": books_list,
                     "user_id": user_id.val(),
                     "user_role": user_role.val(),
@@ -112,29 +139,32 @@ var save_Issue_Request = (issue_id) => {
                     "overdue_rate": overdue_rate.val(),
                     "overdue_apply": overdue_apply
                 }
-            };
+            } else if (request === "request") {
+                label["data"] = {
+                    "books_list": books_list,
+                    "user_id": user_id.val(),
+                    "return_date": return_date.val()
+                };
+            }
 
             $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
+                let s_icon = "error";
                 if (response.code == 200) {
                     selected_books.html("");
-                    selected_books_list.html(`<div class="font-italic">No books has been selected yet.</div>`),
+                    selected_books_list.html(`<div class="font-italic">No books has been selected yet.</div>`);
+                    return_date.val("");
+                    if (request === "issue") {
                         user_role.val("").change(),
-                        user_id.val("").change(),
-                        overdue_rate.val(""),
-                        return_date.val("");
-
-                    swal({
-                        position: "top",
-                        text: response.data.result,
-                        icon: "success",
-                    });
-                } else {
-                    swal({
-                        position: "top",
-                        text: response.data.result,
-                        icon: "error",
-                    });
+                            user_id.val("").change(),
+                            overdue_rate.val("");
+                    }
+                    s_icon = "success";
                 }
+                swal({
+                    position: "top",
+                    text: response.data.result,
+                    icon: s_icon,
+                });
             });
         }
     });

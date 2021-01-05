@@ -2887,7 +2887,7 @@ class Forms extends Myschoolgh {
                 <input type="hidden" readonly name="user_id" id="user_id" value="'.$data->user_id.'">
                 <div class="form-group">
                     <label>Return Date <span class="required">*</span></label>
-                    <input type="text" name="return_date" id="return_date" class="form-control datepicker">
+                    <input type="text" value="'.($data->return_date ?? date("Y-m-d", strtotime("+1 week"))).'" name="return_date" id="return_date" class="form-control datepicker">
                 </div>
                 <div class="text-right">
                     <input type="hidden" value="'.($data->issue_id ?? null).'" name="issue_id" readonly>

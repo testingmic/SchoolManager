@@ -341,6 +341,33 @@ class Library extends Myschoolgh {
 			];
 		}
 
+		/** Issue the book out to the user */
+		elseif($params->label["todo"] == "request") {
+
+			// if the data is not parsed
+			if(!isset($params->label["data"])) {
+				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+			}
+
+			// the books list
+			if(!isset($params->label["data"]["books_list"])) {
+				return ["code" => 203, "data" => "Sorry! You have not selected any books yet"];
+			}
+
+			// append more values
+			$params->label["data"]["userId"] = $params->userId;
+			$params->label["data"]["clientId"] = $params->clientId;
+			$params->label["data"]["fullname"] = $params->userData->name;
+			
+			// issue book from session
+			$request = $this->issue_book_to_user($params->label["data"], $the_session, $params->userId);
+
+			// return the session list as the response
+			return [
+				"data" => $request ? "The request for selected books was successfully placed." : "Sorry! There was an error while processing the request"
+			];
+		}
+
 	}
 
 	/**
@@ -608,11 +635,16 @@ class Library extends Myschoolgh {
 		// convert the data parameter to an object
 		$data = (object) $params;
 
+		// confirm that the return date is not empty
+		if(!isset($data->return_date)) {
+			return ["code" => 203, "data" => "Sorry! The return date for this request must be set."];
+		}
 
-		if($data->overdue_apply !== "single") {
+		// rate for overdue
+		if(($data->overdue_apply !== "single") && !empty($data->overdue_rate)) {
 			$eachBookRate = ($data->overdue_rate / count($data->books_list));
 		} else {
-			$eachBookRate = $data->overdue_rate;
+			$eachBookRate = isset($data->overdue_rate) ? $data->overdue_rate : 0;
 		}
 
 		$books_list = [];
@@ -641,8 +673,8 @@ class Library extends Myschoolgh {
 					issued_by = ?
 			");
 			$stmt->execute([
-				$data->clientId, $item_id, $data->user_id, $data->user_role, json_encode($books_list), 
-				date("Y-m-d"), $data->return_date, $data->overdue_rate, $userId
+				$data->clientId, $item_id, $data->user_id, $data->user_role ?? null, json_encode($books_list), 
+				date("Y-m-d"), $data->return_date, $data->overdue_rate ?? 0, $userId
 			]);
 
 			foreach($data->books_list as $key => $value) {
@@ -658,10 +690,10 @@ class Library extends Myschoolgh {
 						issued_by = ?,
 						received_by = ?
 				");
-				$stmt->execute([
-					$item_id, $key, $value, $data->return_date,
-					$eachBookRate, $userId, $data->user_id
-				]);
+				$stmt->execute([$item_id, $key, $value, $data->return_date,$eachBookRate, $userId, $data->user_id]);
+
+				// reduce the books stock quantity
+				$this->db->query("UPDATE books_stock SET quantity = (quantity - {$value}) WHERE books_id = '{$key}' LIMIT 1");
 			}
 
 			/** Record the user activity **/
@@ -674,7 +706,6 @@ class Library extends Myschoolgh {
 			return true;
 		} catch(PDOException $e) {
 			$this->db->rollback();
-			print $e->getMessage();
 			return [];
 		}
 
