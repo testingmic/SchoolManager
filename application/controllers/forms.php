@@ -2884,6 +2884,7 @@ class Forms extends Myschoolgh {
         if(isset($data->request_form)) {
             // set the html_content to display
             $html_content .= '
+                <input type="hidden" readonly name="user_role" id="user_role" value="'.$data->user_role.'">
                 <input type="hidden" readonly name="user_id" id="user_id" value="'.$data->user_id.'">
                 <div class="form-group">
                     <label>Return Date <span class="required">*</span></label>

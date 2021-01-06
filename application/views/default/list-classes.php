@@ -19,12 +19,11 @@ $response = (object) [];
 $response->title = "Classes List : {$appName}";
 $response->scripts = [];
 
-$department_param = (object) [
+$classes_param = (object) [
     "clientId" => $session->clientId,
     "limit" => 99999
 ];
-
-$item_list = load_class("classes", "controllers")->list($department_param);
+$item_list = load_class("classes", "controllers")->list($classes_param);
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;

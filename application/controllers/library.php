@@ -32,7 +32,8 @@ class Library extends Myschoolgh {
 
         // set the filters
         $filters = "";
-        $filters .= isset($params->class_id) ? " AND bk.class_id='{$params->class_id}'" : "";
+        $filters .= isset($params->q) ? " AND bk.title LIKE '%{$params->q}%'" : "";
+		$filters .= isset($params->class_id) ? " AND bk.class_id='{$params->class_id}'" : "";
         $filters .= isset($params->book_id) ? " AND bk.item_id='{$params->book_id}'" : "";
         $filters .= isset($params->category_id) ? " AND bk.category_id='{$params->category_id}'" : "";
         $filters .= isset($params->department_id) ? " AND bk.department_id='{$params->department_id}'" : "";
@@ -90,6 +91,142 @@ class Library extends Myschoolgh {
             "data" => $data
         ];
     }
+
+	/**
+	 * @method book_borrowed_details
+	 *
+	 * This will convert the books list submitted as an array and fetch records for each item
+	 *
+	 * @param array $booksList
+	 *
+	 * @return bookName
+	 **/
+	public function book_borrowed_details($borrowed_id) {
+		
+		try {
+			
+			$stmt = $this->db->prepare("
+				SELECT 
+					bd.quantity, bd.fine, bd.actual_paid, bd.date_borrowed, bd.return_date,
+					bk.isbn, bk.title, bk.item_id, bd.status, bd.id AS borrowed_row_id, bd.book_id
+				FROM 
+					books_borrowed_details bd
+				LEFT JOIN books bk ON bk.item_id = bd.book_id
+				WHERE borrowed_id = ? LIMIT 100
+			");
+			$stmt->execute([$borrowed_id]);
+			
+			// set the returned state to true
+			$data = [];
+
+			// using the while loop to fetch all the items
+			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+				$data[] = $result;
+			}
+
+			return [
+				"data" => $data
+			];
+
+		} catch(PDOException $e) {
+			return $e->getMessage();
+		}
+	}
+
+	/**
+     * List The Issued or Request List
+     * 
+	 * @param stdClass $params
+	 *  
+     * @return Array
+     */
+	public function issued_request_list(stdClass $params) {
+
+		global $accessObject;
+
+		$params->query = "1";
+
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+		// append to the parameter based on the user type logged in
+		if($params->userData->user_type == "teacher") {
+			$params->user_role = "teacher";
+			$params->user_id = $params->userData->user_id;
+		}
+
+		// if the user is an employee and does not have the permission to issue
+		if(in_array($params->userData->user_type, ["accountant", "employee"]) && !$accessObject->hasAccess("issue", "library")) {
+			$params->user_role = $params->userData->user_type;
+			$params->user_id = $params->userData->user_id;
+		}
+
+		// if the user is a student or parent
+		if(in_array($params->userData->user_type, ["student", "parent"])) {
+			$params->user_role = "student";
+			$user_id = $params->userData->user_id;
+
+			// if the user is a parent
+			if($params->userData->user_type == "parent") {
+				$user_id = $this->session->student_id;
+			}
+
+			// set the user id
+			$params->user_id = $user_id;
+		}
+
+		// show the book list so long as the borrowed_id is parsed
+		if(isset($params->borrowed_id)) {
+			$params->show_list = true;
+		}
+
+		$params->query .= (isset($params->issued_date)) ? " AND a.issued_date='{$params->issued_date}'" : null;
+		$params->query .= (isset($params->return_date)) ? " AND a.return_date='{$params->return_date}'" : null;
+		$params->query .= (isset($params->status)) ? " AND a.status='{$params->status}'" : null;
+        $params->query .= (isset($params->user_role)) ? " AND a.user_role='{$params->user_role}'" : null;
+        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
+		$params->query .= (isset($params->borrowed_id)) ? " AND a.item_id='{$params->borrowed_id}'" : null;
+
+        try {
+
+            $stmt = $this->db->prepare("
+                SELECT a.*,
+                    (SELECT COUNT(*) FROM books_borrowed_details b WHERE b.book_id = a.item_id LIMIT 1) AS books_count,
+					(SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.unique_id) FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_info
+                FROM books_borrowed a
+                WHERE {$params->query} AND a.deleted = ? ORDER BY a.id LIMIT {$params->limit}
+            ");
+            $stmt->execute([0]);
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+				if(isset($params->show_list)) {
+					$result->books_list = $this->book_borrowed_details($result->item_id);
+				}
+
+				// loop through the information
+                foreach(["user_info"] as $each) {
+                    // confirm that it is set
+                    if(isset($result->{$each})) {
+                        // convert the created by string into an object
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type","unique_id"]);
+                    }
+                }
+
+                $data[] = $result;
+            }
+
+            return [
+                "code" => 200,
+                "data" => $data
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+	}
 
 	/**
      * List library books category
@@ -443,6 +580,7 @@ class Library extends Myschoolgh {
 		
 		// convert the data parameter to an object
 		$data = (object) $params;
+		$status = ($params->request == "issue") ? "Issued" : "Requested";
 
 		// confirm that the return date is not empty
 		if(!isset($data->return_date)) {
@@ -472,11 +610,11 @@ class Library extends Myschoolgh {
 					books_borrowed
 				SET
 					client_id = ?, item_id = ?, user_id = ?, user_role = ?, books_id = ?, 
-					issue_date = ?, return_date = ?, fine = ?, issued_by = ?, the_type = ?
+					issued_date = ?, return_date = ?, fine = ?, issued_by = ?, the_type = ?, status = ?
 			");
 			$stmt->execute([
 				$data->clientId, $item_id, $data->user_id, $data->user_role ?? null, json_encode($books_list), 
-				date("Y-m-d"), $data->return_date, $data->overdue_rate ?? 0, $userId, $data->request
+				date("Y-m-d"), $data->return_date, $data->overdue_rate ?? 0, $userId, $data->request, $status
 			]);
 
 			foreach($data->books_list as $key => $value) {
@@ -494,7 +632,7 @@ class Library extends Myschoolgh {
 			}
 
 			/** The Message */
-			$message = $data->request == "issue" ? "Issued Books out to a User" : "Made a request for a list of Books.";
+			$message = $data->request == "issue" ? "Issued Books out to the User." : "Made a request for a list of Books.";
 
 			/** Record the user activity **/
 			$this->userLogs("books_borrowed", $item_id, null, "{$data->fullname} {$message}.", $data->userId);
@@ -510,7 +648,6 @@ class Library extends Myschoolgh {
 		}
 
 	}
-	
 
 	/**
 	 * @method booksFiltered
@@ -586,63 +723,6 @@ class Library extends Myschoolgh {
 			}
 
 			return $booksTitle;
-
-		} catch(PDOException $e) {
-			return $e->getMessage();
-		}
-	}
-
-	/**
-	 * @method booksBorrowedBooksListing
-	 *
-	 * This will convert the books list submitted as an array and fetch records for each item
-	 *
-	 * @param array $booksList
-	 *
-	 * @return bookName
-	 **/
-	public function bookBorrowedBooksDetails($borrowedId) {
-		
-		try {
-			$booksList = "";
-			$stmt = $this->db->prepare("
-				SELECT 
-					bd.quantity, bd.fine, bd.date_borrowed, bd.return_date,
-					bk.isbn, bk.title, bd.status, bd.id AS borrowed_row_id, bd.book_id
-				FROM 
-					books_borrowed_details bd
-				LEFT JOIN _books bk ON bk.id = bd.book_id
-				WHERE borrowed_id = ?
-			");
-			$stmt->execute([$borrowedId]);
-			// set the returned state to true
-			$due_button = '<span class="badge badge-success">Active</span>';
-			$due_note = 'active';
-			// using the while loop to fetch all the items
-			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-				// if the user did not request for showing the details fo the books
-				// then print only the book title
-				// check if the due date has expired
-				if($result->status == "Borrowed") {
-					// set it as overdue
-					if(strtotime($result->return_date) < time()) {
-						$due_button = '<span class="badge badge-danger">Overdue</span>';
-						$due_note = 'overdue';
-					}
-				} elseif($result->status == "Returned") {
-					$due_button = '';
-				}
-				//print_r($result);
-				$booksList .= "<tr>";
-				$booksList .= "<td><a data-function=\"view-book\" href='javascript:void(0)' data-book-id=\"{$result->book_id}\">{$result->title}</a> {$due_button} <br><strong>ISBN: <small>{$result->isbn}</small></strong></td>";
-				$booksList .= "<td>{$result->quantity}</td>";
-				$booksList .= "<td>{$result->return_date}</td>";
-				$booksList .= "<td>{$result->fine}</td>";
-				$booksList .= "<td>".(($result->status == "Borrowed") ? "<button data-note=\"$due_note\" data-amount=\"".substr($result->fine, 0, -3)."\" data-book-id=\"{$result->borrowed_row_id}\" title=\"Return Book\" data-function=\"return-book\" data-mode=\"single-book\" class=\"btn btn-outline-warning\"><i class=\"fa fa-reply\"></i> Return</button>" : "<span class=\"badge badge-success\">Returned</span>")."</td>";
-				$booksList .= "</tr>";
-			}
-
-			return $booksList;
 
 		} catch(PDOException $e) {
 			return $e->getMessage();

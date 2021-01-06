@@ -22,16 +22,46 @@ $accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 
 $hasIssue = $accessObject->hasAccess("issue", "library");
-
 $pageTitle = $hasIssue ? "Issued Books List" : "My Books List";
 
 $response->title = "{$pageTitle} : {$appName}";
 
-$params = (object)[
-    "clientId" => $clientId
-];
-$the_form = load_class("forms", "controllers")->library_category_form($params);
+// begin the request parameter
+$params = (object) ["clientId" => $session->clientId, "show_list" => true, "limit" => 999999, "userData" => $defaultUser];
+$item_list = load_class("library", "controllers")->issued_request_list($params);
 
+$books_list = "";
+foreach($item_list["data"] as $key => $each) {
+    
+    $action = "<a href='{$baseUrl}update-book/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+
+    // if($hasUpdate) {
+    //     $action .= "&nbsp;<a href='{$baseUrl}update-book/{$each->item_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+    // }
+    // if($hasDelete) {
+    //     $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+    // }
+
+    $books_list .= "<tr data-row_id=\"{$each->item_id}\">";
+    $books_list .= "<td>".($key+1)."</td>";
+
+    // if the user has issue permission
+    if($hasIssue) {
+        // if the books list is parsed
+        $books_list .= "<td>
+            {$each->user_info->name}
+            <span class='badge badge-primary p-1'>{$each->user_role}</span><br>
+            <strong>{$each->user_info->unique_id}</strong>
+        </td>";
+    }
+
+    $books_list .= "<td>{$each->issued_date}</td>";
+    $books_list .= "<td>{$each->return_date}</td>";
+    $books_list .= "<td>".($each->fine ?? null)."</td>";
+    $books_list .= "<td>".$myClass->the_status_label($each->status)."</td>";
+    $books_list .= "<td align='center'>{$action}</td>";
+    $books_list .= "</tr>";
+}
 $response->html = '
     <section class="section">
         <div class="section-header">
@@ -55,17 +85,15 @@ $response->html = '
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
-                                        <th>Book Title</th>
-                                        '.($hasIssue ? '<th>Role</th>' : '').'
                                         '.($hasIssue ? '<th>Fullname</th>' : '').'
-                                        <th>Date of Issue</th>
+                                        '.($hasIssue ? '<th>Date of Issue</th>' : '<th>Date of Request</th>').'
                                         <th>Date of Expiry</th>
                                         <th width="10%">Fine</th>
                                         <th width="10%">Status</th>
                                         <th align="center" width="10%"></th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+                                <tbody>'.$books_list.'</tbody>
                             </table>
                         </div>
                     </div>

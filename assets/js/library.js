@@ -116,6 +116,7 @@ var save_Issue_Request = (issue_id, request) => {
                     overdue_rate = $(`div[id='library_form'] input[name="overdue_rate"]`),
                     overdue_apply = $(`div[id='library_form'] select[name="overdue_apply"]`).val();
             } else if (request === "request") {
+                user_role = $(`div[id='library_form'] input[name="user_role"]`);
                 user_id = $(`div[id='library_form'] input[name="user_id"]`);
             }
 

@@ -35,7 +35,7 @@ if(!$hasRequest) {
     $search = (object)["search_form" => true, "clientId" => $clientId];
     $search_form = load_class("forms", "controllers")->library_book_issue_form($search);
     
-    $form = (object)["request_form" => true, "user_id" => $session->userId, "clientId" => $clientId];
+    $form = (object)["request_form" => true, "user_id" => $session->userId, "clientId" => $clientId, "user_role" => $defaultUser->user_type];
     $request_form = load_class("forms", "controllers")->library_book_issue_form($form);
 
     $response->html = '
