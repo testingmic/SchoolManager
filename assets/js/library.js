@@ -115,7 +115,7 @@ var save_Issue_Request = (issue_id, request) => {
                     user_id = $(`div[id='library_form'] select[name="user_id"]`),
                     overdue_rate = $(`div[id='library_form'] input[name="overdue_rate"]`),
                     overdue_apply = $(`div[id='library_form'] select[name="overdue_apply"]`).val();
-            } else if (request === "request") {
+            } else if (request === "requested") {
                 user_role = $(`div[id='library_form'] input[name="user_role"]`);
                 user_id = $(`div[id='library_form'] input[name="user_id"]`);
             }
@@ -140,7 +140,7 @@ var save_Issue_Request = (issue_id, request) => {
                     "overdue_rate": overdue_rate.val(),
                     "overdue_apply": overdue_apply
                 }
-            } else if (request === "request") {
+            } else if (request === "requested") {
                 label["data"] = {
                     "books_list": books_list,
                     "user_id": user_id.val(),

@@ -55,7 +55,7 @@ if(!$hasRequest) {
                             '.$search_form.'
                         </div>
                     </div>
-                    <div class="card hidden mb-3" id="selected_book_details" data-mode="request"></div>
+                    <div class="card hidden mb-3" id="selected_book_details" data-mode="requested"></div>
                     <div class="card mb-3">
                         <div class="card-body">
                             <h6>SELECTED BOOKS LIST</h6>

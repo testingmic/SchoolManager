@@ -33,14 +33,15 @@ $item_list = load_class("library", "controllers")->issued_request_list($params);
 $books_list = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a href='{$baseUrl}update-book/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a href='{$baseUrl}update-book-request/{$each->item_id}' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
-    // if($hasUpdate) {
-    //     $action .= "&nbsp;<a href='{$baseUrl}update-book/{$each->item_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-    // }
-    // if($hasDelete) {
-    //     $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
-    // }
+    if($hasIssue && in_array($each->status, ["Issued", "Requested"]) && ($each->state !== "Overdue")) {
+        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-stop'></i></a>";
+    }
+
+    if(!$hasIssue && ($each->the_type == "request") && in_array($each->status, ["Requested"])) {
+        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-stop'></i></a>";
+    }
 
     $books_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $books_list .= "<td>".($key+1)."</td>";
@@ -55,10 +56,18 @@ foreach($item_list["data"] as $key => $each) {
         </td>";
     }
 
+    $books_ = "";
+    foreach($each->books_list as $key => $book) {
+        $books_ .= "
+        <div class='mb-1'>
+            ".($key+1).". {$book->title}
+        </div>";
+    }
+    $books_list .= "<td>{$books_}</td>";
     $books_list .= "<td>{$each->issued_date}</td>";
     $books_list .= "<td>{$each->return_date}</td>";
     $books_list .= "<td>".($each->fine ?? null)."</td>";
-    $books_list .= "<td>".$myClass->the_status_label($each->status)."</td>";
+    $books_list .= "<td>".$myClass->the_status_label($each->state)."</td>";
     $books_list .= "<td align='center'>{$action}</td>";
     $books_list .= "</tr>";
 }
@@ -86,6 +95,7 @@ $response->html = '
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
                                         '.($hasIssue ? '<th>Fullname</th>' : '').'
+                                        <th>Books List</th>
                                         '.($hasIssue ? '<th>Date of Issue</th>' : '<th>Date of Request</th>').'
                                         <th>Date of Expiry</th>
                                         <th width="10%">Fine</th>

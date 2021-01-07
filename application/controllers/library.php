@@ -107,8 +107,9 @@ class Library extends Myschoolgh {
 			
 			$stmt = $this->db->prepare("
 				SELECT 
+					bk.item_id, bk.isbn, bk.title, bk.description, bk.book_image, 
 					bd.quantity, bd.fine, bd.actual_paid, bd.date_borrowed, bd.return_date,
-					bk.isbn, bk.title, bk.item_id, bd.status, bd.id AS borrowed_row_id, bd.book_id
+					bk.author, bd.status, bd.id AS borrowed_row_id, bd.book_id
 				FROM 
 					books_borrowed_details bd
 				LEFT JOIN books bk ON bk.item_id = bd.book_id
@@ -191,7 +192,7 @@ class Library extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT COUNT(*) FROM books_borrowed_details b WHERE b.book_id = a.item_id LIMIT 1) AS books_count,
+                    (SELECT COUNT(*) FROM books_borrowed_details b WHERE b.borrowed_id = a.item_id LIMIT 1) AS books_count,
 					(SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.unique_id) FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_info
                 FROM books_borrowed a
                 WHERE {$params->query} AND a.deleted = ? ORDER BY a.id LIMIT {$params->limit}
@@ -201,8 +202,20 @@ class Library extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
+				// append the list of books to the borrowed order
 				if(isset($params->show_list)) {
-					$result->books_list = $this->book_borrowed_details($result->item_id);
+					$result->books_list = $this->book_borrowed_details($result->item_id)["data"];
+				}
+
+				// set the state
+				$result->state = $result->status;
+				$result->books_id = json_decode($result->books_id);
+
+				// check the return date and status
+				if(strtotime($result->return_date) < strtotime(date("Y-m-d"))) {
+					$result->state = "Overdue";
+				} else if(strtotime($result->return_date) === strtotime(date("Y-m-d"))) {
+					$result->state = "Due Today";
 				}
 
 				// loop through the information
@@ -452,7 +465,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** Issue the book out to the user */
-		elseif(in_array($params->label["todo"], ["issue", "request"])) {
+		elseif(in_array($params->label["todo"], ["issue", "requested"])) {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
@@ -581,6 +594,7 @@ class Library extends Myschoolgh {
 		// convert the data parameter to an object
 		$data = (object) $params;
 		$status = ($params->request == "issue") ? "Issued" : "Requested";
+		$data->issued_date = ($params->request == "issue") ? date("Y-m-d") : null;
 
 		// confirm that the return date is not empty
 		if(!isset($data->return_date)) {
@@ -614,7 +628,7 @@ class Library extends Myschoolgh {
 			");
 			$stmt->execute([
 				$data->clientId, $item_id, $data->user_id, $data->user_role ?? null, json_encode($books_list), 
-				date("Y-m-d"), $data->return_date, $data->overdue_rate ?? 0, $userId, $data->request, $status
+				$data->issued_date, $data->return_date, $data->overdue_rate ?? 0, $userId, $data->request, $status
 			]);
 
 			foreach($data->books_list as $key => $value) {
