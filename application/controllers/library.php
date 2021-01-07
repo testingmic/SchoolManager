@@ -559,7 +559,25 @@ class Library extends Myschoolgh {
 
 		/** Approve / Cancel the book request placed */
 		elseif(in_array($todo, ["approve_request", "cancel_request"])) {
+			// if the data is not parsed
+			if(!isset($params->label["data"])) {
+				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+			}
 
+			// set additional parameters to the data parameter
+			$params->label["data"]["userId"] = $params->userId;
+			$params->label["data"]["clientId"] = $params->clientId;
+			$params->label["data"]["fullname"] = $params->userData->name;
+
+			// issue book from session
+			$request = $this->{$todo}($params->label["data"]);
+
+			// return the session list as the response
+			return $request;
+		}
+
+		/** Return books or entire order */
+		elseif($todo === "return_books") {
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
 				return ["code" => 203, "data" => "Sorry! The data to be processed"];
@@ -861,7 +879,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** Remove the file from the list */
-		$this->db->query("UPDATE books_borrowed SET status='Approved' WHERE item_id='{$params->borrowed_id}' LIMIT 1");
+		$this->db->query("UPDATE books_borrowed SET status='Approved', issued_date=now() WHERE item_id='{$params->borrowed_id}' LIMIT 1");
 
 		/** Log the user activity */
 		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} changed the Request Status from {$data[0]->status} to Approved.", $params->userId);
@@ -899,206 +917,80 @@ class Library extends Myschoolgh {
 
 		return ["code" => 200, "data" => "The request was successfully processed.", "additional" => ["reload" => true]];
 	}
-
+	
 	/**
-	 * @method booksFiltered
-	 *
-	 * This returns a list of books based on the filters that has been applied
-	 *
-	 * @param stdClass postData
-	 *
-	 * @return Array list of all book category and the count
-	 **/
-	public function booksFiltered(stdClass $params) {
+	 * Cancelled the user books list request
+	 * 
+	 * @param String	$params->borrowed_id
+	 * 
+	 * @return Bool
+	 */
+	public function return_books($params) {
 
-		try {
-
-			$filter = "";
-			$filter .= isset($params->departmentId) ? "_books.department_id = '{$params->departmentId}'" :  null;
-			$filter .= isset($params->programmeId) ? "_books.programme_id = '{$params->programmeId}'" :  null;
-
-			$stmt = $this->db->prepare("
-				SELECT
-					bt.*, 
-					(SELECT COUNT(*) FROM _books WHERE _books.category_id = bt.id AND _books.status = 1)
-				FROM books_type bt
-				WHERE bt.client_id = ? AND bt.status = ?
-			");
-			$stmt->execute([$this->session->userId, 1]);
-
-			$results = array();
-
-			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-				$results[] = $result;
-			}
-
-			return $results;
-
-		} catch(PDOException $e) {
-			return false;
-		}
-	}
-
-	/**
-	 * @method booksBorrowedBooksListing
-	 *
-	 * This will convert the books list submitted as an array and fetch records for each item
-	 *
-	 * @param stdClass $booksList
-	 *
-	 * @return bookName
-	 **/
-	public function bookBorrowedBooksTitles($booksList, $linkType = 'link') {
+		/** Convert the parameter into an object */
+		$params = (object) $params;
+		$isEntire = (bool) ($params->return_mode === "entire_order");
 		
-		try {
+		/** Check if the entire order is to be returned */
+		if($isEntire) {
+			/** Set the borrowed id */
+			$borrowed_id = $params->record_id;
 
-			$booksTitle = '';
-			$booksList = $this->stringToArray($booksList);
+			/** get the information */
+			$data = $this->pushQuery("fine, status", "books_borrowed", "client_id='{$params->clientId}' AND item_id='{$params->record_id}' AND status != 'Returned' AND deleted='0'");
+		} else {
 
-			foreach($booksList as $eachBook) {
-
-				$stmt = $this->db->prepare("
-					SELECT title, id FROM _books WHERE id = ?
-				");
-				$stmt->execute([$eachBook]);
-
-				while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-
-					if($linkType == 'link') {
-						$booksTitle .= "<a href='{$this->baseUrl}update-book/{$result->id}'>{$result->title}</a><br>";
-					} else {
-						$booksTitle .= "<a data-function=\"view-book\" data-book-id=\"{$result->id}\" href=\"javascript:void(0)\">{$result->title}</a><br>";
-					}
-
-				}
-			}
-
-			return $booksTitle;
-
-		} catch(PDOException $e) {
-			return $e->getMessage();
-		}
-	}
-
-	/**
-	 * @method returnBorrowedBook
-	 *
-	 * This handles the return of any borrowed book either single or entire order
-	 *
-	 * @param $itemId 		This can either be the Order Id or single item in the order
-	 * @param $returnOption	Either entire-order OR single-book
-	 * @param $paymentAmount	The Amount that the Student has paid
-	 * @param $overdueFine	Also parse the fine that is to be paid by the student
-	 *
-	 * @return boolean
-	 **/
-	public function returnBorrowedBook($itemId, $returnOption, $paymentAmount, $overdueFine) {
-		
-		/* Fetch the overdue fine that is stored in the database */
-		if($returnOption == "entire-order") {
-			$mainOrderId = $itemId;
-			$booksCount =  $this->stringToArray($this->itemByIdNoStatus("books_borrowed", "id", $itemId, "books_id"));
-			$dbOverdueAmount = $this->itemById("books_borrowed", "id", $itemId, "fine");
-		}
-		else {
-			$mainOrderId = $this->itemByIdNoStatus("books_borrowed_details", "id", $itemId, "borrowed_id");
-			$booksCount = $this->stringToArray($this->itemByIdNoStatus("books_borrowed", "id", $mainOrderId, "books_id"));
-			$dbOverdueAmount = $this->itemById("books_borrowed_details", "id", $itemId, "fine");
-		}
-
-		/* Setting the records straight */
-		$fine_paid = 0;
-		/* Continue processing the form */
-		if(($dbOverdueAmount <= $paymentAmount))
-			$fine_paid = 1;
-		
-		/* if the user wants to return a single book */
-		if($returnOption == "single-book") {
-			/**
-			 * Update the books borrowed data info
-			 * If the books borrowed is One then set the status to 
-			 * returned else just return this book only.
-			*/
-			$stmt = $this->db->prepare("
-				UPDATE books_borrowed_details 
-				SET status = ?, fine_paid = ?, actual_paid = ?, actual_date_returned = now()
-				WHERE id = ?
-			");
-			$stmt->execute(['Returned', $fine_paid, $paymentAmount, $itemId]);
-
-			/* Update the books borowed */
-			if($booksCount == 1) {
-				$stmt = $this->db->prepare("
-					UPDATE books_borrowed
-					SET status = ?, actual_paid = ?, fine_paid = ?, actual_date_returned = now()
-					WHERE id = ?
-				");
-				$stmt->execute(['Returned', $paymentAmount, $fine_paid, $mainOrderId]);
-
-				/* Record the user activity */
-				$this->recordUserHistory(array($mainOrderId, 'books-borrowed', 'Recorded the return of a Book by a Student.'));
-			}
-		}
-
-		/* If the return option is the entire order */
-		elseif($returnOption == "entire-order") {
-			/* Loop through the entire order list and do some mega processing */
-			$stmt = $this->db->prepare("
-				SELECT * FROM books_borrowed_details WHERE borrowed_id = ?
-			");
-			$stmt->execute([$mainOrderId]);
-			/* Initializing */
-			$paymentBalance = $paymentAmount;
-			/* Using the while loop */
-			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-				/* Fetch the fine for this item */
-				$paymentAmount = $paymentBalance;
-				if($result->fine < $paymentAmount) {
-					$paymentBalance = $paymentAmount - $result->fine;
-					$totalPaid = $result->fine;
-					$fine_paid = 1;
-				} elseif($result->fine == $paymentAmount) {
-					$paymentBalance = 0.00;
-					$totalPaid = $result->fine;
-					$fine_paid = 1;
-				} elseif($result->fine > $paymentAmount) {
-					$paymentBalance = 0.00;
-					$totalPaid = $paymentAmount;
-					$fine_paid = 0;
-				}
-
-				/**
-				 * Update the books borrowed data info
-				 * If the books borrowed is One then set the status to 
-				 * returned else just return this book only.
-				*/
-				$detailStmt = $this->db->prepare("
-					UPDATE books_borrowed_details 
-					SET status = ?, fine_paid = ?, actual_paid = ?, actual_date_returned = now()
-					WHERE borrowed_id = ? AND id = ?
-				");
-				$detailStmt->execute(['Returned', $fine_paid, $totalPaid, $mainOrderId, $result->id]);
-			}
-
-			/* Setting the records straight */
-			$fine_paid = 0;
+			/** Split the id */
+			$expl = explode("_", $params->record_id);
 			
-			/* Continue processing the form */
-			if(($dbOverdueAmount <= $paymentAmount))
-				$fine_paid = 1;
+			/** If the book id was not parsed */
+			if(!isset($expl[1])) {
+				return ["code" => 203, "data" => "Sorry! An invalid book id was submitted."];
+			}
 
-			/* Update the main book borrowed order */
-			$stmt = $this->db->prepare("
-				UPDATE books_borrowed
-				SET status = ?, actual_paid = ?, fine_paid = ?, actual_date_returned = now()
-				WHERE id = ?
-			");
-			$stmt->execute(['Returned', xss_clean($_POST["paymentAmount"]), $fine_paid, $mainOrderId]);
-			
+			/** Set the borrowed id */
+			$borrowed_id = $expl[0];
+
+			/** If a single book is to be returned */
+			$data = $this->pushQuery("fine, status, quantity", "books_borrowed_details", "book_id='{$expl[1]}' AND borrowed_id='{$borrowed_id}' AND deleted='0' AND status != 'Returned' LIMIT 1");
 		}
 
-		return true;
+		/** If no record was found */
+		if(empty($data)) {
+			return ["code" => 203, "data" => "Sorry! An invalid record_id was submitted."];
+		}
 
+		// confirm that it has not already been approved
+		if($data[0]->status === "Returned") {
+			return ["code" => 203, "data" => "Sorry! The book(s) has already been Returned."];
+		}
+
+		/** Update the returned information */
+		if($isEntire) {
+			/** Execute the status */
+			$this->db->query("UPDATE books_borrowed SET status='Returned', actual_date_returned=now() WHERE item_id='{$borrowed_id}' LIMIT 1");
+			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned=now() WHERE borrowed_id='{$borrowed_id}' LIMIT 100");
+			
+			/** Get all Books and Their Quanities */
+			foreach($this->pushQuery("quantity, book_id", "books_borrowed_details", "book_borrowed = '{$borrowed_id}' AND status !='Returned'") as $book) {
+				/** increase the books stock quantity */
+				$this->db->query("UPDATE books_stock SET quantity = (quantity - {$book[0]->quantity}) WHERE books_id = '{$book[0]->book_id}' LIMIT 1");
+			}
+
+			/** Log the user activity */
+			$this->userLogs("books_borrowed", $borrowed_id, null, "{$params->fullname} returned the Books Borrowed.", $params->userId);
+		} else {
+			/** Execute the status */
+			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned=now() WHERE borrowed_id='{$borrowed_id}' AND book_id='{$expl[1]}' LIMIT 1");
+
+			/** increase the books stock quantity */
+			$this->db->query("UPDATE books_stock SET quantity = (quantity - {$data[0]->quantity}) WHERE books_id = '{$expl[1]}' LIMIT 1");
+
+			/** Log the user activity */
+			$this->userLogs("books_borrowed", $borrowed_id, null, "{$params->fullname} returned the Book in the list of Books Borrowed.", $params->userId);
+		}
+
+		return ["code" => 200, "data" => "The request was successfully processed.", "additional" => ["borrowed_id" => $borrowed_id, "reload" => true]];
 	}
 
  	/**

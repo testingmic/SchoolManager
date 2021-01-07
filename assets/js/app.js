@@ -964,20 +964,16 @@ var initExportButtons = () => {
 
 var initDataTables = () => {
     if ($('.datatable').length > 0) {
-
-        $('.datatable').each(function(index, element) {
-            let ifempty = $(this).attr("data-empty");
-            $(element).dataTable({
-                search: null,
-                lengthMenu: [
-                    [15, 30, 50, 75, 100, 200, -1],
-                    [15, 30, 50, 75, 100, 200, "All"]
-                ],
-                language: {
-                    sEmptyTable: ifempty == undefined ? "Nothing Found" : ifempty,
-                    lengthMenu: "Display _MENU_ rows"
-                }
-            });
+        $('.datatable').dataTable({
+            search: null,
+            lengthMenu: [
+                [15, 30, 50, 75, 100, 200, -1],
+                [15, 30, 50, 75, 100, 200, "All"]
+            ],
+            language: {
+                sEmptyTable: "Nothing Found",
+                lengthMenu: "Display _MENU_ rows"
+            }
         });
     }
 }

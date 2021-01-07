@@ -54,7 +54,8 @@ if(!empty($item_id)) {
         // set the permission 
         $isPermitted = (bool) ($hasIssue && $data->state === "Requested");
         $isRequested = (bool) ($data->state === "Requested");
-        $isEditable = (bool) !in_array($data->state, ["Cancelled", "Overdue", "Approved"]);
+        $isReturned = (bool) ($data->state === "Returned");
+        $isEditable = (bool) !in_array($data->state, ["Cancelled", "Overdue", "Approved", "Returned"]);
         $isOverdue = (bool) ($data->state === "Overdue");
         $canReturn = (bool) in_array($data->state, ["Approved", "Overdue", "Issued"]);
 
@@ -83,10 +84,12 @@ if(!empty($item_id)) {
             if($canReturn) {
                 // if the book has not been returned
                 if(($book->status === "Borrowed") && $hasIssue) {
-                    $books_list .= '<td><button onclick="return return_Requested_Book(\'single_book\',\''.$book->book_id.'\',\''.$book->fine.'\');" title="Return Book" class="btn btn-sm btn-outline-warning"><i class="fa fa-reply"></i> Return</button></td>';
+                    $books_list .= '<td class="return_book_column_'.$item_id.'_'.$book->book_id.'" id="return_book_column"><button onclick="return return_Requested_Book(\'single_book\',\''.$item_id.'_'.$book->book_id.'\',\''.($isOverdue ? $book->fine : 0).'\');" title="Return Book" class="btn btn-sm btn-outline-warning"><i class="fa fa-reply"></i> Return</button></td>';
                 } else {
                     $books_list .= "<td><span class='badge badge-".(($book->status === "Borrowed") ? "primary" : "success")."'>{$book->status}</span></td>";
                 }
+            } else if($isReturned) {
+                $books_list .= "<td><span class='badge badge-success'>{$book->status}</span></td>";
             }
 
             // if the item is not yet overdue
@@ -103,14 +106,14 @@ if(!empty($item_id)) {
         // books listing
         $books_listing = '
         <div class="table-responsive">
-            <table data-empty="" class="table table-striped datatable">
+            <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>Book Title</th>
                         <th>Author</th>
                         <th>Quantity</th>
                         '.(round($data->fine) > 1 ? "<th>Fine</th>" : "").'
-                        '.($isRequested || $canReturn ? '<th width="13%"></th>' : '').'
+                        '.($isRequested || $canReturn || $isReturned ? '<th width="13%"></th>' : '').'
                     </tr>
                 </thead>
                 <tbody>'.$books_list.'</tbody>
@@ -167,6 +170,10 @@ if(!empty($item_id)) {
                         </div>
                         <div class="card-body pt-0 pb-0">
                             <div class="py-3 pt-0">
+                                <p class="clearfix">
+                                    <span class="float-left">Mode:</span>
+                                    <span class="float-right text-muted">'.(($data->the_type == "issued") ? "<span class='badge badge-primary'>Issued</span>" : "<span class='badge badge-primary'>Requested</span>").'</span>
+                                </p>
                                 <p class="clearfix">
                                     <span class="float-left">Issued Date:</span>
                                     <span class="float-right text-muted">'.($data->issued_date ?? null).'</span>
@@ -234,11 +241,12 @@ if(!empty($item_id)) {
                                                     !$hasIssue && $isRequested ? 
                                                         "<div><button onclick='return approve_Cancel_Books_Request(\"{$item_id}\",\"cancel_request\");' class='btn btn-outline-danger'><i class='fa fa-times'></i> Cancel Request</button></div>" : 
                                                         (
-                                                            $hasIssue ? "<div><button onclick='return return_Requested_Book(\"entire_order\",\"{$item_id}\",\"{$data->fine}\");' class='btn btn-outline-success'><i class='fa fa-reply'></i> Return All</button></div>": ""
+                                                            $hasIssue ? "<div id='return_all_container'><button onclick='return return_Requested_Book(\"entire_order\",\"{$item_id}\",\"".($isOverdue ? $data->fine : 0)."\");' class='btn btn-outline-success'><i class='fa fa-reply'></i> Return All</button></div>": ""
                                                         )
                                                 )
                                             ) : ''
                                         ).'
+                                        '.(($data->state === "Approved") && $hasIssue ? "<div id='return_all_container'><button onclick='return return_Requested_Book(\"entire_order\",\"{$item_id}\",\"".($isOverdue ? $data->fine : 0)."\");' class='btn btn-outline-success'><i class='fa fa-reply'></i> Return All</button></div>" : "").'
                                     </div>
                                     <div class="mt-3">
                                         '.$books_listing.'

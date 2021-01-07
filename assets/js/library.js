@@ -178,8 +178,9 @@ var save_Request_Fine = (borrowed_id) => {
 }
 
 var return_Requested_Book = (mode, borrowed_id, fine) => {
-    let s_title = (mode === "entire_order") ? "Return Order" : "Return Books",
-        s_message = (mode === "entire_order") ? "Are you sure you want to return the entire books" : "Are you sure you want to return this book from the list?";
+    let f_note = fine > 1 ? "\nConfirming this indicates that the user has paid the fine." : "";
+    let s_title = (mode === "entire_order") ? "Return Order" : "Return Book",
+        s_message = (mode === "entire_order") ? `Are you sure you want to return the entire books? ${f_note}` : `Are you sure you want to return this book from the list? ${f_note}`;
     swal({
         title: s_title,
         text: s_message,
@@ -188,7 +189,31 @@ var return_Requested_Book = (mode, borrowed_id, fine) => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-
+            let label = {
+                "todo": "return_books",
+                "mode": "request",
+                "data": {
+                    "return_mode": mode,
+                    "record_id": borrowed_id
+                }
+            };
+            $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
+                let s_icon = "error";
+                if (response.code == 200) {
+                    s_icon = "success";
+                    if (mode == "entire_order") {
+                        $(`td[id="return_book_column"]`).html(`<span class="badge badge-success">Returned</span>`);
+                        $(`div[id=" id='return_all_container'"]`).html(``);
+                    } else {
+                        $(`td[class="return_book_column_${borrowed_id}"]`).html(`<span class="badge badge-success">Returned</span>`);
+                    }
+                }
+                swal({
+                    position: "top",
+                    text: response.data.result,
+                    icon: s_icon,
+                });
+            });
         }
     });
 }
@@ -323,7 +348,7 @@ var approve_Cancel_Books_Request = (borrowed_id, todo) => {
                     text: response.data.result,
                     icon: s_icon,
                 });
-            })
+            });
         }
     });
 }
