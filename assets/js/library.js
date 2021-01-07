@@ -274,6 +274,42 @@ var save_Issue_Request = (issue_id, request) => {
     });
 }
 
+var approve_Cancel_Books_Request = (borrowed_id, todo) => {
+    let t_title = (todo == "approve_request") ? "Approve Request" : "Cancel Request",
+        t_text = (todo == "approve_request") ? "approve" : "cancel";
+    swal({
+        title: t_title,
+        text: `Are you sure you want to ${t_text} the request? \nOnce confirmed, it cannot be reversed.`,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            let label = {
+                "todo": todo,
+                "mode": "request",
+                "data": {
+                    "borrowed_id": borrowed_id
+                }
+            };
+            $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
+                let s_icon = "error";
+                if (response.code == 200) {
+                    s_icon = "success";
+                    setTimeout(() => {
+                        loadPage(`${baseUrl}update-book-request/${borrowed_id}`);
+                    }, 700);
+                }
+                swal({
+                    position: "top",
+                    text: response.data.result,
+                    icon: s_icon,
+                });
+            })
+        }
+    });
+}
+
 $(`div[id="library_form"] select[name="category_id"]`).on("change", function() {
     let category_id = $(this).val(),
         mode = selected_books.attr("data-mode");

@@ -54,6 +54,7 @@ if(!empty($item_id)) {
         // set the permission 
         $isPermitted = (bool) ($hasIssue && $data->state === "Requested");
         $isRequested = (bool) ($data->state === "Requested");
+        $isEditable = (bool) !in_array($data->state, ["Cancelled", "Overdue", "Approved"]);
         $isOverdue = (bool) ($data->state === "Overdue");
 
         // loop through the books list
@@ -69,23 +70,19 @@ if(!empty($item_id)) {
             $books_list .= "<td>{$book->author}</td>";
 
             // if the user has the required permissions
-            // if($isPermitted) {
+            if($isEditable) {
                 $books_list .= "<td><input type='number' min='1' max='{$book->books_stock}' class='form-control' style='width:100px' data-request_id='{$item_id}' data-book_id='{$book->book_id}' data-original='{$book->quantity}' value='{$book->quantity}'></td>";
-            // } else {
-            //     $books_list .= "<td>{$book->quantity}</td>";
-            // }
-
-            $books_list .= "<td align='center'>";
-
+            } else {
+                $books_list .= "<td>{$book->quantity}</td>";
+            }
             // if the item is not yet overdue
             // $isPermitted && 
             if($isRequested && !$isOverdue) {
+                $books_list .= "<td align='center'>";
                 $books_list .= "<button onclick=\"return remove_Book('{$item_id}','{$book->book_id}');\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>";
                 $books_list .= "&nbsp;<button onclick=\"return save_Book_Quantity('{$item_id}','{$book->book_id}');\" id='save_book_{$book->book_id}' class='btn btn-sm hidden btn-outline-success'><i class='fa fa-save'></i></button>";
+                $books_list .= "</td>";
             }
-            
-            $books_list .= "</td>";
-
             $books_list .= "</tr>";
         }
 
@@ -98,7 +95,7 @@ if(!empty($item_id)) {
                         <th>Book Title</th>
                         <th>Author</th>
                         <th>Quantity</th>
-                        <th width="13%"></th>
+                        '.(($isRequested && !$isEditable) ? '<th width="13%"></th>' : '').'
                     </tr>
                 </thead>
                 <tbody>'.$books_list.'</tbody>
@@ -215,7 +212,12 @@ if(!empty($item_id)) {
                                 <div class="tab-pane fade show active" id="books_list" role="tabpanel" aria-labelledby="books_list-tab2">
                                     <div class="d-flex justify-content-between">
                                         <div><h4 class="text-uppercase">Books Selected List</h4></div>
-                                        '.($hasIssue && $isRequested ? "<div><button onclick='return issue_Book_Requested(\"{$item_id}\");' class='btn btn-outline-success'><i class='fa fa-save'></i> Approve Request</button></div>" : null).'
+                                        '.($isEditable ? 
+                                            ($hasIssue && $isRequested ? 
+                                                "<div><button onclick='return approve_Cancel_Books_Request(\"{$item_id}\",\"approve_request\");' class='btn btn-outline-success'><i class='fa fa-save'></i> Approve Request</button></div>" : 
+                                                "<div><button onclick='return approve_Cancel_Books_Request(\"{$item_id}\",\"cancel_request\");' class='btn btn-outline-danger'><i class='fa fa-times'></i> Cancel Request</button></div>"
+                                            ) : ''
+                                        ).'
                                     </div>
                                     <div class="mt-3">
                                         '.$books_listing.'
@@ -224,7 +226,7 @@ if(!empty($item_id)) {
                                 <div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab2">
                                     <div class="col-lg-12 pl-0"><h5>Readers\'s Comments</h5></div>
                                     <div>
-                                        '.($hasIssue ? leave_comments_builder("books_request", $item_id, false) : "").'
+                                        '.($isEditable && $hasIssue ? leave_comments_builder("books_request", $item_id, false) : "").'
                                         <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
                                         <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary">Loading comments</button></div>    
                                     </div> 

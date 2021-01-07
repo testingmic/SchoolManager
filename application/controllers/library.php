@@ -514,7 +514,7 @@ class Library extends Myschoolgh {
 			];
 		}
 
-		/** Remove book from the list of books */
+		/** change the quantity of a requested book */
 		elseif($todo == "save_book_quantity") {
 
 			// if the data is not parsed
@@ -535,7 +535,7 @@ class Library extends Myschoolgh {
 			];
 		}
 
-		/** Remove book from the list of books */
+		/** Save book request fine */
 		elseif($todo == "save_book_fine") {
 
 			// if the data is not parsed
@@ -550,6 +550,28 @@ class Library extends Myschoolgh {
 
 			// issue book from session
 			$request = $this->save_book_fine($params->label["data"]);
+
+			// return the session list as the response
+			return [
+				"data" => "The request successfully processed."
+			];
+		}
+
+		/** Approve / Cancel the book request placed */
+		elseif(in_array($todo, ["approve_request", "cancel_request"])) {
+
+			// if the data is not parsed
+			if(!isset($params->label["data"])) {
+				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+			}
+
+			// set additional parameters to the data parameter
+			$params->label["data"]["userId"] = $params->userId;
+			$params->label["data"]["clientId"] = $params->clientId;
+			$params->label["data"]["fullname"] = $params->userData->name;
+
+			// issue book from session
+			$request = $this->{$todo}($params->label["data"]);
 
 			// return the session list as the response
 			return [
@@ -808,6 +830,58 @@ class Library extends Myschoolgh {
 
 		/** Log the user activity */
 		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} changed the Request Fine from {$data[0]->fine} to {$params->fine}.", $params->userId);
+
+		return true;
+	}
+	
+	/**
+	 * Approve the user books list request
+	 * 
+	 * @param String	$params->borrowed_id
+	 * 
+	 * @return Bool
+	 */
+	public function approve_request($params) {
+
+		$params = (object) $params;
+		
+		$data = $this->pushQuery("status", "books_borrowed", "client_id='{$params->clientId}' AND item_id='{$params->borrowed_id}' AND deleted='0'");
+
+		if(empty($data)) {
+			return ["code" => 203, "data" => "Sorry! An invalid id were submitted."];
+		}
+
+		/** Remove the file from the list */
+		$this->db->query("UPDATE books_borrowed SET status='Approved' WHERE item_id='{$params->borrowed_id}' LIMIT 1");
+
+		/** Log the user activity */
+		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} changed the Request Status from {$data[0]->status} to Approved.", $params->userId);
+
+		return true;
+	}
+	
+	/**
+	 * Cancelled the user books list request
+	 * 
+	 * @param String	$params->borrowed_id
+	 * 
+	 * @return Bool
+	 */
+	public function cancel_request($params) {
+
+		$params = (object) $params;
+		
+		$data = $this->pushQuery("status", "books_borrowed", "client_id='{$params->clientId}' AND item_id='{$params->borrowed_id}' AND deleted='0'");
+
+		if(empty($data)) {
+			return ["code" => 203, "data" => "Sorry! An invalid id were submitted."];
+		}
+
+		/** Remove the file from the list */
+		$this->db->query("UPDATE books_borrowed SET status='Cancelled' WHERE item_id='{$params->borrowed_id}' LIMIT 1");
+
+		/** Log the user activity */
+		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} Cancelled the request for the books.", $params->userId);
 
 		return true;
 	}
