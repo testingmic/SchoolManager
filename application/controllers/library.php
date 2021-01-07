@@ -574,9 +574,7 @@ class Library extends Myschoolgh {
 			$request = $this->{$todo}($params->label["data"]);
 
 			// return the session list as the response
-			return [
-				"data" => "The request successfully processed."
-			];
+			return $request;
 		}
 
 		return ["code" => 203, "data" => "Sorry! Unknown request was parsed."];
@@ -851,13 +849,18 @@ class Library extends Myschoolgh {
 			return ["code" => 203, "data" => "Sorry! An invalid id were submitted."];
 		}
 
+		// confirm that it has not already been cancelled
+		if($data[0]->status === "Cancelled") {
+			return ["code" => 203, "data" => "Sorry! The request has already been Cancelled."];
+		}
+
 		/** Remove the file from the list */
 		$this->db->query("UPDATE books_borrowed SET status='Approved' WHERE item_id='{$params->borrowed_id}' LIMIT 1");
 
 		/** Log the user activity */
 		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} changed the Request Status from {$data[0]->status} to Approved.", $params->userId);
 
-		return true;
+		return ["code" => 200, "data" => "The request was successfully processed.", "additional" => ["reload" => true]];
 	}
 	
 	/**
@@ -877,13 +880,18 @@ class Library extends Myschoolgh {
 			return ["code" => 203, "data" => "Sorry! An invalid id were submitted."];
 		}
 
+		// confirm that it has not already been approved
+		if($data[0]->status === "Approved") {
+			return ["code" => 203, "data" => "Sorry! The request has already been Approved."];
+		}
+
 		/** Remove the file from the list */
 		$this->db->query("UPDATE books_borrowed SET status='Cancelled' WHERE item_id='{$params->borrowed_id}' LIMIT 1");
 
 		/** Log the user activity */
 		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} Cancelled the request for the books.", $params->userId);
 
-		return true;
+		return ["code" => 200, "data" => "The request was successfully processed.", "additional" => ["reload" => true]];
 	}
 
 	/**

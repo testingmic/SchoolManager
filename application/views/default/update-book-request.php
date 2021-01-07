@@ -95,7 +95,7 @@ if(!empty($item_id)) {
                         <th>Book Title</th>
                         <th>Author</th>
                         <th>Quantity</th>
-                        '.(($isRequested && !$isEditable) ? '<th width="13%"></th>' : '').'
+                        '.($isEditable ? '<th width="13%"></th>' : '').'
                     </tr>
                 </thead>
                 <tbody>'.$books_list.'</tbody>
@@ -226,7 +226,7 @@ if(!empty($item_id)) {
                                 <div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab2">
                                     <div class="col-lg-12 pl-0"><h5>Readers\'s Comments</h5></div>
                                     <div>
-                                        '.($isEditable && $hasIssue ? leave_comments_builder("books_request", $item_id, false) : "").'
+                                        '.($hasIssue ? leave_comments_builder("books_request", $item_id, false) : "").'
                                         <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
                                         <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary">Loading comments</button></div>    
                                     </div> 

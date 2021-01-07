@@ -296,9 +296,11 @@ var approve_Cancel_Books_Request = (borrowed_id, todo) => {
                 let s_icon = "error";
                 if (response.code == 200) {
                     s_icon = "success";
-                    setTimeout(() => {
-                        loadPage(`${baseUrl}update-book-request/${borrowed_id}`);
-                    }, 700);
+                    if (response.data.additional.reload !== undefined) {
+                        setTimeout(() => {
+                            loadPage(`${baseUrl}update-book-request/${borrowed_id}`);
+                        }, 700);
+                    }
                 }
                 swal({
                     position: "top",
