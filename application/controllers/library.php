@@ -816,6 +816,9 @@ class Library extends Myschoolgh {
 	public function save_book_fine($params) {
 
 		$params = (object) $params;
+
+		// spread the rate
+		$each_fine = $params->fine > 0 ? ($params->fine / count($params->books_list)) : 0;
 		
 		$data = $this->pushQuery("fine", "books_borrowed", "client_id='{$params->clientId}' AND item_id='{$params->borrowed_id}' AND deleted='0'");
 
@@ -823,8 +826,11 @@ class Library extends Myschoolgh {
 			return ["code" => 203, "data" => "Sorry! An invalid id were submitted."];
 		}
 
-		/** Remove the file from the list */
+		/** update the fine for the request */
 		$this->db->query("UPDATE books_borrowed SET fine='{$params->fine}' WHERE item_id='{$params->borrowed_id}' LIMIT 1");
+
+		/** Update each book rate */
+		$this->db->query("UPDATE books_borrowed_details SET fine='{$each_fine}' WHERE borrowed_id='{$params->borrowed_id}'");
 
 		/** Log the user activity */
 		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} changed the Request Fine from {$data[0]->fine} to {$params->fine}.", $params->userId);

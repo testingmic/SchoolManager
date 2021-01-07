@@ -177,6 +177,22 @@ var save_Request_Fine = (borrowed_id) => {
     });
 }
 
+var return_Requested_Book = (mode, borrowed_id, fine) => {
+    let s_title = (mode === "entire_order") ? "Return Order" : "Return Books",
+        s_message = (mode === "entire_order") ? "Are you sure you want to return the entire books" : "Are you sure you want to return this book from the list?";
+    swal({
+        title: s_title,
+        text: s_message,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+
+        }
+    });
+}
+
 var save_Book_Quantity = (borrowed_id, book_id) => {
     let quantity = parseInt($(`input[data-request_id="${borrowed_id}"][data-book_id="${book_id}"]`).val());
     let label = {
