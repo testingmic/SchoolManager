@@ -66,11 +66,28 @@ var request_quantity_Checker = () => {
             input.val(max);
         }
 
-        console.log($(`button[id="save_book_${book_id}"]`));
         if (value !== original) {
             $(`button[id="save_book_${book_id}"]`).removeClass("hidden");
         } else if (value === original) {
             $(`button[id="save_book_${book_id}"]`).addClass("hidden");
+        }
+    });
+    $(`div[id='books_request_details'] input[name="request_fine"]`).on("input", function() {
+        var input = $(this);
+        let value = parseInt(input.val()),
+            max = parseInt(input.attr("max")),
+            original = parseInt(input.attr("data-original"));
+
+        if (value < 1) {
+            input.val(1);
+        } else if (value > max) {
+            input.val(max);
+        }
+
+        if (value !== original) {
+            $(`button[id="save_fine_"]`).removeClass("hidden");
+        } else if (value === original) {
+            $(`button[id="save_fine_"]`).addClass("hidden");
         }
     });
 }
@@ -142,7 +159,25 @@ var remove_Book = (borrowed_id, book_id) => {
     });
 }
 
-var save_Book = (borrowed_id, book_id) => {
+var save_Request_Fine = (borrowed_id) => {
+    let fine = parseInt($(`input[name='request_fine']`).val());
+    let label = {
+        "todo": "save_book_fine",
+        "mode": "request",
+        "data": {
+            "borrowed_id": borrowed_id,
+            "fine": fine
+        }
+    };
+    $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
+        if (response.code == 200) {
+            $(`button[id="save_fine_"]`).addClass("hidden");
+            $(`input[name='request_fine']`).attr("data-original", quantity);
+        }
+    });
+}
+
+var save_Book_Quantity = (borrowed_id, book_id) => {
     let quantity = parseInt($(`input[data-request_id="${borrowed_id}"][data-book_id="${book_id}"]`).val());
     let label = {
         "todo": "save_book_quantity",

@@ -25,8 +25,7 @@ $accessObject->clientId = $session->clientId;
 
 $response->scripts = [
     "assets/js/comments.js",
-    "assets/js/library.js",
-    "assets/js/comments_upload.js"
+    "assets/js/library.js"
 ];
 
 // item id

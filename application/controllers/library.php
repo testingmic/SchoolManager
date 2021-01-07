@@ -535,6 +535,28 @@ class Library extends Myschoolgh {
 			];
 		}
 
+		/** Remove book from the list of books */
+		elseif($todo == "save_book_fine") {
+
+			// if the data is not parsed
+			if(!isset($params->label["data"])) {
+				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+			}
+
+			// set additional parameters to the data parameter
+			$params->label["data"]["userId"] = $params->userId;
+			$params->label["data"]["clientId"] = $params->clientId;
+			$params->label["data"]["fullname"] = $params->userData->name;
+
+			// issue book from session
+			$request = $this->save_book_fine($params->label["data"]);
+
+			// return the session list as the response
+			return [
+				"data" => "The request successfully processed."
+			];
+		}
+
 		return ["code" => 203, "data" => "Sorry! Unknown request was parsed."];
 
 	}
@@ -759,6 +781,33 @@ class Library extends Myschoolgh {
 
 		/** Log the user activity */
 		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} changed the Book Quantity from {$data[0]->quantity} to {$params->quantity}.", $params->userId);
+
+		return true;
+	}
+	
+	/**
+	 * Save the Request Fine
+	 * 
+	 * @param String	$params->borrowed_id
+	 * @param Int		$params->fine
+	 * 
+	 * @return Bool
+	 */
+	public function save_book_fine($params) {
+
+		$params = (object) $params;
+		
+		$data = $this->pushQuery("fine", "books_borrowed", "client_id='{$params->clientId}' AND item_id='{$params->borrowed_id}' AND deleted='0'");
+
+		if(empty($data)) {
+			return ["code" => 203, "data" => "Sorry! An invalid id were submitted."];
+		}
+
+		/** Remove the file from the list */
+		$this->db->query("UPDATE books_borrowed SET fine='{$params->fine}' WHERE item_id='{$params->borrowed_id}' LIMIT 1");
+
+		/** Log the user activity */
+		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} changed the Request Fine from {$data[0]->fine} to {$params->fine}.", $params->userId);
 
 		return true;
 	}

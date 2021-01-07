@@ -46,7 +46,7 @@ if(!empty($item_id)) {
         // set the first key
         $data = $data["data"][0];
         $item_param = $data;
-        $response->scripts = ["assets/js/library.js"];
+        $response->scripts = ["assets/js/library.js", "assets/js/comments.js"];
 
         // list the books in this request
         $books_list = "";
@@ -69,21 +69,21 @@ if(!empty($item_id)) {
             $books_list .= "<td>{$book->author}</td>";
 
             // if the user has the required permissions
-            if($isPermitted) {
+            // if($isPermitted) {
                 $books_list .= "<td><input type='number' min='1' max='{$book->books_stock}' class='form-control' style='width:100px' data-request_id='{$item_id}' data-book_id='{$book->book_id}' data-original='{$book->quantity}' value='{$book->quantity}'></td>";
-            } else {
-                $books_list .= "<td>{$book->quantity}</td>";
-            }
+            // } else {
+            //     $books_list .= "<td>{$book->quantity}</td>";
+            // }
 
             $books_list .= "<td align='center'>";
 
             // if the item is not yet overdue
-            if($isPermitted && !$isOverdue) {
-                if($isRequested) {
-                    $books_list .= "<button onclick=\"return remove_Book('{$item_id}','{$book->book_id}');\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>";
-                    $books_list .= "&nbsp;<button onclick=\"return save_Book('{$item_id}','{$book->book_id}');\" id='save_book_{$book->book_id}' class='btn btn-sm hidden btn-outline-success'><i class='fa fa-save'></i></button>";
-                }
+            // $isPermitted && 
+            if($isRequested && !$isOverdue) {
+                $books_list .= "<button onclick=\"return remove_Book('{$item_id}','{$book->book_id}');\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>";
+                $books_list .= "&nbsp;<button onclick=\"return save_Book_Quantity('{$item_id}','{$book->book_id}');\" id='save_book_{$book->book_id}' class='btn btn-sm hidden btn-outline-success'><i class='fa fa-save'></i></button>";
             }
+            
             $books_list .= "</td>";
 
             $books_list .= "</tr>";
@@ -164,8 +164,21 @@ if(!empty($item_id)) {
                                     <span class="float-right text-muted">'.($data->return_date ?? null).'</span>
                                 </p>
                                 <p class="clearfix">
-                                    <span class="float-left">Overdue Fine:</span>
-                                    <span class="float-right text-muted">'.($data->fine ?? null).'</span>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="float-left">Overdue Fine:</div>
+                                        '.($isRequested && $hasIssue ? 
+                                            "<div>
+                                                <div class='input-group mb-2'>
+                                                    <input type='number' name='request_fine' class='form-control' data-original='{$data->fine}' value='{$data->fine}' style='max-width:90px' min='0'>
+                                                    <div class='input-group-append'>
+                                                        <div class='input-group-text p-0'>
+                                                            &nbsp;<button onclick=\"return save_Request_Fine('{$item_id}');\" id='save_fine_' class='btn hidden btn-outline-success'><i class='fa fa-save'></i></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>" : "<div>{$data->fine}</div>"
+                                        ).'
+                                    </div>
                                 </p>
                                 '.( 
                                     $data->state == "Overdue" ? '
@@ -187,7 +200,6 @@ if(!empty($item_id)) {
                         </div>
                     </div>
                 </div>
-
                 <div class="col-12 col-md-12 col-lg-8">
                     <div class="card">
                         <div class="padding-20">
@@ -203,7 +215,7 @@ if(!empty($item_id)) {
                                 <div class="tab-pane fade show active" id="books_list" role="tabpanel" aria-labelledby="books_list-tab2">
                                     <div class="d-flex justify-content-between">
                                         <div><h4 class="text-uppercase">Books Selected List</h4></div>
-                                        '.($hasIssue ? "<div><button onclick='return show_EResource_Modal();' class='btn btn-outline-primary btn-sm'><i class='fa fa-plus'></i> Upload</button></div>" : null).'
+                                        '.($hasIssue && $isRequested ? "<div><button onclick='return issue_Book_Requested(\"{$item_id}\");' class='btn btn-outline-success'><i class='fa fa-save'></i> Approve Request</button></div>" : null).'
                                     </div>
                                     <div class="mt-3">
                                         '.$books_listing.'
@@ -211,7 +223,11 @@ if(!empty($item_id)) {
                                 </div>
                                 <div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab2">
                                     <div class="col-lg-12 pl-0"><h5>Readers\'s Comments</h5></div>
-                                    
+                                    <div>
+                                        '.($hasIssue ? leave_comments_builder("books_request", $item_id, false) : "").'
+                                        <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
+                                        <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary">Loading comments</button></div>    
+                                    </div> 
                                 </div>
                             </div>
                         </div>
