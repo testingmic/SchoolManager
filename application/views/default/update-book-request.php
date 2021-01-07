@@ -46,6 +46,64 @@ if(!empty($item_id)) {
         // set the first key
         $data = $data["data"][0];
         $item_param = $data;
+        $response->scripts = ["assets/js/library.js"];
+
+        // list the books in this request
+        $books_list = "";
+
+        // set the permission 
+        $isPermitted = (bool) ($hasIssue && $data->state === "Requested");
+        $isRequested = (bool) ($data->state === "Requested");
+        $isOverdue = (bool) ($data->state === "Overdue");
+
+        // loop through the books list
+        foreach($data->books_list as $book) {
+            // set the permission
+            $books_list .= "<tr class='each_book_item' data-request_id='{$item_id}' data-book_id='{$book->book_id}'>";
+            $books_list .= "<td>
+                <div class='d-flex justify-content-start'>
+                    <div class='mr-2'>".(!empty($book->book_image) ? "<img src='{$baseUrl}{$book->book_image}' width='50px' height='40px'>" : "")."</div>
+                    <div><a href='{$baseUrl}update-book/{$book->book_id}'>{$book->title}</a> <br> <strong>{$book->isbn}</strong></div>
+                </div>
+            </td>";
+            $books_list .= "<td>{$book->author}</td>";
+
+            // if the user has the required permissions
+            if($isPermitted) {
+                $books_list .= "<td><input type='number' min='1' max='{$book->books_stock}' class='form-control' style='width:100px' data-request_id='{$item_id}' data-book_id='{$book->book_id}' data-original='{$book->quantity}' value='{$book->quantity}'></td>";
+            } else {
+                $books_list .= "<td>{$book->quantity}</td>";
+            }
+
+            $books_list .= "<td align='center'>";
+
+            // if the item is not yet overdue
+            if($isPermitted && !$isOverdue) {
+                if($isRequested) {
+                    $books_list .= "<button onclick=\"return remove_Book('{$item_id}','{$book->book_id}');\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>";
+                    $books_list .= "&nbsp;<button onclick=\"return save_Book('{$item_id}','{$book->book_id}');\" id='save_book_{$book->book_id}' class='btn btn-sm hidden btn-outline-success'><i class='fa fa-save'></i></button>";
+                }
+            }
+            $books_list .= "</td>";
+
+            $books_list .= "</tr>";
+        }
+
+        // books listing
+        $books_listing = '
+        <div class="table-responsive">
+            <table data-empty="" class="table table-striped datatable">
+                <thead>
+                    <tr>
+                        <th>Book Title</th>
+                        <th>Author</th>
+                        <th>Quantity</th>
+                        <th width="13%"></th>
+                    </tr>
+                </thead>
+                <tbody>'.$books_list.'</tbody>
+            </table>
+        </div>';
         
         $response->html = '
         <section class="section">
@@ -57,7 +115,7 @@ if(!empty($item_id)) {
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>
-            <div class="row" id="library_form">
+            <div class="row" id="books_request_details">
                 <div class="col-12 col-md-12 col-lg-4">
                     <div class="card">
                         <div class="card-header">
@@ -131,7 +189,33 @@ if(!empty($item_id)) {
                 </div>
 
                 <div class="col-12 col-md-12 col-lg-8">
-
+                    <div class="card">
+                        <div class="padding-20">
+                            <ul class="nav nav-tabs" id="myTab2" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="books_list-tab2" data-toggle="tab" href="#books_list" role="tab" aria-selected="true">Books List</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="comments-tab2" data-toggle="tab" href="#comments" role="tab" aria-selected="true">Comments</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content tab-bordered" id="myTab3Content">
+                                <div class="tab-pane fade show active" id="books_list" role="tabpanel" aria-labelledby="books_list-tab2">
+                                    <div class="d-flex justify-content-between">
+                                        <div><h4 class="text-uppercase">Books Selected List</h4></div>
+                                        '.($hasIssue ? "<div><button onclick='return show_EResource_Modal();' class='btn btn-outline-primary btn-sm'><i class='fa fa-plus'></i> Upload</button></div>" : null).'
+                                    </div>
+                                    <div class="mt-3">
+                                        '.$books_listing.'
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="comments" role="tabpanel" aria-labelledby="comments-tab2">
+                                    <div class="col-lg-12 pl-0"><h5>Readers\'s Comments</h5></div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>';

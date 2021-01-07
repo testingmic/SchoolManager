@@ -109,11 +109,12 @@ class Library extends Myschoolgh {
 				SELECT 
 					bk.item_id, bk.isbn, bk.title, bk.description, bk.book_image, 
 					bd.quantity, bd.fine, bd.actual_paid, bd.date_borrowed, bd.return_date,
-					bk.author, bd.status, bd.id AS borrowed_row_id, bd.book_id
+					bk.author, bd.status, bd.id AS borrowed_row_id, bd.book_id,
+					(SELECT quantity FROM books_stock WHERE books_id = bd.book_id) AS books_stock
 				FROM 
 					books_borrowed_details bd
 				LEFT JOIN books bk ON bk.item_id = bd.book_id
-				WHERE borrowed_id = ? LIMIT 100
+				WHERE borrowed_id = ? AND bd.deleted='0' LIMIT 100
 			");
 			$stmt->execute([$borrowed_id]);
 			
@@ -416,7 +417,7 @@ class Library extends Myschoolgh {
 		$the_session = "{$mode}_session";
 
 		/** Switch through the label */
-		if($params->label["todo"] == "add") {
+		if($todo == "add") {
 			// quantity
 			$quantity = $params->label["quantity"] ?? 1;
 
@@ -446,7 +447,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** Remove book from session */
-		elseif($params->label["todo"] == "remove") {
+		elseif($todo == "remove") {
 			// remove book from session
 			$this->remove_book_from_session($the_session, $book_id);
 			
@@ -457,7 +458,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** List the books list in session */
-		elseif($params->label["todo"] == "list") {
+		elseif($todo == "list") {
 			// return the session list as the response
 			return [
 				"data" => ["books_list" => $this->session->$the_session]
@@ -465,7 +466,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** Issue the book out to the user */
-		elseif(in_array($params->label["todo"], ["issue", "requested"])) {
+		elseif(in_array($todo, ["issue", "requested"])) {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
@@ -480,7 +481,7 @@ class Library extends Myschoolgh {
 			// append more values
 			$params->label["data"]["userId"] = $params->userId;
 			$params->label["data"]["clientId"] = $params->clientId;
-			$params->label["data"]["request"] = $params->label["todo"];
+			$params->label["data"]["request"] = $todo;
 			$params->label["data"]["fullname"] = $params->userData->name;
 			
 			// issue book from session
@@ -491,6 +492,50 @@ class Library extends Myschoolgh {
 				"data" => $request ? "The request successfully processed." : "Sorry! There was an error while processing the request"
 			];
 		}
+
+		/** Remove book from the list of books */
+		elseif($todo == "remove_book") {
+
+			// if the data is not parsed
+			if(!isset($params->label["data"])) {
+				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+			}
+
+			// set additional parameters to the data parameter
+			$params->label["data"]["userId"] = $params->userId;
+			$params->label["data"]["fullname"] = $params->userData->name;
+
+			// issue book from session
+			$request = $this->remove_book_from_list($params->label["data"]);
+
+			// return the session list as the response
+			return [
+				"data" => "The request successfully processed."
+			];
+		}
+
+		/** Remove book from the list of books */
+		elseif($todo == "save_book_quantity") {
+
+			// if the data is not parsed
+			if(!isset($params->label["data"])) {
+				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+			}
+
+			// set additional parameters to the data parameter
+			$params->label["data"]["userId"] = $params->userId;
+			$params->label["data"]["fullname"] = $params->userData->name;
+
+			// issue book from session
+			$request = $this->save_book_quantity($params->label["data"]);
+
+			// return the session list as the response
+			return [
+				"data" => "The request successfully processed."
+			];
+		}
+
+		return ["code" => 203, "data" => "Sorry! Unknown request was parsed."];
 
 	}
 
@@ -661,6 +706,61 @@ class Library extends Myschoolgh {
 			return [];
 		}
 
+	}
+
+	/**
+	 * Remove Book from List
+	 * 
+	 * @param String	$params->borrowed_id
+	 * @param String 	$params->book_id
+	 *  
+	 * @return Bool
+	 */
+	public function remove_book_from_list($params) {
+
+		$params = (object) $params;
+		
+		$data = $this->pushQuery("id", "books_borrowed_details", "borrowed_id='{$params->borrowed_id}' AND book_id='{$params->book_id}' AND deleted='0'");
+
+		if(empty($data)) {
+			return ["code" => 203, "data" => "Sorry! An invalid ids were submitted."];
+		}
+
+		/** Remove the file from the list */
+		$this->db->query("UPDATE books_borrowed_details SET  deleleted='1' WHERE borrowed_id='{$params->borrowed_id}' AND book_id='{$params->book_id}' LIMIT 1");
+
+		/** Log the user activity */
+		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} deleted a book from the List.", $params->userId);
+
+		return true;
+	}
+
+	/**
+	 * Save the Book Quantity
+	 * 
+	 * @param String	$params->borrowed_id
+	 * @param String 	$params->book_id
+	 * @param Int		$params->quantity
+	 * 
+	 * @return Bool
+	 */
+	public function save_book_quantity($params) {
+
+		$params = (object) $params;
+		
+		$data = $this->pushQuery("quantity", "books_borrowed_details", "borrowed_id='{$params->borrowed_id}' AND book_id='{$params->book_id}' AND deleted='0'");
+
+		if(empty($data)) {
+			return ["code" => 203, "data" => "Sorry! An invalid ids were submitted."];
+		}
+
+		/** Remove the file from the list */
+		$this->db->query("UPDATE books_borrowed_details SET quantity='{$params->quantity}' WHERE borrowed_id='{$params->borrowed_id}' AND book_id='{$params->book_id}' LIMIT 1");
+
+		/** Log the user activity */
+		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} changed the Book Quantity from {$data[0]->quantity} to {$params->quantity}.", $params->userId);
+
+		return true;
 	}
 
 	/**

@@ -47,8 +47,7 @@ foreach($item_list["data"] as $key => $each) {
 
     $books_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $books_list .= "<td>".($key+1)."</td>";
-    $books_list .= "<td>
-        ".(!empty($each->book_image) ? "<img src='{$baseUrl}{$each->book_image}' width='50px' height='40px'>" : "")." {$each->title}</td>";
+    $books_list .= "<td>".(!empty($each->book_image) ? "<img src='{$baseUrl}{$each->book_image}' width='50px' height='40px'>" : "")." {$each->title}</td>";
     $books_list .= "<td>{$each->author}</td>";
     $books_list .= "<td>{$each->books_stock}</td>";
     $books_list .= "<td><span class='underline'>".($each->category_name ?? null)."</span></td>";

@@ -40,7 +40,7 @@ var upload_EBook_Resource = (book_id) => {
 }
 
 var book_quantity_Checker = () => {
-    $(`div[id='library_form'] table tr[class="each_book_item"] input[type="number"]`).on("keyup", function() {
+    $(`div[id='library_form'] table tr[class~="each_book_item"] input[type="number"]`).on("input", function() {
         let input = $(this),
             value = parseInt(input.val()),
             max = parseInt(input.attr("max"));
@@ -48,6 +48,29 @@ var book_quantity_Checker = () => {
             input.val(1);
         } else if (value > max) {
             input.val(max);
+        }
+    });
+}
+
+var request_quantity_Checker = () => {
+    $(`div[id='books_request_details'] tr[class~="each_book_item"] input[type="number"]`).on("input", function() {
+        var input = $(this);
+        let value = parseInt(input.val()),
+            max = parseInt(input.attr("max")),
+            original = parseInt(input.attr("data-original")),
+            book_id = input.attr("data-book_id");
+
+        if (value < 1) {
+            input.val(1);
+        } else if (value > max) {
+            input.val(max);
+        }
+
+        console.log($(`button[id="save_book_${book_id}"]`));
+        if (value !== original) {
+            $(`button[id="save_book_${book_id}"]`).removeClass("hidden");
+        } else if (value === original) {
+            $(`button[id="save_book_${book_id}"]`).addClass("hidden");
         }
     });
 }
@@ -89,6 +112,51 @@ var issue_Request_Handler = (todo, book_id = "") => {
                 book_quantity_Checker();
                 $(`option[data-item_id='${book_id}']`).remove();
             }
+        }
+    });
+}
+
+var remove_Book = (borrowed_id, book_id) => {
+    swal({
+        title: "Remove Book",
+        text: "Are you sure you want remove this Book? \nOnce confirmed, it cannot be reversed.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            let label = {
+                "todo": "remove_book",
+                "mode": "request",
+                "data": {
+                    "borrowed_id": borrowed_id,
+                    "book_id": book_id
+                }
+            };
+            $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
+                if (response.code == 200) {
+                    $(`tr[class~="each_book_item"][data-request_id="${borrowed_id}"][data-book_id="${book_id}"]`).remove();
+                }
+            });
+        }
+    });
+}
+
+var save_Book = (borrowed_id, book_id) => {
+    let quantity = parseInt($(`input[data-request_id="${borrowed_id}"][data-book_id="${book_id}"]`).val());
+    let label = {
+        "todo": "save_book_quantity",
+        "mode": "request",
+        "data": {
+            "borrowed_id": borrowed_id,
+            "book_id": book_id,
+            "quantity": quantity
+        }
+    };
+    $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
+        if (response.code == 200) {
+            $(`button[id="save_book_${book_id}"]`).addClass("hidden");
+            $(`input[data-request_id="${borrowed_id}"][data-book_id="${book_id}"]`).attr("data-original", quantity);
         }
     });
 }
@@ -241,4 +309,9 @@ $(`div[id='library_form'] select[name='book_id']`).on("change", function() {
     }
 });
 
-issue_Request_Handler("list");
+if(selected_books.length) {
+    book_quantity_Checker();
+    issue_Request_Handler("list");
+} else {
+    request_quantity_Checker();
+}

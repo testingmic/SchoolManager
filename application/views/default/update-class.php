@@ -89,7 +89,7 @@ if(!empty($item_id)) {
                         <th>Student Name</th>
                         <th>Class</th>
                         <th>Gender</th>
-                        <th width="13%">Action</th>
+                        <th width="13%"></th>
                     </tr>
                 </thead>
                 <tbody>'.$students.'</tbody>
