@@ -64,7 +64,7 @@ if(!empty($item_id)) {
             $books_list .= "<td>
                 <div class='d-flex justify-content-start'>
                     <div class='mr-2'>".(!empty($book->book_image) ? "<img src='{$baseUrl}{$book->book_image}' width='50px' height='40px'>" : "")."</div>
-                    <div><a href='{$baseUrl}update-book/{$book->book_id}'>{$book->title}</a> <br> <strong>{$book->isbn}</strong></div>
+                    <div><a href='#' onclick='return loadPage(\"{$baseUrl}update-book/{$book->book_id}\");'>{$book->title}</a> <br> <strong>{$book->isbn}</strong></div>
                 </div>
             </td>";
             $books_list .= "<td>{$book->author}</td>";
@@ -211,7 +211,7 @@ if(!empty($item_id)) {
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="books_list" role="tabpanel" aria-labelledby="books_list-tab2">
                                     <div class="d-flex justify-content-between">
-                                        <div><h4 class="text-uppercase">Books Selected List</h4></div>
+                                        <div><h5 class="text-uppercase">Books Selected List</h5></div>
                                         '.($isEditable ? 
                                             ($hasIssue && $isRequested ? 
                                                 "<div><button onclick='return approve_Cancel_Books_Request(\"{$item_id}\",\"approve_request\");' class='btn btn-outline-success'><i class='fa fa-save'></i> Approve Request</button></div>" : 

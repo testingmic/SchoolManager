@@ -198,12 +198,6 @@ class Replies extends Myschoolgh {
             return ["code" => 203, "data" => "Invalid request parsed"];
         }
 
-        // table names
-        $table_pages = [
-            "assignments" => ["page" => "update-assignment"],
-            "events" => ["page" => "update-event"]
-        ];
-
         /** Process the data parsed */
         $params->message = addslashes($params->message);
 
@@ -319,11 +313,11 @@ class Replies extends Myschoolgh {
         $params->_item_id = random_string("alnum", 32);
 
         /** The resource */
-        $resource = explode("_", $params->resource)[0];
+        $resource = $params->resource;
 
         /** If the resource is not in the array */
-        if(!in_array($resource, ["assignments", "events", "ebook"])) {
-            return ["code" => 203, "data" => "Invalid request parsed: assignments"];
+        if(!in_array($resource, ["assignments", "events", "ebook", "books_request"])) {
+            return ["code" => 203, "data" => "Invalid request parsed: assignments|events|ebook|books_request"];
         }
 
         // append the attachments
@@ -342,9 +336,6 @@ class Replies extends Myschoolgh {
         ];
         
         try {
-
-            // global variable for notice
-            global $noticeClass;
 
             // initial
             $comments_count = "";
@@ -434,7 +425,6 @@ class Replies extends Myschoolgh {
         } catch(PDOException $e) {
             // roll back the transaction
             $this->db->rollBack();
-            return $e->getMessage();
         }
 
     }
