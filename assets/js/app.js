@@ -3,6 +3,7 @@
  */
 
 // Links
+$.form_data = {};
 $.current_page = "";
 $.protocol = window.location.protocol;
 $.host = window.location.host;
@@ -306,13 +307,11 @@ var formSubmitStopper = (element) => {
 var linkHandler = (target, pushstate) => {
     devlog("linkHandler(). I called =>")
 
-    let callback = getCallback(target)
-
     if (target.slice(0, -1) === $.baseurl || target === $.baseurl || target === $.default) {
         target = $.baseurl + "/dashboard"
     }
 
-    loadPage(target, callback, pushstate)
+    loadPage(target, pushstate)
 }
 
 var deleteReply = function() {
@@ -409,11 +408,11 @@ var abortscripts = () => {
         // $.post($.baseurl+"/process/abortscripts", {abort: true})
 }
 
-var loadPage = (loc, callback, pushstate) => {
+var loadPage = (loc, pushstate) => {
     devlog("loadPage(", loc, ") I called =>")
 
     if (appxhr.length > 0) abortscripts();
-    if (callback === undefined) callback = getCallback(loc);
+    // if (callback === undefined) callback = getCallback(loc);
 
     if (loc == `${$.baseurl}` || loc == `${$.baseurl}/dashboard`) {
         $(`[id="history-refresh"]`).addClass("hidden");
@@ -424,6 +423,7 @@ var loadPage = (loc, callback, pushstate) => {
     let progress = moveProgress();
     $.ajax({
         url: loc,
+        data: $.form_data,
         method: "POST",
         dataType: "JSON",
         beforeSend: () => {
@@ -960,7 +960,6 @@ var initExportButtons = () => {
         });
     });
 }
-
 
 var initDataTables = () => {
     if ($('.datatable').length > 0) {

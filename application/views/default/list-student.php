@@ -16,18 +16,24 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 $response = (object) [];
-$response->title = "Students List : {$appName}";
-$response->scripts = [];
+$filter = (object) $_POST;
 
+$response->title = "Students List : {$appName}";
+$response->scripts = ["assets/js/filters.js"];
+
+$clientId = $session->clientId;
 $student_param = (object) [
-    "clientId" => $session->clientId,
-    "user_type" => "student"
+    "clientId" => $clientId,
+    "user_type" => "student",
+    "department_id" => $filter->department_id ?? null,
+    "class_id" => $filter->class_id ?? null,
+    "gender" => $filter->gender ?? null
 ];
 
 $student_list = load_class("users", "controllers")->list($student_param);
 
 $accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
+$accessObject->clientId = $clientId;
 $hasDelete = $accessObject->hasAccess("delete", "student");
 $hasUpdate = $accessObject->hasAccess("update", "student");
 
@@ -55,6 +61,18 @@ foreach($student_list["data"] as $key => $each) {
     $students .= "</tr>";
 }
 
+// default class_list
+$class_list = [];
+// if the class_id is not empty
+if(!empty($filter->department_id)) {
+    $classes_param = (object) [
+        "clientId" => $clientId,
+        "columns" => "id, name",
+        "department_id" => $filter->department_id
+    ];
+    $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+}
+
 $response->html = '
     <section class="section">
         <div class="section-header">
@@ -64,7 +82,41 @@ $response->html = '
                 <div class="breadcrumb-item">Students List</div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="filter_Department_Class">
+            <div class="col-xl-4 col-md-4 col-12 form-group">
+                <label>Select Department</label>
+                <select class="form-control selectpicker" id="department_id" name="department_id">
+                    <option value="">Please Select Department</option>';
+                    foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
+                        $response->html .= "<option ".(isset($filter->department_id) && ($filter->department_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Select Class</label>
+                <select class="form-control selectpicker" name="class_id">
+                    <option value="">Please Select Class</option>';
+                    foreach($class_list as $each) {
+                        $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Select Gender</label>
+                <select class="form-control selectpicker" name="gender">
+                    <option value="">Please Select Gender</option>';
+                    foreach($myClass->pushQuery("*", "users_gender") as $each) {
+                        $response->html .= "<option ".(isset($filter->gender) && ($filter->gender == $each->name) ? "selected" : "")." value=\"{$each->name}\">{$each->name}</option>";                            
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-2 col-md-2 col-12 form-group">
+                <label for="">&nbsp;</label>
+                <button id="filter_Students_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+            </div>
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">

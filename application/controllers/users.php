@@ -64,7 +64,7 @@ class Users extends Myschoolgh {
 			$params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department='{$params->department_id}'" : null;
 			$params->query .= (isset($params->section_id) && !empty($params->section_id)) ? " AND a.section='{$params->section_id}'" : null;
 			$params->query .= (isset($params->username)) ? " AND a.username='{$params->username}'" : null;
-			$params->query .= (isset($params->gender)) ? " AND a.gender='{$params->gender}'" : null;
+			$params->query .= (isset($params->gender) && !empty($params->gender)) ? " AND a.gender='{$params->gender}'" : null;
 		}
 		$params->query .= isset($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
 
@@ -868,7 +868,7 @@ class Users extends Myschoolgh {
 				".(isset($params->religion) ? ", religion='{$params->religion}'" : null)."
 				".(isset($params->section) ? ", section='{$params->section}'" : null)."
 				".(isset($params->programme) ? ", programme='{$params->programme}'" : null)."
-				".(isset($params->department) ? ", department='{$params->department}'" : null)."
+				".(isset($params->department_id) ? ", department='{$params->department_id}'" : null)."
 
 				".(isset($params->residence) ? ", residence='{$params->residence}'" : null)."
 				".(isset($params->phone) ? ", phone_number='{$params->phone}'" : null)."
@@ -1081,7 +1081,7 @@ class Users extends Myschoolgh {
 				".(isset($params->religion) ? ", religion='{$params->religion}'" : null)."
 				".(isset($params->section) ? ", section='{$params->section}'" : null)."
 				".(isset($params->programme) ? ", programme='{$params->programme}'" : null)."
-				".(isset($params->department) ? ", department='{$params->department}'" : null)."
+				".(isset($params->department_id) ? ", department='{$params->department_id}'" : null)."
 				".(isset($params->enrollment_date) ? ", enrollment_date='{$params->enrollment_date}'" : null)."
 
 				".(isset($params->username) ? ", username='{$params->username}'" : null)."

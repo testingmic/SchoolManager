@@ -1833,22 +1833,22 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12"><h5>ACADEMICS</h5></div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="class_id">Class</label>
-                        <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
-                            <option value="null">Select Student Class</option>';
-                            foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->id == $userData->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                        <label for="department_id">Department <span class="required">*</span></label>
+                        <select data-width="100%" name="department_id" id="department_id" class="form-control selectpicker">
+                            <option value="">Select Student Department</option>';
+                            foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $userData->department) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="department">Department <span class="required">*</span></label>
-                        <select data-width="100%" name="department" id="department" class="form-control selectpicker">
-                            <option value="">Select Student Department</option>';
-                            foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->id == $userData->department) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                        <label for="class_id">Class</label>
+                        <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
+                            <option value="null">Select Student Class</option>';
+                            foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $userData->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
                     </div>
@@ -2466,8 +2466,8 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12"><h5>ACADEMICS</h5></div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="department">Department <span class="required">*</span></label>
-                        <select data-width="100%" name="department" id="department" class="form-control selectpicker">
+                        <label for="department_id">Department <span class="required">*</span></label>
+                        <select data-width="100%" name="department_id" id="department_id" class="form-control selectpicker">
                             <option value="">Select Department</option>';
                             foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->department) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
