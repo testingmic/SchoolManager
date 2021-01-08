@@ -330,18 +330,6 @@ class Fees extends Myschoolgh {
 
             // loop through the results list
             foreach($student_allocation_array as $key => $student) {
-                // init
-                $action = "";
-
-                // set the button for receiving the amount
-                if(!empty($params->receivePayment)) {
-                    if(($student->amount_due < $student->amount_paid) || ($student->amount_due === $student->amount_paid)) {
-                        $action = "<span class='badge badge-success'>Paid</span>";
-                    } else {
-                        $action = "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?record_id={$student->id}&student_id={$student->student_id}\");' class='btn btn-outline-success btn-sm'>Pay</button>";
-                    }
-                }
-                
                 // append to the url string
                 $student_allocation_list .= "<tr data-row_id=\"{$student->id}\">";
                 $student_allocation_list .= "<td>".($key+1)."</td>";
@@ -358,7 +346,26 @@ class Fees extends Myschoolgh {
                 $student_allocation_list .= "<td>{$student->category_name}</td>";
                 $student_allocation_list .= "<td>{$student->amount_due}</td>";
                 $student_allocation_list .= "<td>{$student->amount_paid}</td>";
-                $student_allocation_list .= "<td>{$action}</td>";
+
+                // confirm if the user has the permission to make payment
+                if(!empty($params->receivePayment)) {
+                    $student_allocation_list .= "<td width='13%' class='pl-2'>";
+                    // assign variable
+                    $isPaid = (bool) ($student->amount_due < $student->amount_paid) || ($student->amount_due === $student->amount_paid);
+
+                    // confirm if the fee has been paid
+                    if($isPaid) {
+                        $student_allocation_list .= "<span class='badge badge-success'>Paid</span>";
+                    } else {
+                        $student_allocation_list .= "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?record_id={$student->id}&student_id={$student->student_id}\");' class='btn btn-sm btn-outline-success'>Pay</button>";
+                    }
+                    // delete the record if possible => that is allowed only if the student has not already made an payment
+                    if(!empty($params->canAllocate) && empty($student->amount_paid)) {
+                        $student_allocation_list .= " &nbsp; <button onclick='return remove_Fees_Allocation(\"{$student->id}\",\"student\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>";
+                    }
+                    $student_allocation_list .= "</td>";
+                }
+
                 $student_allocation_list .= "</tr>";
             }
         }

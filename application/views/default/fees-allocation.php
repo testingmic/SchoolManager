@@ -31,6 +31,9 @@ if(!$receivePayment) {
     $response->html = page_not_found();
 } else {
 
+    // the allocation fees
+    $canAllocate = $accessObject->hasAccess("allocation", "fees");
+
     // scripts for the page
     $response->scripts = ["assets/js/filters.js", "assets/js/payments.js"];
 
@@ -39,7 +42,7 @@ if(!$receivePayment) {
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
     // load fees allocation list for class
-    $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "receivePayment" => $receivePayment];
+    $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "receivePayment" => $receivePayment, "canAllocate" => $canAllocate];
     $class_allocation_list = load_class("fees", "controllers", $allocation_param)->class_allocation_array($allocation_param);
 
     // load fees allocation list for the students

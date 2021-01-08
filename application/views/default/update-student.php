@@ -344,7 +344,7 @@ if(!empty($user_id)) {
                                             <th>Category</th>
                                             <th>Due</th>
                                             <th>Paid</th>
-                                            <th align="center"></th>
+                                            '.($receivePayment ? '<th width="10%" align="center"></th>' : '').'
                                         </tr>
                                     </thead>
                                     <tbody>'.$student_allocation_list.'</tbody>
