@@ -1,3 +1,4 @@
+$.form_data = {};
 if ($(`div[id="filter_Department_Class"]`).length) {
 
     $(`select[name="department_id"]`).on("change", function() {
@@ -23,3 +24,11 @@ if ($(`div[id="filter_Department_Class"]`).length) {
         loadPage(`${baseUrl}list-student`);
     });
 }
+
+$(`button[id="filter_Staff_List"]`).on("click", function() {
+    department_id = $(`select[name="department_id"]`).val(),
+        user_type = $(`select[name="user_type"]`).val(),
+        gender = $(`select[name="gender"]`).val();
+    $.form_data = { department_id, user_type, gender };
+    loadPage(`${baseUrl}list-staff`);
+});

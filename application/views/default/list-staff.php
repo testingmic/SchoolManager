@@ -16,18 +16,25 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 $response = (object) [];
+$filter = (object) $_POST;
+
 $response->title = "Staff List : {$appName}";
-$response->scripts = [];
+$response->scripts = ["assets/js/filters.js"];
+
+$filter->user_type = !empty($filter->user_type) ? $filter->user_type : "employee,teacher,admin,accountant";
 
 $staff_param = (object) [
     "clientId" => $session->clientId,
-    "user_type" => "employee,teacher,admin,accountant"
+    "user_type" => $filter->user_type,
+    "department_id" => $filter->department_id ?? null,
+    "gender" => $filter->gender ?? null
 ];
 
 $api_staff_list = load_class("users", "controllers")->list($staff_param);
 
+$clientId = $session->clientId;
+$accessObject->clientId = $clientId;
 $accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
 
 // get the user data
 $accessObject->userPermits = $defaultUser->user_permissions;
@@ -79,6 +86,40 @@ $response->html = '
             </div>
         </div>
         <div class="row">
+            <div class="col-xl-4 col-md-4 col-12 form-group">
+                <label>Select Department</label>
+                <select class="form-control selectpicker" id="department_id" name="department_id">
+                    <option value="">Please Select Department</option>';
+                    foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
+                        $response->html .= "<option ".(isset($filter->department_id) && ($filter->department_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Select Role</label>
+                <select class="form-control selectpicker" name="user_type">
+                    <option value="">Please Select Role</option>';
+                    foreach($myClass->user_roles_list as $key => $value) {
+                        $response->html .= "<option ".(isset($filter->user_type) && ($filter->user_type == $key) ? "selected" : "")." value=\"{$key}\">{$value}</option>";                            
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Select Gender</label>
+                <select class="form-control selectpicker" name="gender">
+                    <option value="">Please Select Gender</option>';
+                    foreach($myClass->pushQuery("*", "users_gender") as $each) {
+                        $response->html .= "<option ".(isset($filter->gender) && ($filter->gender == $each->name) ? "selected" : "")." value=\"{$each->name}\">{$each->name}</option>";                            
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-2 col-md-2 col-12 form-group">
+                <label for="">&nbsp;</label>
+                <button id="filter_Staff_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+            </div>
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">
