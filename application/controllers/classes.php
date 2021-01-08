@@ -32,6 +32,7 @@ class Classes extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT ".(isset($params->columns) ? $params->columns : " a.*,
+                    (SELECT name FROM departments WHERE departments.id = a.department_id LIMIT 1) AS department_name,
                     (SELECT COUNT(*) FROM users b WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' AND b.class_id = a.id AND b.client_id = a.client_id) AS students_count,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.class_assistant LIMIT 1) AS class_assistant_info,

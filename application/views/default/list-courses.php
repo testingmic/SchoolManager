@@ -112,7 +112,7 @@ $response->html = '
                 <select class="form-control selectpicker" name="course_tutor">
                     <option value="">Please Select Tutor</option>';
                     foreach($myClass->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND user_status='Active' AND client_id='{$clientId}'") as $each) {
-                        $response->html .= "<option ".(isset($filter->course_tutor) && ($filter->course_tutor == $each->id) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
+                        $response->html .= "<option ".(isset($filter->course_tutor) && ($filter->course_tutor == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                     }
                 $response->html .= '
                 </select>

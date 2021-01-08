@@ -22,14 +22,11 @@ $response->scripts = ["assets/js/filters.js"];
 
 $filter = (object) $_POST;
 
-$clientId = $session->clientId;
 $userId = $session->userId;
 
 $accessObject->userId = $userId;
 $accessObject->clientId = $clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
-
-$fees_history = "";
 
 // default class_list
 $class_list = [];
@@ -41,6 +38,50 @@ if(!empty($filter->department_id)) {
         "department_id" => $filter->department_id
     ];
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+}
+
+// begin the request parameter
+$params = (object) [
+    "clientId" => $clientId,
+    "userData" => $defaultUser,
+    "department_id" => $filter->department_id ?? null,
+    "class_id" => $filter->class_id ?? null,
+    "category_id" => $filter->category_id ?? null
+];
+$item_list = load_class("fees", "controllers")->list($params);
+
+$hasAdd = $accessObject->hasAccess("add", "fees");
+$hasUpdate = $accessObject->hasAccess("update", "fees");
+
+$fees_history = "";
+foreach($item_list["data"] as $key => $each) {
+    
+    $action = "";
+    $action = "<a href='{$baseUrl}update-fees/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+
+    if($hasUpdate) {
+        $action .= "&nbsp;<a href='{$baseUrl}update-fees/{$each->item_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+    }
+    $action .= "&nbsp;<a href='{$baseUrl}update-fees/{$each->item_id}/print' class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
+
+    $fees_history .= "<tr data-row_id=\"{$each->item_id}\">";
+    $fees_history .= "<td>".($key+1)."</td>";
+    $fees_history .= "
+        <td>
+            <div class='d-flex justify-content-start'>
+                ".(!empty($each->student_info->image) ? "
+                <div class='mr-2'><img src='{$baseUrl}{$each->student_info->image}' width='40px' height='40px'></div>" : "")."
+                <div>{$each->student_info->name} <br>
+                <strong>{$each->student_info->unique_id}</strong></div>
+            </div>
+        </td>";
+    $fees_history .= "<td>{$each->class_name}</td>";
+    $fees_history .= "<td>{$each->amount}</td>";
+    $fees_history .= "<td>{$each->category_name}</td>";
+    $fees_history .= "<td>{$each->recorded_date}</td>";
+    $fees_history .= "<td>{$each->created_by_info->name}</td>";
+    $fees_history .= "<td width='10%' align='center'>{$action}</td>";
+    $fees_history .= "</tr>";
 }
 
 $response->html = '
@@ -75,9 +116,9 @@ $response->html = '
         </div>
         <div class="col-xl-3 col-md-3 col-12 form-group">
             <label>Select Category</label>
-            <select class="form-control selectpicker" name="fees_category_id">
+            <select class="form-control selectpicker" name="category_id">
                 <option value="">Please Select Category</option>';
-                foreach($myClass->pushQuery("id, name", "fees_type", "status='1' AND client_id='{$clientId}'") as $each) {
+                foreach($myClass->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$clientId}'") as $each) {
                     $response->html .= "<option ".(isset($filter->category_id) && ($filter->category_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";                            
                 }
             $response->html .= '

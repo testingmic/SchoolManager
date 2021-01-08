@@ -39,57 +39,64 @@ class Library extends Myschoolgh {
         $filters .= isset($params->department_id) ? " AND bk.department_id='{$params->department_id}'" : "";
         $filters .= isset($params->isbn) ? " AND bk.isbn='{$params->isbn}'" : "";
 
-        // query the database
-		$stmt = $this->db->prepare("
-			SELECT 
-				".(isset($params->minified) ? 
-					" 	bk.id, bk.item_id, bk.title, bk.description, bk.rack_no, bk.row_no, bk.book_image, bk.isbn, 
-						bk.author, (SELECT quantity FROM books_stock WHERE books_id = bk.item_id) AS books_stock " : 
-					" bk.*, (SELECT quantity FROM books_stock WHERE books_id = bk.item_id) AS books_stock,
-                (SELECT name FROM classes WHERE classes.id = bk.class_id LIMIT 1) AS class_name,
-                (SELECT name FROM departments WHERE departments.id = bk.department_id LIMIT 1) AS department_name,
-                bt.name AS category_name,
-                (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = bk.created_by LIMIT 1) AS created_by_info,
-                (SELECT b.description FROM files_attachment b WHERE b.resource='library_book' AND b.record_id = bk.item_id ORDER BY b.id DESC LIMIT 1) AS attachment ")."
-			FROM books bk
-			LEFT JOIN books_type bt ON bt.id = bk.category_id
-			WHERE bk.deleted= ? AND bk.client_id = ? {$filters} ORDER BY bk.id DESC LIMIT {$params->limit} 
-		");
-		$stmt->execute([0, $params->clientId]);
+		try {
+			
+			// query the database
+			$stmt = $this->db->prepare("
+				SELECT 
+					".(isset($params->minified) ? 
+						" 	bk.id, bk.item_id, bk.title, bk.description, bk.rack_no, bk.row_no, bk.book_image, bk.isbn, 
+							bk.author, (SELECT quantity FROM books_stock WHERE books_id = bk.item_id) AS books_stock " : 
+						" bk.*, (SELECT quantity FROM books_stock WHERE books_id = bk.item_id) AS books_stock,
+					(SELECT name FROM classes WHERE classes.id = bk.class_id LIMIT 1) AS class_name,
+					(SELECT name FROM departments WHERE departments.id = bk.department_id LIMIT 1) AS department_name,
+					bt.name AS category_name,
+					(SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = bk.created_by LIMIT 1) AS created_by_info,
+					(SELECT b.description FROM files_attachment b WHERE b.resource='library_book' AND b.record_id = bk.item_id ORDER BY b.id DESC LIMIT 1) AS attachment ")."
+				FROM books bk
+				LEFT JOIN books_type bt ON bt.id = bk.category_id
+				WHERE bk.deleted= ? AND bk.client_id = ? {$filters} ORDER BY bk.id DESC LIMIT {$params->limit} 
+			");
+			$stmt->execute([0, $params->clientId]);
 
-        $data = [];
+			$data = [];
 
-        // loop through the list of books
-        while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+			// loop through the list of books
+			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
-            // if attachment variable was parsed
-            $result->isbn = strtoupper($result->isbn);
+				// if attachment variable was parsed
+				$result->isbn = strtoupper($result->isbn);
 
-			// if created_by_info is set
-			if(isset($result->created_by_info)) {
+				// if created_by_info is set
+				if(isset($result->created_by_info)) {
 
-				// convert the attachment into an object
-				$result->attachment = json_decode($result->attachment);
-            	$result->attachment_html = !empty($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
+					// convert the attachment into an object
+					$result->attachment = json_decode($result->attachment);
+					$result->attachment_html = !empty($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
 
-				// loop through the information
-				foreach(["created_by_info"] as $each) {
-					// convert the created by string into an object
-					$result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+					// loop through the information
+					foreach(["created_by_info"] as $each) {
+						// convert the created by string into an object
+						$result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+					}
 				}
-			}
 
-			// if show_in_list was parsed
-			if(isset($params->show_in_list)) {
-				$result->in_session = $this->in_session_list($result->item_id, "{$params->show_in_list}_session");
+				// if show_in_list was parsed
+				if(isset($params->show_in_list)) {
+					$result->in_session = $this->in_session_list($result->item_id, "{$params->show_in_list}_session");
+				}
+				
+				$data[] = $result;
 			}
-            
-            $data[] = $result;
-        }
-        
-        return [
-            "data" => $data
-        ];
+			
+			return [
+				"data" => $data
+			];
+		
+		} catch(PDOException $e) {
+			return [];
+		}
+		
     }
 
 	/**

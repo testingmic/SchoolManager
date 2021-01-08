@@ -8,7 +8,7 @@ class Sections extends Myschoolgh {
     }
     
     /**
-     * Update existing incident record
+     * List Sections
      * 
      * @param stdClass $params
      * 
@@ -21,7 +21,7 @@ class Sections extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
-        $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
+        $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
         $params->query .= (isset($params->section_leader)) ? " AND a.section_leader='{$params->section_leader}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= (isset($params->section_id)) ? " AND a.id='{$params->section_id}'" : null;

@@ -73,7 +73,6 @@ class Assignments extends Myschoolgh {
         $params->query .= (isset($params->course_id)) ? " AND a.course_id='{$params->course_id}'" : null;
         $params->query .= (isset($params->assignment_id)) ? " AND a.item_id='{$params->assignment_id}'" : null;
         $params->query .= (isset($params->course_tutor)) ? " AND a.course_tutor LIKE '%{$params->course_tutor}%'" : null;
-
         
         try {
 

@@ -38,10 +38,6 @@ $hasDelete = $accessObject->hasAccess("delete", "assignments");
 $hasUpdate = $accessObject->hasAccess("update", "assignments");
 
 // unset the sessions if $session->currentQuestionId is not empty
-if(!empty($session->currentQuestionId)) {
-    // $session->remove(["currentQuestionId","previousQuestionId","showSubmitButton", "attachAssignmentDocs", "nextQuestionId"]);
-}
-
 $assignments = "";
 foreach($item_list["data"] as $key => $each) {
     

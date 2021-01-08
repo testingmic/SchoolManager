@@ -56,6 +56,8 @@ class Courses extends Myschoolgh {
         $params->query .= (isset($params->programme_id)) ? " AND a.programme_id='{$params->programme_id}'" : null;
         $params->query .= (isset($params->course_id)) ? " AND a.id='{$params->course_id}'" : null;
         $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
+        $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
+        $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
 
         try {
 
