@@ -1,0 +1,2 @@
+[08-Jan-2021 07:17:08 Africa/Accra] PHP Notice:  Undefined property: stdClass::$id in C:\xampp\htdocs\myschool_gh\application\views\default\list-courses.php on line 115
+[08-Jan-2021 07:17:12 Africa/Accra] PHP Notice:  Undefined property: stdClass::$id in C:\xampp\htdocs\myschool_gh\application\views\default\list-courses.php on line 115

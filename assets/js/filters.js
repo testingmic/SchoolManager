@@ -23,6 +23,15 @@ if ($(`div[id="filter_Department_Class"]`).length) {
         $.form_data = { department_id, class_id, gender };
         loadPage(`${baseUrl}list-student`);
     });
+
+    $(`button[id="filter_Courses_List"]`).on("click", function() {
+        department_id = $(`select[name="department_id"]`).val(),
+            class_id = $(`select[name="class_id"]`).val(),
+            course_tutor = $(`select[name="course_tutor"]`).val();
+        $.form_data = { department_id, class_id, course_tutor };
+        loadPage(`${baseUrl}list-courses`);
+    });
+
 }
 
 $(`button[id="filter_Staff_List"]`).on("click", function() {

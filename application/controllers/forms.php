@@ -2284,7 +2284,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="class_id">Class</label>
+                        <label for="class_id">Class <span class="required">*</span></label>
                         <select '.$isAdmin.' data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
                             <option value="null">Select Class</option>';
                             foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
@@ -2295,7 +2295,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-8 col-md-8">
                     <div class="form-group">
-                        <label for="name">Course Title<span class="required">*</span></label>
+                        <label for="name">Course Title <span class="required">*</span></label>
                         <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
                     </div>
                 </div>
@@ -2304,7 +2304,7 @@ class Forms extends Myschoolgh {
                         <label for="course_tutor">Course Tutor</label>
                         <select data-width="100%" '.$isAdmin.' name="course_tutor" id="course_tutor" class="form-control selectpicker">
                             <option value="null">Select Course Tutor</option>';
-                            foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
+                            foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND user_status='Active' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->item_id == $itemData->course_tutor) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
                         $response .= '</select>

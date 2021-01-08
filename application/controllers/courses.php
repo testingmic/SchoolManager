@@ -48,13 +48,14 @@ class Courses extends Myschoolgh {
             $params->class_id = $params->userData->class_id;
         }
 
-        $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
-        $params->query .= (isset($params->course_tutor)) ? " AND a.course_tutor='{$params->course_tutor}'" : null;
+        $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
+        $params->query .= (isset($params->course_tutor) && !empty($params->course_tutor)) ? " AND a.course_tutor='{$params->course_tutor}'" : null;
         $params->query .= (isset($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->programme_id)) ? " AND a.id='{$params->programme_id}'" : null;
+        $params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
+        $params->query .= (isset($params->programme_id)) ? " AND a.programme_id='{$params->programme_id}'" : null;
         $params->query .= (isset($params->course_id)) ? " AND a.id='{$params->course_id}'" : null;
-        $params->query .= (isset($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
+        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
 
         try {
 
@@ -200,6 +201,15 @@ class Courses extends Myschoolgh {
         if(!$accessObject->hasAccess("add", "course")) {
             return ["code" => 203, "data" => $this->permission_denied];
         }
+
+        // get the class department
+        $dept_id = $this->pushQuery("department_id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        // if empty then return
+        if(empty($dept_id)) {
+            return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+        }
+        // set the department id retrieved using the class id
+        $params->department_id = $dept_id[0]->department_id;
  
         // create a new Course code
         if(isset($params->course_code) && !empty($params->course_code)) {
@@ -227,6 +237,7 @@ class Courses extends Myschoolgh {
                 INSERT INTO courses SET client_id = ?, created_by = ?, item_id = '{$item_id}'
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
+                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
                 ".(isset($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
                 ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
@@ -275,12 +286,20 @@ class Courses extends Myschoolgh {
 
             // old record
             $prevData = $this->pushQuery("*", "courses", "id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
-
             // if empty then return
             if(empty($prevData)) {
                 return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
             }
 
+            // get the class department
+            $dept_id = $this->pushQuery("department_id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+            // if empty then return
+            if(empty($dept_id)) {
+                return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+            }
+            // set the department id retrieved using the class id
+            $params->department_id = $dept_id[0]->department_id;
+            
             // create a new class code
             if(isset($params->course_code) && !empty($params->course_code) && ($prevData[0]->course_code !== $params->course_code)) {
                 // replace any empty space with 
@@ -305,6 +324,7 @@ class Courses extends Myschoolgh {
                 ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
+                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(isset($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."

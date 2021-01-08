@@ -17,19 +17,26 @@ jump_to_main($baseUrl);
 
 $response = (object) [];
 $response->title = "Courses List : {$appName}";
-$response->scripts = [];
+$response->scripts = ["assets/js/filters.js"];
+
+$clientId = $session->clientId;
+
+$filter = (object) $_POST;
 
 $courses_param = (object) [
-    "clientId" => $session->clientId,
+    "clientId" => $clientId,
     "userId" => $session->userId,
     "userData" => $defaultUser,
-    "limit" => 99999
+    "limit" => 99999,
+    "department_id" => $filter->department_id ?? null,
+    "class_id" => $filter->class_id ?? null,
+    "course_tutor" => $filter->course_tutor ?? null
 ];
 
 $item_list = load_class("courses", "controllers")->list($courses_param);
 
+$accessObject->clientId = $clientId;
 $accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
 $hasDelete = $accessObject->hasAccess("delete", "course");
 $hasUpdate = $accessObject->hasAccess("update", "course");
 
@@ -58,6 +65,18 @@ foreach($item_list["data"] as $key => $each) {
     $courses .= "</tr>";
 }
 
+// default class_list
+$class_list = [];
+// if the class_id is not empty
+if(!empty($filter->department_id)) {
+    $classes_param = (object) [
+        "clientId" => $clientId,
+        "columns" => "id, name",
+        "department_id" => $filter->department_id
+    ];
+    $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+}
+
 $response->html = '
     <section class="section">
         <div class="section-header">
@@ -67,7 +86,41 @@ $response->html = '
                 <div class="breadcrumb-item">Courses List</div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="filter_Department_Class">
+            <div class="col-xl-4 col-md-4 col-12 form-group">
+                <label>Select Department</label>
+                <select class="form-control selectpicker" id="department_id" name="department_id">
+                    <option value="">Please Select Department</option>';
+                    foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
+                        $response->html .= "<option ".(isset($filter->department_id) && ($filter->department_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Select Class</label>
+                <select class="form-control selectpicker" name="class_id">
+                    <option value="">Please Select Class</option>';
+                    foreach($class_list as $each) {
+                        $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Select Course Tutor</label>
+                <select class="form-control selectpicker" name="course_tutor">
+                    <option value="">Please Select Tutor</option>';
+                    foreach($myClass->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND user_status='Active' AND client_id='{$clientId}'") as $each) {
+                        $response->html .= "<option ".(isset($filter->course_tutor) && ($filter->course_tutor == $each->id) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
+                    }
+                $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-2 col-md-2 col-12 form-group">
+                <label for="">&nbsp;</label>
+                <button id="filter_Courses_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+            </div>
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">
