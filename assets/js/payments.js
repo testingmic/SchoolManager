@@ -11,7 +11,7 @@ var load_Pay_Fees_Form = () => {
         "show_history": true
     };
     $(`div[id="make_payment_button"] button`).prop("disabled", true).html(`Loading record <i class="fa fa-spin fa-spinner"></i>`);
-
+    i
     $.get(`${baseUrl}api/fees/payment_form`, data).then((response) => {
         $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Make Payment`);
         if (response.code === 200) {
@@ -71,9 +71,17 @@ var save_Fees_Allocation = () => {
             $.post(`${baseUrl}api/fees/allocate_fees`, data).then((response) => {
                 $(`div[id="fees_allocation_form"] *`).prop("disabled", false);
                 $(`div[id="allocate_fees_button"] button`).html(`Allocate Fee`);
+
+                let s_icon = "error";
                 if (response.code === 200) {
+                    s_icon = "success";
                     $(`div[id="fees_allocation_form"] input`).val("");
                 }
+                swal({
+                    position: "top",
+                    text: response.data.result,
+                    icon: s_icon,
+                });
             }).catch(() => {
                 $(`div[id="fees_allocation_form"] *`).prop("disabled", false);
                 $(`div[id="allocate_fees_button"] button`).html(`Allocate Fee`);
@@ -82,11 +90,49 @@ var save_Fees_Allocation = () => {
     });
 }
 
-$(`select[name="allocate_to"]`).on("change", function() {
+$(`div[id="fees_allocation_form"] select[name="allocate_to"]`).on("change", function() {
     let value = $(this).val();
     if (value === "class") {
         $(`div[id="students_list"]`).addClass("hidden");
     } else {
         $(`div[id="students_list"]`).removeClass("hidden");
+    }
+});
+
+var load_Fees_Allocation_Amount = () => {
+    let $allot_to = $(`div[id="fees_allocation_form"] select[name="allocate_to"]`).val(),
+        $class_id = $(`div[id="fees_allocation_form"] select[name="class_id"]`).val(),
+        $student_id = $(`div[id="fees_allocation_form"] select[name="student_id"]`).val(),
+        $category_id = $(`div[id="fees_allocation_form"] select[name="category_id"]`).val();
+
+    let data = {
+        "allocate_to": $allot_to,
+        "class_id": $class_id,
+        "student_id": $student_id,
+        "category_id": $category_id
+    };
+    if ($category_id.length && $category_id !== "null") {
+        $(`div[id="fees_allocation_form"] input[name="amount"]`).prop("disabled", true);
+        $.get(`${baseUrl}api/fees/allocate_fees_amount`, data).then((response) => {
+            $(`div[id="fees_allocation_form"] input[name="amount"]`).prop("disabled", false);
+            if (response.code == 200) {
+                $(`div[id="fees_allocation_form"] input[name="amount"]`).val(response.data.result);
+            }
+        }).catch(() => {
+            $(`div[id="fees_allocation_form"] input[name="amount"]`).prop("disabled", false);
+        });
+    }
+}
+
+$(`div[id="fees_allocation_form"] select[name="category_id"]`).on("change", function() {
+    load_Fees_Allocation_Amount();
+});
+
+$(`div[id="fees_allocation_form"] select[name="student_id"]`).on("change", function() {
+    let value = $(this).val(),
+        cat_id = $(`div[id="fees_allocation_form"] select[name="category_id"]`).val();
+
+    if (value.length && value !== "null" && cat_id.length) {
+        load_Fees_Allocation_Amount();
     }
 });

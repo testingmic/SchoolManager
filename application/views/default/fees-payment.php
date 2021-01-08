@@ -31,6 +31,9 @@ if(!$receivePayment) {
     $response->html = page_not_found();
 } else {
 
+    // disable form inputs
+    $disabled = "disabled='disabled'";
+
     // scripts for the page
     $response->scripts = ["assets/js/filters.js", "assets/js/payments.js"];
 
@@ -113,16 +116,16 @@ if(!$receivePayment) {
                             <div class="col-12 col-md-6" id="fees_payment_form">
                                 <div class="form-group">
                                     <label>Amount</label>
-                                    <input class="form-control" name="amount" id="amount" type="number" min="0">
+                                    <input '.$disabled.' class="form-control" name="amount" id="amount" type="number" min="0">
                                 </div>
                                 <div class="form-group">
                                     <label>Remarks</label>
-                                    <textarea class="form-control" name="remarks" id="remarks"></textarea>
+                                    <textarea '.$disabled.' class="form-control" name="remarks" id="remarks"></textarea>
                                 </div>
                                 <div class="form-group text-right">
                                     <div class="d-flex justify-content-between">
-                                        <div><button class="btn btn-outline-success"><i class="fa fa-save"></i> Save</button></div>
-                                        <div><button id="payment_cancel" onclick="return cancel_Payment_Form()" class="btn hidden btn-outline-danger">Cancel</button></div>
+                                        <div><button '.$disabled.' class="btn btn-outline-success"><i class="fa fa-save"></i> Save</button></div>
+                                        <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form()" class="btn hidden btn-outline-danger">Cancel</button></div>
                                     </div>
                                 </div>
                             </div>

@@ -61,6 +61,18 @@ if(!empty($user_id)) {
         $updateIncident = $accessObject->hasAccess("update", "incident");
         $deleteIncident = $accessObject->hasAccess("delete", "incident");
 
+        // can recieve
+        $canReceive = $accessObject->hasAccess("receive", "fees");
+
+        // receive fees payment 
+        $receivePayment = !empty($canReceive) ? $canReceive : $isParent;
+
+        // load fees allocation list for class
+        $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "student_id" => $user_id, "receivePayment" => $receivePayment];
+
+        // load fees allocation list for the students
+        $student_allocation_list = load_class("fees", "controllers", $allocation_param)->student_allocation_array($allocation_param);
+
         // populate the incidents
         $incidents_list = "";
 
@@ -265,6 +277,10 @@ if(!empty($user_id)) {
                         aria-selected="true">Other Information</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" id="fees-tab2" data-toggle="tab" href="#fees" role="tab"
+                        aria-selected="true">Fees Allocation</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab"
                         aria-selected="true">Timetable</a>
                     </li>
@@ -317,6 +333,23 @@ if(!empty($user_id)) {
                                 </div>
                             </div>
                             '.$guardian.'
+                        </div>
+                        <div class="tab-pane fade" id="fees" role="tabpanel" aria-labelledby="fees-tab2">
+                            <div class="table-responsive">
+                                <table data-empty="" class="table table-striped datatable">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%" class="text-center">#</th>
+                                            <th>Student Name</th>
+                                            <th>Category</th>
+                                            <th>Due</th>
+                                            <th>Paid</th>
+                                            <th align="center"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>'.$student_allocation_list.'</tbody>
+                                </table>
+                            </div>
                         </div>
                         <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">
                             

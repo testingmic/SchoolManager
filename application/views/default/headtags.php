@@ -273,7 +273,7 @@ if(!isset($userPrefs->messages)) {
                                 <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Receive Payment</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Category</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Allocation</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Reports</a></li>
                             </ul>
                         </li>

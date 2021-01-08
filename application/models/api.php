@@ -218,9 +218,12 @@ class Api {
         if(empty($this->userId) && (($this->outer_url !== "select" && $this->inner_url !== "account"))) {
             return $this->output($code, $result);
         }
+
+        // set the default object to parse when instantiating a class
+        $default = (object) ["clientId" => $this->clientId, "default_User_Id" => $this->userId];
         
         // create a new class for handling the resource
-        $classObject = load_class("{$this->inner_url}", "controllers");
+        $classObject = load_class("{$this->inner_url}", "controllers", $default);
         
         // confirm that there is a method to process the resource endpoint
         if(!empty($this->clientId) && method_exists($classObject, $this->outer_url)) {

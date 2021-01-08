@@ -1,8 +1,6 @@
 $.form_data = {};
 if ($(`div[id="filter_Department_Class"]`).length) {
 
-    $(`div[id="fees_payment_form"] *`).prop("disabled", true);
-
     $(`select[name="department_id"]`).on("change", function() {
         let value = $(this).val();
         $(`select[name='class_id']`).find('option').remove().end();

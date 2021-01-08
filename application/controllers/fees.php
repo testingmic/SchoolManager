@@ -15,8 +15,15 @@ if( !defined( 'SITE_URL' ) && !defined( 'SITE_DATE_FORMAT' ) ) die( 'Restricted 
  */
 class Fees extends Myschoolgh {
 
-	public function __construct() {
+	public function __construct($params) {
 		parent::__construct();
+
+        // get the client data
+        $client_data = $this->client_data($params->clientId ?? null);
+
+        // run this query
+        $this->academic_term = $client_data->client_preferences->academics->academic_term;
+        $this->academic_year = $client_data->client_preferences->academics->academic_year;
 	}
 
 	/**
@@ -42,6 +49,9 @@ class Fees extends Myschoolgh {
 			$student_id = $this->session->student_id;
         }
 
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
+
         $filters = "";
 		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : "";
         $filters .= isset($params->department_id) && !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : "";
@@ -49,8 +59,8 @@ class Fees extends Myschoolgh {
         $filters .= isset($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";
         $filters .= isset($params->programme_id) && !empty($params->programme_id) ? " AND a.programme_id='{$params->programme_id}'" : "";
         $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id='{$params->category_id}'" : ""; 
-        $filters .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
-        $filters .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
+        $filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
+        $filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
         $filters .= isset($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";
 
 		try {
@@ -147,10 +157,26 @@ class Fees extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
+
+        /** Init the user type */
+        $class_id = $params->userData->class_id;
+
+        /** The user id algorithm */
+        if(in_array($params->userData->user_type, ["accountant", "admin"])) {
+            $class_id = "";
+        } else if(in_array($params->userData->user_type, ["parent"])) {
+            // if the user is a parent
+			$class_id = $this->session->student_class_id;
+        }
+
+        $params->query .= !empty($class_id) ? " AND a.class_id='{$class_id}'" : null;
         $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
-        $params->query .= (isset($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= (isset($params->category_id)) ? " AND a.id='{$params->category_id}'" : null;
+        $params->query .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
+        $params->query .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
 
         try {
 
@@ -177,6 +203,166 @@ class Fees extends Myschoolgh {
             return $this->unexpected_error;
         } 
 
+    }
+    
+    /**
+     * List Students Fees Allocation
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function students_fees_allocation(stdClass $params) {
+
+        $params->query = "1";
+
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
+
+        /** Init set the student id */
+        $student_id = $params->userData->user_id;
+
+        /** The user id algorithm */
+        if(in_array($params->userData->user_type, ["accountant", "admin"])) {
+            $student_id = "";
+        } else if(in_array($params->userData->user_type, ["parent"])) {
+            // if the user is a parent
+			$student_id = $this->session->student_id;
+        }
+
+        /** Init the user type */
+        $student_id = isset($params->student_id) ? $params->student_id : $student_id;
+
+        $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
+        $params->query .= !empty($student_id) ? " AND a.student_id='{$student_id}'" : null;
+        $params->query .= (isset($params->record_id)) ? " AND a.id='{$params->record_id}'" : null;
+        $params->query .= (isset($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
+        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->category_id)) ? " AND a.category_id='{$params->category_id}'" : null;
+        $params->query .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
+        $params->query .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
+
+        try {
+
+            $stmt = $this->db->prepare("
+                SELECT a.*,
+                    (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
+                    (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
+                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info,
+                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                FROM fees_payments a
+                WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
+            ");
+            $stmt->execute([1]);
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // loop through the information
+                foreach(["student_info", "created_by_info"] as $each) {
+                    // confirm that it is set
+                    if(isset($result->{$each})) {
+                        // convert the created by string into an object
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["unique_id", "user_id", "name", "image", "user_type"]);
+                    }
+                }
+
+                $data[] = $result;
+            }
+
+            return [
+                "code" => 200,
+                "data" => $data
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
+
+    }
+
+    /**
+     * List the Class Fees Allocation Array
+     * 
+     * @param String $params->clientId
+     * 
+     * @return Array
+     */
+    public function class_allocation_array(stdClass $params) {
+        
+        // load fees allocation list for class
+        $class_allocation_list = "";
+        $class_allocation_array = $this->class_fees_allocation($params)["data"];
+
+        // if the result is not empty
+        if(!empty($class_allocation_array)) {
+            // loop through the results list
+            foreach($class_allocation_array as $key => $each) {
+                $class_allocation_list .= "<tr data-row_id=\"{$each->id}\">";
+                $class_allocation_list .= "<td>".($key+1)."</td>";
+                $class_allocation_list .= "<td>{$each->class_name}</td>";
+                $class_allocation_list .= "<td>{$each->category_name}</td>";
+                $class_allocation_list .= "<td>{$each->amount}</td>";
+                $class_allocation_list .= "<td></td>";
+                $class_allocation_list .= "</tr>";
+            }
+        }
+        return $class_allocation_list;
+    }
+
+    /**
+     * List the Student Fees Allocation Array
+     * 
+     * @param String $params->clientId
+     * 
+     * @return Array
+     */
+    public function student_allocation_array(stdClass $params) {
+        
+        // load fees allocation list for class
+        $student_allocation_list = "";
+        $student_allocation_array = $this->students_fees_allocation($params)["data"];
+
+        // if the result is not empty
+        if(!empty($student_allocation_array)) {
+
+            // loop through the results list
+            foreach($student_allocation_array as $key => $student) {
+                // init
+                $action = "";
+
+                // set the button for receiving the amount
+                if(!empty($params->receivePayment)) {
+                    if(($student->amount_due < $student->amount_paid) || ($student->amount_due === $student->amount_paid)) {
+                        $action = "<span class='badge badge-success'>Paid</span>";
+                    } else {
+                        $action = "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?record_id={$student->id}&student_id={$student->student_id}\");' class='btn btn-outline-success btn-sm'>Pay</button>";
+                    }
+                }
+                
+                // append to the url string
+                $student_allocation_list .= "<tr data-row_id=\"{$student->id}\">";
+                $student_allocation_list .= "<td>".($key+1)."</td>";
+                $student_allocation_list .= "<td>
+                    <div class='d-flex justify-content-start'>
+                        ".(!empty($student->student_info->image) ? "
+                        <div class='mr-2'><img src='{$this->baseUrl}{$student->student_info->image}' width='40px' height='40px'></div>" : "")."
+                        <div>
+                            {$student->student_info->name} <br class='p-0 m-0'>
+                            <strong>{$student->student_info->unique_id}</strong>
+                        </div>
+                    </div>
+                </td>";
+                $student_allocation_list .= "<td>{$student->category_name}</td>";
+                $student_allocation_list .= "<td>{$student->amount_due}</td>";
+                $student_allocation_list .= "<td>{$student->amount_paid}</td>";
+                $student_allocation_list .= "<td>{$action}</td>";
+                $student_allocation_list .= "</tr>";
+            }
+        }
+        return $student_allocation_list;
     }
 
     /**
@@ -260,7 +446,7 @@ class Fees extends Myschoolgh {
             // global variable
             global $myschoolgh;
 
-            /** Update the existing record */
+            /** Insert the existing record */
             $stmt = $myschoolgh->prepare("INSERT INTO fees_payments SET 
                 amount_due = ?, balance = ?, category_id = ?, student_id = ?, 
                 client_id = ?, academic_year = ?, academic_term = ?, class_id = ?, created_by = ?
@@ -269,6 +455,25 @@ class Fees extends Myschoolgh {
             return $stmt->execute([
                 $params->amount, $params->amount, $params->category_id, $params->student_id, $params->clientId, 
                 $params->academic_year, $params->academic_term, $params->class_id, $params->userId
+            ]);
+        }
+
+        /** An annonymous function to update the student fees record */
+        function update_student_fees(stdClass $params) {
+
+            // global variable
+            global $myschoolgh;
+
+            /** Update the existing record */
+            $stmt = $myschoolgh->prepare("UPDATE fees_payments SET 
+                    amount_due = ?, balance = ($params->amount - amount_paid)
+                WHERE category_id = ? AND student_id = ? AND client_id = ? 
+                    AND academic_year = ? AND academic_term = ?");
+
+            /** Execute the prepared statement */
+            return $stmt->execute([
+                $params->amount, $params->category_id, $params->student_id, $params->clientId, 
+                $params->academic_year, $params->academic_term
             ]);
         }
 
@@ -294,27 +499,100 @@ class Fees extends Myschoolgh {
 
             /** Confirm if a record already exist */
             if($this->confirm_student_payment_record($params)) {
-                /** Update the existing record */
-                $stmt = $this->db->prepare("UPDATE fees_payments SET 
-                        amount_due = ?, balance = ($params->amount - amount_paid)
-                    WHERE category_id = ? AND student_id = ? AND client_id = ? 
-                        AND academic_year = ? AND academic_term = ?");
-
-                /** Execute the prepared statement */
-                $stmt->execute([
-                    $params->amount, $params->category_id, $params->student_id, $params->clientId, 
-                    $params->academic_year, $params->academic_term
-                ]);
-
+                update_student_fees($params);
             } else {
                 /** Insert a new record */
-                $pay = insert_student_fees($params);
+                insert_student_fees($params);
             }
+
+            return ["data" => "Fees Allocation was successfully executed."];
+
         } elseif($params->allocate_to === "class") {
+
+            /** Fetch all students that fall under this category */
+            $student_param = (object) ["clientId" => $params->clientId, "class_id" => $params->class_id, "user_type" => "student", "minified" => "simplified"];
+            $student_list = load_class("users", "controllers")->list($student_param);
+
             /** Confirm if a record already exist */
             if($this->confirm_class_payment_record($params)) {
+
+                /** Update the existing record */
+                $stmt = $this->db->prepare("UPDATE fees_allocations SET 
+                    amount = ? WHERE category_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND class_id = ?
+                ");
                 
+                /** Execute the prepared statement */
+                $stmt->execute([
+                    $params->amount, $params->category_id, $params->clientId, 
+                    $params->academic_year, $params->academic_term, $params->class_id
+                ]);
+            } else {
+                /** Insert the Record */
+                $stmt = $this->db->prepare("INSERT INTO fees_allocations SET 
+                    amount = ?, category_id = ?, client_id = ?, academic_year = ?, academic_term = ?, class_id = ?, created_by = ?
+                ");
+                
+                /** Execute the prepared statement */
+                $stmt->execute([
+                    $params->amount, $params->category_id, $params->clientId, 
+                    $params->academic_year, $params->academic_term, $params->class_id, $params->userId
+                ]);
             }
+
+            // loop through the students list
+            foreach($student_list["data"] as $key => $student) {
+                /** Append the student id as the current user id */
+                $params->student_id = $student->user_id;
+
+                /** Confirm if a record already exist */
+                if($this->confirm_student_payment_record($params)) {
+                    update_student_fees($params);
+                } else {
+                    /** Insert a new record */
+                    insert_student_fees($params);
+                }
+            }
+
+            return ["data" => "Fees Allocation was successfully executed."];
+
+        }
+    }
+
+    /**
+     * Allocated Fees Amount
+     * 
+     * @param stdClass $params
+     *  
+     * @return Array
+     */
+    public function allocate_fees_amount(stdClass $params) {
+
+        /** Check if the student id is valid */
+        $class_check = $this->pushQuery("id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        if(empty($class_check)) {
+            return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+        }
+
+        /** Confirm if the allocate to is student */
+        if($params->allocate_to === "student") {
+
+            /** Return false if the student id was not parsed */
+            if(empty($params->student_id)) {
+                return ["code" => 203, "data" => "Sorry! The student id cannot be left empty"];
+            }
+
+            /** Confirm if a record already exist */
+            $query = $this->pushQuery("amount_due", "fees_payments", "student_id='{$params->student_id}' AND category_id='{$params->category_id}' AND class_id='{$params->class_id}' AND status='1' AND client_id='{$params->clientId}' ORDER BY id DESC LIMIT 1");
+
+            return ["data" => $query[0]->amount_due ?? null];
+
+        } elseif($params->allocate_to === "class") {
+
+            /** Confirm if a record already exist */
+            $query = $this->pushQuery("amount", "fees_collection", "class_id='{$params->class_id}' AND category_id='{$params->category_id}' AND client_id='{$params->clientId}' AND status='1' ORDER BY id DESC LIMIT 1");
+
+            return ["data" => $query[0]->amount ?? null];
+
         }
     }
 
@@ -331,7 +609,7 @@ class Fees extends Myschoolgh {
 			$stmt = $this->db->prepare("
 				SELECT amount 
 				FROM fees_allocations 
-				WHERE client_id = ? AND class_id = ? AND category_id = ? AND academic_year = ? AND academic_term = ? 
+				WHERE client_id = ? AND class_id = ? AND category_id = ? AND academic_year = ? AND academic_term = ? AND status = '1' LIMIT 1
 			");
 			$stmt->execute([$params->clientId, $params->class_id, $params->category_id, $params->academic_year, $params->academic_term]);
 			return ($stmt->rowCount() > 0) ? true : false;
@@ -353,12 +631,14 @@ class Fees extends Myschoolgh {
 			$stmt = $this->db->prepare("
 				SELECT amount_due 
 				FROM fees_payments 
-				WHERE client_id = ? AND student_id = ? AND category_id = ? AND academic_year = ? AND academic_term = ? 
+				WHERE client_id = ? AND student_id = ? AND category_id = ? AND academic_year = ? AND academic_term = ? AND status = '1' LIMIT 1
 			");
 			$stmt->execute([$params->clientId, $params->student_id, $params->category_id, $params->academic_year, $params->academic_term]);
-			return ($stmt->rowCount() > 0) ? true : false;
+			
+            return ($stmt->rowCount() > 0) ? true : false;
+
 		} catch(PDOException $e) {
-			return false;
+            return false;
 		}
 	}
 

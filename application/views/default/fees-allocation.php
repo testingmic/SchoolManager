@@ -39,20 +39,11 @@ if(!$receivePayment) {
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
     // load fees allocation list for class
-    $class_allocation_list = "";
-    $allocation_param = (object) ["clientId" => $clientId];
-    $allocation_array = load_class("fees", "controllers")->class_fees_allocation($allocation_param)["data"];
+    $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "receivePayment" => $receivePayment];
+    $class_allocation_list = load_class("fees", "controllers", $allocation_param)->class_allocation_array($allocation_param);
 
-    // loop through the results list
-    foreach($allocation_array as $key => $each) {
-        $class_allocation_list .= "<tr data-row_id=\"{$each->id}\">";
-        $class_allocation_list .= "<td>".($key+1)."</td>";
-        $class_allocation_list .= "<td>{$each->class_name}</td>";
-        $class_allocation_list .= "<td>{$each->category_name}</td>";
-        $class_allocation_list .= "<td>{$each->amount}</td>";
-        $class_allocation_list .= "<td></td>";
-        $class_allocation_list .= "</tr>";
-    }
+    // load fees allocation list for the students
+    $student_allocation_list = load_class("fees", "controllers", $allocation_param)->student_allocation_array($allocation_param);
 
     // info
     $info = "Use this form to assign fees to a class or to a particular student. Leave the student id field blank if you want to set for the entire class.";
@@ -133,7 +124,7 @@ if(!$receivePayment) {
                 </div>
                 <div class="col-12 col-md-8">
                     <div class="card">
-                        <div class="card-body" id="fees_allocation_history">
+                        <div class="card-body">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
                                     <a class="nav-link active" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Class Allocation</a>
@@ -172,7 +163,7 @@ if(!$receivePayment) {
                                                     <th align="center"></th>
                                                 </tr>
                                             </thead>
-                                            <tbody>'.($student_allocation_list ?? null).'</tbody>
+                                            <tbody>'.$student_allocation_list.'</tbody>
                                         </table>
                                     </div>
                                 </div>

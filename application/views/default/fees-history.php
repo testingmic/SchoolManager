@@ -48,7 +48,7 @@ $params = (object) [
     "class_id" => $filter->class_id ?? null,
     "category_id" => $filter->category_id ?? null
 ];
-$item_list = load_class("fees", "controllers")->list($params);
+$item_list = load_class("fees", "controllers", $params)->list($params);
 
 $hasAdd = $accessObject->hasAccess("add", "fees");
 $hasUpdate = $accessObject->hasAccess("update", "fees");
