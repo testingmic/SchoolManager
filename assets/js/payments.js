@@ -54,23 +54,24 @@ var save_Receive_Payment = () => {
         buttons: true,
         dangerMode: true,
     }).then((proceed) => {
-        let data = {
-            "amount": $amount,
-            "balance": $balance,
-            "description": description,
-            "checkout_url": checkout_url,
-            "payment_mode": payment_mode
-        };
-        $.post(`${baseUrl}api/fees/make_payment`, data).then((response) => {
-            let s_icon = "error";
-            if (response.code === 200) {
-                s_icon = "success";
-            }
-            swal({
-                text: response.data.result,
-                icon: s_icon,
-            });
-        }).catch(() => {});
+        if (proceed) {
+            let data = {
+                "amount": $amount,
+                "description": description,
+                "checkout_url": checkout_url,
+                "payment_mode": payment_mode
+            };
+            $.post(`${baseUrl}api/fees/make_payment`, data).then((response) => {
+                let s_icon = "error";
+                if (response.code === 200) {
+                    s_icon = "success";
+                }
+                swal({
+                    text: response.data.result,
+                    icon: s_icon,
+                });
+            }).catch(() => {});
+        }
     });
 }
 

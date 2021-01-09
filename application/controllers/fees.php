@@ -415,7 +415,7 @@ class Fees extends Myschoolgh {
         $html_form .= "<div class='table-responsive'>";
         $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
         $html_form .= "<tr>";
-        $html_form .= "<td width='70%'>Amount Due:</td>";
+        $html_form .= "<td width='60%'>Amount Due:</td>";
         $html_form .= "<td>{$allocation->amount_due}</td>";
         $html_form .= "</tr>";
         $html_form .= "<tr>";
@@ -444,36 +444,6 @@ class Fees extends Myschoolgh {
         ];
 
     }
-
-	/**
-	 * @method feesPayment
-	 * @param array $params
-	 * @param array $params->dataColumns 
-	 * @param array $params->whereClause
-	 *
-	 * @return queryResults 
-	 **/
-	public function feesPayment(array $params) {
-
-		$params = (Object) $params;
-
-		try {
-
-			$stmt = $this->db->prepare("
-				SELECT {$params->dataColumns} 
-				FROM _fees_payments ".(isset($params->tableJoins) ? $params->tableJoins : null)."
-				WHERE {$params->whereClause}
-			");
-
-
-			$stmt->execute();
-
-			return $stmt->fetch(PDO::FETCH_OBJ);
-
-		} catch(PDOException $e) {
-			return $e->getMessage();
-		}
-	}
 
     /**
      * Allocate Fees to Class/Student
@@ -702,6 +672,93 @@ class Fees extends Myschoolgh {
 		}
 	}
 
+    /**
+     * Make payment for the fees
+     * 
+     * @return Array
+     */
+	public function make_payment(stdClass $params) {
+
+        
+        try {
+
+            // begin transaction
+            $this->db->beginTransaction();
+
+            /** Get the checkout details */
+            $paymentRecord = $this->pushQuery("a.*, 
+                (SELECT b.department FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS department_id,
+                (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
+                (SELECT b.department FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_name", 
+                "fees_payments a", "a.checkout_url='{$params->checkout_url}' AND a.client_id='{$params->clientId}' LIMIT 1
+            ");
+
+            /** If no allocation record was found */
+            if(empty($paymentRecord)) {
+                return ["code" => 203, "data" => "Sorry! An invalid checkout url was parsed for processing."];
+            }
+            // get the details of the record
+            $paymentRecord = $paymentRecord[0];
+
+            /* Outstanding balance calculator */
+            $outstandingBalance = $paymentRecord->balance - $params->amount;
+            $totalPayment = $paymentRecord->amount_paid + $params->amount;
+
+            /* Confirm if the user has any credits */
+            if($outstandingBalance < 0) {
+                $creditBalance = $outstandingBalance * -1;
+                $outstandingBalance = 0;
+            }
+
+            $uniqueId = random_string('alnum', 14);
+
+            /* Record the payment made by the user */
+            $stmt = $this->db->prepare("
+                INSERT INTO fees_collection 
+                SET client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
+                category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, description = ?
+            ");
+            $stmt->execute([
+                $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id, 
+                $paymentRecord->class_id, $paymentRecord->category_id, $params->amount, $params->userId, 
+                $paymentRecord->academic_year, $paymentRecord->academic_term, $params->description
+            ]);
+
+            /* Update the user payment record */
+            $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
+            last_payment_date = now(), last_payment_id = '{$uniqueId}' ".(($outstandingBalance == 0) ? ", paid_status='1'" : "")."
+            WHERE checkout_url = ? AND client_id = ? LIMIT 1");
+            $stmt->execute([$totalPayment, $outstandingBalance, $params->checkout_url, $params->clientId]);
+
+            /* Update the student credit balance */
+            if(isset($creditBalance)) {
+                // update the user data
+                $this->db->query("UPDATE users SET account_balance = (account_balance + $creditBalance) WHERE item_id = ? AND client_id = '{$params->clientId}' LIMIT 1");
+            }
+
+            /* Record the user activity log */
+            $this->userLogs("fees_payment", $params->checkout_url, null, "{$params->userData->name} received an amount of 
+                <strong>{$params->amount}</strong> as Payment for <strong>{$paymentRecord->category_name}</strong> from <strong>{$paymentRecord->student_name}</strong>. 
+                Outstanding Balance is <strong>{$outstandingBalance}</strong>", $params->userId);
+
+            // commit the statements
+            $this->db->commit();
+
+            // return the success message
+            return [
+                "data" => "Fee payment was successfully recorded."
+            ];
+
+        } catch(PDOException $e) {
+            // Role Back the statement
+            $this->db->rollBack();
+
+            // return an unexpected error notice
+            return $this->unexpected_error;
+        }
+        
+	}
+
 	/**
 	 * @method studentFeesPaymentsHistory
 	 * @param string $studentId 		This is the student id that the filtering will be based on
@@ -794,109 +851,6 @@ class Fees extends Myschoolgh {
 		}
 
 		return $responseData;
-	}
-
-	public function processFeesCollection($studentId, $programmeId, $classId, $feesType, $amount, $description) {
-
-		$status = 500;
-		$uniqueId = null;
-
-		$paymentRecord = $this->feesPayment(
-			array(
-				"dataColumns" => "amount_due, amount_paid, balance",
-				"whereClause" => "school_id = '{$this->session->school_id}' AND academic_term = '{$this->session->academicTerm}' 
-				AND academic_year = '{$this->session->academicYear}'
-				AND student_id = '{$studentId}' AND fees_category = '{$feesType}'"
-			)
-		);
-
-		/* Confirm that there was a record found for the query */
-		if(isset($paymentRecord->amount_due)) {
-
-			/* Outstanding balance calculator */
-			$outstandingBalance = $paymentRecord->balance - $amount;
-			$totalPayment = $paymentRecord->amount_paid + $amount;
-
-			/* Verify if the student has made full payment */
-			if($totalPayment >= $paymentRecord->amount_due) {
-				$paidStatus = 1;
-			} else {
-				$paidStatus = 0;
-			}
-
-			/* Confirm if the user has any credits */
-			if($outstandingBalance < 0) {
-				$creditBalance = $outstandingBalance * -1;
-				$outstandingBalance = 0;
-			}
-
-			$uniqueId = random_string('alnum', 14);
-
-			/* Record the payment made by the user */
-			$stmt = $this->db->prepare("
-				INSERT INTO _fees_collection 
-				SET school_id = ?, unique_id = ?, student_id = ?, programme_id = ?, class_id = ?, fees_category = ?, amount = ?,
-				recorded_by = ?, academic_year = ?, academic_term = ?, description = ?
-			");
-			$stmt->execute([
-				$this->session->school_id, $uniqueId, $studentId, $programmeId, $classId, $feesType, $amount,
-				$this->session->userId, $this->session->academicYear, $this->session->academicTerm, $description
-			]);
-
-			/* Update the user payment record */
-			$stmt = $this->db->prepare("
-				UPDATE _fees_payments
-				SET amount_paid = ?, balance = ?
-				WHERE school_id = ? AND student_id = ? AND fees_category = ? AND academic_year = ? AND academic_term = ?
-			");
-			$stmt->execute([
-				$totalPayment, $outstandingBalance, $this->session->school_id, 
-				$studentId, $feesType, $this->session->academicYear, $this->session->academicTerm
-			]);
-
-			/* Update the student credit balance */
-			if(isset($creditBalance)) {
-				// fetch the amount that the user already have
-				$recordedBalance = $this->itemById('_users', 'unique_id', $studentId, 'account_balance');
-				$creditBalance = $recordedBalance + $creditBalance;
-
-				// update the user data
-				$stmt = $this->db->prepare("
-					UPDATE _users SET account_balance = ? WHERE unique_id = ?
-				");
-				$stmt->execute([
-					$creditBalance, $studentId
-				]);
-			}
-
-			/* Update the paid status for the student if the outstanding balance is equal to zero (0) */
-			if($outstandingBalance == 0) {
-				$stmt = $this->db->prepare("
-					UPDATE _fees_payments
-					SET paid_status = ?
-					WHERE student_id = ? AND fees_category = ? AND academic_year = ? AND academic_term = ?
-				");
-				$stmt->execute([
-					1, $studentId, $feesType, $this->session->academicYear, $this->session->academicTerm
-				]);
-			}
-
-			/* Record the user activity log */
-			$this->recordUserHistory(array($uniqueId, 'fees-collection', "An amount of $amount was received from <strong>student-id::$studentId</strong> for the payment of <strong>fees-type::$feesType</strong>. The Outstanding balance is <strong>$outstandingBalance</strong>."));
-
-			/* Print the success message */
-			$status = 200;
-
-			$data = 'Fee payment was successfully recorded. Issuing receipt in some few seconds...';
-		} else {
-			$data = '<div class="alert alert-danger">Sorry! There was no record for this Student. Please contact the Administrator in order to rectify this error before you can continue.</div>';
-		}
-
-		return [
-			'data' => $data,
-			'status' => $status,
-			'uniqueId' => $uniqueId
-		];
 	}
 
 }

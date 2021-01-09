@@ -126,7 +126,7 @@ if(!$receivePayment) {
                                 </div>
                                 <div class="form-group">
                                     <label>Remarks</label>
-                                    <textarea '.$disabled.' class="form-control" name="remarks" id="remarks"></textarea>
+                                    <textarea '.$disabled.' class="form-control" name="description" id="description"></textarea>
                                 </div>
                                 <div class="form-group text-right">
                                     <div class="d-flex justify-content-between">
