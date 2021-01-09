@@ -381,29 +381,66 @@ class Fees extends Myschoolgh {
      */
     public function payment_form(stdClass $params) {
 
-        $html_form = "<div class='table-responsive'>";
-        $html_form .= "<table class='table table-bordered'>";
+        /** Load the payment information that has been allocated to the student */
+        $allocation = $this->confirm_student_payment_record($params);
+
+        /** If no allocation record was found */
+        if(empty($allocation)) {
+            return ["code" => 203, "data" => "Sorry! No allocation has been made for the selected category.
+                Please ensure an allocation has been made before payment can be received."];
+        }
+
+        /** Format the last_payment_info value */
+        if(!empty($allocation->last_payment_info)) {
+                // b.amount,'|',b.description,'|',b.created_by,'|',b.recorded_date
+            $allocation->last_payment_info = $this->stringToArray(
+                $allocation->last_payment_info, "|",
+                ["amount", "description", "created_by", "created_date"]
+            );
+        }
+
+        /** Set the label for the amount */
+        if(($allocation->amount_paid > 1) && (round($allocation->amount_due) > round($allocation->amount_paid))) {
+            $label = "<span class='badge badge-primary'>Part Payment</span>";
+        } elseif(round($allocation->amount_paid) == 0) {
+            $label = "<span class='badge badge-danger'>Not Paid</span>";
+        } else if(($allocation->amount_due < $allocation->amount_paid) || ($allocation->amount_due === $allocation->amount_paid)) {
+            $label = "<span class='badge badge-success'>Paid</span>";
+        }
+
+        /** Quick CSS */
+        $html_form = "<style>.t_table td {padding:10px;}</style>";
+        
+        /** Set the HMTL form to display */
+        $html_form .= "<div class='table-responsive'>";
+        $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
         $html_form .= "<tr>";
-        $html_form .= "<td width='40%'>Amount Due:</td>";
-        $html_form .= "<td></td>";
+        $html_form .= "<td width='70%'>Amount Due:</td>";
+        $html_form .= "<td>{$allocation->amount_due}</td>";
         $html_form .= "</tr>";
         $html_form .= "<tr>";
         $html_form .= "<td>Amount Paid:</td>";
-        $html_form .= "<td></td>";
+        $html_form .= "<td><span class='amount_paid'>{$allocation->amount_paid}</span></td>";
         $html_form .= "</tr>";
         $html_form .= "<tr>";
         $html_form .= "<td>Outstanding Balance:</td>";
-        $html_form .= "<td></td>";
+        $html_form .= "<td><span data-checkout_url='{$allocation->checkout_url}' data-amount_payable='{$allocation->balance}' class='outstanding'>{$allocation->balance}</span></td>";
         $html_form .= "</tr>";
         $html_form .= "<tr>";
         $html_form .= "<td>Last Payment Info:</td>";
-        $html_form .= "<td></td>";
+        $html_form .= "<td><span class='last_payment_date'>{$allocation->last_payment_date}</span></td>";
+        $html_form .= "</tr>";
+        $html_form .= "<td>Status:</td>";
+        $html_form .= "<td>{$label}</td>";
         $html_form .= "</tr>";
         $html_form .= "</table>";
         $html_form .= "</div>";
 
         return [
-            "data" => $html_form
+            "data" => [
+                "form" => $html_form,
+                "query" => $allocation
+            ]
         ];
 
     }
@@ -455,12 +492,13 @@ class Fees extends Myschoolgh {
 
             /** Insert the existing record */
             $stmt = $myschoolgh->prepare("INSERT INTO fees_payments SET 
-                amount_due = ?, balance = ?, category_id = ?, student_id = ?, 
+                amount_due = ?, balance = ?, category_id = ?, student_id = ?, checkout_url = ?,
                 client_id = ?, academic_year = ?, academic_term = ?, class_id = ?, created_by = ?
             ");
             /** Execute the prepared statement */
             return $stmt->execute([
-                $params->amount, $params->amount, $params->category_id, $params->student_id, $params->clientId, 
+                $params->amount, $params->amount, $params->category_id, $params->student_id, 
+                $params->clientId, random_string("alnum", 32),
                 $params->academic_year, $params->academic_term, $params->class_id, $params->userId
             ]);
         }
@@ -609,7 +647,8 @@ class Fees extends Myschoolgh {
 	 * @param String $params->category_id		This is the fees type (tuition, ict, pta, or any other)
 	 * @param String $params->academic_year	    This specifies the academic year to fetch the record
 	 * @param String $params->academic_term 	This specifies the academic term that the record is been fetched
-	 * @return Bool
+     * 
+	 * @return Object
 	 **/
 	public function confirm_class_payment_record(stdClass $params) {
 		try {
@@ -619,7 +658,9 @@ class Fees extends Myschoolgh {
 				WHERE client_id = ? AND class_id = ? AND category_id = ? AND academic_year = ? AND academic_term = ? AND status = '1' LIMIT 1
 			");
 			$stmt->execute([$params->clientId, $params->class_id, $params->category_id, $params->academic_year, $params->academic_term]);
-			return ($stmt->rowCount() > 0) ? true : false;
+			
+            return ($stmt->rowCount() > 0) ? $stmt->fetch(PDO::FETCH_OBJ) : false;
+
 		} catch(PDOException $e) {
 			return false;
 		}
@@ -631,18 +672,30 @@ class Fees extends Myschoolgh {
 	 * @param String $params->category_id		This is the fees type (tuition, ict, pta, or any other)
 	 * @param String $params->academic_year	    This specifies the academic year to fetch the record
 	 * @param String $params->academic_term 	This specifies the academic term that the record is been fetched
-	 * @return Bool
+     * 
+	 * @return Object
 	 **/
 	public function confirm_student_payment_record(stdClass $params) {
-		try {
+		
+        try {
+
+            // return false if any parameter is missing
+            if(!isset($params->student_id) || !isset($params->category_id)) {
+                return null;
+            }
+
+            // run the query
 			$stmt = $this->db->prepare("
-				SELECT amount_due 
-				FROM fees_payments 
-				WHERE client_id = ? AND student_id = ? AND category_id = ? AND academic_year = ? AND academic_term = ? AND status = '1' LIMIT 1
+				SELECT 
+                    a.checkout_url, a.student_id, a.class_id, a.category_id, a.amount_due, a.amount_paid, a.balance, 
+                    a.paid_status, a.last_payment_id, a.academic_year, a.academic_term, a.date_created, a.last_payment_date, 
+                    (SELECT CONCAT(b.amount,'|',b.description,'|',b.created_by,'|',b.recorded_date) FROM fees_collection b WHERE b.item_id = a.last_payment_id LIMIT 1) AS last_payment_info
+				FROM fees_payments a
+				WHERE a.client_id = ? AND a.student_id = ? AND a.category_id = ? AND a.academic_year = ? AND a.academic_term = ? AND a.status = '1' LIMIT 1
 			");
 			$stmt->execute([$params->clientId, $params->student_id, $params->category_id, $params->academic_year, $params->academic_term]);
 			
-            return ($stmt->rowCount() > 0) ? true : false;
+            return ($stmt->rowCount() > 0) ? $stmt->fetch(PDO::FETCH_OBJ) : false;
 
 		} catch(PDOException $e) {
             return false;

@@ -11,18 +11,66 @@ var load_Pay_Fees_Form = () => {
         "show_history": true
     };
     $(`div[id="make_payment_button"] button`).prop("disabled", true).html(`Loading record <i class="fa fa-spin fa-spinner"></i>`);
-    i
+
     $.get(`${baseUrl}api/fees/payment_form`, data).then((response) => {
         $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Make Payment`);
         if (response.code === 200) {
-            $(`div[id="fees_payment_history"]`).html(response.data.result);
+            $(`div[id="fees_payment_history"]`).html(response.data.result.form);
             $(`div[id="fees_payment_form"] *`).prop("disabled", false);
             $(`div[id="fees_payment_preload"] *`).prop("disabled", true);
             $(`button[id="payment_cancel"]`).removeClass("hidden");
             $(`div[id="fees_payment_form"] input[id="amount"]`).focus();
+        } else {
+            swal({
+                text: response.data.result,
+                icon: "error",
+            });
         }
     }).catch(() => {
         $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Make Payment`);
+    });
+}
+
+var save_Receive_Payment = () => {
+
+    let $balance = parseInt($(`span[class="outstanding"]`).attr("data-amount_payable")),
+        $amount = parseInt($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
+        description = $(`div[id="fees_payment_form"] textarea[name="description"]`).val(),
+        payment_mode = $(`div[id="fees_payment_form"] select[name="payment_mode"]`).val(),
+        checkout_url = $(`span[class="outstanding"]`).attr("data-checkout_url"),
+        t_message = "";
+
+    if ($amount > $balance) {
+        t_message = `Are you sure you want to save this payment. 
+            An amount of ${$amount} is been paid which is more than the required of ${$balance}`;
+    } else if ($amount < $balance) {
+        t_message = `Are you sure you want to save this payment. 
+            An amount of ${$amount} is been paid which will leave a balance of ${$balance-$amount}.`;
+    }
+    swal({
+        title: "Make Payment",
+        text: `${t_message}\nDo you want to proceed to make the payment?`,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        let data = {
+            "amount": $amount,
+            "balance": $balance,
+            "description": description,
+            "checkout_url": checkout_url,
+            "payment_mode": payment_mode
+        };
+        $.post(`${baseUrl}api/fees/make_payment`, data).then((response) => {
+            let s_icon = "error";
+            if (response.code === 200) {
+                s_icon = "success";
+            }
+            swal({
+                text: response.data.result,
+                icon: s_icon,
+            });
+        }).catch(() => {});
     });
 }
 
@@ -39,6 +87,7 @@ var cancel_Payment_Form = () => {
             $(`button[id="payment_cancel"]`).addClass("hidden");
             $(`div[id="fees_payment_form"] *`).prop("disabled", true);
             $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
+            $(`div[id="fees_payment_form"] input, div[id="fees_payment_form"] textarea`).val("");
         }
     });
 }

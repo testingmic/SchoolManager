@@ -113,7 +113,13 @@ if(!$receivePayment) {
                 <div class="col-12 col-md-8">
                     <div class="card">
                         <div class="row padding-20" style="min-height:470px">
-                            <div class="col-12 col-md-6" id="fees_payment_form">
+                            <div class="col-12 col-md-5" id="fees_payment_form">
+                                <div class="form-group">
+                                    <label>Payment Medium</label>
+                                    <select '.$disabled.' class="form-control selectpicker" name="payment_mode" id="payment_mode">
+                                        <option value="cash">Cash</option>
+                                    </select>
+                                </div>
                                 <div class="form-group">
                                     <label>Amount</label>
                                     <input '.$disabled.' class="form-control" name="amount" id="amount" type="number" min="0">
@@ -124,12 +130,12 @@ if(!$receivePayment) {
                                 </div>
                                 <div class="form-group text-right">
                                     <div class="d-flex justify-content-between">
-                                        <div><button '.$disabled.' class="btn btn-outline-success"><i class="fa fa-save"></i> Save</button></div>
-                                        <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form()" class="btn hidden btn-outline-danger">Cancel</button></div>
+                                        <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form();" class="btn hidden btn-outline-danger">Cancel</button></div>
+                                        <div><button '.$disabled.' onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-save"></i> Save</button></div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-md-6" id="fees_payment_history"></div>
+                            <div class="col-12 col-md-7" id="fees_payment_history"></div>
                         </div>
                     </div>
                 </div>
