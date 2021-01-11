@@ -21,7 +21,7 @@ $pageTitle = "Fees Payment";
 $response->title = "{$pageTitle} : {$appName}";
 
 $accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
+$accessObject->clientId = $clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 
 $receivePayment = $accessObject->hasAccess("receive", "fees");
@@ -30,9 +30,68 @@ $receivePayment = $accessObject->hasAccess("receive", "fees");
 if(!$receivePayment) {
     $response->html = page_not_found();
 } else {
+    /** Preset */
+    $department_id = null;
+    $category_id = null;
+    $students_list = [];
+    $payment_form = "";
+    $student_id = null;
+    $class_id = null;
 
     // disable form inputs
+    $search_disabled = null;
     $disabled = "disabled='disabled'";
+
+    /** Confirm if some items has already been selected */
+    if(isset($_GET["checkout_url"])) {
+        /** Clean the checkout url parsed */
+        $checkout_url = xss_clean($_GET["checkout_url"]);
+
+        /** Create a parameter */
+        $params = (object) [
+            "clientId" => $clientId,
+            "checkout_url" => $checkout_url
+        ];
+        /** Create a new object */
+        $feesClass = load_class("fees", "controllers", $params);
+
+        /** Get the student fees allocation */
+        $data = $feesClass->confirm_student_payment_record($params);
+        
+        /** End the query if the data is empty */
+        if(empty($data)) {
+            // set the html to show
+            $response->html = page_not_found();
+            // print the error page
+            echo json_encode($response);
+            // end the query
+            exit;
+        }
+
+        // set the information
+        $amount = $data->balance;
+        $class_id = $data->class_id;
+        $student_id = $data->student_id;
+        $category_id = $data->category_id;
+        $department_id = $data->department_id;
+        $disabled = $data->paid_status === 1 ? "disabled='disabled'" : null;
+        $search_disabled = $data->paid_status === 1 ? null : "disabled='disabled'";
+
+        // append the allocation information to the parameters before fetching the payment form
+        $params->allocation_info = $data;
+
+        // load the last payment information
+        $payment_form = $feesClass->payment_form($params)["data"];
+        $payment_form = $payment_form["form"];
+
+        // append to the params
+        $params->class_id = $class_id;
+        $params->user_type = "student";
+        $params->minified = "simplified";
+
+        // load the students list
+        $students_list = load_class("users", "controllers")->list($params)["data"];
+    }
 
     // scripts for the page
     $response->scripts = ["assets/js/filters.js", "assets/js/payments.js"];
@@ -64,10 +123,10 @@ if(!$receivePayment) {
 
                                 <div class="form-group">
                                     <label>Select Department</label>
-                                    <select class="form-control selectpicker" id="department_id" name="department_id">
+                                    <select '.$search_disabled.' class="form-control selectpicker" id="department_id" name="department_id">
                                         <option value="">Please Select Department</option>';
                                         foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
-                                            $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                                            $response->html .= "<option ".(($department_id === $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
                                         }
                                         $response->html .= '
                                     </select>
@@ -75,10 +134,10 @@ if(!$receivePayment) {
 
                                 <div class="form-group">
                                     <label>Select Class</label>
-                                    <select class="form-control selectpicker" name="class_id">
+                                    <select '.$search_disabled.' class="form-control selectpicker" name="class_id">
                                         <option value="">Please Select Class</option>';
                                         foreach($class_list as $each) {
-                                            $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                                            $response->html .= "<option ".(($class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
                                         }
                                         $response->html .= '
                                     </select>
@@ -86,24 +145,28 @@ if(!$receivePayment) {
 
                                 <div class="form-group">
                                     <label>Select Student</label>
-                                    <select class="form-control selectpicker" name="student_id">
-                                        <option value="">Please Select Student</option>
+                                    <select '.$search_disabled.' class="form-control selectpicker" name="student_id">
+                                        <option value="">Please Select Student</option>';
+                                        foreach($students_list as $each) {
+                                            $response->html .= "<option ".(($student_id == $each->user_id) ? "selected" : "")." value=\"{$each->user_id}\">{$each->name}</option>";
+                                        }
+                                        $response->html .= '
                                     </select>
                                 </div>
 
                                 <div class="form-group">
                                     <label>Select Category</label>
-                                    <select disabled="disabled" class="form-control selectpicker" name="category_id">
+                                    <select '.$search_disabled.' class="form-control selectpicker" name="category_id">
                                         <option value="">Please Select Category</option>';
                                         foreach($myClass->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$clientId}'") as $each) {
-                                            $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";                            
+                                            $response->html .= "<option ".(($category_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";                            
                                         }
                                     $response->html .= '
                                     </select>
                                 </div>
 
-                                <div class="form-group text-right mb-0 hidden" id="make_payment_button">
-                                    <button onclick="return load_Pay_Fees_Form()" class="btn btn-outline-success">Load Form</button>
+                                <div class="form-group text-right mb-0 '.($category_id ? null : 'hidden').'" id="make_payment_button">
+                                    <button '.$search_disabled.' onclick="return load_Pay_Fees_Form()" class="btn btn-outline-success">Load Form</button>
                                 </div>
 
                             </div>
@@ -122,7 +185,7 @@ if(!$receivePayment) {
                                 </div>
                                 <div class="form-group">
                                     <label>Amount</label>
-                                    <input '.$disabled.' class="form-control" name="amount" id="amount" type="number" min="0">
+                                    <input '.$disabled.' value="'.($amount ?? null).'" class="form-control" name="amount" id="amount" type="number" min="0">
                                 </div>
                                 <div class="form-group">
                                     <label>Remarks</label>
@@ -130,12 +193,12 @@ if(!$receivePayment) {
                                 </div>
                                 <div class="form-group text-right">
                                     <div class="d-flex justify-content-between">
-                                        <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form();" class="btn hidden btn-outline-danger">Cancel</button></div>
+                                        <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form();" class="btn '.($category_id ? null : 'hidden').' btn-outline-danger">Cancel</button></div>
                                         <div><button '.$disabled.' onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-save"></i> Save</button></div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-md-7" id="fees_payment_history"></div>
+                            <div class="col-12 col-md-7" id="fees_payment_history">'.$payment_form.'</div>
                         </div>
                     </div>
                 </div>

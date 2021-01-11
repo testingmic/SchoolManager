@@ -7,7 +7,6 @@ if($usersClass->loggedIn()) {
     header("location: {$config->base_url("main")}");
     exit;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,9 +21,16 @@ if($usersClass->loggedIn()) {
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
   <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
   <link id="current_url" name="current_url" value="<?= $user_current_url ?>">
+  <style>
+  .bg {
+    background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+  }
+  </style>
 </head>
-
-<body>
+<body class="bg">
   <div class="loader"></div>
   <div id="app">
     <section class="section">

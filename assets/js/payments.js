@@ -16,10 +16,18 @@ var load_Pay_Fees_Form = () => {
         $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Make Payment`);
         if (response.code === 200) {
             $(`div[id="fees_payment_history"]`).html(response.data.result.form);
-            $(`div[id="fees_payment_form"] *`).prop("disabled", false);
-            $(`div[id="fees_payment_preload"] *`).prop("disabled", true);
             $(`button[id="payment_cancel"]`).removeClass("hidden");
             $(`div[id="fees_payment_form"] input[id="amount"]`).focus();
+
+            if (response.data.result.query.paid_status !== undefined) {
+                if (response.data.result.query.paid_status == 1) {
+                    $(`div[id="fees_payment_form"] *`).prop("disabled", true);
+                } else {
+                    $(`div[id="fees_payment_preload"] *`).prop("disabled", true);
+                    $(`div[id="fees_payment_form"] *`).prop("disabled", false);
+                }
+            }
+
         } else {
             swal({
                 text: response.data.result,
@@ -65,6 +73,8 @@ var save_Receive_Payment = () => {
                 let s_icon = "error";
                 if (response.code === 200) {
                     s_icon = "success";
+                    $(`div[id="fees_payment_form"] input[name="amount"]`).val("");
+                    $(`div[id="fees_payment_form"] textarea[name="description"]`).val("");
                 }
                 swal({
                     text: response.data.result,

@@ -116,6 +116,7 @@ class Users extends Myschoolgh {
 						$params->columns .= ", a.date_of_birth, a.guardian_id, (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name";
 					}
 				}
+
 			}
 
 			// prepare and execute the statement

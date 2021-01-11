@@ -94,7 +94,7 @@ if(!isset($userPrefs->messages)) {
     <?php } ?>
     <link id="user_current_url" name="user_current_url" value="<?= $user_current_url ?>">
 </head>
-<body class="<?= $sidebar_pref ?> <?=  $theme_color ?>">
+<body class="<?= $sidebar_pref ?> <?=  $theme_color ?> bg">
 	<div class="loader"></div>
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
@@ -270,9 +270,9 @@ if(!isset($userPrefs->messages)) {
                         <li class="dropdown">
                             <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Fees</span></a>
                             <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Receive Payment</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Category</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Receive Payment</a></li>
+                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Fees Category</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
                                 <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Reports</a></li>
                             </ul>
