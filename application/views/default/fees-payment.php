@@ -74,8 +74,8 @@ if(!$receivePayment) {
         $student_id = $data->student_id;
         $category_id = $data->category_id;
         $department_id = $data->department_id;
-        $disabled = $data->paid_status === 1 ? "disabled='disabled'" : null;
-        $search_disabled = $data->paid_status === 1 ? null : "disabled='disabled'";
+        $disabled = $data->paid_status ? "disabled='disabled'" : null;
+        $search_disabled = $data->paid_status ? null : "disabled='disabled'";
 
         // append the allocation information to the parameters before fetching the payment form
         $params->allocation_info = $data;

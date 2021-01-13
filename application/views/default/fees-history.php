@@ -55,14 +55,14 @@ $hasUpdate = $accessObject->hasAccess("update", "fees");
 
 $fees_history = "";
 foreach($item_list["data"] as $key => $each) {
-    
     $action = "";
-    $action = "<a href='{$baseUrl}update-fees/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a href='{$baseUrl}fees-view/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
-    if($hasUpdate) {
-        $action .= "&nbsp;<a href='{$baseUrl}update-fees/{$each->item_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-    }
-    $action .= "&nbsp;<a href='{$baseUrl}update-fees/{$each->item_id}/print' class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
+    //if($hasUpdate) {
+        //$action .= "&nbsp;<a href='#' onclick='return email_Receipt(\"{$each->item_id}\");' class='btn btn-sm btn-outline-success'><i class='fa fa-envelope'></i></a>";
+    //}
+
+    $action .= "&nbsp;<a href='{$baseUrl}fees-view/{$each->item_id}/print' class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
 
     $fees_history .= "<tr data-row_id=\"{$each->item_id}\">";
     $fees_history .= "<td>".($key+1)."</td>";
@@ -71,7 +71,8 @@ foreach($item_list["data"] as $key => $each) {
             <div class='d-flex justify-content-start'>
                 ".(!empty($each->student_info->image) ? "
                 <div class='mr-2'><img src='{$baseUrl}{$each->student_info->image}' width='40px' height='40px'></div>" : "")."
-                <div>{$each->student_info->name} <br>
+                <div>
+                    <a href='{$baseUrl}update-student/{$each->student_info->user_id}/'>{$each->student_info->name}</a> <br>
                 <strong>{$each->student_info->unique_id}</strong></div>
             </div>
         </td>";

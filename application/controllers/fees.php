@@ -70,8 +70,8 @@ class Fees extends Myschoolgh {
                     (SELECT b.name FROM departments b WHERE b.id = a.department_id LIMIT 1) AS department_name,
                     (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
                     (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
-                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
-                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info
+                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.phone_number,'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
+                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info
                 FROM fees_collection a
 				WHERE a.client_id = ? {$filters} ORDER BY a.id DESC LIMIT {$params->limit}
             ");
@@ -84,7 +84,7 @@ class Fees extends Myschoolgh {
                     // confirm that it is set
                     if(isset($result->{$each})) {
                         // convert the created by string into an object
-                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["unique_id", "user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["unique_id", "user_id", "name", "image","last_seen","online","user_type", "phone_number", "email"]);
                     }
                 }
                 $data[] = $result;
@@ -395,7 +395,7 @@ class Fees extends Myschoolgh {
             // assign a key to the concat value
             $allocation->last_payment_info = $this->stringToArray(
                 $allocation->last_payment_info, "|",
-                ["amount", "description", "created_by", "created_date"]
+                ["pay_id", "amount", "created_by", "created_date", "description"]
             );
         }
 
@@ -417,7 +417,7 @@ class Fees extends Myschoolgh {
         $html_form .= "<div class='table-responsive'>";
         $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
         $html_form .= "<tr>";
-        $html_form .= "<td width='60%'>Amount Due:</td>";
+        $html_form .= "<td width='55%'>Amount Due:</td>";
         $html_form .= "<td>{$allocation->amount_due}</td>";
         $html_form .= "</tr>";
         $html_form .= "<tr>";
@@ -429,18 +429,36 @@ class Fees extends Myschoolgh {
         $html_form .= "<td><span data-checkout_url='{$allocation->checkout_url}' data-amount_payable='{$allocation->balance}' class='outstanding'>{$allocation->balance}</span></td>";
         $html_form .= "</tr>";
 
-        /** If last payment information is not empty */
-        if(!empty($allocation->last_payment_info)) {
-            $html_form .= "<tr>";
-            $html_form .= "<td>Last Payment Info:</td>";
-            $html_form .= "<td><span class='last_payment_date'>{$allocation->last_payment_date}</span></td>";
-            $html_form .= "</tr>";
-        }
-
+        $html_form .= "<tr>";
         $html_form .= "<td>Status:</td>";
         $html_form .= "<td>{$label}</td>";
         $html_form .= "</tr>";
         $html_form .= "</table>";
+
+        /** Last payment container */
+        $html_form .= "<div class='last_payment_container'>";
+
+        /** If last payment information is not empty */
+        if(!empty($allocation->last_payment_info)) {
+
+            // append value
+            $allocation->last_payment_uid = $allocation->last_payment_info["pay_id"];
+            $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
+            // set the rows for the last payment id
+            $html_form .= "<tr>";
+            $html_form .= "<td width='55%'>Last Payment Info:</td>";
+            $html_form .= "
+            <td>
+                <span class='last_payment_id'><strong>Payment ID:</strong> {$allocation->last_payment_uid}</span><br>
+                <span class='amount_paid'><i class='fa fa-money-bill'></i> {$allocation->last_payment_info["amount"]}</span><br>
+                <span class='last_payment_date'><i class='fa fa-calendar-check'></i> {$allocation->last_payment_date}</span><br>
+                <p class='mt-3 mb-0 pb-0' id='print_receipt'><a class='btn btn-sm btn-outline-primary' target='_blank' href='{$this->baseUrl}fees-view/{$allocation->last_payment_id}/print'><i class='fa fa-print'></i> Print Receipt</a></p>
+            </td>";
+            $html_form .= "</tr>";
+            $html_form .= "</table>";
+        }
+
+        $html_form .= "</div>";
         $html_form .= "</div>";
 
         return [
@@ -677,7 +695,7 @@ class Fees extends Myschoolgh {
                     (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
                     (SELECT b.department FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS department_id,
                     (
-                        SELECT CONCAT(b.amount,'|',b.description,'|',b.created_by,'|',b.recorded_date) FROM fees_collection b 
+                        SELECT CONCAT(b.id,'|',b.amount,'|',b.created_by,'|',b.recorded_date,'|',b.description) FROM fees_collection b 
                         WHERE b.item_id = a.last_payment_id LIMIT 1
                     ) AS last_payment_info
 				FROM fees_payments a
@@ -689,7 +707,17 @@ class Fees extends Myschoolgh {
 			");
 			$stmt->execute();
 			
-            return ($stmt->rowCount() > 0) ? $stmt->fetch(PDO::FETCH_OBJ) : false;
+            $result = ($stmt->rowCount() > 0) ? $stmt->fetch(PDO::FETCH_OBJ) : false;
+
+            // if clean_payment_info was parsed then query below
+            if(!empty($result) && isset($params->clean_payment_info)) {
+                // convert the last payment information into an array
+                $result->last_payment_info = $this->stringToArray($result->last_payment_info, "|",
+                    ["pay_id", "amount", "created_by", "created_date", "description"]
+                );
+            }
+
+            return $result;
 
 		} catch(PDOException $e) {
             return false;
@@ -698,6 +726,9 @@ class Fees extends Myschoolgh {
 
     /**
      * Make payment for the fees
+     * 
+     * @param String        $params->checkout_url
+     * @param Float         $params->amount
      * 
      * @return Array
      */
@@ -728,7 +759,7 @@ class Fees extends Myschoolgh {
             }
 
             // generate a unique id for the payment record
-            $uniqueId = random_string('alnum', 14);
+            $uniqueId = random_string('alnum', 32);
 
             /* Record the payment made by the user */
             $stmt = $this->db->prepare("
@@ -739,7 +770,7 @@ class Fees extends Myschoolgh {
             $stmt->execute([
                 $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id, 
                 $paymentRecord->class_id, $paymentRecord->category_id, $params->amount, $params->userId, 
-                $paymentRecord->academic_year, $paymentRecord->academic_term, $params->description ?? null
+                $paymentRecord->academic_year, $paymentRecord->academic_term, $params->description ?? "null"
             ]);
 
             /* Update the user payment record */
@@ -762,6 +793,9 @@ class Fees extends Myschoolgh {
 
             // commit the statements
             $this->db->commit();
+
+            // append to the query
+            $params->clean_payment_info = true;
 
             // return the success message
             return [

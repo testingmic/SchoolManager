@@ -23,10 +23,6 @@ $response->title = "{$pageTitle} : {$appName}";
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
 
-$response->scripts = [
-    "assets/js/page/index.js"
-];
-
 // item id
 $item_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
 $pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
