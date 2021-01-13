@@ -198,7 +198,7 @@ if(!isset($userPrefs->messages)) {
                         <li class="menu-header">Main</li>
 
                         <li>
-                            <a href="<?= $baseUrl ?>" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                            <a href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a>
                         </li>
                         <li class="dropdown">
                             <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
