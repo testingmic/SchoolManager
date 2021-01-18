@@ -39,11 +39,11 @@ if(!empty($user_id)) {
     $guardian_param = (object) [
         "limit" => 1,
         "clientId" => $clientId,
-        "guardian_id" => $user_id,
+        "user_id" => $user_id,
         "append_wards" => true,
     ];
 
-    $data = load_class("users", "controllers")->guardian_list($guardian_param);
+    $data = load_class("users", "controllers")->list($guardian_param)["data"];
     
     // if no record was found
     if(empty($data)) {
@@ -90,7 +90,7 @@ if(!empty($user_id)) {
                     <div class="author-box-center">
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
                         <div class="clearfix"></div>
-                        <div class="author-box-name"><a href="#">'.$data->fullname.'</a></div>
+                        <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
                         <div class="author-box-job">'.$data->residence.'</div>
                     </div>
                     <div class="text-center">
@@ -127,12 +127,12 @@ if(!empty($user_id)) {
                         </p>
                         <p class="clearfix">
                             <span class="float-left">Primary Contact</span>
-                            <span class="float-right text-muted">'.$data->contact.'</span>
+                            <span class="float-right text-muted">'.$data->phone_number.'</span>
                         </p>
-                        '.($data->contact_2 ? 
+                        '.($data->phone_number_2 ? 
                             '<p class="clearfix">
                                 <span class="float-left">Secondary Contact</span>
-                                <span class="float-right text-muted">'.$data->contact_2.'</span>
+                                <span class="float-right text-muted">'.$data->phone_number_2.'</span>
                             </p>
                             ' : ''
                         ).'

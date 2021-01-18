@@ -1004,9 +1004,16 @@ class Forms extends Myschoolgh {
         $html_content .= "<button onclick='return search_usersList(\"{$array[$data->user_type]["type"]}\")' class='btn btn-outline-success btn-block'><i class='fa fa-filter'></i></button>";
         $html_content .= "</div>";
         $html_content .= "</div>";
-        $html_content .= "<div class='col-md-12 mt-2' data-{$array[$data->user_type]["attr"]}='{$data->user_id}' id='user_search_list'>";
+        $html_content .= "<div class='col-md-12 mt-2' data-{$array[$data->user_type]["attr"]}='{$data->unique_id}' id='user_search_list'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
+        $html_content .= "
+        <script>$(`input[name='user_name_search']`).on('keyup', function(evt) {
+            evt.preventDefault();
+            if (evt.keyCode == 13 && !evt.shiftKey) {
+                search_usersList(\"{$array[$data->user_type]["type"]}\");
+            }
+        });</script>";
 
         return $html_content;
     }
@@ -1908,27 +1915,26 @@ class Forms extends Myschoolgh {
 
         $isData = !empty($userData) && isset($userData->user_id) ? true : false;
 
-        $guardian = "";
-
         $response = '
-        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "guardian_update" : "guardian_add").'" method="POST">
+        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
                     <h5>BIO INFORMATION</h5>
                 </div>
-                <div class="col-lg-'.(!empty($userData) ? 6 : 4 ).' col-md-5">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Guardian Image</label>
                         <input type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-'.(!empty($userData) ? 4 : 4 ).' col-md-5">
+                <div class="col-lg-'.(!empty($userData) ? 4 : 4 ).' col-md-6">
                     <div class="form-group">
-                        <label for="guardian_id">Guardian ID (optional)</label>
-                        <input type="text" readonly value="'.($userData->user_id ?? random_string("nozero", 10)).'" name="guardian_id" id="guardian_id" class="form-control">
+                        <label for="unique_id">Guardian ID (optional)</label>
+                        <input type="text" readonly value="'.($userData->unique_id ?? "").'" name="unique_id" id="unique_id" class="form-control">
+                        <input type="text" readonly value="'.($userData->user_id ?? "").'" hidden name="user_id" id="user_id" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-4">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="gender">Gender</label>
                         <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
@@ -1939,10 +1945,16 @@ class Forms extends Myschoolgh {
                     $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-8 col-md-8">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="fullname">Fullname <span class="required">*</span></label>
-                        <input type="text" value="'.($userData->fullname ?? null).'" name="fullname" id="fullname" class="form-control">
+                        <label for="firstname">Firstname <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->firstname ?? null).'" name="firstname" id="firstname" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="lastname">Lastname <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->lastname ?? null).'" name="lastname" id="lastname" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -1960,13 +1972,13 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="contact">Primary Contact</label>
-                        <input type="text" name="contact" value="'.($userData->contact ?? null).'" id="contact" class="form-control">
+                        <input type="text" name="phone" value="'.($userData->phone_number ?? null).'" id="phone" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="contact_2">Secondary Contact</label>
-                        <input type="text" name="contact_2" value="'.($userData->contact_2 ?? null).'" id="contact_2" class="form-control">
+                        <input type="text" name="phone_2" value="'.($userData->phone_number_2 ?? null).'" id="phone_2" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -1992,16 +2004,27 @@ class Forms extends Myschoolgh {
                         <input type="hidden" id="user_type" name="user_type" value="'.(!$isData ? "student" : null).'">
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="residence">Place of Residence <span class="required">*</span></label>
                         <input type="text" value="'.($userData->residence ?? null).'" name="residence" id="residence" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="address">Postal Address <span class="required">*</span></label>
                         <input type="text" value="'.($userData->address ?? null).'" name="address" id="address" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4">
+                    <div class="form-group">
+                        <label for="relationship">Relationship</label>
+                        <select data-width="100%" name="relationship" id="relationship" class="form-control selectpicker">
+                            <option value="null">Select Relation</option>';
+                            foreach($this->pushQuery("id, name", "guardian_relation", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".(isset($userData->relationship) && $userData->relationship === $each->name ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
+                            }
+                $response .= '</select>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">
@@ -2025,6 +2048,7 @@ class Forms extends Myschoolgh {
             </div>
             <div class="row">
                 <div class="col-lg-12 text-right">
+                    <input type="hidden" hidden name="user_type" value="parent">
                     <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>

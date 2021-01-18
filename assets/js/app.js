@@ -7,8 +7,8 @@ $.form_data = {};
 $.current_page = "";
 $.protocol = window.location.protocol;
 $.host = window.location.host;
-$.baseurl = $.protocol + "//" + $.host + "/";
-$.default = $.protocol + "//" + $.host + "/main";
+$.baseurl = $.protocol + "//" + $.host + "/myschool_gh";
+$.default = $.protocol + "//" + $.host + "/myschool_gh/main";
 $.pagecontent = $("#pagecontent");
 $.mainprogress = $(".main-progress-bar");
 $.pageoverlay = $(".pageoverlay");
@@ -308,9 +308,8 @@ var linkHandler = (target, pushstate) => {
     devlog("linkHandler(). I called =>")
 
     if (target.slice(0, -1) === $.baseurl || target === $.baseurl || target === $.default) {
-        target = $.baseurl + "/dashboard"
+        target = $.baseurl + "/dashboard";
     }
-
     loadPage(target, pushstate)
 }
 

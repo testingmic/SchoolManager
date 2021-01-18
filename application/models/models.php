@@ -64,7 +64,7 @@ class Models {
 			'xlsx' => 'fa fa-file-excel', 'php' => 'fa fa-file-alt',
 			'css' => 'fa fa-file-alt', 'ppt' => 'fa fa-file-powerpoint',
 			'pptx' => 'fa fa-file-powerpoint', 'sql' => 'fa fa-file-alt',
-             'flv' => 'fa fa-file-video', 'json' => 'fa fa-file-alt'
+            'flv' => 'fa fa-file-video', 'json' => 'fa fa-file-alt'
 		];
 
         $this->unexpected_error = ["code" => 203, "data" => "Sorry! An unexpected error occured.\nPlease contact the admin if problem persists"];
@@ -95,6 +95,49 @@ class Models {
             "employee" => "Employee",
             "accountant" => "Accountant",
             "admin" => "Admin"
+        ];
+
+        // permissive users to be created by each access level
+        $this->the_user_roles_long = [
+            "student" => [
+                "_role_title" => "Student"
+            ],
+            "parent" => [
+                "_role_title" => "Parent"
+            ],
+            "employee" => [
+                "_role_title" => "Employee"
+            ],
+            "accountant" => [
+                "_role_title" => "Accountant"
+            ],
+            "teacher" => [
+                "_role_title" => "Teacher"
+            ],
+            "admin" => [
+                "_role_title" => "Admin User"
+            ]
+        ];
+
+        $this->the_user_roles = [
+            "student" => [
+                "_role_title" => "Student"
+            ],
+            "parent" => [
+                "_role_title" => "Parent"
+            ],
+            "employee" => [
+                "_role_title" => "Employee"
+            ],
+            "accountant" => [
+                "_role_title" => "Accountant"
+            ],
+            "teacher" => [
+                "_role_title" => "Teacher"
+            ],
+            "admin" => [
+                "_role_title" => "Admin User"
+            ]
         ];
 
         $this->user_status_list = [

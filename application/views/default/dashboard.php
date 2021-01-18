@@ -140,7 +140,7 @@ $response->html .= '</select>
                 <div class="card-body card-type-3">
                     <div class="row">
                     <div class="col">
-                        <h6 class="text-muted mb-0">New Students</h6>
+                        <h6 class="text-muted mb-0">Teaching Stafff</h6>
                         <span class="font-weight-bold mb-0">0</span>
                     </div>
                     <div class="col-auto">
@@ -161,7 +161,7 @@ $response->html .= '</select>
                 <div class="card-body card-type-3">
                   <div class="row">
                     <div class="col">
-                      <h6 class="text-muted mb-0">Staff Strength</h6>
+                      <h6 class="text-muted mb-0">Employees</h6>
                       <span class="font-weight-bold mb-0">0</span>
                     </div>
                     <div class="col-auto">

@@ -21,10 +21,11 @@ $response->scripts = [];
 
 $guardian_param = (object) [
     "append_wards" => true,
+    "user_type" => "parent",
     "clientId" => $session->clientId
 ];
 
-$guardian_list = load_class("users", "controllers")->guardian_list($guardian_param);
+$guardian_list = load_class("users", "controllers")->list($guardian_param)["data"];
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
@@ -67,10 +68,10 @@ foreach($guardian_list as $kkey => $each) {
     // append to the list of all guardians
     $guardians .= "<tr data-row_id=\"{$each->user_id}\">";
     $guardians .= "<td>".($kkey+1)."</td>";
-    $guardians .= "<td><img title=\"Click to view full details\" onclick=\"return loadPage('{$baseUrl}update-guardian/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->fullname}</td>";
+    $guardians .= "<td><img title=\"Click to view full details\" onclick=\"return loadPage('{$baseUrl}update-guardian/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
     $guardians .= "<td>{$each->relationship}</td>";
     $guardians .= "<td>{$each->email}</td>";
-    $guardians .= "<td>{$each->contact}</td>";
+    $guardians .= "<td>{$each->phone_number}</td>";
     $guardians .= "<td>{$wards_list}</td>";
     $guardians .= "<td class='text-center'>{$action}</td>";
     $guardians .= "</tr>";

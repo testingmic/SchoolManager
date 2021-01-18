@@ -119,6 +119,19 @@ class Users extends Myschoolgh {
 
 			}
 
+			// if the request is to return the where clause parameter only
+			if(isset($params->return_where_clause)) {
+				
+				// remove user data was parsed
+				if(isset($params->remove_user_data)) {
+					unset($params->userData);
+				}
+
+				return $params->query;
+			}
+
+			$loadWards = isset($params->append_wards) ? true : false;
+
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT 
 				".((isset($params->columns) ? $params->columns : "
@@ -141,7 +154,8 @@ class Users extends Myschoolgh {
 			// init
 			$row = 0;
 			$data = [];
-			
+			$users_group = [];
+
 			// loop through the results
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
 
@@ -212,8 +226,27 @@ class Users extends Myschoolgh {
 					$result->msg_id = strtoupper(random_string("alnum", 32));
 				}
 
+				// if the user wants to load wards as well
+				if($loadWards && ($result->user_type === "parent")) {
+					$qr = $this->db->prepare("
+						SELECT 
+							a.item_id AS student_guid, a.unique_id, a.firstname, a.lastname, a.othername,
+							a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
+							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
+							(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
+						FROM users a WHERE a.status='1' AND a.guardian_id LIKE '%{$result->unique_id}%' AND a.user_type='student'
+					");
+					$qr->execute();
+					$result->wards_list = $qr->fetchAll(PDO::FETCH_OBJ);
+				}
+
 				// append to the results set to return
 				$data[] = $result;
+
+				// if minified
+				if(isset($params->minified)) {
+					$users_group[$result->user_type][] = $result;
+				}
 
 			}
 
@@ -230,6 +263,26 @@ class Users extends Myschoolgh {
 				];
 			}
 
+			// the reports list
+			if(isset($params->minified) && ($params->minified == "reporting_list")) {
+
+				// array loop
+				$array_list = $this->array_keys_count($users_group);
+
+				$data_set = [
+					"users_list" => [
+						"list" => $data,
+						"performance" => $this->user_performance_group($users_group),
+					],
+					"users_group" => $array_list["list"],
+					"clients_count" => $array_list["clients_count"],
+					"total_count" => count($data)
+				];
+
+				return $data_set;
+
+			}
+
 			// return the data
 			return [
 				"data" => $data,
@@ -240,6 +293,95 @@ class Users extends Myschoolgh {
 			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
 		}
 
+	}
+
+	/**
+	 * array_keys_count
+	 * 
+	 * This loops through the array list and gets the count
+	 * 
+	 * @param Array $array
+	 * 
+	 * @return Array
+	 */
+	public function array_keys_count($array) {
+
+		if(!is_array($array)) {
+			return;
+		}
+
+		$list = [];
+		$clients_count = 0;
+
+		// loop through the list of array values
+		foreach($array as $key => $value) {
+			
+			// append to the clients count
+			if(in_array($key, ["user", "business"])) {
+				$clients_count += count($value);
+			} 
+			$list[$key] = [
+				"count" => is_array($array[$key]) ? count($value) : 0,
+				"title" => $this->the_user_roles[$key]["_role_title"]
+			];
+		}
+		return [
+			"list" => $list,
+			"clients_count" => $clients_count
+		];
+	}
+
+	/**
+	 * array_keys_count
+	 * 
+	 * This loops through the array list and gets the count
+	 * 
+	 * @param Array $array
+	 * 
+	 * @return Array
+	 */
+	public function user_performance_group($array) {
+
+		if(!is_array($array)) {
+			return;
+		}
+
+		$list = [];
+		$types = [
+			"student" => [
+				"role" => "students_report",
+				"title" => "Student"
+			],
+			"teacher" => [
+				"role" => "teachers_report",
+				"title" => "Broker"
+			],
+			"accountant" => [
+				"role" => "accountants_report",
+				"title" => "Accountant"
+			],
+			"parent" => [
+				"role" => "parents_report",
+				"title" => "Parent"
+			],
+			"employee" => [
+				"role" => "employees_report",
+				"title" => "Employee"
+			],
+			"admin" => [
+				"role" => "admin_report",
+				"title" => "Admin User's"
+			]
+		];
+
+		// loop through the list of array values
+		foreach($array as $key => $value) {
+			
+			// append to the clients count
+			$list[$types[$key]["role"]][] = $value;
+		}
+
+		return $list;
 	}
 
 	/**
@@ -260,20 +402,21 @@ class Users extends Myschoolgh {
 		if(!empty($guardian_id) || $force_search) {
 			// loop through the guardian ids submitted
 			foreach($guardian_id as $user_id) {
-				$query = $this->pushQuery("user_id, image, fullname, contact, email, relationship, address", "users_guardian", "status='1' AND user_id='{$user_id}' AND client_id='{$client_id}'");
+				$query = $this->pushQuery("item_id AS user_id, image, name AS fullname, phone_number AS contact, email, relationship, address", "users", "status='1' AND user_status='Active' AND (item_id='{$user_id}' OR unique_id='{$user_id}') AND client_id='{$client_id}' LIMIT 1");
 				$data[] = !empty($query) ? $query[0] : [];
 			}
 		}
 		// load all the guardian list and submit in the response
 		else {
 			// set the client id and confirm load wards
-			$guardianId = isset($guardian_ids->guardian_id) ? "AND user_id='{$guardian_ids->guardian_id}' LIMIT 1" : null; 
+			$guardianId = isset($guardian_ids->guardian_id) ? "AND (a.item_id='{$guardian_ids->guardian_id}' OR unique_id='{$guardian_ids->guardian_id}') AND user_type='parent' LIMIT 1" : null; 
 			$clientId = isset($guardian_ids->clientId) ? $guardian_ids->clientId : $client_id;
 			$loadWards = isset($guardian_ids->append_wards) ? true : false;
 
-			$query = $this->pushQuery("a.*,
+			$query = $this->pushQuery("a.item_id AS user_id, a.unique_id, a.name, a.phone_number, a.phone_number_2, a.residence, 
+				a.email, a.username, a.blood_group, a.nationality, a.occupation, a.employer, a.relationship,
 				(SELECT b.country_name FROM country b WHERE b.id = a.country LIMIT 1) AS country_name", 
-				"users_guardian a", "a.status='1' AND a.client_id='{$clientId}' {$guardianId}");
+				"users a", "a.status='1' AND a.client_id='{$clientId}' {$guardianId}");
 
 			// loop through the users list
 			foreach($query as $value) {
@@ -289,7 +432,7 @@ class Users extends Myschoolgh {
 							a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
 							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
 							(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
-						FROM users a WHERE a.status='1' AND a.guardian_id LIKE '%{$value->user_id}%'
+						FROM users a WHERE a.status='1' AND a.user_type = 'student' AND a.guardian_id LIKE '%{$value->unique_id}%'
 					");
 					$qr->execute();
 					$value->wards_list = $qr->fetchAll(PDO::FETCH_OBJ);
@@ -300,153 +443,6 @@ class Users extends Myschoolgh {
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Add a new guardian information
-	 * 
-	 * @param stdClass $params
-	 * 
-	 * @return Array
-	 */
-	public function guardian_add(stdClass $params) {
-
-		// set the client id and confirm load wards
-		$guardianId = isset($params->guardian_id) ? "AND user_id='{$params->guardian_id}' LIMIT 1" : null; 	
-		$query = $this->pushQuery("a.*", "users_guardian a", "a.status='1' AND a.client_id='{$params->clientId}' {$guardianId}");
-
-		// if the query was empty
-		if(!empty($query)) {
-			$params->guardian_id = random_string("nozero", 10);
-		}
-
-		// data
-		$data = $query[0];
-
-		try {
-
-			$stmt = $this->db->prepare("
-				INSERT INTO users_guardian SET date_updated = now(), client_id = ? AND user_id = ?
-				".(isset($params->gender) ? ", gender='{$params->gender}'" : null)."
-				".(isset($params->fullname) ? ", fullname='{$params->fullname}'" : null)."
-				".(isset($params->email) ? ", email='{$params->email}'" : null)."
-				".(isset($params->occupation) ? ", occupation='{$params->occupation}'" : null)."
-				".(isset($params->employer) ? ", employer='{$params->employer}'" : null)."
-				".(isset($params->country) ? ", country='{$params->country}'" : null)."
-				".(isset($params->description) ? ", description='{$params->description}'" : null)."
-				".(isset($params->date_of_birth) ? ", date_of_birth='{$params->date_of_birth}'" : null)."
-				".(isset($params->contact) ? ", contact='{$params->contact}'" : null)."
-				".(isset($params->blood_group) ? ", blood_group='{$params->blood_group}'" : null)."
-				".(isset($params->contact_2) ? ", contact_2='{$params->contact_2}'" : null)."
-				".(isset($params->residence) ? ", residence='{$params->residence}'" : null)."
-				".(isset($params->address) ? ", address='{$params->address}'" : null)."
-			");
-			$stmt->execute([$params->clientId, $params->guardian_id]);
-
-			// log the user activity
-            $this->userLogs("guardian", $params->guardian_id, null, "{$params->userData->name} created a new guardian record.", $params->userId);
-
-			# set the output to return when successful
-			$return = ["code" => 200, "data" => "Guardian Information successfully created.", "refresh" => 2000];
-			
-			# append to the response
-			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}update-guardian/{$params->guardian_id}/view"];
-
-			// return the output
-            return $return;
-
-		} catch(PDOException $e) {}
-
-	}
-
-	/**
-	 * Update the guardian information
-	 * 
-	 * @param stdClass $params
-	 * 
-	 * @return Array
-	 */
-	public function guardian_update(stdClass $params) {
-
-		// set the client id and confirm load wards
-		$guardianId = isset($params->guardian_id) ? "AND user_id='{$params->guardian_id}' LIMIT 1" : null; 	
-		$query = $this->pushQuery("a.*", "users_guardian a", "a.status='1' AND a.client_id='{$params->clientId}' {$guardianId}");
-
-		// if the query was empty
-		if(empty($query)) {
-			return ["code" => 203, "data" => "Sorry! An invalid guardian id was parsed"];
-		}
-
-		// data
-		$data = $query[0];
-
-		try {
-
-			$stmt = $this->db->prepare("
-				UPDATE users_guardian SET date_updated = now()
-				".(isset($params->gender) ? ", gender='{$params->gender}'" : null)."
-				".(isset($params->fullname) ? ", fullname='{$params->fullname}'" : null)."
-				".(isset($params->email) ? ", email='{$params->email}'" : null)."
-				".(isset($params->occupation) ? ", occupation='{$params->occupation}'" : null)."
-				".(isset($params->employer) ? ", employer='{$params->employer}'" : null)."
-				".(isset($params->country) ? ", country='{$params->country}'" : null)."
-				".(isset($params->description) ? ", description='{$params->description}'" : null)."
-				".(isset($params->date_of_birth) ? ", date_of_birth='{$params->date_of_birth}'" : null)."
-				".(isset($params->contact) ? ", contact='{$params->contact}'" : null)."
-				".(isset($params->blood_group) ? ", blood_group='{$params->blood_group}'" : null)."
-				".(isset($params->contact_2) ? ", contact_2='{$params->contact_2}'" : null)."
-				".(isset($params->residence) ? ", residence='{$params->residence}'" : null)."
-				".(isset($params->address) ? ", address='{$params->address}'" : null)."
-				WHERE client_id = ? AND user_id = ? LIMIT 1
-			");
-			$stmt->execute([$params->clientId, $params->guardian_id]);
-
-			// log the user activity
-            $this->userLogs("guardian", $params->guardian_id, null, "{$params->userData->name} updated the guardian record.", $params->userId);
-
-			# set the output to return when successful
-			$return = ["code" => 200, "data" => "Guardian Information successfully updated.", "refresh" => 2000];
-			
-			if(isset($params->gender) && ($data->gender !== $params->gender)) {
-                $this->userLogs("guardian", $params->guardian_id, $data->gender, "Guardian gender was changed from {$data->gender}", $params->userId);
-            }
-
-            if(isset($params->employer) && ($data->employer !== $params->employer)) {
-                $this->userLogs("guardian", $params->guardian_id, $data->employer, "Guardian employer was changed from {$data->employer}", $params->userId);
-            }
-
-            if(isset($params->occupation) && ($data->occupation !== $params->occupation)) {
-                $this->userLogs("guardian", $params->guardian_id, $data->occupation, "Guardian occupation was changed from {$data->occupation}", $params->userId);
-            }
-
-            if(isset($params->date_of_birth) && ($data->date_of_birth !== $params->date_of_birth)) {
-                $this->userLogs("guardian", $params->guardian_id, $data->date_of_birth, "Guardian date of birth was changed from {$data->date_of_birth}", $params->userId);
-            }
-
-            if(isset($params->email) && ($data->email !== $params->email)) {
-                $this->userLogs("guardian", $params->guardian_id, $data->email, "Guardian email was changed from {$data->email}", $params->userId);
-            }
-
-            if(isset($params->contact) && ($data->contact !== $params->contact)) {
-                $this->userLogs("guardian", $params->guardian_id, $data->contact, "Guardian primary contact was changed from {$data->contact}", $params->userId);
-            }
-
-            if(isset($params->contact_2) && ($data->contact_2 !== $params->contact_2)) {
-                $this->userLogs("guardian", $params->guardian_id, $data->contact_2, "Guardian secondary contact was changed from {$data->contact_2}", $params->userId);
-            }
-
-            if(isset($params->description) && ($data->description !== $params->description)) {
-                $this->userLogs("guardian", $params->guardian_id, $data->description, "Guardian description was changed from {$data->description}", $params->userId);
-            }
-
-			# append to the response
-			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}update-guardian/{$params->guardian_id}/view"];
-
-			// return the output
-            return $return;
-
-		} catch(PDOException $e) {}
-
 	}
 
 	/**
@@ -518,7 +514,7 @@ class Users extends Myschoolgh {
 		}
 		
 		// confirm that a valid parent id was parsed
-		$p_data = $this->pushQuery("a.id", "users_guardian a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.user_id = '{$expl[0]}' LIMIT 1");
+		$p_data = $this->pushQuery("a.id", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND (a.item_id = '{$expl[0]}' OR a.unique_id = '{$expl[0]}') LIMIT 1");
 		if(empty($p_data)) {
 			return ["code" => 203, "data" => "Sorry! An invalid guardian id was parsed"];
 		}
@@ -604,7 +600,7 @@ class Users extends Myschoolgh {
 		}
 		
 		// confirm that a valid parent id was parsed
-		$p_data = $this->pushQuery("a.id", "users_guardian a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.user_id = '{$expl[0]}' LIMIT 1");
+		$p_data = $this->pushQuery("a.id", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[0]}' LIMIT 1");
 		if(empty($p_data)) {
 			return ["code" => 203, "data" => "Sorry! An invalid guardian id was parsed"];
 		}
@@ -703,9 +699,11 @@ class Users extends Myschoolgh {
 		
 		/** Run this section if the user is logged in */
 		if($loggedInAccount || (isset($params->remote) && $params->remote)) {
+			/** The user types */
+			$user_type = $params->user_type == "parent" ? "guardian" : $params->user_type;
 
 			/** If not permitted */
-			if(!$accessObject->hasAccess("add", $params->user_type)) {
+			if(!$accessObject->hasAccess("add", $user_type)) {
 				return ["code" => 201, "data" => $this->permission_denied];
 			}
 
@@ -798,7 +796,7 @@ class Users extends Myschoolgh {
 		}
 
 		// generate a new unique user id
-		$label = $params->user_type == "student" ? "student_label" : "staff_label";
+		$label = $params->user_type === "student" ? "student_label" : ($params->user_type === "parent" ? "parent_label" : "staff_label");
 		$counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='{$params->user_type}'") + 1), $this->append_zeros);
         $unique_id = $this->client_data($params->clientId)->client_preferences->labels->$label.$counter.date("Y");
 
@@ -853,7 +851,11 @@ class Users extends Myschoolgh {
 				".(isset($params->gender) ? ", gender='{$params->gender}'" : null)."
 				".(isset($params->username) ? ", username='{$params->username}'" : null)."
 				".(isset($params->position) ? ", position='{$params->position}'" : null)."
-				".(isset($params->created_by) ? ", created_by='{$params->created_by}'" : null)."
+				
+				".(isset($params->relationship) ? ", relationship='{$params->relationship}'" : null)."
+
+				".(isset($params->academic_term) ? ", academic_term='{$params->academic_term}'" : null)."
+				".(isset($params->academic_year) ? ", academic_year='{$params->academic_year}'" : null)."
 
 				".(isset($params->status) ? ", status='{$params->status}'" : null)."
 				".(isset($encrypt_password) ? ", password='{$encrypt_password}'" : null)."
@@ -895,15 +897,28 @@ class Users extends Myschoolgh {
 			if(!empty($guardian)) {
 				$guardian_ids = [];
 				foreach($guardian as $key => $value) {
-					$stmt = $this->db->prepare("INSERT INTO users_guardian SET 
-						fullname = ?, contact = ?, `email` = ?, `relationship` = ?, 
+					// explode the first and lastnames
+					$expl = explode(" ", $value["guardian_fullname"]);
+					// use the first and second index as the names
+					$firstname = $expl[0];
+					$lastname = isset($expl[1]) ? $expl[1] : null;
+					$othername = isset($expl[2]) ? $expl[2] : null;
+
+					// join the names as the fullname
+					$fullname = "{$firstname} {$othername} {$lastname}";
+					
+					// insert the name of the guardian
+					$stmt = $this->db->prepare("INSERT INTO users SET 
+						firstname = ?, lastname = ?, othername = ?, name = ?,
+						phone_number = ?, `email` = ?, `relationship` = ?, 
 						`address` = ?, `user_id` = ?, `client_id` = ?
 					");
 					$stmt->execute([
-						$value["guardian_fullname"], $value["guardian_contact"], $value["guardian_email"], 
-						$value["guardian_relation"], $value["guardian_address"], $value["guardian_id"], $params->clientId
+						$firstname, $lastname, $othername, $fullname, $value["guardian_contact"], 
+						$value["guardian_email"], $value["guardian_relation"], $value["guardian_address"], 
+						$params->unique_id, $params->clientId
 					]);
-					$guardian_ids[] = $value["guardian_id"];
+					$guardian_ids[] = $params->unique_id;
 				}
 				$this->db->query("UPDATE users SET guardian_id='".implode(",", $guardian_ids)."' WHERE item_id='{$params->user_id}' LIMIT 1");
 			}
@@ -1084,6 +1099,8 @@ class Users extends Myschoolgh {
 				".(isset($params->programme) ? ", programme='{$params->programme}'" : null)."
 				".(isset($params->department_id) ? ", department='{$params->department_id}'" : null)."
 				".(isset($params->enrollment_date) ? ", enrollment_date='{$params->enrollment_date}'" : null)."
+
+				".(isset($params->relationship) ? ", relationship='{$params->relationship}'" : null)."
 
 				".(isset($params->username) ? ", username='{$params->username}'" : null)."
 				".(isset($params->created_by) ? ", created_by='{$params->created_by}'" : null)."
