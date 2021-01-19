@@ -98,7 +98,7 @@ class Analitics extends Myschoolgh {
             // query the clients data
             $this->final_report["summary_report"] = $this->summary_report($params);
             // get the percentage difference between the current and previous
-            // $this->array_percentage_diff($this->final_report);
+            $this->calculate_percentages($this->final_report, "summary_report.students_class_record_count.count");
         }
 
         return $this->final_report;
@@ -187,7 +187,12 @@ class Analitics extends Myschoolgh {
 
             $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause}");
             $query->execute([$this->user_status]);
-            $result["students_class_record_count"]["count"][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
+            $_q_result = $query->fetch(PDO::FETCH_OBJ);
+
+            $result["students_class_record_count"]["count"][$value_count] = [
+                "value" => $_q_result->{$value_count} ?? 0,
+                "name" => $value->name
+            ];
 
             // loop through the date ranges for the current and previous
             foreach($this->date_range as $range_key => $range_value) {
@@ -201,9 +206,13 @@ class Analitics extends Myschoolgh {
                 // run a query for the user count
                 $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause}");
                 $query->execute([$this->user_status]);
+                $_q_result = $query->fetch(PDO::FETCH_OBJ);
 
                 // append to the result array
-                $result["students_class_record_count"]["comparison"][$range_key][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
+                $result["students_class_record_count"]["comparison"][$range_key][$value_count] = [
+                    "value" => $_q_result->{$value_count} ?? 0,
+                    "name" => $value->name
+                ];
             }
 
         }
@@ -269,12 +278,17 @@ class Analitics extends Myschoolgh {
                 $_q_result = $_query->fetch(PDO::FETCH_OBJ);
                 
                 // append to the result array
-                $result["fees_record_count"]["comparison"]["count"][$range_key][$value_count] = $_q_result->{$value_count} ?? 0;
-                $result["fees_record_count"]["comparison"]["amount"][$range_key][$amount_paid] = $_q_result->{$amount_paid} ?? 0;
+                $result["fees_record_count"]["comparison"]["count"][$range_key][$value_count] = [
+                    "value" => $_q_result->{$value_count} ?? 0,
+                    "name" => $value->name
+                ];
+                $result["fees_record_count"]["comparison"]["amount"][$range_key][$amount_paid] = [
+                    "value" => $_q_result->{$amount_paid} ?? 0,
+                    "name" => $value->name
+                ];
             }
 
         }
-        
 
         return $result;
     }
@@ -720,6 +734,44 @@ class Analitics extends Myschoolgh {
 	}
 
     /**
+     * Calculate Percentages
+     * 
+     * Loop through the array, get the match and find the percentage difference between 
+     * the previous and the current values.
+     * 
+     * @return Array
+     */
+    public function calculate_percentages($array_data, $section) {
+
+        // split the section
+        $section = explode(".", $section);
+        $report = $section[0];
+        $array_list = $array_data[$section[0]];
+
+        // set the item
+        if(isset($section[1])) {
+            $array_list = $array_data[$section[0]][$section[1]];
+        }
+        // set the item
+        if(isset($section[2])) {
+            $array_list = $array_data[$section[0]][$section[1]][$section[2]];
+        }
+
+        // get the array key
+        $total_value = array_sum(array_column($array_list, "value"));
+
+        foreach($array_list as $key => $value) {
+            $percentage = (($value["value"] / $total_value) * 100);
+            $array_data[$section[0]][$section[1]][$section[2]][$key]["percentage"] = $percentage;
+        }
+
+        $this->final_report = $array_data;
+
+        return $this;
+
+    }
+
+    /**
      * Percentage difference
      * 
      * Loop through the array, get the match and find the percentage difference between 
@@ -767,6 +819,7 @@ class Analitics extends Myschoolgh {
                 }
 
             }
+            
         }
 
         return $this->final_report[$array_key[0]]["difference"] = $difference;

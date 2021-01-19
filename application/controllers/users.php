@@ -113,9 +113,10 @@ class Users extends Myschoolgh {
 					// if the user type was parsed and the type is guardian
 					if($params->user_type == "guardian") {
 						// make a query for the guardian list
-						$query = $this->pushQuery("a.fullname AS name, a.user_id, a.image, a.email, a.contact AS phone_number, a.residence,
+						$query = $this->pushQuery("a.name, a.item_id AS user_id, a.unique_id, a.image, 
+							a.email, a.phone_number, a.residence, a.relationship,
 							(SELECT b.country_name FROM country b WHERE b.id = a.country LIMIT 1) AS country_name", 
-							"users_guardian a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.fullname LIKE '%{$params->q}%'");
+							"users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.user_type='parent' AND a.name LIKE '%{$params->q}%'");
 						
 						// return the response
 						return ["data" => $query];
@@ -155,7 +156,7 @@ class Users extends Myschoolgh {
 				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions
 				FROM users a 
 				LEFT JOIN country c ON c.id = a.country
-				WHERE {$params->query} AND a.deleted='0' {$order_by} LIMIT {$params->limit}
+				WHERE {$params->query} AND a.deleted='0' AND a.status='1' {$order_by} LIMIT {$params->limit}
 			");
 			$sql->execute();
 			
@@ -406,12 +407,15 @@ class Users extends Myschoolgh {
 		$data = [];
 		$guardian_id = !empty($guardian_ids) && !isset($guardian_ids->clientId) ? $this->stringToArray($guardian_ids) : [];
 
+		
 		// if the guardian id is not empty
 		if(!empty($guardian_id) || $force_search) {
 			// loop through the guardian ids submitted
 			foreach($guardian_id as $user_id) {
-				$query = $this->pushQuery("item_id AS user_id, image, name AS fullname, phone_number AS contact, email, relationship, address", "users", "status='1' AND user_status='Active' AND (item_id='{$user_id}' OR unique_id='{$user_id}') AND client_id='{$client_id}' LIMIT 1");
-				$data[] = !empty($query) ? $query[0] : [];
+				$query = $this->pushQuery("item_id AS user_id, unique_id, image, name AS fullname, phone_number AS contact, email, relationship, address", "users", "status='1' AND user_status='Active' AND (item_id='{$user_id}' OR unique_id='{$user_id}') AND client_id='{$client_id}' LIMIT 1");
+				if(!empty($query)) {
+					$data[] = $query[0];
+				}
 			}
 		}
 		// load all the guardian list and submit in the response
@@ -804,9 +808,12 @@ class Users extends Myschoolgh {
 		}
 
 		// generate a new unique user id
+		$theClientData = $this->client_data($params->clientId);
+
+		// set the label and generate a new unique id
 		$label = $params->user_type === "student" ? "student_label" : ($params->user_type === "parent" ? "parent_label" : "staff_label");
 		$counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='{$params->user_type}'") + 1), $this->append_zeros);
-        $unique_id = $this->client_data($params->clientId)->client_preferences->labels->$label.$counter.date("Y");
+        $unique_id = $theClientData->client_preferences->labels->$label.$counter.date("Y");
 
 		// set the unique id
 		$params->unique_id = isset($params->unique_id) && !empty($params->unique_id) ? $params->unique_id : $unique_id;
@@ -912,6 +919,10 @@ class Users extends Myschoolgh {
 					// process if the fullname is not empty
 					if(!empty($value["guardian_fullname"])) {
 
+						// generate a new unique user id
+						$counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='parent'") + 1), $this->append_zeros);
+						$unique_id = $theClientData->client_preferences->labels->parent_label.$counter.date("Y");
+
 						// explode the first and lastnames
 						$expl = explode(" ", $value["guardian_fullname"]);
 						// use the first and second index as the names
@@ -934,15 +945,15 @@ class Users extends Myschoolgh {
 						$stmt->execute([
 							$firstname, $lastname, $othername, $fullname, $value["guardian_contact"], 
 							$value["guardian_email"], $value["guardian_relation"], "parent", 
-							$value["guardian_address"], $params->unique_id, $params->clientId, $guardian_id 
+							$value["guardian_address"], $unique_id, $params->clientId, $guardian_id 
 						]);
-						$guardian_ids[] = $params->unique_id;
+						$guardian_ids[] = $unique_id;
 					}
 					
 				}
 				// update the user information if the guardian_ids is not empty
 				if(!empty($guardian_ids)) {
-					$this->db->query("UPDATE users SET guardian_id='".implode(",", $guardian_ids)."' WHERE item_id='{$params->user_id}' LIMIT 1");
+					$this->db->query("UPDATE users SET guardian_id='".implode(",", $guardian_ids)."' WHERE item_id='{$params->user_id}' AND user_type = 'student' LIMIT 1");
 				}
 			}
 			
@@ -1148,39 +1159,69 @@ class Users extends Myschoolgh {
 			$stmt->execute([$params->user_id]);
 
 			$guardian_ids = [];
+			$theClientData = $this->client_data($params->clientId);
 
 			// update the user guardian information
 			if(!empty($guardian)) {
 
 				// loop through the guardian list
 				foreach($guardian as $key => $value) {
+					
+					// process if the fullname is not empty
+					if(!empty($value["guardian_fullname"])) {
 
-					// confirm that the guardian information does not already exist
-					if(empty($this->pushQuery("id", "users_guardian", "user_id='{$value["guardian_id"]}' AND status='1'"))) {
-						// insert the new record
-						$stmt = $this->db->prepare("INSERT INTO users_guardian SET 
-							fullname = ?, contact = ?, email = ?, `relationship` = ?, 
-							`address` = ?, `user_id` = ?, `client_id` = ?
-						");
-						$stmt->execute([
-							$value["guardian_fullname"], $value["guardian_contact"], $value["guardian_email"], 
-							$value["guardian_relation"], $value["guardian_address"], $value["guardian_id"], $params->clientId
-						]);
-					}
-					// update the guardian record if the information already exist
-					else {
-						$stmt = $this->db->prepare("UPDATE users_guardian SET 
-							fullname = ?, contact = ?, email = ?, `relationship` = ?, `address` = ? 
-							WHERE `user_id` = ? AND `client_id` = ? LIMIT 1
-						");
-						$stmt->execute([
-							$value["guardian_fullname"], $value["guardian_contact"], $value["guardian_email"], 
-							$value["guardian_relation"], $value["guardian_address"], $value["guardian_id"], $params->clientId
-						]);
-					}
-					$guardian_ids[] = $value["guardian_id"];
+						// explode the first and lastnames
+						$expl = explode(" ", $value["guardian_fullname"]);
+						// use the first and second index as the names
+						$firstname = $expl[0];
+						$lastname = isset($expl[1]) ? $expl[1] : null;
+						$othername = isset($expl[2]) ? $expl[2] : null;
 
-					$this->db->query("UPDATE users SET guardian_id='".implode(",", $guardian_ids)."' WHERE item_id='{$params->user_id}' LIMIT 1");
+						// generate a new unique user id
+						$counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='parent'") + 1), $this->append_zeros);
+						$unique_id = $theClientData->client_preferences->labels->parent_label.$counter.date("Y");
+
+						// create a new random string
+						$guardian_id = random_string("alnum", 32);
+
+						// join the names as the fullname
+						$fullname = "{$firstname} {$othername} {$lastname}";
+
+						// confirm that the guardian information does not already exist
+						if(empty($this->pushQuery("id", "users", "item_id='{$value["guardian_id"]}' AND status='1' AND user_type='parent' LIMIT 1"))) {
+							// insert the new record
+							$stmt = $this->db->prepare("INSERT INTO users SET 
+								firstname = ?, lastname = ?, othername = ?, name = ?,
+								phone_number = ?, email = ?, `relationship` = ?, 
+								`address` = ?, `unique_id` = ?, `client_id` = ?, 
+								user_type = ?, item_id = ?
+							");
+							$stmt->execute([
+								$firstname, $lastname, $othername, $fullname, 
+								$value["guardian_contact"], $value["guardian_email"], 
+								$value["guardian_relation"], $value["guardian_address"], 
+								$unique_id, $params->clientId, 'parent', $guardian_id
+							]);
+						}
+						// update the guardian record if the information already exist
+						else {
+							$stmt = $this->db->prepare("UPDATE users SET 
+								firstname = ?, lastname = ?, othername = ?, name = ?,
+								phone_number = ?, email = ?, `relationship` = ?, `address` = ? 
+								WHERE `item_id` = ? AND `client_id` = ? AND user_type = ? LIMIT 1
+							");
+							$stmt->execute([
+								$firstname, $lastname, $othername, $fullname,$value["guardian_contact"], 
+								$value["guardian_email"], $value["guardian_relation"], $value["guardian_address"], 
+								$value["guardian_id"], $params->clientId, 'parent'
+							]);
+						}
+						$guardian_ids[] = $value["guardian_id"];
+					}
+				}
+				// update the user information if the guardian_ids is not empty
+				if(!empty($guardian_ids)) {
+					$this->db->query("UPDATE users SET guardian_id='".implode(",", $guardian_ids)."' WHERE item_id='{$params->user_id}' AND user_type='student' LIMIT 1");
 				}
 			}
 

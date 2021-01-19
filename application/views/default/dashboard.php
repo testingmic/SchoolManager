@@ -227,6 +227,11 @@ $response->html .= '</select>
                     <h4>Revenue Chart</h4>
                 </div>
                 <div class="card-body">
+                    <div class="form-content-loader" style="display: none; position: absolute">
+                        <div class="offline-content text-center">
+                            <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                        </div>
+                    </div>
                     <canvas id="chart-1"></canvas>
                 </div>
                 </div>
@@ -237,6 +242,11 @@ $response->html .= '</select>
                     <h4>Attendance Chart</h4>
                 </div>
                 <div class="card-body">
+                    <div class="form-content-loader" style="display: none; position: absolute">
+                        <div class="offline-content text-center">
+                            <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                        </div>
+                    </div>
                     <canvas id="myChart"></canvas>
                 </div>
                 </div>
@@ -248,49 +258,12 @@ $response->html .= '</select>
                 <div class="card-header">
                   <h4>Class Count</h4>
                 </div>
-                <div class="card-body">
-                  <div class="m-b-20">
-                    <div class="text-small float-right font-weight-bold text-muted">2,675</div>
-                    <div class="font-weight-bold">Google</div>
-                    <div class="progress" data-height="5" style="height: 5px;">
-                      <div class="progress-bar l-bg-purple" role="progressbar" data-width="80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div>
+                <div class="card-body slim-scroll" id="class_count_list" style="max-height:300px;height:300px;overflow-y:auto;">
+                    <div class="form-content-loader" style="display: flex; position: absolute">
+                        <div class="offline-content text-center">
+                            <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                        </div>
                     </div>
-                  </div>
-                  <div class="m-b-20">
-                    <div class="text-small float-right font-weight-bold text-muted">1,753</div>
-                    <div class="font-weight-bold">Facebook</div>
-                    <div class="progress" data-height="5" style="height: 5px;">
-                      <div class="progress-bar l-bg-green" role="progressbar" data-width="67%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 67%;"></div>
-                    </div>
-                  </div>
-                  <div class="m-b-20">
-                    <div class="text-small float-right font-weight-bold text-muted">1,254</div>
-                    <div class="font-weight-bold">Bing</div>
-                    <div class="progress" data-height="5" style="height: 5px;">
-                      <div class="progress-bar l-bg-orange" role="progressbar" data-width="58%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 58%;"></div>
-                    </div>
-                  </div>
-                  <div class="m-b-20">
-                    <div class="text-small float-right font-weight-bold text-muted">984</div>
-                    <div class="font-weight-bold">Yahoo</div>
-                    <div class="progress" data-height="5" style="height: 5px;">
-                      <div class="progress-bar l-bg-yellow" role="progressbar" data-width="36%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 36%;"></div>
-                    </div>
-                  </div>
-                  <div class="m-b-20">
-                    <div class="text-small float-right font-weight-bold text-muted">563</div>
-                    <div class="font-weight-bold">Instagram</div>
-                    <div class="progress" data-height="5" style="height: 5px;">
-                      <div class="progress-bar bg-cyan" role="progressbar" data-width="28%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 28%;"></div>
-                    </div>
-                  </div>
-                  <div class="m-b-20">
-                    <div class="text-small float-right font-weight-bold text-muted">345</div>
-                    <div class="font-weight-bold">Twitter</div>
-                    <div class="progress" data-height="5" style="height: 5px;">
-                      <div class="progress-bar bg-light-blue" role="progressbar" data-width="20%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 20%;"></div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>

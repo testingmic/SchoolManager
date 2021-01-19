@@ -84,10 +84,10 @@ class Records extends Myschoolgh {
                 "query" => "SELECT id FROM users WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' AND user_status='Active' LIMIT 1"
             ],
             "guardian" => [
-                "table" => "users_guardian",
-                "update" => "status='0'",
-                "where" => "user_id='{$record_id}'",
-                "query" => "SELECT id FROM users_guardian WHERE user_id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "table" => "users",
+                "update" => "status='0', deleted='1'",
+                "where" => "item_id='{$record_id}' AND user_type='parent'",
+                "query" => "SELECT id FROM users WHERE item_id='{$record_id}' AND client_id='{$userData->client_id}' AND user_type='parent' AND status ='1' LIMIT 1"
             ]
         ];
 
