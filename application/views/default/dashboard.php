@@ -26,9 +26,7 @@ $accessObject->userId = $loggedUserId;
 $accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 
-$hasDelete = $accessObject->hasAccess("delete", "student");
 $hasUpdate = $accessObject->hasAccess("update", "student");
-
 
 // filters
 $filters = [
@@ -39,6 +37,13 @@ $filters = [
             "value" => "Last Week"
         ]
     ],
+    "last_14days" => [
+        "title" => "Last 2 Weeks",
+        "alt" => [
+            "key" => "last_14days",
+            "value" => "Last 28 Days"
+        ]
+    ],
     "this_month" => [
         "title" => "This Month",
         "alt" => [
@@ -46,11 +51,25 @@ $filters = [
             "value" => "Last Month"
         ]
     ],
-    "this_quarter" => [
-        "title" => "This Quarter",
+    "last_30days" => [
+        "title" => "Last 30 Days",
         "alt" => [
-            "key" => "last_quarter",
-            "value" => "Last Quarter"
+            "key" => "last_30days",
+            "value" => "Previous 30 Days"
+        ]
+    ],
+    "last_month" => [
+        "title" => "Last Month",
+        "alt" => [
+            "key" => "last_month",
+            "value" => "Last 2 Months"
+        ]
+    ],
+    "last_3months" => [
+        "title" => "Last 3 Month",
+        "alt" => [
+            "key" => "last_month",
+            "value" => "Last 6 Months"
         ]
     ]
 ];
@@ -58,7 +77,7 @@ $filters = [
 $response = (object) [];
 $response->title = "Dashboard : {$appName}";
 $response->scripts = [
-    "assets/js/page/index.js"
+    "assets/js/analitics.js"
 ];
 
 // get the list of users
@@ -66,6 +85,7 @@ $student_param = (object) ["clientId" => $session->clientId,"user_type" => "stud
 
 $students = "";
 $viewStudents = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
+
 // get the list of students
 if($viewStudents) {
 
@@ -80,9 +100,9 @@ if($viewStudents) {
         if($hasUpdate) {
             $action .= "&nbsp;<a href='{$baseUrl}update-student/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
         }
-        if($hasDelete) {
-            $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
-        }
+        // if($hasDelete) {
+        //     // $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        // }
 
         $students .= "<tr data-row_id=\"{$each->user_id}\">";
         $students .= "<td>".($key+1)."</td>";
@@ -104,13 +124,13 @@ $response->html = '
                 <h1>Dashboard</h1>
             </div>
             <div>
-                <div class="form-group">
+                <!--<div class="form-group">
                     <select style="width:300px" class="selectpicker form-control" id="filter-dashboard" data-width="100%">';
                     foreach($filters as $key => $value) {
-                        $response->html .= "<option data-select_option='".json_encode($value["alt"])."' value='{$key}'>{$value["title"]}</option>";
+                        //$response->html .= "<option data-select_option='".json_encode($value["alt"])."' value='{$key}'>{$value["title"]}</option>";
                     }
 $response->html .= '</select>
-                </div>
+                </div>-->
             </div>
         </div>
         <div class="row">
@@ -120,7 +140,7 @@ $response->html .= '</select>
                     <div class="row">
                     <div class="col">
                         <h6 class="text-muted mb-0">Total Students</h6>
-                        <span class="font-weight-bold mb-0">0</span>
+                        <span data-count="total_students_count" class="font-weight-bold mb-0">0</span>
                     </div>
                     <div class="col-auto">
                         <div class="card-circle l-bg-orange text-white">
@@ -128,10 +148,6 @@ $response->html .= '</select>
                         </div>
                     </div>
                     </div>
-                    <p class="mt-3 mb-0 text-muted text-sm">
-                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
-                    <span class="text-nowrap">Since last month</span>
-                    </p>
                 </div>
                 </div>
             </div>
@@ -141,7 +157,7 @@ $response->html .= '</select>
                     <div class="row">
                     <div class="col">
                         <h6 class="text-muted mb-0">Teaching Stafff</h6>
-                        <span class="font-weight-bold mb-0">0</span>
+                        <span data-count="total_teachers_count" class="font-weight-bold mb-0">0</span>
                     </div>
                     <div class="col-auto">
                         <div class="card-circle l-bg-cyan text-white">
@@ -149,10 +165,6 @@ $response->html .= '</select>
                         </div>
                     </div>
                     </div>
-                    <p class="mt-3 mb-0 text-muted text-sm">
-                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
-                    <span class="text-nowrap">Since last month</span>
-                    </p>
                 </div>
                 </div>
             </div>
@@ -161,8 +173,8 @@ $response->html .= '</select>
                 <div class="card-body card-type-3">
                   <div class="row">
                     <div class="col">
-                      <h6 class="text-muted mb-0">Employees</h6>
-                      <span class="font-weight-bold mb-0">0</span>
+                      <h6 class="text-muted mb-0">Employees / Users</h6>
+                      <span data-count="total_employees_count" class="font-weight-bold mb-0">0</span>
                     </div>
                     <div class="col-auto">
                       <div class="card-circle l-bg-green text-white">
@@ -170,14 +182,27 @@ $response->html .= '</select>
                       </div>
                     </div>
                   </div>
-                  <p class="mt-3 mb-0 text-muted text-sm">
-                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
-                    <span class="text-nowrap">Since last month</span>
-                  </p>
                 </div>
               </div>
             </div>
             <div class="col-xl-3 col-lg-6">
+              <div class="card">
+                <div class="card-body card-type-3">
+                  <div class="row">
+                    <div class="col">
+                      <h6 class="text-muted mb-0">Parents</h6>
+                      <span data-count="total_parents_count" class="font-weight-bold mb-0">0</span>
+                    </div>
+                    <div class="col-auto">
+                      <div class="card-circle l-bg-yellow text-white">
+                        <i class="fas fa-user"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 hidden col-lg-6">
               <div class="card">
                 <div class="card-body card-type-3">
                   <div class="row">
@@ -191,10 +216,6 @@ $response->html .= '</select>
                       </div>
                     </div>
                   </div>
-                  <p class="mt-3 mb-0 text-muted text-sm">
-                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
-                    <span class="text-nowrap">Since last month</span>
-                  </p>
                 </div>
               </div>
             </div>
@@ -222,6 +243,59 @@ $response->html .= '</select>
             </div>
         </div>
         <div class="row">
+            <div class="col-lg-4 col-md-12 col-12 col-sm-12">
+              <div class="card">
+                <div class="card-header">
+                  <h4>Class Count</h4>
+                </div>
+                <div class="card-body">
+                  <div class="m-b-20">
+                    <div class="text-small float-right font-weight-bold text-muted">2,675</div>
+                    <div class="font-weight-bold">Google</div>
+                    <div class="progress" data-height="5" style="height: 5px;">
+                      <div class="progress-bar l-bg-purple" role="progressbar" data-width="80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div>
+                    </div>
+                  </div>
+                  <div class="m-b-20">
+                    <div class="text-small float-right font-weight-bold text-muted">1,753</div>
+                    <div class="font-weight-bold">Facebook</div>
+                    <div class="progress" data-height="5" style="height: 5px;">
+                      <div class="progress-bar l-bg-green" role="progressbar" data-width="67%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 67%;"></div>
+                    </div>
+                  </div>
+                  <div class="m-b-20">
+                    <div class="text-small float-right font-weight-bold text-muted">1,254</div>
+                    <div class="font-weight-bold">Bing</div>
+                    <div class="progress" data-height="5" style="height: 5px;">
+                      <div class="progress-bar l-bg-orange" role="progressbar" data-width="58%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 58%;"></div>
+                    </div>
+                  </div>
+                  <div class="m-b-20">
+                    <div class="text-small float-right font-weight-bold text-muted">984</div>
+                    <div class="font-weight-bold">Yahoo</div>
+                    <div class="progress" data-height="5" style="height: 5px;">
+                      <div class="progress-bar l-bg-yellow" role="progressbar" data-width="36%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 36%;"></div>
+                    </div>
+                  </div>
+                  <div class="m-b-20">
+                    <div class="text-small float-right font-weight-bold text-muted">563</div>
+                    <div class="font-weight-bold">Instagram</div>
+                    <div class="progress" data-height="5" style="height: 5px;">
+                      <div class="progress-bar bg-cyan" role="progressbar" data-width="28%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 28%;"></div>
+                    </div>
+                  </div>
+                  <div class="m-b-20">
+                    <div class="text-small float-right font-weight-bold text-muted">345</div>
+                    <div class="font-weight-bold">Twitter</div>
+                    <div class="progress" data-height="5" style="height: 5px;">
+                      <div class="progress-bar bg-light-blue" role="progressbar" data-width="20%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="width: 20%;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="row">
         '.($viewStudents ? '
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
@@ -241,7 +315,7 @@ $response->html .= '</select>
                                         <th>Gender</th>
                                         <th>Date of Birth</th>
                                         <th>Department</th>
-                                        <th width="10%">Action</th>
+                                        <th class="text-center" width="10%">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$students.'</tbody>

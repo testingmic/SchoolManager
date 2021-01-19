@@ -321,7 +321,7 @@ class Myschoolgh extends Models {
 		$period = new DatePeriod(
 		  new DateTime($startDate),
 		  new DateInterval('P1D'),
-		  new DateTime(date('Y-m-d',strtotime($endDate. '+1 days')))
+		  new DateTime(date('Y-m-d', strtotime($endDate. '+1 days')))
 		);
 
 		$days = array();
@@ -456,11 +456,15 @@ class Myschoolgh extends Models {
 	 * @param string $date This is the date range that has been parsed
 	 * @param string $prefix This is the SQL Query placeholder
 	 **/
-	final function dateRange($date, $prefix, $column = "date_created") {
-
+	final function dateRange($date, $prefix = "a", $column = "date_created") {
+		// return if empty
+		if(empty($date)) {
+			return;
+		}
+		
 		// process the string
 		$date = explode(':', $date);
-		$fPart = (isset($date[0]) && $this->validDate($date[0])) ? $date[0] : '2020-05-01';
+		$fPart = (isset($date[0]) && $this->validDate($date[0])) ? $date[0] : '2020-01-01';
 		$lPart = (isset($date[1]) && $this->validDate($date[1])) ? $date[1] : date('Y-m-d');
 
 		if(!empty($date[1])) {

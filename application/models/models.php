@@ -92,51 +92,36 @@ class Models {
         $this->all_user_roles_list = [
             "student" => "Student",
             "teacher" => "Teacher",
+            "parent" => "Parent",
             "employee" => "Employee",
             "accountant" => "Accountant",
             "admin" => "Admin"
         ];
 
-        // permissive users to be created by each access level
-        $this->the_user_roles_long = [
-            "student" => [
-                "_role_title" => "Student"
-            ],
-            "parent" => [
-                "_role_title" => "Parent"
-            ],
-            "employee" => [
-                "_role_title" => "Employee"
-            ],
-            "accountant" => [
-                "_role_title" => "Accountant"
-            ],
-            "teacher" => [
-                "_role_title" => "Teacher"
-            ],
-            "admin" => [
-                "_role_title" => "Admin User"
-            ]
-        ];
-
         $this->the_user_roles = [
             "student" => [
-                "_role_title" => "Student"
+                "_role_title" => "Student",
+                "report_key" => "students_report"
             ],
             "parent" => [
-                "_role_title" => "Parent"
+                "_role_title" => "Parent",
+                "report_key" => "parents_report"
             ],
             "employee" => [
-                "_role_title" => "Employee"
+                "_role_title" => "Employee",
+                "report_key" => "employees_report"
             ],
             "accountant" => [
-                "_role_title" => "Accountant"
+                "_role_title" => "Accountant",
+                "report_key" => "accountants_report"
             ],
             "teacher" => [
-                "_role_title" => "Teacher"
+                "_role_title" => "Teacher",
+                "report_key" => "teachers_report"
             ],
             "admin" => [
-                "_role_title" => "Admin User"
+                "_role_title" => "Admin User",
+                "report_key" => "admins_report"
             ]
         ];
 

@@ -25,7 +25,7 @@ class Analitics extends Myschoolgh {
             "invalid-date" => "Sorry! An invalid date was parsed for the start date.",
             "invalid-range" => "Sorry! An invalid date was parsed for the end date.",
             "exceeds-today" => "Sorry! The date date must not exceed today's date",
-            "exceeds-count" => "Sorry! The days between the two ranges must not exceed 90 days",
+            "exceeds-count" => "Sorry! The days between the two ranges must not exceed 366 days",
             "invalid-prevdate" => "Sorry! The start date must not exceed the end date.",
         ];
     }
@@ -91,41 +91,12 @@ class Analitics extends Myschoolgh {
 
         // confirm if the user pushed a query set
         $this->query_date_range = isset($params->label["stream_period"]) ? $this->stringToArray($params->label["stream_period"]) : ["current", "previous"];
-
-        /** Filter checks */
-        // append the summary if it is in the array list
-        if(in_array("summary_report", $params->stream)) {
-
-            // loop through the date ranges for the current and previous
-            foreach($this->date_range as $range_key => $range_value) {
-
-                // confirm that the period was in the request
-                if(in_array($range_key, $this->query_date_range)) {
-
-                    /** Load the information */
-                    $stmt = $this->db->prepare("
-                        SELECT 
-                            a.*
-                        FROM users a 
-                        WHERE a.item_id = ? LIMIT 1
-                    ");
-                    $stmt->execute([$params->userData->user_id]);
-
-                    $summary = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-                    // $this->final_report["summary_report"][$range_key]["period"] = $range_value;
-                    // $this->final_report["summary_report"][$range_key]["data"] = (array) $summary[0];
-                    
-                }
-
-            }
-
-        }
+        $this->user_status = isset($params->label["user_status"]) ? $params->label["user_status"] : "Active";
 
         // get the clients information if not parsed in the stream
-        if(in_array("students_report", $params->stream)) {
+        if(in_array("summary_report", $params->stream)) {
             // query the clients data
-            $this->final_report["students_report"] = $this->students_report($params);
+            $this->final_report["summary_report"] = $this->summary_report($params);
             // get the percentage difference between the current and previous
             // $this->array_percentage_diff($this->final_report);
         }
@@ -135,9 +106,183 @@ class Analitics extends Myschoolgh {
     }
 
     /**
+     * Generate Summary Counts Report
      * 
+     * Loop through the various user types and get the total counts and that of the current and previous values
+     * 
+     * @return Array
      */
-    public function students_report($params) {
+    public function summary_report($params) {
+        
+        global $usersClass;
+        $result = [];
+        $ranger = [];
+
+        foreach($this->the_user_roles as $role => $value) {
+            
+            /** Parameter */
+            $client_param = (Object) [
+                "userId" => $params->userId,
+                "user_type" => $role,
+                "user_status" => $this->user_status,
+                "reporting" => true,
+                "remove_user_data" => true,
+                "return_where_clause" => true,
+            ];
+            $where_clause = $usersClass->list($client_param);
+
+            // value_name
+            $value_count = "total_{$role}s_count";
+
+            $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause}");
+            $query->execute([$this->user_status]);
+            $result["users_record_count"]["count"][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
+
+            // loop through the date ranges for the current and previous
+            foreach($this->date_range as $range_key => $range_value) {
+                
+                // set the date range
+                $client_param->date_range = "{$range_value["start"]}:{$range_value["end"]}";
+
+                // set a where clause
+                $where_clause = $usersClass->list($client_param);
+
+                // run a query for the user count
+                $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause}");
+                $query->execute([$this->user_status]);
+
+                // append to the result array
+                $result["users_record_count"]["comparison"][$range_key][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
+            }
+
+        }
+
+        /**
+         * Processing the Class Students Count
+         * 
+         * Load the fees paid count by category and get the amounts paid per category
+         * Run a comparison between the current and previous record set
+         */
+        // get the fees categories
+        $class_list = $this->pushQuery("id, name", "classes", "status='1' AND client_id='{$params->clientId}'");
+
+        // load the fees records
+        foreach($class_list as $key => $value) {
+            
+            /** Parameter */
+            $client_param = (Object) [
+                "userId" => $params->userId,
+                "user_type" => "student",
+                "class_id" => $value->id,
+                "user_status" => $this->user_status,
+                "reporting" => true,
+                "remove_user_data" => true,
+                "return_where_clause" => true,
+            ];
+            $where_clause = $usersClass->list($client_param);
+
+            // value_name
+            $class_name = create_slug($value->name, "_");
+            $value_count = "{$class_name}_total_count";
+
+            $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause}");
+            $query->execute([$this->user_status]);
+            $result["students_class_record_count"]["count"][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
+
+            // loop through the date ranges for the current and previous
+            foreach($this->date_range as $range_key => $range_value) {
+                
+                // set the date range
+                $client_param->date_range = "{$range_value["start"]}:{$range_value["end"]}";
+
+                // set a where clause
+                $where_clause = $usersClass->list($client_param);
+
+                // run a query for the user count
+                $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause}");
+                $query->execute([$this->user_status]);
+
+                // append to the result array
+                $result["students_class_record_count"]["comparison"][$range_key][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
+            }
+
+        }
+        
+        /**
+         * Processing the Request for Fees
+         * 
+         * Load the fees paid count by category and get the amounts paid per category
+         * Run a comparison between the current and previous record set
+         */
+        // create a new object
+        $feesClass = load_class("fees", "controllers");
+
+        // get the fees categories
+        $fees_category_list = $this->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$params->clientId}'");
+
+        // load the fees records
+        foreach($fees_category_list as $key => $value) {
+            
+            /** Parameter */
+            $fees_param = (Object) [
+                "limit" => 100000,
+                "userId" => $params->userId,
+                "userData" => $params->userData,
+                "category_id" => $value->id,
+                "return_where_clause" => true
+            ];
+            $where_clause = $feesClass->list($fees_param);
+
+            // value_name
+            $raw_name = create_slug($value->name, "_");
+            $amount_paid = $raw_name;
+            $value_count = "{$raw_name}_count";
+
+            $query = $this->db->prepare("SELECT 
+                    COUNT(*) AS {$value_count},
+                    SUM(amount) AS {$amount_paid}
+                FROM fees_collection a WHERE {$where_clause}
+            ");
+            $query->execute([$this->user_status]);
+            $q_result = $query->fetch(PDO::FETCH_OBJ);
+            
+            // append the result values
+            $result["fees_record_count"]["count"][$value_count] = $q_result->{$value_count} ?? 0;
+            $result["fees_record_count"]["amount"][$amount_paid] = $q_result->{$amount_paid} ?? 0;
+            
+            // loop through the date ranges for the current and previous
+            foreach($this->date_range as $range_key => $range_value) {
+                  
+                // set the date range
+                $fees_param->date_range = "{$range_value["start"]}:{$range_value["end"]}";
+                
+                // set a where clause
+                $_where_clause = $feesClass->list($fees_param);
+
+                // run a query for the user count
+                $_query = $this->db->prepare("SELECT 
+                        COUNT(*) AS {$value_count}, 
+                        SUM(amount) AS {$amount_paid}
+                    FROM fees_collection a WHERE {$_where_clause}
+                ");
+                $_query->execute([$this->user_status]);
+                $_q_result = $_query->fetch(PDO::FETCH_OBJ);
+                
+                // append to the result array
+                $result["fees_record_count"]["comparison"]["count"][$range_key][$value_count] = $_q_result->{$value_count} ?? 0;
+                $result["fees_record_count"]["comparison"]["amount"][$range_key][$amount_paid] = $_q_result->{$amount_paid} ?? 0;
+            }
+
+        }
+        
+
+        return $result;
+    }
+
+    /**
+     * Generate Students Report
+     */
+    public function _students_report($params) {
         
         try {
 
@@ -157,14 +302,12 @@ class Analitics extends Myschoolgh {
                         "date_range" => "{$range_value["start"]}:{$range_value["end"]}",
                         "userId" => $params->userId,
                         "userData" => $params->userData,
-                        "user_type" => "student,teacher,employee",
+                        "user_type" => "student",
                         "limit" => 200000,
                         "exempt_admin_users" => true,
                         "reporting" => true,
                         "minified" => "reporting_list",
-                        "remote" => true,
-                        "addition_query" => ", (SELECT COUNT(*) FROM users_policy_claims b WHERE (b.user_id = a.item_id) OR (b.created_by = a.item_id)) AS claims_count,
-					    (SELECT COUNT(*) FROM users b WHERE (b.created_by = a.item_id) AND a.deleted='0') AS clients_count"
+                        "remote" => true
                     ];
 
                     // requests timelines
@@ -301,12 +444,17 @@ class Analitics extends Myschoolgh {
             return "invalid-prevdate";
         }
 
+        /** Confirm valid dates */
+        if(!preg_match("/^[0-9-]+$/", $explode[0]) || !preg_match("/^[0-9-]+$/", $explode[1])) {
+            return "invalid-range";
+        }
+
         /** Check the days difference */
         $days_list = $this->listDays($explode[0], $explode[1]);
         $count = count($days_list);
 
         /** ensure that the days count does not exceed 90 days */
-        if($count > 90) {
+        if($count > 366) {
             return "exceeds-count";
         }
 

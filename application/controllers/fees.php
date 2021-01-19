@@ -52,7 +52,7 @@ class Fees extends Myschoolgh {
         $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
         $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
 
-        $filters = "";
+        $filters = "1";
 		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : "";
         $filters .= isset($params->department_id) && !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : "";
         $filters .= !empty($student_id) ? " AND a.student_id IN ('{$student_id}')" : "";
@@ -62,6 +62,13 @@ class Fees extends Myschoolgh {
         $filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
         $filters .= isset($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";
+        $filters .= (isset($params->date_range)) ? $this->dateRange($params->date_range, "a", "recorded_date") : null;
+
+        // if the return_where_clause was parsed
+        // then return the filters that have been pushed
+        if(isset($params->return_where_clause)) {
+            return $filters;
+        }
 
 		try {
 
@@ -73,7 +80,7 @@ class Fees extends Myschoolgh {
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.phone_number,'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info
                 FROM fees_collection a
-				WHERE a.client_id = ? {$filters} ORDER BY a.id DESC LIMIT {$params->limit}
+				WHERE {$filters} AND a.client_id = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
 			$stmt->execute([$params->clientId]);
 

@@ -51,20 +51,28 @@ class Users extends Myschoolgh {
 		$params->query .= (isset($params->user_status) && !empty($params->user_status)) ? " AND a.user_status ='{$params->user_status}'" : " AND a.user_status ='Active'";
 
 		// if the field is null (dont perform all these checks if minified was parsed)
-		if(!isset($params->minified)) {
-			$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-			$params->query .= (isset($params->email)) ? " AND a.email='{$params->email}'" : null;
-			$params->query .= (isset($params->or_clause) && !empty($params->or_clause)) ? $params->or_clause : null;
-			$params->query .= (isset($params->date_of_birth) && !empty($params->date_of_birth)) ? " AND a.date_of_birth='{$params->date_of_birth}'" : null;
-			$params->query .= (isset($params->created_by) && !empty($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
-			$params->query .= (isset($params->academic_year) && !empty($params->academic_year)) ? " AND a.academic_year='{$params->academic_year}'" : null;
-			$params->query .= (isset($params->academic_term) && !empty($params->academic_term)) ? " AND a.academic_term='{$params->academic_term}'" : null;
-			$params->query .= (isset($params->firstname) && !empty($params->firstname)) ? " AND a.firstname LIKE '%{$params->firstname}%'" : null;
-			$params->query .= (isset($params->lastname) && !empty($params->lastname)) ? " AND a.lastname LIKE '%{$params->lastname}%'" : null;
-			$params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department='{$params->department_id}'" : null;
-			$params->query .= (isset($params->section_id) && !empty($params->section_id)) ? " AND a.section='{$params->section_id}'" : null;
-			$params->query .= (isset($params->username)) ? " AND a.username='{$params->username}'" : null;
-			$params->query .= (isset($params->gender) && !empty($params->gender)) ? " AND a.gender='{$params->gender}'" : null;
+		if(!isset($params->minified) || (isset($params->minified) && isset($params->reporting))) {
+
+			// run this section and leave the rest if reporting was parsed
+			if(isset($params->reporting)) {
+				$params->query .= (isset($params->or_clause) && !empty($params->or_clause)) ? $params->or_clause : null;
+				$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
+				$params->query .= (isset($params->date_range)) ? $this->dateRange($params->date_range) : null;
+			} else {
+				$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+				$params->query .= (isset($params->email)) ? " AND a.email='{$params->email}'" : null;
+				$params->query .= (isset($params->or_clause) && !empty($params->or_clause)) ? $params->or_clause : null;
+				$params->query .= (isset($params->date_of_birth) && !empty($params->date_of_birth)) ? " AND a.date_of_birth='{$params->date_of_birth}'" : null;
+				$params->query .= (isset($params->created_by) && !empty($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
+				$params->query .= (isset($params->academic_year) && !empty($params->academic_year)) ? " AND a.academic_year='{$params->academic_year}'" : null;
+				$params->query .= (isset($params->academic_term) && !empty($params->academic_term)) ? " AND a.academic_term='{$params->academic_term}'" : null;
+				$params->query .= (isset($params->firstname) && !empty($params->firstname)) ? " AND a.firstname LIKE '%{$params->firstname}%'" : null;
+				$params->query .= (isset($params->lastname) && !empty($params->lastname)) ? " AND a.lastname LIKE '%{$params->lastname}%'" : null;
+				$params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department='{$params->department_id}'" : null;
+				$params->query .= (isset($params->section_id) && !empty($params->section_id)) ? " AND a.section='{$params->section_id}'" : null;
+				$params->query .= (isset($params->username)) ? " AND a.username='{$params->username}'" : null;
+				$params->query .= (isset($params->gender) && !empty($params->gender)) ? " AND a.gender='{$params->gender}'" : null;
+			}
 		}
 		$params->query .= isset($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
 
@@ -895,32 +903,47 @@ class Users extends Myschoolgh {
 
 			// insert the user guardian information
 			if(!empty($guardian)) {
+				// init the guardian id
 				$guardian_ids = [];
-				foreach($guardian as $key => $value) {
-					// explode the first and lastnames
-					$expl = explode(" ", $value["guardian_fullname"]);
-					// use the first and second index as the names
-					$firstname = $expl[0];
-					$lastname = isset($expl[1]) ? $expl[1] : null;
-					$othername = isset($expl[2]) ? $expl[2] : null;
 
-					// join the names as the fullname
-					$fullname = "{$firstname} {$othername} {$lastname}";
+				// loop through the guardian array list
+				foreach($guardian as $key => $value) {
+
+					// process if the fullname is not empty
+					if(!empty($value["guardian_fullname"])) {
+
+						// explode the first and lastnames
+						$expl = explode(" ", $value["guardian_fullname"]);
+						// use the first and second index as the names
+						$firstname = $expl[0];
+						$lastname = isset($expl[1]) ? $expl[1] : null;
+						$othername = isset($expl[2]) ? $expl[2] : null;
+
+						// create a new random string
+						$guardian_id = random_string("alnum", 32);
+
+						// join the names as the fullname
+						$fullname = "{$firstname} {$othername} {$lastname}";
+						
+						// insert the name of the guardian
+						$stmt = $this->db->prepare("INSERT INTO users SET 
+							firstname = ?, lastname = ?, othername = ?, name = ?,
+							phone_number = ?, `email` = ?, `relationship` = ?, user_type = ?,
+							`address` = ?, `unique_id` = ?, `client_id` = ?, item_id = ?
+						");
+						$stmt->execute([
+							$firstname, $lastname, $othername, $fullname, $value["guardian_contact"], 
+							$value["guardian_email"], $value["guardian_relation"], "parent", 
+							$value["guardian_address"], $params->unique_id, $params->clientId, $guardian_id 
+						]);
+						$guardian_ids[] = $params->unique_id;
+					}
 					
-					// insert the name of the guardian
-					$stmt = $this->db->prepare("INSERT INTO users SET 
-						firstname = ?, lastname = ?, othername = ?, name = ?,
-						phone_number = ?, `email` = ?, `relationship` = ?, 
-						`address` = ?, `user_id` = ?, `client_id` = ?
-					");
-					$stmt->execute([
-						$firstname, $lastname, $othername, $fullname, $value["guardian_contact"], 
-						$value["guardian_email"], $value["guardian_relation"], $value["guardian_address"], 
-						$params->unique_id, $params->clientId
-					]);
-					$guardian_ids[] = $params->unique_id;
 				}
-				$this->db->query("UPDATE users SET guardian_id='".implode(",", $guardian_ids)."' WHERE item_id='{$params->user_id}' LIMIT 1");
+				// update the user information if the guardian_ids is not empty
+				if(!empty($guardian_ids)) {
+					$this->db->query("UPDATE users SET guardian_id='".implode(",", $guardian_ids)."' WHERE item_id='{$params->user_id}' LIMIT 1");
+				}
 			}
 			
 			// if the email address was parsed
