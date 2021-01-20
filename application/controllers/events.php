@@ -37,6 +37,7 @@ class Events extends Myschoolgh {
         $params->query .= (isset($params->holiday) && !empty($params->holiday)) ? " AND a.is_holiday='{$params->holiday}'" : "";
         $params->query .= (isset($params->event_date) && !empty($params->holiday)) ? " AND a.start_date='{$params->event_date}'" : null;
         $params->query .= (isset($params->event_id)) ? " AND a.item_id='{$params->event_id}'" : null;
+        $params->query .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "start_date") : null;
 
         try {
 
@@ -398,22 +399,36 @@ class Events extends Myschoolgh {
         // init
         $birthday_list = [];
 
+        // minified description
+        $minified = (bool) isset($data->mini_description);
+        $do_no_encode = (bool) isset($data->do_no_encode);
+
         // show birthday information if the user type is a teacher or admin
         if(in_array($data->the_user_type, ["admin", "accountant"])) {
+
             // load user birthdays
             $birth_list = $this->pushQuery(
-                "name, phone_number, email, image, item_id, unique_id, DAY(date_of_birth) AS the_day, MONTH(date_of_birth) AS the_month", 
-                "users", "client_id = '{$data->client_id}' AND user_status='Active' AND status='1' AND deleted='0' LIMIT 200"
+                "name, phone_number, email, image, item_id, unique_id, user_type,
+                    DAY(date_of_birth) AS the_day, MONTH(date_of_birth) AS the_month", 
+                "users", "
+                (
+                    DATE_ADD(date_of_birth,
+                        INTERVAL YEAR(CURDATE()) - YEAR(date_of_birth)
+                            + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(date_of_birth), 1, 0)
+                        YEAR)
+                    BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 70 DAY)
+                ) AND client_id = '{$data->client_id}' AND user_status='Active' AND status='1' AND deleted='0' ORDER BY date_of_birth ASC LIMIT 200"
             );
             
             // loop through the users list
             foreach($birth_list as $user) {
+
+                // configure the date to load
                 $dob = date("Y")."-".$this->append_zeros($user->the_month,2)."-".$this->append_zeros($user->the_day,2);
-                $birthday_list[] = [
-                    "title" => "{$user->name}",
-                    "start" => "{$dob}T06:00:00",
-                    "end" => "{$dob}T18:00:00",
-                    "description" => "
+
+                // run this section if the description is not minified
+                if(!$minified) {
+                    $description = "
                         <div class='row'>
                             <div class='col-md-10'>
                                 <div>
@@ -432,7 +447,17 @@ class Events extends Myschoolgh {
                         </div>
                         <div class='modal-footer p-0'>
                             <button type='button' class='btn btn-outline-secondary' data-dismiss='modal'>Close</button>
-                        </div>"
+                        </div>";
+                } else {
+                    $description = $user;
+                }
+
+                // append to the array list
+                $birthday_list[] = [
+                    "title" => $user->name,
+                    "start" => "{$dob}T06:00:00",
+                    "end" => "{$dob}T18:00:00",
+                    "description" => $description
                 ];
             }
         }
@@ -441,16 +466,16 @@ class Events extends Myschoolgh {
         $result = (object) [];
 
         // append the birthday_list 
-        $result->birthday_list = json_encode($birthday_list);
+        $result->birthday_list =  !$do_no_encode ? json_encode($birthday_list) : $birthday_list;
 
         // append the holidays list
         $array_list = [
             "holidays_list" => ["holiday" => "on"], 
             "calendar_events_list" => ["holiday" => "not"]
-        ];
+        ];  
 
         // init the parameters for the events (holidays and other events)
-        $params = (object) ["userData" => $data, "clientId" => $data->client_id, "the_user_type" => $data->the_user_type];
+        $params = (object) ["userData" => $data, "date_range" => $data->date_range ?? null, "clientId" => $data->client_id, "the_user_type" => $data->the_user_type];
 
         // loop through the query to use
         foreach($array_list as $key => $each) {
@@ -465,35 +490,40 @@ class Events extends Myschoolgh {
 
             // loop through the holidays list
             foreach($hol_list as $ekey => $event) {
-
-                // set the description
-                $description = "
-                <div class='row'>
-                    <div class='col-md-12'>
-                        ".(!empty($event->event_image) && file_exists($event->event_image) ? "<div><img width='100%' src='{$this->baseUrl}{$event->event_image}'></div>" : "")."
-                        <div>
-                            $event->description
+                
+                // run this section if the description is not minified
+                if(!$minified) {
+                    // set the description
+                    $description = "
+                    <div class='row'>
+                        <div class='col-md-12'>
+                            ".(!empty($event->event_image) && file_exists($event->event_image) ? "<div><img width='100%' src='{$this->baseUrl}{$event->event_image}'></div>" : "")."
+                            <div>
+                                $event->description
+                            </div>
+                            <div class='mt-3'>
+                                ".(!empty($event->start_date) ? "<p class='p-0 m-0'><i class='fa fa-calendar'></i> <strong>Start Date:</strong> ".date("jS F Y", strtotime($event->start_date))."</p>" : "")."
+                                ".(!empty($event->end_date) ? "<p class='p-0 m-0'><i class='fa fa-calendar-check'></i> <strong>End Date:</strong> ".date("jS F Y", strtotime($event->end_date))."</p>" : "")."
+                                ".($isAdmin ? "<p class='p-0 m-0'><i class='fa fa-users'></i>  <strong>Audience:</strong> ".strtoupper($event->audience)."</p>" : "")."
+                                ".(!empty($event->type_name) ? "<p class='p-0 m-0'><i class='fa fa-home'></i> <strong>Type:</strong> ".$event->type_name."</p>" : "")."
+                                ".(!empty($event->state) ? "<p class='p-0 m-0'><i class='fa fa-air-freshener'></i> <strong>Status:</strong> ".$this->the_status_label($event->state)."</p>" : "")."
+                            </div>    
                         </div>
-                        <div class='mt-3'>
-                            ".(!empty($event->start_date) ? "<p class='p-0 m-0'><i class='fa fa-calendar'></i> <strong>Start Date:</strong> ".date("jS F Y", strtotime($event->start_date))."</p>" : "")."
-                            ".(!empty($event->end_date) ? "<p class='p-0 m-0'><i class='fa fa-calendar-check'></i> <strong>End Date:</strong> ".date("jS F Y", strtotime($event->end_date))."</p>" : "")."
-                            ".($isAdmin ? "<p class='p-0 m-0'><i class='fa fa-users'></i>  <strong>Audience:</strong> ".strtoupper($event->audience)."</p>" : "")."
-                            ".(!empty($event->type_name) ? "<p class='p-0 m-0'><i class='fa fa-home'></i> <strong>Type:</strong> ".$event->type_name."</p>" : "")."
-                            ".(!empty($event->state) ? "<p class='p-0 m-0'><i class='fa fa-air-freshener'></i> <strong>Status:</strong> ".$this->the_status_label($event->state)."</p>" : "")."
-                        </div>    
                     </div>
-                </div>
-                <div class='modal-footer p-0'>
-                    <button type='button' class='btn btn-sm btn-outline-secondary' data-dismiss='modal'>Close</button>
-                    ".($isAdmin ? "
-                        <a href='javascript:void(0)' onclick='return load_Event(\"{$this->baseUrl}update-event/{$event->item_id}\");' class='btn anchor btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</a>
-                        <a href='#' onclick='return delete_record(\"{$event->item_id}\", \"event\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>
-                    ": "")."
-                </div>";
+                    <div class='modal-footer p-0'>
+                        <button type='button' class='btn btn-sm btn-outline-secondary' data-dismiss='modal'>Close</button>
+                        ".($isAdmin ? "
+                            <a href='javascript:void(0)' onclick='return load_Event(\"{$this->baseUrl}update-event/{$event->item_id}\");' class='btn anchor btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</a>
+                            <a href='#' onclick='return delete_record(\"{$event->item_id}\", \"event\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>
+                        ": "")."
+                    </div>";
+                } else {
+                    $description = $event->description;
+                }
 
                 // append the array list
                 $query_array[$ekey] = [
-                    "title" => "{$event->title}",
+                    "title" => $event->title,
                     "start" => "{$event->start_date}T06:00:00",
                     "end" => "{$event->end_date}T18:00:00",
                     "description" => $description,
@@ -501,13 +531,25 @@ class Events extends Myschoolgh {
                     "borderColor" => "{$event->color_code}",
                 ];
 
+                // append to the array return list if the minified is parsed
+                if($minified) {
+                    $query_array[$ekey]["event_group"] = $key;
+                    $query_array[$ekey]["end_date"] = $event->end_date;
+                    $query_array[$ekey]["start_date"] = $event->start_date;
+                    $query_array[$ekey]["item_id"] = $event->item_id;
+                    $query_array[$ekey]["audience"] = $event->audience;
+                    $query_array[$ekey]["event_type"] = $event->type_name;
+                    $query_array[$ekey]["event_image"] = (!empty($event->event_image) && file_exists($event->event_image)) ? $event->event_image : null;
+                }
+
+                // if the user is an admin
                 if($isAdmin) {
                     $query_array[$ekey]["is_editable"] = true;
                     $query_array[$ekey]["item_id"] = $event->item_id; 
                 }
             }
 
-            $result->{$key} = json_encode($query_array);
+            $result->{$key} = !$do_no_encode ? json_encode($query_array) : $query_array;
 
         }
 

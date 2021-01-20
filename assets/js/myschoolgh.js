@@ -271,3 +271,36 @@ var delete_record = (record_id, resource) => {
         }
     });
 }
+
+var view_Event_Details = (event_group, event_id) => {
+        $(`div[id="viewOnlyModal"] div[class="modal-body"], div[id="viewOnlyModal"] h5[class~="modal-title"]`).html("");
+        if ($.array_stream["events_array_list"][event_group] !== undefined) {
+            let event = $.array_stream["events_array_list"][event_group],
+                the_key = "null";
+            $.each(event, function(key, e) {
+                if(e.item_id === event_id) {
+                    the_key = key;
+                    return;
+                }
+            });
+            if (the_key !== "null") {
+                let event_info = event[the_key];
+                $(`div[id="viewOnlyModal"] div[class~="modal-dialog-top"]`).removeClass("modal-lg").addClass("modal-md");
+                $(`div[id="viewOnlyModal"] h5[class~="modal-title"]`).html(event_info.title);
+                $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html(`
+                <div class="row">
+                    <div class="col-md-12">
+                        ${event_info.event_image ? `<div><img width="100%" src="${baseUrl}${event_info.event_image}"></div>` : ""}
+                        <div>${event_info.description}</div>
+                        <div class="mt-3">
+                            <p class="p-0 m-0"><i class="fa fa-calendar"></i> <strong>Start Date:</strong> ${event_info.start_date}</p>
+                            <p class="p-0 m-0"><i class="fa fa-calendar-check"></i> <strong>End Date:</strong> ${event_info.end_date}</p>
+                            <p class="p-0 m-0"><i class="fa fa-users"></i>  <strong>Audience:</strong> ${event_info.audience.toUpperCase()}</p>
+                            <p class="p-0 m-0"><i class="fa fa-home"></i> <strong>Type:</strong> ${event_info.event_type}</p>
+                        </div>    
+                    </div>
+                </div>`);
+            $(`div[id="viewOnlyModal"]`).modal("show");
+        }
+    }
+}

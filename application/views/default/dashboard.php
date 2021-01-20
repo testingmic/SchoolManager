@@ -18,15 +18,14 @@ $appName = config_item("site_name");
 
 // confirm that user id has been parsed
 global $SITEURL, $usersClass;
+$clientId = $session->clientId;
 $loggedUserId = $session->userId;
 $cur_user_id = (confirm_url_id(1)) ? xss_clean($SITEURL[1]) : $loggedUserId;
 
 // get the user data
+$accessObject->clientId = $clientId;
 $accessObject->userId = $loggedUserId;
-$accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
-
-$hasUpdate = $accessObject->hasAccess("update", "student");
 
 // filters
 $filters = [
@@ -80,41 +79,82 @@ $response->scripts = [
     "assets/js/analitics.js"
 ];
 
-// get the list of users
-$student_param = (object) ["clientId" => $session->clientId,"user_type" => "student"];
+// create a new events object
+$eventClass = load_class("events", "controllers");
 
-$students = "";
-$viewStudents = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
+// set the parameters
+$userData = $defaultUser;
+$userData->do_no_encode = true;
+$userData->client_id = $clientId;
+$userData->mini_description = true;
+$userData->the_user_type = $defaultUser->user_type;
+$userData->date_range = date("Y-m-d", strtotime("-20 days")).':'.date("Y-m-t", strtotime("+20 days"));
 
-// get the list of students
-if($viewStudents) {
+// load the events list
+$events_list = $eventClass->events_list($userData);
 
-    // get the list of students
-    $student_list = load_class("users", "controllers")->list($student_param);
+$upcoming_events_list = "";
+$upcoming_birthday_list = "";
 
-    // loop through the students list
-    foreach($student_list["data"] as $key => $each) {
-        
-        $action = "<a href='{$baseUrl}update-student/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+// create an init array to use
+$event_array = ["holidays_list", "calendar_events_list"];
 
-        if($hasUpdate) {
-            $action .= "&nbsp;<a href='{$baseUrl}update-student/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-        }
-        // if($hasDelete) {
-        //     // $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
-        // }
+// merge the two array sets
+$events_array_list = array_merge($events_list->holidays_list, $events_list->calendar_events_list);
 
-        $students .= "<tr data-row_id=\"{$each->user_id}\">";
-        $students .= "<td>".($key+1)."</td>";
-        $students .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
-        $students .= "<td>{$each->class_name}</td>";
-        $students .= "<td>{$each->gender}</td>";
-        $students .= "<td>{$each->date_of_birth}</td>";
-        $students .= "<td>{$each->department_name}</td>";
-        $students .= "<td class='text-center'>{$action}</td>";
-        $students .= "</tr>";
+// sort the array
+function sort_date($a, $b) {
+    return strtotime($a["start"]) - strtotime($b["start"]);
+}
+
+// order the array set using the date of the event
+usort($events_array_list, "sort_date");
+$reversed_array_list = array_reverse($events_array_list);
+
+// loop through the array list
+foreach($reversed_array_list as $event) {
+    $upcoming_events_list .= "
+        <li class='media'>
+            <div class='media-body' style='flex: 2;'>
+                <div class='media-title'>
+                    {$event["title"]} ".($event["event_group"] === "holidays_list" ? "<span class='badge p-1 badge-success'>Holiday</span>" : "")."
+                </div>
+                <div class='text-job text-muted'>{$event["event_type"]}</div>
+            </div>
+            <div class='media-progressbar'>
+                <div class='progress-text'>".date("jS M Y", strtotime($event["start"]))."</div>
+            </div>
+            <div>
+                <span onclick='return view_Event_Details(\"{$event["event_group"]}\", \"{$event["item_id"]}\")' class='badge cursor badge-primary'>Detail</span>
+            </div>
+        </li>";
+}
+
+// if the birthday array is not empty
+if(!empty($events_list->birthday_list)) {
+    // loop through the array list
+    foreach($events_list->birthday_list as $event) {
+        // format the date of birth
+        $clean_date = date("Y").'-'.$event["description"]->the_month.'-'.$event["description"]->the_day;
+
+        $upcoming_birthday_list .= "
+            <li class='media'>
+                <img title='Click to view student details' class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$event["description"]->image}\">
+                <div class='media-body' style='flex: 2;'>
+                    <div class='media-title'>
+                        {$event["description"]->name}<br>
+                    </div>
+                    
+                </div>
+                <div class='media-progressbar'>
+                    <div class='progress-text'>".date("l, jS M Y", strtotime($clean_date))."</div>
+                </div>
+            </li>";
     }
 }
+
+// append the events list as part of the results
+$response->array_stream["events_array_list"] = $events_list;
 
 // set the response dataset
 $response->html = '
@@ -299,39 +339,33 @@ $response->html .= '</select>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-        '.($viewStudents ? '
-            <div class="col-12 col-sm-12 col-lg-12">
+            <div class="col-lg-5 col-md-6 col-12 col-sm-12">
                 <div class="card">
-                    <div class="mt-3 pr-3 pl-3">
-                        <div class="d-flex justify-content-between">
-                            <div><h4>Students List</h4></div>
-                        </div>
+                    <div class="card-header pl-2">
+                        <h4>Upcoming Events</h4>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive table-student_staff_list">
-                            <table class="table table-striped datatable">
-                                <thead>
-                                    <tr>
-                                        <th width="5%" class="text-center">#</th>
-                                        <th>Student Name</th>
-                                        <th>Class</th>
-                                        <th>Gender</th>
-                                        <th>Date of Birth</th>
-                                        <th>Department</th>
-                                        <th class="text-center" width="10%">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>'.$students.'</tbody>
-                            </table>
+                    <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:285px;height:285px;overflow-y:auto;">
+                        <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
+                            '.$upcoming_events_list.'
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            '.(!empty($upcoming_birthday_list) ? 
+                '<div class="col-lg-4 col-md-6 col-12 col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Upcoming Birthdays</h4>
+                        </div>
+                        <div class="card-body trix-slim-scroll" style="max-height:285px;height:285px;overflow-y:auto;">
+                            <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
+                                '.$upcoming_birthday_list.'
+                            </ul>
                         </div>
                     </div>
                 </div>' : ''
             ).'
-            </div>
         </div>
-
     </section>';
 
 // print out the response

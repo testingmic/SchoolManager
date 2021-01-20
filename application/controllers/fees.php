@@ -62,7 +62,7 @@ class Fees extends Myschoolgh {
         $filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
         $filters .= isset($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";
-        $filters .= (isset($params->date_range)) ? $this->dateRange($params->date_range, "a", "recorded_date") : null;
+        $filters .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "recorded_date") : null;
 
         // if the return_where_clause was parsed
         // then return the filters that have been pushed

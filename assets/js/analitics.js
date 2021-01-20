@@ -63,9 +63,7 @@ var summary_Reporting = (summary, date_range) => {
             previous_amount += parseInt(e.value);
             currentValues.push(parseInt(summary.fees_record_count.comparison.amount.current[i].value));
         });
-        console.log(chartKeys);
-        console.log(currentValues);
-        console.log(previousValues);
+
         $(`span[data-count="total_revenue_received"]`).html(format_currency(total_revenue));
         $(`span[data-count="previous_amount_received"]`).html(format_currency(previous_amount));
         $(`span[data-count="total_fees_received"]`).html(format_currency(fees.amount.tuition_fees));

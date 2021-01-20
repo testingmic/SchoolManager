@@ -82,9 +82,6 @@ var view_AssignmentQuestion = (question_id) => {
             let questions = $.array_stream["questions_array"];
             if (questions[question_id] !== undefined) {
                 let question = questions[question_id];
-
-                console.log(question);
-
                 $(`div[id="viewOnlyModal"]`).modal("show");
                 $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html(`
                 <div class="row">
