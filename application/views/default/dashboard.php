@@ -13,7 +13,7 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 // initial variables
-global $accessObject, $defaultUser, $isAdminAccountant, $isTutorStudent, $isParent;
+global $accessObject, $defaultUser, $isAdminAccountant, $isTutorStudent, $isParent, $isStudent;
 $appName = config_item("site_name");
 
 // confirm that user id has been parsed
@@ -314,10 +314,14 @@ if($isWardTutorParent) {
             </div>';
         }
     } else {
-        
+
         // load the class timetable for student / parent & The lessons if a teacher is logged in
-        $timetable = $timetableClass->class_timetable($defaultUser->class_guid, $clientId, "today", 90);    
-        
+        if($isStudent) {
+            $timetable = $timetableClass->class_timetable($defaultUser->class_guid, $clientId, "today", 90);    
+        } else {
+            $timetable = $timetableClass->teacher_timetable($defaultUser->course_ids, $clientId);
+        }
+
         // assign the assignments list
         $assignment_list = '
         <div class="col-lg-12 col-md-12 col-12 col-sm-12">
@@ -849,10 +853,12 @@ $response->html = '
                 <div class="col-lg-12 col-sm-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Today\'s Timetable</h4>
+                            <h4>'.($isStudent ? "Today\'s Timetable": "Today's Lessons to Teach").'</h4>
                         </div>
                         <div class="card-body">
-                            '.$timetable.'
+                            <div class="card-body pt-2 trix-slim-scroll table-responsive">
+                                '.$timetable.'
+                            </div>
                         </div>
                     </div>
                 </div>'

@@ -2,16 +2,9 @@
 
 class Timetable extends Myschoolgh {
 
-    private $color_set;
-
     public function __construct()
     {
         parent::__construct();
-
-        // set the colors to use for the loading of pages
-        $this->color_set = ["#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
-                    "#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
-                    "#007bff", "#6c757d", "#28a745", "#17a2b8", "#ffc107", "#dc3545"];
     }
     
     /**
@@ -468,7 +461,7 @@ class Timetable extends Myschoolgh {
         
         // run a query for the teacher courses taught
         $stmt = $this->db->prepare("SELECT ts.*, c.name AS course_name, r.name AS room_name,
-                    cl.name AS class_name, t.disabled_inputs, t.name AS timetable_name, ts.course_id,
+                    cl.name AS class_name, t.disabled_inputs, t.name AS timetable_name, 
                     t.slots, t.days, t.duration, t.start_time, t.allow_conflicts, c.course_code
                 FROM timetables_slots_allocation ts 
                     LEFT JOIN courses c ON c.item_id = ts.course_id
@@ -505,73 +498,6 @@ class Timetable extends Myschoolgh {
             // set the last timetable id to a variable
             $data[$result->day_slot][] = $result;
         }
-
-        // courses list
-        $courses_list = [];
-        $t_course_ids = [];
-
-        // sort the array
-        function sort_lesson_start_time($a, $b) {
-            return strtotime($a["lesson_start_time"]) - strtotime($b["lesson_start_time"]);
-        }
-
-        // group all the items
-        foreach($data as $each) {
-
-            // loop through the array
-            foreach($each as $key => $value) {
-                // convert to array
-                $value = (array) $value;
-                $t_course_ids[] = $value["course_id"]; 
-
-                // get the lesson time
-                $start = $value["duration"] * $value["slot"];
-                $end = ($value["duration"] * $value["slot"]) + $value["duration"];
-                // configure the lesson start and end time
-                $value["lesson_start_time"] = date("h:i A", strtotime("{$value["start_time"]} +{$start} minutes"));
-                $value["lesson_end_time"] = date("h:i A", strtotime("{$value["start_time"]} +{$end} minutes"));
-                // append to the list
-                $courses_list[] = $value;
-            }
-        }
-
-        $course_ids = array_unique($t_course_ids);
-
-        // set
-        $color_set = [];
-
-        // color coding
-        foreach($course_ids as $key => $each) {
-            $color_set[$each] = $this->color_set[$key] ?? null;
-        }
-        
-        // order the array set using the date of the event
-        usort($courses_list, "sort_lesson_start_time");
-
-        // init
-        $lessons_list = "<div class='row'>";
-
-        // loop through the lessons and generate a clean sheet for the teacher
-        foreach($courses_list as $course) {
-            $lessons_list .= "
-            <div class='col-lg-3 col-md-4'>
-                <div class='card' style='border-top: solid 4px {$color_set[$course["course_id"]]}'>
-                    <div class='card-header pt-1 pb-1'>
-                        <strong>{$course["class_name"]}</strong>
-                    </div>
-                    <div class='card-body pb-0 pt-2'>
-                        <p>{$course["course_name"]} ({$course["course_code"]})</p>
-                        <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course["lesson_start_time"]}</p>
-                        <p><i class='fa fa-clock'></i> {$course["lesson_end_time"]}</p>
-                    </div>
-                </div>
-            </div>";
-        }
-        $lessons_list .= "</div>";
-
-        // print_r($lessons_list);exit;
-        return $lessons_list;
-        
         
         $param = $timetable;
         $param->allocations = $data;
@@ -594,7 +520,7 @@ class Timetable extends Myschoolgh {
             $result = "<div class='alert alert-warning text-center'>No timetable has been generated for this class yet. Please check back later to verify.</div>";
         }
 
-        return $result;
+        return json_encode($result);
 
     }
 
@@ -611,7 +537,6 @@ class Timetable extends Myschoolgh {
         $data = $params->data ?? [];
         $table_class = $params->table_class ?? "";
         $todayOnly = isset($params->today_only) && $params->today_only ? $params->today_only : null;
-        $toDownload = isset($params->download) && $params->download ? $params->download : null;
         $codeOnly = (bool) (isset($params->code_only) && $params->code_only);
                 
         // if load has been parsed
@@ -706,9 +631,7 @@ class Timetable extends Myschoolgh {
             $end_time = $this->add_time($start_time, $data->duration);
 
             // show the time
-            $html_table .= "\t<td width=\"{$width}%\" style=\"background-color:#607d8b;color:#fff\">
-                <div align=\"center\"><strong>{$start_time}</strong><br>-<br><strong>{$end_time}</strong></div>
-            </td>\n";
+            $html_table .= "\t<td width=\"{$width}%\" style=\"background-color:#607d8b;color:#fff\"><div align=\"center\"><strong>{$start_time}</strong><br>-<br><strong>{$end_time}</strong></div></td>\n";
             $start_time = $end_time;
         }
         $html_table .= "</tr>\n";
@@ -726,23 +649,23 @@ class Timetable extends Myschoolgh {
             "tomorrow" => date("l", strtotime("+1 day"))
         ];
 
-        // init
-        $t_course_ids = [];        
-        // loop through all the allocations
-        foreach($data->allocations as $allot) {
-            foreach($allot as $all) {
-                $t_course_ids[] = $all->course_id;
-            }
-        }
-        $course_ids = array_unique($t_course_ids);
+        // set the colors to use for the loading of pages
+        $colors = ["#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
+                    "#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
+                    "#007bff", "#6c757d", "#28a745", "#17a2b8", "#ffc107", "#dc3545"];
+        
+        $course_ids = array_column($data->allocations, "course_id");
+        $course_ids = array_unique($course_ids);
 
         // set
         $color_set = [];
 
         // color coding
         foreach($course_ids as $key => $each) {
-            $color_set[$each] = $this->color_set[$key] ?? null;
+            $color_set[$each] = $colors[$key] ?? null;
         }
+
+        print_r($data->allocations);
 
         // loop through each day
         for ($d = 0; $d < $data->days; $d++) {
@@ -758,37 +681,32 @@ class Timetable extends Myschoolgh {
 
                 // loop through the slots
                 for ($i = 0; $i < $slots; $i++) {
-                    
+
                     // set the key
-                    $course = "";
+                    $info = "";
                     $bg_color = "style=\"padding:10px\"";
                     $key = ($d + 1)."_".($i + 1);
 
-                    // get the data
-                    $allocation = isset($data->allocations[$key]) ? $data->allocations[$key] : [];
-                    
-                    // loop through each allocation for the day
-                    foreach($allocation as $akey => $cleaned) {
+                    // loop through the allocations
+                    foreach($data->allocations as $allocation) {
                         
+                        // get the data
+                        $cleaned = isset($allocation[$key]) ? $allocation[$key] : null;
+print $key.":::::";
                         // set the information to display
                         if(!empty($cleaned)) {
-                            $bg_color = "style=\"padding:10px;background-color:".($color_set[$cleaned->course_id] ?? "#000").";color:#fff\"";
+                            $bg_color = "style=\"padding:10px;background-color:{$color_set[$cleaned->course_id]};color:#fff\"";
                             $info = !$codeOnly ? $cleaned->course_name. " (" : null; 
                             $info .= "<strong>{$cleaned->course_code}</strong>";
                             $info .= !$codeOnly ? " )" : null; 
-                            // $info .= ($akey !== (count($allocation) - 1)) ? "<hr>" : null;
-                            $course .=  "<div {$bg_color}>{$info}</div>";
                         }
                         if(in_array($key, $data->disabled_inputs)) {
                             $bg_color = "style=\"padding:10px;background-color:#cccccc;color:#888888;\"";
-                            $course .=  "<div {$bg_color}>DISABLED</div>";
                         }
-                        
+
                     }
-
                     // append the information
-                    $row .= "\t<td {$bg_color} align=\"center\">{$course}</td>\n";
-
+                    $row .= "\t<td {$bg_color} align=\"center\">{$info}</td>\n";
                 }
 
                 $row .= "</tr>\n";
@@ -798,10 +716,9 @@ class Timetable extends Myschoolgh {
 
         }
         $html_table .= "</table>";
-        
-        // print $html_table;
-        // exit;
-        
+
+        print $html_table;exit;
+
         return [
             "table" => $html_table,
             "result" => $data
@@ -816,7 +733,7 @@ class Timetable extends Myschoolgh {
      * 
      */
     private function add_time($start_time, $interval) {
-        $time = date("h:i A", strtotime("{$start_time} + {$interval} minutes"));
+        $time = date("h:i A", strtotime("{$start_time} + {$interval}minutes"));
         return $time;
     }
 

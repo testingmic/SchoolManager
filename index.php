@@ -97,13 +97,11 @@ if(!empty($session->userId)) {
 	$isTutor = (bool) ($defaultUser->user_type == "teacher");
 	$isParent = (bool) ($defaultUser->user_type == "parent");
 	$isStudent = (bool) ($defaultUser->user_type == "student");
-	// $isEmployee = (bool) ($defaultUser->user_type == "employee");
 	$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
 	$isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
     $isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
 	$isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
 	$isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
-
 }
 
 // To be used for inserting additional scripts
