@@ -11,19 +11,25 @@ global $myClass, $accessObject, $defaultUser;
 // initial variables
 $appName = config_item("site_name");
 $baseUrl = $config->base_url();
+$clientId = $session->clientId;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $response = (object) [];
-$response->title = "Assignments List : {$appName}";
 $response->scripts = [];
+$filter = (object) $_POST;
+$response->title = "Assignments List : {$appName}";
+
+$response->scripts = ["assets/js/filters.js"];
 
 // the query parameter to load the user information
 $assignments_param = (object) [
-    "clientId" => $session->clientId,
+    "clientId" => $clientId,
     "userData" => $defaultUser,
-    "limit" => 99999
+    "department_id" => $filter->department_id ?? null,
+    "class_id" => $filter->class_id ?? null,
+    "course_id" => $filter->course_id ?? null
 ];
 
 // unset the session
@@ -32,7 +38,7 @@ $session->remove("assignment_uploadID");
 $item_list = load_class("assignments", "controllers")->list($assignments_param);
 
 $accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
+$accessObject->clientId = $clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 $hasDelete = $accessObject->hasAccess("delete", "assignments");
 $hasUpdate = $accessObject->hasAccess("update", "assignments");
@@ -78,6 +84,31 @@ foreach($item_list["data"] as $key => $each) {
     $assignments .= "</tr>";
 }
 
+// default class_list and courses_list
+$class_list = [];
+$courses_list = [];
+
+// if the class_id is not empty
+if(!empty($filter->department_id)) {
+    $classes_param = (object) [
+        "clientId" => $clientId,
+        "columns" => "id, name",
+        "department_id" => $filter->department_id
+    ];
+    $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+}
+
+// if the class_id is not empty
+if(!empty($filter->class_id)) {
+    $courses_param = (object) [
+        "clientId" => $clientId,
+        "minified" => true,
+        "userData" => $defaultUser,
+        "class_id" => $filter->class_id
+    ];
+    $courses_list = load_class("courses", "controllers")->list($courses_param)["data"];
+}
+
 $response->html = '
     <section class="section">
         <div class="section-header">
@@ -87,7 +118,42 @@ $response->html = '
                 <div class="breadcrumb-item">Assignments List</div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="filter_Department_Class">
+            <div class="col-xl-4 col-md-4 col-12 form-group">
+                <label>Select Department</label>
+                <select class="form-control selectpicker" id="department_id" name="department_id">
+                    <option value="">Please Select Department</option>';
+                    foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
+                        $response->html .= "<option ".(isset($filter->department_id) && ($filter->department_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Select Class</label>
+                <select class="form-control selectpicker" name="class_id">
+                    <option value="">Please Select Class</option>';
+                    foreach($class_list as $each) {
+                        $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Select Course</label>
+                <select class="form-control selectpicker" name="course_id">
+                    <option value="">Please Select Course</option>';
+                    foreach($courses_list as $each) {
+                        $response->html .= "<option ".(isset($filter->course_id) && ($filter->course_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-2 col-md-2 col-12 form-group">
+                <label for="">&nbsp;</label>
+                <button id="filter_Assignments_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+            </div>
+
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">

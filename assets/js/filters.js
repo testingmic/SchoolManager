@@ -75,6 +75,31 @@ if ($(`div[id="filter_Department_Class"]`).length) {
         });
     }
 
+    if ($(`select[name="course_id"]`).length) {
+        $(`select[name="class_id"]`).on("change", function() {
+            let value = $(this).val();
+            $(`select[name='course_id']`).find('option').remove().end();
+            $(`select[name='course_id']`).append(`<option value="">Please Select Course</option>`);
+            if (value.length && value !== "null") {
+                $.get(`${baseUrl}api/courses/list?class_id=${value}&minified=true`).then((response) => {
+                    if (response.code == 200) {
+                        $.each(response.data.result, function(i, e) {
+                            $(`select[name='course_id']`).append(`<option value='${e.id}'>${e.name}</option>'`);
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    $(`button[id="filter_Assignments_List"]`).on("click", function() {
+        department_id = $(`select[name="department_id"]`).val(),
+            class_id = $(`select[name="class_id"]`).val(),
+            course_id = $(`select[name="course_id"]`).val();
+        $.form_data = { department_id, class_id, course_id };
+        loadPage(`${baseUrl}list-assignments`);
+    });
+
 }
 
 $(`button[id="filter_Fees_Collection"]`).on("click", function() {

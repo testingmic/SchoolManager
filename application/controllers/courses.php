@@ -38,7 +38,6 @@ class Courses extends Myschoolgh {
      */
     public function list(stdClass $params) {
 
-
         $params->query = "1";
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
@@ -54,7 +53,7 @@ class Courses extends Myschoolgh {
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
         $params->query .= (isset($params->programme_id)) ? " AND a.programme_id='{$params->programme_id}'" : null;
-        $params->query .= (isset($params->course_id)) ? " AND a.id='{$params->course_id}'" : null;
+        $params->query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND a.id='{$params->course_id}'" : null;
         $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
         $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
@@ -72,40 +71,50 @@ class Courses extends Myschoolgh {
             $stmt->execute([0]);
 
             $is_permitted = false;
-            $commentsObj = load_class("replies", "controllers");
-            $filesObject = load_class("files", "controllers");
+            $minified = isset($params->minified) ? true : false;
 
-            $threadInteraction = (object)[
-                "userId" => $params->userId,
-                "feedback_type" => "comment"
-            ];
+            // load class if an only if the minified has not been parsed
+            if(!$minified) {
+                $commentsObj = load_class("replies", "controllers");
+                $filesObject = load_class("files", "controllers");
+
+                // set param for the thread interactions
+                $threadInteraction = (object)[
+                    "userId" => $params->userId,
+                    "feedback_type" => "comment"
+                ];
+            }
             
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                
-                // if the files is set
-                if(isset($params->full_attachments)) {
-                   $result->attachment = $filesObject->resource_attachments_list("courses_plan", $result->id);
-                }
 
-                // load the course links
-                $result->resources_list = $this->resources_list($params->clientId, $result->item_id);
+                // load this section if the minified was not parsed
+                if(!$minified) {
                 
-                // if a request was made for full details
-                if(isset($params->full_details)) {
+                    // if the files is set
+                    if(isset($params->full_attachments)) {
+                    $result->attachment = $filesObject->resource_attachments_list("courses_plan", $result->id);
+                    }
+
+                    // load the course links
+                    $result->resources_list = $this->resources_list($params->clientId, $result->item_id);
                     
-                    // create a new object
-                    $threadInteraction->resource_id = $result->id;
-                    $result->comments_list = $commentsObj->list($threadInteraction);
+                    // if a request was made for full details
+                    if(isset($params->full_details)) {
+                        
+                        // create a new object
+                        $threadInteraction->resource_id = $result->id;
+                        $result->comments_list = $commentsObj->list($threadInteraction);
+                        
+                        // if the user is permitted
+                        $result->lesson_plan = $this->course_lessons($result->client_id, $result->id);
+                    }
                     
-                    // if the user is permitted
-                    $result->lesson_plan = $this->course_lessons($result->client_id, $result->id);
-                }
-                
-                // loop through the information
-                foreach(["course_tutor_info", "created_by_info"] as $each) {
-                    // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                    // loop through the information
+                    foreach(["course_tutor_info", "created_by_info"] as $each) {
+                        // convert the created by string into an object
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                    }
                 }
 
                 $data[] = $result;

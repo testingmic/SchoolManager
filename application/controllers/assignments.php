@@ -67,11 +67,11 @@ class Assignments extends Myschoolgh {
 
         $params->query .= " AND a.academic_year='{$params->academic_year}'";
         $params->query .= " AND a.academic_term='{$params->academic_term}'";
-        $params->query .= (isset($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
+        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
         $params->query .= (isset($params->due_date)) ? " AND a.due_date='{$params->due_date}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->course_id)) ? " AND a.course_id='{$params->course_id}'" : null;
-        $params->query .= (isset($params->assignment_id)) ? " AND a.item_id='{$params->assignment_id}'" : null;
+        $params->query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND a.course_id='{$params->course_id}'" : null;
+        $params->query .= (isset($params->assignment_id) && !empty($params->assignment_id)) ? " AND a.item_id='{$params->assignment_id}'" : null;
         $params->query .= (isset($params->course_tutor)) ? " AND a.course_tutor LIKE '%{$params->course_tutor}%'" : null;
         
         try {
