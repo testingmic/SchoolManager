@@ -152,13 +152,16 @@ class Assignments extends Myschoolgh {
             return ["code" => 203, "data" => "Sorry! An invalid assignment type was parsed."];
         }
 
+        /** Run a class check */
+        $classCheck = $this->pushQuery("id, department_id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+
         /** Confirm the class id */
-        if(empty($this->pushQuery("id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1'"))) {
+        if(empty($classCheck)) {
             return ["code" => 203, "data" => "Sorry! An invalid class id was submitted"];
         }
 
         /** Confirm the selected course */
-        $course_data = $this->pushQuery("id, course_tutor", "courses", "id='{$params->course_id}' AND class_id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1'");
+        $course_data = $this->pushQuery("id, course_tutor", "courses", "id='{$params->course_id}' AND class_id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         if(empty($course_data)) {
             return ["code" => 203, "data" => "Sorry! An invalid course id was submitted"];
         }
@@ -211,6 +214,7 @@ class Assignments extends Myschoolgh {
                 ".(isset($params->assignment_title) ? ", assignment_title = '{$params->assignment_title}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
                 ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
+                ".(!empty($classCheck[0]->department_id) ? ", department_id = '{$classCheck[0]->department_id}'" : null)."
                 ".(isset($params->grade) ? ", grading = '{$params->grade}'" : null)."
                 ".(isset($course_data[0]->course_tutor) ? ", course_tutor = '{$course_data[0]->course_tutor}'" : null)."
                 ".(isset($params->date_due) ? ", due_date = '{$params->date_due}'" : null)."
