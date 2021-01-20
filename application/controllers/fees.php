@@ -80,7 +80,7 @@ class Fees extends Myschoolgh {
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.phone_number,'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info
                 FROM fees_collection a
-				WHERE {$filters} AND a.client_id = ? ORDER BY a.id DESC LIMIT {$params->limit}
+				WHERE {$filters} AND a.client_id = ? ORDER BY DATE(a.recorded_date) DESC LIMIT {$params->limit}
             ");
 			$stmt->execute([$params->clientId]);
 
@@ -337,16 +337,35 @@ class Fees extends Myschoolgh {
 
             // loop through the results list
             foreach($student_allocation_array as $key => $student) {
+                // verify if the student has paid some amount
+                $due = round($student->amount_due);
+                $paid = round($student->amount_paid);
+                $balance = round($student->balance);
+
+                // assign variable
+                $isPaid = (bool) ($student->amount_due < $student->amount_paid) || ($student->amount_due === $student->amount_paid);
+
+                // label
+                $label = "";
+                if($due === $balance) {
+                    $label = "<br><span class='badge p-1 badge-danger'>Not Paid</span>";
+                } elseif($paid > 0 && !$isPaid) {
+                    $label = "<br><span class='badge p-1 badge-primary'>Part Paid</span>";
+                }
+
                 // append to the url string
                 $student_allocation_list .= "<tr data-row_id=\"{$student->id}\">";
                 $student_allocation_list .= "<td>".($key+1)."</td>";
                 $student_allocation_list .= "<td>
                     <div class='d-flex justify-content-start'>
                         ".(!empty($student->student_info->image) ? "
-                        <div class='mr-2'><img src='{$this->baseUrl}{$student->student_info->image}' width='40px' height='40px'></div>" : "")."
+                        <div class='mr-2'>
+                            <img src='{$this->baseUrl}{$student->student_info->image}' width='40px' height='40px'>
+                        </div>" : "")."
                         <div>
                             {$student->student_info->name} <br class='p-0 m-0'>
                             <strong>{$student->student_info->unique_id}</strong>
+                            {$label}
                         </div>
                     </div>
                 </td>";
@@ -357,8 +376,6 @@ class Fees extends Myschoolgh {
                 // confirm if the user has the permission to make payment
                 if(!empty($params->receivePayment)) {
                     $student_allocation_list .= "<td width='13%' class='pl-2'>";
-                    // assign variable
-                    $isPaid = (bool) ($student->amount_due < $student->amount_paid) || ($student->amount_due === $student->amount_paid);
 
                     // confirm if the fee has been paid
                     if($isPaid) {

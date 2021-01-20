@@ -258,7 +258,7 @@ $response->html .= '</select>
                 <div class="card-header">
                   <h4>Class Count</h4>
                 </div>
-                <div class="card-body slim-scroll" id="class_count_list" style="max-height:300px;height:300px;overflow-y:auto;">
+                <div class="card-body trix-slim-scroll quick_loader" id="class_count_list" style="max-height:465px;height:465px;overflow-y:auto;">
                     <div class="form-content-loader" style="display: flex; position: absolute">
                         <div class="offline-content text-center">
                             <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
@@ -266,6 +266,38 @@ $response->html .= '</select>
                     </div>
                 </div>
               </div>
+            </div>
+            <div class="col-lg-8 col-md-12 col-12 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Revenue</h4>
+                    </div>
+                    <div class="card-body quick_loader" style="max-height:465px;height:465px;">
+                        <div class="form-content-loader" style="display: flex; position: absolute">
+                            <div class="offline-content text-center">
+                                <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h3 class="card-title"><i class="fas fa-dollar-sign col-green font-30 p-b-10"></i> <span data-count="total_revenue_received">0.00</span></h3>
+                            </div>
+                            <div style="width:50%">
+                                <div class="d-flex justify-content-between">
+                                    <div class="col-6">
+                                        <p class="text-muted font-15 text-truncate m-b-5">Tuition Fees</p>
+                                        <h5><i class="fas fa-arrow-circle-up col-green m-r-5"></i><span data-count="total_fees_received">0.00</span></h5>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="text-muted text-truncate m-b-5">Revenue <span data-filter="period">Last Week</span></p>
+                                        <h5><i class="fas fa-arrow-circle-up col-green m-r-5"></i><span data-count="previous_amount_received">0.00</span></h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="revenue_category_chart"></div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="row">

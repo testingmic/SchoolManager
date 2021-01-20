@@ -43,7 +43,7 @@ class Analitics extends Myschoolgh {
         global $usersClass;
 
         /** set the date period */
-        $params->period = $params->period ?? "this_week";
+        $params->period = $params->period ?? "this_month"; //"this_week";
 
         /** Convert the stream into an array list */
         $params->stream = isset($params->label["stream"]) && !empty($params->label["stream"]) ? $this->stringToArray($params->label["stream"]) : $this->default_stream;
@@ -92,6 +92,9 @@ class Analitics extends Myschoolgh {
         // confirm if the user pushed a query set
         $this->query_date_range = isset($params->label["stream_period"]) ? $this->stringToArray($params->label["stream_period"]) : ["current", "previous"];
         $this->user_status = isset($params->label["user_status"]) ? $params->label["user_status"] : "Active";
+
+        // append the arange information
+        $this->final_report["date_range"] = $this->date_range;
 
         // get the clients information if not parsed in the stream
         if(in_array("summary_report", $params->stream)) {

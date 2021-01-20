@@ -103,7 +103,7 @@
 
 .slim-scroll::-webkit-scrollbar-thumb {
     border-radius: 10px;
-    background-color: #919599;
+    background-color: #007bff;
 }
 
 .trix-slim-scroll::-webkit-scrollbar-track {
@@ -114,22 +114,22 @@
 .trix-slim-scroll::-webkit-scrollbar {
     width: 4px;
     height: 5px;
-    background-color: #919599;
+    background-color: #007bff;
 }
 
 .trix-slim-scroll::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background-color: #919599;
+    background-color: #007bff;
 }
 
 .ajax-data-form trix-editor {
     min-height: 250px;
-    max-height: 350px;
+    max-height: 250px;
 }
 
 .leave-comment-wrapper trix-editor {
     min-height: 250px;
-    max-height: 350px;
+    max-height: 250px;
 }
 
 .form-data-unavailable {
