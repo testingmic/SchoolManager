@@ -8,7 +8,7 @@ date_default_timezone_set('Africa/Accra');
 # set the constants for the database connection
 defined('DB_HOST')  OR define('DB_HOST', "localhost");
 defined('DB_USER')  OR define('DB_USER', "root");
-defined('DB_PASS')  OR define('DB_PASS', "0987654321");
+defined('DB_PASS')  OR define('DB_PASS', "");
 defined('DB_NAME')  OR define('DB_NAME', "myschoolgh");
 
 define('TIME_PERIOD', 60);

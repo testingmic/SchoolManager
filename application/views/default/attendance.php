@@ -45,7 +45,7 @@ if(!empty($clientId)) {
             '.($isAdminAccountant ? 
                 '<div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
-                        <i class="fas fa-hiking card-icon col-green"></i>
+                        <i class="fas fa-user-graduate card-icon col-green"></i>
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
@@ -58,7 +58,7 @@ if(!empty($clientId)) {
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
-                        <i class="fas fa-user card-icon col-orange"></i>
+                        <i class="fas fa-user-tie card-icon col-orange"></i>
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
@@ -71,7 +71,7 @@ if(!empty($clientId)) {
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
-                        <i class="fas fa-users card-icon col-cyan"></i>
+                        <i class="fas fa-users card-icon col-blue"></i>
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
@@ -84,7 +84,7 @@ if(!empty($clientId)) {
                 </div>' : '
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
-                        <i class="fas fa-user card-icon col-orange"></i>
+                        <i class="fas fa-user-check card-icon col-green"></i>
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
@@ -97,7 +97,7 @@ if(!empty($clientId)) {
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
-                        <i class="fas fa-user card-icon col-red"></i>
+                        <i class="fas fa-user-alt-slash card-icon col-red"></i>
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
@@ -110,7 +110,7 @@ if(!empty($clientId)) {
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
-                        <i class="fas fa-user card-icon col-blue"></i>
+                        <i class="fas fa-user-edit card-icon col-blue"></i>
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">

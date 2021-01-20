@@ -107,7 +107,7 @@ $(`select[id="change_TimetableViewId"]`).on("change", function() {
         if (response.code === 200) {
             $(`div[id="timetable_content"]`).html(response.data.result.table);
             $.current_page = `${baseUrl}timetable-view/${timetable_id}`;
-            window.history.pushState({ current: `${baseUrl}timetable-view/${timetable_id}` }, "", `${baseUrl}timetable-view/${timetable_id}`);
+            window.history.pushState({ current: $.current_page }, "", $.current_page);
         }
         $(`div[id="timetable_content_loader"] div[class="form-content-loader"]`).css("display", "none");
     }).catch(() => {

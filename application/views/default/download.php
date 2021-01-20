@@ -117,9 +117,19 @@ elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) 
     $data = [];
     $file_name = "./assets/test.pdf";
 
+    // set some parameters
     $param = (object) ["data" => $data, "timetable_id" => $timetable_id, "code_only" => $codeOnly];
-    $html_table = $timetableClass->draw($param);
 
+    // set a day parameter
+    if(isset($_GET["load"]) && (in_array($_GET["load"], ["yesterday", "today", "tomorrow"]))) {
+        $param->today_only = xss_clean($_GET["load"]);
+    }
+    
+    // load the table
+    $html_table = $timetableClass->draw($param);
+    
+    print_r($html_table["table"]);
+    exit;
     // end query if no result found
     if(!isset($html_table["result"])) {
         print_r($html_table);

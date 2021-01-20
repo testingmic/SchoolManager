@@ -39,9 +39,18 @@ class Timetable extends Myschoolgh {
             $stmt->execute([1]);
 
             $fullDetails = (bool) isset($params->full_detail);
+            $todayOnly = isset($params->today_only) ? $params->today_only : null;
 
             $data = [];
             $timetable_id = "";
+            
+            $filters = [
+                "yesterday" => "AND a.day = '".date("w", strtotime("-1 day"))."'",
+                "today" => "AND a.day = '".date("w")."'",
+                "tomorrow" => "AND a.day = '".date("w", strtotime("+1 day"))."'"
+            ];
+
+            $query = $todayOnly ? ($filters[$todayOnly] ?? null) : null;
 
             // loop through the result set
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
@@ -58,9 +67,8 @@ class Timetable extends Myschoolgh {
                         (SELECT name FROM classes_rooms WHERE classes_rooms.item_id = a.room_id LIMIT 1) AS room_name
                     ", "timetables_slots_allocation a 
                         LEFT JOIN courses b ON b.item_id = a.course_id
-                        LEFT JOIN classes c ON c.item_id = a.class_id
-                        ", 
-                    "a.timetable_id = '{$result->item_id}' AND a.status='1'");
+                        LEFT JOIN classes c ON c.item_id = a.class_id", 
+                    "a.timetable_id = '{$result->item_id}' AND a.status='1' {$query}");
                     
                     $allocations = [];
                     foreach($allocate as $alot) {
@@ -68,8 +76,7 @@ class Timetable extends Myschoolgh {
                     }
                     $result->allocations = $allocations;
 
-                    $result->client_details = $this->pushQuery("a.*", "clients_accounts a", 
-                    "a.client_id = '{$result->client_id}' AND a.client_status='1' LIMIT 1")[0];
+                    $result->client_details = $this->pushQuery("a.*", "clients_accounts a", "a.client_id = '{$result->client_id}' AND a.client_status='1' LIMIT 1")[0];
                 }
 
                 // set the last timetable id to a variable
@@ -364,13 +371,16 @@ class Timetable extends Myschoolgh {
      * 
      * @return Array
      */
-    public function class_timetable($classId, $clientId) {
+    public function class_timetable($classId, $clientId, $today_only = false, $height = null) {
 
         try {
+
+            // parameters to use to load the information
             $param = (object) [
                 "class_id" => $classId,
                 "clientId" => $clientId,
                 "full_detail" => true,
+                "today_only" => $today_only,
                 "limit" => 1
             ];
             $result = $this->list($param);
@@ -387,23 +397,29 @@ class Timetable extends Myschoolgh {
                 // set new param
                 $param = (object) [
                     "data" => $data,
+                    "height" => $height,
                     "no_header" => true,
+                    "today_only" => $today_only,
                     "timetable_id" => $timetable_id,
-                    "table_class" => "table table-bordered table-hover"
+                    "table_class" => "table-bordered table-hover"
                 ];
                 $result = $this->draw($param);
 
                 // confirm that the table was found
                 if(isset($result["table"])) {
-
-                    // append the results set
-                    $table = "
-                        <div class='text-center mb-3'>
-                            <a class='btn btn-outline-success' target='_blank' href='{$this->baseUrl}download?tb=true&tb_id={$timetable_id}&dw=true'>
-                                <i class='fa fa-download'></i> Download Timetable
-                            </a>
-                        </div>
-                    ";
+                    // init
+                    $table = "";
+                    
+                    // if not only today
+                    if(!$today_only) {
+                        // append the results set
+                        $table = "
+                            <div class='text-center mb-3'>
+                                <a class='btn btn-outline-success' target='_blank' href='{$this->baseUrl}download?tb=true&tb_id={$timetable_id}&dw=true'>
+                                    <i class='fa fa-download'></i> Download Timetable
+                                </a>
+                            </div>";
+                    }
                     $table .= $result["table"];
 
                     // return the results
@@ -433,7 +449,13 @@ class Timetable extends Myschoolgh {
         // initial parameters
         $data = $params->data ?? [];
         $table_class = $params->table_class ?? "";
+        $todayOnly = isset($params->today_only) && $params->today_only ? $params->today_only : null;
         $codeOnly = (bool) (isset($params->code_only) && $params->code_only);
+
+        // if load has been parsed
+        if(isset($params->load) && (in_array($params->load, ["yesterday", "today", "tomorrow"]))) {
+            $todayOnly = xss_clean($params->load);
+        }
 
         // if the data is empty and the timetable_id isset
         if(empty($data) && isset($params->timetable_id)) {
@@ -444,6 +466,12 @@ class Timetable extends Myschoolgh {
                 "full_detail" => true,
                 "timetable_id" => $params->timetable_id,
             ];
+
+            // confirm if the user wants only today_only
+            if($todayOnly) {
+                $param->today_only = $todayOnly;
+            }
+
             $data = $this->list($param)["data"];
 
             // if no record was found
@@ -480,6 +508,7 @@ class Timetable extends Myschoolgh {
 
         // if the header parameter is not set
         if(!isset($params->no_header)) {
+            
             // set the header content
             $summary = '<table width="100%" class="'.$table_class.'" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
             $summary .= "<tr>\n
@@ -502,8 +531,8 @@ class Timetable extends Myschoolgh {
 
         // start drawing the table
         $html_table = "<style>table tr td, table tr td {border:1px dashed #ccc;}</style>\n";
-        $html_table .= $summary.'<table class="'.$table_class.'" width="100%" cellpadding="5px" style="min-height: 400px; margin: auto auto;" cellspacing="5px">'."\n";
-        $html_table .= "<tr>\n\t<td width=\"{$width}%\"></td>\n";
+        $html_table .= $summary.'<table class="'.$table_class.'" width="100%" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
+        $html_table .= "<tr ".(isset($params->height) && $params->height ? "style='height:{$params->height}px'" : "").">\n\t<td width=\"{$width}%\"></td>\n";
         $start_time = $data->start_time;
         
         // generate the header
@@ -519,8 +548,19 @@ class Timetable extends Myschoolgh {
         $html_table .= "</tr>\n";
 
         // days of the week
-        $d_style = "style=\"background-color:#795548;font-weight:bold;text-align:center;color:#fff\"";
+        $d_style = "style=\"background-color:#795548;font-weight:bold;text-align:center;color:#fff;".(isset($params->height) && $params->height ? "height:{$params->height}px;" : "")."\"";
+
+        // set the array of days
         $days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+        // some more features
+        $filters = [
+            "yesterday" => date("l", strtotime("-1 day")),
+            "today" => date("l"),
+            "tomorrow" => date("l", strtotime("+1 day"))
+        ];
+
+        // set the colors to use for the loading of pages
         $colors = ["#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
                     "#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
                     "#007bff", "#6c757d", "#28a745", "#17a2b8", "#ffc107", "#dc3545"];
@@ -533,42 +573,51 @@ class Timetable extends Myschoolgh {
 
         // color coding
         foreach($course_ids as $key => $each) {
-            $color_set[$each] = $colors[$key];
+            $color_set[$each] = $colors[$key] ?? null;
         }
 
         // loop through each day
         for ($d = 0; $d < $data->days; $d++) {
-            $row = "<tr>\n";
 
-            // set the day name of the week
-            $row .= "\t<td {$d_style}>".($days[$d] ?? null)."</td>\n";
+            // if not today only 
+            if(!$todayOnly || ($todayOnly && $days[$d] == $filters[$todayOnly])) {
 
-            // loop through the slots
-            for ($i = 0; $i < $slots; $i++) {
-                
-                // set the key
-                $info = "";
-                $bg_color = "style=\"padding:10px\"";
-                $key = ($d + 1)."_".($i + 1);
+                // set the begining of the table
+                $row = "<tr>\n";
 
-                // get the data
-                $cleaned = isset($data->allocations[$key]) ? $data->allocations[$key] : null;
+                // set the day name of the week
+                $row .= "\t<td {$d_style}>".($days[$d] ?? null)."</td>\n";
 
-                // set the information to display
-                if(!empty($cleaned)) {
-                    $bg_color = "style=\"padding:10px;background-color:{$color_set[$cleaned->course_id]};color:#fff\"";
-                    $info = !$codeOnly ? $cleaned->course_name. " (" : null; 
-                    $info .= "<strong>{$cleaned->course_code}</strong>";
-                    $info .= !$codeOnly ? " )" : null; 
+                // loop through the slots
+                for ($i = 0; $i < $slots; $i++) {
+                    
+                    // set the key
+                    $info = "";
+                    $bg_color = "style=\"padding:10px\"";
+                    $key = ($d + 1)."_".($i + 1);
+
+                    // get the data
+                    $cleaned = isset($data->allocations[$key]) ? $data->allocations[$key] : null;
+
+                    // set the information to display
+                    if(!empty($cleaned)) {
+                        $bg_color = "style=\"padding:10px;background-color:{$color_set[$cleaned->course_id]};color:#fff\"";
+                        $info = !$codeOnly ? $cleaned->course_name. " (" : null; 
+                        $info .= "<strong>{$cleaned->course_code}</strong>";
+                        $info .= !$codeOnly ? " )" : null; 
+                    }
+                    if(in_array($key, $data->disabled_inputs)) {
+                        $bg_color = "style=\"padding:10px;background-color:#cccccc;color:#888888;\"";
+                    }
+                    // append the information
+                    $row .= "\t<td {$bg_color} align=\"center\">{$info}</td>\n";
                 }
-                if(in_array($key, $data->disabled_inputs)) {
-                    $bg_color = "style=\"padding:10px;background-color:#cccccc;color:#888888;\"";
-                }
-                // append the information
-                $row .= "\t<td {$bg_color} align=\"center\">{$info}</td>\n";
+
+                $row .= "</tr>\n";
+                $html_table .= $row;
+            
             }
-            $row .= "</tr>\n";
-            $html_table .= $row;
+
         }
         $html_table .= "</table>";
 

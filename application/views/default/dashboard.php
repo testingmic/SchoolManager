@@ -174,16 +174,22 @@ if($isWardTutorParent) {
 
     // load the use information
     $data = $defaultUser;
-    
+    $timetableClass = load_class("timetable", "controllers");
+
     // load the wards list
     if($isParent) {
+        
         // wards count
         $wards_count = 0;
         $total_expenditure = 0;
         
         // stream nothing if the student id has not been set yet
         if(empty($session->student_id)) {
+            // set parameters
             $data_stream = "";
+
+            // load the class timetable for student / parent & The lessons if a teacher is logged in
+            $timetable = $timetableClass->class_timetable($session->student_class_id, $clientId, "today");    
         }
 
         // if the wards array is not empty
@@ -308,6 +314,10 @@ if($isWardTutorParent) {
             </div>';
         }
     } else {
+        
+        // load the class timetable for student / parent & The lessons if a teacher is logged in
+        $timetable = $timetableClass->class_timetable($defaultUser->class_guid, $clientId, "today", 90);    
+        
         // assign the assignments list
         $assignment_list = '
         <div class="col-lg-12 col-md-12 col-12 col-sm-12">
@@ -338,6 +348,7 @@ if($isWardTutorParent) {
             </div>
         </div>';
     }
+
 }
 
 // set the response dataset
@@ -777,7 +788,7 @@ $response->html = '
                     </div>
                 </div>
             </div>
-            '.(!empty($upcoming_birthday_list) ? 
+            '.($isAdminAccountant ? 
                 '<div class="col-lg-4 col-md-6 col-12 col-sm-12">
                     <div class="card">
                         <div class="card-header">
@@ -795,7 +806,7 @@ $response->html = '
                         '<div class="row">
                             <div class="col-lg-4 col-md-6 col-sm-12">
                                 <div class="card card-statistic-1">
-                                    <i class="fas fa-user card-icon col-orange"></i>
+                                    <i class="fas fa-user-check card-icon col-green"></i>
                                     <div class="card-wrap">
                                         <div class="padding-20">
                                             <div class="text-right">
@@ -808,7 +819,7 @@ $response->html = '
                             </div>
                             <div class="col-lg-4 col-md-6 col-sm-12">
                                 <div class="card card-statistic-1">
-                                    <i class="fas fa-user card-icon col-red"></i>
+                                    <i class="fas fa-user-alt-slash card-icon col-red"></i>
                                     <div class="card-wrap">
                                         <div class="padding-20">
                                             <div class="text-right">
@@ -821,7 +832,7 @@ $response->html = '
                             </div>
                             <div class="col-lg-4 col-md-6 col-sm-12">
                                 <div class="card card-statistic-1">
-                                    <i class="fas fa-user card-icon col-blue"></i>
+                                    <i class="fas fa-user-edit card-icon col-blue"></i>
                                     <div class="card-wrap">
                                         <div class="padding-20">
                                             <div class="text-right">
@@ -835,7 +846,16 @@ $response->html = '
                         </div>' : ''
                     ).'
                 </div>
-                '
+                <div class="col-lg-12 col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Today\'s Timetable</h4>
+                        </div>
+                        <div class="card-body">
+                            '.$timetable.'
+                        </div>
+                    </div>
+                </div>'
             ).'
         </div>
     </section>';
