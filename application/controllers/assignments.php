@@ -88,42 +88,51 @@ class Assignments extends Myschoolgh {
             ");
             $stmt->execute([1]);
 
+            $isMinified = isset($params->minified) ? true : false;
+
             $data = [];
+
+            // loop through the results list
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
-                // is an attachment assignment
-                $isAttachment = (bool) ($result->assignment_type == "file_attachment");
-                
+                // labels
                 $result->handedin_label = $this->the_status_label("Pending");
 
                 // handedin label
                 if(isset($result->handed_in)) {
                     $result->handedin_label = $this->the_status_label($result->handed_in);
-                    // if the assignment is an attachment type
+                }
+                
+                // if not minified request
+                if(!$isMinified) {
+
+                    // is an attachment assignment
+                    $isAttachment = (bool) ($result->assignment_type == "file_attachment");
+
+                    // clean the assignment description
+                    $result->assignment_description = custom_clean(htmlspecialchars_decode($result->assignment_description));
+
+                    // count the number of students assigned to
+                    if(isset($result->students_assigned)) {
+                        $result->students_assigned = ($result->assigned_to === "selected_students") ? count($this->stringToArray($result->assigned_to_list)) : $result->students_assigned;
+                    }
+
+                    // if attachment variable was parsed
                     if($isAttachment) {
+                        // if the assignment is an attachment type
                         $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
                         $result->attached_attachment_html = isset($result->attached_document->files) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
+
+                        // decode the attachments as well
+                        $result->attachment = json_decode($result->attachment);
+                        $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : "";
                     }
-                }
 
-                // clean the assignment description
-                $result->assignment_description = custom_clean(htmlspecialchars_decode($result->assignment_description));
-
-                // count the number of students assigned to
-                if(isset($result->students_assigned)) {
-                    $result->students_assigned = ($result->assigned_to === "selected_students") ? count($this->stringToArray($result->assigned_to_list)) : $result->students_assigned;
-                }
-
-                // if attachment variable was parsed
-                if($isAttachment) {
-                    $result->attachment = json_decode($result->attachment);
-                    $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : "";
-                }
-
-                // loop through the information
-                foreach(["created_by_info", "course_tutor_info"] as $each) {
-                    // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                    // loop through the information
+                    foreach(["created_by_info", "course_tutor_info"] as $each) {
+                        // convert the created by string into an object
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                    }
                 }
 
                 $data[] = $result;

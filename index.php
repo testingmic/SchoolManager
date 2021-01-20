@@ -101,7 +101,7 @@ if(!empty($session->userId)) {
 	$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
     $isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
 	// $isTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
-	// $isAccountantAdmin = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
+	$isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
 }
 
 // To be used for inserting additional scripts
