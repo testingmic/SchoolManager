@@ -589,7 +589,7 @@ class Attendance extends Myschoolgh {
             foreach($users as $user) {
 
                 // run a query for the information
-                $theQuery = $this->pushQuery("users_list", "users_attendance_log", "log_date='{$day}' AND user_type IN ('{$user}') AND client_id='{$params->clientId}' {$query}");
+                $theQuery = $this->pushQuery("user_type, users_list", "users_attendance_log", "log_date='{$day}' AND user_type IN ('{$user}') AND client_id='{$params->clientId}' {$query}");
 
                 // if the query is not empty
                 if(!empty($theQuery)) {
@@ -600,6 +600,9 @@ class Attendance extends Myschoolgh {
                         // convert the users list into an array
                         $present = json_decode($today->users_list, true);
                         
+                        // set a new variable for the day
+                        $the_day = date("jS M", strtotime($day));
+
                         // if the user is not an admin/accountant then verify if the user was present or absent
                         if($checkPresent) {
 
@@ -608,11 +611,22 @@ class Attendance extends Myschoolgh {
 
                             // set the label for the day
                             $the_state = $is_present ? "present" : "absent";
-                            $users_count["days_list"][$day] = $the_state;
+                            $users_count["days_list"][$the_day] = $the_state;
 
                         } else {
-                            $users_count["summary"][$user] = isset($users_count["summary"][$user]) ? ($users_count["summary"][$user] + count($present)) : count($present);
-                            $users_count["days_list"][$day][$user] = isset($users_count["days_list"][$day][$user]) ? ($users_count["days_list"][$day][$user] + count($present)) : count($present);
+                           
+                            // set a new label to be used
+                            if(in_array($params->the_user_type, ["admin", "accountant"]) && ($today->user_type !== "student")) { 
+                                $n_label = "all_employees";
+                                $users_count["summary"][$n_label] = isset($users_count["summary"][$n_label]) ? ($users_count["summary"][$n_label] + count($present)) : count($present);
+                                $users_count["days_list"][$the_day][$n_label] = isset($users_count["days_list"][$the_day][$n_label]) ? ($users_count["days_list"][$the_day][$n_label] + count($present)) : count($present);
+                            }
+
+                            // label to use
+                            $the_label = $user.'_count';
+                            // append to the summary
+                            $users_count["summary"][$the_label] = isset($users_count["summary"][$the_label]) ? ($users_count["summary"][$the_label] + count($present)) : count($present);
+                            $users_count["days_list"][$the_day][$the_label] = isset($users_count["days_list"][$the_day][$the_label]) ? ($users_count["days_list"][$the_day][$the_label] + count($present)) : count($present);
                         }
 
                     }
@@ -637,8 +651,23 @@ class Attendance extends Myschoolgh {
             } else {
                 $users_count["summary"] = ["present" => 0, "absent" => 0];
             }
+        } else {
+            // using the grouping format
+            $new_group = [];
+            foreach($users_count["days_list"] as $day) {
+                foreach($day as $role => $count) {
+                    $new_group[$role][] = $count;
+                }
+            }
+            $fresh_group = [];
+            foreach($new_group as $name => $data) {
+                $fresh_group[] = [
+                    "name" => $name,
+                    "data" => array_values($data)
+                ];
+            }
+            $users_count["chart_grouping"] = $fresh_group;
         }
-
 
         $users_count = (object) $users_count;
         

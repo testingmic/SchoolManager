@@ -15,9 +15,7 @@ function format_currency(total) {
     return (neg ? "-" : '') + parseFloat(total, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString();
 }
 
-var revenueReporting = (revenue, date_range) => {
-
-
+var revenueReporting = (revenue) => {
     if ($(`canvas[id="revenue_flow_chart"]`).length) {
 
         let the_value = new Array(),
@@ -122,8 +120,6 @@ var revenueReporting = (revenue, date_range) => {
         });
 
     }
-
-
 }
 
 var summaryReporting = (t_summary, date_range) => {
@@ -282,6 +278,63 @@ var summaryReporting = (t_summary, date_range) => {
     $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
 }
 
+var attendanceReport = (attendance) => {
+    $.each(attendance.summary, function(i, e) {
+        $(`h3[data-attendance_count="${i}"]`).html(e);
+    });
+
+    var chart_label = new Array(),
+        groupSet = new Array();
+    $.each(attendance.days_list, function(i, day) {
+        chart_label.push(i);
+        try {
+            $.each(day, function(role, count) {
+                if (groupSet[role] === undefined) {
+                    groupSet[role] = new Array();
+                }
+                groupSet[role].push(count);
+            });
+        } catch (err) {}
+    });
+
+    var options = {
+        chart: {
+            height: 350,
+            type: 'bar',
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                endingShape: 'rounded',
+                columnWidth: '35%',
+            },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        series: attendance.chart_grouping,
+        xaxis: {
+            categories: chart_label,
+        },
+        fill: {
+            opacity: 1
+        }
+    }
+
+    var chart = new ApexCharts(
+        document.querySelector("#attendance_chart"),
+        options
+    );
+
+    chart.render();
+
+}
+
 var loadDashboardAnalitics = () => {
     let period = filter.val(),
         to_stream = $(`div[id="data-report_stream"]`).attr(`data-report_stream`);
@@ -293,6 +346,9 @@ var loadDashboardAnalitics = () => {
             if (response.data.result.revenue_flow !== undefined) {
                 revenueReporting(response.data.result.revenue_flow, response.data.result.date_range);
             }
+            if (response.data.result.attendance_report !== undefined) {
+                attendanceReport(response.data.result.attendance_report.attendance);
+            }
             setTimeout(() => {
                 $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
             }, 1000);
@@ -302,7 +358,9 @@ var loadDashboardAnalitics = () => {
     });
 }
 
-loadDashboardAnalitics();
-filter.on("change", function() {
+if ($(`div[id="data-report_stream"]`).length) {
     loadDashboardAnalitics();
-});
+    filter.on("change", function() {
+        loadDashboardAnalitics();
+    });
+}

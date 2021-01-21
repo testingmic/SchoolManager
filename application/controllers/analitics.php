@@ -474,7 +474,8 @@ class Analitics extends Myschoolgh {
                 // set the quick information
                 $params->is_finalized = true;
                 $user_type = $params->userData->user_type;
-
+                $params->the_user_type = $user_type;
+                
                 // set the user types that each person can view
                 if(in_array($user_type, ["admin", "accountant"])) {
                     $params->user_types_list = ["student", "teacher", "admin", "employee", "accountant"];

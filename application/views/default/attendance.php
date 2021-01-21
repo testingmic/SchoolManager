@@ -26,19 +26,10 @@ if(!empty($clientId)) {
     $client_id = strtolower($clientId);
     
     // load the scripts
-    $response->scripts = [
-        "assets/js/attendance.js"
-    ];
-
-    // params
-    $params = (object) [
-        "clientId" => $clientId
-    ];
-
-    // load the summary information
-    $attendance = load_class("attendance", "controllers")->summary($params);
-    $users_count = $attendance["users_count"];
-    $today_summary = $attendance["today_summary"];
+    $response->scripts = ["assets/js/analitics.js"];
+    
+    // the default data to stream
+    $data_stream = "attendance_report";
 
     // set the html text to display
     $response->html = '
@@ -57,14 +48,8 @@ if(!empty($clientId)) {
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
-                                    <h3 class="font-light mb-0">
-                                        <i class="ti-arrow-up text-success"></i> '.($users_count->today["student"] ?? 0).'
-                                    </h3>
+                                    <h3 data-attendance_count="student_count" class="font-light mb-0">0</h3>
                                     <span class="text-muted">Students</span>
-                                </div>
-                                <div class="mb-0 text-right text-muted text-sm">
-                                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
-                                    <span class="text-nowrap">Since Yesterday</span>
                                 </div>
                             </div>
                         </div>
@@ -76,14 +61,8 @@ if(!empty($clientId)) {
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
-                                    <h3 class="font-light mb-0">
-                                        <i class="ti-arrow-up text-success"></i> '.($users_count->today["teacher"] ?? 0).'
-                                    </h3>
+                                    <h3 data-attendance_count="teacher_count" class="font-light mb-0">0</h3>
                                     <span class="text-muted">Teachers</span>
-                                </div>
-                                <div class="mb-0 text-right text-muted text-sm">
-                                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
-                                    <span class="text-nowrap">Since Yesterday</span>
                                 </div>
                             </div>
                         </div>
@@ -95,14 +74,8 @@ if(!empty($clientId)) {
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
-                                    <h3 class="font-light mb-0">
-                                        <i class="ti-arrow-up text-success"></i> '.($users_count->today["admin"] ?? 0).'
-                                    </h3>
+                                    <h3 data-attendance_count="all_employees" class="font-light mb-0">0</h3>
                                     <span class="text-muted">Employees</span>
-                                </div>
-                                <div class="mb-0 text-right text-muted text-sm">
-                                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
-                                    <span class="text-nowrap">Since Yesterday</span>
                                 </div>
                             </div>
                         </div>
@@ -114,24 +87,23 @@ if(!empty($clientId)) {
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
-                                    <h3 class="font-light mb-0">
-                                        <i class="ti-arrow-up text-success"></i> '.($today_summary ?? 0).'
-                                    </h3>
+                                    <h3 class="font-light mb-0">0</h3>
                                     <span class="text-muted">All Logs</span>
-                                </div>
-                                <div class="mb-0 text-right text-muted text-sm">
-                                    <span class="text-success mr-2"><i class="fa fa-arrow-up"></i> 0%</span>
-                                    <span class="text-nowrap">Since Yesterday</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                <div class="col-lg-12 col-md-12 col-12 col-sm-12" id="data-report_stream" data-report_stream="'.$data_stream.'">
                     <div class="card">
                         <div class="card-header"><h4>Attendance Record</h4></div>
-                        <div class="card-body">
-                            <div id="attendance_chart"></div>
+                        <div class="card-body quick_loader">
+                            <div class="form-content-loader" style="display: flex; position: absolute">
+                                <div class="offline-content text-center">
+                                    <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                </div>
+                            </div>
+                            <div style="width:100%;height:345px;" id="attendance_chart"></div>
                         </div>
                     </div>
                 </div>
