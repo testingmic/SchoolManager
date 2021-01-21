@@ -13,7 +13,7 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 // initial variables
-global $accessObject, $defaultUser, $isAdminAccountant;
+global $accessObject, $defaultUser, $isAdminAccountant, $isTutorStudent, $isParent;
 $appName = config_item("site_name");
 
 // confirm that user id has been parsed
@@ -28,51 +28,6 @@ $accessObject->userId = $loggedUserId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 
 // filters
-$filters = [
-    "this_week" => [
-        "title" => "This Week",
-        "alt" => [
-            "key" => "last_week",
-            "value" => "Last Week"
-        ]
-    ],
-    "last_14days" => [
-        "title" => "Last 2 Weeks",
-        "alt" => [
-            "key" => "last_14days",
-            "value" => "Last 28 Days"
-        ]
-    ],
-    "this_month" => [
-        "title" => "This Month",
-        "alt" => [
-            "key" => "last_month",
-            "value" => "Last Month"
-        ]
-    ],
-    "last_30days" => [
-        "title" => "Last 30 Days",
-        "alt" => [
-            "key" => "last_30days",
-            "value" => "Previous 30 Days"
-        ]
-    ],
-    "last_month" => [
-        "title" => "Last Month",
-        "alt" => [
-            "key" => "last_month",
-            "value" => "Last 2 Months"
-        ]
-    ],
-    "last_3months" => [
-        "title" => "Last 3 Month",
-        "alt" => [
-            "key" => "last_month",
-            "value" => "Last 6 Months"
-        ]
-    ]
-];
-
 $response = (object) [];
 $response->title = "Dashboard : {$appName}";
 
@@ -90,6 +45,7 @@ $userData->date_range = date("Y-m-d", strtotime("-20 days")).':'.date("Y-m-t", s
 // load the events list
 $events_list = $eventClass->events_list($userData);
 
+$wards_list = "";
 $assigments_list = "";
 $upcoming_events_list = "";
 $upcoming_birthday_list = "";
@@ -155,7 +111,7 @@ if(!empty($events_list->birthday_list) && $isAdminAccountant) {
 }
 
 // load the assignments list
-else if($isWardTutorParent) {
+else if($isTutorStudent) {
     // unset the session
     $session->remove("assignment_uploadID");
 
@@ -213,6 +169,126 @@ if($isAdminAccountant) {
 // append the scripts to the page
 $response->scripts = ["assets/js/analitics.js"];
 
+// if ward/parent/tutor
+if($isWardTutorParent) {
+
+    // load the use information
+    $data = $defaultUser;
+    
+    // load the wards list
+    if($isParent) {
+        if(empty($data->wards_list)) {
+            $wards_list = "<div class='font-italic'>You currently do not have any ward in the school</div>";
+        } else {
+            // loop through the wards list
+            foreach($data->wards_list as $ward) {
+
+                // convert to object
+                $ward = (object) $ward;
+
+                // set the selected session
+                $isCurrent = (bool) ($session->student_id == $ward->student_guid);
+
+                $wards_list .= "
+                <div class='mb-3 border-bottom'>
+                    <div class='row'>
+                        <div class='col-lg-3 text-center'>
+                            <img src='{$baseUrl}{$ward->image}' width='80px' class='rounded-circle author-box-picture'>
+                        </div>
+                        <div class='col-lg-9'>
+                            <table width='100%'>
+                                <tr>
+                                    <td class='font-weight-bold p-1' align='right'>Name</td>
+                                    <td class='pr-2' align='right'>{$ward->name}</td>
+                                </tr>
+                                <tr>
+                                    <td class='font-weight-bold p-1' align='right'>Gender</td>
+                                    <td class='pr-2' align='right'>{$ward->gender}</td>
+                                </tr>
+                                <tr>
+                                    <td class='font-weight-bold p-1' align='right'>Class</td>
+                                    <td class='pr-2' align='right'>{$ward->class_name}</td>
+                                </tr>
+                                <tr>
+                                    <td class='font-weight-bold p-1' align='right'>Admission Id</td>
+                                    <td class='pr-2' align='right'>{$ward->unique_id}</td>
+                                </tr>
+                                <tr>
+                                    <td class='font-weight-bold p-1' align='right'>Admission Date</td>
+                                    <td class='pr-2' align='right'>{$ward->enrollment_date}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan='2' align='right'>
+                                        ".($isCurrent ? "<span class='badge mb-2 badge-success'>Selected</span>" : "<button onclick='return set_default_Student(\"{$ward->student_guid}\")' class='btn btn-sm btn-outline-primary mb-2'>Load Student</button>")."
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>";
+            }
+
+            // assign the assignments list
+            $expenses_list = '
+            <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>All Expenses</h4>
+                    </div>
+                    <div class="card-body trix-slim-scroll" style="max-height:435px;height:435px;overflow-y:auto;">
+                        <div class="table-responsive">
+                            <table data-empty="" class="table table-striped datatable">
+                                <thead>
+                                    <tr>
+                                        <th width="5%" class="text-center">#</th>
+                                        <th>Student Name</th>
+                                        <th>Class</th>
+                                        <th width="10%">Category</th>
+                                        <th>Amount</th>
+                                        <th>Date</th>
+                                        <th align="center"></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>';
+        }
+    } else {
+        // assign the assignments list
+        $assignment_list = '
+        <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Assignments</h4>
+                </div>
+                <div class="card-body trix-slim-scroll" style="max-height:435px;height:435px;overflow-y:auto;">
+                    <div class="table-responsive">
+                        <table data-empty="" class="table table-striped datatable">
+                            <thead>
+                                <tr>
+                                    <th width="5%" class="text-center">#</th>
+                                    <th>Title</th>
+                                    <th>Due Date</th>
+                                    '.($can_Update_Assign ? '
+                                        <th width="10%">Assigned</th>
+                                        <th>Handed In</th>
+                                        <th>Marked</th>' : '<th>Awarded Mark</th>'
+                                    ).'
+                                    <th align="center"></th>
+                                </tr>
+                            </thead>
+                            <tbody>'.$assigments_list.'</tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>';
+    }
+}
+
 // set the response dataset
 $response->html = '
     <section class="section">
@@ -233,7 +309,7 @@ $response->html = '
                                 </div>
                                 <div class="col-auto">
                                     <div class="card-circle l-bg-orange text-white">
-                                        <i class="fas fa-book-open"></i>
+                                        <i class="fas fa-users"></i>
                                     </div>
                                 </div>
                             </div>
@@ -250,7 +326,7 @@ $response->html = '
                                 </div>
                                 <div class="col-auto">
                                     <div class="card-circle l-bg-cyan text-white">
-                                        <i class="fas fa-users"></i>
+                                        <i class="fas fa-user-secret"></i>
                                     </div>
                                 </div>
                             </div>
@@ -284,7 +360,7 @@ $response->html = '
                                 </div>
                                 <div class="col-auto">
                                     <div class="card-circle l-bg-yellow text-white">
-                                        <i class="fas fa-user"></i>
+                                        <i class="fas fa-anchor"></i>
                                     </div>
                                 </div>
                             </div>
@@ -311,7 +387,8 @@ $response->html = '
             </div>' : ''
         ).'
         <div class="row">
-            <div class="col-md-12">
+            '.($isAdminAccountant ?
+            '<div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
                         <h4>Revenue Flow Chart</h4>
@@ -325,7 +402,132 @@ $response->html = '
                         <canvas id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></canvas>
                     </div>
                 </div>
+            </div>' : '').'
+            '.($isWardTutorParent ?
+            '<div class="col-lg-4 col-md-12">
+                <div class="card">
+                    '.($isTutorStudent ?
+                        '<div class="card-header">
+                            <h5 class="pb-0 mb-0">About Me</h5>
+                        </div>
+                        <div class="card-body mt-0 pt-0 pb-0">
+                            <div class="py-4">
+                                <p class="clearfix">
+                                    <span class="float-left">Name</span>
+                                    <span class="float-right text-muted">'.$data->name.'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Gender</span>
+                                    <span class="float-right text-muted">'.$data->gender.'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Enrollment Date</span>
+                                    <span class="float-right text-muted">'.$data->enrollment_date.'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Class</span>
+                                    <span class="float-right text-muted">'.$data->class_name.'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Section</span>
+                                    <span class="float-right text-muted">'.$data->section_name.'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Department</span>
+                                    <span class="float-right text-muted">'.$data->department_name.'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Birthday</span>
+                                    <span class="float-right text-muted">'.$data->date_of_birth.'</span>
+                                </p>
+                                '.($data->phone_number ?
+                                    '<p class="clearfix">
+                                        <span class="float-left">Phone</span>
+                                        <span class="float-right text-muted">'.$data->phone_number.'</span>
+                                    </p>' : ''
+                                ).'
+                                '.($data->email ?
+                                    '<p class="clearfix">
+                                        <span class="float-left">E-Mail</span>
+                                        <span class="float-right text-muted">'.$data->email.'</span>
+                                    </p>' : ''
+                                ).'
+                                <p class="clearfix">
+                                    <span class="float-left">Blood Group</span>
+                                    <span class="float-right text-muted">'.$data->blood_group_name.'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Residence</span>
+                                    <span class="float-right text-muted">'.$data->residence.'</span>
+                                </p>
+                                '.($data->religion ? 
+                                    '<p class="clearfix">
+                                        <span class="float-left">Religion</span>
+                                        <span class="float-right text-muted">'.$data->religion.'</span>
+                                    </p>' : ''
+                                ).'
+                                <p class="clearfix">
+                                    <span class="float-left">Country</span>
+                                    <span class="float-right text-muted">'.$data->country_name.'</span>
+                                </p>
+                            </div>
+                        </div>' : '
+                        <div class="card-header">
+                            <h5 class="pb-0 mb-0">My Kids</h5>
+                        </div>
+                        <div class="card-body pr-2 mt-0 pt-0 pb-0">
+                            <div class="py-2">
+                                '.$wards_list.'
+                            </div>
+                        </div>'
+                    ).'
+                </div>
             </div>
+            <div class="col-lg-8 col-md-12">
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                        <div class="card card-statistic-1">
+                            <i class="fas fa-list-alt card-icon col-blue"></i>
+                            <div class="card-wrap">
+                            <div class="padding-20">
+                                <div class="text-right">
+                                    <h3 class="font-light mb-0">0</h3>
+                                    <span class="text-muted">Notifications</span>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                        <div class="card card-statistic-1">
+                            <i class="fas fa-book-open card-icon col-red"></i>
+                            <div class="card-wrap">
+                            <div class="padding-20">
+                                <div class="text-right">
+                                    <h3 class="font-light mb-0">0</h3>
+                                    <span class="text-muted">Assignments</span>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                        <div class="card card-statistic-1">
+                            <i class="fas fa-percentage card-icon col-green"></i>
+                            <div class="card-wrap">
+                            <div class="padding-20">
+                                <div class="text-right">
+                                    <h3 class="font-light mb-0">0</h3>
+                                    <span class="text-muted">Attendance</span>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    '.($isTutorStudent ? $assignment_list : $expenses_list).'
+                </div>
+            </div>
+            ' : '').'
             <div class="col-md-6 hidden">
                 <div class="card">
                 <div class="card-header">
@@ -342,6 +544,78 @@ $response->html = '
                 </div>
             </div>
         </div>
+        '.($isAdminAccountant ?
+            '<div class="row">
+                <div class="col-xl-3 col-lg-6">
+                    <div class="card">
+                        <div class="card-body card-type-3">
+                            <div class="row">
+                                <div class="col">
+                                    <h6 class="text-muted mb-0">Books Category</h6>
+                                    <span data-count="library_category_count" class="font-weight-bold mb-0">0</span>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="card-circle l-bg-purple-dark text-white">
+                                        <i class="fas fa-book-open"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6">
+                    <div class="card">
+                        <div class="card-body card-type-3">
+                            <div class="row">
+                                <div class="col">
+                                    <h6 class="text-muted mb-0">Books Available</h6>
+                                    <span data-count="library_books_count" class="font-weight-bold mb-0">0</span>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="card-circle bg-green text-white">
+                                        <i class="fas fa-book-reader"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6">
+                    <div class="card">
+                        <div class="card-body card-type-3">
+                            <div class="row">
+                                <div class="col">
+                                    <h6 class="text-muted mb-0">Departments</h6>
+                                    <span data-count="departments_count" class="font-weight-bold mb-0">0</span>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="card-circle bg-pink text-white">
+                                        <i class="fas fa-bookmark"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6">
+                    <div class="card">
+                        <div class="card-body card-type-3">
+                            <div class="row">
+                                <div class="col">
+                                    <h6 class="text-muted mb-0">Classes</h6>
+                                    <span data-count="total_classes_count" class="font-weight-bold mb-0">0</span>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="card-circle bg-red text-white">
+                                        <i class="fas fa-home"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>' : ''
+        ).'
         <div class="row">
             '.($isAdminAccountant ? 
                 '<div class="col-lg-4 col-md-12 col-12 col-sm-12">
@@ -437,36 +711,7 @@ $response->html = '
                             </ul>
                         </div>
                     </div>
-                </div>' : (
-                    $isWardTutorParent ? '
-                <div class="col-lg-7 col-md-6 col-12 col-sm-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4>Assignments</h4>
-                        </div>
-                        <div class="card-body trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
-                            <div class="table-responsive">
-                                <table data-empty="" class="table slim-scrdddoll table-striped datatable">
-                                    <thead>
-                                        <tr>
-                                            <th width="5%" class="text-center">#</th>
-                                            <th>Title</th>
-                                            <th>Due Date</th>
-                                            '.($can_Update_Assign ? '
-                                                <th width="10%">Assigned</th>
-                                                <th>Handed In</th>
-                                                <th>Marked</th>' : '<th>Awarded Mark</th>'
-                                            ).'
-                                            <th align="center"></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>'.$assigments_list.'</tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                ' : '')
+                </div>' : ''
             ).'
         </div>
     </section>';

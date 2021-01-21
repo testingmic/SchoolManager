@@ -22,7 +22,6 @@ class Assignments extends Myschoolgh {
         $params->query = "1";
 
         $filesObject = load_class("forms", "controllers");
-        $client_data = $this->client_data($params->clientId);
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
@@ -31,13 +30,18 @@ class Assignments extends Myschoolgh {
         $params->academic_year = isset($params->academic_year) ? $params->academic_year : $client_data->client_preferences->academics->academic_year;
         
         // variables
-        global $isTutorAdmin, $isWardParent;
+        global $isTutorAdmin, $isWardParent, $isParent;
 
         // if the user is a parent or student
         if($isWardParent) {
-            $query = ",
-            (SELECT handed_in FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$params->userData->user_id}') AS handed_in,
-            (SELECT score FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$params->userData->user_id}') AS awarded_mark";
+
+            // set the user id
+            $the_user_id = $isParent ? $this->session->student_id : $params->userData->user_id;
+
+            // run the query
+            $query = ",(SELECT handed_in FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$the_user_id}') AS handed_in,
+                (SELECT score FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$the_user_id}') AS awarded_mark, 
+                (SELECT b.description FROM files_attachment b WHERE b.resource='assignment_doc' AND b.record_id = a.item_id AND b.created_by = '{$the_user_id}' ORDER BY b.id DESC LIMIT 1) AS attached_document";
         }
 
         // if the user type is an admin or teacher
@@ -47,11 +51,6 @@ class Assignments extends Myschoolgh {
             (SELECT COUNT(*) FROM assignments_submitted	c WHERE c.assignment_id=a.item_id AND c.handed_in='Submitted') AS students_handed_in,
             (SELECT COUNT(*) FROM users c WHERE c.client_id=a.client_id AND a.class_id=c.class_id AND c.user_type='student' AND c.user_status='Active' AND c.status='1') AS students_assigned
             ";
-        }
-        
-        // if the user is a parent, student or teacher
-        if($isWardParent) {
-            $query .= ", (SELECT b.description FROM files_attachment b WHERE b.resource='assignment_doc' AND b.record_id = a.item_id AND b.created_by = '{$params->userData->user_id}' ORDER BY b.id DESC LIMIT 1) AS attached_document";
         }
 
         // append the course tutor if the user_type is teacher

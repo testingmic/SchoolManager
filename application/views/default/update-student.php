@@ -238,14 +238,18 @@ if(!empty($user_id)) {
                             <span class="float-left">Birthday</span>
                             <span class="float-right text-muted">'.$data->date_of_birth.'</span>
                         </p>
-                        <p class="clearfix">
-                            <span class="float-left">Phone</span>
-                            <span class="float-right text-muted">'.$data->phone_number.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">E-Mail</span>
-                            <span class="float-right text-muted">'.$data->email.'</span>
-                        </p>
+                        '.($data->phone_number ?
+                            '<p class="clearfix">
+                                <span class="float-left">Phone</span>
+                                <span class="float-right text-muted">'.$data->phone_number.'</span>
+                            </p>' : ''
+                        ).'
+                        '.($data->email ?
+                            '<p class="clearfix">
+                                <span class="float-left">E-Mail</span>
+                                <span class="float-right text-muted">'.$data->email.'</span>
+                            </p>' : ''
+                        ).'
                         <p class="clearfix">
                             <span class="float-left">Blood Group</span>
                             <span class="float-right text-muted">'.$data->blood_group_name.'</span>

@@ -153,7 +153,6 @@ $response->html = '
                 <label for="">&nbsp;</label>
                 <button id="filter_Assignments_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>
-
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">

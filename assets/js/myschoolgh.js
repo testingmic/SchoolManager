@@ -304,3 +304,17 @@ var view_Event_Details = (event_group, event_id) => {
         }
     }
 }
+
+var set_default_Student = (student_id) => {
+    $.post(`${baseUrl}api/users/set_default_student`, {student_id}).then((response) => {
+        if(response.code === 200) {
+            swal({
+                text: "Student ID successfully changed.",
+                icon: "success",
+            });
+            setTimeout(() => {
+                window.location.href= `${baseUrl}main`;
+            }, 1000);
+        }
+    });
+}

@@ -90,7 +90,7 @@ $announcementClass = load_class('announcements', 'controllers');
 if(!empty($session->userId)) {
 	
 	// the query parameter to load the user information
-	$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "userId" => $session->userId];
+	$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "append_wards" => true, "userId" => $session->userId];
 	$defaultUser = $usersClass->list($i_params)["data"][0];
 
 	$isAdmin = (bool) ($defaultUser->user_type == "admin");
@@ -99,9 +99,11 @@ if(!empty($session->userId)) {
 	$isStudent = (bool) ($defaultUser->user_type == "student");
 	// $isEmployee = (bool) ($defaultUser->user_type == "employee");
 	$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
+	$isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
     $isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
 	$isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
 	$isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
+
 }
 
 // To be used for inserting additional scripts

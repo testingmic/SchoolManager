@@ -50,6 +50,9 @@ foreach($guardian_list as $kkey => $each) {
 
         // loop through the list of wards
         foreach($each->wards_list as $key => $ward) {
+            // convert to object
+            $ward = (object) $ward;
+
             // append to the list
             $wards_list .= "
                 <div class='d-flex justify-content-start".($key+1 !== count($each->wards_list) ? "border-bottom mb-2 pb-2" : "")."'>

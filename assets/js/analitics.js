@@ -126,7 +126,9 @@ var revenueReporting = (revenue, date_range) => {
 
 }
 
-var summaryReporting = (summary, date_range) => {
+var summaryReporting = (t_summary, date_range) => {
+
+    var summary = t_summary.summary_report;
 
     if (summary.users_record_count !== undefined) {
         let user = summary.users_record_count;
@@ -163,44 +165,26 @@ var summaryReporting = (summary, date_range) => {
                 }
             }
         });
+    }
 
-        // var doughnutChartData = {
-        //     labels: ["Female Students", "Male Students"],
-        //     datasets: [{
-        //         backgroundColor: ["#304ffe", "#ffa601"],
-        //         data: [45000, 105000],
-        //         label: "Total Students"
-        //     }, ]
-        // };
-        // var doughnutChartOptions = {
-        //     responsive: true,
-        //     maintainAspectRatio: false,
-        //     cutoutPercentage: 65,
-        //     rotation: -9.4,
-        //     animation: {
-        //         duration: 2000
-        //     },
-        //     legend: {
-        //         display: false
-        //     },
-        //     tooltips: {
-        //         enabled: true
-        //     },
-        // };
-        // var studentCanvas = $("#male_female_comparison").get(0).getContext("2d");
-        // var studentChart = new Chart(studentCanvas, {
-        //     type: 'doughnut',
-        //     data: doughnutChartData,
-        //     options: doughnutChartOptions
-        // });
+    if (t_summary.departments_report !== undefined) {
+        let department = t_summary.departments_report;
+        $(`span[data-count="departments_count"]`).html(department.departments_count);
+    }
 
-
+    if (t_summary.library_report !== undefined) {
+        let library = t_summary.library_report;
+        $(`span[data-count="library_category_count"]`).html(library.library_category_count);
+        $(`span[data-count="library_books_count"]`).html(library.library_books_count);
     }
 
     if (summary.students_class_record_count !== undefined) {
         let classes = summary.students_class_record_count,
             class_count_list = "",
             key = 0;
+
+        $(`span[data-count="total_classes_count"]`).html(classes.total_classes_count);
+
         $.each(classes.count, function(i, e) {
             key++;
             class_count_list += `
@@ -304,7 +288,7 @@ var loadDashboardAnalitics = () => {
     $.get(`${baseUrl}api/analitics/generate?label[stream]=${to_stream}`).then((response) => {
         if (response.code === 200) {
             if (response.data.result.summary_report !== undefined) {
-                summaryReporting(response.data.result.summary_report, response.data.result.date_range);
+                summaryReporting(response.data.result, response.data.result.date_range);
             }
             if (response.data.result.revenue_flow !== undefined) {
                 revenueReporting(response.data.result.revenue_flow, response.data.result.date_range);

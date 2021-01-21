@@ -238,7 +238,7 @@ class Analitics extends Myschoolgh {
          */
         // get the fees categories
         $class_list = $this->pushQuery("id, name", "classes", "status='1' AND client_id='{$params->clientId}'");
-        $result["students_class_record_count"]["total_count"] = count($class_list);
+        $result["students_class_record_count"]["total_classes_count"] = count($class_list);
 
         // load the fees records
         foreach($class_list as $key => $value) {

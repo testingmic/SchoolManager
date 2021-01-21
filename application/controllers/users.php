@@ -41,15 +41,30 @@ class Users extends Myschoolgh {
 	public function list(stdClass $params = null) {
 
 		$params->query = " 1 ";
+		
+		global $defaultUser;
+
+		// load the informatin per the user permissions
+		if(isset($params->userData) || !empty($defaultUser)) {
+			
+			// set the user type
+			$d_data = isset($params->userData) ? $params->userData : $defaultUser;
+			$user_type = $d_data->user_type;
+
+			// loop through the query
+			if(in_array($user_type, ["employee", "student"])) {
+				$params->user_id = $d_data->user_id;
+			}
+
+		}
 
 		// boolean value
         $params->remote = (bool) (isset($params->remote) && $params->remote);
 		
-		$params->query .= (isset($params->user_id)) ? (preg_match("/^[0-9]+$/", $params->user_id) ? " AND a.id='{$params->user_id}'" : " AND a.item_id='{$params->user_id}'") : null;
+		$params->query .= (isset($params->user_id) && !empty($params->user_id)) ? " AND a.item_id IN {$this->inList($params->user_id)}" : "";
 		$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
 		$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 		$params->query .= (isset($params->user_status) && !empty($params->user_status)) ? " AND a.user_status ='{$params->user_status}'" : " AND a.user_status ='Active'";
-		
 		$params->query .= (isset($params->academic_year) && !empty($params->academic_year)) ? " AND a.academic_year='{$params->academic_year}'" : null;
 		$params->query .= (isset($params->academic_term) && !empty($params->academic_term)) ? " AND a.academic_term='{$params->academic_term}'" : null;
 
@@ -75,7 +90,9 @@ class Users extends Myschoolgh {
 				$params->query .= (isset($params->username)) ? " AND a.username='{$params->username}'" : null;
 				$params->query .= (isset($params->gender) && !empty($params->gender)) ? " AND a.gender='{$params->gender}'" : null;
 			}
+
 		}
+
 		$params->query .= isset($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
 
 		// if a search parameter was parsed in the request
@@ -93,7 +110,17 @@ class Users extends Myschoolgh {
 			if(isset($params->minified)) {
 
 				// set the columns to load
-				$params->columns = "a.client_id, a.guardian_id, a.item_id AS user_id, a.name, a.unique_id, a.email, a.image, a.phone_number, a.user_type, a.class_id";
+				$params->columns = "
+					a.client_id, a.guardian_id, a.item_id AS user_id, a.name, 
+					a.unique_id, a.email, a.image, a.phone_number, a.user_type, a.class_id,
+					a.gender, a.enrollment_date, a.residence, a.religion, a.date_of_birth,
+					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
+					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
+					(SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
+					(SELECT name FROM departments WHERE departments.id = a.department LIMIT 1) AS department_name,
+					(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name,
+					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name
+				";
 
 				// exempt current user
 				if(($params->minified == "chat_list_users")) {
@@ -142,6 +169,7 @@ class Users extends Myschoolgh {
 			}
 
 			$loadWards = isset($params->append_wards) ? true : false;
+			$noKeyLoad = !isset($params->key_data_load) ? true : false;
 
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT 
@@ -164,6 +192,7 @@ class Users extends Myschoolgh {
 			
 			// init
 			$row = 0;
+			$key = 0;
 			$data = [];
 			$users_group = [];
 
@@ -243,16 +272,21 @@ class Users extends Myschoolgh {
 						SELECT 
 							a.item_id AS student_guid, a.unique_id, a.firstname, a.lastname, a.othername,
 							a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
-							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
+							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name, a.enrollment_date,
 							(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
 						FROM users a WHERE a.status='1' AND a.guardian_id LIKE '%{$result->unique_id}%' AND a.user_type='student'
 					");
 					$qr->execute();
-					$result->wards_list = $qr->fetchAll(PDO::FETCH_OBJ);
+					$result->wards_list = $qr->fetchAll(PDO::FETCH_ASSOC);
+					$result->wards_list_ids = array_column($result->wards_list, "student_guid");
 				}
 
 				// append to the results set to return
-				$data[] = $result;
+				if($noKeyLoad) {
+					$data[] = $result;
+				} else {
+					$data[$result->user_id] = $result;
+				}
 
 				// if minified
 				if(isset($params->minified)) {
@@ -474,6 +508,10 @@ class Users extends Myschoolgh {
 
 		// loop through the array list
 		foreach($wards as $ward) {
+			// convert to object
+            $ward = (object) $ward;
+
+			// append to the list
 			$wards_list .= "
 				<div class=\"col-12 col-md-6 load_ward_information col-lg-6\" data-id=\"{$ward->student_guid}\">
 					<div class=\"card card-success\">
@@ -1808,6 +1846,24 @@ class Users extends Myschoolgh {
 			return $e->getMessage();
 		}
 
+	}
+
+	/**
+	 * Set the default student id
+	 * 
+	 * @param String $params->student_id
+	 * 
+	 * @return Array
+	 */
+	public function set_default_student(stdClass $params) {
+
+		// save the id in session
+		$this->session->student_id = $params->student_id;
+
+		return [
+			"code" => 200,
+			"data" => "Student Id successfully changed"
+		];
 	}
 	
 }
