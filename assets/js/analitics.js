@@ -279,59 +279,88 @@ var summaryReporting = (t_summary, date_range) => {
 }
 
 var attendanceReport = (attendance) => {
+
     $.each(attendance.summary, function(i, e) {
         $(`h3[data-attendance_count="${i}"]`).html(e);
     });
 
-    var chart_label = new Array(),
-        groupSet = new Array();
-    $.each(attendance.days_list, function(i, day) {
-        chart_label.push(i);
-        try {
-            $.each(day, function(role, count) {
-                if (groupSet[role] === undefined) {
-                    groupSet[role] = new Array();
-                }
-                groupSet[role].push(count);
-            });
-        } catch (err) {}
+    let chart_summary = "";
+    $.each(attendance.chart_summary, function(i, e) {
+        chart_summary += `
+            <div><strong>${i}:</strong> ${e}</div>
+        `;
     });
+    $(`span[data-section="chart_summary"]`).html(chart_summary);
 
-    var options = {
-        chart: {
-            height: 350,
-            type: 'bar',
-        },
-        plotOptions: {
-            bar: {
-                horizontal: false,
-                endingShape: 'rounded',
-                columnWidth: '35%',
+    if ($(`div[id="attendance_chart"]`).length) {
+        var chart_label = new Array(),
+            groupSet = new Array();
+        $.each(attendance.days_list, function(i, day) {
+            chart_label.push(i);
+            try {
+                $.each(day, function(role, count) {
+                    if (groupSet[role] === undefined) {
+                        groupSet[role] = new Array();
+                    }
+                    groupSet[role].push(count);
+                });
+            } catch (err) {}
+        });
+
+        var options = {
+            chart: {
+                height: 350,
+                type: 'bar',
             },
-        },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            show: true,
-            width: 2,
-            colors: ['transparent']
-        },
-        series: attendance.chart_grouping,
-        xaxis: {
-            categories: chart_label,
-        },
-        fill: {
-            opacity: 1
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    endingShape: 'rounded',
+                    columnWidth: '35%',
+                },
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['transparent']
+            },
+            series: attendance.chart_grouping,
+            xaxis: {
+                categories: chart_label,
+            },
+            fill: {
+                opacity: 1
+            }
         }
+
+        var chart = new ApexCharts(
+            document.querySelector("#attendance_chart"),
+            options
+        );
+
+        chart.render();
     }
 
-    var chart = new ApexCharts(
-        document.querySelector("#attendance_chart"),
-        options
-    );
-
-    chart.render();
+    if ($(`div[id="attendance_chart_list"]`).length) {
+        let attendance_chart_list = "<div class='row'>";
+        $.each(attendance.days_list, function(day, status) {
+            attendance_chart_list += `
+            <div class='col-lg-3 col-md-6'>
+                <div class='card mb-3'>
+                    <div class='card-header pb-0'><h5>${day}</h5></div>
+                    <div class='card-body pt-2 pb-2'>
+                        <i class="fa ${status === "present" ? "text-success fa-check" : "text-danger fa-times"}"></i> 
+                        <strong class="${status === "present" ? "text-success" : "text-danger"}">${status.toUpperCase()}</strong>
+                    </div>
+                </div>
+            </div>`;
+        });
+        attendance_chart_list += "</div>";
+        $(`div[id="attendance_chart_list"]`).html(attendance_chart_list);
+    }
 
 }
 

@@ -579,8 +579,7 @@ class Attendance extends Myschoolgh {
         $checkPresent = (bool) isset($params->is_present_check);
 
         // attendance log algo
-        $was_present = 0;
-        $was_absent = 0;
+        $logged_count = 0;
 
         // loop through the days for the record
         foreach($days as $day) {
@@ -593,6 +592,9 @@ class Attendance extends Myschoolgh {
 
                 // if the query is not empty
                 if(!empty($theQuery)) {
+
+                    // increment the logged count
+                    $logged_count++;
                     
                     // loop through the results set
                     foreach($theQuery as $today) {
@@ -601,7 +603,7 @@ class Attendance extends Myschoolgh {
                         $present = json_decode($today->users_list, true);
                         
                         // set a new variable for the day
-                        $the_day = date("jS M", strtotime($day));
+                        $the_day = date("D, jS M", strtotime($day));
 
                         // if the user is not an admin/accountant then verify if the user was present or absent
                         if($checkPresent) {
@@ -645,12 +647,21 @@ class Attendance extends Myschoolgh {
                 $summary_set = [];
                 // loop through the records list
                 foreach($users_count["days_list"] as $value) {
-                    $summary_set[$value] = isset($summary_set[$value]) ? ($summary_set[$value]+1) : 1;
+                    // ucfirst
+                    $key = ucfirst($value);
+                    // append to the array
+                    $summary_set[$key] = isset($summary_set[$key]) ? ($summary_set[$key]+1) : 1;
                 }
                 $users_count["summary"] = $summary_set;
             } else {
                 $users_count["summary"] = ["present" => 0, "absent" => 0];
             }
+            $users_count["summary"]["logs_count"] = $logged_count;
+            $users_count["chart_summary"] = [
+                "Start Date" => $params->start_date,
+                "End Date" => $params->end_date,
+                "Days Interval" => count($days) . " days interval"
+            ];
         } else {
             // using the grouping format
             $new_group = [];
@@ -667,6 +678,12 @@ class Attendance extends Myschoolgh {
                 ];
             }
             $users_count["chart_grouping"] = $fresh_group;
+            $users_count["chart_summary"] = [
+                "Start Date" => $params->start_date,
+                "End Date" => $params->end_date,
+                "Days Interval" => count($days) . " days interval",
+                "Logs Count" => $logged_count,
+            ];
         }
 
         $users_count = (object) $users_count;

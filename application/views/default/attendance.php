@@ -42,7 +42,8 @@ if(!empty($clientId)) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+            '.($isAdminAccountant ? 
+                '<div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
                         <i class="fas fa-hiking card-icon col-green"></i>
                         <div class="card-wrap">
@@ -55,7 +56,7 @@ if(!empty($clientId)) {
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
                         <i class="fas fa-user card-icon col-orange"></i>
                         <div class="card-wrap">
@@ -68,7 +69,7 @@ if(!empty($clientId)) {
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
                         <i class="fas fa-users card-icon col-cyan"></i>
                         <div class="card-wrap">
@@ -80,15 +81,58 @@ if(!empty($clientId)) {
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 col-12">
+                </div>' : '
+                <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
-                        <i class="fas fa-chart-line card-icon col-orange"></i>
+                        <i class="fas fa-user card-icon col-orange"></i>
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
-                                    <h3 class="font-light mb-0">0</h3>
-                                    <span class="text-muted">All Logs</span>
+                                    <h3 data-attendance_count="Present" class="font-light mb-0">0</h3>
+                                    <span class="text-muted">Days Present</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="card card-statistic-1">
+                        <i class="fas fa-user card-icon col-red"></i>
+                        <div class="card-wrap">
+                            <div class="padding-20">
+                                <div class="text-right">
+                                    <h3 data-attendance_count="Absent" class="font-light mb-0">0</h3>
+                                    <span class="text-muted">Days Absent</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="card card-statistic-1">
+                        <i class="fas fa-user card-icon col-blue"></i>
+                        <div class="card-wrap">
+                            <div class="padding-20">
+                                <div class="text-right">
+                                    <h3 data-attendance_count="logs_count" class="font-light mb-0">0</h3>
+                                    <span class="text-muted">Logs Counter</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>'
+                ).'
+                <div class="col-lg-3 col-md-6 col-sm-6">
+                    <div class="card">
+                        <div class="card-wrap">
+                            <div class="padding-20 pt-2 quick_loader pb-1" style="height:100px">
+                                <div class="form-content-loader" style="display: flex; position: absolute">
+                                    <div class="offline-content text-center">
+                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                    </div>
+                                </div>
+                                <div class="text-left">
+                                    <span class="text-muted" data-section="chart_summary"></span>
                                 </div>
                             </div>
                         </div>
@@ -103,7 +147,8 @@ if(!empty($clientId)) {
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                 </div>
                             </div>
-                            <div style="width:100%;height:345px;" id="attendance_chart"></div>
+                            '.($isAdminAccountant ? '<div style="width:100%;height:345px;" id="attendance_chart"></div>' : 
+                            '<div id="attendance_chart_list"></div>').'
                         </div>
                     </div>
                 </div>
