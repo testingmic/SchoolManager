@@ -40,13 +40,13 @@ class Fees extends Myschoolgh {
 
         /** Init the user type */
         $student_id = $params->userData->user_id;
-
+        
         /** The user id algorithm */
         if(in_array($params->userData->user_type, ["accountant", "admin"])) {
             $student_id = "";
         } else if(in_array($params->userData->user_type, ["parent"])) {
             // if the user is a parent
-			$student_id = $this->session->student_id;
+			$student_id = isset($params->student_array_ids) ? $params->student_array_ids : $this->session->student_id;
         }
 
         $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
@@ -55,7 +55,7 @@ class Fees extends Myschoolgh {
         $filters = "1";
 		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : "";
         $filters .= isset($params->department_id) && !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : "";
-        $filters .= !empty($student_id) ? " AND a.student_id IN ('{$student_id}')" : "";
+        $filters .= !empty($student_id) ? " AND a.student_id IN {$this->inList($student_id)}" : "";
         $filters .= isset($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";
         $filters .= isset($params->programme_id) && !empty($params->programme_id) ? " AND a.programme_id='{$params->programme_id}'" : "";
         $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id IN {$this->inList($params->category_id)}" : ""; 
@@ -337,6 +337,7 @@ class Fees extends Myschoolgh {
 
             // loop through the results list
             foreach($student_allocation_array as $key => $student) {
+
                 // verify if the student has paid some amount
                 $due = round($student->amount_due);
                 $paid = round($student->amount_paid);
@@ -346,7 +347,7 @@ class Fees extends Myschoolgh {
                 $isPaid = (bool) ($student->amount_due < $student->amount_paid) || ($student->amount_due === $student->amount_paid);
 
                 // label
-                $label = "";
+                $label = "<span class='badge p-1 badge-success'>Paid</span>";
                 if($due === $balance) {
                     $label = "<br><span class='badge p-1 badge-danger'>Not Paid</span>";
                 } elseif($paid > 0 && !$isPaid) {

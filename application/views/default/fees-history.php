@@ -58,10 +58,6 @@ foreach($item_list["data"] as $key => $each) {
     $action = "";
     $action = "<a href='{$baseUrl}fees-view/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
-    //if($hasUpdate) {
-        //$action .= "&nbsp;<a href='#' onclick='return email_Receipt(\"{$each->item_id}\");' class='btn btn-sm btn-outline-success'><i class='fa fa-envelope'></i></a>";
-    //}
-
     $action .= "&nbsp;<a href='{$baseUrl}fees-view/{$each->item_id}/print' class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
 
     $fees_history .= "<tr data-row_id=\"{$each->item_id}\">";

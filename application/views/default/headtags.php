@@ -66,6 +66,9 @@ if(!isset($userPrefs->messages)) {
         "status" => ""
     ];
 }
+
+// load the helper
+load_helpers(['menu_helper']);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -200,102 +203,16 @@ if(!isset($userPrefs->messages)) {
                         <li>
                             <a href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a>
                         </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-student">Students List</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-student">Add Student</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-clock"></i><span>Guardians</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-guardian">Guardian List</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-guardian">Add Guardian</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Staff</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-staff">Staff List</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-staff">Add Staff</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>attendance">List Attendance</a></li>
-                                <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
-                            </ul>
-                        </li>                        
-                        <li class="menu-header">Academics</li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Academics</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-classes">List Classes</a></li>
-                                <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>add-class">Add Class</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-departments">List Departments</a></li>
-                                <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>add-department">Add Department</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-sections">List Sections</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-section">Add Section</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-courses">List Courses</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-course">Add Course</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Course Resources</a></li>
-                            </ul>
-                        </li>
-                        <li><a href="<?= $baseUrl ?>timetable" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Assignments</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-assignments">List Assignments</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>add-assignment">Create Assignment</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>submit-assignment">Submit Assignment</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Library</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books List</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>issued-books">Issued Books</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>return-book">Return Book</a></li>
-                            </ul>
-                        </li>
-                        <li class="menu-header">Finance</li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Fees</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Receive Payment</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Fees Category</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Reports</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>HR/Payroll</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>hr-payroll">Payroll</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>hr-history">List History</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>hr-category">Category</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>hr-expenditure">Expenditure</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
-                            </ul>
-                        </li>
-                        <li class="menu-header">Communication</li>
-                        <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
-                        <li class="dropdown">
-                            <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails</span></a>
-                            <ul class="dropdown-menu">
-                                <li><a class="nav-link" href="<?= $baseUrl ?>list-emails">List Mails</a></li>
-                                <li><a class="nav-link" href="<?= $baseUrl ?>compose-email">Compose</a></li>
-                            </ul>
-                        </li>
+                        <?php 
+                        // set the menu function 
+                        $menu_function = $userData->user_type."_menu";
+                        
+                        // confirm that the function exists
+                        if(function_exists($menu_function)) {
+                            // load the function
+                            $menu_function();
+                        }
+                        ?>
                         <li><a href="<?= $baseUrl ?>chat" class="nav-link"><i class="fas fa-envelope-open-text"></i><span>Live Chat</span></a></li>
 
                     </ul>

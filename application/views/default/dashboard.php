@@ -177,14 +177,21 @@ if($isWardTutorParent) {
     
     // load the wards list
     if($isParent) {
+        // wards count
+        $wards_count = 0;
+        $total_expenditure = 0;
+
+        // if the wards array is not empty
         if(empty($data->wards_list)) {
             $wards_list = "<div class='font-italic'>You currently do not have any ward in the school</div>";
         } else {
+
             // loop through the wards list
             foreach($data->wards_list as $ward) {
 
                 // convert to object
                 $ward = (object) $ward;
+                $wards_count++;
 
                 // set the selected session
                 $isCurrent = (bool) ($session->student_id == $ward->student_guid);
@@ -219,13 +226,53 @@ if($isWardTutorParent) {
                                 </tr>
                                 <tr>
                                     <td colspan='2' align='right'>
-                                        ".($isCurrent ? "<span class='badge mb-2 badge-success'>Selected</span>" : "<button onclick='return set_default_Student(\"{$ward->student_guid}\")' class='btn btn-sm btn-outline-primary mb-2'>Load Student</button>")."
+                                        ".($isCurrent ? "<span class='badge mb-2 badge-success'>Selected</span>" : "<button onclick='return set_default_Student(\"{$ward->student_guid}\")' class='btn btn-sm btn-outline-primary mb-2'>Select Student</button>")."
                                     </td>
                                 </tr>
                             </table>
                         </div>
                     </div>
                 </div>";
+            }
+            
+            // begin the request parameter
+            $params = (object) [
+                "clientId" => $clientId,
+                "userData" => $defaultUser,
+                "student_array_ids" => $defaultUser->wards_list_ids
+            ];
+            $item_list = load_class("fees", "controllers", $params)->list($params)["data"];
+
+            $fees_history = "";
+
+            // loop through the list
+            foreach($item_list as $key => $each) {
+                // add up to the expenses
+                $total_expenditure += $each->amount;
+
+                // list the items
+                $action = "";
+                $action .= "&nbsp;<a href='{$baseUrl}fees-view/{$each->item_id}/print' class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
+
+                $fees_history .= "<tr data-row_id=\"{$each->item_id}\">";
+                $fees_history .= "<td>".($key+1)."</td>";
+                $fees_history .= "
+                    <td>
+                        <div class='d-flex justify-content-start'>
+                            ".(!empty($each->student_info->image) ? "
+                            <div class='mr-2'><img src='{$baseUrl}{$each->student_info->image}' width='40px' height='40px'></div>" : "")."
+                            <div>
+                                <a href='{$baseUrl}update-student/{$each->student_info->user_id}/'>{$each->student_info->name}</a> <br>
+                                <strong>{$each->student_info->unique_id}</strong><br>
+                                {$each->class_name}
+                            </div>
+                        </div>
+                    </td>";
+                $fees_history .= "<td>{$each->amount}</td>";
+                $fees_history .= "<td>{$each->category_name}</td>";
+                $fees_history .= "<td>{$each->recorded_date}</td>";
+                $fees_history .= "<td width='10%' align='center'>{$action}</td>";
+                $fees_history .= "</tr>";
             }
 
             // assign the assignments list
@@ -242,14 +289,13 @@ if($isWardTutorParent) {
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
                                         <th>Student Name</th>
-                                        <th>Class</th>
                                         <th width="10%">Category</th>
                                         <th>Amount</th>
                                         <th>Date</th>
                                         <th align="center"></th>
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+                                <tbody>'.$fees_history.'</tbody>
                             </table>
                         </div>
                     </div>
@@ -475,8 +521,8 @@ $response->html = '
                         <div class="card-header">
                             <h5 class="pb-0 mb-0">My Kids</h5>
                         </div>
-                        <div class="card-body pr-2 mt-0 pt-0 pb-0">
-                            <div class="py-2">
+                        <div class="card-body pr-2 trix-slim-scroll mt-0 pt-0 pb-0" style="max-height:575px;min-height:435px;overflow-y:auto;">
+                            <div class="py-2" style="width:98%">
                                 '.$wards_list.'
                             </div>
                         </div>'
@@ -498,7 +544,8 @@ $response->html = '
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                    '.($isTutorStudent ?
+                    '<div class="col-lg-4 col-md-6 col-sm-6 col-12">
                         <div class="card card-statistic-1">
                             <i class="fas fa-book-open card-icon col-red"></i>
                             <div class="card-wrap">
@@ -522,7 +569,33 @@ $response->html = '
                                 </div>
                             </div>
                             </div>
+                        </div>':'
+                        <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                            <div class="card card-statistic-1">
+                                <i class="fas fa-users card-icon col-red"></i>
+                                <div class="card-wrap">
+                                <div class="padding-20">
+                                    <div class="text-right">
+                                        <h3 class="font-light mb-0">'.$wards_count.'</h3>
+                                        <span class="text-muted">Wards</span>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
                         </div>
+                        <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                            <div class="card card-statistic-1">
+                                <i class="fas fa-money-alt card-icon col-green"></i>
+                                <div class="card-wrap">
+                                <div class="padding-20">
+                                    <div class="text-right">
+                                        <h3 class="font-light mb-0">'.number_format($total_expenditure, 2).'</h3>
+                                        <span class="text-muted">Total Expenditure</span>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>'
+                        ).'
                     </div>
                     '.($isTutorStudent ? $assignment_list : $expenses_list).'
                 </div>
