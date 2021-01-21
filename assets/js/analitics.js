@@ -278,7 +278,9 @@ var summaryReporting = (t_summary, date_range) => {
     $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
 }
 
-var attendanceReport = (attendance) => {
+var attendanceReport = (_attendance) => {
+
+    let attendance = _attendance.attendance;
 
     $.each(attendance.summary, function(i, e) {
         $(`h3[data-attendance_count="${i}"]`).html(e);
@@ -293,18 +295,9 @@ var attendanceReport = (attendance) => {
     $(`span[data-section="chart_summary"]`).html(chart_summary);
 
     if ($(`div[id="attendance_chart"]`).length) {
-        var chart_label = new Array(),
-            groupSet = new Array();
+        var chart_label = new Array();
         $.each(attendance.days_list, function(i, day) {
             chart_label.push(i);
-            try {
-                $.each(day, function(role, count) {
-                    if (groupSet[role] === undefined) {
-                        groupSet[role] = new Array();
-                    }
-                    groupSet[role].push(count);
-                });
-            } catch (err) {}
         });
 
         var options = {
@@ -335,13 +328,54 @@ var attendanceReport = (attendance) => {
                 opacity: 1
             }
         }
-
         var chart = new ApexCharts(
             document.querySelector("#attendance_chart"),
             options
         );
-
         chart.render();
+
+
+        let _class_summary = _attendance.class_summary;
+
+        chart_label = new Array();
+        $.each(_class_summary.summary, function(i, day) {
+            chart_label.push(i);
+        });
+
+        options = {
+            chart: {
+                height: 350,
+                type: 'bar',
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    endingShape: 'rounded',
+                    columnWidth: '35%',
+                },
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['transparent']
+            },
+            series: _class_summary.chart_grouping,
+            xaxis: {
+                categories: chart_label,
+            },
+            fill: {
+                opacity: 1
+            }
+        }
+        var chart = new ApexCharts(
+            document.querySelector("#class_attendance_chart"),
+            options
+        );
+        chart.render();
+
     }
 
     if ($(`div[id="attendance_chart_list"]`).length) {
@@ -376,7 +410,7 @@ var loadDashboardAnalitics = () => {
                 revenueReporting(response.data.result.revenue_flow, response.data.result.date_range);
             }
             if (response.data.result.attendance_report !== undefined) {
-                attendanceReport(response.data.result.attendance_report.attendance);
+                attendanceReport(response.data.result.attendance_report);
             }
             setTimeout(() => {
                 $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });

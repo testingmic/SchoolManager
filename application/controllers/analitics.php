@@ -487,6 +487,8 @@ class Analitics extends Myschoolgh {
 
                 // load the attendance summary
                 $result["attendance"] = $attendClass->range_summary($params);
+                $params->load_date = isset($params->load_date) ? $params->load_date : date("Y-m-d");
+                $result["class_summary"] = $attendClass->class_summary($params);
 
             }
 

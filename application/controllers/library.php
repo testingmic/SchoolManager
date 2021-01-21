@@ -438,7 +438,7 @@ class Library extends Myschoolgh {
 		$the_session = "{$mode}_session";
 
 		/** Switch through the label */
-		if($todo == "add") {
+		if($todo === "add") {
 			// quantity
 			$quantity = $params->label["quantity"] ?? 1;
 
@@ -467,8 +467,29 @@ class Library extends Myschoolgh {
 			];
 		}
 
+		/** update the session value of the book */
+		elseif($todo === "update_quantity") {
+			// if quantity is not set the end the query
+			if(!isset($params->label["quantity"])) {
+				return;
+			}
+
+			// quantity
+			$quantity = (int) $params->label["quantity"];
+
+			// add to session
+			$this->add_book_to_session($the_session, $book_id, $quantity);
+
+			// return the session list as the response
+			return [
+				"data" => [
+					"books_list" => $this->session->$the_session
+				]
+			];
+		}
+
 		/** Remove book from session */
-		elseif($todo == "remove") {
+		elseif($todo === "remove") {
 			// remove book from session
 			$this->remove_book_from_session($the_session, $book_id);
 			
@@ -479,7 +500,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** List the books list in session */
-		elseif($todo == "list") {
+		elseif($todo === "list") {
 			// return the session list as the response
 			return [
 				"data" => ["books_list" => $this->session->$the_session]
@@ -515,7 +536,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** Remove book from the list of books */
-		elseif($todo == "remove_book") {
+		elseif($todo === "remove_book") {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
@@ -536,7 +557,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** change the quantity of a requested book */
-		elseif($todo == "save_book_quantity") {
+		elseif($todo === "save_book_quantity") {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
@@ -557,7 +578,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** Save book request fine */
-		elseif($todo == "save_book_fine") {
+		elseif($todo === "save_book_fine") {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
@@ -648,22 +669,30 @@ class Library extends Myschoolgh {
 	 * 
 	 * @return Bool
 	 */
-	public function add_book_to_session($the_session, $book_id, $quantity, $info) {
+	public function add_book_to_session($the_session, $book_id, $quantity, $info = null) {
+		// confirm that the session is not empty
 		if($this->count_session_data($the_session)) {
-			foreach($_SESSION[$the_session] as $key => $value) {				
+			// loop through the session array
+			foreach($_SESSION[$the_session] as $key => $value) {
+				// if the book was found in the session
 				if($value['book_id'] == $book_id) {
+					// update the quantity
 				 	$_SESSION[$the_session][$key]['quantity'] = $quantity;
 				 	break;
 				}				
 			}
-			$book_ids = array_column($_SESSION[$the_session], "book_id");
-            if (!in_array($book_id, $book_ids)) {
-            	$_SESSION[$the_session][] = ['book_id' => $book_id, 'quantity' => $quantity, 'info' => $info];
-            }
+			// add the book information if not empty
+			if(!empty($info)) {
+				$book_ids = array_column($_SESSION[$the_session], "book_id");
+				if (!in_array($book_id, $book_ids)) {
+					$_SESSION[$the_session][] = ['book_id' => $book_id, 'quantity' => $quantity, 'info' => $info];
+				}
+			}
 		} else {
 			$_SESSION[$the_session][] = ['book_id' => $book_id, 'quantity' => $quantity, 'info' => $info];
 		}
 
+		// set the new values for the session
 		$this->session->set($the_session, $_SESSION[$the_session]);
 		
 		return true;

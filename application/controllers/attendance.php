@@ -363,7 +363,7 @@ class Attendance extends Myschoolgh {
         $summary = [];
 
         // confirm existing record
-        $check = $this->pushQuery("id, users_list, users_data, finalize, date_finalized", "users_attendance_log", "log_date='{$list_days[0]}' {$query} LIMIT 1");
+        $check = $this->pushQuery("id, users_list, users_data, finalize, date_finalized", "users_attendance_log", "log_date='{$list_days[0]}' AND status='1' {$query} LIMIT 1");
         $attendance_log = !empty($check) ? json_decode($check[0]->users_data) : [];
         $final = !empty($check) ? $check[0]->finalize : null;
 
@@ -535,7 +535,7 @@ class Attendance extends Myschoolgh {
                 $user_type = ($user == "admin") ? "('admin','accountant','employee')" : "('{$user}')";
                 
                 // run a query for the information
-                $theQuery = $this->pushQuery("users_list", "users_attendance_log", "log_date='{$day}' AND user_type IN {$user_type} AND client_id='{$params->clientId}'");
+                $theQuery = $this->pushQuery("users_list", "users_attendance_log", "log_date='{$day}' AND status='1' AND user_type IN {$user_type} AND client_id='{$params->clientId}'");
                 
                 // if the query is not empty
                 if(!empty($theQuery)) {
@@ -588,7 +588,7 @@ class Attendance extends Myschoolgh {
             foreach($users as $user) {
 
                 // run a query for the information
-                $theQuery = $this->pushQuery("user_type, users_list", "users_attendance_log", "log_date='{$day}' AND user_type IN ('{$user}') AND client_id='{$params->clientId}' {$query}");
+                $theQuery = $this->pushQuery("user_type, users_list", "users_attendance_log", "log_date='{$day}' AND user_type IN ('{$user}') AND status='1' AND client_id='{$params->clientId}' {$query}");
 
                 // if the query is not empty
                 if(!empty($theQuery)) {
@@ -690,6 +690,93 @@ class Attendance extends Myschoolgh {
         
         return $users_count;
 
+    }
+
+    /**
+     * Get the Class Summary for the Current Date
+     * 
+     * Loop through all classes and get the number of students present 
+     * and absent for the specified date
+     * 
+     * @return Array
+     */
+    public function class_summary(stdClass $params) {
+
+        /** If finalized */
+        $query = isset($params->is_finalized) ? " AND finalize='1'" : null;
+
+        /** Run a query for all classes, append the total logged count as well */
+        $classes_list = $this->pushQuery(
+            "a.id, a.name, 
+                (
+                    SELECT COUNT(*) FROM users b 
+                    WHERE 
+                        b.user_status = 'Active' AND b.deleted='0' AND 
+                        b.user_type='student' AND b.class_id = a.id AND 
+                        b.client_id = a.client_id
+                ) AS class_size,
+                (
+                    SELECT b.users_list FROM users_attendance_log b
+                    WHERE 
+                        DATE(b.log_date) = '{$params->load_date}' AND 
+                        b.class_id = a.id AND b.user_type = 'student' AND
+                        status = '1' {$query}
+                    LIMIT 1
+                ) AS users_list, 
+                (
+                    SELECT b.users_data FROM users_attendance_log b
+                    WHERE 
+                        DATE(b.log_date) = '{$params->load_date}' AND 
+                        b.class_id = a.id AND b.user_type = 'student' AND
+                        status = '1' {$query}
+                    LIMIT 1
+                ) AS users_data
+            ", 
+            "classes a", 
+            "a.status='1' AND a.client_id='{$params->clientId}'"
+        );
+        /** Init variables */
+        $data = [];
+
+        /** Loop through the results list */
+        foreach($classes_list as $result) {
+            // convert the columns into an array
+            $users_list = json_decode($result->users_list, true);
+            $users_data = json_decode($result->users_data, true);
+
+            // get the students who were present
+            $result->present = !empty($users_list) ? count($users_list) : 0;
+            $result->absent = !empty($users_data) ? (count($users_data) - $result->present) : 0;
+
+            // append to the array
+            $data[$result->name] = [
+                "Present" => $result->present,
+                "Absent" => $result->absent,
+                "Class Size" => (int) $result->class_size,
+            ];
+        }
+
+        // using the grouping format
+        $new_group = [];
+        foreach($data as $day) {
+            foreach($day as $role => $count) {
+                $new_group[$role][] = $count;
+            }
+        }
+
+        // set it in an array again
+        $fresh_group = [];
+        foreach($new_group as $name => $ddata) {
+            $fresh_group[] = [
+                "name" => $name,
+                "data" => array_values($ddata)
+            ];
+        }
+
+        return [
+            "summary" => $data,
+            "chart_grouping" => $fresh_group
+        ];
     }
 
     /**

@@ -138,6 +138,31 @@ if(!empty($clientId)) {
                         </div>
                     </div>
                 </div>
+                '.(
+                    $isAdminAccountant ? '
+                    <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between" style="width:100%">
+                                    <div><h4>Class Attendance</h4></div>
+                                    <div>
+                                        <input type="text" class="form-control datepicker" name="class_date_select" id="class_date_select">
+                                        <button class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body quick_loader">
+                                <div class="form-content-loader" style="display: flex; position: absolute">
+                                    <div class="offline-content text-center">
+                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                    </div>
+                                </div>
+                                <div style="width:100%;height:345px;" id="class_attendance_chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    ' : ''
+                ).'
                 <div class="col-lg-12 col-md-12 col-12 col-sm-12" id="data-report_stream" data-report_stream="'.$data_stream.'">
                     <div class="card">
                         <div class="card-header"><h4>Attendance Record</h4></div>

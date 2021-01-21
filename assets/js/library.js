@@ -46,8 +46,20 @@ var book_quantity_Checker = () => {
             max = parseInt(input.attr("max"));
         if (value < 1) {
             input.val(1);
+            value = input;
         } else if (value > max) {
             input.val(max);
+            value = max;
+        }
+        let book_id = input.attr("data-book_id");
+        let label = {
+            "todo": "update_quantity",
+            "mode": selected_books.attr("data-mode"),
+            "book_id": book_id,
+            "quantity": value
+        };
+        if (value) {
+            $.post(`${baseUrl}api/library/issue_request_handler`, { label });
         }
     });
 }
