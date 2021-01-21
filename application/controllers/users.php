@@ -111,7 +111,7 @@ class Users extends Myschoolgh {
 
 				// set the columns to load
 				$params->columns = "
-					a.client_id, a.guardian_id, a.item_id AS user_id, a.name, 
+					a.client_id, a.guardian_id, a.item_id AS user_id, a.name, a.preferences,	
 					a.unique_id, a.email, a.image, a.phone_number, a.user_type, a.class_id,
 					a.gender, a.enrollment_date, a.residence, a.religion, a.date_of_birth,
 					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
@@ -199,6 +199,14 @@ class Users extends Myschoolgh {
 			// loop through the results
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
 
+				// if the preference is set
+				if(isset($result->preferences)) {
+					# return an empty result
+					unset($result->password);
+					unset($result->item_id);
+					$result->preferences = json_decode($result->preferences);
+				}
+
 				// if not a minified suggestion list
 				if(!isset($params->minified)) {
 
@@ -221,14 +229,6 @@ class Users extends Myschoolgh {
 
 						// action buttons
 						$result->action .= " &nbsp; <a class='btn p-1 btn-outline-success m-0 btn-sm' title='Click to view details of this policy' href='{$this->baseUrl}profile/{$result->user_id}'><i class='fa fa-eye'></i></a>";
-					}
-
-					// if the preference is set
-					if(isset($result->preferences)) {
-						# return an empty result
-						unset($result->password);
-						unset($result->item_id);
-						$result->preferences = json_decode($result->preferences);
 					}
 					
 					// append to the list and return

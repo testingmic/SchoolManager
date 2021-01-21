@@ -13,11 +13,8 @@ if(!$usersClass->loggedIn()) { require "login.php"; exit(-1); }
 $loggedUserId = $session->userId;
 $cur_user_id = (confirm_url_id(1)) ? xss_clean($SITEURL[1]) : $loggedUserId;
 
-// the query parameter to load the user information
-$i_params = (object) ["limit" => 1, "user_id" => $loggedUserId];
-
 // get the user data
-$userData = $usersClass->list($i_params)["data"][0];
+$userData = $defaultUser;
 
 // get the variables for the accessobject
 $accessObject->userId = $loggedUserId;
@@ -112,6 +109,37 @@ load_helpers(['menu_helper']);
                 </ul>
                 </div>
                 <ul class="navbar-nav navbar-right">
+                    <?php if(!empty($session->student_id)) { ?>
+                    <li class="dropdown dropdown-list-toggle"><a href="#" data-toggle="dropdown" title="Wards List" data-toggle="tooltip" class="nav-link nav-link-lg"><i class="fa fa-users"></i></a>
+                        <div class="dropdown-menu dropdown-list dropdown-menu-right" style="overflow-y:auto;">
+                            <div class="dropdown-header">Wards List</div>
+                            <div class="dropdown-list-content dropdown-list-message">
+                                <?php if(!empty($userData->wards_list)) { ?>
+                                    <?php foreach($userData->wards_list as $ward) {
+                                        $ward = (object) $ward;
+                                        $isThis = (bool) ($session->student_id === $ward->student_guid);
+                                        ?>
+                                        <a href="javacript:void(0);" onclick="return set_default_Student('<?= $ward->student_guid ?>')"; class="<?= $isThis ? "bg-success text-white" : ""; ?> dropdown-item anchor">
+                                            <span class="dropdown-item-avatar text-white">
+                                                <img alt="image" src="<?= $baseUrl ?><?= $ward->image ?>" class="rounded-circle">
+                                            </span>
+                                            <span class="dropdown-item-desc">
+                                                <span style="font-size: 14px;" class="message-user <?= $isThis ? "text-white" : ""; ?>"><?= $ward->name ?></span>
+                                                <span style="font-size: 14px;" class="time  <?= $isThis ? "text-white" : ""; ?>"><strong><?= $ward->unique_id ?></strong></span>
+                                                <span style="font-size: 14px;" class="time text-primary"><?= $ward->class_name ?></span>
+                                            </span>
+                                        </a>
+                                    <?php } ?>
+                                <?php } else { ?>
+                                <a href="javascript:void(0)" class="anchor dropdown-item">
+                                    <span class="font-italic">Sorry! You currently do not have any ward in the school.</span>
+                                </a>
+                                <?php } ?>
+
+                            </div>
+                        </div>
+                    </li>
+                    <?php } ?>
                 <li class="dropdown dropdown-list-toggle"><a href="#" data-toggle="dropdown"
                     class="nav-link nav-link-lg message-toggle beep"><i class="far fa-envelope"></i></a>
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
@@ -194,15 +222,12 @@ load_helpers(['menu_helper']);
                     <div class="sidebar-brand">
                         <a href="<?= $baseUrl ?>">
                             <img alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" />
-                            <span class="logo-name">Ality</span>
+                            <span class="logo-name"><?= $appName ?></span>
                         </a>
                     </div>
                     <ul class="sidebar-menu">
                         <li class="menu-header">Main</li>
-
-                        <li>
-                            <a href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a>
-                        </li>
+                        <li><a href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
                         <?php 
                         // set the menu function 
                         $menu_function = $userData->user_type."_menu";
@@ -214,7 +239,6 @@ load_helpers(['menu_helper']);
                         }
                         ?>
                         <li><a href="<?= $baseUrl ?>chat" class="nav-link"><i class="fas fa-envelope-open-text"></i><span>Live Chat</span></a></li>
-
                     </ul>
                 </aside>
             </div>

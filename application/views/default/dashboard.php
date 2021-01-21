@@ -159,11 +159,11 @@ else if($isTutorStudent) {
 $response->array_stream["events_array_list"] = $events_list;
 
 // the default data to stream
-$data_stream = "attendance_report";
+$data_stream = 'id="data-report_stream" data-report_stream="attendance_report"';
 
 // set the data to stream for an admin user
 if($isAdminAccountant) {
-    $data_stream = "summary_report,revenue_flow";
+    $data_stream = 'id="data-report_stream" data-report_stream="summary_report,revenue_flow"';
 }
 
 // append the scripts to the page
@@ -180,10 +180,15 @@ if($isWardTutorParent) {
         // wards count
         $wards_count = 0;
         $total_expenditure = 0;
+        
+        // stream nothing if the student id has not been set yet
+        if(empty($session->student_id)) {
+            $data_stream = "";
+        }
 
         // if the wards array is not empty
         if(empty($data->wards_list)) {
-            $wards_list = "<div class='font-italic'>You currently do not have any ward in the school</div>";
+            $wards_list = "<div class='font-italic'>Sorry! You currently do not have any ward in the school.</div>";
         } else {
 
             // loop through the wards list
@@ -338,7 +343,7 @@ if($isWardTutorParent) {
 // set the response dataset
 $response->html = '
     <section class="section">
-        <div class="d-flex mt-3 justify-content-between" id="data-report_stream" data-report_stream="'.$data_stream.'">
+        <div class="d-flex mt-3 justify-content-between" '.$data_stream.'>
             <div class="section-header">
                 <h1>Dashboard</h1>
             </div>
@@ -784,7 +789,53 @@ $response->html = '
                             </ul>
                         </div>
                     </div>
-                </div>' : ''
+                </div>' : '
+                <div class="col-lg-8">
+                    '.($data_stream ? 
+                        '<div class="row">
+                            <div class="col-lg-4 col-md-6 col-sm-12">
+                                <div class="card card-statistic-1">
+                                    <i class="fas fa-user card-icon col-orange"></i>
+                                    <div class="card-wrap">
+                                        <div class="padding-20">
+                                            <div class="text-right">
+                                                <h3 data-attendance_count="Present" class="font-light mb-0">0</h3>
+                                                <span class="text-muted">Days Present</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 col-sm-12">
+                                <div class="card card-statistic-1">
+                                    <i class="fas fa-user card-icon col-red"></i>
+                                    <div class="card-wrap">
+                                        <div class="padding-20">
+                                            <div class="text-right">
+                                                <h3 data-attendance_count="Absent" class="font-light mb-0">0</h3>
+                                                <span class="text-muted">Days Absent</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-6 col-sm-12">
+                                <div class="card card-statistic-1">
+                                    <i class="fas fa-user card-icon col-blue"></i>
+                                    <div class="card-wrap">
+                                        <div class="padding-20">
+                                            <div class="text-right">
+                                                <h3 data-attendance_count="logs_count" class="font-light mb-0">0</h3>
+                                                <span class="text-muted">Logs Counter</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>' : ''
+                    ).'
+                </div>
+                '
             ).'
         </div>
     </section>';
