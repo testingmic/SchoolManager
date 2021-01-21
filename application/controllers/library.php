@@ -278,14 +278,28 @@ class Library extends Myschoolgh {
             $stmt->execute([1]);
 
             $data = [];
+			
+			$isMinified = (bool) isset($params->quick_analitics_load);
+
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                $data[] = $result;
+				
+				// if the minified is true
+				if($isMinified) {
+					$data[] = [
+						"name" => $result->name,
+						"books_count" => (int) $result->books_count
+					];
+				} else {
+                	$data[] = $result;
+				}
+
             }
 
-            return [
-                "code" => 200,
-                "data" => $data
-            ];
+			if($isMinified) {
+            	return $data;
+			} else {
+				return [ "code" => 200, "data" => $data ];
+			}
 
         } catch(PDOException $e) {
             return $this->unexpected_error;

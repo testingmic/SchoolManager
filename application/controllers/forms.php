@@ -2755,7 +2755,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label for="">BOOK CATEGORY</label>
+                        <label for="">BOOK CATEGORY <span class="required">*</span></label>
                         <select name="category_id" data-width="100%" id="category" class="form-control category selectpicker">
                             <option value="">Please Select</option>';
                             foreach($this->pushQuery("id, name", "books_type", "status='1' AND client_id='{$data->clientId}'") as $each) {

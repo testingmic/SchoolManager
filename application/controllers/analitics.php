@@ -13,7 +13,8 @@ class Analitics extends Myschoolgh {
         parent::__construct();
 
         $this->default_stream = [
-            "summary_report", "students_report", "revenue_flow", "library_report"
+            "summary_report", "students_report", "revenue_flow", "library_report", 
+            "departments_report"
         ];
 
         $this->accepted_period = [
@@ -112,6 +113,16 @@ class Analitics extends Myschoolgh {
             $this->final_report["summary_report"] = $this->summary_report($params);
             // get the percentage difference between the current and previous
             $this->calculate_percentages($this->final_report, "summary_report.students_class_record_count.count");
+
+            // load quick data
+            if(!in_array("library_report", $params->stream)) {
+                // append this paramter
+                $params->load_summary_info = true;
+
+                // load the summary information and submit
+                $this->final_report["library_report"] = $this->library_report($params);
+                $this->final_report["departments_report"] = $this->departments_report($params);
+            }
         }
 
         // get the revenue information if not parsed in the stream
@@ -122,8 +133,18 @@ class Analitics extends Myschoolgh {
 
         // get the library information if not parsed in the stream
         if(in_array("library_report", $params->stream)) {
+            // append this paramter
+            $params->load_summary_info = true;
             // query the library data
             $this->final_report["library_report"] = $this->library_report($params);
+        }
+
+        // get the departments information if not parsed in the stream
+        if(in_array("departments_report", $params->stream)) {
+            // append this paramter
+            $params->load_summary_info = true;
+            // query the departments data
+            $this->final_report["departments_report"] = $this->departments_report($params);
         }
 
         return $this->final_report;
@@ -137,7 +158,7 @@ class Analitics extends Myschoolgh {
      * 
      * @return Array
      */
-    public function summary_report($params) {
+    public function summary_report(stdClass $params) {
         
         global $usersClass;
         $result = [];
@@ -353,17 +374,65 @@ class Analitics extends Myschoolgh {
      * 
      * @return Array
      */
-    public function library_report($params) {
+    public function library_report(stdClass $params) {
 
         try {
             
             /** Set the parameters */
-            $params->quick_analitics_load = true;
-            
-            /** Load the Books */
-            $library_category = load_class("library", "controllers")->category_list($params);
+            $result = [];
 
-            return $library_category;
+            // if the summary load was parsed
+            if(isset($params->load_summary_info)) {
+
+                // set the quick information
+                $params->quick_analitics_load = true;
+
+                /** Load the Books */
+                $result["library_category_list"] = load_class("library", "controllers")->category_list($params);
+
+                /** Get the books count */
+                $result["library_category_count"] = count($result["library_category_list"]);
+                $result["library_books_count"] = array_sum(array_column($result["library_category_list"], "books_count"));
+
+            }
+
+            // return the result
+            return $result;
+
+        } catch(PDOException $e) {
+
+        }
+    }
+
+    /**
+     * Departments Manager
+     * 
+     * Loop through the dates and departments
+     * 
+     * @return Array
+     */
+    public function departments_report(stdClass $params) {
+
+        try {
+            
+            /** Set the parameters */
+            $result = [];
+
+            // if the summary load was parsed
+            if(isset($params->load_summary_info)) {
+
+                // set the quick information
+                $params->quick_analitics_load = true;
+
+                /** Load the Books */
+                $result["departments_list"] = load_class("departments", "controllers")->list($params);
+
+                /** Get the books count */
+                $result["departments_count"] = count($result["departments_list"]);
+            }
+
+            // return the result
+            return $result;
 
         } catch(PDOException $e) {
 
@@ -383,7 +452,7 @@ class Analitics extends Myschoolgh {
      * 
      * @return Array
      */
-    public function revenue_flow($params) {
+    public function revenue_flow(stdClass $params) {
 
         try {
 

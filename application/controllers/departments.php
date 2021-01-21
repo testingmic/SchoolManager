@@ -26,6 +26,8 @@ class Departments extends Myschoolgh {
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= (isset($params->department_id)) ? " AND a.id='{$params->department_id}'" : null;
 
+        $isMinified = (bool) isset($params->quick_analitics_load);
+
         try {
 
             $stmt = $this->db->prepare("
@@ -41,19 +43,29 @@ class Departments extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
-                // loop through the information
-                foreach(["department_head_info", "created_by_info"] as $each) {
-                    // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
-                }
+                // if the minified is true
+                if($isMinified) {
+					$data[] = [
+						"name" => $result->name,
+						"students_count" => (int) $result->students_count
+					];
+				} else {
+                	// loop through the information
+                    foreach(["department_head_info", "created_by_info"] as $each) {
+                        // convert the created by string into an object
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                    }
 
-                $data[] = $result;
+                    $data[] = $result;
+				}
+
             }
 
-            return [
-                "code" => 200,
-                "data" => $data
-            ];
+            if($isMinified) {
+            	return $data;
+			} else {
+				return [ "code" => 200, "data" => $data ];
+			}
 
         } catch(PDOException $e) {
             return $this->unexpected_error;
