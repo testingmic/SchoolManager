@@ -31,17 +31,22 @@ class Attendance extends Myschoolgh {
             return ["code" => 203, "data" => "Sorry! Please the user_type is required."];
         }
 
+        // unset the user id if the user type is not teacher
+        if(isset($params->user_type) && ($params->user_type !== "student")) {
+            // set the class id to null
+            $params->class_id = null;
+        }
+
         // validate the class id if parsed
         if(isset($params->class_id) && !empty($params->class_id)) {
 
             // run the query for the class details
-            $classData = $this->pushQuery("*", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+            $classData = $this->pushQuery("id, name", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
             // if empty then return
             if(empty($classData)) {
                 return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
             }
-
         }
 
         // init
@@ -66,6 +71,7 @@ class Attendance extends Myschoolgh {
 
             // loop through the array list
             foreach($params->attendance as $key => $value) {
+
                 // append to the list of present users array
                 if($value == "present") {
                     $present_list[] = $key;
@@ -126,8 +132,8 @@ class Attendance extends Myschoolgh {
         } else {
 
             // confirm that the user has not finalize the attendance log
-            if($check[0]->finalize == 1) {
-                return ["code" => 203, "data" => "Sorry! The attendance log the specified date has already been finalized and cannot be updated."];
+            if($check[0]->finalize === 1) {
+                return ["code" => 203, "data" => "Sorry! The attendance log for the specified date has already been finalized and cannot be updated."];
             }
 
             // prepare and execute the statement
@@ -179,15 +185,15 @@ class Attendance extends Myschoolgh {
     public function attendance_radios($userId = null, $user_state = null, $final = false) {
         
         $html = "";
-        $statuses = ["success" => "Present", "danger" => "Absent", "primary" => "Holiday", "warning" => "Late"];
+        $labels = ["success" => "Present", "danger" => "Absent", "primary" => "Holiday", "warning" => "Late"];
         $disabled = $final ? "disabled" : "data-user_id='{$userId}' name='attendance_status[{$userId}][]'";
 
-        foreach($statuses as $color => $status) {
-            $the_key = strtolower($status);
+        foreach($labels as $color => $label) {
+            $the_key = strtolower($label);
             $html .= "
             <span class='mr-2'>
                 <input {$disabled} type='radio' ".($user_state == $the_key ? "checked" : "")." class='cursor' value='{$the_key}' id='{$userId}_{$the_key}'>
-                <label class='cursor' for='{$userId}_{$the_key}'>".($user_state == $the_key ? "<strong class='text-{$color}'>{$status}</strong>" : "{$status}")."</label>
+                <label class='cursor' for='{$userId}_{$the_key}'>".($user_state == $the_key ? "<strong class='text-{$color}'>{$label}</strong>" : "{$label}")."</label>
             </span>
             ";
         }
@@ -209,8 +215,8 @@ class Attendance extends Myschoolgh {
         $state = "";
 
         // loop through the list
-        foreach($attendance_log as $key => $attendance) {
-            if($attendance->item_id == $userId) {
+        foreach($attendance_log as $key => $student) {
+            if($student->item_id == $userId) {
                 $state = $attendance_log[$key]->state;
                 break;
             }
@@ -274,7 +280,15 @@ class Attendance extends Myschoolgh {
         // append some few query
         $attendance = [];
         
+        
         $user_type = isset($params->user_type) ? $params->user_type : null;
+        
+        // unset the user id if the user type is not teacher
+        if($user_type !== "student") {
+            // set the class id to null
+            $params->class_id = null;
+        }
+        
         $class_id = isset($params->class_id) && ($params->class_id !== "null") ? $params->class_id : null;
 
         $query = !empty($params->user_type) ? " AND user_type='{$params->user_type}'" : null;
@@ -418,7 +432,6 @@ class Attendance extends Myschoolgh {
 
             // show this section if the finalize is empty
             if(!$final) {
-
                 // append the buttons to the table
                 $table_content .= "
                 <tr class='attendance_control_buttons'>
@@ -506,17 +519,18 @@ class Attendance extends Myschoolgh {
             "today" => $this->get_date("today"),
             "yesterday" => $this->get_date("yesterday")
         ];
-        $users = ["student", "teacher", "admin"];
+        $users = ["student", "teacher", "admin", "employee", "accountant"];
         
         // users counter
-        $totals = [];
         $users_count = [];
 
         // attendance log algo
         // loop through the days for the record
         foreach($days as $key => $day) {
+
             // loop through the users for each day
             foreach($users as $user) {
+
                 // set a parameter for the user_type
                 $user_type = ($user == "admin") ? "('admin','accountant','employee')" : "('{$user}')";
                 
@@ -541,6 +555,94 @@ class Attendance extends Myschoolgh {
         ];
 
         return $result;
+
+    }
+    
+    /**
+     * Summary Insight
+     * 
+     * This gives a brief insight into attendance log for range of dates
+     * 
+     * @return Array
+     */
+    public function range_summary(stdClass $params) {
+
+        // get the attendance log for the day
+        $days = $this->listDays($params->start_date, $params->end_date, 'Y-m-d', );
+
+        // group the user types
+        $users = $params->user_types_list;
+
+        // users counter
+        $users_count = [];
+        $query = isset($params->is_finalized) ? " AND finalize='1'" : null;
+        $checkPresent = (bool) isset($params->is_present_check);
+
+        // attendance log algo
+        $was_present = 0;
+        $was_absent = 0;
+
+        // loop through the days for the record
+        foreach($days as $day) {
+            
+            // loop through the users for each day
+            foreach($users as $user) {
+
+                // run a query for the information
+                $theQuery = $this->pushQuery("users_list", "users_attendance_log", "log_date='{$day}' AND user_type IN ('{$user}') AND client_id='{$params->clientId}' {$query}");
+
+                // if the query is not empty
+                if(!empty($theQuery)) {
+                    
+                    // loop through the results set
+                    foreach($theQuery as $today) {
+                        
+                        // convert the users list into an array
+                        $present = json_decode($today->users_list, true);
+                        
+                        // if the user is not an admin/accountant then verify if the user was present or absent
+                        if($checkPresent) {
+
+                            // confirm if present
+                            $is_present = (bool) in_array($params->the_current_user_id, $present);
+
+                            // set the label for the day
+                            $the_state = $is_present ? "present" : "absent";
+                            $users_count["days_list"][$day] = $the_state;
+
+                        } else {
+                            $users_count["summary"][$user] = isset($users_count["summary"][$user]) ? ($users_count["summary"][$user] + count($present)) : count($present);
+                            $users_count["days_list"][$day][$user] = isset($users_count["days_list"][$day][$user]) ? ($users_count["days_list"][$day][$user] + count($present)) : count($present);
+                        }
+
+                    }
+                    
+                }
+
+            }
+
+        }
+
+        // count the number of present and absent
+        if($checkPresent) {
+            // if the array is set
+            if(isset($users_count["days_list"])) {
+                // count the values
+                $summary_set = [];
+                // loop through the records list
+                foreach($users_count["days_list"] as $value) {
+                    $summary_set[$value] = isset($summary_set[$value]) ? ($summary_set[$value]+1) : 1;
+                }
+                $users_count["summary"] = $summary_set;
+            } else {
+                $users_count["summary"] = ["present" => 0, "absent" => 0];
+            }
+        }
+
+
+        $users_count = (object) $users_count;
+        
+        return $users_count;
 
     }
 
@@ -578,6 +680,59 @@ class Attendance extends Myschoolgh {
 			return $today;
 		elseif($request == "yesterday")
 			return $yesterday;
+	}
+
+    /**
+     * Start and End Date for the Week
+     * 
+     * @return String
+     */
+	public function Start_End_Date_of_a_week($week, $year){
+		$time = strtotime("1 January $year");
+		$day = date('w', $time);
+		$time += ((7*($week-1))+1-$day)*24*3600;
+		$dates[0] = date('Y-m-d', $time);
+		return $dates;
+	}
+    
+    /**
+     * Get the Date for the start of this week 
+     * 
+     * @return String
+     */
+	public function get_week($initial_info, $week_start) {
+		
+		$fix = date('D');
+		if ($fix === 'Sat'){
+			$thswk = date('Y-m-d', strtotime("$week_start "." -1 days"));
+		} elseif ($fix === 'Sun'){
+			$thswk = date('Y-m-d', strtotime("$week_start "." -2 days"));
+		} elseif (($fix !== 'Sat') && ($fix !== 'Sun')){
+			$thswk = date('Y-m-d', strtotime("$week_start "." +0 day"));
+		}
+		
+		$wk = date("W", strtotime($thswk));
+		$yr = date("Y", strtotime($thswk));
+		$draw = $this->Start_End_Date_of_a_week($wk,$yr);
+		$wstrt = $draw[0];
+		$wend = date('Y-m-d', strtotime("+5 days", strtotime($draw[0])));
+
+		$laswk = date("Y-m-d", strtotime("-5 days", strtotime($thswk)));
+		$wk = date("W", strtotime($laswk));
+		$yr = date("Y", strtotime($laswk));
+		$draw = $this->Start_End_Date_of_a_week($wk,$yr);
+		$laswstrt = $draw[0];
+		$laswend = date('Y-m-d', strtotime("+5 days", strtotime($draw[0])));
+
+		if($initial_info == "this_wkstart")
+			return $wstrt;
+		elseif($initial_info == "this_wkend")
+			return $wend;
+		elseif($initial_info == "last_wkstart")
+			return $laswstrt;
+		elseif($initial_info == "last_wkend")
+			return $laswend;
+
 	}
 
 }

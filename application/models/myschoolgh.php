@@ -341,7 +341,7 @@ class Myschoolgh extends Models {
 		foreach ($period as $key => $value) {
 
 			// exempt weekends from the list
-			if(!$weekends || !in_array(date("l", strtotime($value->format($format))), ['Sunday'])) {
+			if(!$weekends || !in_array(date("l", strtotime($value->format($format))), ['Sunday', 'Saturday'])) {
 				$days[] = $value->format($format);
 			}
 			

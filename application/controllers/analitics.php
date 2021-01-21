@@ -14,7 +14,7 @@ class Analitics extends Myschoolgh {
 
         $this->default_stream = [
             "summary_report", "students_report", "revenue_flow", "library_report", 
-            "departments_report"
+            "departments_report", "attendance_report"
         ];
 
         $this->accepted_period = [
@@ -140,11 +140,19 @@ class Analitics extends Myschoolgh {
         }
 
         // get the departments information if not parsed in the stream
-        if(in_array("departments_report", $params->stream)) {
+        if(in_array("attendance_report", $params->stream)) {
             // append this paramter
             $params->load_summary_info = true;
             // query the departments data
-            $this->final_report["departments_report"] = $this->departments_report($params);
+            $this->final_report["attendance_report"] = $this->attendance_report($params);
+        }
+
+        // get the attendance information if not parsed in the stream
+        if(in_array("attendance_report", $params->stream)) {
+            // append this paramter
+            $params->load_summary_info = true;
+            // query the attendance data
+            $this->final_report["attendance_report"] = $this->attendance_report($params);
         }
 
         return $this->final_report;
@@ -429,6 +437,56 @@ class Analitics extends Myschoolgh {
 
                 /** Get the books count */
                 $result["departments_count"] = count($result["departments_list"]);
+            }
+
+            // return the result
+            return $result;
+
+        } catch(PDOException $e) {
+
+        }
+    }
+
+    /**
+     * Attendance Manager
+     * 
+     * Loop through the dates and Attendance
+     * 
+     * @return Array
+     */
+    public function attendance_report(stdClass $params) {
+
+        try {
+            
+            /** Set the parameters */
+            $result = [];
+            
+            // create new object
+            $attendClass = load_class("attendance", "controllers");
+
+            // if the summary load was parsed
+            if(isset($params->load_summary_info)) {
+                
+                // set additional parameters
+                $params->start_date = date("Y-m-d", strtotime("last week monday"));
+                $params->end_date = date("Y-m-d", strtotime("this week friday"));
+
+                // set the quick information
+                $params->is_finalized = true;
+                $user_type = $params->userData->user_type;
+
+                // set the user types that each person can view
+                if(in_array($user_type, ["admin", "accountant"])) {
+                    $params->user_types_list = ["student", "teacher", "admin", "employee", "accountant"];
+                } else {
+                    $params->is_present_check = true;
+                    $params->user_types_list = [$user_type];
+                    $params->the_current_user_id = ($user_type === "parent") ? $this->session->student_id : $params->userId;
+                }
+
+                // load the attendance summary
+                $result["attendance"] = $attendClass->range_summary($params);
+
             }
 
             // return the result

@@ -43,7 +43,6 @@ var save_AttendanceLog = (date, user_type = "", class_id = "") => {
                 let m_icon = "error"
                 if (response.code == 200) {
                     m_icon = "success";
-
                     if ($(`select[id="attendance_class"]`).length) {
                         $(`select[id="attendance_class"]`).trigger("change");
                     }
