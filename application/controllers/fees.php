@@ -58,7 +58,7 @@ class Fees extends Myschoolgh {
         $filters .= !empty($student_id) ? " AND a.student_id IN ('{$student_id}')" : "";
         $filters .= isset($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";
         $filters .= isset($params->programme_id) && !empty($params->programme_id) ? " AND a.programme_id='{$params->programme_id}'" : "";
-        $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id='{$params->category_id}'" : ""; 
+        $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id IN {$this->inList($params->category_id)}" : ""; 
         $filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
         $filters .= isset($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";

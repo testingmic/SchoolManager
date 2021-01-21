@@ -8,12 +8,12 @@ class Analitics extends Myschoolgh {
     public $previous_title = "Yesterday";
     public $final_report = [];
 
-    public function __construct() {
+    public function __construct(stdClass $params) {
 
         parent::__construct();
 
         $this->default_stream = [
-            "summary_report", "students_report"
+            "summary_report", "students_report", "revenue_flow", "library_report"
         ];
 
         $this->accepted_period = [
@@ -28,6 +28,14 @@ class Analitics extends Myschoolgh {
             "exceeds-count" => "Sorry! The days between the two ranges must not exceed 366 days",
             "invalid-prevdate" => "Sorry! The start date must not exceed the end date.",
         ];
+
+        // get the client data
+        $client_data = $this->client_data($params->clientId ?? null);
+
+        // run this query
+        $this->academic_term = $client_data->client_preferences->academics->academic_term;
+        $this->academic_year = $client_data->client_preferences->academics->academic_year;
+
     }
 
     /**
@@ -43,11 +51,11 @@ class Analitics extends Myschoolgh {
         global $usersClass;
 
         /** set the date period */
-        $params->period = $params->period ?? "this_month"; //"this_week";
+        $params->period = $params->period ?? "last_14days";
 
         /** Convert the stream into an array list */
         $params->stream = isset($params->label["stream"]) && !empty($params->label["stream"]) ? $this->stringToArray($params->label["stream"]) : $this->default_stream;
-
+        
         /** Preformat date */
         if(in_array($params->period, $this->accepted_period)) {
 
@@ -64,7 +72,7 @@ class Analitics extends Myschoolgh {
                     ]
                 ]
             ];
-            $usersClass->preference($user_pref);
+            // $usersClass->preference($user_pref);
             
         } else {
             $the_date = $this->preformat_date($params->period);
@@ -90,8 +98,10 @@ class Analitics extends Myschoolgh {
         ];
 
         // confirm if the user pushed a query set
-        $this->query_date_range = isset($params->label["stream_period"]) ? $this->stringToArray($params->label["stream_period"]) : ["current", "previous"];
         $this->user_status = isset($params->label["user_status"]) ? $params->label["user_status"] : "Active";
+        $this->student_id_query = isset($params->label["student_id"]) ? " AND a.student_id = '{$params->label["student_id"]}'" : null;
+        $this->fees_category_id = isset($params->label["category_id"]) ? " AND a.category_id IN {$this->inList($params->label["category_id"])}" : null;
+        $this->query_date_range = isset($params->label["stream_period"]) ? $this->stringToArray($params->label["stream_period"]) : ["current", "previous"];
 
         // append the arange information
         $this->final_report["date_range"] = $this->date_range;
@@ -102,6 +112,18 @@ class Analitics extends Myschoolgh {
             $this->final_report["summary_report"] = $this->summary_report($params);
             // get the percentage difference between the current and previous
             $this->calculate_percentages($this->final_report, "summary_report.students_class_record_count.count");
+        }
+
+        // get the revenue information if not parsed in the stream
+        if(in_array("revenue_flow", $params->stream)) {
+            // query the revenue data
+            $this->final_report["revenue_flow"] = $this->revenue_flow($params);
+        }
+
+        // get the library information if not parsed in the stream
+        if(in_array("library_report", $params->stream)) {
+            // query the library data
+            $this->final_report["library_report"] = $this->library_report($params);
         }
 
         return $this->final_report;
@@ -119,27 +141,53 @@ class Analitics extends Myschoolgh {
         
         global $usersClass;
         $result = [];
-        $ranger = [];
+        $sex_group = [];
 
+        /**
+         * Loop through the user roles and get the count per each user category
+         * 
+         * Also, get the total number of male and female records
+         */
         foreach($this->the_user_roles as $role => $value) {
             
             /** Parameter */
             $client_param = (Object) [
-                "userId" => $params->userId,
-                "user_type" => $role,
-                "user_status" => $this->user_status,
                 "reporting" => true,
+                "user_type" => $role,
                 "remove_user_data" => true,
+                "userId" => $params->userId,
                 "return_where_clause" => true,
+                "user_status" => $this->user_status,
+                "academic_term" => $this->academic_term,
+                "academic_year" => $this->academic_year,
             ];
             $where_clause = $usersClass->list($client_param);
 
             // value_name
             $value_count = "total_{$role}s_count";
 
-            $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause}");
+            $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause} AND status='1'");
             $query->execute([$this->user_status]);
             $result["users_record_count"]["count"][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
+
+            // set the sex
+            foreach(["Male", "Female"] as $gender) {
+
+                // get the user gender
+                $client_param->gender = $gender;
+
+                // set a where clause
+                $where_clause = $usersClass->list($client_param);
+
+                // run a query for the user count
+                $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause} AND status='1'");
+                $query->execute([$this->user_status]);
+
+                // append to the result array
+                $result["users_record_count"]["gender_count"][$gender][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
+            }
+
+            $client_param->gender = null;
 
             // loop through the date ranges for the current and previous
             foreach($this->date_range as $range_key => $range_value) {
@@ -156,6 +204,7 @@ class Analitics extends Myschoolgh {
 
                 // append to the result array
                 $result["users_record_count"]["comparison"][$range_key][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
+
             }
 
         }
@@ -168,6 +217,7 @@ class Analitics extends Myschoolgh {
          */
         // get the fees categories
         $class_list = $this->pushQuery("id, name", "classes", "status='1' AND client_id='{$params->clientId}'");
+        $result["students_class_record_count"]["total_count"] = count($class_list);
 
         // load the fees records
         foreach($class_list as $key => $value) {
@@ -226,11 +276,11 @@ class Analitics extends Myschoolgh {
          * Load the fees paid count by category and get the amounts paid per category
          * Run a comparison between the current and previous record set
          */
-        // create a new object
         $feesClass = load_class("fees", "controllers");
 
         // get the fees categories
         $fees_category_list = $this->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$params->clientId}'");
+        $result["fees_record_count"]["total_count"] = count($fees_category_list);
 
         // load the fees records
         foreach($fees_category_list as $key => $value) {
@@ -297,15 +347,47 @@ class Analitics extends Myschoolgh {
     }
 
     /**
-     * Generate Students Report
+     * Library Manager
+     * 
+     * Loop through the dates and categories of the categories type and get the records
+     * 
+     * @return Array
      */
-    public function _students_report($params) {
-        
+    public function library_report($params) {
+
+        try {
+            
+            /** Set the parameters */
+            $params->quick_analitics_load = true;
+            
+            /** Load the Books */
+            $library_category = load_class("library", "controllers")->category_list($params);
+
+            return $library_category;
+
+        } catch(PDOException $e) {
+
+        }
+    }
+
+    /**
+     * Fees Record
+     * 
+     * Loop through the dates and categories of the fees type and get the records
+     */
+
+    /**
+     * Generate report on the revenue flow
+     * 
+     * This gets the amount received grouped by hour/day/months as the case may be
+     * 
+     * @return Array
+     */
+    public function revenue_flow($params) {
+
         try {
 
             // init
-            global $usersClass;
-            $result = [];
             $ranger = [];
 
             // loop through the date ranges for the current and previous
@@ -314,111 +396,130 @@ class Analitics extends Myschoolgh {
                 // confirm that the period was in the request
                 if(in_array($range_key, $this->query_date_range)) {
 
-                    /** Parameter */
-                    $client_param = (Object) [
-                        "date_range" => "{$range_value["start"]}:{$range_value["end"]}",
-                        "userId" => $params->userId,
-                        "userData" => $params->userData,
-                        "user_type" => "student",
-                        "limit" => 200000,
-                        "exempt_admin_users" => true,
-                        "reporting" => true,
-                        "minified" => "reporting_list",
-                        "remote" => true
-                    ];
-
-                    // requests timelines
-                    $clients_query = $usersClass->list($client_param);
-                    $result["users_count"][$range_key] = $clients_query;
-
-                    // if the summary report was requested as well
-                    if(in_array("summary_report", $params->stream)) {
-                        $this->final_report["summary_report"][$range_key]["data"]["clients_count"] = $clients_query["clients_count"];
-                        $this->final_report["summary_report"][$range_key]["data"]["all_users_count"] = $clients_query["total_count"];
-                    }
-
-                    // get the where clause for generating the report
-                    $client_param->addition_query = null;
-                    $client_param->return_where_clause = true;
-                    $client_param->user_type = "user,business";
-                    $where_clause = $usersClass->list($client_param);
-
                     /** The policies created for the period */
                     $stmt = $this->db->prepare("
                         SELECT 
-                            COUNT(*) AS value, {$this->group_by}(a.date_created) AS value_date
-                        FROM users a 
+                            COUNT(*) AS value, {$this->group_by}(a.recorded_date) AS value_date
+                        FROM fees_collection a 
                         WHERE 
-                           {$where_clause} 
-                        GROUP BY {$this->group_by}(a.date_created) LIMIT {$client_param->limit}
+                            a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
+                            AND (
+                                DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
+                            )
+                        GROUP BY {$this->group_by}(a.recorded_date)
                     ");
                     $stmt->execute();
                     $counter = $stmt->fetchAll(PDO::FETCH_OBJ);
-                    $result["users_counter"][$range_key]["data"] = $counter;
+                    $result["revenue_received_count"][$range_key]["data"] = $counter;
 
-                    // get the data to use
-                    $the_data = !empty($result["users_counter"][$range_key]) ? $result["users_counter"][$range_key]["data"] : [];
+                    // create new array
+                    $count_converted = [];
+                    // convert to int
+                    foreach($counter as $count) {
+                        $count->value = (float) $count->value;
+                        $count_converted[] = $count;
+                    }
+                    // assign the int cast value back to the array
+                    $result["revenue_received_count"][$range_key]["data"] = $count_converted;
 
-                    // combine the date and sales from the database into one set
-                    $combined = array_combine(array_column($the_data, "value_date"), array_column($the_data, "value"));
-                    
-                    // labels check 
-                    $listing = "list-days";
-                    if($params->period == "today") {
-                        $listing = "hour";
+                    /** claims paid for the period */
+                    $stmt = $this->db->prepare("
+                        SELECT {$this->group_by}(a.recorded_date) AS value_date, SUM(a.amount) AS value 
+                        FROM fees_collection a
+                        WHERE a.status = '1' AND a.reversed = '0' {$this->student_id_query} {$this->fees_category_id}
+                        AND (
+                            DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
+                        )
+                        GROUP BY {$this->group_by}(a.recorded_date)
+                    ");
+                    $stmt->execute();
+                    $amount_received = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    $result["revenue_received_amount"][$range_key]["data"] = $amount_received;
+
+                    // if the summary report was requested as well
+                    if(in_array("summary_report", $params->stream)) {
+                        $revenue_total_sum = !empty($amount_received) ? array_sum(array_column($amount_received, "value")) : 0;
+                        $this->final_report["summary_report"][$range_key]["data"]["revenue_received_amount"] = $revenue_total_sum;
                     }
 
-                    // if the period is a year
-                    if(in_array($params->period, ["this_year", "last_6months", "last_year"])) {
-                        $listing = "year-to-months";
+                    // create new array
+                    $amount_converted = [];
+                    // convert to int
+                    foreach($amount_received as $amount) {
+                        $amount["value"] = (float) $amount["value"];
+                        $amount_converted[] = $amount;
                     }
-                    
-                    // replace the empty fields with 0
-                    $replaceEmptyField = $this->value_replacer($listing, array_column($the_data, "value_date"), array($range_value["start"], $range_value["end"]));
+                    // assign the int cast value back to the array
+                    $result["revenue_received_amount"][$range_key]["data"] = $amount_converted;
 
-                    // append the fresh dataset to the old dataset
-                    $freshData = array_replace($combined, $replaceEmptyField);
-                    ksort($freshData);
+                    // loop through the results set
+                    foreach($result as $the_key => $value) {
+                        
+                        // get the data to use
+                        $the_data = isset($value[$range_key]) ? $value[$range_key]["data"] : [];
 
-                    /** Labels control */
-                    $labelArray = array_keys($freshData);
-                    $labels = [];
-                    // confirm which period we are dealing with
-                    if($listing == "list-days") {
-                        // change the labels to hours of day
-                        foreach($labelArray as $value) {
-                            $labels[] = date("jS M", strtotime($value));
+                        // combine the date and sales from the database into one set
+                        $combined = array_combine(array_column($the_data, "value_date"), array_column($the_data, "value"));
+                        
+                        // labels check 
+                        $listing = "list-days";
+                        if($params->period == "today") {
+                            $listing = "hour";
                         }
-                    } elseif($listing == "hour") {
-                        // change the labels to hours of day
-                        foreach($labelArray as $value) {
-                            $labels[] = $this->convertToPeriod("hour", $value);
+
+                        // if the period is a year
+                        if(in_array($params->period, ["this_year", "last_6months", "last_year"])) {
+                            $listing = "year-to-months";
                         }
-                    } elseif($listing == "year-to-months") {
-                        // change the labels to hours of day
-                        foreach($labelArray as $value) {
-                            $labels[] = $this->convertToPeriod("month", $value, "F");
+                        
+                        // replace the empty fields with 0
+                        $replaceEmptyField = $this->value_replacer($listing, array_column($the_data, "value_date"), array($range_value["start"], $range_value["end"]));
+
+                        // append the fresh dataset to the old dataset
+                        $freshData = array_replace($combined, $replaceEmptyField);
+                        ksort($freshData);
+
+                        /** Labels control */
+                        $labelArray = array_keys($freshData);
+                        $labels = [];
+                        // confirm which period we are dealing with
+                        if($listing == "list-days") {
+                            // change the labels to hours of day
+                            foreach($labelArray as $value) {
+                                $labels[] = date("jS M", strtotime($value));
+                            }
+                        } elseif($listing == "hour") {
+                            // change the labels to hours of day
+                            foreach($labelArray as $value) {
+                                $labels[] = $this->convertToPeriod("hour", $value);
+                            }
+                        } elseif($listing == "year-to-months") {
+                            // change the labels to hours of day
+                            foreach($labelArray as $value) {
+                                $labels[] = $this->convertToPeriod("month", $value, "F");
+                            }
                         }
+
+                        // Parse the amount into the chart array data
+                        $resultData = [];
+                        $resultData["labels"] = $labels;
+                        $resultData["data"] = array_values($freshData);
+
+                        $ranger[$range_key][$the_key]["data"] = $resultData;
+                        $ranger[$range_key][$the_key]["period"] = $range_value;
+
                     }
-
-                    // Parse the amount into the chart array data
-                    $resultData = [];
-                    $resultData["labels"] = $labels;
-                    $resultData["data"] = array_values($freshData);
-
-                    $ranger[$range_key]["users_counter"]["data"] = $resultData;
-                    $ranger[$range_key]["users_counter"]["period"] = $range_value;
-                    
 
                     // append the period to to the array values
-                    $result["users_counter"][$range_key]["period"] = $range_value;
-
+                    $result["revenue_received_count"][$range_key]["period"] = $range_value;
+                    $result["revenue_received_amount"][$range_key]["period"] = $range_value;
+                
                 }
 
             }
 
             $result["grouped_list"] = $ranger;
-
+            
             return $result;
 
         } catch(PDOException $e) {
@@ -655,7 +756,7 @@ class Analitics extends Myschoolgh {
 			$dataSet = [];
 
 			foreach($notFoundDays as $value) {
-				$dataSet[$value] = "0.00";
+				$dataSet[$value] = 0;
 			}
 			// check the rangeset that has been parsed
 		} elseif($rangeSet == "hour") {
@@ -675,7 +776,7 @@ class Analitics extends Myschoolgh {
 			$dataSet = [];
 			
 			foreach($notFoundHours as $value) {
-				$dataSet[$value] = "0.00";
+				$dataSet[$value] = 0.00;
 			}
 		} elseif($rangeSet == "year-to-months") {
 			// set the first parameter for the hours
@@ -691,7 +792,7 @@ class Analitics extends Myschoolgh {
 			
 			$dataSet = [];
 			foreach($notFoundMonths as $value) {
-				$dataSet[$value] = "0.00";
+				$dataSet[$value] = 0.00;
 			}
 		}
 

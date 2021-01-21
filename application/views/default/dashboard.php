@@ -111,6 +111,7 @@ $reversed_array_list = array_reverse($events_array_list);
 
 // loop through the array list
 foreach($reversed_array_list as $event) {
+    // append to the events list
     $upcoming_events_list .= "
         <li class='media'>
             <div class='media-body' style='flex: 2;'>
@@ -129,7 +130,8 @@ foreach($reversed_array_list as $event) {
 }
 
 // if the birthday array is not empty
-if(!empty($events_list->birthday_list)) {
+if(!empty($events_list->birthday_list) && $isAdminAccountant) {
+    
     // loop through the array list
     foreach($events_list->birthday_list as $event) {
         // format the date of birth
@@ -149,18 +151,16 @@ if(!empty($events_list->birthday_list)) {
                 </div>
             </li>";
     }
+
 }
+
 // load the assignments list
-else {
+else if($isWardTutorParent) {
     // unset the session
     $session->remove("assignment_uploadID");
 
     // the query parameter to load the user information
-    $assignments_param = (object) [
-        "minified" => true,
-        "clientId" => $clientId,
-        "userData" => $defaultUser
-    ];
+    $assignments_param = (object) ["minified" => true, "clientId" => $clientId, "userData" => $defaultUser];
     $assignments_array_list = load_class("assignments", "controllers")->list($assignments_param);
 
     // can update assignments
@@ -198,18 +198,25 @@ else {
     }
     
 }
+
 // append the events list as part of the results
 $response->array_stream["events_array_list"] = $events_list;
 
-// append the scripts to the page
+// the default data to stream
+$data_stream = "attendance_report";
+
+// set the data to stream for an admin user
 if($isAdminAccountant) {
-    $response->scripts = ["assets/js/analitics.js"];
+    $data_stream = "summary_report,revenue_flow";
 }
+
+// append the scripts to the page
+$response->scripts = ["assets/js/analitics.js"];
 
 // set the response dataset
 $response->html = '
     <section class="section">
-        <div class="d-flex mt-3 justify-content-between">
+        <div class="d-flex mt-3 justify-content-between" id="data-report_stream" data-report_stream="'.$data_stream.'">
             <div class="section-header">
                 <h1>Dashboard</h1>
             </div>
@@ -304,28 +311,28 @@ $response->html = '
             </div>' : ''
         ).'
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <div class="card">
-                <div class="card-header">
-                    <h4>Revenue Flow Chart</h4>
-                </div>
-                <div class="card-body">
-                    <div class="form-content-loader" style="display: none; position: absolute">
-                        <div class="offline-content text-center">
-                            <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
-                        </div>
+                    <div class="card-header">
+                        <h4>Revenue Flow Chart</h4>
                     </div>
-                    <div id="revenue_flow_chart"></div>
-                </div>
+                    <div class="card-body quick_loader">
+                        <div class="form-content-loader" style="display: flex; position: absolute">
+                            <div class="offline-content text-center">
+                                <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                            </div>
+                        </div>
+                        <canvas id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></canvas>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 hidden">
                 <div class="card">
                 <div class="card-header">
                     <h4>Attendance Chart</h4>
                 </div>
-                <div class="card-body">
-                    <div class="form-content-loader" style="display: none; position: absolute">
+                <div class="card-body quick_loader" style="max-height:405px;height:405px;">
+                    <div class="form-content-loader" style="display: flex; position: absolute">
                         <div class="offline-content text-center">
                             <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                         </div>
@@ -382,9 +389,31 @@ $response->html = '
                             <div id="revenue_category_chart"></div>
                         </div>
                     </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-12 col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Students</h4>
+                        </div>
+                        <div class="card-body" style="max-height:265px;height:265px;">
+                            <canvas id="male_female_comparison"></canvas>
+                        </div>
+                        <div class="card-footer">
+                            <div class="student-report">
+                                <div class="student-count pseudo-bg-blue">
+                                    <h4 class="item-title">Female Students</h4>
+                                    <div class="item-number" data-sex_count="Female"></div>
+                                </div>
+                                <div class="student-count pseudo-bg-yellow">
+                                    <h4 class="item-title">Male Students</h4>
+                                    <div class="item-number" data-sex_count="Male"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>' : ''
             ).'
-            <div class="col-lg-5 col-md-6 col-12 col-sm-12">
+            <div class="col-lg-4 col-md-6 col-12 col-sm-12">
                 <div class="card">
                     <div class="card-header pl-2">
                         <h4>Upcoming Events</h4>
@@ -408,7 +437,8 @@ $response->html = '
                             </ul>
                         </div>
                     </div>
-                </div>' : '
+                </div>' : (
+                    $isWardTutorParent ? '
                 <div class="col-lg-7 col-md-6 col-12 col-sm-12">
                     <div class="card">
                         <div class="card-header">
@@ -436,7 +466,7 @@ $response->html = '
                         </div>
                     </div>
                 </div>
-                '
+                ' : '')
             ).'
         </div>
     </section>';

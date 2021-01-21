@@ -49,6 +49,9 @@ class Users extends Myschoolgh {
 		$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
 		$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 		$params->query .= (isset($params->user_status) && !empty($params->user_status)) ? " AND a.user_status ='{$params->user_status}'" : " AND a.user_status ='Active'";
+		
+		$params->query .= (isset($params->academic_year) && !empty($params->academic_year)) ? " AND a.academic_year='{$params->academic_year}'" : null;
+		$params->query .= (isset($params->academic_term) && !empty($params->academic_term)) ? " AND a.academic_term='{$params->academic_term}'" : null;
 
 		// if the field is null (dont perform all these checks if minified was parsed)
 		if(!isset($params->minified) || (isset($params->minified) && isset($params->reporting))) {
@@ -58,14 +61,13 @@ class Users extends Myschoolgh {
 				$params->query .= (isset($params->or_clause) && !empty($params->or_clause)) ? $params->or_clause : null;
 				$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 				$params->query .= (isset($params->date_range)) ? $this->dateRange($params->date_range) : null;
+				$params->query .= (isset($params->gender) && !empty($params->gender)) ? " AND a.gender='{$params->gender}'" : null;
 			} else {
 				$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
 				$params->query .= (isset($params->email)) ? " AND a.email='{$params->email}'" : null;
 				$params->query .= (isset($params->or_clause) && !empty($params->or_clause)) ? $params->or_clause : null;
 				$params->query .= (isset($params->date_of_birth) && !empty($params->date_of_birth)) ? " AND a.date_of_birth='{$params->date_of_birth}'" : null;
 				$params->query .= (isset($params->created_by) && !empty($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
-				$params->query .= (isset($params->academic_year) && !empty($params->academic_year)) ? " AND a.academic_year='{$params->academic_year}'" : null;
-				$params->query .= (isset($params->academic_term) && !empty($params->academic_term)) ? " AND a.academic_term='{$params->academic_term}'" : null;
 				$params->query .= (isset($params->firstname) && !empty($params->firstname)) ? " AND a.firstname LIKE '%{$params->firstname}%'" : null;
 				$params->query .= (isset($params->lastname) && !empty($params->lastname)) ? " AND a.lastname LIKE '%{$params->lastname}%'" : null;
 				$params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department='{$params->department_id}'" : null;

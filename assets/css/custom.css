@@ -287,3 +287,70 @@ textarea.form-control {
     right: 0px;
     top: 0px;
 }
+
+.pseudo-bg-Aquamarine:after {
+    background-color: #1de9b6;
+}
+
+.pseudo-bg-blue:after {
+    background-color: #417dfc;
+}
+
+.pseudo-bg-yellow:after {
+    background-color: #ffaa01;
+}
+
+.pseudo-bg-red:after {
+    background-color: #ff0000;
+}
+
+.pseudo-bg-pink:after {
+    background-color: #f939a1;
+}
+
+.student-report {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.student-report:before {
+    content: "";
+    height: 58px;
+    width: 1px;
+    background-color: #d7d7d7;
+    position: absolute;
+    top: -15px;
+    right: 50%;
+    transform: translateX(-50%);
+}
+
+.student-report .student-count {
+    position: relative;
+}
+
+.student-report .student-count .item-title {
+    font-size: 14px;
+    color: #a5a5a5;
+    margin-bottom: 2px;
+}
+
+.student-report .student-count .item-number {
+    font-size: 16px;
+    color: #111111;
+    font-weight: 500;
+}
+
+.student-report .student-count:after {
+    content: "";
+    height: 6px;
+    width: 49px;
+    border-radius: 6px;
+    position: absolute;
+    top: -18px;
+    left: 0;
+}
+
+.student-report .student-count:last-child:before {
+    display: none;
+}

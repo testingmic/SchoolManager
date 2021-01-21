@@ -100,7 +100,7 @@ if(!empty($session->userId)) {
 	// $isEmployee = (bool) ($defaultUser->user_type == "employee");
 	$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
     $isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
-	// $isTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
+	$isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
 	$isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
 }
 

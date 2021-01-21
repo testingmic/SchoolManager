@@ -193,7 +193,7 @@ class Api_validate {
 					// only parse if the value is not empty
 					if( (!empty($value) && ($key != "access_token")) || ($value == 0) ) {
 						// append the parameters
-						$params[$key] = xss_clean($value);
+						$params[$key] = is_array($value) ? $value : xss_clean($value);
 					}
 				}
 			}
@@ -211,7 +211,7 @@ class Api_validate {
 					// only parse if the value is not empty
 					if( (!empty($value) && ($key != "access_token")) || ($value == 0) ) {
 						// append the parameters
-						$params[$key] = (is_array($value)) ? $value : xss_clean($value);
+						$params[$key] = is_array($value) ? $value : xss_clean($value);
 					}
 				}
 			}
