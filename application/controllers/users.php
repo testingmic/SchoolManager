@@ -1946,7 +1946,7 @@ class Users extends Myschoolgh {
 	 */
 	public function remove_all_user_courses(stdClass $params) {
 
-		$courses_ids = $this->pushQuery("course_tutor, id", "courses", "client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' LIMIT 400");
+		$courses_ids = $this->pushQuery("course_tutor, id", "courses", "client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' AND status='1' LIMIT 400");
 
 		foreach($courses_ids as $course) {
 			if(!empty($course->course_tutor)) {
@@ -1955,7 +1955,7 @@ class Users extends Myschoolgh {
 					$key = array_search($params->user_id, $result);
 					if($key !== FALSE) {
 						unset($result[$key]);
-						$this->db->query("UPDATE courses SET course_tutor = '".json_encode($result)."' WHERE id='{$course->id}' LIMIT 1");
+						$this->db->query("UPDATE courses SET course_tutor = '".json_encode($result)."' WHERE id='{$course->id}' AND status='1' LIMIT 1");
 					}
 				}
 			}

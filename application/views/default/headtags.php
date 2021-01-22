@@ -84,9 +84,9 @@ load_helpers(['menu_helper']);
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/datatables/datatables.min.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-daterangepicker/daterangepicker.css">
-    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/vendors/trix/trix.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/select2/select2.css">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/fullcalendar/fullcalendar.min.css">
     <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
     <?php foreach($loadedCSS as $eachCSS) { ?>

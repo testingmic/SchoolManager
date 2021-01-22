@@ -354,3 +354,7 @@ textarea.form-control {
 .student-report .student-count:last-child:before {
     display: none;
 }
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #607D8B;
+}

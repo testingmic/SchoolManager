@@ -33,6 +33,7 @@ if(!empty($item_id)) {
     $item_param = (object) [
         "clientId" => $clientId,
         "class_id" => $item_id,
+        "load_courses" => true,
         "limit" => 1
     ];
 
@@ -200,7 +201,41 @@ if(!empty($item_id)) {
                         </div>
                         <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="courses-tab2">
                             <div class="col-lg-12 pl-0"><h5>Class Courses List</h5></div>
+                                <div class="row">';
+
+                            // if the class list is not empty
+                            if(!empty($data->class_courses_list)) {
+                                
+                                // loop throught the classes list
+                                foreach($data->class_courses_list as $course) {
+                                    $response->html .= '
+                                    <div class="col-lg-6 col-md-6">
+                                        <div class="card">
+                                            <div class="card-body pt-0 pb-0">
+                                                <div class="pb-2 pt-3 border-bottom">
+                                                    <p class="clearfix mb-2">
+                                                        <span class="float-left">Name</span>
+                                                        <span class="float-right text-muted"><a href="'.$baseUrl.'update-course/'.$course->id.'/view">'.$course->name.'</a></span>
+                                                    </p>
+                                                    <p class="clearfix">
+                                                        <span class="float-left">Code</span>
+                                                        <span class="float-right text-muted">'.$course->course_code.'</span>
+                                                    </p>
+                                                    <p class="clearfix">
+                                                        <span class="float-left">Credit Hours</span>
+                                                        <span class="float-right text-muted">'.$course->credit_hours.'</span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>';
+                                }
+                            } else {
+                                $response->html .= '<div class="col-lg-12 font-italic">No class is currently offering this course.</div>';
+                            }
                             
+                            $response->html .= ' 
+                            </div>
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                         

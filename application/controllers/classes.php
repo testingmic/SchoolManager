@@ -43,6 +43,8 @@ class Classes extends Myschoolgh {
             ");
             $stmt->execute([1]);
 
+            $loadCourses = (bool) isset($params->load_courses);
+
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
@@ -52,6 +54,23 @@ class Classes extends Myschoolgh {
                     if(isset($result->{$each})) {
                         // convert the created by string into an object
                         $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                    }
+                }
+                // init
+                $result->class_courses_list = [];
+
+                // if the user also requested to load the courses
+                if($loadCourses) {
+                    // convert to array
+                    $class_courses_list = !empty($result->courses_list) ? json_decode($result->courses_list, true) : [];
+                    
+                    // loop through the array list
+                    foreach($class_courses_list as $course) {
+                        // get the course tutor information
+                        $course_info = $this->pushQuery("id, item_id, name, course_code, credit_hours, description", "courses", "item_id='{$course}' AND status='1' LIMIT 1");
+                        if(!empty($course_info)) {
+                            $result->class_courses_list[] = $course_info[0];
+                        }
                     }
                 }
 

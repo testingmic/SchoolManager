@@ -54,7 +54,7 @@ class Courses extends Myschoolgh {
         $params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
         $params->query .= (isset($params->programme_id)) ? " AND a.programme_id='{$params->programme_id}'" : null;
         $params->query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND a.id='{$params->course_id}'" : null;
-        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id IN {$this->inList($params->class_id)}" : null;
+        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id LIKE '%{$params->class_id}%'" : null;
         $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
 
@@ -114,14 +114,14 @@ class Courses extends Myschoolgh {
                     $result->course_tutor_ids = empty($course_tutors) ? [] : $course_tutors;
 
                     // convert to array
-                    $result->class_ids = $this->stringToArray($result->class_id);
+                    $result->class_ids = !empty($result->class_id) ? json_decode($result->class_id, true) : [];
                     
                     // load the course tutor details
                     if(!empty($course_tutors)) {
                         // loop through the array list
                         foreach($course_tutors as $tutor) {
                             // get the course tutor information
-                            $tutor_info = $this->pushQuery("name, item_id, unique_id, phone_number, email, image", "users", "item_id='{$tutor}' LIMIT 1");
+                            $tutor_info = $this->pushQuery("name, item_id, unique_id, phone_number, email, image", "users", "item_id='{$tutor}' AND user_status='Active' LIMIT 1");
                             if(!empty($tutor_info)) {
                                 $result->course_tutors[] = $tutor_info[0];
                             }
@@ -135,7 +135,7 @@ class Courses extends Myschoolgh {
                         // loop through the array list
                         foreach($result->class_ids as $class) {
                             // get the course tutor information
-                            $class_info = $this->pushQuery("name, id, class_size, class_code, weekly_meeting", "classes", "id='{$class}' LIMIT 1");
+                            $class_info = $this->pushQuery("name, id, class_size, class_code, weekly_meeting", "classes", "item_id='{$class}' AND status='1' LIMIT 1");
                             if(!empty($class_info)) {
                                 $result->class_list[] = $class_info[0];
                             }
@@ -247,15 +247,6 @@ class Courses extends Myschoolgh {
             return ["code" => 203, "data" => $this->permission_denied];
         }
 
-        // get the class department
-        $dept_id = $this->pushQuery("department_id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
-        // if empty then return
-        if(empty($dept_id)) {
-            return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
-        }
-        // set the department id retrieved using the class id
-        $params->department_id = $dept_id[0]->department_id;
- 
         // create a new Course code
         if(isset($params->course_code) && !empty($params->course_code)) {
             // replace any empty space with 
@@ -331,19 +322,11 @@ class Courses extends Myschoolgh {
 
             // old record
             $prevData = $this->pushQuery("*", "courses", "id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+            
             // if empty then return
             if(empty($prevData)) {
                 return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
             }
-
-            // get the class department
-            $dept_id = $this->pushQuery("department_id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
-            // if empty then return
-            if(empty($dept_id)) {
-                return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
-            }
-            // set the department id retrieved using the class id
-            $params->department_id = $dept_id[0]->department_id;
             
             // create a new class code
             if(isset($params->course_code) && !empty($params->course_code) && ($prevData[0]->course_code !== $params->course_code)) {
@@ -359,25 +342,69 @@ class Courses extends Myschoolgh {
                 $params->course_code = $this->client_data($params->clientId)->client_preferences->labels->{"course_label"}.$counter;
             }
 
+            // init
+			$tutor_ids = [];
+            $class_ids = [];
+
+			// append tutor to courses list
+			if(isset($params->course_tutor)) {
+
+                // convert the course tutor into an array
+                $course_tutor = !empty($prevData[0]->course_tutor) ? json_decode($prevData[0]->course_tutor, true) : [];
+
+				// find tutor ids which were initially attached to the course but no longer attached
+				$diff = array_diff($course_tutor, $params->course_tutor);
+
+				// append
+				$tutor_ids = $this->append_course_tutors($params->course_tutor, $params->course_id, $params->clientId);
+
+				// remove user from courses
+				if(!empty($diff)) {
+					$this->remove_course_tutor($diff, $params->course_id, $params->clientId);
+					$tutor_ids = $params->course_tutor;
+				}
+			} else {
+				$this->remove_all_course_tutors($params);
+			}
+
+            // append tutor to courses list
+			if(isset($params->class_id)) {
+
+                // convert the course tutor into an array
+                $class_course = !empty($prevData[0]->class_course) ? json_decode($prevData[0]->class_course, true) : [];
+
+				// find class ids which were initially attached to the course but no longer attached
+				$diff = array_diff($class_course, $params->class_id);
+
+				// append
+				$class_ids = $this->append_class_courses($params->class_id, $prevData[0]->item_id, $params->clientId);
+
+				// remove user from courses
+				if(!empty($diff)) {
+					$this->remove_class_course($diff, $prevData[0]->item_id, $params->clientId);
+					$class_ids = $params->class_id;
+				}
+			} else {
+				$this->remove_all_class_courses($params, $prevData[0]->item_id);
+			}          
+
             // convert the code to uppercase
             $params->course_code = strtoupper($params->course_code);
 
             // execute the statement
             $stmt = $this->db->prepare("
-                UPDATE courses SET date_updated = now()
+                UPDATE courses SET date_updated = now(), course_tutor = ?, class_id = ?
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
-                ".(isset($params->class_id) ? ", class_id = '".json_encode($params->class_id)."'" : null)."
-                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(isset($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
+                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(isset($params->course_tutor) ? ", course_tutor = '".json_encode($params->course_tutor)."" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
-                WHERE id = ? AND client_id = ?
+                WHERE id = ? AND client_id = ? LIMIT 1
             ");
-            $stmt->execute([$params->course_id, $params->clientId]);
+            $stmt->execute([json_encode($tutor_ids), json_encode($class_ids), $params->course_id, $params->clientId]);
             
             // log the user activity
             $this->userLogs("courses", $params->course_id, $prevData[0], "{$params->userData->name} updated the Course: {$prevData[0]->name}", $params->userId);
@@ -702,6 +729,178 @@ class Courses extends Myschoolgh {
         } 
 
     }
+
+    /**
+	 * Append Courses Classes
+	 * 
+	 * Loop through the courses that the user has been attached to 
+	 * If not in the courses tutors list then append the user_id to it
+	 * 
+	 * @return Bool
+	 */
+	public function append_class_courses($course_class, $course_id, $client_id) {
+
+		$course_classes = $this->stringToArray($course_class);
+		$valid_ids = [];
+
+		foreach($course_classes as $class) {
+			$query = $this->pushQuery("courses_list", "classes", "item_id='{$class}' AND client_id='{$client_id}' AND status='1' LIMIT 1");
+			if(!empty($query)) {
+				$valid_ids[] = $class;
+				if(!empty($query[0]->courses_list)) {
+					$result = json_decode($query[0]->courses_list, true);
+					if(!in_array($course_id, $result)) {
+						array_push($result, $course_id);
+						$this->db->query("UPDATE classes SET courses_list = '".json_encode($result)."' WHERE item_id='{$class}' AND status='1' LIMIT 1");
+					}
+				} else {
+					$classes = [$course_id];
+					$this->db->query("UPDATE classes SET courses_list = '".json_encode($classes)."' WHERE item_id='{$class}' AND status='1' LIMIT 1");
+				}
+			}
+		}
+		return $valid_ids;
+
+	}
+    
+
+	/**
+	 * Unattach a class from a course
+	 * 
+	 * @return Bool
+	 */
+	public function remove_class_course($class_ids, $course_id, $client_id) {
+
+		$class_ids = $this->stringToArray($class_ids);
+		
+		foreach($class_ids as $class) {
+			$query = $this->pushQuery("courses_list", "classes", "item_id='{$class}' AND client_id='{$client_id}' AND status='1' LIMIT 1");
+			if(!empty($query)) {
+				if(!empty($query[0]->courses_list)) {
+					$result = json_decode($query[0]->courses_list, true);
+					if(in_array($course_id, $result)) {
+						$key = array_search($course_id, $result);
+						unset($result[$key]);
+						$this->db->query("UPDATE classes SET courses_list = '".json_encode($result)."' WHERE item_id='{$class}' LIMIT 1");
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Remove All Course Tutors
+	 * 
+	 * Loop through the courses that the user has been attached to 
+	 * If not in the courses tutors list then append the user_id to it
+	 * 
+	 * @return Bool
+	 */
+	public function remove_all_class_courses(stdClass $params, $item_id) {
+
+		$class_ids = $this->pushQuery("courses_list, id", "classes", "client_id='{$params->clientId}' AND status='1' LIMIT 100");
+
+		foreach($class_ids as $class) {
+			if(!empty($class->courses_list)) {
+				$result = json_decode($class->courses_list, true);
+				if(in_array($item_id, $result)) {
+					$key = array_search($item_id, $result);
+					if($key !== FALSE) {
+						unset($result[$key]);
+						$this->db->query("UPDATE classes SET courses_list = '".json_encode($result)."' WHERE id='{$class->id}' LIMIT 1");
+					}
+				}
+			}
+		}
+		return true;
+
+	}
+
+    /**
+	 * Append Courses Tutors
+	 * 
+	 * Loop through the courses that the user has been attached to 
+	 * If not in the courses tutors list then append the user_id to it
+	 * 
+	 * @return Bool
+	 */
+	public function append_course_tutors($course_tutor, $course_id, $client_id) {
+
+		$course_tutors = $this->stringToArray($course_tutor);
+		$valid_ids = [];
+
+		foreach($course_tutors as $tutor) {
+			$query = $this->pushQuery("course_ids", "users", "item_id='{$tutor}' AND client_id='{$client_id}' LIMIT 1");
+			if(!empty($query)) {
+				$valid_ids[] = $tutor;
+				if(!empty($query[0]->course_ids)) {
+					$result = json_decode($query[0]->course_ids, true);
+					if(!in_array($course_id, $result)) {
+						array_push($result, $course_id);
+						$this->db->query("UPDATE users SET course_ids = '".json_encode($result)."' WHERE item_id='{$tutor}' LIMIT 1");
+					}
+				} else {
+					$tutors = [$course_id];
+					$this->db->query("UPDATE users SET course_ids = '".json_encode($tutors)."' WHERE item_id='{$tutor}' LIMIT 1");
+				}
+			}
+		}
+		return $valid_ids;
+
+	}
+    
+
+	/**
+	 * Unattach a tutor from a course
+	 * 
+	 * @return Bool
+	 */
+	public function remove_course_tutor($tutor_ids, $course_id, $client_id) {
+
+		$tutor_ids = $this->stringToArray($tutor_ids);
+		
+		foreach($tutor_ids as $tutor) {
+			$query = $this->pushQuery("course_ids", "users", "item_id='{$tutor}' AND client_id='{$client_id}' LIMIT 1");
+			if(!empty($query)) {
+				if(!empty($query[0]->course_ids)) {
+					$result = json_decode($query[0]->course_ids, true);
+					if(in_array($course_id, $result)) {
+						$key = array_search($course_id, $result);
+						unset($result[$key]);
+						$this->db->query("UPDATE users SET course_ids = '".json_encode($result)."' WHERE item_id='{$tutor}' LIMIT 1");
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Remove All Course Tutors
+	 * 
+	 * Loop through the courses that the user has been attached to 
+	 * If not in the courses tutors list then append the user_id to it
+	 * 
+	 * @return Bool
+	 */
+	public function remove_all_course_tutors(stdClass $params) {
+
+		$tutor_ids = $this->pushQuery("course_ids, id", "users", "client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' AND user_type='teacher' AND user_status='Active' LIMIT 400");
+
+		foreach($tutor_ids as $course) {
+			if(!empty($course->course_ids)) {
+				$result = json_decode($course->course_ids, true);
+				if(in_array($params->course_id, $result)) {
+					$key = array_search($params->course_id, $result);
+					if($key !== FALSE) {
+						unset($result[$key]);
+						$this->db->query("UPDATE users SET course_ids = '".json_encode($result)."' WHERE id='{$course->id}' AND user_status='Active' LIMIT 1");
+					}
+				}
+			}
+		}
+		return true;
+
+	}
 
     
 }

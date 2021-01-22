@@ -2329,8 +2329,8 @@ class Forms extends Myschoolgh {
                         <label for="class_id">Class <span class="required">*</span></label>
                         <select multiple '.$isAdmin.' data-width="100%" name="class_id[]" id="class_id[]" class="form-control selectpicker">
                             <option value="null">Select Class</option>';
-                            foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && in_array($each->id, $itemData->class_ids) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            foreach($this->pushQuery("id, name, item_id", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && in_array($each->item_id, $itemData->class_ids) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
                     </div>

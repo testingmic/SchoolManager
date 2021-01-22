@@ -290,31 +290,39 @@ if(!empty($item_id)) {
                         
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="classes" role="tabpanel" aria-labelledby="classes-tab2">
                             <div class="row">';
-                            foreach($data->class_list as $class) {
-                                $response->html .= '
-                                <div class="col-lg-6 col-md-6">
-                                    <div class="card">
-                                        <div class="card-body pt-0 pb-0">
-                                            <div class="pb-2 pt-3 border-bottom">
-                                                <p class="clearfix mb-2">
-                                                    <span class="float-left">Name</span>
-                                                    <span class="float-right text-muted"><a href="'.$baseUrl.'update-class/'.$class->id.'/view">'.$class->name.'</a></span>
-                                                </p>
-                                                <p class="clearfix">
-                                                    <span class="float-left">Code</span>
-                                                    <span class="float-right text-muted">'.$class->class_code.'</span>
-                                                </p>
-                                                <p class="clearfix">
-                                                    <span class="float-left">Class Size</span>
-                                                    <span class="float-right text-muted">'.$class->class_size.'</span>
-                                                </p>
+
+                            // if the class list is not empty
+                            if(!empty($data->class_list)) {
+                                
+                                // loop throught the classes list
+                                foreach($data->class_list as $class) {
+                                    $response->html .= '
+                                    <div class="col-lg-6 col-md-6">
+                                        <div class="card">
+                                            <div class="card-body pt-0 pb-0">
+                                                <div class="pb-2 pt-3 border-bottom">
+                                                    <p class="clearfix mb-2">
+                                                        <span class="float-left">Name</span>
+                                                        <span class="float-right text-muted"><a href="'.$baseUrl.'update-class/'.$class->id.'/view">'.$class->name.'</a></span>
+                                                    </p>
+                                                    <p class="clearfix">
+                                                        <span class="float-left">Code</span>
+                                                        <span class="float-right text-muted">'.$class->class_code.'</span>
+                                                    </p>
+                                                    <p class="clearfix">
+                                                        <span class="float-left">Class Size</span>
+                                                        <span class="float-right text-muted">'.$class->class_size.'</span>
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>';
+                                    </div>';
                                 }
-                                $response->html .= '    
-                                
+                            } else {
+                                $response->html .= '<div class="col-lg-12 font-italic">No class is currently offering this course.</div>';
+                            }
+                            
+                            $response->html .= '        
                             </div>
                         </div>
 

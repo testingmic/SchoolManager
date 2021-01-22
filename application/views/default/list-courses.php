@@ -59,13 +59,13 @@ foreach($item_list["data"] as $key => $each) {
     $courses .= "<td>{$each->credit_hours}</td><td>";
     
     foreach($each->class_list as $class) {
-        $courses .= "<p class='mb-1 pb-1'><span class='underline'>".$class->name."</span></p>";
+        $courses .= "<p class='mb-0 pb-0'><a href='{$baseUrl}update-class/{$class->id}/view'><span class='underline'>".$class->name."</span></a></p>";
     }
 
     $courses .= "</td><td>";
 
     foreach($each->course_tutors as $tutor) {
-        $courses .= "<p class='mb-1 pb-1'><a href='{$baseUrl}update-staff/{$tutor->item_id}/view'><span class='underline'>".$tutor->name."</span></a></p>";
+        $courses .= "<p class='mb-0 pb-0'><a href='{$baseUrl}update-staff/{$tutor->item_id}/view'><span class='underline'>".$tutor->name."</span></a></p>";
     }
 
     $courses .= "</td><td class='text-center'>{$action}</td>";
