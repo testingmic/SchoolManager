@@ -266,23 +266,34 @@ class Courses extends Myschoolgh {
 
         try {
 
+            // init
+			$tutor_ids = [];
+            $class_ids = [];
+
             $item_id = random_string("alnum", 32);
+
+			// append class to courses list
+			if(isset($params->class_id)) {
+				$class_ids = $this->append_class_courses($params->class_id, $item_id, $params->clientId);
+			}
+
+            // append tutor to courses list
+			if(isset($params->course_tutor)) {
+				$tutor_ids = $this->append_course_tutors($params->course_tutor, $item_id, $params->clientId);
+			}
 
             // execute the statement
             $stmt = $this->db->prepare("
-                INSERT INTO courses SET client_id = ?, created_by = ?, item_id = '{$item_id}'
+                INSERT INTO courses SET course_tutor = ?, class_id = ?, client_id = ?, created_by = ?, item_id = '{$item_id}'
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
-                ".(isset($params->class_id) ? ", class_id = '".json_encode($params->class_id)."'" : null)."
-                ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(isset($params->course_tutor) ? ", course_tutor = '".json_encode($params->course_tutor)."" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
             ");
-            $stmt->execute([$params->clientId, $params->userId]);
+            $stmt->execute([json_encode($tutor_ids), json_encode($class_ids), $params->clientId, $params->userId]);
             
             // log the user activity
             $this->userLogs("courses", $this->lastRowId("courses"), null, "{$params->userData->name} created a new Course: {$params->name}", $params->userId);

@@ -2238,7 +2238,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="department_id">Department ID</label>
                         <select data-width="100%" name="department_id" id="department_id" class="form-control selectpicker">
-                            <option value="null">Select Department</option>';
+                            <option value="">Select Department</option>';
                             foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $itemData->department_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
                             }
@@ -2249,7 +2249,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="class_teacher">Class Teacher</label>
                         <select data-width="100%" name="class_teacher" id="class_teacher" class="form-control selectpicker">
-                            <option value="null">Select Class Teacher</option>';
+                            <option value="">Select Class Teacher</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->item_id == $itemData->class_teacher) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
@@ -2260,9 +2260,20 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="class_assistant">Class Assistant</label>
                         <select data-width="100%" name="class_assistant" id="class_assistant" class="form-control selectpicker">
-                            <option value="null">Select Class Assistant</option>';
+                            <option value="">Select Class Assistant</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('student') AND status='1' AND client_id='{$clientId}' ".($isData ? " AND class_id='{$itemData->id}'" : "")."") as $each) {
                                 $response .= "<option ".($isData && ($each->item_id == $itemData->class_assistant) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-6">
+                    <div class="form-group">
+                        <label for="room_id[]">Class Rooms</label>
+                        <select data-width="100%" multiple name="room_id[]" id="room_id" class="form-control selectpicker">
+                            <option value="">Select Room</option>';
+                            foreach($this->pushQuery("item_id, name", "classes_rooms", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && in_array($each->item_id, $itemData->rooms_list) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
                     </div>
@@ -2308,7 +2319,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <div class="form-group">
-                        <label for="course_code">Course Code (optional)</label>
+                        <label for="course_code">Course Code <span class="required">*</span></label>
                         <input '.$isAdmin.' type="text" value="'.($itemData->course_code ?? null).'" name="course_code" id="course_code" class="form-control text-uppercase">
                     </div>
                 </div>
@@ -2328,7 +2339,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="class_id">Class <span class="required">*</span></label>
                         <select multiple '.$isAdmin.' data-width="100%" name="class_id[]" id="class_id[]" class="form-control selectpicker">
-                            <option value="null">Select Class</option>';
+                            <option value="">Select Class</option>';
                             foreach($this->pushQuery("id, name, item_id", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && in_array($each->item_id, $itemData->class_ids) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
                             }
@@ -2339,7 +2350,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="course_tutor">Course Tutor</label>
                         <select multiple data-width="100%" '.$isAdmin.' name="course_tutor[]" id="course_tutor[]" class="form-control selectpicker">
-                            <option value="null">Select Course Tutor</option>';
+                            <option value="">Select Course Tutor</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND user_status='Active' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && in_array($each->item_id, $itemData->course_tutor_ids) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }

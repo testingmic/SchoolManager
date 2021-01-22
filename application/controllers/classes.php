@@ -44,6 +44,7 @@ class Classes extends Myschoolgh {
             $stmt->execute([1]);
 
             $loadCourses = (bool) isset($params->load_courses);
+            $loadRooms = (bool) isset($params->load_rooms);
 
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
@@ -57,7 +58,9 @@ class Classes extends Myschoolgh {
                     }
                 }
                 // init
+                $result->class_rooms_list = [];
                 $result->class_courses_list = [];
+                $result->rooms_list = !empty($result->rooms_list) ? json_decode($result->rooms_list, true) : [];
 
                 // if the user also requested to load the courses
                 if($loadCourses) {
@@ -70,6 +73,21 @@ class Classes extends Myschoolgh {
                         $course_info = $this->pushQuery("id, item_id, name, course_code, credit_hours, description", "courses", "item_id='{$course}' AND status='1' LIMIT 1");
                         if(!empty($course_info)) {
                             $result->class_courses_list[] = $course_info[0];
+                        }
+                    }
+                }
+
+                // if the user also requested to load the courses
+                if($loadRooms) {
+                    // convert to array
+                    $class_rooms_list = !empty($result->courses_list) ? json_decode($result->courses_list, true) : [];
+                    
+                    // loop through the array list
+                    foreach($class_rooms_list as $room) {
+                        // get the class room information
+                        $room_info = $this->pushQuery("item_id, name, code, capacity, classes_list", "classes_rooms", "item_id='{$room}' AND status='1' LIMIT 1");
+                        if(!empty($room_info)) {
+                            $result->class_rooms_list[] = $room_info[0];
                         }
                     }
                 }
@@ -113,12 +131,19 @@ class Classes extends Myschoolgh {
                 $params->class_code = $this->client_data($params->clientId)->client_preferences->labels->{"class_label"}.$counter;
             }
 
+            // init
+			$room_ids = [];
+            $item_id = random_string("alnum", 32);
+
+            // append
+			$room_ids = $this->append_class_rooms($params->room_id, $item_id, $params->clientId);
+
             // convert the code to uppercase
             $params->class_code = strtoupper($params->class_code);
 
             // execute the statement
             $stmt = $this->db->prepare("
-                INSERT INTO classes SET client_id = ?, created_by = ?
+                INSERT INTO classes SET client_id = ?, created_by = ?, rooms_list = ?, item_id = ?
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->class_code) ? ", class_code = '{$params->class_code}'" : null)."
                 ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
@@ -130,10 +155,10 @@ class Classes extends Myschoolgh {
                 ".(isset($params->class_assistant) ? ", class_assistant = '{$params->class_assistant}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
             ");
-            $stmt->execute([$params->clientId, $params->userId]);
+            $stmt->execute([$params->clientId, $params->userId, json_encode($room_ids), $item_id]);
             
             // log the user activity
-            $this->userLogs("classes", $this->lastRowId("classes"), null, "{$params->userData->name} created a new Class: {$params->name}", $params->userId);
+            $this->userLogs("classes", $item_id, null, "{$params->userData->name} created a new Class: {$params->name}", $params->userId);
 
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Class successfully created.", "refresh" => 2000];
@@ -186,9 +211,33 @@ class Classes extends Myschoolgh {
             // convert the code to uppercase
             $params->class_code = strtoupper($params->class_code);
 
+            // init
+			$room_ids = [];
+
+            // append tutor to courses list
+			if(isset($params->room_id)) {
+
+                // convert the course tutor into an array
+                $room_id = !empty($prevData[0]->rooms_list) ? json_decode($prevData[0]->rooms_list, true) : [];
+
+				// find tutor ids which were initially attached to the course but no longer attached
+				$diff = array_diff($room_id, $params->room_id);
+
+				// append
+				$room_ids = $this->append_class_rooms($params->room_id, $prevData[0]->item_id, $params->clientId);
+
+				// remove user from courses
+				if(!empty($diff)) {
+					$this->remove_class_room($diff, $params->room_id, $params->clientId);
+					$room_ids = $params->room_id;
+				}
+			} else {
+				$this->remove_all_class_rooms($params, $prevData[0]->item_id);
+			}
+
             // execute the statement
             $stmt = $this->db->prepare("
-                UPDATE classes SET date_updated = now()
+                UPDATE classes SET date_updated = now(), rooms_list = ?
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->class_code) ? ", class_code = '{$params->class_code}'" : null)."
                 ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
@@ -201,7 +250,7 @@ class Classes extends Myschoolgh {
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
                 WHERE id = ? AND client_id = ?
             ");
-            $stmt->execute([$params->class_id, $params->clientId]);
+            $stmt->execute([json_encode($room_ids), $params->class_id, $params->clientId]);
             
             // log the user activity
             $this->userLogs("classes", $params->class_id, $prevData[0], "{$params->userData->name} updated the Class: {$prevData[0]->name}", $params->userId);
@@ -221,6 +270,93 @@ class Classes extends Myschoolgh {
         
     }
 
+    
+
+    /**
+	 * Append Class Rooms
+	 * 
+	 * Loop through the courses that the user has been attached to 
+	 * If not in the courses tutors list then append the user_id to it
+	 * 
+	 * @return Bool
+	 */
+	public function append_class_rooms($class_rooms, $class_id, $client_id) {
+
+		$class_rooms = $this->stringToArray($class_rooms);
+		$valid_ids = [];
+
+		foreach($class_rooms as $room) {
+			$query = $this->pushQuery("classes_list", "classes_rooms", "item_id='{$room}' AND client_id='{$client_id}' AND status='1' LIMIT 1");
+			if(!empty($query)) {
+				$valid_ids[] = $room;
+				if(!empty($query[0]->classes_list)) {
+					$result = json_decode($query[0]->classes_list, true);
+					if(!in_array($class_id, $result)) {
+						array_push($result, $class_id);
+						$this->db->query("UPDATE classes_rooms SET classes_list = '".json_encode($result)."' WHERE item_id='{$room}' AND status='1' LIMIT 1");
+					}
+				} else {
+					$classes = [$class_id];
+					$this->db->query("UPDATE classes_rooms SET classes_list = '".json_encode($classes)."' WHERE item_id='{$room}' AND status='1' LIMIT 1");
+				}
+			}
+		}
+		return $valid_ids;
+
+	}
+    
+
+	/**
+	 * Unattach a room from a class
+	 * 
+	 * @return Bool
+	 */
+	public function remove_class_room($room_ids, $class_id, $client_id) {
+
+		$room_ids = $this->stringToArray($room_ids);
+		
+		foreach($room_ids as $class) {
+			$query = $this->pushQuery("classes_list", "classes_rooms", "item_id='{$class}' AND client_id='{$client_id}' AND status='1' LIMIT 1");
+			if(!empty($query)) {
+				if(!empty($query[0]->classes_list)) {
+					$result = json_decode($query[0]->classes_list, true);
+					if(in_array($class_id, $result)) {
+						$key = array_search($class_id, $result);
+						unset($result[$key]);
+						$this->db->query("UPDATE classes_rooms SET classes_list = '".json_encode($result)."' WHERE item_id='{$class}' LIMIT 1");
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Remove All Course Tutors
+	 * 
+	 * Loop through the courses that the user has been attached to 
+	 * If not in the courses tutors list then append the user_id to it
+	 * 
+	 * @return Bool
+	 */
+	public function remove_all_class_rooms(stdClass $params, $item_id) {
+
+		$room_ids = $this->pushQuery("classes_list, id", "classes_rooms", "client_id='{$params->clientId}' AND status='1' LIMIT 100");
+
+		foreach($room_ids as $class) {
+			if(!empty($class->classes_list)) {
+				$result = json_decode($class->classes_list, true);
+				if(in_array($item_id, $result)) {
+					$key = array_search($item_id, $result);
+					if($key !== FALSE) {
+						unset($result[$key]);
+						$this->db->query("UPDATE classes_rooms SET classes_list = '".json_encode($result)."' WHERE id='{$class->id}' LIMIT 1");
+					}
+				}
+			}
+		}
+		return true;
+
+	}
     
 }
 ?>

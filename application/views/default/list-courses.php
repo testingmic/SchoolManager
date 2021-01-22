@@ -139,7 +139,7 @@ $response->html = '
                                         <th>Course Title</th>
                                         <th>Course Code</th>
                                         <th>Credit Hours</th>
-                                        <th width="15%">Class</th>
+                                        <th width="15%">Classes</th>
                                         <th>Course Tutor</th>
                                         <th align="center" width="10%"></th>
                                     </tr>
