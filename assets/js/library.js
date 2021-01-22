@@ -184,7 +184,9 @@ var save_Request_Fine = (borrowed_id) => {
     $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
         if (response.code == 200) {
             $(`button[id="save_fine_"]`).addClass("hidden");
-            $(`input[name='request_fine']`).attr("data-original", quantity);
+            $(`input[name='request_fine']`).attr("data-original", fine);
+            $(`span[data-each_fine='request']`).html(response.data.result);
+            // loadPage(`${baseUrl}update-book-request/${borrowed_id}`)
         }
     });
 }

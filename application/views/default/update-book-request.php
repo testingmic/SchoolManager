@@ -78,7 +78,7 @@ if(!empty($item_id)) {
                 $books_list .= "<td>{$book->quantity}</td>";
             }
 
-            $books_list .= (round($data->fine) > 2) ? "<td>{$book->fine}</td>" : "";
+            $books_list .= (round($data->fine) > 2) ? "<td><span data-each_fine='request'>{$book->fine}</span></td>" : "";
 
             // if the user has permission
             if($canReturn) {

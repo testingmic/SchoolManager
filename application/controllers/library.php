@@ -594,9 +594,7 @@ class Library extends Myschoolgh {
 			$request = $this->save_book_fine($params->label["data"]);
 
 			// return the session list as the response
-			return [
-				"data" => "The request successfully processed."
-			];
+			return ["data" => $request];
 		}
 
 		/** Approve / Cancel the book request placed */
@@ -885,8 +883,22 @@ class Library extends Myschoolgh {
 
 		$params = (object) $params;
 
+		// confirm that the borrowed id was parsed
+		if(!isset($params->borrowed_id)) {
+			return false;
+		}
+
+		// get the books list for this record
+		$books_list = $this->pushQuery("books_id", "books_borrowed", "item_id ='{$params->borrowed_id}' AND deleted='0'");
+		
+		// end query if the books list is empty
+		if(empty($books_list)) {
+			return;
+		}
+		$books_list = !empty($books_list[0]->books_id) ? json_decode($books_list[0]->books_id, true) : 1;
+
 		// spread the rate
-		$each_fine = $params->fine > 0 ? ($params->fine / count($params->books_list)) : 0;
+		$each_fine = (isset($params->fine) && $params->fine > 0) ? ($params->fine / count($books_list)) : 0;
 		
 		$data = $this->pushQuery("fine", "books_borrowed", "client_id='{$params->clientId}' AND item_id='{$params->borrowed_id}' AND deleted='0'");
 
@@ -903,7 +915,7 @@ class Library extends Myschoolgh {
 		/** Log the user activity */
 		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} changed the Request Fine from {$data[0]->fine} to {$params->fine}.", $params->userId);
 
-		return true;
+		return $each_fine;
 	}
 	
 	/**
