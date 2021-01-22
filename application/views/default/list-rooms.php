@@ -16,15 +16,15 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 $response = (object) [];
-$pageTitle = "Books Category";
+$pageTitle = "Class Rooms";
 $response->title = "{$pageTitle} : {$appName}";
 
-$department_param = (object) [
+$params = (object) [
     "clientId" => $session->clientId,
     "limit" => 9999
 ];
 
-$item_list = load_class("library", "controllers")->category_list($department_param);
+$item_list = load_class("rooms", "controllers")->list($params);
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
@@ -34,25 +34,25 @@ $hasAdd = $accessObject->hasAccess("add", "library");
 $hasDelete = $accessObject->hasAccess("delete", "library");
 $hasUpdate = $accessObject->hasAccess("update", "library");
 
-$category_list = "";
+$rooms_list = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a href='{$baseUrl}update-book-category/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a href='{$baseUrl}update-room/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate) {
-        $action .= "&nbsp;<a href='{$baseUrl}update-book-category/{$each->item_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a href='{$baseUrl}update-room/{$each->item_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
     if($hasDelete) {
-        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"book_category\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"class_room\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
-    $category_list .= "<tr data-row_id=\"{$each->item_id}\">";
-    $category_list .= "<td>".($key+1)."</td>";
-    $category_list .= "<td>{$each->name}</td>";
-    $category_list .= "<td>{$each->description}</td>";
-    $category_list .= "<td>{$each->books_count}</td>";
-    $category_list .= "<td align='center'>{$action}</td>";
-    $category_list .= "</tr>";
+    $rooms_list .= "<tr data-row_id=\"{$each->item_id}\">";
+    $rooms_list .= "<td>".($key+1)."</td>";
+    $rooms_list .= "<td>{$each->name}</td>";
+    $rooms_list .= "<td>{$each->code}</td>";
+    $rooms_list .= "<td>{$each->capacity}</td>";
+    $rooms_list .= "<td align='center'>{$action}</td>";
+    $rooms_list .= "</tr>";
 }
 
 $response->html = '
@@ -68,7 +68,7 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 '.($hasAdd ? '
                     <div class="text-right mb-2">
-                        <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'add-book-category"><i class="fa fa-plus"></i> Add Category</a>
+                        <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'add-room"><i class="fa fa-plus"></i> Add Class Room</a>
                     </div>' : ''
                 ).'
                 <div class="card">
@@ -78,13 +78,13 @@ $response->html = '
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
-                                        <th width="20%">Category Name</th>
-                                        <th>Description</th>
-                                        <th width="15%">Books Count</th>
+                                        <th width="40%">Name</th>
+                                        <th>Code</th>
+                                        <th width="15%">Capacity</th>
                                         <th align="center" width="10%"></th>
                                     </tr>
                                 </thead>
-                                <tbody>'.$category_list.'</tbody>
+                                <tbody>'.$rooms_list.'</tbody>
                             </table>
                         </div>
                     </div>

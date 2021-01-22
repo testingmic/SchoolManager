@@ -2829,7 +2829,7 @@ class Forms extends Myschoolgh {
                 <div class="col-md-8">
                     <div class="form-group">
                         <label for="">CATEGORY NAME <span class="required">*</span></label>
-                        <input type="text" placeholder="Category Enter" value="'.($data->name ?? null).'" class="form-control" name="name">
+                        <input type="text" placeholder="Category Name" value="'.($data->name ?? null).'" class="form-control" name="name">
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -2851,6 +2851,57 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-md-12 text-right">
                     <input type="hidden" value="'.($data->item_id ?? null).'" name="category_id" readonly>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>
+        </form>';
+
+        return $html_content;
+    }
+
+    /**
+     * Class Room Forms
+     * 
+     * @param stdClass $data
+     * 
+     * @return String
+     */
+    public function class_room_form($data = null) {
+
+        $html_content = '
+        <form class="ajax-data-form" action="'.$this->baseUrl.'api/rooms/'.(isset($data->name) ? "update_classroom" : "add_classroom").'" method="POST" id="ajax-data-form-content">    
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="">Room Name <span class="required">*</span></label>
+                        <input type="text" placeholder="Enter room name" value="'.($data->name ?? null).'" class="form-control" name="name">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Room Code</label>
+                        <input type="text" placeholder="Room Code" value="'.($data->code ?? null).'" class="form-control" name="code">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="">Capacity</label>
+                        <input type="number" placeholder="Room Capacity" value="'.($data->capacity ?? null).'" class="form-control" name="capacity">
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
+                    <div class="form-group">
+                        <label for="class_id">Class <span class="required">*</span></label>
+                        <select multiple data-width="100%" name="class_id[]" id="class_id[]" class="form-control selectpicker">
+                            <option value="">Select Class</option>';
+                            foreach($this->pushQuery("id, name, item_id", "classes", "status='1' AND client_id='{$data->clientId}'") as $each) {
+                                $html_content .= "<option ".($data && in_array($each->item_id, $data->class_ids) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
+                            }
+                        $html_content .= '</select>
+                    </div>
+                </div>
+                <div class="col-md-12 text-right">
+                    <input type="hidden" value="'.($data->item_id ?? null).'" name="class_room_id" readonly>
                     <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
