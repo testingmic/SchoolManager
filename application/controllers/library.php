@@ -629,7 +629,9 @@ class Library extends Myschoolgh {
 			$params->label["data"]["fullname"] = $params->userData->name;
 
 			// issue book from session
-			$request = $this->{$todo}($params->label["data"]);
+			if(method_exists($this, $todo)) {
+				$request = $this->{$todo}($params->label["data"]);
+			}
 
 			// return the session list as the response
 			return $request;
@@ -991,6 +993,12 @@ class Library extends Myschoolgh {
 
 		/** Convert the parameter into an object */
 		$params = (object) $params;
+
+		// ensure that the mode has been set
+		if(!isset($params->return_mode)) {
+			return false;
+		}
+		
 		$isEntire = (bool) ($params->return_mode === "entire_order");
 		
 		/** Check if the entire order is to be returned */
@@ -1034,7 +1042,7 @@ class Library extends Myschoolgh {
 			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned=now() WHERE borrowed_id='{$borrowed_id}' LIMIT 100");
 			
 			/** Get all Books and Their Quanities */
-			foreach($this->pushQuery("quantity, book_id", "books_borrowed_details", "book_borrowed = '{$borrowed_id}' AND status !='Returned'") as $book) {
+			foreach($this->pushQuery("quantity, book_id", "books_borrowed_details", "books_borrowed = '{$borrowed_id}' AND status !='Returned'") as $book) {
 				/** increase the books stock quantity */
 				$this->db->query("UPDATE books_stock SET quantity = (quantity - {$book[0]->quantity}) WHERE books_id = '{$book[0]->book_id}' LIMIT 1");
 			}

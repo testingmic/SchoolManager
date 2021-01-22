@@ -21,7 +21,8 @@ class Rooms extends Myschoolgh {
 
         $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->code)) ? " AND a.item_id='{$params->code}'" : null;
+        $params->query .= (isset($params->code)) ? " AND a.code='{$params->code}'" : null;
+        $params->query .= (isset($params->room_id)) ? " AND a.item_id='{$params->room_id}'" : null;
 
         try {
 
@@ -87,7 +88,7 @@ class Rooms extends Myschoolgh {
             } else {
                 // generate a new room code
                 $counter = $this->append_zeros(($this->itemsCount("classes_rooms", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
-                $params->code = $counter;
+                $params->code = "CRM".$counter;
             }
 
             // init
@@ -126,6 +127,147 @@ class Rooms extends Myschoolgh {
         } 
 
     }
+
+    /**
+     * Add New Classroom
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function update_classroom(stdClass $params) {
+
+        try {
+
+            // old record
+            $prevData = $this->pushQuery("*", "classes_rooms", "item_id='{$params->class_room_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+
+            // if empty then return
+            if(empty($prevData)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            // create a new class code
+            if(isset($params->code) && !empty($params->code) && ($prevData[0]->code !== $params->code)) {
+                // replace any empty space with 
+                $params->code = str_replace("/^[\s]+$/", "", $params->code);
+                // confirm if the class code already exist
+                if(!empty($this->pushQuery("item_id, name", "classes_rooms", "status='1' AND client_id='{$params->clientId}' AND code='{$params->code}'"))) {
+                    return ["code" => 203, "data" => "Sorry! There is an existing Classroom with the same code."];
+                }
+            } elseif(empty($prevData[0]->code) || !isset($params->code)) {
+                // set the key
+                $new_key = $this->itemsCount("classes_rooms", "client_id = '{$params->clientId}'") + 1;
+                // generate a new class code
+                $counter = $this->append_zeros($new_key, $this->append_zeros);
+                $params->code = "CRM".$counter;
+            }
+
+            // init
+			$class_ids = [];
+
+            // append tutor to courses list
+			if(isset($params->class_id)) {
+
+                // convert the course tutor into an array
+                $class_id = !empty($prevData[0]->classes_list) ? json_decode($prevData[0]->classes_list, true) : [];
+
+				// find tutor ids which were initially attached to the course but no longer attached
+				$diff = array_diff($class_id, $params->class_id);
+
+				// append
+				$class_ids = $this->append_class_rooms($params->class_id, $params->class_room_id, $params->clientId);
+
+				// remove user from courses
+				if(!empty($diff)) {
+					$this->remove_class_room($diff, $params->class_id, $params->clientId);
+					$class_ids = $params->class_id;
+				}
+			} else {
+				$this->remove_all_class_rooms($params, $params->class_room_id);
+			}
+
+            // execute the statement
+            $stmt = $this->db->prepare("
+                UPDATE classes_rooms SET classes_list = ?
+                    ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
+                    ".(isset($params->code) ? ", code = '{$params->code}'" : null)."
+                    ".(isset($params->capacity) ? ", capacity = '{$params->capacity}'" : null)."
+                    ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                WHERE item_id = ? AND client_id = ?
+            ");
+            $stmt->execute([json_encode($class_ids), $params->class_room_id, $params->clientId]);
+            
+            // log the user activity
+            $this->userLogs("class_room", $params->class_room_id, $prevData[0], "{$params->userData->name} updated the Classroom: {$prevData[0]->name}", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Class room successfully updated.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["href" => "{$this->baseUrl}update-room/{$params->class_room_id}/update"];
+
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {
+            print $e->getMessage();
+            return $this->unexpected_error;
+        } 
+
+    }
+
+	/**
+	 * Remove All Course Tutors
+	 * 
+	 * Loop through the courses that the user has been attached to 
+	 * If not in the courses tutors list then append the user_id to it
+	 * 
+	 * @return Bool
+	 */
+	public function remove_all_class_rooms(stdClass $params, $item_id) {
+
+		$room_ids = $this->pushQuery("rooms_list, id", "classes", "client_id='{$params->clientId}' AND status='1' LIMIT 100");
+
+		foreach($room_ids as $class) {
+			if(!empty($class->rooms_list)) {
+				$result = json_decode($class->rooms_list, true);
+				if(in_array($item_id, $result)) {
+					$key = array_search($item_id, $result);
+					if($key !== FALSE) {
+						unset($result[$key]);
+						$this->db->query("UPDATE classes SET rooms_list = '".json_encode($result)."' WHERE id='{$class->id}' LIMIT 1");
+					}
+				}
+			}
+		}
+		return true;
+
+	}
+
+	/**
+	 * Unattach a room from a class
+	 * 
+	 * @return Bool
+	 */
+	public function remove_class_room($classes_ids, $room_id, $client_id) {
+
+		$classes_ids = $this->stringToArray($classes_ids);
+		
+		foreach($classes_ids as $class) {
+			$query = $this->pushQuery("rooms_list", "classes", "item_id='{$class}' AND client_id='{$client_id}' AND status='1' LIMIT 1");
+			if(!empty($query)) {
+				if(!empty($query[0]->rooms_list)) {
+					$result = json_decode($query[0]->rooms_list, true);
+					if(in_array($room_id, $result)) {
+						$key = array_search($room_id, $result);
+						unset($result[$key]);
+						$this->db->query("UPDATE classes SET rooms_list = '".json_encode($result)."' WHERE item_id='{$class}' LIMIT 1");
+					}
+				}
+			}
+		}
+	}
 
     /**
 	 * Append Class Rooms

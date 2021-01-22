@@ -36,9 +36,9 @@ $hasUpdate = $accessObject->hasAccess("update", "library");
 
 $rooms_list = "";
 foreach($item_list["data"] as $key => $each) {
-    
-    $action = "<a href='{$baseUrl}update-room/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
+    $action = "";
+    
     if($hasUpdate) {
         $action .= "&nbsp;<a href='{$baseUrl}update-room/{$each->item_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }

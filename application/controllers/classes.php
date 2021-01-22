@@ -336,7 +336,7 @@ class Classes extends Myschoolgh {
 	 */
 	public function remove_all_class_rooms(stdClass $params, $item_id) {
 
-		$room_ids = $this->pushQuery("classes_list, id", "classes_rooms", "client_id='{$params->clientId}' AND status='1' LIMIT 100");
+		$room_ids = $this->pushQuery("classes_list, item_id", "classes_rooms", "client_id='{$params->clientId}' AND status='1' LIMIT 100");
 
 		foreach($room_ids as $class) {
 			if(!empty($class->classes_list)) {
@@ -345,7 +345,7 @@ class Classes extends Myschoolgh {
 					$key = array_search($item_id, $result);
 					if($key !== FALSE) {
 						unset($result[$key]);
-						$this->db->query("UPDATE classes_rooms SET classes_list = '".json_encode($result)."' WHERE id='{$class->id}' LIMIT 1");
+						$this->db->query("UPDATE classes_rooms SET classes_list = '".json_encode($result)."' WHERE item_id='{$class->item_id}' LIMIT 1");
 					}
 				}
 			}
