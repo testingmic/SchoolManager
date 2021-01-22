@@ -64,4 +64,100 @@ class Rooms extends Myschoolgh {
         }
 
 	}
+
+    /**
+     * Add New Classroom
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function add_classroom(stdClass $params) {
+
+        try {
+
+            // create a new room code
+            if(isset($params->code) && !empty($params->code)) {
+                // replace any empty space with 
+                $params->code = str_replace("/^[\s]+$/", "", $params->code);
+                // confirm if the room code already exist
+                if(!empty($this->pushQuery("item_id, name", "classes_rooms", "status='1' AND client_id='{$params->clientId}' AND code='{$params->code}'"))) {
+                    return ["code" => 203, "data" => "Sorry! There is an existing Room with the same code."];
+                }
+            } else {
+                // generate a new room code
+                $counter = $this->append_zeros(($this->itemsCount("classes_rooms", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+                $params->code = $counter;
+            }
+
+            // init
+			$class_ids = [];
+            $item_id = random_string("alnum", 32);
+
+            // append
+            if(isset($params->class_id)) {
+			    $class_ids = $this->append_class_rooms($params->class_id, $item_id, $params->clientId);
+            }
+
+            // execute the statement
+            $stmt = $this->db->prepare("
+                INSERT INTO classes_rooms SET client_id = ?, classes_list = ?, item_id = ?
+                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(isset($params->code) ? ", code = '{$params->code}'" : null)."
+                ".(isset($params->capacity) ? ", capacity = '{$params->capacity}'" : null)."
+                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+            ");
+            $stmt->execute([$params->clientId, json_encode($class_ids), $item_id]);
+            
+            // log the user activity
+            $this->userLogs("class_room", $item_id, null, "{$params->userData->name} created a new Classroom: {$params->name}", $params->userId);
+
+            # set the output to return when successful
+			$return = ["code" => 200, "data" => "Classroom successfully created.", "refresh" => 2000];
+			
+			# append to the response
+			$return["additional"] = ["clear" => true];
+
+			// return the output
+            return $return;
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
+
+    }
+
+    /**
+	 * Append Class Rooms
+	 * 
+	 * Loop through the courses that the user has been attached to 
+	 * If not in the courses tutors list then append the user_id to it
+	 * 
+	 * @return Bool
+	 */
+	public function append_class_rooms($classes_list, $room_id, $client_id) {
+
+		$classes_list = $this->stringToArray($classes_list);
+		$valid_ids = [];
+
+		foreach($classes_list as $class) {
+			$query = $this->pushQuery("rooms_list", "classes", "item_id='{$class}' AND client_id='{$client_id}' AND status='1' LIMIT 1");
+			if(!empty($query)) {
+				$valid_ids[] = $class;
+				if(!empty($query[0]->rooms_list)) {
+					$result = json_decode($query[0]->rooms_list, true);
+					if(!in_array($room_id, $result)) {
+						array_push($result, $room_id);
+						$this->db->query("UPDATE classes SET rooms_list = '".json_encode($result)."' WHERE item_id='{$class}' AND status='1' LIMIT 1");
+					}
+				} else {
+					$classes = [$room_id];
+					$this->db->query("UPDATE classes SET rooms_list = '".json_encode($classes)."' WHERE item_id='{$class}' AND status='1' LIMIT 1");
+				}
+			}
+		}
+		return $valid_ids;
+	}
+
+
 }

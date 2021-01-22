@@ -2320,7 +2320,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-3 col-md-6">
                     <div class="form-group">
                         <label for="course_code">Course Code <span class="required">*</span></label>
-                        <input '.$isAdmin.' type="text" value="'.($itemData->course_code ?? null).'" name="course_code" id="course_code" class="form-control text-uppercase">
+                        <input '.$isAdmin.' type="text" maxlength="12" value="'.($itemData->course_code ?? null).'" name="course_code" id="course_code" class="form-control text-uppercase">
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6">
@@ -2880,7 +2880,7 @@ class Forms extends Myschoolgh {
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="">Room Code</label>
-                        <input type="text" placeholder="Room Code" value="'.($data->code ?? null).'" class="form-control" name="code">
+                        <input type="text" maxlength="12" placeholder="Room Code" value="'.($data->code ?? null).'" class="form-control" name="code">
                     </div>
                 </div>
                 <div class="col-md-3">

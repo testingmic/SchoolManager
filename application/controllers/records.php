@@ -81,7 +81,7 @@ class Records extends Myschoolgh {
                 "table" => "classes_rooms",
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}' AND status='1'",
-                "query" => "SELECT id FROM classes_rooms WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
+                "query" => "SELECT name FROM classes_rooms WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
             ],
             "user" => [
                 "table" => "users",

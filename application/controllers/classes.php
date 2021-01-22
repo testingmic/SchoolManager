@@ -107,7 +107,7 @@ class Classes extends Myschoolgh {
     }
 
     /**
-     * Add new department record
+     * Add new class
      * 
      * @param stdClass $params
      * 
@@ -136,7 +136,9 @@ class Classes extends Myschoolgh {
             $item_id = random_string("alnum", 32);
 
             // append
-			$room_ids = $this->append_class_rooms($params->room_id, $item_id, $params->clientId);
+			if(isset($params->room_id)) {
+			    $room_ids = $this->append_class_rooms($params->room_id, $item_id, $params->clientId);
+            }
 
             // convert the code to uppercase
             $params->class_code = strtoupper($params->class_code);
@@ -176,7 +178,7 @@ class Classes extends Myschoolgh {
     }
 
     /**
-     * Update existing department record
+     * Update existing class record
      * 
      * @param stdClass $params
      * 
@@ -270,8 +272,6 @@ class Classes extends Myschoolgh {
         
     }
 
-    
-
     /**
 	 * Append Class Rooms
 	 * 
@@ -304,7 +304,6 @@ class Classes extends Myschoolgh {
 		return $valid_ids;
 
 	}
-    
 
 	/**
 	 * Unattach a room from a class
