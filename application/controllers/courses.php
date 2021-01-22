@@ -135,7 +135,7 @@ class Courses extends Myschoolgh {
                         // loop through the array list
                         foreach($result->class_ids as $class) {
                             // get the course tutor information
-                            $class_info = $this->pushQuery("name, id, class_size, class_code, weekly_meeting", "classes", "item_id='{$class}' AND status='1' LIMIT 1");
+                            $class_info = $this->pushQuery("name, id, class_size, class_code", "classes", "item_id='{$class}' AND status='1' LIMIT 1");
                             if(!empty($class_info)) {
                                 $result->class_list[] = $class_info[0];
                             }
@@ -289,6 +289,7 @@ class Courses extends Myschoolgh {
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
+                ".(isset($params->weekly_meeting) ? ", weekly_meeting = '{$params->weekly_meeting}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
@@ -409,6 +410,7 @@ class Courses extends Myschoolgh {
                 ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
+                ".(isset($params->weekly_meeting) ? ", weekly_meeting = '{$params->weekly_meeting}'" : null)."
                 ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."

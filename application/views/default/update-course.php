@@ -317,10 +317,6 @@ if(!empty($item_id)) {
                                                         <span class="float-left">Class Size</span>
                                                         <span class="float-right text-muted">'.$class->class_size.'</span>
                                                     </p>
-                                                    <p class="clearfix">
-                                                        <span class="float-left">Weekly Meetings</span>
-                                                        <span class="float-right text-muted">'.$class->weekly_meeting.'</span>
-                                                    </p>
                                                 </div>
                                             </div>
                                         </div>

@@ -47,7 +47,7 @@ class Rooms extends Myschoolgh {
                     // loop through the array list
                     foreach($result->class_ids as $class) {
                         // get the class room information
-                        $room_info = $this->pushQuery("item_id, name, class_code, class_size, weekly_meeting", "classes", "item_id='{$class}' AND status='1' LIMIT 1");
+                        $room_info = $this->pushQuery("item_id, name, class_code, class_size", "classes", "item_id='{$class}' AND status='1' LIMIT 1");
                         if(!empty($room_info)) {
                             $result->room_classes_list[] = $room_info[0];
                         }

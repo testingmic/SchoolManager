@@ -55,7 +55,6 @@ function timeAdd(t, dur) {
  *
  */
 function drawGrid(not_empty, numSlots, numDays, slotDur, start_time) {
-    console.log("drawing grid table now");
     var cell_color = "";
     if (!numSlots) {
         numSlots = parseInt($(`input[name="slots"]`).val()),

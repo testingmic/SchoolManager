@@ -24,17 +24,35 @@ $response->scripts = [
 
 // load_class("scripts", "controllers")->timetable();
 
-$params = (object)[
-    "class_ids" => [],
-    "clientId" => $clientId
-];
-$the_form = load_class("forms", "controllers")->class_room_form($params);
-
 $d_time = "08:00";
 $d_slots = 9;
 $d_days = 6;
 $d_duration = 60;
+$disabled_inputs = [];
 $timetable_id = "alfjlakjkdajfdlkafd";
+
+// set the parameters to load
+$params = (object)[
+    "timetable_id" => $timetable_id,
+    "clientId" => $clientId
+];
+$timetable = load_class("timetable", "controllers")->list($params);
+
+// if the table is not empty
+if(!empty($timetable["data"])) {
+    
+    // get the first item
+    $data = $timetable["data"][0];
+    
+    // reassign variables
+    $d_time = $data->start_time;
+    $d_slots = $data->slots;
+    $d_days = $data->days;
+    $d_duration = $data->duration;
+    $disabled_inputs = $data->disabled_inputs;
+}
+
+$n_string = $disabled_inputs;
 
 $response->html = '
     <section class="section">
@@ -121,7 +139,11 @@ $response->html = '
                                         <button onclick="return save_Timetable_Record()" class="btn btn-outline-success">Save Timetable</button>
                                     </div>
                                 </div>
-                                <div id="disabledSlots"></div>
+                                <div id="disabledSlots" data-disabled_inputs=\''.json_encode($n_string).'\'>';
+                                foreach($disabled_inputs as $input) {
+                                    $response->html .= "<input name='{$input}' type='hidden' value='disabled'>";
+                                }
+                                $response->html .= '</div>
                             </div>
                         </div>
                     </div>

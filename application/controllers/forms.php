@@ -2221,12 +2221,6 @@ class Forms extends Myschoolgh {
                         <label for="class_size">Class Size (optional)</label>
                         <input type="text" value="'.($itemData->class_size ?? null).'" name="class_size" id="class_size" class="form-control text-uppercase">
                     </div>
-                </div>                
-                <div class="col-lg-4 col-md-4">
-                    <div class="form-group">
-                        <label for="weekly_meeting">Weekly Meetings</label>
-                        <input type="number" value="'.($itemData->weekly_meeting ?? null).'" name="weekly_meeting" id="weekly_meeting" class="form-control text-uppercase">
-                    </div>
                 </div>
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
@@ -2317,19 +2311,25 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12">
                     <h5>COURSE DETAILS</h5>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="course_code">Course Code <span class="required">*</span></label>
                         <input '.$isAdmin.' type="text" maxlength="12" value="'.($itemData->course_code ?? null).'" name="course_code" id="course_code" class="form-control text-uppercase">
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="credit_hours">Credit Hours</label>
                         <input type="number" value="'.($itemData->credit_hours ?? null).'" name="credit_hours" id="credit_hours" class="form-control text-uppercase">
                     </div>
+                </div>                
+                <div class="col-lg-4 col-md-4">
+                    <div class="form-group">
+                        <label for="weekly_meeting">Weekly Meetings</label>
+                        <input type="number" value="'.($itemData->weekly_meeting ?? null).'" name="weekly_meeting" id="weekly_meeting" class="form-control text-uppercase">
+                    </div>
                 </div>
-                <div class="col-lg-6 col-md-12">
+                <div class="col-lg-12 col-md-12">
                     <div class="form-group">
                         <label for="name">Course Title <span class="required">*</span></label>
                         <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
@@ -2337,7 +2337,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
-                        <label for="class_id">Class <span class="required">*</span></label>
+                        <label for="class_id">Classes that offer this course <span class="required">*</span></label>
                         <select multiple '.$isAdmin.' data-width="100%" name="class_id[]" id="class_id[]" class="form-control selectpicker">
                             <option value="">Select Class</option>';
                             foreach($this->pushQuery("id, name, item_id", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
@@ -2348,7 +2348,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
-                        <label for="course_tutor">Course Tutor</label>
+                        <label for="course_tutor">Course Tutors</label>
                         <select multiple data-width="100%" '.$isAdmin.' name="course_tutor[]" id="course_tutor[]" class="form-control selectpicker">
                             <option value="">Select Course Tutor</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND user_status='Active' AND client_id='{$clientId}'") as $each) {

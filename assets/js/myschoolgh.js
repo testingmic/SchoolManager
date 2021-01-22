@@ -1,4 +1,4 @@
-var client_auto_save;
+var client_auto_save, disabled_inputs = new Array();
 var initDashboard = () => {}
 
 var responseCode = (code) => {

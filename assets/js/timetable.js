@@ -1,6 +1,5 @@
 // Timetable
-var changes_effected = false,
-    disabled_inputs = new Array();
+var changes_effected = false;
 
 function remove(array) {
     var what, a = arguments,
@@ -29,7 +28,20 @@ $("#dynamic_timetable").on("click", ".cell.blue", function() {
     }
     $("input[name=" + this.id + "]").val('disabled');
 });
-drawGrid();
+
+var set_Disabled_Inputs = (disabled_array) => {
+    let the_list = "",
+        new_array = new Array();
+    $.each(disabled_array, function(_, value) {
+        new_array.push(value);
+        the_list += `<input name="${value}" type="hidden" value="disabled">`;
+    });
+    $(`div[id="disabledSlots"]`).html(the_list);
+    disabled_inputs = new_array;
+}
+
+$disabled = JSON.parse($(`div[id="disabledSlots"]`).attr("data-disabled_inputs"));
+set_Disabled_Inputs($disabled);
 
 var save_Timetable_Record = () => {
     swal({
@@ -58,8 +70,12 @@ var save_Timetable_Record = () => {
                     text: response.data.result,
                     icon: responseCode(response.code),
                 });
-                if (response.code === 200) {}
+                if (response.code === 200) {
+                    loadPage(`${baseUrl}timetable/${timetable_id}`)
+                }
             });
         }
     });
 }
+
+drawGrid();
