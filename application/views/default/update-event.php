@@ -60,6 +60,7 @@ if(!empty($item_id)) {
         $data = $data["data"][0];
         $event_types = $eventClass->types_list($item_param);
         $data->event_types = $event_types;
+        $userData = $defaultUser;
 
         $formsClass = load_class("forms", "controllers");
         
@@ -122,7 +123,7 @@ if(!empty($item_id)) {
                             <div class="p-2 pt-0">
                                 <div><strong>EVENT COMMENTS</strong></div>
                                 <div>
-                                    '.leave_comments_builder("events", $data->item_id, true).'
+                                    '.leave_comments_builder("events", $data->item_id, true, null, $defaultUser).'
                                     <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
                                     <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-outline-secondary">Loading comments</button></div>    
                                 </div>

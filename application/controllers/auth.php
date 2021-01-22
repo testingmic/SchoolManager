@@ -69,6 +69,7 @@ class Auth extends Myschoolgh {
 
                             // last login trial
                             $lastLogin = $this->pushQuery("attempts", "users_access_attempt", "username='{$params->username}' AND attempt_type='login'");
+                            
                             // if the last login information is not empty
                             if(!empty($lastLogin)) {
 
@@ -115,6 +116,16 @@ class Auth extends Myschoolgh {
                                 $session->set("userName", $params->username);
                                 $session->set("userRole", $results->access_level);
                                 $session->set("activated", $results->activated);
+
+                                // set additional session for student
+                                if($results->user_type === "student") {
+                                    $session->set("student_id", $results->user_id);
+                                }
+
+                                // set a general session for all except for a parent user
+                                if($results->user_type !== "parent") {
+                                    $session->set("ready_App", true);
+                                }
                             }
                             
                             // unset session locked
@@ -164,6 +175,7 @@ class Auth extends Myschoolgh {
                             return ["code" => 201, "data" => "Sorry! Invalid Username/Password.3"];
                         }
                     }
+                    
                 } else {
                     // return the error message
                     return ["code" => 201, "data" => "Access denied due to multiple trial. Try again in an Hour's time."];

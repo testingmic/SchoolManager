@@ -79,13 +79,10 @@ class Classes extends Myschoolgh {
 
                 // if the user also requested to load the courses
                 if($loadRooms) {
-                    // convert to array
-                    $class_rooms_list = !empty($result->courses_list) ? json_decode($result->courses_list, true) : [];
-                    
                     // loop through the array list
-                    foreach($class_rooms_list as $room) {
+                    foreach($result->rooms_list as $room) {
                         // get the class room information
-                        $room_info = $this->pushQuery("item_id, name, code, capacity, classes_list", "classes_rooms", "item_id='{$room}' AND status='1' LIMIT 1");
+                        $room_info = $this->pushQuery("item_id, name, code, capacity", "classes_rooms", "item_id='{$room}' AND status='1' LIMIT 1");
                         if(!empty($room_info)) {
                             $result->class_rooms_list[] = $room_info[0];
                         }

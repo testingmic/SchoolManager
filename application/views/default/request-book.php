@@ -31,11 +31,14 @@ if(!$hasRequest) {
     $response->html = page_not_found("denied");
 } else {
 
+    $userId = !empty($session->student_id) ? $session->student_id : $session->userId;
+    $user_role = !empty($session->student_id) ? "student" : $defaultUser->user_type;
+
     $response->scripts = ["assets/js/library.js"];
     $search = (object)["search_form" => true, "clientId" => $clientId];
     $search_form = load_class("forms", "controllers")->library_book_issue_form($search);
     
-    $form = (object)["request_form" => true, "user_id" => $session->userId, "clientId" => $clientId, "user_role" => $defaultUser->user_type];
+    $form = (object)["request_form" => true, "user_id" => $userId, "clientId" => $clientId, "user_role" => $user_role];
     $request_form = load_class("forms", "controllers")->library_book_issue_form($form);
 
     $response->html = '
@@ -55,7 +58,7 @@ if(!$hasRequest) {
                             '.$search_form.'
                         </div>
                     </div>
-                    <div class="card hidden mb-3" id="selected_book_details" data-mode="requested"></div>
+                    <div class="card hidden mb-3" id="selected_book_details" data-mode="request"></div>
                     <div class="card mb-3">
                         <div class="card-body">
                             <h6>SELECTED BOOKS LIST</h6>

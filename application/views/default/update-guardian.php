@@ -67,7 +67,7 @@ if(!empty($user_id)) {
         // if the wards_list is not empty
         if(!empty($data->wards_list)) {
             // append the guardian wards list
-            $wards_list .= $usersClass->guardian_wardlist($data->wards_list, $data->user_id);
+            $wards_list .= $usersClass->guardian_wardlist($data->wards_list, $data->user_id, $hasUpdate);
         }
         $wards_list .= "</div>";
         

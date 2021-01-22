@@ -185,7 +185,8 @@
         </ul>
     </li>
 <?php } ?>
-<?php function parent_menu() { global $baseUrl; ?>
+<?php function parent_menu() { global $baseUrl, $session; ?>
+    <?php if(!empty($session->student_id)) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
         <ul class="dropdown-menu">
@@ -215,14 +216,9 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>issued-books">Issued Books</a></li>
         </ul>
     </li>
+    <?php } ?>
     <li class="menu-header">Finance</li>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Fees</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Fees Category</a></li>
-        </ul>
-    </li>
+    <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
     <li class="dropdown">
@@ -264,13 +260,8 @@
         </ul>
     </li>
     <li class="menu-header">Finance</li>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Fees</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Fees Category</a></li>
-        </ul>
-    </li>
+    <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
+    
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
     <li class="dropdown">

@@ -571,8 +571,7 @@ class Events extends Myschoolgh {
         $params->userData->hasEventUpdate = $params->hasEventUpdate;
 
         // loop through the various user types
-        // foreach(["admin", "parent", "teacher", "student", "accountant"] as $user_type) {
-        foreach(["admin", "accountant", "teacher"] as $user_type) {
+        foreach(["admin", "accountant", "teacher", "parent", "student", "employee"] as $user_type) {
             
             // append the usertype
             $params->userData->the_user_type = $user_type;

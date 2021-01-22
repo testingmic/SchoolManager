@@ -27,7 +27,7 @@ $pageTitle = $hasIssue ? "Issued Books List" : "My Books List";
 $response->title = "{$pageTitle} : {$appName}";
 
 // begin the request parameter
-$params = (object) ["clientId" => $session->clientId, "show_list" => true, "limit" => 999999, "userData" => $defaultUser];
+$params = (object) ["clientId" => $session->clientId, "show_list" => true, "limit" => 99999, "userData" => $defaultUser];
 $item_list = load_class("library", "controllers")->issued_request_list($params);
 
 $books_list = "";

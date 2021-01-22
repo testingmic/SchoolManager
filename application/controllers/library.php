@@ -508,7 +508,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** Issue the book out to the user */
-		elseif(in_array($todo, ["issue", "requested"])) {
+		elseif(in_array($todo, ["issue", "request"])) {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
@@ -748,8 +748,8 @@ class Library extends Myschoolgh {
 		
 		// convert the data parameter to an object
 		$data = (object) $params;
-		$status = ($params->request == "issue") ? "Issued" : "Requested";
-		$data->issued_date = ($params->request == "issue") ? date("Y-m-d") : null;
+		$status = ($data->request === "issue") ? "Issued" : "Requested";
+		$data->issued_date = ($data->request === "issue") ? date("Y-m-d") : null;
 
 		// confirm that the return date is not empty
 		if(!isset($data->return_date)) {

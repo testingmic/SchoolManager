@@ -92,6 +92,11 @@ class Users extends Myschoolgh {
 			}
 
 		}
+		
+		// if the user is a parent
+		if(isset($params->only_wards_list)) {
+			$params->query .= " AND a.guardian_id LIKE '%{$params->userId}%'";
+		}
 
 		$params->query .= isset($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
 
@@ -501,10 +506,11 @@ class Users extends Myschoolgh {
 	 * 
 	 * @param Array 	$wards
 	 * @param String 	$guardian_id
+	 * @param Bool		$canupdate
 	 * 
 	 * @return String
 	 */
-	public function guardian_wardlist(array $wards, $guardian_id) {
+	public function guardian_wardlist(array $wards, $guardian_id, $canupdate = false) {
 
 		// initialize
 		$wards_list = "";
@@ -532,16 +538,18 @@ class Users extends Myschoolgh {
 								</div>
 							</div>
 						</div>
-						<div class=\"border-top p-2\">
-							<div class=\"d-flex justify-content-between\">
-								<div>
-									<a href=\"#\" onclick=\"return loadPage('{$this->baseUrl}update-student/{$ward->student_guid}/view')\" class=\"btn btn-sm btn-outline-success\" title=\"View ward details\"><i class=\"fa fa-eye\"></i> View</a>
+						".($canupdate ? 
+							"<div class=\"border-top p-2\">
+								<div class=\"d-flex justify-content-between\">
+									<div>
+										<a href=\"#\" onclick=\"return loadPage('{$this->baseUrl}update-student/{$ward->student_guid}/view')\" class=\"btn btn-sm btn-outline-success\" title=\"View ward details\"><i class=\"fa fa-eye\"></i> View</a>
+									</div>
+									<div>
+										<a href=\"#\" onclick='return modifyGuardianWard(\"{$guardian_id}_{$ward->student_guid}\", \"remove\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Remove</a>
+									</div>
 								</div>
-								<div>
-									<a href=\"#\" onclick='return modifyGuardianWard(\"{$guardian_id}_{$ward->student_guid}\", \"remove\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Remove</a>
-								</div>
-							</div>
-						</div>
+							</div>" : ""
+						)."
 					</div>
 				</div>
 			";
@@ -623,7 +631,7 @@ class Users extends Myschoolgh {
 			$data = $this->guardian_list($guardian_param);
 
 			// format the list
-			$wards_list = $this->guardian_wardlist($data[0]->wards_list, $expl[0]);
+			$wards_list = $this->guardian_wardlist($data[0]->wards_list, $expl[0], true);
 
 			// return the results
 			return [
@@ -699,18 +707,6 @@ class Users extends Myschoolgh {
 				"code" => 200
 			];
 		} else if($params->todo == "append") {
-			// get the list of guardian wards
-			// $guardian_param = (object) [
-			// 	"limit" => 1,
-			// 	"append_wards" => true,
-			// 	"guardian_id" => $expl[0],
-			// 	"clientId" => $params->clientId,
-			// ];
-			// $data = $this->guardian_list($guardian_param);
-
-			// format the list
-			// $wards_list = $this->guardian_wardlist($data[0]->wards_list, $expl[0]);
-
 			// return the results
 			return [
 				"data" => [

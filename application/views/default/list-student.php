@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject;
+global $myClass, $accessObject, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -22,13 +22,21 @@ $response->title = "Students List : {$appName}";
 $response->scripts = ["assets/js/filters.js"];
 
 $clientId = $session->clientId;
+
 $student_param = (object) [
     "clientId" => $clientId,
     "user_type" => "student",
+    "userId" => $session->userId, 
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
     "gender" => $filter->gender ?? null
 ];
+
+// if the current user is a parent then append this query
+if($defaultUser->user_type === "parent") {
+    $student_param->userId = $defaultUser->unique_id;
+    $student_param->only_wards_list = true;
+}
 
 $student_list = load_class("users", "controllers")->list($student_param);
 

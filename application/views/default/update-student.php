@@ -169,10 +169,14 @@ if(!empty($user_id)) {
                 $guardian .= "<div class='col-lg-3'><strong>Contact:</strong><br> {$each->contact}</div>";
                 $guardian .= "<div class='col-lg-4'><strong>Email:</strong><br> {$each->email}</div>";
                 $guardian .= "<div class='col-lg-12'><strong>Address:</strong><br> {$each->address}</div>";
-                $guardian .= "<div class='col-lg-12 text-right'>
-                    <a href=\"{$baseUrl}update-guardian/{$each->user_id}/view\" class=\"btn btn-sm btn-outline-success\" title=\"View guardian full details\"><i class=\"fa fa-eye\"></i> View</a>
-                    <a onclick=\"return modifyWardGuardian('{$each->user_id}_{$data->user_id}','remove');\" href=\"javascript:void(0);\" class=\"btn btn-outline-danger anchor btn-sm\">Remove</a>
-                </div>";
+
+                // if the user has permissions to update the student record
+                if($hasUpdate) {
+                    $guardian .= "<div class='col-lg-12 text-right'>
+                        <a href=\"{$baseUrl}update-guardian/{$each->user_id}/view\" class=\"btn btn-sm btn-outline-success\" title=\"View guardian full details\"><i class=\"fa fa-eye\"></i> View</a>
+                        <a onclick=\"return modifyWardGuardian('{$each->user_id}_{$data->user_id}','remove');\" href=\"javascript:void(0);\" class=\"btn btn-outline-danger anchor btn-sm\">Remove</a>
+                    </div>";
+                }
                 $guardian .= "</div>";
             }
         } else {
