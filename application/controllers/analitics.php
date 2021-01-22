@@ -145,12 +145,12 @@ class Analitics extends Myschoolgh {
             $this->final_report["attendance_report"] = $this->attendance_report($params);
         }
 
-        // get the attendance information if not parsed in the stream
-        if(in_array("attendance_report", $params->stream)) {
+        // get the department information if not parsed in the stream
+        if(in_array("departments_report", $params->stream)) {
             // append this paramter
             $params->load_summary_info = true;
-            // query the attendance data
-            $this->final_report["attendance_report"] = $this->attendance_report($params);
+            // query the department data
+            $this->final_report["departments_report"] = $this->departments_report($params);
         }
 
         // get the class attendance information if not parsed in the stream
@@ -194,6 +194,11 @@ class Analitics extends Myschoolgh {
                 "academic_term" => $this->academic_term,
                 "academic_year" => $this->academic_year,
             ];
+            if($role === "parent") {
+                $client_param->no_academic_year = true;
+            } else {
+                $client_param->no_academic_year = false;
+            }
             $where_clause = $usersClass->list($client_param);
 
             // value_name

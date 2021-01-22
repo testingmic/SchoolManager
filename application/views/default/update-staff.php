@@ -45,6 +45,12 @@ if(!empty($user_id)) {
         "user_type" => "employee,teacher,admin,accountant"
     ];
 
+    // bypass check if the user is a student or parent
+    if(!empty($session->student_id)) {
+        $staff_param->bypass = true;
+        $staff_param->user_type = "teacher,accountant";
+    }
+
     $data = load_class("users", "controllers")->list($staff_param);
     
     // if no record was found
@@ -108,7 +114,7 @@ if(!empty($user_id)) {
                     $course_listing .= "<td>{$each->credit_hours}</td>";
                     $course_listing .= "<td>";
                     foreach($each->class_list as $class) {
-                        $course_listing .= "<p class='mb-1 pb-1'><span class='underline'>".$class->name."</span></p>";
+                        $course_listing .= "<p class='mb-0 pb-0'><span>".$class->name."</span></p>";
                     }
                     $course_listing .= "</td><td class='text-center'>{$action}</td>";
                     $course_listing .= "</tr>";

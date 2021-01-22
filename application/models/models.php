@@ -99,13 +99,13 @@ class Models {
         ];
 
         $this->the_user_roles = [
-            "student" => [
-                "_role_title" => "Student",
-                "report_key" => "students_report"
-            ],
             "parent" => [
                 "_role_title" => "Parent",
                 "report_key" => "parents_report"
+            ],
+            "student" => [
+                "_role_title" => "Student",
+                "report_key" => "students_report"
             ],
             "employee" => [
                 "_role_title" => "Employee",

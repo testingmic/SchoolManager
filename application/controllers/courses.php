@@ -43,7 +43,7 @@ class Courses extends Myschoolgh {
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
         // append the class_id if the user type is student
-        if($params->userData->user_type == "student") {
+        if(($params->userData->user_type === "student") && !isset($params->bypass)) {
             $params->class_id = $params->userData->class_id;
         }
 

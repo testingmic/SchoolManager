@@ -1,6 +1,14 @@
 var client_auto_save;
 var initDashboard = () => {}
 
+var responseCode = (code) => {
+    if (code == 200 || code == 201) {
+        return "success";
+    } else {
+        return "error";
+    }
+}
+
 var redirect_btnClicked = (href, modal_id = "") => {
     $.pageoverlay.show();
     if ($(`div[class~="${modal_id}"]`).length) {

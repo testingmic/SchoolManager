@@ -23,10 +23,6 @@ $response->title = "{$pageTitle} : {$appName}";
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
 
-$response->scripts = [
-    "assets/js/page/index.js"
-];
-
 // item id
 $item_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
 $pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
@@ -34,6 +30,7 @@ $pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageT
 // if the user id is not empty
 if(!empty($item_id)) {
 
+    // bypass the request
     $item_param = (object) [
         "clientId" => $clientId,
         "userId" => $session->userId,
@@ -44,6 +41,11 @@ if(!empty($item_id)) {
         "limit" => 1
     ];
 
+    // bypass check if the user is a student or parent
+    if(!empty($session->student_id)) {
+        $item_param->bypass = true;
+    }
+
     $data = load_class("courses", "controllers")->list($item_param);
 
     // if no record was found
@@ -53,6 +55,8 @@ if(!empty($item_id)) {
 
         // set the first key
         $data = $data["data"][0];
+
+        $response->scripts = ["assets/js/page/index.js"];
 
         // append is admin to the query string
         $isAdmin = (bool) ($defaultUser->user_type == "admin");

@@ -81,6 +81,10 @@
     <script src="<?= $baseUrl; ?>assets/bundles/bootstrap-daterangepicker/daterangepicker.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/fullcalendar/fullcalendar.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
+
+    <script src="<?= $baseUrl; ?>assets/vendors/timetable/chosen.js"></script>
+    <script src="<?= $baseUrl; ?>assets/vendors/timetable/form.js"></script>
+    <script src="<?= $baseUrl; ?>assets/vendors/timetable/grid.js"></script>
     
     <script src="<?= $baseUrl; ?>assets/js/myschoolgh.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/app.js"></script>

@@ -56,7 +56,7 @@ if(!empty($user_id)) {
         $incidents = load_class("incidents", "controllers")->list($student_param);
         
         // user permissions
-        $hasUpdate = $accessObject->hasAccess("update", "student");
+        $hasUpdate = $accessObject->hasAccess("update", "guardian");
         $addIncident = $accessObject->hasAccess("add", "incident");
         $updateIncident = $accessObject->hasAccess("update", "incident");
         $deleteIncident = $accessObject->hasAccess("delete", "incident");

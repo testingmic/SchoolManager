@@ -58,4 +58,20 @@ initiateCalendar();";
 
     }
 
+    public function timetable() {
+
+        $data = "// Timetable
+    
+        ";
+
+        // generate a new script for this client
+        $filename = "assets/js/timetable.js";
+        $file = fopen($filename, "w");
+        fwrite($file, $data);
+        fclose($file);
+
+        return true;
+        
+    }
+
 }

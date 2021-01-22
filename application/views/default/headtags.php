@@ -87,6 +87,10 @@ load_helpers(['menu_helper']);
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/vendors/trix/trix.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/select2/select2.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
+
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/table.css">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/chosen.css">
+    
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/fullcalendar/fullcalendar.min.css">
     <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
     <?php foreach($loadedCSS as $eachCSS) { ?>

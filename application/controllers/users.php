@@ -52,7 +52,7 @@ class Users extends Myschoolgh {
 			$user_type = $d_data->user_type;
 
 			// loop through the query
-			if(in_array($user_type, ["employee", "student"])) {
+			if(in_array($user_type, ["employee", "student"]) && !isset($params->bypass)) {
 				$params->user_id = $d_data->user_id;
 			}
 
@@ -65,8 +65,12 @@ class Users extends Myschoolgh {
 		$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
 		$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 		$params->query .= (isset($params->user_status) && !empty($params->user_status)) ? " AND a.user_status ='{$params->user_status}'" : " AND a.user_status ='Active'";
-		$params->query .= (isset($params->academic_year) && !empty($params->academic_year)) ? " AND a.academic_year='{$params->academic_year}'" : null;
-		$params->query .= (isset($params->academic_term) && !empty($params->academic_term)) ? " AND a.academic_term='{$params->academic_term}'" : null;
+		
+		// bypass the academic year checker
+		if(empty($params->no_academic_year)) {
+			$params->query .= (isset($params->academic_year) && !empty($params->academic_year)) ? " AND a.academic_year='{$params->academic_year}'" : null;
+			$params->query .= (isset($params->academic_term) && !empty($params->academic_term)) ? " AND a.academic_term='{$params->academic_term}'" : null;
+		}
 
 		// if the field is null (dont perform all these checks if minified was parsed)
 		if(!isset($params->minified) || (isset($params->minified) && isset($params->reporting))) {
@@ -74,7 +78,6 @@ class Users extends Myschoolgh {
 			// run this section and leave the rest if reporting was parsed
 			if(isset($params->reporting)) {
 				$params->query .= (isset($params->or_clause) && !empty($params->or_clause)) ? $params->or_clause : null;
-				$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 				$params->query .= (isset($params->date_range)) ? $this->dateRange($params->date_range) : null;
 				$params->query .= (isset($params->gender) && !empty($params->gender)) ? " AND a.gender='{$params->gender}'" : null;
 			} else {
