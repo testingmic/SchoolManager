@@ -29,8 +29,8 @@ if(!empty($clientId)) {
     $response->scripts = ["assets/js/analitics.js"];
     
     // the default data to stream
-    $data_stream = "attendance_report";
-
+    $data_stream = $isAdminAccountant ? "attendance_report,class_attendance_report" : "attendance_report";
+ 
     // set the html text to display
     $response->html = '
         <section class="section">
@@ -146,18 +146,28 @@ if(!empty($clientId)) {
                                 <div class="d-flex justify-content-between" style="width:100%">
                                     <div><h4>Class Attendance</h4></div>
                                     <div>
-                                        <input type="text" class="form-control datepicker" name="class_date_select" id="class_date_select">
-                                        <button class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fa fa-calendar-check"></i></span>
+                                            </div>
+                                            <input type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="class_date_select" id="class_date_select">
+                                            <div class="input-group-append">
+                                                <button style="border-radius:0px" onclick="return filter_Class_Calender()" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
+                                            </div>
+                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body quick_loader">
+                            <div class="card-body quick_loader" id="class_attendance_loader">
                                 <div class="form-content-loader" style="display: flex; position: absolute">
                                     <div class="offline-content text-center">
                                         <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                     </div>
                                 </div>
-                                <div style="width:100%;height:345px;" id="class_attendance_chart"></div>
+                                <div data-chart_container="class_attendance_chart">
+                                    <div style="width:100%;height:345px;" id="class_attendance_chart"></div>
+                                </div>
                             </div>
                         </div>
                     </div>

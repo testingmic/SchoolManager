@@ -280,107 +280,108 @@ var summaryReporting = (t_summary, date_range) => {
 
 var attendanceReport = (_attendance) => {
 
-    let attendance = _attendance.attendance;
+    if (_attendance.attendance !== undefined) {
+        let attendance = _attendance.attendance;
 
-    $.each(attendance.summary, function(i, e) {
-        $(`h3[data-attendance_count="${i}"]`).html(e);
-    });
-
-    let chart_summary = "";
-    $.each(attendance.chart_summary, function(i, e) {
-        chart_summary += `
-            <div><strong>${i}:</strong> ${e}</div>
-        `;
-    });
-    $(`span[data-section="chart_summary"]`).html(chart_summary);
-
-    if ($(`div[id="attendance_chart"]`).length) {
-        var chart_label = new Array();
-        $.each(attendance.days_list, function(i, day) {
-            chart_label.push(i);
+        $.each(attendance.summary, function(i, e) {
+            $(`h3[data-attendance_count="${i}"]`).html(e);
         });
 
-        var options = {
-            chart: {
-                height: 350,
-                type: 'bar',
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    endingShape: 'rounded',
-                    columnWidth: '35%',
-                },
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            series: attendance.chart_grouping,
-            xaxis: {
-                categories: chart_label,
-            },
-            fill: {
-                opacity: 1
-            }
-        }
-        var chart = new ApexCharts(
-            document.querySelector("#attendance_chart"),
-            options
-        );
-        chart.render();
-
-
-        let _class_summary = _attendance.class_summary;
-
-        chart_label = new Array();
-        $.each(_class_summary.summary, function(i, day) {
-            chart_label.push(i);
+        let chart_summary = "";
+        $.each(attendance.chart_summary, function(i, e) {
+            chart_summary += `<div><strong>${i}:</strong> ${e}</div>`;
         });
+        $(`span[data-section="chart_summary"]`).html(chart_summary);
 
-        options = {
-            chart: {
-                height: 350,
-                type: 'bar',
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    endingShape: 'rounded',
-                    columnWidth: '35%',
+        if ($(`div[id="attendance_chart"]`).length) {
+            var chart_label = new Array();
+            $.each(attendance.days_list, function(i, day) {
+                chart_label.push(i);
+            });
+
+            var options = {
+                chart: {
+                    height: 350,
+                    type: 'bar',
                 },
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            series: _class_summary.chart_grouping,
-            xaxis: {
-                categories: chart_label,
-            },
-            fill: {
-                opacity: 1
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        endingShape: 'rounded',
+                        columnWidth: '35%',
+                    },
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    show: true,
+                    width: 2,
+                    colors: ['transparent']
+                },
+                series: attendance.chart_grouping,
+                xaxis: {
+                    categories: chart_label,
+                },
+                fill: {
+                    opacity: 1
+                }
             }
+            var chart = new ApexCharts(
+                document.querySelector("#attendance_chart"),
+                options
+            );
+            chart.render();
         }
-        var chart = new ApexCharts(
-            document.querySelector("#class_attendance_chart"),
-            options
-        );
-        chart.render();
+    }
 
+    if (_attendance.class_summary !== undefined) {
+        if ($(`div[id="class_attendance_chart"]`).length) {
+            let _class_summary = _attendance.class_summary,
+                _chart_label = new Array();
+            $.each(_class_summary.summary, function(i, day) {
+                _chart_label.push(i);
+            });
+            options = {
+                chart: {
+                    height: 350,
+                    type: 'bar',
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        endingShape: 'rounded',
+                        columnWidth: '35%',
+                    },
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    show: true,
+                    width: 2,
+                    colors: ['transparent']
+                },
+                series: _class_summary.chart_grouping,
+                xaxis: {
+                    categories: _chart_label,
+                },
+                fill: {
+                    opacity: 1
+                }
+            }
+            var chart = new ApexCharts(
+                document.querySelector("#class_attendance_chart"),
+                options
+            );
+            chart.render();
+        }
     }
 
     if ($(`div[id="attendance_chart_list"]`).length) {
         let attendance_chart_list = "<div class='row'>";
-        $.each(attendance.days_list, function(day, status) {
+        console.log(_attendance.attendance.days_list);
+        $.each(_attendance.attendance.days_list, function(day, status) {
             attendance_chart_list += `
             <div class='col-lg-3 col-md-6'>
                 <div class='card mb-3'>
@@ -399,8 +400,7 @@ var attendanceReport = (_attendance) => {
 }
 
 var loadDashboardAnalitics = () => {
-    let period = filter.val(),
-        to_stream = $(`div[id="data-report_stream"]`).attr(`data-report_stream`);
+    let to_stream = $(`div[id="data-report_stream"]`).attr(`data-report_stream`);
     $.get(`${baseUrl}api/analitics/generate?label[stream]=${to_stream}`).then((response) => {
         if (response.code === 200) {
             if (response.data.result.summary_report !== undefined) {
@@ -418,6 +418,24 @@ var loadDashboardAnalitics = () => {
         }
     }).catch(() => {
         $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
+    });
+}
+
+var filter_Class_Calender = () => {
+    let load_date = $(`input[name="class_date_select"]`).val();
+    $(`div[id="class_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "flex" });
+    $.get(`${baseUrl}api/analitics/generate?label[stream]=class_attendance_report&label[load_date]=${load_date}`).then((response) => {
+        if (response.code === 200) {
+            $(`div[data-chart_container="class_attendance_chart"]`).html(`<div style="width:100%;height:345px;" id="class_attendance_chart"></div>`);
+            if (response.data.result.attendance_report !== undefined) {
+                attendanceReport(response.data.result.attendance_report);
+            }
+            setTimeout(() => {
+                $(`div[id="class_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
+            }, 1000);
+        }
+    }).catch(() => {
+        $(`div[id="class_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
     });
 }
 

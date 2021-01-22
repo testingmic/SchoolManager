@@ -14,7 +14,7 @@ class Analitics extends Myschoolgh {
 
         $this->default_stream = [
             "summary_report", "students_report", "revenue_flow", "library_report", 
-            "departments_report", "attendance_report"
+            "departments_report", "attendance_report", "class_attendance_report"
         ];
 
         $this->accepted_period = [
@@ -48,15 +48,13 @@ class Analitics extends Myschoolgh {
      */
     public function generate(stdClass $params) {
 
-        /** Global variables */
-        global $usersClass;
-
         /** set the date period */
         $params->period = $params->period ?? "last_14days";
 
         /** Convert the stream into an array list */
         $params->stream = isset($params->label["stream"]) && !empty($params->label["stream"]) ? $this->stringToArray($params->label["stream"]) : $this->default_stream;
-        
+        $this->info_to_stream = $params->stream;
+
         /** Preformat date */
         if(in_array($params->period, $this->accepted_period)) {
 
@@ -152,6 +150,12 @@ class Analitics extends Myschoolgh {
             // append this paramter
             $params->load_summary_info = true;
             // query the attendance data
+            $this->final_report["attendance_report"] = $this->attendance_report($params);
+        }
+
+        // get the class attendance information if not parsed in the stream
+        if(in_array("class_attendance_report", $this->info_to_stream)) {
+            // query the class attendance data
             $this->final_report["attendance_report"] = $this->attendance_report($params);
         }
 
@@ -464,6 +468,9 @@ class Analitics extends Myschoolgh {
             // create new object
             $attendClass = load_class("attendance", "controllers");
 
+            // if finalized record is requested
+            $params->is_finalized = true;
+
             // if the summary load was parsed
             if(isset($params->load_summary_info)) {
                 
@@ -472,7 +479,6 @@ class Analitics extends Myschoolgh {
                 $params->end_date = date("Y-m-d", strtotime("this week friday"));
 
                 // set the quick information
-                $params->is_finalized = true;
                 $user_type = $params->userData->user_type;
                 $params->the_user_type = $user_type;
                 
@@ -484,12 +490,20 @@ class Analitics extends Myschoolgh {
                     $params->user_types_list = ($user_type === "parent") ? ["student"] : [$user_type];
                     $params->the_current_user_id = ($user_type === "parent") ? $this->session->student_id : $params->userId;
                 }
-
+                
                 // load the attendance summary
                 $result["attendance"] = $attendClass->range_summary($params);
-                $params->load_date = isset($params->load_date) ? $params->load_date : date("Y-m-d");
-                $result["class_summary"] = $attendClass->class_summary($params);
 
+            }
+
+            // if class summary was also requested
+            if(in_array("class_attendance_report", $params->stream)) {
+
+                // load the attendance summary
+                $params->load_date = isset($params->label["load_date"]) ? $params->label["load_date"] : date("Y-m-d");
+                
+                // load the class summary
+                $result["class_summary"] = $attendClass->class_summary($params);
             }
 
             // return the result
