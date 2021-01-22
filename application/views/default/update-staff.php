@@ -106,8 +106,11 @@ if(!empty($user_id)) {
                     $course_listing .= "<td>&nbsp; {$each->name}</td>";
                     $course_listing .= "<td>{$each->course_code}</td>";
                     $course_listing .= "<td>{$each->credit_hours}</td>";
-                    $course_listing .= "<td>{$each->class_name}</td>";
-                    $course_listing .= "<td class='text-center'>{$action}</td>";
+                    $course_listing .= "<td>";
+                    foreach($each->class_list as $class) {
+                        $course_listing .= "<p class='mb-1 pb-1'><span class='underline'>".$class->name."</span></p>";
+                    }
+                    $course_listing .= "</td><td class='text-center'>{$action}</td>";
                     $course_listing .= "</tr>";
                 }
             }
@@ -206,35 +209,38 @@ if(!empty($user_id)) {
             // disable the input field if the current user is also logged in
             $isDisabled = ($session->userId == $user_id) ? "disabled='disabled'" : null;
 
-            // loop through the list
-            foreach ($user_permission as $key => $value) {
-                $header = ucwords(str_replace("_", " ", $key));
-                $level_data .= "<div class='".(isset($thisUserAccess) ? "col-lg-4 col-md-4" : "col-lg-12")." mb-2 border-bottom border-default'><h6 style='font-weight:bolder'>".$header."</h6>";
-                
-                if(!isset($thisUserAccess)) {
-                    $level_data .= "<div class='row'>";
-                }
-                
-                // loop through the user permissions
-                foreach($value as $nkey => $nvalue) {						
+            // if the permission is not empty
+            if(!empty($user_permission)) {
+                // loop through the list
+                foreach ($user_permission as $key => $value) {
+                    $header = ucwords(str_replace("_", " ", $key));
+                    $level_data .= "<div class='".(isset($thisUserAccess) ? "col-lg-4 col-md-4" : "col-lg-12")." mb-2 border-bottom border-default'><h6 style='font-weight:bolder'>".$header."</h6>";
                     
-                    // if the user access was parsed
-                    if(isset($thisUserAccess)) {
-                        $level_data .= "<div class='col-lg-12'>";
-                        $level_data .= "<input {$isDisabled} ".(isset($thisUserAccess[$key][$nkey]) && ($thisUserAccess[$key][$nkey] == 1) ? "checked" : null )." type='checkbox' id='access_level[$key][$nkey]' class='brands-checkbox' name='access_level[$key][$nkey][]'>";
-                    } else {
-                        $level_data .= "<div class='col-lg-3 col-md-4'>";
-                        $level_data .= "<input {$isDisabled} checked='checked' type='checkbox' id='access_level[$key][$nkey]' class='brands-checkbox' name='access_level[$key][$nkey][]'>";
+                    if(!isset($thisUserAccess)) {
+                        $level_data .= "<div class='row'>";
                     }
-                    $level_data .= "<label class='cursor' for='access_level[$key][$nkey]'> &nbsp; ".ucfirst($nkey)."</label>";
-                    $level_data .= "</div>";
                     
-                }
+                    // loop through the user permissions
+                    foreach($value as $nkey => $nvalue) {						
+                        
+                        // if the user access was parsed
+                        if(isset($thisUserAccess)) {
+                            $level_data .= "<div class='col-lg-12'>";
+                            $level_data .= "<input {$isDisabled} ".(isset($thisUserAccess[$key][$nkey]) && ($thisUserAccess[$key][$nkey] == 1) ? "checked" : null )." type='checkbox' id='access_level[$key][$nkey]' class='brands-checkbox' name='access_level[$key][$nkey][]'>";
+                        } else {
+                            $level_data .= "<div class='col-lg-3 col-md-4'>";
+                            $level_data .= "<input {$isDisabled} checked='checked' type='checkbox' id='access_level[$key][$nkey]' class='brands-checkbox' name='access_level[$key][$nkey][]'>";
+                        }
+                        $level_data .= "<label class='cursor' for='access_level[$key][$nkey]'> &nbsp; ".ucfirst($nkey)."</label>";
+                        $level_data .= "</div>";
+                        
+                    }
 
-                if(!isset($thisUserAccess)) {
+                    if(!isset($thisUserAccess)) {
+                        $level_data .= "</div>";
+                    }
                     $level_data .= "</div>";
                 }
-                $level_data .= "</div>";
             }
             
             $level_data .= "</div>";

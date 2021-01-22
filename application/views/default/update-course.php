@@ -203,8 +203,6 @@ if(!empty($item_id)) {
                 </div>";
         }
 
-        $link = !empty($data->course_tutor) ? "href='{$baseUrl}update-staff/{$data->course_tutor}/view'" : null;
-
         // append the html content
         $response->html = '
         <section class="section">
@@ -241,24 +239,27 @@ if(!empty($item_id)) {
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <h4>Course Tutor Details</h4>
+                        <h4>Course Tutor(s) Details</h4>
                     </div>
-                    <div class="card-body pt-0 pb-0">
-                        <div class="py-3 pt-0">
-                            <p class="clearfix">
+                    <div class="card-body pt-0 pb-0">';
+                    foreach($data->course_tutors as $tutor) {
+                        $response->html .= '
+                        <div class="pb-2 pt-3 border-bottom">
+                            <p class="clearfix mb-2">
                                 <span class="float-left">Fullname</span>
-                                <span class="float-right text-muted"><a '.$link.'>'.($data->course_tutor_info->name ?? null).'</a></span>
+                                <span class="float-right text-muted"><a href="'.$baseUrl.'update-staff/'.$tutor->item_id.'/view">'.$tutor->name.'</a></span>
                             </p>
-                            <p class="clearfix">
+                            <p class="clearfix mb-2">
                                 <span class="float-left">Email</span>
-                                <span class="float-right text-muted">'.($data->course_tutor_info->email ?? null).'</span>
+                                <span class="float-right text-muted">'.$tutor->email.'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Contact</span>
-                                <span class="float-right text-muted">'.($data->course_tutor_info->phone_number ?? null).'</span>
+                                <span class="float-right text-muted">'.$tutor->phone_number.'</span>
                             </p>
-                        </div>
-                    </div>
+                        </div>';
+                    }
+                    $response->html .= '</div>
                 </div>
             </div>
             <div class="col-12 col-md-12 col-lg-9">
@@ -266,7 +267,10 @@ if(!empty($item_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Course Lesson Planner</a>
+                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Classes List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Course Lesson Planner</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="resources-tab2" data-toggle="tab" href="#resources" role="tab" aria-selected="true">Course Materials</a>
@@ -283,7 +287,38 @@ if(!empty($item_id)) {
                     $response->html .= '
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
-                        <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
+                        
+                        <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="classes" role="tabpanel" aria-labelledby="classes-tab2">
+                            <div class="row">';
+                            foreach($data->class_list as $class) {
+                                $response->html .= '
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="card">
+                                        <div class="card-body pt-0 pb-0">
+                                            <div class="pb-2 pt-3 border-bottom">
+                                                <p class="clearfix mb-2">
+                                                    <span class="float-left">Name</span>
+                                                    <span class="float-right text-muted"><a href="'.$baseUrl.'update-class/'.$class->id.'/view">'.$class->name.'</a></span>
+                                                </p>
+                                                <p class="clearfix">
+                                                    <span class="float-left">Code</span>
+                                                    <span class="float-right text-muted">'.$class->class_code.'</span>
+                                                </p>
+                                                <p class="clearfix">
+                                                    <span class="float-left">Class Size</span>
+                                                    <span class="float-right text-muted">'.$class->class_size.'</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>';
+                                }
+                                $response->html .= '    
+                                
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
                             <div class="d-flex justify-content-between">
                                 <div><h5>COURSE LESSONS</h5></div>
                                 <div>

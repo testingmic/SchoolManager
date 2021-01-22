@@ -52,16 +52,23 @@ foreach($item_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
-    $link = !empty($each->course_tutor) ? "href='{$baseUrl}update-staff/{$each->course_tutor}/view'" : null;
-
     $courses .= "<tr data-row_id=\"{$each->id}\">";
     $courses .= "<td>".($key+1)."</td>";
     $courses .= "<td>&nbsp; {$each->name}</td>";
     $courses .= "<td>{$each->course_code}</td>";
-    $courses .= "<td>{$each->credit_hours}</td>";
-    $courses .= "<td>{$each->class_name}</td>";
-    $courses .= "<td><a {$link}><span class='underline'>".($each->course_tutor_info->name ?? null)."</span></a></td>";
-    $courses .= "<td class='text-center'>{$action}</td>";
+    $courses .= "<td>{$each->credit_hours}</td><td>";
+    
+    foreach($each->class_list as $class) {
+        $courses .= "<p class='mb-1 pb-1'><span class='underline'>".$class->name."</span></p>";
+    }
+
+    $courses .= "</td><td>";
+
+    foreach($each->course_tutors as $tutor) {
+        $courses .= "<p class='mb-1 pb-1'><a href='{$baseUrl}update-staff/{$tutor->item_id}/view'><span class='underline'>".$tutor->name."</span></a></p>";
+    }
+
+    $courses .= "</td><td class='text-center'>{$action}</td>";
     $courses .= "</tr>";
 }
 

@@ -2002,7 +2002,6 @@ class Forms extends Myschoolgh {
                                 $response .= "<option ".($isData && ($each->name == $userData->blood_group) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
-                        <input type="hidden" id="user_type" name="user_type" value="'.(!$isData ? "student" : null).'">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2211,13 +2210,25 @@ class Forms extends Myschoolgh {
         <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/classes/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12"><h5>CLASS INFORMATION</h5></div>
-                <div class="col-lg-4 col-md-5">
+                <div class="col-lg-4 col-md-4">
                     <div class="form-group">
                         <label for="class_code">Class Code (optional)</label>
                         <input type="text" value="'.($itemData->class_code ?? null).'" name="class_code" id="class_code" class="form-control text-uppercase">
                     </div>
                 </div>
-                <div class="col-lg-8 col-md-7">
+                <div class="col-lg-4 col-md-4">
+                    <div class="form-group">
+                        <label for="class_size">Class Size (optional)</label>
+                        <input type="text" value="'.($itemData->class_size ?? null).'" name="class_size" id="class_size" class="form-control text-uppercase">
+                    </div>
+                </div>                
+                <div class="col-lg-4 col-md-4">
+                    <div class="form-group">
+                        <label for="weekly_meeting">Weekly Meetings</label>
+                        <input type="number" value="'.($itemData->weekly_meeting ?? null).'" name="weekly_meeting" id="weekly_meeting" class="form-control text-uppercase">
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
                     <div class="form-group">
                         <label for="name">Class Name<span class="required">*</span></label>
                         <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
@@ -2295,42 +2306,42 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12">
                     <h5>COURSE DETAILS</h5>
                 </div>
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <div class="form-group">
                         <label for="course_code">Course Code (optional)</label>
                         <input '.$isAdmin.' type="text" value="'.($itemData->course_code ?? null).'" name="course_code" id="course_code" class="form-control text-uppercase">
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <div class="form-group">
                         <label for="credit_hours">Credit Hours</label>
                         <input type="number" value="'.($itemData->credit_hours ?? null).'" name="credit_hours" id="credit_hours" class="form-control text-uppercase">
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="class_id">Class <span class="required">*</span></label>
-                        <select '.$isAdmin.' data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
-                            <option value="null">Select Class</option>';
-                            foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->id == $itemData->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
-                            }
-                        $response .= '</select>
-                    </div>
-                </div>
-                <div class="col-lg-8 col-md-8">
+                <div class="col-lg-6 col-md-12">
                     <div class="form-group">
                         <label for="name">Course Title <span class="required">*</span></label>
                         <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-12 col-md-12">
+                    <div class="form-group">
+                        <label for="class_id">Class <span class="required">*</span></label>
+                        <select multiple '.$isAdmin.' data-width="100%" name="class_id[]" id="class_id[]" class="form-control selectpicker">
+                            <option value="null">Select Class</option>';
+                            foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && in_array($each->id, $itemData->class_ids) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
                     <div class="form-group">
                         <label for="course_tutor">Course Tutor</label>
-                        <select data-width="100%" '.$isAdmin.' name="course_tutor" id="course_tutor" class="form-control selectpicker">
+                        <select multiple data-width="100%" '.$isAdmin.' name="course_tutor[]" id="course_tutor[]" class="form-control selectpicker">
                             <option value="null">Select Course Tutor</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND user_status='Active' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->item_id == $itemData->course_tutor) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
+                                $response .= "<option ".($isData && in_array($each->item_id, $itemData->course_tutor_ids) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
                         $response .= '</select>
                     </div>
@@ -2471,13 +2482,13 @@ class Forms extends Myschoolgh {
                                 $response .= "<option ".($isData && ($each->id == $userData->blood_group) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
-                        <input type="hidden" id="user_type" name="user_type" value="'.(!$isData ? "student" : null).'">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="position">Position / Role <span class="required">*</span></label>
                         <input type="text" value="'.($userData->position ?? null).'" name="position" id="position" class="form-control">
+                        <input type="hidden" hidden value="'.($userData->user_id ?? null).'" name="user_id" id="user_id" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12">
@@ -2507,6 +2518,17 @@ class Forms extends Myschoolgh {
                             <option value="null">Select Section</option>';
                             foreach($this->pushQuery("id, name", "sections", "status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->section) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-6 '.($isData && $userData->user_type !== "teacher" ? "hidden" : "").'" id="course_ids_container">
+                    <div class="form-group">
+                        <label for="courses_ids">Courses</label>
+                        <select multiple data-width="100%" name="courses_ids[]" id="courses_ids" class="form-control selectpicker">
+                            <option value="">Select Course</option>';
+                            foreach($this->pushQuery("id, name", "courses", "status='1' AND client_id='{$clientId}'") as $each) {
+                                $response .= "<option ".($isData && in_array($each->id, $userData->course_ids) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
                     </div>

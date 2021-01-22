@@ -178,6 +178,9 @@ if(!empty($item_id)) {
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
                         <a class="nav-link '.(!$updateItem ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Student List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Courses List</a>
                     </li>';
 
                     if($hasUpdate) {
@@ -194,6 +197,10 @@ if(!empty($item_id)) {
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
                             <div class="col-lg-12 pl-0"><h5>CLASS STUDENTS LIST</h5></div>
                             '.$student_listing.'
+                        </div>
+                        <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="courses-tab2">
+                            <div class="col-lg-12 pl-0"><h5>Class Courses List</h5></div>
+                            
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                         

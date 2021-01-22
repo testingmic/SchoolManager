@@ -48,13 +48,13 @@ class Courses extends Myschoolgh {
         }
 
         $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
-        $params->query .= (isset($params->course_tutor) && !empty($params->course_tutor)) ? " AND a.course_tutor='{$params->course_tutor}'" : null;
+        $params->query .= (isset($params->course_tutor) && !empty($params->course_tutor)) ? " AND a.course_tutor LIKE '%{$params->course_tutor}%'" : null;
         $params->query .= (isset($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
         $params->query .= (isset($params->programme_id)) ? " AND a.programme_id='{$params->programme_id}'" : null;
         $params->query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND a.id='{$params->course_id}'" : null;
-        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
+        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id IN {$this->inList($params->class_id)}" : null;
         $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
 
@@ -63,8 +63,7 @@ class Courses extends Myschoolgh {
             $stmt = $this->db->prepare("
                 SELECT a.*,
                     (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.course_tutor LIMIT 1) AS course_tutor_info
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM courses a
                 WHERE {$params->query} AND a.deleted = ? ORDER BY a.id LIMIT {$params->limit}
             ");
@@ -109,9 +108,44 @@ class Courses extends Myschoolgh {
                         // if the user is permitted
                         $result->lesson_plan = $this->course_lessons($result->client_id, $result->id);
                     }
+
+                    // set the course tutor into an array
+                    $course_tutors = json_decode($result->course_tutor, true);
+                    $result->course_tutor_ids = empty($course_tutors) ? [] : $course_tutors;
+
+                    // convert to array
+                    $result->class_ids = $this->stringToArray($result->class_id);
+                    
+                    // load the course tutor details
+                    if(!empty($course_tutors)) {
+                        // loop through the array list
+                        foreach($course_tutors as $tutor) {
+                            // get the course tutor information
+                            $tutor_info = $this->pushQuery("name, item_id, unique_id, phone_number, email, image", "users", "item_id='{$tutor}' LIMIT 1");
+                            if(!empty($tutor_info)) {
+                                $result->course_tutors[] = $tutor_info[0];
+                            }
+                        }
+                    } else {
+                        $result->course_tutors = [];
+                    }
+
+                    // load the course tutor details
+                    if(!empty($result->class_ids)) {
+                        // loop through the array list
+                        foreach($result->class_ids as $class) {
+                            // get the course tutor information
+                            $class_info = $this->pushQuery("name, id, class_size, class_code, weekly_meeting", "classes", "id='{$class}' LIMIT 1");
+                            if(!empty($class_info)) {
+                                $result->class_list[] = $class_info[0];
+                            }
+                        }
+                    } else {
+                        $result->class_list = [];
+                    }
                     
                     // loop through the information
-                    foreach(["course_tutor_info", "created_by_info"] as $each) {
+                    foreach(["created_by_info"] as $each) {
                         // convert the created by string into an object
                         $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
                     }
@@ -250,11 +284,11 @@ class Courses extends Myschoolgh {
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
-                ".(isset($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
+                ".(isset($params->class_id) ? ", class_id = '".json_encode($params->class_id)."'" : null)."
                 ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(isset($params->course_tutor) ? ", course_tutor = '{$params->course_tutor}'" : null)."
+                ".(isset($params->course_tutor) ? ", course_tutor = '".json_encode($params->course_tutor)."" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
@@ -334,12 +368,12 @@ class Courses extends Myschoolgh {
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
-                ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
+                ".(isset($params->class_id) ? ", class_id = '".json_encode($params->class_id)."'" : null)."
                 ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(isset($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(isset($params->course_tutor) ? ", course_tutor = '{$params->course_tutor}'" : null)."
+                ".(isset($params->course_tutor) ? ", course_tutor = '".json_encode($params->course_tutor)."" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
                 WHERE id = ? AND client_id = ?
             ");

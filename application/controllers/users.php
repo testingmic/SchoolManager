@@ -183,7 +183,7 @@ class Users extends Myschoolgh {
 					(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name,
 					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name,
 					(SELECT phone_number FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_phone
-				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions
+				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions, a.course_ids
 				FROM users a 
 				LEFT JOIN country c ON c.id = a.country
 				WHERE {$params->query} AND a.deleted='0' AND a.status='1' {$order_by} LIMIT {$params->limit}
@@ -206,6 +206,8 @@ class Users extends Myschoolgh {
 					unset($result->item_id);
 					$result->preferences = json_decode($result->preferences);
 				}
+
+				$result->course_ids = !empty($result->course_ids) ? json_decode($result->course_ids, true) : [];
 
 				// if not a minified suggestion list
 				if(!isset($params->minified)) {
@@ -234,6 +236,7 @@ class Users extends Myschoolgh {
 					// append to the list and return
 					$row++;
 					$result->row_id = $row;
+
 				}
 
 				// if the guardian id was parsed
@@ -892,6 +895,15 @@ class Users extends Myschoolgh {
 			$permissions = $accessPermissions[0]->user_permissions;
 			$access_level = $accessPermissions[0]->id;
 
+			// init course ids
+			$course_ids = [];
+			// append tutor to courses list
+			if(isset($params->courses_ids)) {
+				$course_ids = $this->append_user_courses($params->courses_ids, $params->user_id, $params->clientId);
+			}
+
+			$redirect = ($params->user_type === "student") ? "student" : ($params->user_type === "parent" ? "guardian" : "staff");
+
 			// insert the user information
 			$stmt = $this->db->prepare("
 				INSERT INTO users SET item_id = ?, user_type = ?, access_level = ?,
@@ -914,6 +926,8 @@ class Users extends Myschoolgh {
 
 				".(isset($params->status) ? ", status='{$params->status}'" : null)."
 				".(isset($encrypt_password) ? ", password='{$encrypt_password}'" : null)."
+
+				".(!empty($course_ids) ? ", course_ids='".json_encode($course_ids)."'" : "")."
 
 				".(isset($fileName) ? ", image='{$fileName}'" : null)."
 				".(isset($params->previous_school) ? ", previous_school='{$params->previous_school}'" : null)."
@@ -1033,7 +1047,8 @@ class Users extends Myschoolgh {
 			# append to the response
 			if($loggedInAccount) {
 				$return["additional"] = [
-					"clear" => true
+					"clear" => true,
+					"href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"
 				];
 			}
 
@@ -1059,6 +1074,7 @@ class Users extends Myschoolgh {
 		// confirm that the user_id does not already exist
 		$i_params = (object) ["limit" => 1, "user_id" => $params->user_id];
 		$the_user = $this->list($i_params)["data"];
+
 		// get the user data
 		if(empty($the_user)) {
 			return ["code" => 201, "data" => "Sorry! Please provide a valid user id."];
@@ -1139,7 +1155,7 @@ class Users extends Myschoolgh {
 			$additional = null;
 
 			/** Load the previous record */
-            $prevData = $this->prevData("users", $params->user_id);
+            $prevData = $the_user[0];
 			
 			// usertype and fullname
 			$params->client_id = isset($params->clientId) ? strtoupper($params->clientId) : null;
@@ -1148,9 +1164,28 @@ class Users extends Myschoolgh {
 			// convert the user type to lowercase
 			$params->user_type = strtolower($the_user[0]->user_type);
 
+			// init course ids
+			$course_ids = [];
+			// append tutor to courses list
+			if(isset($params->courses_ids)) {
+				// find course ids which were initially attached to the tutor but no longer attached
+				$diff = array_diff($prevData->course_ids, $params->courses_ids);
+
+				// append
+				$course_ids = $this->append_user_courses($params->courses_ids, $params->user_id, $params->clientId);
+
+				// remove user from courses
+				if(!empty($diff)) {
+					$this->remove_user_courses($diff, $params->user_id, $params->clientId);
+					$course_ids = $params->courses_ids;
+				}
+			} else {
+				$this->remove_all_user_courses($params);
+			}
+
 			// insert the user information
 			$stmt = $this->db->prepare("
-				UPDATE users SET last_updated = now()
+				UPDATE users SET last_updated = now(), course_ids = ?
 				".(!empty($params->clientId) ? ", client_id='{$params->clientId}'" : null)."
 				".(isset($params->firstname) ? ", firstname='{$params->firstname}'" : null)."
 				".(isset($params->lastname) ? ", lastname='{$params->lastname}'" : null)."
@@ -1160,7 +1195,7 @@ class Users extends Myschoolgh {
 				".(isset($params->residence) ? ", residence='{$params->residence}'" : null)."
 				".(isset($params->gender) ? ", gender='{$params->gender}'" : null)."
 				".(isset($fileName) ? ", image='{$fileName}'" : null)."
-
+				
 				".(isset($params->previous_school) ? ", previous_school='{$params->previous_school}'" : null)."
 				".(isset($params->previous_school_remarks) ? ", previous_school_remarks='{$params->previous_school_remarks}'" : null)."
 				".(isset($params->previous_school_qualification) ? ", previous_school_qualification='{$params->previous_school_qualification}'" : null)."
@@ -1196,7 +1231,7 @@ class Users extends Myschoolgh {
 			");
 
 			// execute the insert user data
-			$stmt->execute([$params->user_id]);
+			$stmt->execute([json_encode($course_ids), $params->user_id]);
 
 			$guardian_ids = [];
 			$theClientData = $this->client_data($params->clientId);
@@ -1265,68 +1300,70 @@ class Users extends Myschoolgh {
 				}
 			}
 
+			$redirect = ($params->user_type === "student") ? "student" : ($params->user_type === "parent" ? "guardian" : "staff");
+
 			// save the name change
             if(isset($params->fullname) && ($prevData->name !== $params->fullname)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->name, "Name was changed from {$prevData->name}", $params->userId);
 
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
             }
 
 			// save the email address
             if(isset($params->email) && ($prevData->email !== $params->email)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->email, "Email Address was changed from {$prevData->email}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
             }
 			
 			// save the postal address changes
             if(isset($params->address) && ($prevData->address !== $params->address)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->address, "Postal Address has been changed.", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
             }
 
 			// save the date of birth change
             if(isset($params->date_of_birth) && ($prevData->date_of_birth !== $params->date_of_birth)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->date_of_birth, "Date of Birth has been changed to {$params->date_of_birth}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
             }
 
 			// save the phone_number change
             if(isset($params->phone) && ($prevData->phone_number !== $params->phone)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->phone_number, "Primary Contact was been changed from {$prevData->phone_number}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
             }
 
 			// save the phone_number_2 change
             if(isset($params->phone_2) && ($prevData->phone_number !== $params->phone_2)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->phone_number_2, "Primary Contact was been changed from {$prevData->phone_number_2}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
             }
 			
 			// save the occupation
             if(isset($params->occupation) && ($prevData->occupation !== $params->occupation)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->occupation, "Occupation has been altered. {$prevData->occupation} => {$params->occupation}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
             }
 			
 			// save the employer
             if(isset($params->employer) && ($prevData->employer !== $params->employer)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->employer, "Employer details has been altered. {$prevData->employer} => {$params->employer}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
             }
 			
 			// save the position
             if(isset($params->position) && ($prevData->position !== $params->position)) {
                 $this->userLogs("user-account", $params->user_id, $prevData->position, "Position has been altered. {$prevData->position} => {$params->position}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
             }
 
 			// insert the user activity
@@ -1334,7 +1371,7 @@ class Users extends Myschoolgh {
 				// Insert the log
 				$this->userLogs("user-account", $params->user_id, $prevData, "You updated your account information", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-student/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
 			} else {
 				// notification object
 				global $noticeClass;
@@ -1864,6 +1901,91 @@ class Users extends Myschoolgh {
 			"code" => 200,
 			"data" => "Student Id successfully changed"
 		];
+	}
+
+	/**
+	 * Append User Courses
+	 * 
+	 * Loop through the courses that the user has been attached to 
+	 * If not in the courses tutors list then append the user_id to it
+	 * 
+	 * @return Bool
+	 */
+	public function append_user_courses($courses_ids, $user_id, $client_id) {
+
+		$courses_ids = $this->stringToArray($courses_ids);
+		$valid_ids = [];
+
+		foreach($courses_ids as $course) {
+			$query = $this->pushQuery("course_tutor", "courses", "id='{$course}' AND client_id='{$client_id}' LIMIT 1");
+			if(!empty($query)) {
+				$valid_ids[] = $course;
+				if(!empty($query[0]->course_tutor)) {
+					$result = json_decode($query[0]->course_tutor, true);
+					if(!in_array($user_id, $result)) {
+						array_push($result, $user_id);
+						$this->db->query("UPDATE courses SET course_tutor = '".json_encode($result)."' WHERE id='{$course}' LIMIT 1");
+					}
+				} else {
+					$tutors = [$user_id];
+					$this->db->query("UPDATE courses SET course_tutor = '".json_encode($tutors)."' WHERE id='{$course}' LIMIT 1");
+				}
+			}
+		}
+		return $valid_ids;
+
+	}
+
+	/**
+	 * Remove User From All Courses
+	 * 
+	 * Loop through the courses that the user has been attached to 
+	 * If not in the courses tutors list then append the user_id to it
+	 * 
+	 * @return Bool
+	 */
+	public function remove_all_user_courses(stdClass $params) {
+
+		$courses_ids = $this->pushQuery("course_tutor, id", "courses", "client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' LIMIT 400");
+
+		foreach($courses_ids as $course) {
+			if(!empty($course->course_tutor)) {
+				$result = json_decode($course->course_tutor, true);
+				if(in_array($params->user_id, $result)) {
+					$key = array_search($params->user_id, $result);
+					if($key !== FALSE) {
+						unset($result[$key]);
+						$this->db->query("UPDATE courses SET course_tutor = '".json_encode($result)."' WHERE id='{$course->id}' LIMIT 1");
+					}
+				}
+			}
+		}
+		return true;
+
+	}
+
+	/**
+	 * Unattach a course from a user
+	 * 
+	 * @return Bool
+	 */
+	public function remove_user_courses($courses_ids, $user_id, $client_id) {
+
+		$courses_ids = $this->stringToArray($courses_ids);
+		
+		foreach($courses_ids as $course) {
+			$query = $this->pushQuery("course_tutor", "courses", "id='{$course}' AND client_id='{$client_id}' LIMIT 1");
+			if(!empty($query)) {
+				if(!empty($query[0]->course_tutor)) {
+					$result = json_decode($query[0]->course_tutor, true);
+					if(in_array($user_id, $result)) {
+						$key = array_search($user_id, $result);
+						unset($result[$key]);
+						$this->db->query("UPDATE courses SET course_tutor = '".json_encode($result)."' WHERE id='{$course}' LIMIT 1");
+					}
+				}
+			}
+		}
 	}
 	
 }
