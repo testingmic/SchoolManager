@@ -105,110 +105,15 @@ if((isset($_GET["file"]) && !empty($_GET["file"])) || (isset($_GET["file_id"], $
 }
 /** Download timetables */
 elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) {
+    
     // set the timetable id
+    $timetableClass = load_class("timetable", "controllers");
     $timetable_id = xss_clean($_GET["tb_id"]);
     $codeOnly = (bool) isset($_GET["code_only"]);
+    $data = [];
 
-    // load the timetable information
-    $params = (object) [
-        "limit" => 1,
-        "full_detail" => true,
-        "timetable_id" => $timetable_id,
-        "clientId" => $session->clientId,
-    ];
-    $data = load_class("timetable", "controllers")->list($params)["data"];
-
-    // make the request
-    if(empty($data)) {
-        print "Access Denied!";
-        return; 
-    }
-    $data = $data[$timetable_id];
-    
-    // create a test function
-    function add_time($start_time, $interval) {
-        $time = date("h:i A", strtotime("{$start_time} + {$interval}minutes"));
-        return $time;
-    }
-
-    // column with calculation
-    $slots = $data->slots;
-    $width = round(100/($slots+1));
-
-    // start drawing the table
-    $html_table = "<style>table tr td, table tr th {padding:10px;}</style>";
-    $html_table .= "<table border='1' width='100%'>";
-    $html_table .= "<tr style='background:#2f5e74e3;color:#fff'><th width='{$width}%'></th>";
-    $start_time = $data->start_time;
-
-    // generate the header
-    for($i = 0; $i < $slots; $i++) {
-        // set the start time
-        $start_time = date("h:i A", strtotime($start_time));
-        $end_time = add_time($start_time, $data->duration);
-
-        // show the time
-        $html_table .= "<th width='{$width}%'>";
-        $html_table .= "
-        <div align='center'>
-            {$start_time}<br>-<br>
-            {$end_time}
-        </div>";
-        $html_table .= "</th>";
-        $start_time = $end_time;
-    }
-
-    // days of the week
-    $d_style = "style='background:rgba(235,249,163,0.9) padding-box !important;font-weight:bold;text-align:center;box-shadow:0 0 25px rgba(207,229,84,0.9) inset !important'";
-    $days = ["Monday", "Tuesday", "Wednesday", "Thurday", "Friday", "Saturday", "Sunday"];
-    $colors = ["#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
-                "#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
-                "#007bff", "#6c757d", "#28a745", "#17a2b8", "#ffc107", "#dc3545"];
-    
-    $course_ids = array_column($data->allocations, "course_id");
-    $course_ids = array_unique($course_ids);
-
-    // set
-    $color_set = [];
-
-    // color coding
-    foreach($course_ids as $key => $each) {
-        $color_set[$each] = $colors[$key];
-    }
-
-    // loop through each day
-    for ($d = 0; $d < $data->days; $d++) {
-        $row = "<tr>";
-
-        // set the day name of the week
-        $row .= "<td {$d_style}>".($days[$d] ?? null)."</td>";
-
-        // loop through the slots
-        for ($i = 0; $i < $slots; $i++) {
-            // set the key
-            $info = "";
-            $bg_color = "";
-            $key = ($d + 1)."_".($i + 1);
-
-            // get the data
-            $cleaned = isset($data->allocations[$key]) ? $data->allocations[$key] : null;
-
-            // set the information to display
-            if(!empty($cleaned)) {
-                $bg_color = "style='background:{$color_set[$cleaned->course_id]};color:#fff'";
-                $info = !$codeOnly ? $cleaned->course_name. " (" : null; 
-                $info .= "<strong>{$cleaned->course_code}</strong>";
-                $info .= !$codeOnly ? " )" : null; 
-            }
-            // append the information
-            $row .= "<td {$bg_color} align='center' id='{$key}'>{$info}</td>";
-        }
-        $row .= "</tr>";
-        $html_table .= $row;
-    }
-
-    $html_table .= "</tr>";
-    $html_table .= "</table>";
+    $param = (object) ["data" => $data, "timetable_id" => $timetable_id, "code_only" => $codeOnly];
+    $html_table = $timetableClass->draw($param);
 
     // print 
     print_r($html_table);
