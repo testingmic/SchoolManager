@@ -52,32 +52,33 @@ $(".cell", "#dynamic_timetable").click(function() {
         course_id: $("input[name=" + this.id + "]", "#courseAlloc").val().split(':')[0],
         class_id: $(`input[name="t_class_id"]`).val()
     };
-    $.ajax({
-        type: "POST",
-        url: `${baseUrl}api/timetable/allocate`,
-        data: { data },
-        dataType: "json",
-        success: function(result) {
-            if (result.code === 200) {
-                $(`div[id="default_room_label"]`).addClass("hidden");
-                $(`div[id="default_room_select"]`).removeClass("hidden");
-                var current = $(`div[class~="selected"]`).attr('id'),
-                    roomSelect = $(`select[name='t_room_id']`);
-                $(`select[name='t_room_id'] > option`).prop("selected", false);
-                if (current) {
-                    var current_room = $("input[name=" + current + "]", "#courseAlloc").val().split(':')[1];
-                    if (current_room && current_room !== "undefined") {
-                        $("option[value='" + current_room + "']", roomSelect).prop("selected", true);
-                    } else {
-                        roomSelect.prop("selectedIndex", 0)
-                    }
-                    roomSelect.change();
-                } else {
-                    roomSelect.remove();
-                }
-            }
+    $(`div[id="default_room_label"]`).addClass("hidden");
+    $(`div[id="default_room_select"]`).removeClass("hidden");
+    var current = $(`div[class~="selected"]`).attr('id'),
+        roomSelect = $(`select[name='t_room_id']`);
+    $(`select[name='t_room_id'] > option`).prop("selected", false);
+    if (current) {
+        var current_room = $("input[name=" + current + "]", "#courseAlloc").val().split(':')[1];
+        if (current_room && current_room !== "undefined") {
+            $("option[value='" + current_room + "']", roomSelect).prop("selected", true);
+        } else {
+            roomSelect.prop("selectedIndex", 0)
         }
-    });
+        roomSelect.change();
+    } else {
+        roomSelect.remove();
+    }
+    // $.ajax({
+    //     type: "POST",
+    //     url: `${baseUrl}api/timetable/allocate`,
+    //     data: { data },
+    //     dataType: "json",
+    //     success: function(result) {
+    //         if (result.code === 200) {
+
+    //         }
+    //     }
+    // });
 });
 
 var active = $(".cell", "#dynamic_timetable").not(".disabled,.blank,.day,.time");
@@ -97,19 +98,21 @@ active.droppable({
                 timetable_id: $(`input[name="timetable_id"]`).val(),
                 class_id: $(`input[name="t_class_id"]`).val()
             };
+            $("#conflict_help").hide();
+            $("#conflict_info").append(data);
 
-            $.ajax({
-                type: "POST",
-                url: `${baseUrl}api/timetable/allocate?q=conflict`,
-                data: { data },
-                dataType: "json",
-                success: function(response) {
-                    // if (response.data.code === 200) {
-                    $("#conflict_help").hide();
-                    $("#conflict_info").append(data);
-                    // }
-                }
-            })
+            // $.ajax({
+            //     type: "POST",
+            //     url: `${baseUrl}api/timetable/allocate?q=conflict`,
+            //     data: { data },
+            //     dataType: "json",
+            //     success: function(response) {
+            //         // if (response.data.code === 200) {
+            //         $("#conflict_help").hide();
+            //         $("#conflict_info").append(data);
+            //         // }
+            //     }
+            // });
             return;
         }
         var i = ui.draggable.index() % colors.length;
@@ -182,19 +185,21 @@ var save_TimetableAllocation = () => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            $(`div[class="notices_div"]`).html(`Processing request... <i class="fa fa-spin fa-spinner"></i>`);
             save_button.prop({ "disabled": true });
             save_button.html(`Saving.. <i class="fa fa-spin fa-spinner"></i>`);
             $.post(`${baseUrl}api/timetable/allocate`, { data }).then((response) => {
                 save_button.prop({ "disabled": false });
                 save_button.html(`<i class="fa fa-save"></i> Save Timetable`);
                 if (response.code === 200) {
-                    $(`div[class="notices_div"]`).html(`<div class="text-left text-success">${response.data.result}</div>`);
+                    $(`div[class="notices_div"]`).html(`<div class="text-center text-success">${response.data.result}</div>`);
                 } else {
-                    $(`div[class="notices_div"]`).html(`<div class="text-left text-danger">${response.data.result}</div>`);
+                    $(`div[class="notices_div"]`).html(`<div class="text-center text-danger">${response.data.result}</div>`);
                 }
             }).catch(() => {
                 save_button.prop({ "disabled": false });
                 save_button.html(`<i class="fa fa-save"></i> Save Timetable`);
+                $(`div[class="notices_div"]`).html(`<div class="text-center text-danger">Sorry! There was an error while processing the request.</div>`);
             });
         }
     });

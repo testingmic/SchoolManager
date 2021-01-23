@@ -32,6 +32,7 @@ $timetable_list = $timetable_list["data"];
 
 $courses_list = [];
 $rooms_list = [];
+$timetable_allocations = [];
 $response->scripts = ["assets/js/timetable.js", "assets/js/allocate.js"];
 
 // if the table is not empty
@@ -56,7 +57,11 @@ if(!empty($timetable_list)) {
         $rooms_list = load_class("rooms", "controllers")->list($params)["data"];
         $disabled_inputs = $data->disabled_inputs;
 
-        // course and meetings count
+        // load the allocations
+        $params->limit = 1;
+        $params->full_detail = true;
+        $params->timetable_id = $timetable_id;
+        $timetable_allocations = load_class("timetable", "controllers")->list($params)[0]->allocations;
 
     } else {
         // once again set the $timetable_id == null even if a session has been set 

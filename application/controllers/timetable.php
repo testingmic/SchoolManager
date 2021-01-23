@@ -23,6 +23,7 @@ class Timetable extends Myschoolgh {
 
         $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
         $params->query .= (isset($params->timetable_id) && !empty($params->timetable_id)) ? " AND a.item_id='{$params->timetable_id}'" : null;
+        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
         $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
 
@@ -36,9 +37,21 @@ class Timetable extends Myschoolgh {
             ");
             $stmt->execute([1]);
 
+            $fullDetails = (bool) isset($params->full_detail);
+
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 $result->disabled_inputs = !empty($result->disabled_inputs) ? json_decode($result->disabled_inputs, true) : [];
+                
+                if($fullDetails) {
+                    $result->allocations = $this->pushQuery("
+                        a.day, a.slot, a.room_id, a.class_id, a.course_id, a.date_created,
+                        (SELECT name FROM classes WHERE classes.item_id = a.class_id LIMIT 1) AS class_name,
+                        (SELECT name FROM courses WHERE courses.item_id = a.course_id LIMIT 1) AS course_name,
+                        (SELECT name FROM classes_rooms WHERE classes_rooms.item_id = a.room_id LIMIT 1) AS room_name
+                    ", "timetables_slots_allocation a", "a.timetable_id = '{$result->item_id}' AND status='1'");
+                }
+
                 $data[$result->item_id] = $result;
             }
 
@@ -98,6 +111,19 @@ class Timetable extends Myschoolgh {
             // convert to array
             $disabled_inputs =  isset($params->disabled_inputs) ? $this->stringToArray($params->disabled_inputs) : [];
 
+            // clean input
+            if( !is_numeric($params->days) || !is_numeric($params->slots) || !is_numeric($params->duration)) {
+                return ["code" => 203, "data" => "Sorry! The days, slots and duration must be a valid numeric integers."];
+            }
+
+            // schedules
+            $schedules = $params->days * $params->slots;
+            
+            // set a boundary
+            if($schedules > 180) {
+                return ["code" => 203, "data" => "Sorry! The maximum number of Allocations must be 180  ie 9 rows & 20 columns."];
+            }
+
             // update the record if found
             if($isFound) {
                 $stmt = $this->db->prepare("
@@ -140,7 +166,7 @@ class Timetable extends Myschoolgh {
         
         } catch(PDOException $e) {
             return $this->unexpected_error;
-        } 
+        }
 
     }
 
@@ -209,56 +235,88 @@ class Timetable extends Myschoolgh {
             // validate the id
             $item_id = $params->data["timetable_id"];
             $allocations = $params->data["allocations"];
+
+            try {
             
-            // check if a record exist
-            if(empty($this->pushQuery("item_id", "timetables", "item_id = '{$item_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
-                return ["code" => 203, "data" => "Sorry! An invalid timetable id was parsed"];
-            }
+                // check if a record exist
+                if(empty($this->pushQuery("item_id", "timetables", "item_id = '{$item_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
+                    return ["code" => 203, "data" => "Sorry! An invalid timetable id was parsed"];
+                }
 
-            // init values
-            $course_ids = [];
+                // init values
+                $course_ids = [];
 
-            // loop through the allocations and group them
-            foreach($allocations as $slots) {
+                // loop through the allocations and group them
+                foreach($allocations as $slots) {
+                    // assign some variables
+                    $course_room = explode(":", $slots["value"]);
+                    $course = $course_room[0];
+                    $course_ids[$course] = isset($course_ids[$course]) ? $course_ids[$course]+1 : 1;
+
+                    // confirm that a room has been assigned
+                    if(!isset($course_room[1])) {
+                        return ["code" => 203, "data" => "Sorry! There was no room assigned to the course."];
+                    }
+                }
+
+                // load the meeting periods for each course
+                $courses_list = $this->pushQuery("name, weekly_meeting, item_id", "courses", "item_id IN {$this->inList(array_keys($course_ids))} AND client_id='{$params->clientId}' LIMIT 200");
                 
-                // assign some variables
-                $slot = $slots["slot"];
-                $course_room = explode(":", $slots["value"]);
-                $course = $course_room[0];
-                $course_ids[$course] = isset($course_ids[$course]) ? $course_ids[$course]+1 : 1;
+                // set the bugs list
+                $bugs_list = null;
+                $class_id = isset($params->data["class_id"]) ? $params->data["class_id"] : null;
 
-                // confirm that a room has been assigned
-                if(!isset($course_room[1])) {
-                    return ["code" => 203, "data" => "Sorry! There was no room assigned to the course."];
+                // rectify the error
+                foreach($courses_list as $key => $single) {
+                    // confirm that the course id is found
+                    if(isset($course_ids[$single->item_id])) {
+                        // if the weekly meeting is less than the allocated days
+                        if($single->weekly_meeting < $course_ids[$single->item_id]) {
+                            $bugs_list .= "<div>".($key+1).". {$single->name} has only <strong>{$single->weekly_meeting} meetings</strong> per week.</div>";
+                        }
+                    } else {
+                        return ["code" => 203, "data" => "Sorry! An invalid Course ID was parsed."];
+                    }
                 }
-                // set the room
-                $room = $course_room[1];
 
-            }
-
-            // load the meeting periods for each course
-            $courses_list = $this->pushQuery("name, weekly_meeting, item_id", "courses", "item_id IN {$this->inList(array_keys($course_ids))}");
-            
-            // set the bugs list
-            $bugs_list = null;
-
-            // rectify the error
-            foreach($courses_list as $key => $single) {
-                // if the weekly meeting is less than the allocated days
-                if($single->weekly_meeting < $course_ids[$single->item_id]) {
-                    $bugs_list .= "<div>".($key+1).". {$single->name} has only <strong>{$single->weekly_meeting} meetings</strong> per week.</div>";
+                // if the bug is not empty then return
+                if(!empty($bugs_list)) {
+                    return ["code" => 203, "data" => $bugs_list];
                 }
+
+                // delete any slots inserted into the database for this class record
+                $query = $this->db->prepare("DELETE FROM timetables_slots_allocation WHERE 
+                    timetable_id = '{$item_id}' AND course_id IN {$this->inList(array_keys($course_ids))} AND client_id = '{$params->clientId}'
+                    ".($class_id ? "AND class_id='{$class_id}'" : null)." LIMIT 200
+                ");
+                $query->execute();
+
+                // prepare the insert query here
+                $allot_slot = $this->db->prepare('INSERT INTO timetables_slots_allocation SET 
+                    client_id = ?, timetable_id = ?, `day` = ?, slot = ?, room_id = ?, class_id = ?, course_id = ?, `status` = ?
+                ');
+
+                // continue processing
+                // loop through the allocations again and group them
+                foreach($allocations as $slots) {
+                    // assign some variables
+                    $slot = explode("_", $slots["slot"]);
+                    $course_room = explode(":", $slots["value"]);
+                    $course = $course_room[0];
+                    $room = $course_room[1];
+
+                    // insert the value into the database
+                    $allot_slot->execute([$params->clientId, $item_id, $slot[0], $slot[1], $room, $class_id, $course, 1]);
+                }
+
+                // return
+                return "The timetable was successfully save!";
+
+            } catch(PDOException $e) {
+                print $e->getMessage();
+                return $this->unexpected_error;
             }
 
-            // if the bug is not empty then return
-            if(!empty($bugs_list)) {
-                return ["code" => 203, "data" => $bugs_list];
-            }
-
-            // continue processing
-
-            // return
-            return "Everything is in order for now.";
         } else {
 
             // if slot is not parsed
