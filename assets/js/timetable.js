@@ -39,6 +39,7 @@ var set_Disabled_Inputs = (disabled_array) => {
     $(`div[id="disabledSlots"]`).html(the_list);
     disabled_inputs = new_array;
 }
+
 var save_Timetable_Record = () => {
     swal({
         title: "Save Timetable",
@@ -76,4 +77,32 @@ if ($(`div[id="disabledSlots"]`).length) {
     $disabled = JSON.parse($(`div[id="disabledSlots"]`).attr("data-disabled_inputs"));
     set_Disabled_Inputs($disabled);
     drawGrid();
+}
+
+$(`select[id="current_TimetableId"]`).on("change", function() {
+    let timetable_id = $(this).val();
+    swal({
+        title: "Select Timetable",
+        text: "Do you want to change the current timetable? Please ensure to save all changes before you proceed to do that.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/timetable/set_timetable_id`, { timetable_id }).then((response) => {
+                if (response.code === 200) {
+                    loadPage(`${baseUrl}timetable-allocate/${timetable_id}`);
+                }
+            });
+        }
+    });
+});
+
+if ($(`div[id="allocate_dynamic_timetable"]`).length) {
+    let _name = parseInt($(`input[name="t_name"]`).val()),
+        _slots = parseInt($(`input[name="t_slots"]`).val()),
+        _days = parseInt($(`input[name="t_days"]`).val()),
+        _duration = parseInt($(`input[name="t_duration"]`).val()),
+        _start_time = $(`input[name="t_start_time"]`).val();
+    drawGrid(_name, _slots, _days, _duration, _start_time);
 }

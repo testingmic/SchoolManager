@@ -56,7 +56,17 @@ class Timetable extends Myschoolgh {
     /**
      * Save timetable record
      * 
-     * @param StdClass
+     * This method saves a timetable record
+     * 
+     * @param String        $params->timetable_id
+     * @param Int           $params->slots
+     * @param Int           $params->days
+     * @param Int           $params->duration
+     * @param String        $params->start_time
+     * @param String        $params->name
+     * @param String        $params->class_id
+     * 
+     * @return Array
      */
     public function save(stdClass $params) {
 
@@ -76,9 +86,12 @@ class Timetable extends Myschoolgh {
                 $item_id = random_string("alnum", 32);
                 $isFound = false;
 
-                // confirm if a class already exist with the same id
-                if(!empty($this->pushQuery("item_id", "timetables", "class_id='{$params->class_id}' AND client_id = '{$params->clientId}' AND status='1'"))) {
-                    return ["code" => 203, "data" => "Sorry! There is an existing record in the database for the specified Class ID."];
+                // if the class isset
+                if(isset($params->class_id)) {
+                    // confirm if a class already exist with the same id
+                    if(!empty($this->pushQuery("item_id", "timetables", "class_id='{$params->class_id}' AND client_id = '{$params->clientId}' AND status='1'"))) {
+                        return ["code" => 203, "data" => "Sorry! There is an existing record in the database for the specified Class ID."];
+                    }
                 }
             }
 
@@ -112,6 +125,9 @@ class Timetable extends Myschoolgh {
                 $stmt->execute([$params->days, $params->slots, $params->duration, $params->start_time, 
                     json_encode($disabled_inputs), $item_id, $params->clientId]);
             }
+
+            // set the timetable in session
+            $this->session->set("last_TimetableId", $item_id);
             
             return [
                 "code" => 200, 
@@ -125,6 +141,33 @@ class Timetable extends Myschoolgh {
         } catch(PDOException $e) {
             return $this->unexpected_error;
         } 
+
+    }
+
+    /**
+     * Save Timetable Id
+     * 
+     * Save the parsed timetable id in session after checking if it exists
+     * 
+     * @param String        $params->timetable_id
+     * 
+     * @return Array
+     */
+    public function set_timetable_id(stdClass $params) {
+        
+        // assign
+        $item_id = $params->timetable_id;
+        
+        // check if a record exist
+        if(empty($this->pushQuery("item_id", "timetables", "item_id = '{$item_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
+            return ["code" => 203, "data" => "Sorry! An invalid timetable id was parsed"];
+        }
+
+        // set in session
+        $this->session->set("last_TimetableId", $item_id);
+
+        // return success
+        return ["code" => 200, "data" => "Timetable ID successfully set as default."];
 
     }
 }

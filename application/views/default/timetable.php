@@ -58,6 +58,8 @@ if(!empty($timetable_id)) {
         
         // if the data is not empty
         if(!empty($data)) {
+            // set the timetable id in session
+            $session->set("last_TimetableId", $timetable_id);
 
             // set the found variable to true
             $timetable_found = true;
@@ -113,10 +115,12 @@ $response->html = '
                                                     <span class='float-left font-weight-bolder'>Name</span>
                                                     <span class='float-right'>{$value->name}</span>
                                                 </p>
-                                                <p class='clearfix pb-0 mb-0'>
-                                                    <span class='float-left font-weight-bolder'>Class</span>
-                                                    <span class='float-right'>{$value->class_name}</span>
-                                                </p>
+                                                ".($value->class_name ? 
+                                                    "<p class='clearfix pb-0 mb-0'>
+                                                        <span class='float-left font-weight-bolder'>Class</span>
+                                                        <span class='float-right'>{$value->class_name}</span>
+                                                    </p>" : ""
+                                                )."
                                                 <p class='clearfix pb-0 mb-0'>
                                                     <span class='float-left font-weight-bolder'>Slots</span>
                                                     <span class='float-right'>{$value->slots}</span>
@@ -150,9 +154,9 @@ $response->html = '
                                     <div class="col-xl-4 col-md-4 col-12 form-group">
                                         <div class="input-group mb-3">
                                             <div class="input-group-prepend">
-                                                <span class="input-group-text">Name<span class="required">*</span></span>
+                                                <span class="input-group-text">Class</span>
                                             </div>
-                                            <select class="form-control '.($timetable_found ? "selectpicker" : null).'" '.(!$class_id ? 'name="class_id"' : "disabled='disabled'").'>
+                                            <select class="form-control '.($timetable_found ? "selectpicker" : null).'" name="class_id">
                                                 <option value="">Please Select Class</option>';
                                                 foreach($class_list as $each) {
                                                     $response->html .= "<option ".($class_id == $each->item_id ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";
@@ -201,6 +205,11 @@ $response->html = '
                                             <input type="number" pattern="[0-9]{2,}" value="'.($d_duration ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="duration" id="duration">
                                         </div>
                                     </div>
+                                    '.(!$timetable_found ? 
+                                        '<div class="col-lg-12 text-right">
+                                            <button onclick="return save_Timetable_Record()" class="btn btn-outline-success">Save Timetable</button>
+                                        </div>' : ''
+                                    ).'
                                 </div>
                             </div>';
                             if($timetable_found) {
@@ -215,7 +224,7 @@ $response->html = '
                                 <div class="col-lg-12 mt-3" id="legend">
                                     <div class="row">
                                         <div class="col-lg-2 mt-3">
-                                            <div class="card mb-3">
+                                            <div title="Click on a slot to disable or enable" class="card mb-3">
                                                 <div class="card-body bg-blue text-center">
                                                     <strong>Active</strong>
                                                 </div>
@@ -223,32 +232,23 @@ $response->html = '
                                         </div>
                                         <div class="col-lg-2 mt-3">
                                             <div class="card">
-                                                <div class="card-body bg-grey text-center">
+                                                <div title="Click on a slot to disable or enable" class="card-body bg-grey text-center">
                                                     <strong>Disabled</strong>
+                                                    <input type="hidden" hidden name="timetable_id" id="timetable_id" value="'.$timetable_id.'">
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-lg-3 pr-2 pl-2 mt-3">
-                                            <div class="card p-0">
-                                                <div class="card-body text-center">
-                                                    <strong>Click on a slot to disable or enable</strong>
-                                                </div>
+                                        <div class="text-center col-lg-8 mt-3">
+                                            <div class="d-flex justify-content-around">
+                                                <div><a href="'.$baseUrl.'timetable-allocate/'.$timetable_id.'" class="btn btn-outline-warning"><i class="fa fa-copy"></i> Allocate Timetable</a></div>
+                                                <div><button onclick="return save_Timetable_Record()" class="btn btn-outline-success"><i class="fa fa-save"></i> Update Timetable</button></div>
                                             </div>
-                                        </div>
-                                        <div class="text-right col-lg-5 mt-3">
-                                            <input type="hidden" name="timetable_id" id="timetable_id" value="'.$timetable_id.'">
-                                            <button onclick="return save_Timetable_Record()" class="btn btn-outline-success">Update Timetable</button>
                                         </div>
                                     </div>
                                     <div id="disabledSlots" data-disabled_inputs=\''.json_encode($n_string).'\'>';
                                     foreach($disabled_inputs as $input) {
                                         $response->html .= "<input name='{$input}' type='hidden' value='disabled'>";
                                     }
-                            } else {
-                                $response->html .= '
-                                <div class="col-lg-12 text-right">
-                                    <button onclick="return save_Timetable_Record()" class="btn btn-outline-success">Save Timetable</button>
-                                </div>';
                             }
                             $response->html .= '
                                 </div>

@@ -69,7 +69,6 @@ class Courses extends Myschoolgh {
             ");
             $stmt->execute([0]);
 
-            $is_permitted = false;
             $minified = isset($params->minified) ? true : false;
 
             // load class if an only if the minified has not been parsed
