@@ -139,7 +139,7 @@ $response->html = '
                                                 </p>
                                                 <p class='clearfix pb-0 mb-2 text-right'>
                                                     <a href='#' onclick='return delete_record(\"{$value->item_id}\", \"timetable\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a>
-                                                    <!--<a href='#' class='btn btn-outline-warning btn-sm'><i class='fa fa-copy'></i> Duplicate</a>-->
+                                                    <a href='{$baseUrl}timetable-allocate/{$value->item_id}' class='btn btn-outline-warning btn-sm'><i class='fa fa-copy'></i> Allocate</a>
                                                     <a class='btn btn-outline-primary btn-sm' href='{$baseUrl}timetable/{$value->item_id}'><i class='fa fa-edit'></i> Modify</a>
                                                 </p>
                                             </div>

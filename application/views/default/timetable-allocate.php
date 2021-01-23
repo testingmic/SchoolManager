@@ -61,8 +61,7 @@ if(!empty($timetable_list)) {
         $params->limit = 1;
         $params->full_detail = true;
         $params->timetable_id = $timetable_id;
-        $timetable_allocations = load_class("timetable", "controllers")->list($params)[0]->allocations;
-
+        $timetable_allocations = load_class("timetable", "controllers")->list($params)["data"][$timetable_id]->allocations;
     } else {
         // once again set the $timetable_id == null even if a session has been set 
         $timetable_id = null;
@@ -123,17 +122,36 @@ $response->html = '
                                                 <div class="col-lg-12 table-responsive timetable">
                                                     <div id="dynamic_timetable"></div>
                                                 </div>
-                                                <div class="col-lg-12 text-center mt-2">
+                                                <div class="col-lg-12 '.(!$timetable_id ? "hidden" : "").' text-center mt-2">
                                                     <button id="save_TimetableAllocation" onclick="return save_TimetableAllocation()" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Timetable</button>
+                                                </div>
+                                                <div class="col-lg-12 mt-3 text-left">
+                                                    <span style="line-height: 25px">
+                                                    ● Drag and Drop a course from the right panel to the required slot<br>
+                                                    ● Double-click on a slot to clear it<br>
+                                                    ● Conflicting Slots are indicated in red and would contain the number of batches affected<br>
+                                                    ● A "~" before a course indicates that its conflicts are not considered
+                                                    </span>
+                                                    <form method="post" class="hidden" action="'.$baseUrl.'api/timetable/allocate" id="courseAlloc">';
+                                                        foreach($timetable_allocations as $key => $value) {
+                                                            $response->html .= "<input type=\"hidden\" name=\"{$value->day}_{$value->slot}\" value=\"{$value->course_id}:{$value->room_id}\">";
+                                                        }
+                                                    $response->html .= '
+                                                        <button type="submit">Save</button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-3 timetable" id="rightpane">
-                                        <div class="form-group text-center" id="courseScroll">
+                                        <div class="form-group text-center trix-slim-scroll" id="courseScroll">
                                             <h5>Courses List</h5>';
-                                            foreach($courses_list as $key => $value) {
-                                                $response->html .= "<div class='course p-2' id='{$value->item_id}'>{$value->name} ({$value->course_code})</div>";
+                                            if(!empty($courses_list)) {
+                                                foreach($courses_list as $key => $value) {
+                                                    $response->html .= "<div class='course p-2' id='{$value->item_id}'>{$value->name} ({$value->course_code})</div>";
+                                                }
+                                            } else {
+                                                $response->html .= '<div class="text-warning">You have not started offering any courses.<br>Visit the <b>Lesson Planner</b> section to add courses</div>';
                                             }
                                             $response->html .= '
                                         </div>
@@ -151,21 +169,10 @@ $response->html = '
                                         </div>
                                         <div class="form-group">
                                             <h5>Notifications</h5>
-                                            <div class="notices_div">The are no nofications to display currently.</div>
+                                            <div class="notices_div"><div class="text-warning">The are no nofications to display currently.</div></div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-12 mt-3 text-left">
-                                <span style="line-height: 25px">
-                                ● Drag and Drop a course from the right panel to the required slot<br>
-                                ● Double-click on a slot to clear it<br>
-                                ● Conflicting Slots are indicated in red and would contain the number of batches affected<br>
-                                ● A "~" before a course indicates that its conflicts are not considered
-                                </span>
-                                <form method="post" class="hidden" action="'.$baseUrl.'api/timetable/allocate" id="courseAlloc">
-                                    <button type="submit">Save</button>
-                                </form>
                             </div>
                         </div>
                     </div>

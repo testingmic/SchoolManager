@@ -68,17 +68,6 @@ $(".cell", "#dynamic_timetable").click(function() {
     } else {
         roomSelect.remove();
     }
-    // $.ajax({
-    //     type: "POST",
-    //     url: `${baseUrl}api/timetable/allocate`,
-    //     data: { data },
-    //     dataType: "json",
-    //     success: function(result) {
-    //         if (result.code === 200) {
-
-    //         }
-    //     }
-    // });
 });
 
 var active = $(".cell", "#dynamic_timetable").not(".disabled,.blank,.day,.time");
@@ -100,19 +89,6 @@ active.droppable({
             };
             $("#conflict_help").hide();
             $("#conflict_info").append(data);
-
-            // $.ajax({
-            //     type: "POST",
-            //     url: `${baseUrl}api/timetable/allocate?q=conflict`,
-            //     data: { data },
-            //     dataType: "json",
-            //     success: function(response) {
-            //         // if (response.data.code === 200) {
-            //         $("#conflict_help").hide();
-            //         $("#conflict_info").append(data);
-            //         // }
-            //     }
-            // });
             return;
         }
         var i = ui.draggable.index() % colors.length;
@@ -192,6 +168,10 @@ var save_TimetableAllocation = () => {
                 save_button.prop({ "disabled": false });
                 save_button.html(`<i class="fa fa-save"></i> Save Timetable`);
                 if (response.code === 200) {
+                    swal({
+                        text: response.data.result,
+                        icon: "success",
+                    });
                     $(`div[class="notices_div"]`).html(`<div class="text-center text-success">${response.data.result}</div>`);
                 } else {
                     $(`div[class="notices_div"]`).html(`<div class="text-center text-danger">${response.data.result}</div>`);

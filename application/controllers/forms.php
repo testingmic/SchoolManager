@@ -2326,7 +2326,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-4">
                     <div class="form-group">
                         <label for="weekly_meeting">Weekly Meetings</label>
-                        <input type="number" value="'.($itemData->weekly_meeting ?? null).'" name="weekly_meeting" id="weekly_meeting" class="form-control text-uppercase">
+                        <input type="number" min="1" max="30" value="'.($itemData->weekly_meeting ?? null).'" name="weekly_meeting" id="weekly_meeting" class="form-control text-uppercase">
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12">

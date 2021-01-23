@@ -53,7 +53,7 @@ class Courses extends Myschoolgh {
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
         $params->query .= (isset($params->programme_id)) ? " AND a.programme_id='{$params->programme_id}'" : null;
-        $params->query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND a.id='{$params->course_id}'" : null;
+        $params->query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND (a.id='{$params->course_id}' OR a.item_id='{$params->course_id}')" : null;
         $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id LIKE '%{$params->class_id}%'" : null;
         $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
@@ -289,6 +289,7 @@ class Courses extends Myschoolgh {
                 ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
                 ".(isset($params->weekly_meeting) ? ", weekly_meeting = '{$params->weekly_meeting}'" : null)."
+                ".(isset($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
@@ -296,13 +297,13 @@ class Courses extends Myschoolgh {
             $stmt->execute([json_encode($tutor_ids), json_encode($class_ids), $params->clientId, $params->userId]);
             
             // log the user activity
-            $this->userLogs("courses", $this->lastRowId("courses"), null, "{$params->userData->name} created a new Course: {$params->name}", $params->userId);
+            $this->userLogs("courses", $item_id, null, "{$params->userData->name} created a new Course: {$params->name}", $params->userId);
 
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Course successfully created.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true];
+            $return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}update-course/{$item_id}/view"];
 
 			// return the output
             return $return;
@@ -419,29 +420,33 @@ class Courses extends Myschoolgh {
             $stmt->execute([json_encode($tutor_ids), json_encode($class_ids), $params->course_id, $params->clientId]);
             
             // log the user activity
-            $this->userLogs("courses", $params->course_id, $prevData[0], "{$params->userData->name} updated the Course: {$prevData[0]->name}", $params->userId);
+            $this->userLogs("courses", $prevData[0]->item_id, $prevData[0], "{$params->userData->name} updated the Course: {$prevData[0]->name}", $params->userId);
 
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Course successfully updated.", "refresh" => 2000];
 
             if(isset($params->name) && ($prevData[0]->name !== $params->name)) {
-                $this->userLogs("courses", $params->course_id, $prevData[0]->name, "Course name was changed from {$prevData[0]->name}", $params->userId);
+                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->name, "Course name was changed from {$prevData[0]->name}", $params->userId);
             }
 
             if(isset($params->credit_hours) && ($prevData[0]->credit_hours !== $params->credit_hours)) {
-                $this->userLogs("courses", $params->course_id, $prevData[0]->credit_hours, "Course credit hours was changed from {$prevData[0]->credit_hours}", $params->userId);
+                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->credit_hours, "Course credit hours was changed from {$prevData[0]->credit_hours}", $params->userId);
             }
 
             if(isset($params->description) && ($prevData[0]->description !== $params->description)) {
-                $this->userLogs("courses", $params->course_id, $prevData[0]->description, "Course description was changed from {$prevData[0]->description}", $params->userId);
+                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->description, "Course description was changed from {$prevData[0]->description}", $params->userId);
             }
 
             if(isset($params->course_code) && ($prevData[0]->course_code !== $params->course_code)) {
-                $this->userLogs("courses", $params->course_id, $prevData[0]->course_code, "Course code was changed from {$prevData[0]->course_code}", $params->userId);
+                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->course_code, "Course code was changed from {$prevData[0]->course_code}", $params->userId);
+            }
+
+            if(isset($params->weekly_meeting) && ($prevData[0]->weekly_meeting !== $params->weekly_meeting)) {
+                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->weekly_meeting, "Weekly Meetings was changed from {$prevData[0]->weekly_meeting}", $params->userId);
             }
 			
 			# append to the response
-			$return["additional"] = ["href" => "{$this->baseUrl}update-course/{$params->course_id}/update"];
+			$return["additional"] = ["href" => "{$this->baseUrl}update-course/{$prevData[0]->item_id}/update"];
 
 			// return the output
             return $return;
