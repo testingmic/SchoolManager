@@ -111,12 +111,64 @@ elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) 
     $timetable_id = xss_clean($_GET["tb_id"]);
     $codeOnly = (bool) isset($_GET["code_only"]);
     $data = [];
+    $file_name = "./assets/test.pdf";
 
     $param = (object) ["data" => $data, "timetable_id" => $timetable_id, "code_only" => $codeOnly];
     $html_table = $timetableClass->draw($param);
 
-    // print 
-    print_r($html_table);
+    // create a new object
+    require "./system/libraries/pdf/tcpdf_include.php";
+
+    // create new PDF document
+    $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+
+    //print $report_data;
+	// set document information
+	$pdf->SetCreator(PDF_CREATOR);
+	$pdf->SetAuthor('UNIVERSITY OF CAPE COAST');
+	$pdf->SetTitle(' - School of Nursing and Midwery');
+	$pdf->SetSubject('Student Attendance Recorder');
+	$pdf->SetKeywords('score, ucc, nursing, attendance, timetable, manager');
+
+	$pdf->SetHeaderData(NULL);
+	// set header and footer fonts
+	$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+	$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+
+	// set default monospaced font
+	$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
+	// set margins
+	$pdf->SetMargins(3, 5, 3);
+	$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
+	$pdf->SetFooterMargin(PDF_MARGIN_FOOTER);
+
+	// set auto page breaks
+	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+
+	// set image scale factor
+	$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+
+	// set some language-dependent strings (optional)
+	if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
+		require_once(dirname(__FILE__).'/lang/eng.php');
+		$pdf->setLanguageArray($l);
+	}
+
+	// set font
+	$pdf->SetFont('dejavusans', '', 10);
+
+	// add a page
+	$pdf->AddPage("L", 'A4');
+
+	// output the HTML content
+    if(isset($_GET["dw"])) {
+        $pdf->writeHTML($html_table, false, false, true, false, '');
+	    $pdf->Output($file_name, 'I');
+    } else {
+        print $html_table;
+    }
+
     exit;
 }
 
