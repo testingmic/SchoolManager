@@ -124,7 +124,6 @@ class Users extends Myschoolgh {
 					a.gender, a.enrollment_date, a.residence, a.religion, a.date_of_birth,
 					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
 					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
-					(SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
 					(SELECT name FROM departments WHERE departments.id = a.department LIMIT 1) AS department_name,
 					(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name,
 					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name
@@ -186,14 +185,15 @@ class Users extends Myschoolgh {
 					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
 					(SELECT COUNT(*) FROM users b WHERE (b.created_by = a.item_id) AND a.deleted='0') AS clients_count,
 					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
-					(SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
 					(SELECT name FROM departments WHERE departments.id = a.department LIMIT 1) AS department_name,
 					(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name,
 					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name,
 					(SELECT phone_number FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_phone
-				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions, a.course_ids
+				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions, 
+					a.course_ids, cl.name AS class_name, cl.item_id AS class_guid
 				FROM users a 
 				LEFT JOIN country c ON c.id = a.country
+				LEFT JOIN classes cl ON cl.id = a.class_id
 				WHERE {$params->query} AND a.deleted='0' AND a.status='1' {$order_by} LIMIT {$params->limit}
 			");
 			$sql->execute();

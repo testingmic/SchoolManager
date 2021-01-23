@@ -52,6 +52,9 @@ if(!empty($user_id)) {
         $response->html = page_not_found();
     } else {
 
+        // set the first key
+        $data = $data["data"][0];
+
         // load the incidents
         $incidents = load_class("incidents", "controllers")->list($student_param);
         
@@ -69,6 +72,9 @@ if(!empty($user_id)) {
 
         // load fees allocation list for class
         $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "student_id" => $user_id, "receivePayment" => $receivePayment];
+        
+        // load the class timetable
+        $timetable = load_class("timetable", "controllers")->class_timetable($data->class_guid, $clientId);
 
         // load fees allocation list for the students
         $student_allocation_list = load_class("fees", "controllers", $allocation_param)->student_allocation_array($allocation_param);
@@ -145,9 +151,6 @@ if(!empty($user_id)) {
         if(empty($incidents_list)) {
             $incidents_list = "<div class='text-center font-italic'>No recorded incidents</div>";
         }
-
-        // set the first key
-        $data = $data["data"][0];
 
         // guardian information
         $user_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl, $data);
@@ -293,10 +296,6 @@ if(!empty($user_id)) {
                         aria-selected="true">Timetable</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab"
-                        aria-selected="true">Attendance</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" id="incident-tab2" data-toggle="tab" href="#incident" role="tab"
                         aria-selected="true">Incidents</a>
                     </li>';
@@ -360,12 +359,9 @@ if(!empty($user_id)) {
                             </div>
                         </div>
                         <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">
-                            
-
-                        </div>
-                        <div class="tab-pane fade" id="attendance" role="tabpanel" aria-labelledby="attendance-tab2">
-                            
-                            
+                            <div class="table-responsive trix-slim-scroll">
+                                '.$timetable.'
+                            </div>
                         </div>
                         <div class="tab-pane fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
                             <div class="d-flex justify-content-between">

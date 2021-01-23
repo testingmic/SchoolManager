@@ -16,7 +16,6 @@ class Timetable extends Myschoolgh {
      */
     public function list(stdClass $params) {
 
-
         $params->query = "1";
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
@@ -41,10 +40,17 @@ class Timetable extends Myschoolgh {
             $fullDetails = (bool) isset($params->full_detail);
 
             $data = [];
+            $timetable_id = "";
+
+            // loop through the result set
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                
+                // convert the disabled inputs into an array
                 $result->disabled_inputs = !empty($result->disabled_inputs) ? json_decode($result->disabled_inputs, true) : [];
                 
-                if($fullDetails && isset($params->timetable_id)) {
+                // if the full details is parsed
+                if(($fullDetails && isset($params->timetable_id)) || ($fullDetails && isset($params->class_id))) {
+
                     $allocate = $this->pushQuery("
                         a.day, a.slot, a.day_slot, a.room_id, a.class_id, a.course_id, a.date_created,
                         c.name AS class_name, b.name AS course_name, b.course_code AS course_code,
@@ -65,11 +71,14 @@ class Timetable extends Myschoolgh {
                     "a.client_id = '{$result->client_id}' AND a.client_status='1' LIMIT 1")[0];
                 }
 
+                // set the last timetable id to a variable
+                $timetable_id = $result->item_id;
                 $data[$result->item_id] = $result;
             }
 
             return [
                 "code" => 200,
+                "last_id" => $timetable_id,
                 "data" => $data
             ];
 
@@ -347,6 +356,71 @@ class Timetable extends Myschoolgh {
     }
 
     /**
+     * Load Class Timetable Record
+     * 
+     * @param String      $classId
+     * @param String      $clientId
+     * 
+     * @return Array
+     */
+    public function class_timetable($classId, $clientId) {
+
+        try {
+            $param = (object) [
+                "class_id" => $classId,
+                "clientId" => $clientId,
+                "full_detail" => true,
+                "limit" => 1
+            ];
+            $result = $this->list($param);
+
+            // if the result is not empty
+            if(!empty($result["last_id"])) {
+
+                // assign a variable to the timetable_id
+                $timetable_id = $result["last_id"];
+                
+                // get the data
+                $data = $result["data"][$timetable_id];
+
+                // set new param
+                $param = (object) [
+                    "data" => $data,
+                    "no_header" => true,
+                    "timetable_id" => $timetable_id,
+                    "table_class" => "table table-bordered table-hover"
+                ];
+                $result = $this->draw($param);
+
+                // confirm that the table was found
+                if(isset($result["table"])) {
+
+                    // append the results set
+                    $table = "
+                        <div class='text-center mb-3'>
+                            <a class='btn btn-outline-success' target='_blank' href='{$this->baseUrl}download?tb=true&tb_id={$timetable_id}&dw=true'>
+                                <i class='fa fa-download'></i> Download Timetable
+                            </a>
+                        </div>
+                    ";
+                    $table .= $result["table"];
+
+                    // return the results
+                    return $table;
+                }
+            } else {
+                $result = "<div class='alert alert-warning text-center'>No timetable has been generated for this class yet. Please check back later to verify.</div>";
+            }
+
+            return $result;
+
+        } catch(PDOException $e) {
+            return false;
+        }
+
+    }
+
+    /**
      * Draw Clendar
      *
      * Use the provided information to draw the calendar
@@ -356,10 +430,12 @@ class Timetable extends Myschoolgh {
     public function draw(stdClass $params) {
 
         $data = $params->data ?? [];
-        $codeOnly = (bool) (isset($params->code_only) && $params->code_only);     
+        $table_class = $params->table_class ?? "";
+        $codeOnly = (bool) (isset($params->code_only) && $params->code_only);
 
         // if the data is empty and the timetable_id isset
         if(empty($data) && isset($params->timetable_id)) {
+            
             // load the timetable information
             $param = (object) [
                 "limit" => 1,
@@ -380,7 +456,7 @@ class Timetable extends Myschoolgh {
 
             // get the record and start processing
             $data = $data[$params->timetable_id];
-        } else {
+        } elseif(!empty($data) && !isset($data->slots)) {
             return $this->permission_denied;
         }
         
@@ -395,7 +471,7 @@ class Timetable extends Myschoolgh {
         // if the header parameter is not set
         if(!isset($params->no_header)) {
             // set the header content
-            $summary = '<table width="100%" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
+            $summary = '<table width="100%" class="'.$table_class.'" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
             $summary .= "<tr>\n
                     <td>
                         <strong style=\"padding-top:0px;font-size:20px\">".strtoupper($data->client_details->client_name)."</strong><br>
@@ -416,7 +492,7 @@ class Timetable extends Myschoolgh {
 
         // start drawing the table
         $html_table = "<style>table tr td, table tr td {border:1px dashed #ccc;}</style>\n";
-        $html_table .= $summary.'<table width="100%" cellpadding="5px" style="min-height: 400px; margin: auto auto;" cellspacing="5px">'."\n";
+        $html_table .= $summary.'<table class="'.$table_class.'" width="100%" cellpadding="5px" style="min-height: 400px; margin: auto auto;" cellspacing="5px">'."\n";
         $html_table .= "<tr>\n\t<td width=\"{$width}%\"></td>\n";
         $start_time = $data->start_time;
         
