@@ -1893,13 +1893,29 @@ class Users extends Myschoolgh {
 	 */
 	public function set_default_student(stdClass $params) {
 
-		// save the id in session
-		$this->session->student_id = $params->student_id;
+		// get the student class id
+		$stmt = $this->db->prepare("SELECT 
+				c.item_id AS class_guid, u.last_timetable_id
+			FROM classes c
+			LEFT JOIN users u ON u.class_id = c.id
+			WHERE u.item_id = ? LIMIT 1
+		");
+		$stmt->execute([$params->student_id]);
+		$result = $stmt->fetch(PDO::FETCH_OBJ);
 
+		// set the student and class id
+		$this->session->set([
+			"student_id" => $params->student_id,
+			"student_class_id" => $result->class_guid ?? null,
+			"last_TimetableId" => $result->last_timetable_id ?? null
+		]);
+
+		// return the success message
 		return [
 			"code" => 200,
 			"data" => "Student Id successfully changed"
 		];
+
 	}
 
 	/**

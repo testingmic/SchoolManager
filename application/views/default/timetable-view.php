@@ -38,7 +38,7 @@ $params = (object)["clientId" => $clientId];
 
 // if a student is logged in then show timetables for the class
 if(in_array($defaultUser->user_type, ["student", "parent"])) {
-    $params->class_id = $defaultUser->class_guid;
+    $params->class_id = $session->student_class_id ? $session->student_class_id : $defaultUser->class_guid;
 }
 
 // create a new object
