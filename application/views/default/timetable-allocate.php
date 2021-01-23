@@ -20,13 +20,15 @@ $disabled_inputs = [];
 $pageTitle = "Allocate Timetable";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [];
-$response->timer = 0;
+$response->timer = 350;
 
 $timetable_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : $session->last_TimetableId;
 
 // set the parameters to load
 $params = (object)["clientId" => $clientId];
-$timetable_list = load_class("timetable", "controllers")->list($params);
+
+$timetableClass = load_class("timetable", "controllers");
+$timetable_list = $timetableClass->list($params);
 
 // set the timetable key
 $timetable_list = $timetable_list["data"];
@@ -62,7 +64,7 @@ if(!empty($timetable_list)) {
         $params->limit = 1;
         $params->full_detail = true;
         $params->timetable_id = $timetable_id;
-        $timetable_allocations = load_class("timetable", "controllers")->list($params)["data"][$timetable_id]->allocations;
+        $timetable_allocations = $timetableClass->list($params)["data"][$timetable_id]->allocations;
     } else {
         // once again set the $timetable_id == null even if a session has been set 
         $timetable_id = null;
@@ -98,7 +100,7 @@ $response->html = '
                             <div class="col-lg-12 text-center">
                                 <div class="form-group">
                                     <label>Timetable</label>
-                                    <select style="max-width:400px" class="form-control selectpicker" id="current_TimetableId" name="current_TimetableId">';
+                                    <select style="max-width:400px" class="form-control selectpicker" data-url="timetable-allocate" id="current_TimetableId" name="current_TimetableId">';
                                     if(empty($timetable_id)) {
                                         $response->html .= "<option value='auto_select'>Select Timetable</option>";
                                     }
@@ -125,6 +127,8 @@ $response->html = '
                                                 </div>
                                                 <div class="col-lg-12 '.(!$timetable_id ? "hidden" : "").' text-center mt-2">
                                                     <button id="save_TimetableAllocation" onclick="return save_TimetableAllocation()" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Timetable</button>
+                                                    <a class="btn btn-outline-primary" target="_blank" href="'.$baseUrl.'download?tb=true&tb_id='.$timetable_id.'&dw=true">
+                                                    <i class="fa fa-download"></i> Download Timetable</a>
                                                 </div>
                                                 <div class="col-lg-12 mt-3 text-left">
                                                     <span style="line-height: 25px">

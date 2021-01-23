@@ -89,12 +89,29 @@ $(`select[id="current_TimetableId"]`).on("change", function() {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            let url = $(`select[id="current_TimetableId"]`).attr("data-url");
             $.post(`${baseUrl}api/timetable/set_timetable_id`, { timetable_id }).then((response) => {
                 if (response.code === 200) {
-                    loadPage(`${baseUrl}timetable-allocate/${timetable_id}`);
+                    $.current_page = `${baseUrl}${url}/${timetable_id}`;
+                    loadPage(`${baseUrl}${url}/${timetable_id}`);
                 }
             });
         }
+    });
+});
+
+$(`select[id="change_TimetableViewId"]`).on("change", function() {
+    let timetable_id = $(this).val();
+    $(`div[id="timetable_content_loader"] div[class="form-content-loader"]`).css("display", "flex");
+    $.get(`${baseUrl}api/timetable/draw`, { timetable_id }).then((response) => {
+        if (response.code === 200) {
+            $(`div[id="timetable_content"]`).html(response.data.result.table);
+            $.current_page = `${baseUrl}timetable-view/${timetable_id}`;
+            window.history.pushState({ current: `${baseUrl}timetable-view/${timetable_id}` }, "", `${baseUrl}timetable-view/${timetable_id}`);
+        }
+        $(`div[id="timetable_content_loader"] div[class="form-content-loader"]`).css("display", "none");
+    }).catch(() => {
+        $(`div[id="timetable_content_loader"] div[class="form-content-loader"]`).css("display", "none");
     });
 });
 

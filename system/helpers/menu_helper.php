@@ -60,8 +60,8 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-clock"></i><span>Manage Timetable</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>timetable">Timetable</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-rooms">Manage Rooms</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>timetable-allocate">Allocate Timetable</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>list-rooms">Manage Rooms</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>timetable-view">View Timetable</a></li>
         </ul>
     </li>

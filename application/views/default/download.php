@@ -106,6 +106,10 @@ if((isset($_GET["file"]) && !empty($_GET["file"])) || (isset($_GET["file_id"], $
 /** Download timetables */
 elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) {
     
+    // base url
+    // $baseUrl = config_item("base_url");
+    $appName = config_item("site_name");
+
     // set the timetable id
     $timetableClass = load_class("timetable", "controllers");
     $timetable_id = xss_clean($_GET["tb_id"]);
@@ -116,6 +120,12 @@ elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) 
     $param = (object) ["data" => $data, "timetable_id" => $timetable_id, "code_only" => $codeOnly];
     $html_table = $timetableClass->draw($param);
 
+    // end query if no result found
+    if(!isset($html_table["result"])) {
+        print_r($html_table);
+        return;
+    }
+
     // create a new object
     require "./system/libraries/pdf/tcpdf_include.php";
 
@@ -125,9 +135,9 @@ elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) 
     //print $report_data;
 	// set document information
 	$pdf->SetCreator(PDF_CREATOR);
-	$pdf->SetAuthor('UNIVERSITY OF CAPE COAST');
-	$pdf->SetTitle(' - School of Nursing and Midwery');
-	$pdf->SetSubject('Student Attendance Recorder');
+	$pdf->SetAuthor($appName);
+	$pdf->SetTitle($appName.' - School Management System');
+	$pdf->SetSubject('Calendar');
 	$pdf->SetKeywords('score, ucc, nursing, attendance, timetable, manager');
 
 	$pdf->SetHeaderData(NULL);
@@ -163,10 +173,12 @@ elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) 
 
 	// output the HTML content
     if(isset($_GET["dw"])) {
-        $pdf->writeHTML($html_table, false, false, true, false, '');
+        $pdf->writeHTML($html_table["table"], false, false, true, false, '');
 	    $pdf->Output($file_name, 'I');
     } else {
-        print $html_table;
+        $data = $html_table["result"];
+        // print_r($data);
+        print $html_table["table"];
     }
 
     exit;

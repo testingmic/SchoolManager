@@ -44,7 +44,7 @@ class Timetable extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 $result->disabled_inputs = !empty($result->disabled_inputs) ? json_decode($result->disabled_inputs, true) : [];
                 
-                if($fullDetails) {
+                if($fullDetails && isset($params->timetable_id)) {
                     $allocate = $this->pushQuery("
                         a.day, a.slot, a.day_slot, a.room_id, a.class_id, a.course_id, a.date_created,
                         c.name AS class_name, b.name AS course_name, b.course_code AS course_code,
@@ -60,6 +60,9 @@ class Timetable extends Myschoolgh {
                         $allocations[$alot->day_slot] = $alot;
                     }
                     $result->allocations = $allocations;
+
+                    $result->client_details = $this->pushQuery("a.*", "clients_accounts a", 
+                    "a.client_id = '{$result->client_id}' AND a.client_status='1' LIMIT 1")[0];
                 }
 
                 $data[$result->item_id] = $result;
@@ -319,6 +322,9 @@ class Timetable extends Myschoolgh {
                     $allot_slot->execute([$params->clientId, $item_id, $slot[0], $slot[1], $slots["slot"], $room, $class_id, $course, 1]);
                 }
 
+                // update the timetable information
+                $this->db->query("UPDATE timetables SET last_updated=now() WHERE item_id ='{$item_id}' LIMIT 1");
+
                 // return
                 return "The timetable was successfully save!";
 
@@ -355,15 +361,20 @@ class Timetable extends Myschoolgh {
         // if the data is empty and the timetable_id isset
         if(empty($data) && isset($params->timetable_id)) {
             // load the timetable information
-            $params = (object) [
+            $param = (object) [
                 "limit" => 1,
                 "full_detail" => true,
                 "timetable_id" => $params->timetable_id,
             ];
-            $data = $this->list($params)["data"];
+            $data = $this->list($param)["data"];
 
             // if no record was found
             if(empty($data)) {
+                return $this->permission_denied;
+            }
+
+            // if no record was found
+            if(!isset($data[$params->timetable_id])) {
                 return $this->permission_denied;
             }
 
@@ -374,13 +385,39 @@ class Timetable extends Myschoolgh {
         }
         
         // column with calculation
+        $summary = null;
         $slots = $data->slots;
         $width = round(100/($slots+1));
 
+        // preferences
+        $prefs = $data->client_details->client_preferences = json_decode($data->client_details->client_preferences);
+
+        // if the header parameter is not set
+        if(!isset($params->no_header)) {
+            // set the header content
+            $summary = '<table width="100%" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
+            $summary .= "<tr>\n
+                    <td>
+                        <strong style=\"padding-top:0px;font-size:20px\">".strtoupper($data->client_details->client_name)."</strong><br>
+                        <strong style=\"padding-top:0px;font-size:13px\">".$data->client_details->client_email."</strong><br>
+                        <strong style=\"padding-top:0px;font-size:13px\">".$data->client_details->client_contact."</strong><br>
+                        <strong>".$data->client_details->client_address."</strong><br>
+                    </td>
+                    <td>
+                        <strong style=\"font-size:13px;\">Academic Year:</strong> {$prefs->academics->academic_year}<br>
+                        <strong style=\"font-size:13px;\">Academic Term:</strong> {$prefs->academics->academic_term}<br>
+                        <strong style=\"font-size:13px;\">Generated On:</strong> {$data->last_updated}<br>
+                        <strong style=\"font-size:14px;\">CLASS NAME:</strong> {$data->class_name}<br>
+                        <strong style=\"font-size:14px;\">DEPARTMENT:</strong> {$data->class_name}
+                    </td>\n
+                </tr>\n
+                </table>\n";
+        }
+
         // start drawing the table
         $html_table = "<style>table tr td, table tr td {border:1px dashed #ccc;}</style>\n";
-        $html_table .= '<table width="100%" cellpadding="5px" style="min-height: 400px; margin: auto auto;" cellspacing="5px">'."\n";
-        $html_table .= "<tr>\n\t<td></td>\n";
+        $html_table .= $summary.'<table width="100%" cellpadding="5px" style="min-height: 400px; margin: auto auto;" cellspacing="5px">'."\n";
+        $html_table .= "<tr>\n\t<td width=\"{$width}%\"></td>\n";
         $start_time = $data->start_time;
         
         // generate the header
@@ -390,14 +427,14 @@ class Timetable extends Myschoolgh {
             $end_time = $this->add_time($start_time, $data->duration);
 
             // show the time
-            $html_table .= "\t<td style=\"background-color:#607d8b;color:#fff\"><div align=\"center\">{$start_time}<br>-<br>{$end_time}</div></td>\n";
+            $html_table .= "\t<td width=\"{$width}%\" style=\"background-color:#607d8b;color:#fff\"><div align=\"center\"><strong>{$start_time}</strong><br>-<br><strong>{$end_time}</strong></div></td>\n";
             $start_time = $end_time;
         }
         $html_table .= "</tr>\n";
 
         // days of the week
         $d_style = "style=\"background-color:#795548;font-weight:bold;text-align:center;color:#fff\"";
-        $days = ["Monday", "Tuesday", "Wednesday", "Thurday", "Friday", "Saturday", "Sunday"];
+        $days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         $colors = ["#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
                     "#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
                     "#007bff", "#6c757d", "#28a745", "#17a2b8", "#ffc107", "#dc3545"];
@@ -449,7 +486,10 @@ class Timetable extends Myschoolgh {
         }
         $html_table .= "</table>";
 
-        return $html_table;
+        return [
+            "table" => $html_table,
+            "result" => $data
+        ];
 
     }
 
