@@ -16,6 +16,7 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];
+$disabled_inputs = [];
 $pageTitle = "Allocate Timetable";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [];
@@ -52,12 +53,19 @@ if(!empty($timetable_list)) {
         $courses_list = load_class("courses", "controllers")->list($params)["data"];
 
         // load the class rooms available to be used
-        $rooms_list = [];
+        $rooms_list = load_class("rooms", "controllers")->list($params)["data"];
+        $disabled_inputs = $data->disabled_inputs;
+
+        // course and meetings count
+
     } else {
         // once again set the $timetable_id == null even if a session has been set 
         $timetable_id = null;
     }
 }
+
+// set the disabled slots
+$n_string = $disabled_inputs;
 
 // display the page
 $response->html = '
@@ -78,6 +86,8 @@ $response->html = '
                     <input type="hidden" disabled value="'.($data->duration ?? null).'" name="t_duration">
                     <input type="hidden" disabled value="'.($data->days ?? null).'" name="t_days">
                     <input type="hidden" disabled value="'.($data->start_time ?? null).'" name="t_start_time">
+                    <input type="hidden" disabled value="'.($data->class_id ?? null).'" name="t_class_id">
+                    <input type="hidden" disabled value="'.($timetable_id ?? null).'" name="timetable_id">
                     <div class="card-body">
                         <div class="row">
                             <div class="col-lg-12 text-center">
@@ -94,6 +104,12 @@ $response->html = '
                                     </select>
                                 </div>
                             </div>
+                            <div id="disabledSlots" data-disabled_inputs=\''.json_encode($n_string).'\'>';
+                            foreach($disabled_inputs as $input) {
+                                $response->html .= "<input name='{$input}' type='hidden' value='disabled'>";
+                            }
+                            $response->html .= '
+                            </div>
                             <div class="col-lg-12" id="allocate_dynamic_timetable">
                                 <div class="row">
                                     <div class="col-lg-9">
@@ -102,25 +118,35 @@ $response->html = '
                                                 <div class="col-lg-12 table-responsive timetable">
                                                     <div id="dynamic_timetable"></div>
                                                 </div>
+                                                <div class="col-lg-12 text-center mt-2">
+                                                    <button id="save_TimetableAllocation" onclick="return save_TimetableAllocation()" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Timetable</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 text-center timetable" id="rightpane">
-                                        <div class="form-group" id="courseScroll">
+                                    <div class="col-lg-3 timetable" id="rightpane">
+                                        <div class="form-group text-center" id="courseScroll">
                                             <h5>Courses List</h5>';
                                             foreach($courses_list as $key => $value) {
-                                                $response->html .= "<div class='course' id='{$value->item_id}'>{$value->name}</div>";
+                                                $response->html .= "<div class='course p-2' id='{$value->item_id}'>{$value->name} ({$value->course_code})</div>";
                                             }
                                             $response->html .= '
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group text-center">
                                             <h5>Assign Room</h5>
-                                            <select name="room_name" class="updateSelect form-control selectpicker" data-placeholder="Choose Room..." required="" onchange="assignRoom(this.value)" tabindex="-1">';
+                                            <div id="default_room_label">Click on a slot to assign room</div>
+                                            <div class="hidden" id="default_room_select">
+                                                <select name="t_room_id" class="updateSelect form-control selectpicker" data-placeholder="Choose Room..." required="" onchange="assignRoom(this.value)" tabindex="-1">';
                                                 foreach($rooms_list as $key => $value) {
                                                     $response->html .= "<option value='{$value->item_id}'>{$value->name} - {$value->code}</option>";
                                                 }
                                             $response->html .= '
                                                 </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <h5>Notifications</h5>
+                                            <div class="notices_div">The are no nofications to display currently.</div>
                                         </div>
                                     </div>
                                 </div>

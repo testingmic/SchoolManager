@@ -141,7 +141,8 @@
 }
 
 #courseScroll {
-    width: 220px;
+    /* width: 220px; */
+    padding: 10px;
     display: inline-block;
     z-index: 99999;
     max-height: 270px;

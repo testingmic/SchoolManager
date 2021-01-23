@@ -22,7 +22,8 @@ class Rooms extends Myschoolgh {
         $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= (isset($params->code)) ? " AND a.code='{$params->code}'" : null;
-        $params->query .= (isset($params->room_id)) ? " AND a.item_id='{$params->room_id}'" : null;
+        $params->query .= (isset($params->room_id) && !empty($params->room_id)) ? " AND a.item_id='{$params->room_id}'" : null;
+        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.classes_list LIKE '%{$params->class_id}%'" : null;
 
         try {
 
@@ -211,7 +212,6 @@ class Rooms extends Myschoolgh {
             return $return;
 
         } catch(PDOException $e) {
-            print $e->getMessage();
             return $this->unexpected_error;
         } 
 

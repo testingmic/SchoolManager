@@ -73,7 +73,7 @@ var save_Timetable_Record = () => {
     });
 }
 
-if ($(`div[id="disabledSlots"]`).length) {
+if ($(`div[id="disabledSlots"]`).length && !$(`div[id="allocate_dynamic_timetable"]`).length) {
     $disabled = JSON.parse($(`div[id="disabledSlots"]`).attr("data-disabled_inputs"));
     set_Disabled_Inputs($disabled);
     drawGrid();

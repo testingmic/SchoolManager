@@ -170,5 +170,107 @@ class Timetable extends Myschoolgh {
         return ["code" => 200, "data" => "Timetable ID successfully set as default."];
 
     }
+
+    /**
+     * Process Slots Allocation
+     * 
+     * First confirm if the slot has been allocated if so then replace
+     * 
+     * // TODO ::: Will later on fix the conflict issues
+     * 
+     * @param String        $params->data["timetable_id"]
+     * @param Int           $params->data["course_id"]
+     * @param Int           $params->data["query"]
+     * @param Int           $params->data["slot"]
+     * @param String        $params->data["class_id"]
+     * 
+     * @return Array
+     */
+    public function allocate(stdClass $params) {
+        
+        /** End Query if there was no allocation */
+        if(!isset($params->data["query"])) {
+            return ["code" => 203, "data" => "Sorry! Query parameter is required"];
+        }
+
+        // if the user wants to save changes
+        if($params->data["query"] === "allocation") {
+            
+            // end query if the allocations array is not parsed
+            if(!isset($params->data["allocations"]) || !isset($params->data["timetable_id"])) {
+                return ["code" => 203, "data" => "Sorry! Allocation / Timetable ID parameters are required"];
+            }
+
+            // confirm that allocations is an array
+            if(!is_array($params->data["allocations"])) {
+                return ["code" => 203, "data" => "Sorry! Allocations must be an array"];
+            }
+
+            // validate the id
+            $item_id = $params->data["timetable_id"];
+            $allocations = $params->data["allocations"];
+            
+            // check if a record exist
+            if(empty($this->pushQuery("item_id", "timetables", "item_id = '{$item_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
+                return ["code" => 203, "data" => "Sorry! An invalid timetable id was parsed"];
+            }
+
+            // init values
+            $course_ids = [];
+
+            // loop through the allocations and group them
+            foreach($allocations as $slots) {
+                
+                // assign some variables
+                $slot = $slots["slot"];
+                $course_room = explode(":", $slots["value"]);
+                $course = $course_room[0];
+                $course_ids[$course] = isset($course_ids[$course]) ? $course_ids[$course]+1 : 1;
+
+                // confirm that a room has been assigned
+                if(!isset($course_room[1])) {
+                    return ["code" => 203, "data" => "Sorry! There was no room assigned to the course."];
+                }
+                // set the room
+                $room = $course_room[1];
+
+            }
+
+            // load the meeting periods for each course
+            $courses_list = $this->pushQuery("name, weekly_meeting, item_id", "courses", "item_id IN {$this->inList(array_keys($course_ids))}");
+            
+            // set the bugs list
+            $bugs_list = null;
+
+            // rectify the error
+            foreach($courses_list as $key => $single) {
+                // if the weekly meeting is less than the allocated days
+                if($single->weekly_meeting < $course_ids[$single->item_id]) {
+                    $bugs_list .= "<div>".($key+1).". {$single->name} has only <strong>{$single->weekly_meeting} meetings</strong> per week.</div>";
+                }
+            }
+
+            // if the bug is not empty then return
+            if(!empty($bugs_list)) {
+                return ["code" => 203, "data" => $bugs_list];
+            }
+
+            // continue processing
+
+            // return
+            return "Everything is in order for now.";
+        } else {
+
+            // if slot is not parsed
+            if(!isset($params->data["slot"])) {
+                return ["code" => 203, "data" => "Sorry! Slot parameter is required"];
+            }
+
+            $slot = explode("_", $params->data["slot"]);
+
+        }
+
+    }
+
 }
 ?>
