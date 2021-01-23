@@ -22,21 +22,39 @@ $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [];
 $response->timer = 0;
 
+// specify some variables
+$accessObject->userId = $session->userId;
+$accessObject->clientId = $session->clientId;
+$accessObject->userPermits = $defaultUser->user_permissions;
+
+// confirm if the user has permission to manage
+$isPermitted = $accessObject->hasAccess("manage", "timetable");
+
+// set the id for the timetable id
 $timetable_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : $session->last_TimetableId;
 
 // set the parameters to load
 $params = (object)["clientId" => $clientId];
 
+// if a student is logged in then show timetables for the class
+if(in_array($defaultUser->user_type, ["student", "parent"])) {
+    $params->class_id = $defaultUser->class_guid;
+}
+
+// create a new object
 $timetableClass = load_class("timetable", "controllers");
+
+// load the timetables list
 $timetable_list = $timetableClass->list($params);
 
 // set the timetable key
 $timetable_list = $timetable_list["data"];
 
-$courses_list = [];
 $rooms_list = [];
+$courses_list = [];
 $timetable_allocations = [];
 $response->scripts = ["assets/js/timetable.js"];
+$table = "No timetable record to show at the moment.";
 
 // if the table is not empty
 if(!empty($timetable_list)) {
@@ -51,27 +69,21 @@ if(!empty($timetable_list)) {
         $timetable_found = true;
         
         // load the class courses list
-        $params->minified = true;
-        $params->userData = $defaultUser;
         $params->class_id = $data->class_id;
-        $courses_list = load_class("courses", "controllers")->list($params)["data"];
-
-        // load the class rooms available to be used
-        $rooms_list = load_class("rooms", "controllers")->list($params)["data"];
-        $disabled_inputs = $data->disabled_inputs;
 
         // load the allocations
         $params->limit = 1;
         $params->timetable_id = $timetable_id;
+        
+        // draw the timetable to show
         $table = $timetableClass->draw($params);
+
     } else {
         // once again set the $timetable_id == null even if a session has been set 
         $timetable_id = null;
     }
-}
 
-// set the disabled slots
-$n_string = $disabled_inputs;
+}
 
 // display the page
 $response->html = '
@@ -80,7 +92,7 @@ $response->html = '
             <h1>'.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'">Dashboard</a></div>
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'timetable">Timetables List</a></div>
+                '.($isPermitted ? '<div class="breadcrumb-item active"><a href="'.$baseUrl.'timetable">Timetables List</a></div>' : null).'
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>

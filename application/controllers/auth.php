@@ -46,7 +46,8 @@ class Auth extends Myschoolgh {
                 SELECT 
                     u.id, u.password, u.item_id AS user_id, 
                     u.access_level, u.username, u.client_id, 
-                    u.status AS activated, u.email, u.user_type
+                    u.status AS activated, u.email, u.user_type,
+                    u.last_timetable_id
                 FROM users u
                 WHERE u.username = ? AND u.deleted =  ? LIMIT 1
             ");
@@ -97,7 +98,6 @@ class Auth extends Myschoolgh {
                                 }
                             }
 
-
                             // clear the login attempt
                             $this->clearAttempt($params->username);
 
@@ -109,13 +109,17 @@ class Auth extends Myschoolgh {
 
                             // set these sessions if not a remote call
                             if(!$params->remote) {
+
                                 // set the user sessions for the person to continue
                                 $session->set("userLoggedIn", random_string('alnum', 50));
                                 $session->set("userId", $results->user_id);
-                                $session->set("clientId", $results->client_id);
                                 $session->set("userName", $params->username);
-                                $session->set("userRole", $results->access_level);
+                                $session->set("clientId", $results->client_id);
                                 $session->set("activated", $results->activated);
+                                $session->set("userRole", $results->access_level);
+
+                                // set the last timetable id in session
+                                $session->set("last_TimetableId", $results->last_timetable_id);
 
                                 // set additional session for student
                                 if($results->user_type === "student") {

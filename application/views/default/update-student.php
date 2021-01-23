@@ -25,9 +25,7 @@ $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 
-$response->scripts = [
-    "assets/js/page/index.js"
-];
+$response->scripts = ["assets/js/page/index.js"];
 
 // student id
 $user_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;

@@ -20,12 +20,13 @@ class Timetable extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
-        $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
         $params->query .= (isset($params->timetable_id) && !empty($params->timetable_id)) ? " AND a.item_id='{$params->timetable_id}'" : null;
+        $params->query .= (isset($params->published) && !empty($params->published)) ? " AND a.published='{$params->published}'" : null;
         $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
+        $params->query .= isset($params->clientId) && !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : "";
         $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
-        $params->query .= isset($params->clientId) && !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : "";
+        $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
 
         try {
 
@@ -429,6 +430,7 @@ class Timetable extends Myschoolgh {
      */
     public function draw(stdClass $params) {
 
+        // initial parameters
         $data = $params->data ?? [];
         $table_class = $params->table_class ?? "";
         $codeOnly = (bool) (isset($params->code_only) && $params->code_only);
@@ -458,6 +460,14 @@ class Timetable extends Myschoolgh {
             $data = $data[$params->timetable_id];
         } elseif(!empty($data) && !isset($data->slots)) {
             return $this->permission_denied;
+        }
+
+        // if the user is currently logged in and the timetable id parsed is not the same as the current session value
+        if(!empty($this->session->userId) && ($params->timetable_id !== $this->session->last_TimetableId)) {
+            // update the user information
+            $this->db->query("UPDATE users SET last_timetable_id = '{$params->timetable_id}' WHERE item_id = '{$this->session->userId}' LIMIT 1");
+            // save the item in session
+            $this->session->set("last_TimetableId", $params->timetable_id);
         }
         
         // column with calculation
