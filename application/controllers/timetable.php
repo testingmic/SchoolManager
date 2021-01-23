@@ -378,11 +378,11 @@ class Timetable extends Myschoolgh {
         $width = round(100/($slots+1));
 
         // start drawing the table
-        $html_table = "<style>table tr td, table tr th {padding:10px;} table tr td {border:1px dashed #ccc;}</style>";
-        $html_table .= "<table width='100%'>";
-        $html_table .= "<tr style='background:#2f5e74e3;color:#fff'><th width='{$width}%'></th>";
+        $html_table = "<style>table tr td, table tr td {border:1px dashed #ccc;}</style>\n";
+        $html_table .= '<table width="100%" cellpadding="5px" style="min-height: 400px; margin: auto auto;" cellspacing="5px">'."\n";
+        $html_table .= "<tr>\n\t<td></td>\n";
         $start_time = $data->start_time;
-
+        
         // generate the header
         for($i = 0; $i < $slots; $i++) {
             // set the start time
@@ -390,18 +390,13 @@ class Timetable extends Myschoolgh {
             $end_time = $this->add_time($start_time, $data->duration);
 
             // show the time
-            $html_table .= "<th width='{$width}%'>";
-            $html_table .= "
-            <div align='center'>
-                {$start_time}<br>-<br>
-                {$end_time}
-            </div>";
-            $html_table .= "</th>";
+            $html_table .= "\t<td style=\"background-color:#607d8b;color:#fff\"><div align=\"center\">{$start_time}<br>-<br>{$end_time}</div></td>\n";
             $start_time = $end_time;
         }
+        $html_table .= "</tr>\n";
 
         // days of the week
-        $d_style = "style='background:rgba(235,249,163,0.9) padding-box !important;font-weight:bold;text-align:center;box-shadow:0 0 25px rgba(207,229,84,0.9) inset !important'";
+        $d_style = "style=\"background-color:#795548;font-weight:bold;text-align:center;color:#fff\"";
         $days = ["Monday", "Tuesday", "Wednesday", "Thurday", "Friday", "Saturday", "Sunday"];
         $colors = ["#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
                     "#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
@@ -420,17 +415,17 @@ class Timetable extends Myschoolgh {
 
         // loop through each day
         for ($d = 0; $d < $data->days; $d++) {
-            $row = "<tr>";
+            $row = "<tr>\n";
 
             // set the day name of the week
-            $row .= "<td {$d_style}>".($days[$d] ?? null)."</td>";
+            $row .= "\t<td {$d_style}>".($days[$d] ?? null)."</td>\n";
 
             // loop through the slots
             for ($i = 0; $i < $slots; $i++) {
                 
                 // set the key
                 $info = "";
-                $bg_color = "";
+                $bg_color = "style=\"padding:10px\"";
                 $key = ($d + 1)."_".($i + 1);
 
                 // get the data
@@ -438,23 +433,20 @@ class Timetable extends Myschoolgh {
 
                 // set the information to display
                 if(!empty($cleaned)) {
-                    $bg_color = "style='background:{$color_set[$cleaned->course_id]};color:#fff'";
+                    $bg_color = "style=\"padding:10px;background-color:{$color_set[$cleaned->course_id]};color:#fff\"";
                     $info = !$codeOnly ? $cleaned->course_name. " (" : null; 
                     $info .= "<strong>{$cleaned->course_code}</strong>";
                     $info .= !$codeOnly ? " )" : null; 
                 }
                 if(in_array($key, $data->disabled_inputs)) {
-                    $info = "NONE";
-                    $bg_color = "style='background: #EAEAEA padding-box !important; box-shadow: 0 0 20px #939393 inset !important; color: #888888;'";
+                    $bg_color = "style=\"padding:10px;background-color:#cccccc;color:#888888;\"";
                 }
                 // append the information
-                $row .= "<td {$bg_color} align='center' id='{$key}'>{$info}</td>";
+                $row .= "\t<td {$bg_color} align=\"center\">{$info}</td>\n";
             }
-            $row .= "</tr>";
+            $row .= "</tr>\n";
             $html_table .= $row;
         }
-
-        $html_table .= "</tr>";
         $html_table .= "</table>";
 
         return $html_table;
