@@ -39,10 +39,6 @@ var set_Disabled_Inputs = (disabled_array) => {
     $(`div[id="disabledSlots"]`).html(the_list);
     disabled_inputs = new_array;
 }
-
-$disabled = JSON.parse($(`div[id="disabledSlots"]`).attr("data-disabled_inputs"));
-set_Disabled_Inputs($disabled);
-
 var save_Timetable_Record = () => {
     swal({
         title: "Save Timetable",
@@ -52,30 +48,32 @@ var save_Timetable_Record = () => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-            let slots = parseInt($(`input[name="slots"]`).val()),
-                days = parseInt($(`input[name="days"]`).val()),
-                duration = parseInt($(`input[name="duration"]`).val()),
-                start_time = $(`input[name="start_time"]`).val(),
-                timetable_id = $(`input[name="timetable_id"]`).val();
-            let data = {
-                slots,
-                days,
-                duration,
-                start_time,
-                disabled_inputs,
-                timetable_id
-            };
+
+            let name = $(`div[id="timetable_form"] input[name="name"]`).val(),
+                class_id = $(`div[id="timetable_form"] select[name="class_id"]`).val(),
+                slots = parseInt($(`div[id="timetable_form"] input[name="slots"]`).val()),
+                days = parseInt($(`div[id="timetable_form"] input[name="days"]`).val()),
+                duration = parseInt($(`div[id="timetable_form"] input[name="duration"]`).val()),
+                start_time = $(`div[id="timetable_form"] input[name="start_time"]`).val(),
+                timetable_id = $(`div[id="timetable_form"] input[name="timetable_id"]`).val();
+
+            let data = { slots, name, class_id, days, duration, start_time, disabled_inputs, timetable_id };
+
             $.post(`${baseUrl}api/timetable/save`, data).then((response) => {
                 swal({
                     text: response.data.result,
                     icon: responseCode(response.code),
                 });
                 if (response.code === 200) {
-                    loadPage(`${baseUrl}timetable/${timetable_id}`)
+                    loadPage(`${baseUrl}timetable/${response.data.additional.timetable_id}`)
                 }
             });
         }
     });
 }
 
-drawGrid();
+if ($(`div[id="disabledSlots"]`).length) {
+    $disabled = JSON.parse($(`div[id="disabledSlots"]`).attr("data-disabled_inputs"));
+    set_Disabled_Inputs($disabled);
+    drawGrid();
+}
