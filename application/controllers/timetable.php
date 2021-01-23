@@ -26,6 +26,7 @@ class Timetable extends Myschoolgh {
         $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
         $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
+        $params->query .= isset($params->clientId) && !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : "";
 
         try {
 
@@ -44,12 +45,21 @@ class Timetable extends Myschoolgh {
                 $result->disabled_inputs = !empty($result->disabled_inputs) ? json_decode($result->disabled_inputs, true) : [];
                 
                 if($fullDetails) {
-                    $result->allocations = $this->pushQuery("
-                        a.day, a.slot, a.room_id, a.class_id, a.course_id, a.date_created,
-                        (SELECT name FROM classes WHERE classes.item_id = a.class_id LIMIT 1) AS class_name,
-                        (SELECT name FROM courses WHERE courses.item_id = a.course_id LIMIT 1) AS course_name,
+                    $allocate = $this->pushQuery("
+                        a.day, a.slot, a.day_slot, a.room_id, a.class_id, a.course_id, a.date_created,
+                        c.name AS class_name, b.name AS course_name, b.course_code AS course_code,
                         (SELECT name FROM classes_rooms WHERE classes_rooms.item_id = a.room_id LIMIT 1) AS room_name
-                    ", "timetables_slots_allocation a", "a.timetable_id = '{$result->item_id}' AND status='1'");
+                    ", "timetables_slots_allocation a 
+                        LEFT JOIN courses b ON b.item_id = a.course_id
+                        LEFT JOIN classes c ON c.item_id = a.class_id
+                        ", 
+                    "a.timetable_id = '{$result->item_id}' AND a.status='1'");
+                    
+                    $allocations = [];
+                    foreach($allocate as $alot) {
+                        $allocations[$alot->day_slot] = $alot;
+                    }
+                    $result->allocations = $allocations;
                 }
 
                 $data[$result->item_id] = $result;
@@ -293,7 +303,7 @@ class Timetable extends Myschoolgh {
 
                 // prepare the insert query here
                 $allot_slot = $this->db->prepare('INSERT INTO timetables_slots_allocation SET 
-                    client_id = ?, timetable_id = ?, `day` = ?, slot = ?, room_id = ?, class_id = ?, course_id = ?, `status` = ?
+                    client_id = ?, timetable_id = ?, `day` = ?, slot = ?, day_slot = ?, room_id = ?, class_id = ?, course_id = ?, `status` = ?
                 ');
 
                 // continue processing
@@ -306,7 +316,7 @@ class Timetable extends Myschoolgh {
                     $room = $course_room[1];
 
                     // insert the value into the database
-                    $allot_slot->execute([$params->clientId, $item_id, $slot[0], $slot[1], $room, $class_id, $course, 1]);
+                    $allot_slot->execute([$params->clientId, $item_id, $slot[0], $slot[1], $slots["slot"], $room, $class_id, $course, 1]);
                 }
 
                 // return

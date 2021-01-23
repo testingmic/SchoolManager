@@ -19,6 +19,7 @@ $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Events Management";
 $response->title = "{$pageTitle} : {$appName}";
+$response->timer = 0;
 
 // if the client information is not empty
 if(!empty($session->clientId)) {

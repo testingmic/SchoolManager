@@ -20,6 +20,7 @@ $disabled_inputs = [];
 $pageTitle = "Allocate Timetable";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [];
+$response->timer = 0;
 
 $timetable_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : $session->last_TimetableId;
 
@@ -89,7 +90,7 @@ $response->html = '
                     <input type="hidden" disabled value="'.($data->slots ?? null).'" name="t_slots">
                     <input type="hidden" disabled value="'.($data->duration ?? null).'" name="t_duration">
                     <input type="hidden" disabled value="'.($data->days ?? null).'" name="t_days">
-                    <input type="hidden" disabled value="'.($data->start_time ?? null).'" name="t_start_time">
+                    <input type="hidden" disabled value="'.date("h:i A", strtotime($data->start_time)).'" name="t_start_time">
                     <input type="hidden" disabled value="'.($data->class_id ?? null).'" name="t_class_id">
                     <input type="hidden" disabled value="'.($timetable_id ?? null).'" name="timetable_id">
                     <div class="card-body">
@@ -144,8 +145,8 @@ $response->html = '
                                         </div>
                                     </div>
                                     <div class="col-lg-3 timetable" id="rightpane">
-                                        <div class="form-group text-center trix-slim-scroll" id="courseScroll">
-                                            <h5>Courses List</h5>';
+                                        <h5>Courses List</h5>
+                                        <div class="form-group text-center trix-slim-scroll" id="courseScroll">';
                                             if(!empty($courses_list)) {
                                                 foreach($courses_list as $key => $value) {
                                                     $response->html .= "<div class='course p-2' id='{$value->item_id}'>{$value->name} ({$value->course_code})</div>";

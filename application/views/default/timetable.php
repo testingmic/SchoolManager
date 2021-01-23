@@ -135,7 +135,7 @@ $response->html = '
                                                 </p>
                                                 <p class='clearfix pb-0 mb-0'>
                                                     <span class='float-left font-weight-bolder'>Duration</span>
-                                                    <span class='float-right'>{$value->duration}</span>
+                                                    <span class='float-right'>{$value->duration} minutes</span>
                                                 </p>
                                                 <p class='clearfix pb-0 mb-2 text-right'>
                                                     <a href='#' onclick='return delete_record(\"{$value->item_id}\", \"timetable\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a>
