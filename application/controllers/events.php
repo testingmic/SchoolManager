@@ -115,6 +115,10 @@ class Events extends Myschoolgh {
             // set the upload directory
             $uploadDir = "assets/img/events/";
 
+            if(!is_dir($uploadDir)) {
+                mkdir($uploadDir);
+            }
+
             // File path config 
             $file_name = basename($params->event_image["name"]); 
             $targetFilePath = $uploadDir . $file_name; 
@@ -207,6 +211,10 @@ class Events extends Myschoolgh {
         if(isset($params->event_image)) {
             // set the upload directory
             $uploadDir = "assets/img/events/";
+
+            if(!is_dir($uploadDir)) {
+                mkdir($uploadDir);
+            }
 
             // File path config 
             $file_name = basename($params->event_image["name"]); 

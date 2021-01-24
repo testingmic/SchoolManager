@@ -3045,72 +3045,80 @@ class Forms extends Myschoolgh {
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="logo">Logo</label>
-                    <input type="file" name="general[\'logo\']" id="general[\'logo\']" class="form-control">
+                    <input type="file" name="logo" id="logo" class="form-control">
                 </div>
             </div>
             <div class="col-lg-9 col-md-12">
                 <div class="form-group">
                     <label for="name">School Name</label>
-                    <input type="text" value="'.($client_data->client_name ?? null).'" name="general[\'name\']" id="name" class="form-control">
+                    <input type="text" value="'.($client_data->client_name ?? null).'" name="general[name]" id="name" class="form-control">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="website">School Website</label>
-                    <input type="text" value="'.($client_data->client_website ?? null).'" name="general[\'website\']" id="website" class="form-control">
+                    <input type="text" value="'.($client_data->client_website ?? null).'" name="general[website]" id="website" class="form-control">
                 </div>
             </div>
             <div class="col-lg-8 col-md-6">
                 <div class="form-group">
                     <label for="address">School Address</label>
-                    <input type="text" name="general[\'address\']" value="'.($client_data->client_address ?? null).'"  id="address" class="form-control">
+                    <input type="text" name="general[address]" value="'.($client_data->client_address ?? null).'"  id="address" class="form-control">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="email">School Email Address</label>
-                    <input type="email" value="'.($client_data->client_email ?? null).'" name="general[\'email\']" id="email" class="form-control">
+                    <input type="email" value="'.($client_data->client_email ?? null).'" name="general[email]" id="email" class="form-control">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="contact">Contact Number</label>
-                    <input type="text" name="general[\'contact\']" value="'.($client_data->client_contact ?? null).'"  id="contact" class="form-control">
+                    <input type="text" name="general[contact]" value="'.($client_data->client_contact ?? null).'"  id="contact" class="form-control">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="location">School Location</label>
-                    <input type="text" name="general[\'location\']" value="'.($client_data->client_location ?? null).'"  id="location" class="form-control">
+                    <input type="text" name="general[location]" value="'.($client_data->client_location ?? null).'"  id="location" class="form-control">
                 </div>
             </div>
             <div class="col-lg-12"><h5>ACADEMIC CALENDAR</h5></div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="academic_year">Academic Year</label>
-                    <select data-width="100%" name="general[\'academics\'][\'academic_year\']" id="academic_year" class="form-control selectpicker">
-                        <option value="">Select Academic Year</option>
+                    <select data-width="100%" name="general[academics][academic_year]" id="academic_year" class="form-control selectpicker">
+                        <option value="">Select Academic Year</option>';
+                            foreach($this->pushQuery("id, year_group", "academic_years", "1") as $each) {
+                                $general .= "<option ".(($client_data && $each->year_group === $prefs->academics->academic_year) ? "selected" : null)." value=\"{$each->year_group}\">{$each->year_group}</option>";                            
+                            }
+                        $general .= '</select>
                     </select>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="academic_term">Academic Term</label>
-                    <select data-width="100%" name="general[\'academics\'][\'academic_term\']" id="academic_term" class="form-control selectpicker">
-                        <option value="">Select Academic Term</option>
+                    <select data-width="100%" name="general[academics][academic_term]" id="academic_term" class="form-control selectpicker">
+                        <option value="">Select Academic Term</option>';
+                            foreach($this->pushQuery("id, name, description", "academic_terms","1") as $each) {
+                                $general .= "<option ".(($client_data && $each->name === $prefs->academics->academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
+                            }
+                        $general .= '</select>
                     </select>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="term_starts">Academic Term Start</label>
-                    <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[\'academics\'][\'term_starts\']" id="term_starts" class="form-control datepicker">
+                    <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[academics][term_starts]" id="term_starts" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="term_ends">Academic Term Ends</label>
-                    <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[\'academics\'][\'term_ends\']" id="term_ends" class="form-control datepicker">
+                    <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-lg-12"><h5>LABELS</h5></div>';
@@ -3120,7 +3128,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-2 col-md-3">
                     <div class="form-group">
                         <label for="'.$label["key"].'_label">'.$label["label"].' Label</label>
-                        <input type="text" value="'.($prefs->labels->{$ilabel} ?? null).'" maxlength="3" name="general[\'labels\'][\''.$label["key"].'_label\']" id="'.$label["key"].'_label" class="form-control">
+                        <input type="text" value="'.($prefs->labels->{$ilabel} ?? null).'" maxlength="3" name="general[labels]['.$label["key"].'_label]" id="'.$label["key"].'_label" class="form-control text-uppercase">
                     </div>
                 </div>';
             }
