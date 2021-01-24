@@ -3133,12 +3133,117 @@ class Forms extends Myschoolgh {
                 </div>';
             }
         $general .= '
+            <div class="col-lg-12"><h5>&nbsp;</h5></div>
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label for="opening_days">School Opening Days</label>';
+                    // loop through the count 7
+                    $openingDays = $prefs->opening_days ?? [];
+
+                    for($i = 0; $i < 7; $i++) {
+                        // set the day
+                        $today = date("l", strtotime("Monday +$i day"));
+                        $general .= '
+                            <div style="padding-left: 3.5rem;" class="custom-control col-lg-12 custom-switch switch-primary">
+                                <input type="checkbox" name="general[opening_days][]" value="'.ucfirst($today).'" class="custom-control-input" id="'.$today.'" '.(in_array($today, $openingDays) ? "checked=\"checked\"" : null).'>
+                                <label class="custom-control-label" for="'.$today.'">'.$today.'</label>
+                            </div>';
+                    }
+                    $general .= '
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="form-group">
+                    <label for="currency">Currency</label>
+                    <select data-width="100%" name="general[labels][currency]" id="labels" class="form-control selectpicker">
+                        <option value="">Select Currency</option>';
+                            foreach($this->pushQuery("id, currency", "currency","1") as $each) {
+                                $general .= "<option ".((isset($prefs->labels->currency) && $each->currency === $prefs->labels->currency) ? "selected" : null)." value=\"{$each->currency}\">{$each->currency}</option>";                            
+                            }
+                        $general .= '</select>
+                    </select>
+                </div>
+            </div>
+            
             <div class="col-md-12 text-right">
                 <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
             </div>
         </form></div>';
-
         $forms["general"] = $general;
+
+        // forms
+        $select = [
+            "student" => [
+                "Student ID", "Firstname", "Lastname", "Othernames", "Email", "Contact Number", 
+                "Blood Group", "Residence", "Date of Birth", "Admission Date", "Gender",
+                "Section", "Department", "Class", "Description"
+            ],
+            "staff" => [
+                "Employee ID", "Firstname", "Lastname", "Othernames", "Email", "Contact Number", 
+                "Blood Group", "Residence", "Date of Birth", "Date Employed", "Gender",
+                "Section", "Department", "Description", "Courses Taught", "User Type"
+            ],
+            "course" => [
+                "Course Code", "Title", "Credit Hours", "Weekly Meetings", "Course Tutors", "Description"
+            ]
+        ];
+
+        // loop through the select form
+        foreach($select as $key => $import) {
+            $form = '
+            <div data-csv_import_column="'.$key.'">
+                <form method="post" action="'.$this->baseUrl.'api/account/import" class="csvDataImportForm" enctype="multipart/form-data">
+                    <div class="row">
+                        <div id="dropify-space" class="col-md-8  mt-5 pb-4 text-center m-auto border pt-4 border-white">
+                            <div class="form-content-loader" style="display: none;">
+                                <div class="offline-content text-center">
+                                    <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                </div>
+                            </div>
+                            <h2>Upload a CSV to import <strong>'.ucwords($key).' data</strong></h2>
+                            <hr>
+                            <div class="form-controls col-md-4 m-auto">
+                                <hr>
+                                <div class="form-group text-center">
+                                    <input style="height: 50px; line-height: 25px" data-file_unique_id="'.$key.'" accept=".csv" type="file" name="'.$key.'_csv_file" id="'.$key.'_csv_file" class="form-control btn bg-purple text-white no-border text-white cursor">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="row justify-content-center p-4 text-center">
+                    <div class="col-lg-8 p-3 upload-text hidden">
+                        <h2>Upload <strong>'.ucwords($key).'</strong></h2>
+                        <div class="csv-rows-counter text-success font-16"></div>
+                    </div>
+                    <div class="col-lg-8 file-checker"></div>
+                </div>                
+                <div class="mt-4 csv-rows-content border slim-scroll" style="overflow-x: auto;display: flex; flex: 1; padding-top: 20px; flex-direction: row; max-height: 450px; background: none;">
+                    <div class="col-md-4" style="display: none;" data-row="1">
+                        <div class="form-row">
+                            <select class="form-control">
+                                <option value="null">Please Select</option>';
+                                foreach($import as $value) {
+                                    $form .= "<option value='{$value}'>{$value}</option>";
+                                }
+                            $form .= '</select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4 upload-buttons">
+                    <div class="col-lg-12 text-center">
+                        <button type="cancel" onclick="return cancel_csv_upload(\''.$key.'\');" class="btn hidden cancel-button btn-outline-danger">
+                            Cancel Upload
+                        </button>
+                        <button onclick="return import_CSV_Data(\''.$key.'\');" style="display: none;" type="submit" class="btn upload-button btn-outline-success">
+                            <i class="fa fa-upload"></i> Continue Data Import
+                        </button>
+                    </div>
+                </div>
+            </div>';
+            
+            $forms[$key] = $form;
+        }
 
         return $forms;
     }

@@ -1,4 +1,6 @@
-var client_auto_save, disabled_inputs = new Array();
+var client_auto_save, disabled_inputs = new Array(),
+    foundArrayList = new Array(),
+    csvContent = new Array();
 var initDashboard = () => {}
 
 var responseCode = (code) => {

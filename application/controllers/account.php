@@ -57,8 +57,10 @@ class Account extends Myschoolgh {
         // put the preferences together
         $preference["academics"] = $params->general["academics"];
         $preference["labels"] = $params->general["labels"];
+        $preference["opening_days"] = $params->general["opening_days"] ?? [];
 
         // unset the values
+        unset($params->general["opening_days"]);
         unset($params->general["academics"]);
         unset($params->general["labels"]);
 
@@ -90,6 +92,50 @@ class Account extends Myschoolgh {
 
         } catch(PDOException $e) {}
 
+    }
+
+    /**
+     * Upload CSV File Data
+     * 
+     * Save the information in a session to be used later on
+     * 
+     */
+    public function upload_csv(stdClass $params) {
+
+        // reading tmp_file name
+        $csv_file = fopen($params->csv_file['tmp_name'], 'r');
+
+        // get the content of the file
+        $column = fgetcsv($csv_file);
+        $csv_data = array();
+        $csvSessionData = array();
+        $i = 0;
+
+        //using while loop to get the information
+        while($row = fgetcsv($csv_file)) {
+            // session data
+            $csvSessionData[] = $row;
+
+            // push the data parsed by the user to the page
+            if($i < 10)  {
+                $csv_data[] = $row;
+            }
+            // increment
+            $i++;
+        }
+
+        // set the content in a session
+        $this->session->set("{$params->column}_csv_file", $csvSessionData);
+
+        // set the data to send finally
+        return  [
+            "data" => [
+                'column'	=> $column,
+                'csv_data'	=>  $csv_data,
+                'data_count' => count($csvSessionData)
+            ]
+        ];
+        
     }
 
 }

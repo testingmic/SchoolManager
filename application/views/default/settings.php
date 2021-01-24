@@ -18,7 +18,6 @@ $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Settings";
 $response->title = "{$pageTitle} : {$appName}";
-$response->scripts = [];
 
 // specify some variables
 $accessObject->userId = $session->userId;
@@ -32,6 +31,8 @@ if(!$accessObject->hasAccess("manage", "settings")) {
 } else {
 
     $the_form = load_class("forms", "controllers")->settings_form($clientId);
+
+    $response->scripts = ["assets/js/import.js"];
 
     $response->html = '
         <section class="section">
@@ -52,25 +53,30 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                         <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab"
-                                        aria-selected="true">Timetable</a>
+                                        <a class="nav-link" id="import_students-tab2" data-toggle="tab" href="#import_students" role="tab" aria-selected="true">Import Students</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Courses List</a>
+                                        <a class="nav-link" id="staff-tab2" data-toggle="tab" href="#staff" role="tab" aria-selected="true">Import Staff</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Import Courses</a>
                                     </li>
                                 </ul>
                                 <div class="tab-content tab-bordered" id="myTab3Content">
                                     <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
                                         '.($the_form["general"] ?? null).'
                                     </div>
-                                    <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">
-                                        <div class="col-lg-12 pl-0"><h5>ACCOUNTING SETTINGS</h5></div>
-                                        '.($the_form["accounting"] ?? null).'
+                                    <div class="tab-pane fade" id="import_students" role="tabpanel" aria-labelledby="import_students-tab2">
+                                        '.($the_form["student"] ?? null).'
                                     </div>
-                                    <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="courses-tab2">
-                                        <div class="col-lg-12 pl-0"><h5>OTHERS</h5></div>
+                                    <div class="tab-pane fade" id="staff" role="tabpanel" aria-labelledby="staff-tab2">
                                         <div class="col-lg-12">
-                                            '.($the_form["accounting"] ?? null).'
+                                            '.($the_form["staff"] ?? null).'
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="coursestab2">
+                                        <div class="col-lg-12">
+                                            '.($the_form["courses"] ?? null).'
                                         </div>
                                     </div>
                                     <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="profile-tab2">
