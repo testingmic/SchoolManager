@@ -2869,7 +2869,7 @@ class Forms extends Myschoolgh {
     public function class_room_form($data = null) {
 
         $html_content = '
-        <form class="ajax-data-form" action="'.$this->baseUrl.'api/rooms/'.(isset($data->name) ? "update_classroom" : "add_classroom").'" method="POST" id="ajax-data-form-content">    
+        <form class="ajax-data-form" action="'.$this->baseUrl.'api/rooms/'.(isset($data->name) ? "update_classroom" : "add_classroom").'" method="POST" id="ajax-data-form-content">
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
@@ -3006,6 +3006,133 @@ class Forms extends Myschoolgh {
         }
 
         return $html_content;
+    }
+
+    /**
+     * Settings Form
+     * 
+     * @param String    $clientId
+     * 
+     * @return Array
+     */
+    public function settings_form($clientId) {
+
+        // get the client data
+        $client_data = !empty($clientId) ? $this->client_data($clientId) : (object)[];
+
+        // run this query
+        $prefs = !empty($client_data) ? $client_data->client_preferences : (object)[];
+        
+        $forms = [];
+
+        $labels = [
+            ["key" => "student", "label" => "Student"],
+            ["key" => "parent", "label" => "Guardian"],
+            ["key" => "teacher", "label" => "Teacher"],
+            ["key" => "staff", "label" => "Staff"],
+            ["key" => "course", "label" => "Course"],
+            ["key" => "book", "label" => "Books"],
+            ["key" => "class", "label" => "Class"],
+            ["key" => "department", "label" => "Departments"],
+            ["key" => "section", "label" => "Section"],
+            ["key" => "receipt", "label" => "Receipts"],
+        ];
+
+        $general = '
+        <form class="ajax-data-form" action="'.$this->baseUrl.'api/account/'.(isset($client_data->client_name) ? "update" : "add").'" method="POST" id="ajax-data-form-content">
+        <div class="row">
+            <div class="col-lg-12"><h5>GENERAL SETTINGS</h5></div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="logo">Logo</label>
+                    <input type="file" name="general[\'logo\']" id="general[\'logo\']" class="form-control">
+                </div>
+            </div>
+            <div class="col-lg-9 col-md-12">
+                <div class="form-group">
+                    <label for="name">School Name</label>
+                    <input type="text" value="'.($client_data->client_name ?? null).'" name="general[\'name\']" id="name" class="form-control">
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="form-group">
+                    <label for="website">School Website</label>
+                    <input type="text" value="'.($client_data->client_website ?? null).'" name="general[\'website\']" id="website" class="form-control">
+                </div>
+            </div>
+            <div class="col-lg-8 col-md-6">
+                <div class="form-group">
+                    <label for="address">School Address</label>
+                    <input type="text" name="general[\'address\']" value="'.($client_data->client_address ?? null).'"  id="address" class="form-control">
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="form-group">
+                    <label for="email">School Email Address</label>
+                    <input type="email" value="'.($client_data->client_email ?? null).'" name="general[\'email\']" id="email" class="form-control">
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="form-group">
+                    <label for="contact">Contact Number</label>
+                    <input type="text" name="general[\'contact\']" value="'.($client_data->client_contact ?? null).'"  id="contact" class="form-control">
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="form-group">
+                    <label for="location">School Location</label>
+                    <input type="text" name="general[\'location\']" value="'.($client_data->client_location ?? null).'"  id="location" class="form-control">
+                </div>
+            </div>
+            <div class="col-lg-12"><h5>ACADEMIC CALENDAR</h5></div>
+            <div class="col-lg-4 col-md-6">
+                <div class="form-group">
+                    <label for="academic_year">Academic Year</label>
+                    <select data-width="100%" name="general[\'academics\'][\'academic_year\']" id="academic_year" class="form-control selectpicker">
+                        <option value="">Select Academic Year</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="form-group">
+                    <label for="academic_term">Academic Term</label>
+                    <select data-width="100%" name="general[\'academics\'][\'academic_term\']" id="academic_term" class="form-control selectpicker">
+                        <option value="">Select Academic Term</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="form-group">
+                    <label for="term_starts">Academic Term Start</label>
+                    <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[\'academics\'][\'term_starts\']" id="term_starts" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="form-group">
+                    <label for="term_ends">Academic Term Ends</label>
+                    <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[\'academics\'][\'term_ends\']" id="term_ends" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-12"><h5>LABELS</h5></div>';
+            foreach($labels as $label) {
+                $ilabel = "{$label["key"]}_label";
+            $general .= '
+                <div class="col-lg-2 col-md-3">
+                    <div class="form-group">
+                        <label for="'.$label["key"].'_label">'.$label["label"].' Label</label>
+                        <input type="text" value="'.($prefs->labels->{$ilabel} ?? null).'" maxlength="3" name="general[\'labels\'][\''.$label["key"].'_label\']" id="'.$label["key"].'_label" class="form-control">
+                    </div>
+                </div>';
+            }
+        $general .= '
+            <div class="col-md-12 text-right">
+                <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+            </div>
+        </form></div>';
+
+        $forms["general"] = $general;
+
+        return $forms;
     }
 
 }
