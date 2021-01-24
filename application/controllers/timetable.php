@@ -673,7 +673,11 @@ class Timetable extends Myschoolgh {
         }
 
         // start drawing the table
-        $html_table = "<style>#t_table tr td, #t_table tr td {border:1px dashed #ccc;}</style>\n";
+        if($toDownload) {
+            $html_table = "<style>table tr td, table tr td {border:1px dashed #ccc;}</style>\n";
+        } else {
+            $html_table = "<style>#t_table tr td, #t_table tr td {border:1px dashed #ccc;}</style>\n";
+        }
         $html_table .= $summary.'<table class="'.$table_class.'" id="t_table" width="100%" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
         $html_table .= "<tr ".(isset($params->height) && $params->height ? "style='height:{$params->height}px'" : "").">\n\t<td width=\"{$width}%\"></td>\n";
         $start_time = $data->start_time;
