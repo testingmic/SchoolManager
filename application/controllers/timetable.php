@@ -567,35 +567,14 @@ class Timetable extends Myschoolgh {
                 </div>
             </div>";
         }
+        if(empty($courses_list)) {
+            $lessons_list .= "<div class='col-lg-12 text-center'>You do not have any lessons to teach today.</div>";
+        }
+        
         $lessons_list .= "</div>";
 
-        // print_r($lessons_list);exit;
         return $lessons_list;
         
-        
-        $param = $timetable;
-        $param->allocations = $data;
-        $param->client_details = $client_details;
-        
-        $params = (object) ["data" => $param];
-        $params->today_only = $filter;
-        $params->no_header = true;
-
-        $timetable = $this->draw($params);
-
-        // confirm that the table was found
-        if(isset($timetable["table"])) {
-            // init
-            $result .= $timetable["table"];
-
-            // return the results
-            return $result;
-        } else {
-            $result = "<div class='alert alert-warning text-center'>No timetable has been generated for this class yet. Please check back later to verify.</div>";
-        }
-
-        return $result;
-
     }
 
     /**
@@ -694,8 +673,8 @@ class Timetable extends Myschoolgh {
         }
 
         // start drawing the table
-        $html_table = "<style>table tr td, table tr td {border:1px dashed #ccc;}</style>\n";
-        $html_table .= $summary.'<table class="'.$table_class.'" width="100%" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
+        $html_table = "<style>#t_table tr td, #t_table tr td {border:1px dashed #ccc;}</style>\n";
+        $html_table .= $summary.'<table class="'.$table_class.'" id="t_table" width="100%" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
         $html_table .= "<tr ".(isset($params->height) && $params->height ? "style='height:{$params->height}px'" : "").">\n\t<td width=\"{$width}%\"></td>\n";
         $start_time = $data->start_time;
         
@@ -744,59 +723,64 @@ class Timetable extends Myschoolgh {
             $color_set[$each] = $this->color_set[$key] ?? null;
         }
 
-        // loop through each day
-        for ($d = 0; $d < $data->days; $d++) {
+        // if the allocations is not empty
+        if(!empty($data->allocations)) {
+            // loop through each day
+            for ($d = 0; $d < $data->days; $d++) {
+                // if not today only 
+                if(!$todayOnly || ($todayOnly && $days[$d] == $filters[$todayOnly])) {
 
-            // if not today only 
-            if(!$todayOnly || ($todayOnly && $days[$d] == $filters[$todayOnly])) {
+                    // set the begining of the table
+                    $row = "<tr>\n";
 
-                // set the begining of the table
-                $row = "<tr>\n";
+                    // set the day name of the week
+                    $row .= "\t<td {$d_style}>".($days[$d] ?? null)."</td>\n";
 
-                // set the day name of the week
-                $row .= "\t<td {$d_style}>".($days[$d] ?? null)."</td>\n";
-
-                // loop through the slots
-                for ($i = 0; $i < $slots; $i++) {
-                    
-                    // set the key
-                    $course = "";
-                    $bg_color = "style=\"padding:10px\"";
-                    $key = ($d + 1)."_".($i + 1);
-
-                    // get the data
-                    $allocation = isset($data->allocations[$key]) ? $data->allocations[$key] : [];
-                    
-                    // loop through each allocation for the day
-                    foreach($allocation as $akey => $cleaned) {
+                    // loop through the slots
+                    for ($i = 0; $i < $slots; $i++) {
                         
-                        // set the information to display
-                        if(!empty($cleaned)) {
-                            $bg_color = "style=\"padding:10px;background-color:".($color_set[$cleaned->course_id] ?? "#000").";color:#fff\"";
-                            $info = !$codeOnly ? $cleaned->course_name. " (" : null; 
-                            $info .= "<strong>{$cleaned->course_code}</strong>";
-                            $info .= !$codeOnly ? " )" : null; 
-                            // $info .= ($akey !== (count($allocation) - 1)) ? "<hr>" : null;
-                            $course .=  "<div {$bg_color}>{$info}</div>";
-                        }
-                        if(in_array($key, $data->disabled_inputs)) {
-                            $bg_color = "style=\"padding:10px;background-color:#cccccc;color:#888888;\"";
-                            $course .=  "<div {$bg_color}>DISABLED</div>";
-                        }
+                        // set the key
+                        $course = "";
+                        $bg_color = "style=\"padding:10px\"";
+                        $key = ($d + 1)."_".($i + 1);
+
+                        // get the data
+                        $allocation = isset($data->allocations[$key]) ? $data->allocations[$key] : [];
                         
+                        // loop through each allocation for the day
+                        foreach($allocation as $akey => $cleaned) {
+                            
+                            // set the information to display
+                            if(!empty($cleaned)) {
+                                $bg_color = "style=\"padding:10px;background-color:".($color_set[$cleaned->course_id] ?? "#000").";color:#fff\"";
+                                $info = !$codeOnly ? $cleaned->course_name. " (" : null; 
+                                $info .= "<strong>{$cleaned->course_code}</strong>";
+                                $info .= !$codeOnly ? " )" : null; 
+                                // $info .= ($akey !== (count($allocation) - 1)) ? "<hr>" : null;
+                                $course .=  "<div {$bg_color}>{$info}</div>";
+                            }
+                            if(in_array($key, $data->disabled_inputs)) {
+                                $bg_color = "style=\"padding:10px;background-color:#cccccc;color:#888888;\"";
+                                $course .=  "<div {$bg_color}>DISABLED</div>";
+                            }
+                            
+                        }
+
+                        // append the information
+                        $row .= "\t<td {$bg_color} align=\"center\">{$course}</td>\n";
+
                     }
 
-                    // append the information
-                    $row .= "\t<td {$bg_color} align=\"center\">{$course}</td>\n";
-
+                    $row .= "</tr>\n";
+                    $html_table .= $row;
+                
                 }
-
-                $row .= "</tr>\n";
-                $html_table .= $row;
-            
             }
-
+        } else {
+            $slots = $slots+1;
+            $html_table .= "<tr><td align=\"center\" colspan=\"{$slots}\">No timetable record for today was found in the database.</td></tr>";
         }
+
         $html_table .= "</table>";
         
         // print $html_table;

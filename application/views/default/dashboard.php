@@ -168,6 +168,7 @@ if($isAdminAccountant) {
 
 // append the scripts to the page
 $response->scripts = ["assets/js/analitics.js"];
+$timetable = "<div class='text-center'>No timetable record for today was found in the database.</div>";
 
 // if ward/parent/tutor
 if($isWardTutorParent) {
@@ -184,13 +185,14 @@ if($isWardTutorParent) {
         $total_expenditure = 0;
         
         // stream nothing if the student id has not been set yet
-        if(empty($session->student_id)) {
-            // set parameters
-            $data_stream = "";
-
+        if(!empty($session->student_id)) {
             // load the class timetable for student / parent & The lessons if a teacher is logged in
             $timetable = $timetableClass->class_timetable($session->student_class_id, $clientId, "today");    
+        } else {
+            // set parameters
+            $data_stream = "";
         }
+
 
         // if the wards array is not empty
         if(empty($data->wards_list)) {
@@ -853,7 +855,7 @@ $response->html = '
                 <div class="col-lg-12 col-sm-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>'.($isStudent ? "Today\'s Timetable": "Today's Lessons to Teach").'</h4>
+                            <h4>'.($isWardParent ? "Today's Timetable": "Today's Lessons to Teach").'</h4>
                         </div>
                         <div class="card-body">
                             <div class="card-body pt-2 trix-slim-scroll table-responsive">
