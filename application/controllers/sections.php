@@ -112,6 +112,7 @@ class Sections extends Myschoolgh {
                 INSERT INTO sections SET client_id = ?, created_by = ?
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($fileName) ? ", image='{$fileName}'" : null)."
+                ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->section_code) ? ", section_code = '{$params->section_code}'" : null)."
                 ".(isset($params->section_leader) ? ", section_leader = '{$params->section_leader}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
@@ -196,6 +197,7 @@ class Sections extends Myschoolgh {
                 UPDATE sections SET date_updated = now()
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($fileName) ? ", image='{$fileName}'" : null)."
+                ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->section_code) ? ", section_code = '{$params->section_code}'" : null)."
                 ".(isset($params->section_leader) ? ", section_leader = '{$params->section_leader}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."

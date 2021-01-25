@@ -125,6 +125,7 @@ class Departments extends Myschoolgh {
                 INSERT INTO departments SET client_id = ?, created_by = ?
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($fileName) ? ", image='{$fileName}'" : null)."
+                ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->department_code) ? ", department_code = '{$params->department_code}'" : null)."
                 ".(isset($params->department_head) ? ", department_head = '{$params->department_head}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
@@ -209,6 +210,7 @@ class Departments extends Myschoolgh {
                 UPDATE departments SET date_updated = now()
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($fileName) ? ", image='{$fileName}'" : null)."
+                ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->department_code) ? ", department_code = '{$params->department_code}'" : null)."
                 ".(isset($params->department_head) ? ", department_head = '{$params->department_head}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."

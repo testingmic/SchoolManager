@@ -24,6 +24,9 @@ $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 
+// unset all existing sessions
+// $session->remove(["student_csv_file", "course_csv_file", "staff_csv_file"]);
+
 // confirm that the user has the required permissions
 if(!$accessObject->hasAccess("manage", "settings")) {
     // show the error page
@@ -76,7 +79,7 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                     </div>
                                     <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="coursestab2">
                                         <div class="col-lg-12">
-                                            '.($the_form["courses"] ?? null).'
+                                            '.($the_form["course"] ?? null).'
                                         </div>
                                     </div>
                                     <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="profile-tab2">

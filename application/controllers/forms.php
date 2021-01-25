@@ -3176,15 +3176,17 @@ class Forms extends Myschoolgh {
             "student" => [
                 "Student ID", "Firstname", "Lastname", "Othernames", "Email", "Contact Number", 
                 "Blood Group", "Residence", "Date of Birth", "Admission Date", "Gender",
-                "Section", "Department", "Class", "Description"
+                "Section", "Department", "Class", "Description", "Religion", "City",
+                "Previous School", "Previous School Remarks", "Previous School Qualification"
             ],
             "staff" => [
                 "Employee ID", "Firstname", "Lastname", "Othernames", "Email", "Contact Number", 
                 "Blood Group", "Residence", "Date of Birth", "Date Employed", "Gender",
-                "Section", "Department", "Description", "Courses Taught", "User Type"
+                "Section", "Department", "Description", "Religion", "City", 
+                "Courses Taught", "User Type", "Employer", "Occupation"
             ],
             "course" => [
-                "Course Code", "Title", "Credit Hours", "Weekly Meetings", "Course Tutors", "Description"
+                "Course Code", "Title", "Credit Hours", "Weekly Meetings", "Description"
             ]
         ];
 
@@ -3235,7 +3237,7 @@ class Forms extends Myschoolgh {
                         <button type="cancel" onclick="return cancel_csv_upload(\''.$key.'\');" class="btn hidden cancel-button btn-outline-danger">
                             Cancel Upload
                         </button>
-                        <button onclick="return import_CSV_Data(\''.$key.'\');" style="display: none;" type="submit" class="btn upload-button btn-outline-success">
+                        <button onclick="return import_csv_data(\''.$key.'\');" style="display: none;" type="submit" class="btn upload-button btn-outline-success">
                             <i class="fa fa-upload"></i> Continue Data Import
                         </button>
                     </div>

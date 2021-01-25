@@ -2,7 +2,15 @@ var acceptedArray = new Array();
 acceptedArray["student"] = [
     "Student ID", "Firstname", "Lastname", "Othernames", "Email", "Contact Number",
     "Blood Group", "Residence", "Date of Birth", "Admission Date", "Gender",
-    "Section", "Department", "Class", "Description"
+    "Section", "Department", "Class", "Description", "Religion", "City",
+    "Previous School", "Previous School Remarks", "Previous School Qualification"
+], acceptedArray["staff"] = [
+    "Employee ID", "Firstname", "Lastname", "Othernames", "Email", "Contact Number",
+    "Blood Group", "Residence", "Date of Birth", "Date Employed", "Gender",
+    "Section", "Department", "Description", "Religion", "City",
+    "Courses Taught", "User Type", "Employer", "Occupation"
+], acceptedArray["course"] = [
+    "Course Code", "Title", "Credit Hours", "Weekly Meetings", "Description"
 ], current_column = "";
 
 $(`input[id="student_csv_file"]`).change(function() {
@@ -107,7 +115,7 @@ var file_checker_text_handler = (column) => {
     } else {
         $(`div[data-csv_import_column="${column}"] button[class~="upload-button"]`).css("display", "inline-block").removeClass("hidden");
         $(`div[data-csv_import_column="${column}"] button[class~="cancel-button"]`).css("display", "inline-block").removeClass("hidden");
-        $(`div[data-csv_import_column="${column}"] div[class~="file-checker"]`).html(`<h2>All matched! Ready for us to upload the ${column}s information?.</h2>`);
+        $(`div[data-csv_import_column="${column}"] div[class~="file-checker"]`).html(`<h2>All matched! Ready for us to upload the ${column}s information.</h2>`);
     }
 
     $(`div[data-csv_import_column="${column}"] div[class~="upload-text"]`).removeClass('hidden');
@@ -184,6 +192,17 @@ function load_csv_file_data(formdata, column) {
     });
 }
 
+var clear_csv_upload = (column) => {
+    foundArrayList = new Array(),
+        csvContent = new Array();
+    $(`div[data-csv_import_column="${column}"] div[class~="upload-text"]`).addClass('hidden');
+    $(`div[data-csv_import_column="${column}"] form[class="csvDataImportForm"]`).css("display", "block");
+    $(`div[data-csv_import_column="${column}"] div[class~="file-checker"]`).html(``);
+    $(`div[data-csv_import_column="${column}"] div[class~="csv-rows-content"]`).html(``);
+    file_checker_text_handler(column);
+    loadPage(`${baseUrl}settings`);
+}
+
 var cancel_csv_upload = (column) => {
     swal({
         title: "Cancel Data Upload",
@@ -193,23 +212,20 @@ var cancel_csv_upload = (column) => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-            foundArrayList = new Array(),
-                csvContent = new Array();
-            $(`div[data-csv_import_column="${column}"] div[class~="csv-rows-content"]`).html(``);
-            file_checker_text_handler(column);
+            clear_csv_upload(column);
         }
     });
 }
 
-var import_csv_data = () => {
-    var btnClick = $(`div[data-csv_import_column="${current_column}"] div[class~="upload-buttons"] button[type="submit"]`);
+var import_csv_data = (this_column) => {
+    var btnClick = $(`div[data-csv_import_column="${this_column}"] div[class~="upload-buttons"] button[type="submit"]`);
     btnClick.prop({
         'disabled': true,
         'title': 'Processing content'
     }).html(`<i class="fa fa-spin fa-spinner"></i> Processing Content`);
 
-    $(`div[data-csv_import_column="${current_column}"] div[class="form-content-loader"]`).css("display", "flex");
-    $.each($(`div[data-csv_import_column="${current_column}"] div[class~="csv-rows-content"] select`), function(id, key) {
+    $(`div[data-csv_import_column="${this_column}"] div[class="form-content-loader"]`).css("display", "flex");
+    $.each($(`div[data-csv_import_column="${this_column}"] div[class~="csv-rows-content"] select`), function(id, key) {
         var selId = $(this).data('id'),
             selName = $(this).attr('data-name');
         csvContent[selName] = new Array();
@@ -226,26 +242,19 @@ var import_csv_data = () => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            $(`div[data-csv_import_column="${this_column}"] div[class="form-content-loader"]`).css("display", "flex");
             $.ajax({
                 type: "POST",
-                url: `${baseUrl}api/importManager/uploadCSVData/${currentData}`,
-                data: { csvKey: Object.keys(csvContent), csvValues: Object.values(csvContent), uploadCSVData: true },
+                url: `${baseUrl}api/account/import`,
+                data: { csv_keys: Object.keys(csvContent), csv_values: Object.values(csvContent), column: this_column },
                 dataType: "json",
-                success: function(resp) {
-                    if (resp.status == "success") {
-                        Toast.fire({
-                            type: resp.status,
-                            title: resp.message
-                        });
-                        foundArrayList = new Array(),
-                            csvContent = new Array();
-                        $(`div[data-csv_import_column="${current_column}"] div[class~="csv-rows-content"]`).html(``);
-                        file_checker_text_handler(current_column);
-                    } else {
-                        Toast.fire({
-                            type: "error",
-                            title: resp.message
-                        });
+                success: function(response) {
+                    swal({
+                        text: response.data.result,
+                        icon: responseCode(response.code),
+                    });
+                    if (response.code === 200) {
+                        clear_csv_upload(this_column);
                     }
                 },
                 complete: function(data) {
@@ -253,18 +262,26 @@ var import_csv_data = () => {
                         'disabled': false,
                         'title': ''
                     }).html(`<i class="fa fa-upload"></i> Continue Data Import`);
+                    $(`div[data-csv_import_column="${this_column}"] div[class="form-content-loader"]`).css("display", "none");
                 },
                 error: function(err) {
-                    Toast.fire({
-                        type: "error",
-                        title: "Sorry! An error was encountered while processing the request"
+                    swal({
+                        text: "Sorry! An unknown file type was uploaded.",
+                        icon: "error",
                     });
                     btnClick.prop({
                         'disabled': false,
                         'title': ''
                     }).html(`<i class="fa fa-upload"></i> Continue Data Import`);
+                    $(`div[data-csv_import_column="${this_column}"] div[class="form-content-loader"]`).css("display", "none");
                 }
             });
+        } else {
+            btnClick.prop({
+                'disabled': false,
+                'title': ''
+            }).html(`<i class="fa fa-upload"></i> Continue Data Import`);
+            $(`div[data-csv_import_column="${this_column}"] div[class="form-content-loader"]`).css("display", "none");
         }
     });
 }
