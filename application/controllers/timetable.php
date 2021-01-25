@@ -554,15 +554,18 @@ class Timetable extends Myschoolgh {
         // loop through the lessons and generate a clean sheet for the teacher
         foreach($courses_list as $course) {
             $lessons_list .= "
-            <div class='col-lg-3 col-md-4'>
+            <div class='col-lg-3 col-md-6'>
                 <div class='card' style='border-top: solid 4px {$color_set[$course["course_id"]]}'>
                     <div class='card-header pt-1 pb-1'>
                         <strong>{$course["class_name"]}</strong>
                     </div>
-                    <div class='card-body pb-0 pt-2'>
+                    <div style='min-height:140px' class='card-body pb-0 pt-2 mb-0'>
                         <p>{$course["course_name"]} ({$course["course_code"]})</p>
                         <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course["lesson_start_time"]}</p>
-                        <p><i class='fa fa-clock'></i> {$course["lesson_end_time"]}</p>
+                        <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course["lesson_end_time"]}</p>
+                    </div>
+                    <div class='card-footer p-2 border-top mt-0 text-right'>
+                        <a href='{$this->baseUrl}update-course/{$course["course_id"]}' class='btn btn-outline-primary btn-sm'><i class='fa fa-eye'></i> View Course</a>
                     </div>
                 </div>
             </div>";

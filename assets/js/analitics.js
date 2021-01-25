@@ -383,7 +383,7 @@ var attendanceReport = (_attendance) => {
         console.log(_attendance.attendance.days_list);
         $.each(_attendance.attendance.days_list, function(day, status) {
             attendance_chart_list += `
-            <div class='col-lg-3 col-md-6'>
+            <div class='col-lg-3 col-md-4'>
                 <div class='card mb-3'>
                     <div class='card-header pb-0'><h5>${day}</h5></div>
                     <div class='card-body pt-2 pb-2'>

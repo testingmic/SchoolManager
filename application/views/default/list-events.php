@@ -41,37 +41,43 @@ if(!empty($session->clientId)) {
 
     // load the event types
     $event_types_list = "";
-    $event_types = $eventClass->types_list($params);
-    $data->event_types = $event_types;
 
     $accessObject->userId = $session->userId;
     $accessObject->clientId = $session->clientId;
     $accessObject->userPermits = $defaultUser->user_permissions;
+
     $hasEventAdd = $accessObject->hasAccess("add", "events");
     $hasEventDelete = $accessObject->hasAccess("delete", "events");
     $hasEventUpdate = $accessObject->hasAccess("update", "events");
-
-    // loop through the list
-    foreach($event_types as $type) {
-        $event_types_list .= "
-            <div class='card mb-2' data-row_id='{$type->item_id}'>
-                <div class='card-header p-2 text-uppercase'>{$type->name}</div>
-                ".(!empty($type->description) ? "<div class='card-body p-2'>{$type->description}</div>" : "")."
-                <div class='card-footer p-2'>
-                    <div class='d-flex justify-content-between'>
-                        ".($hasEventUpdate ? "<div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</button></div>": "")."
-                        ".($hasEventDelete ? "<div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a></div>" : "")."
+    
+    // load section if the user has the right permissions
+    if($hasEventAdd) {
+        // load the events types
+        $event_types = $eventClass->types_list($params);
+        $data->event_types = $event_types;
+        // loop through the list
+        foreach($event_types as $type) {
+            $event_types_list .= "
+                <div class='card mb-2' data-row_id='{$type->item_id}'>
+                    <div class='card-header p-2 text-uppercase'>{$type->name}</div>
+                    ".(!empty($type->description) ? "<div class='card-body p-2'>{$type->description}</div>" : "")."
+                    <div class='card-footer p-2'>
+                        <div class='d-flex justify-content-between'>
+                            ".($hasEventUpdate ? "<div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</button></div>": "")."
+                            ".($hasEventDelete ? "<div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a></div>" : "")."
+                        </div>
                     </div>
-                </div>
-            </div>";
+                </div>";
+        }
+
+        // append the questions list to the array to be returned
+        $response->array_stream["event_types_array"] = $data->event_types;
+
     }
 
     // append the permissions to the default user object
     $defaultUser->hasEventDelete = $hasEventDelete;
     $defaultUser->hasEventUpdate = $hasEventUpdate;
-
-    // append the questions list to the array to be returned
-    $response->array_stream["event_types_array"] = $data->event_types;
 
     // load the scripts
     $response->scripts = [
@@ -150,7 +156,7 @@ if(!empty($session->clientId)) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-12 col-lg-9">
+                <div class="col-sm-12 '.($hasEventAdd ? 'col-lg-9' : '').'">
                     <div class="card">
                         <div class="card-body">
                             <div class="fc-overflow">
@@ -159,12 +165,14 @@ if(!empty($session->clientId)) {
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-lg-3">
-                    <h5>EVENT TYPES '.($hasEventAdd ? '<span class="float-right"><button onclick="return add_Event_Type()" class="btn btn-sm btn-outline-primary"><i class="fa fa-plus"></i> Add New</button></span>' : '').'</h5>
+                '.($hasEventAdd ? '<div class="col-sm-12 col-lg-3">
+                    <h5>EVENT TYPES <span class="float-right"><button onclick="return add_Event_Type()" class="btn btn-sm btn-outline-primary"><i class="fa fa-plus"></i> Add New</button></span></h5>
                     <div class="mt-3 slim-scroll p-2" style="max-height:700px;overflow-y:auto;" id="events_types_list">
-                        '.$event_types_list.'
+                        <div class="row">
+                            '.$event_types_list.'
+                        </div>
                     </div>
-                </div>
+                </div>' : '').'
             </div>
         </section>';
 }

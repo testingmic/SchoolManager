@@ -64,6 +64,7 @@ if(!empty($user_id)) {
 
         // can recieve
         $canReceive = $accessObject->hasAccess("receive", "fees");
+        $viewAllocation = $accessObject->hasAccess("view_allocation", "fees");
 
         // receive fees payment 
         $receivePayment = !empty($canReceive) ? $canReceive : $isParent;
@@ -74,8 +75,11 @@ if(!empty($user_id)) {
         // load the class timetable
         $timetable = load_class("timetable", "controllers")->class_timetable($data->class_guid, $clientId);
 
-        // load fees allocation list for the students
-        $student_allocation_list = load_class("fees", "controllers", $allocation_param)->student_allocation_array($allocation_param);
+        // if the user has permissions to view fees allocation
+        if($viewAllocation) {
+            // load fees allocation list for the students
+            $student_allocation_list = load_class("fees", "controllers", $allocation_param)->student_allocation_array($allocation_param);
+        }
 
         // populate the incidents
         $incidents_list = "";
@@ -285,10 +289,11 @@ if(!empty($user_id)) {
                         <a class="nav-link '.(!$updateItem ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab"
                         aria-selected="true">Other Information</a>
                     </li>
-                    <li class="nav-item">
+                    '.($viewAllocation ? 
+                    '<li class="nav-item">
                         <a class="nav-link" id="fees-tab2" data-toggle="tab" href="#fees" role="tab"
                         aria-selected="true">Fees Allocation</a>
-                    </li>
+                    </li>' : '').'
                     <li class="nav-item">
                         <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab"
                         aria-selected="true">Timetable</a>
@@ -339,7 +344,8 @@ if(!empty($user_id)) {
                             </div>
                             '.$guardian.'
                         </div>
-                        <div class="tab-pane fade" id="fees" role="tabpanel" aria-labelledby="fees-tab2">
+                        '.($viewAllocation ? 
+                        '<div class="tab-pane fade" id="fees" role="tabpanel" aria-labelledby="fees-tab2">
                             <div class="table-responsive">
                                 <table data-empty="" class="table table-striped datatable">
                                     <thead>
@@ -355,7 +361,7 @@ if(!empty($user_id)) {
                                     <tbody>'.$student_allocation_list.'</tbody>
                                 </table>
                             </div>
-                        </div>
+                        </div>':'').'
                         <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">
                             <div class="table-responsive trix-slim-scroll">
                                 '.$timetable.'

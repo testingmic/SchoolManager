@@ -203,7 +203,7 @@ class Library extends Myschoolgh {
                     (SELECT COUNT(*) FROM books_borrowed_details b WHERE b.borrowed_id = a.item_id LIMIT 1) AS books_count,
 					(SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.unique_id) FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_info
                 FROM books_borrowed a
-                WHERE {$params->query} AND a.deleted = ? ORDER BY a.id LIMIT {$params->limit}
+                WHERE {$params->query} AND a.deleted = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([0]);
 

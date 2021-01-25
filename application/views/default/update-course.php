@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultUser, $SITEURL;
+global $myClass, $defaultUser, $SITEURL, $isTutor;
 
 // initial variables
 $appName = config_item("site_name");
@@ -15,12 +15,13 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 // additional update
+$userId = $session->userId;
 $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Course Details";
 $response->title = "{$pageTitle} : {$appName}";
 
-$accessObject->userId = $session->userId;
+$accessObject->userId = $userId;
 $accessObject->clientId = $session->clientId;
 
 // item id
@@ -33,13 +34,18 @@ if(!empty($item_id)) {
     // bypass the request
     $item_param = (object) [
         "clientId" => $clientId,
-        "userId" => $session->userId,
+        "userId" => $userId,
         "course_id" => $item_id,
         "userData" => $defaultUser,
         "full_attachments" => true,
         "full_details" => true,
         "limit" => 1
     ];
+
+    // if user is a tutor
+    if($isTutor) {
+        $item_param->course_tutor = $userId;
+    }
 
     // bypass check if the user is a student or parent
     if(!empty($session->student_id)) {
@@ -158,7 +164,7 @@ if(!empty($item_id)) {
                     // list the actions
                     $unit_lessons .= "<tr>";
                     $unit_lessons .= "<td>{$ikey}</td>";
-                    $unit_lessons .= "<td>{$lesson->name}</td>";
+                    $unit_lessons .= "<td><a title='Click to view lesson details' href='#' onclick='return load_quick_form(\"course_lesson_form_view\",\"{$plan->course_id}_{$plan->id}_{$lesson->id}\");'>{$lesson->name}</a></td>";
                     $unit_lessons .= "<td>{$lesson->start_date}</td>";
                     $unit_lessons .= "<td>{$lesson->end_date}</td>";
                     $unit_lessons .= "<td class='text-center'>{$action}</td>";
@@ -192,16 +198,18 @@ if(!empty($item_id)) {
                         <div class='mt-2 mb-3'>{$plan->description}</div>
 
                         <div class='border-bottom mb-3'><h6>UNIT LESSONS</h6></div>
-                        <table class='table table-bordered datatable'>
-                            <thead>
-                                <th>#</th>
-                                <th>Lesson Title</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th align='center'>Action</th>
-                            </thead>
-                            <tbody>{$unit_lessons}</tbody>
-                        </table>
+                        <div class='table-responsive trix-slim-scroll'>
+                            <table class='table table-bordered datatable'>
+                                <thead>
+                                    <th>#</th>
+                                    <th>Lesson Title</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th align='center'>Action</th>
+                                </thead>
+                                <tbody>{$unit_lessons}</tbody>
+                            </table>
+                        </div>
                     </div>
                     </div>
                 </div>";

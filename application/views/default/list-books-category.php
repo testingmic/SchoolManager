@@ -48,7 +48,7 @@ foreach($item_list["data"] as $key => $each) {
 
     $category_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $category_list .= "<td>".($key+1)."</td>";
-    $category_list .= "<td>{$each->name}</td>";
+    $category_list .= "<td><a href='{$baseUrl}update-book-category/{$each->item_id}'>{$each->name}</a></td>";
     $category_list .= "<td>{$each->description}</td>";
     $category_list .= "<td>{$each->books_count}</td>";
     $category_list .= "<td align='center'>{$action}</td>";

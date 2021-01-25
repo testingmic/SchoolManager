@@ -227,7 +227,7 @@ class Account extends Myschoolgh {
             // append a comma if the loop hasn't ended yet
             if($i < $keys_count) $sqlQuery .= ",";
         }
-        
+
         // append the last bracket
 	    $sqlQuery .= ") VALUES";
 
@@ -236,9 +236,7 @@ class Account extends Myschoolgh {
 
         // set the values
         if(!empty($params->csv_values) and is_array($params->csv_values)) {
-            // begin
-            $iv = 0;
-
+            
             // loop through the values list
             foreach($params->csv_values as $key => $eachCsvValue) {
                 // print each csv value

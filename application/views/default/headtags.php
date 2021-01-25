@@ -206,12 +206,21 @@ load_helpers(['menu_helper']);
                     <a href="<?= $baseUrl ?>profile" class="dropdown-item has-icon">
                         <i class="far fa-user"></i> Profile
                     </a>
+                    <?php if($accessObject->hasAccess("activities", "settings")) { ?>
                     <a href="<?= $baseUrl ?>timeline" class="dropdown-item has-icon">
                         <i class="fas fa-bolt"></i> Activities
                     </a>
+                    <?php } ?>
+                    <?php if($accessObject->hasAccess("manage", "settings")) { ?>
                     <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon">
                         <i class="fas fa-cog"></i> Settings
                     </a>
+                    <?php } ?>
+                    <?php if($accessObject->hasAccess("login_history", "settings")) { ?>
+                    <a href="<?= $baseUrl ?>login-history" class="dropdown-item has-icon">
+                        <i class="fas fa-lock"></i> Login History
+                    </a>
+                    <?php } ?>
                     <div class="dropdown-divider"></div>
                     <a href="#" onclick="return logout()" class="dropdown-item anchor has-icon text-danger">
                         <i class="fas fa-sign-out-alt"></i> Logout

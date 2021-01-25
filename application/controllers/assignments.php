@@ -397,8 +397,12 @@ class Assignments extends Myschoolgh {
         $result["students_list"] = $this->pushQuery("item_id, unique_id, name, email, phone_number, gender", "users", 
             "client_id='{$params->clientId}' AND class_id='{$params->class_id}' AND user_type='student' AND user_status='Active' AND status='1'");
         
+        /** Get the unique class id */
+        $class_id = $this->columnValue("item_id", "classes", "id='{$params->class_id}'");
+        $class_id = $class_id->item_id ?? null;
+
         /** Load the courses list */
-        $result["courses_list"] = $this->pushQuery("id, item_id, name", "courses", "class_id='{$params->class_id}' AND status='1'"); 
+        $result["courses_list"] = $this->pushQuery("id, item_id, name", "courses", "class_id LIKE '%{$class_id}%' AND status='1'"); 
 
         /** Return the results */
         return [

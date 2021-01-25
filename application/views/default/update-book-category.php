@@ -70,7 +70,7 @@ if(!empty($item_id)) {
 
             $category_books_list .= "<tr data-row_id=\"{$book->item_id}\">";
             $category_books_list .= "<td>".($key+1)."</td>";
-            $category_books_list .= "<td>{$book->title}</td>";
+            $category_books_list .= "<td><a href='{$baseUrl}update-book/{$book->item_id}'>{$book->title}</a></td>";
             $category_books_list .= "<td>{$book->author}</td>";
             $category_books_list .= "<td>{$book->quantity}</td>";
             $category_books_list .= "<td><span class='underline'>".($book->isbn ?? null)."</span></td>";

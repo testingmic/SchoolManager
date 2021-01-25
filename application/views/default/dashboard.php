@@ -810,7 +810,7 @@ $response->html = '
                 <div class="col-lg-8">
                     '.($data_stream ? 
                         '<div class="row">
-                            <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="col-lg-4 col-md-4 col-sm-12">
                                 <div class="card card-statistic-1">
                                     <i class="fas fa-user-check card-icon col-green"></i>
                                     <div class="card-wrap">
@@ -823,7 +823,7 @@ $response->html = '
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="col-lg-4 col-md-4 col-sm-12">
                                 <div class="card card-statistic-1">
                                     <i class="fas fa-user-alt-slash card-icon col-red"></i>
                                     <div class="card-wrap">
@@ -836,7 +836,7 @@ $response->html = '
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="col-lg-4 col-md-4 col-sm-12">
                                 <div class="card card-statistic-1">
                                     <i class="fas fa-user-edit card-icon col-blue"></i>
                                     <div class="card-wrap">
@@ -857,10 +857,8 @@ $response->html = '
                         <div class="card-header">
                             <h4>'.($isWardParent ? "Today's Timetable": "Today's Lessons to Teach").'</h4>
                         </div>
-                        <div class="card-body">
-                            <div class="card-body pt-2 trix-slim-scroll table-responsive">
-                                '.$timetable.'
-                            </div>
+                        <div class="card-body pt-2 trix-slim-scroll table-responsive">
+                            '.$timetable.'
                         </div>
                     </div>
                 </div>'
