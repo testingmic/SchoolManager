@@ -111,16 +111,6 @@ class Analitics extends Myschoolgh {
             $this->final_report["summary_report"] = $this->summary_report($params);
             // get the percentage difference between the current and previous
             $this->calculate_percentages($this->final_report, "summary_report.students_class_record_count.count");
-
-            // load quick data
-            if(!in_array("library_report", $params->stream)) {
-                // append this paramter
-                $params->load_summary_info = true;
-
-                // load the summary information and submit
-                $this->final_report["library_report"] = $this->library_report($params);
-                $this->final_report["departments_report"] = $this->departments_report($params);
-            }
         }
 
         // get the revenue information if not parsed in the stream
@@ -347,8 +337,8 @@ class Analitics extends Myschoolgh {
             $q_result = $query->fetch(PDO::FETCH_OBJ);
             
             // append the result values
-            $result["fees_record_count"]["count"][$value_count] = $q_result->{$value_count} ?? 0;
-            $result["fees_record_count"]["amount"][$amount_paid] = $q_result->{$amount_paid} ?? 0;
+            $result["fees_record_count"]["count"][$value->name] = $q_result->{$value_count} ?? 0;
+            $result["fees_record_count"]["amount"][$value->name] = $q_result->{$amount_paid} ?? 0;
             
             // loop through the date ranges for the current and previous
             foreach($this->date_range as $range_key => $range_value) {
@@ -369,11 +359,11 @@ class Analitics extends Myschoolgh {
                 $_q_result = $_query->fetch(PDO::FETCH_OBJ);
                 
                 // append to the result array
-                $result["fees_record_count"]["comparison"]["count"][$range_key][$value_count] = [
+                $result["fees_record_count"]["comparison"]["count"][$range_key][$value->name] = [
                     "value" => $_q_result->{$value_count} ?? 0,
                     "name" => $value->name
                 ];
-                $result["fees_record_count"]["comparison"]["amount"][$range_key][$amount_paid] = [
+                $result["fees_record_count"]["comparison"]["amount"][$range_key][$value->name] = [
                     "value" => $_q_result->{$amount_paid} ?? 0,
                     "name" => $value->name
                 ];

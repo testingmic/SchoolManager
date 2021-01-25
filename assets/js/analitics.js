@@ -140,27 +140,30 @@ var summaryReporting = (t_summary, date_range) => {
         $(`div[data-sex_count="Female"]`).html(female_student);
         $(`div[data-sex_count="Male"]`).html(male_student);
 
-        var ctx = document.getElementById("male_female_comparison");
-        var myChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Male Students', 'Female Students'],
-                datasets: [{
-                    label: '# of Reactions',
-                    data: [male_student, female_student],
-                    backgroundColor: ['#304ffe', '#ffa601'],
-                    borderColor: ['#fff', '#fff', '#fff']
-                }]
-            },
-            options: {
-                responsive: true,
-                cutoutPercentage: 70,
-                maintainAspectRatio: false,
-                legend: {
-                    display: false
+        if ($(`canvas[id="male_female_comparison"]`).length) {
+            var ctx = document.getElementById("male_female_comparison");
+            var myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Male Students', 'Female Students'],
+                    datasets: [{
+                        label: '# of Reactions',
+                        data: [male_student, female_student],
+                        backgroundColor: ['#304ffe', '#ffa601'],
+                        borderColor: ['#fff', '#fff', '#fff']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutoutPercentage: 70,
+                    maintainAspectRatio: false,
+                    legend: {
+                        display: false
+                    }
                 }
-            }
-        });
+            });
+        }
+
     }
 
     if (t_summary.departments_report !== undefined) {
@@ -201,21 +204,45 @@ var summaryReporting = (t_summary, date_range) => {
             total_revenue = 0,
             previous_amount = 0,
             chartKeys = new Array(),
+            categoryKeys = new Array(),
+            categoryValues = new Array(),
             currentValues = new Array(),
             previousValues = new Array();
+
         $.each(fees.amount, function(i, e) {
-            total_revenue += parseInt(e);
+            categoryKeys.push(i);
+            categoryValues.push(parseFloat(e));
+            total_revenue += parseFloat(e);
         });
+
+        let revenue_category_counts = "<div class='row'>";
+        $.each(fees.count, function(i, e) {
+            let amount = fees.amount[i];
+            let percentage = ((amount / total_revenue) * 100).toFixed(2);
+            revenue_category_counts += `
+            <div class="col-lg-3 col-md-4">
+                <div class="card">
+                    <div class="card-header pb-0"><strong>${i}</strong></div>
+                    <div class="card-body pt-2 pb-1">
+                        <p class="mb-0 pb-0">Processed Count: <strong>${e}</strong></p>
+                        <p class="mb-0 pb-0">Processed Amount: <strong>${myPrefs.labels.currency}${format_currency(amount)}</strong></p>
+                        <p class="mb-0 pb-0">Percentage: <strong>${percentage}%</strong></p>
+                    </div>
+                </div>
+            </div>`;
+        });
+        revenue_category_counts += "</div>";
+        $(`div[id="revenue_category_counts"]`).html(revenue_category_counts);
+
         $.each(summary.fees_record_count.comparison.amount.previous, function(i, e) {
             chartKeys.push(e.name);
-            previousValues.push(parseInt(e.value));
-            previous_amount += parseInt(e.value);
-            currentValues.push(parseInt(summary.fees_record_count.comparison.amount.current[i].value));
+            previousValues.push(parseFloat(e.value));
+            previous_amount += parseFloat(e.value);
+            currentValues.push(parseFloat(summary.fees_record_count.comparison.amount.current[i].value));
         });
 
         $(`span[data-count="total_revenue_received"]`).html(format_currency(total_revenue));
         $(`span[data-count="previous_amount_received"]`).html(format_currency(previous_amount));
-        $(`span[data-count="total_fees_received"]`).html(format_currency(fees.amount.tuition_fees));
 
         var options = {
             chart: {
@@ -238,11 +265,11 @@ var summaryReporting = (t_summary, date_range) => {
                 colors: ['transparent']
             },
             series: [{
-                name: 'Current Revenue',
-                data: currentValues
-            }, {
                 name: 'Previous Revenue',
                 data: previousValues
+            }, {
+                name: 'Current Revenue',
+                data: currentValues
             }],
             xaxis: {
                 categories: chartKeys,
@@ -271,6 +298,32 @@ var summaryReporting = (t_summary, date_range) => {
         );
 
         chart.render();
+
+
+        if ($(`canvas[id="revenue_category_group"]`).length) {
+            var ctx = document.getElementById("revenue_category_group").getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryKeys,
+                    datasets: [{
+                        label: '# of Reactions',
+                        data: categoryValues,
+                        backgroundColor: ['#304ffe', '#ffa601', '#fc544b', '#63ed7a', '#191d21', '#e83e8c', '#6777ef'],
+                        borderColor: ['#fff', '#fff', '#fff']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutoutPercentage: 70,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "bottom",
+                        display: true
+                    }
+                }
+            });
+        }
 
     }
 

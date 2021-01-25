@@ -159,11 +159,11 @@ else if($isTutorStudent) {
 $response->array_stream["events_array_list"] = $events_list;
 
 // the default data to stream
-$data_stream = 'id="data-report_stream" data-report_stream="attendance_report"';
+$data_stream = 'id="data-report_stream" data-report_stream="attendance_report,library_report,departments_report"';
 
 // set the data to stream for an admin user
 if($isAdminAccountant) {
-    $data_stream = 'id="data-report_stream" data-report_stream="summary_report,revenue_flow"';
+    $data_stream = 'id="data-report_stream" data-report_stream="summary_report,revenue_flow,library_report,departments_report"';
 }
 
 // append the scripts to the page
@@ -745,8 +745,7 @@ $response->html = '
                                 <div style="width:60%">
                                     <div class="d-flex justify-content-between">
                                         <div class="col-6">
-                                            <p class="text-muted font-15 text-truncate m-b-5">Tuition Fees</p>
-                                            <h5><i class="fas fa-arrow-circle-up col-green m-r-5"></i><span data-count="total_fees_received">0.00</span></h5>
+                                            <h5>&nbsp;</h5>
                                         </div>
                                         <div class="col-6">
                                             <p class="text-muted text-truncate m-b-5">Revenue <span data-filter="period">Last Week</span></p>
@@ -764,8 +763,8 @@ $response->html = '
                         <div class="card-header">
                             <h4>Students</h4>
                         </div>
-                        <div class="card-body" style="max-height:265px;height:265px;">
-                            <canvas id="male_female_comparison"></canvas>
+                        <div class="card-body" data-chart="male_female_comparison">
+                            <canvas style="max-height:225px;height:225px;" id="male_female_comparison"></canvas>
                         </div>
                         <div class="card-footer">
                             <div class="student-report">
