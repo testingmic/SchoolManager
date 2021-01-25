@@ -426,13 +426,13 @@ class Fees extends Myschoolgh {
 
         /** Set the label for the amount */
         if(($allocation->amount_paid > 1) && (round($allocation->amount_due) > round($allocation->amount_paid))) {
-            $label = "<span class='badge badge-primary'>Part Payment</span>";
+            $label = "<span data-payment_label='status' class='badge badge-primary'>Part Payment</span>";
         } elseif(round($allocation->amount_paid) === 0) {
-            $label = "<span class='badge badge-danger'>Not Paid</span>";
+            $label = "<span data-payment_label='status' class='badge badge-danger'>Not Paid</span>";
         } else if(($allocation->amount_due < $allocation->amount_paid) || ($allocation->amount_due === $allocation->amount_paid)) {
-            $label = "<span class='badge badge-success'>Paid</span>";
+            $label = "<span data-payment_label='status' class='badge badge-success'>Paid</span>";
         } else {
-            $label = "<span class='badge badge-danger'>Not Paid</span>";    
+            $label = "<span data-payment_label='status' class='badge badge-danger'>Not Paid</span>";    
         }
 
         /** Quick CSS */
@@ -448,7 +448,7 @@ class Fees extends Myschoolgh {
         $html_form .= "</tr>";
         $html_form .= "<tr>";
         $html_form .= "<td>Amount Paid:</td>";
-        $html_form .= "<td><span class='amount_paid'>{$currency} {$allocation->amount_paid}</span></td>";
+        $html_form .= "<td><span data-checkout_url='{$allocation->checkout_url}' class='amount_paid'>{$currency} {$allocation->amount_paid}</span></td>";
         $html_form .= "</tr>";
         $html_form .= "<tr>";
         $html_form .= "<td>Outstanding Balance:</td>";
@@ -517,10 +517,10 @@ class Fees extends Myschoolgh {
 
             /** Insert the existing record */
             $stmt = $myschoolgh->prepare("INSERT INTO fees_payments SET 
-                amount_due = ?, balance = ?, category_id = ?, student_id = ?, checkout_url = ?,
-                client_id = ?, academic_year = ?, academic_term = ?, class_id = ?, created_by = ?,
-                currency = ?
+                amount_due = ?, balance = ?, category_id = ?, student_id = ?, checkout_url = ?, client_id = ?,
+                academic_year = ?, academic_term = ?, class_id = ?, created_by = ?, currency = ?
             ");
+
             /** Execute the prepared statement */
             return $stmt->execute([
                 $params->amount, $params->amount, $params->category_id, $params->student_id, 
@@ -528,6 +528,7 @@ class Fees extends Myschoolgh {
                 $params->academic_year, $params->academic_term, $params->class_id, 
                 $params->userId, $params->currency
             ]);
+
         }
 
         /** An annonymous function to update the student fees record */
@@ -549,13 +550,19 @@ class Fees extends Myschoolgh {
             ]);
         }
 
-        /** Check if the student id is valid */
-        $class_check = $this->pushQuery("id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        /** Check if the class id is valid */
+        $class_check = $this->pushQuery("a.id, (SELECT b.name fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", "classes a", 
+            "a.id='{$params->class_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1");
+
         if(empty($class_check)) {
             return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
         }
 
         try {
+
+            /** Start a transaction */
+            $this->db->beginTransaction();
+
             /** Confirm if the allocate to is student */
             if($params->allocate_to === "student") {
 
@@ -565,18 +572,37 @@ class Fees extends Myschoolgh {
                 }
 
                 /** Check if the student id is valid */
-                $student_check = $this->pushQuery("id", "users", "item_id='{$params->student_id}' AND client_id='{$params->clientId}' AND status='1' AND deleted='0' LIMIT 1");
+                $student_check = $this->pushQuery("a.id, a.name, (SELECT b.name fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", 
+                    "users a", 
+                    "a.item_id='{$params->student_id}' 
+                        AND a.client_id='{$params->clientId}' 
+                        AND a.status='1' AND a.deleted='0'
+                        AND a.academic_year = '{$params->academic_year}' 
+                        AND a.academic_term = '{$params->academic_term}'
+                    LIMIT 1");
                 if(empty($student_check)) {
                     return ["code" => 203, "data" => "Sorry! An invalid student id was supplied."];
                 }
 
                 /** Confirm if a record already exist */
                 if($this->confirm_student_payment_record($params, "simple_load")) {
+                    // update the user information
                     update_student_fees($params);
+                    
+                    // log the user activity
+                    $this->userLogs("fees_allocation", $params->student_id, null, 
+                        "{$params->userData->name} updated the fee allocation for <strong>{$student_check[0]->category_name}</strong> to: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
+
                 } else {
                     /** Insert a new record */
                     insert_student_fees($params);
+
+                    // log the user activity
+                    $this->userLogs("fees_allocation", $params->student_id, null, 
+                        "{$params->userData->name} added the fee allocation for <strong>{$student_check[0]->category_name}</strong> of: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
                 }
+
+                $this->db->commit();
 
                 return ["data" => "Fees Allocation was successfully executed."];
 
@@ -599,7 +625,13 @@ class Fees extends Myschoolgh {
                         $params->amount, $params->category_id, $params->clientId, 
                         $params->academic_year, $params->academic_term, $params->class_id
                     ]);
+
+                     // log the user activity
+                    $this->userLogs("fees_allocation", $params->student_id, null, 
+                        "{$params->userData->name} updated the fee allocation for <strong>{$class_check[0]->category_name}</strong> to: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
+
                 } else {
+
                     /** Insert the Record */
                     $stmt = $this->db->prepare("INSERT INTO fees_allocations SET 
                         amount = ?, category_id = ?, client_id = ?, academic_year = ?, 
@@ -612,6 +644,10 @@ class Fees extends Myschoolgh {
                         $params->academic_year, $params->academic_term, $params->class_id,
                         $params->userId, $params->currency
                     ]);
+
+                    // log the user activity
+                    $this->userLogs("fees_allocation", $params->student_id, null, 
+                        "{$params->userData->name} added the fee allocation for <strong>{$class_check[0]->category_name}</strong> of: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
                 }
 
                 // remove some unimportant keys
@@ -631,11 +667,13 @@ class Fees extends Myschoolgh {
                     }
                 }
 
+                $this->db->commit();
+
                 return ["data" => "Fees Allocation was successfully executed."];
 
             }
         } catch(PDOException $e) {
-            
+            $this->db->rollBack();
         }
     }
 
@@ -727,7 +765,7 @@ class Fees extends Myschoolgh {
 				SELECT 
                     a.checkout_url, a.student_id, a.class_id, a.category_id, a.amount_due, a.amount_paid, a.balance, 
                     a.paid_status, a.last_payment_id, a.academic_year, a.academic_term, a.date_created, a.last_payment_date,
-                    u.name AS student_name, u.department AS department_id,
+                    u.name AS student_name, u.department AS department_id, a.currency,
                     (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
                     (
                         SELECT CONCAT(b.id,'|',b.amount,'|',b.created_by,'|',b.recorded_date,'|',b.currency,'|',b.description) 
@@ -791,6 +829,8 @@ class Fees extends Myschoolgh {
             $outstandingBalance = $paymentRecord->balance - $params->amount;
             $totalPayment = $paymentRecord->amount_paid + $params->amount;
 
+            $paid_status = (bool) ((round($totalPayment) === round($paymentRecord->amount_due)) || ($totalPayment > $paymentRecord->amount_due));
+
             /* Confirm if the user has any credits */
             if($outstandingBalance < 0) {
                 $creditBalance = $outstandingBalance * -1;
@@ -818,7 +858,7 @@ class Fees extends Myschoolgh {
 
             /* Update the user payment record */
             $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
-                last_payment_date = now(), last_payment_id = '{$uniqueId}' ".(($outstandingBalance === 0) ? ", paid_status='1'" : "")."
+                last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", paid_status='1'" : "")."
                 WHERE checkout_url = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([$totalPayment, $outstandingBalance, $params->checkout_url, $params->clientId]);
