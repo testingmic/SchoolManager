@@ -79,6 +79,7 @@ if(!$receivePayment) {
 
         // append the allocation information to the parameters before fetching the payment form
         $params->allocation_info = $data;
+        $params->client = $defaultUser->client;
 
         // load the last payment information
         $payment_form = $feesClass->payment_form($params)["data"];

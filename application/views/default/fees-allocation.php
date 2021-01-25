@@ -43,6 +43,7 @@ if(!$receivePayment) {
 
     // load fees allocation list for class
     $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "receivePayment" => $receivePayment, "canAllocate" => $canAllocate];
+    $allocation_param->client = $defaultUser->client;
     $class_allocation_list = load_class("fees", "controllers", $allocation_param)->class_allocation_array($allocation_param);
 
     // load fees allocation list for the students

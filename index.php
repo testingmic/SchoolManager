@@ -90,7 +90,7 @@ $announcementClass = load_class('announcements', 'controllers');
 if(!empty($session->userId)) {
 	
 	// the query parameter to load the user information
-	$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "append_wards" => true, "filter_preferences" => true, "userId" => $session->userId];
+	$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "append_wards" => true, "filter_preferences" => true, "userId" => $session->userId, "append_client" => true];
 	$defaultUser = $usersClass->list($i_params)["data"][0];
 
 	$isAdmin = (bool) ($defaultUser->user_type == "admin");

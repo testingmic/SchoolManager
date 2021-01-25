@@ -73,7 +73,7 @@ foreach($item_list["data"] as $key => $each) {
             </div>
         </td>";
     $fees_history .= "<td>{$each->class_name}</td>";
-    $fees_history .= "<td>{$each->amount}</td>";
+    $fees_history .= "<td>{$each->currency} {$each->amount}</td>";
     $fees_history .= "<td>{$each->category_name}</td>";
     $fees_history .= "<td>{$each->recorded_date}</td>";
     $fees_history .= "<td>{$each->created_by_info->name}</td>";

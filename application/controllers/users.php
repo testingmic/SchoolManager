@@ -177,6 +177,7 @@ class Users extends Myschoolgh {
 
 			$loadWards = isset($params->append_wards) ? true : false;
 			$noKeyLoad = !isset($params->key_data_load) ? true : false;
+			$appendClient = isset($params->append_client) ? true : false;
 
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT 
@@ -290,6 +291,11 @@ class Users extends Myschoolgh {
 					$qr->execute();
 					$result->wards_list = $qr->fetchAll(PDO::FETCH_ASSOC);
 					$result->wards_list_ids = array_column($result->wards_list, "student_guid");
+				}
+
+				// append the client details in the request
+				if($appendClient) {
+					$result->client = $this->client_data($result->client_id);
 				}
 
 				// append to the results set to return

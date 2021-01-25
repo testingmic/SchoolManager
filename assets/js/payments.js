@@ -76,6 +76,7 @@ var save_Receive_Payment = () => {
                     $(`div[id="fees_payment_form"] input[name="amount"]`).val("");
                     $(`div[id="fees_payment_form"] textarea[name="description"]`).val("");
                     let payment = response.data.additional.payment.last_payment_info;
+                    $(`span[class="outstanding"][data-checkout_url="${payment.checkout_url}"]`).html(`${myPrefs.labels.currency ?? null} ${payment.balance}`);
                     $(`div[class='last_payment_container']`).html(`
                     <table width="100%" class="t_table table-hover table-bordered">
                         <tbody>
@@ -83,7 +84,7 @@ var save_Receive_Payment = () => {
                                 <td width="55%">Last Payment Info:</td>
                                 <td>
                                     <span class="last_payment_id"><strong>Payment ID:</strong> ${payment.pay_id}</span><br>
-                                    <span class="amount_paid"><i class="fa fa-money-bill"></i> ${payment.amount}</span><br>
+                                    <span class="amount_paid"><i class="fa fa-money-bill"></i> ${payment.currency ?? null} ${payment.amount}</span><br>
                                     <span class="last_payment_date"><i class="fa fa-calendar-check"></i> ${payment.created_date}</span><br>
                                     <p class="mt-3 mb-0 pb-0" id="print_receipt"><a class="btn btn-sm btn-outline-primary" target="_blank" href="${baseUrl}print/${response.data.additional.payment.last_payment_id}"><i class="fa fa-print"></i> Print Receipt</a></p>
                                 </td>

@@ -1117,7 +1117,7 @@ class Forms extends Myschoolgh {
                     $attachments = $this->list_attachments($attached->files, $params->userId, "col-lg-6");
                 }
             }
-
+            
             // show the details
             $html_content = "
                 <div class='row'>
@@ -1129,6 +1129,7 @@ class Forms extends Myschoolgh {
                         <div class='col-md-12 border-bottom mb-3 mt-4'><h6>LESSON RESOURCES</h6></div>
                         <div class='col-md-12'>{$attachments}</div>" : ""
                     )."
+                    <div class='col-md-12 mt-4 ".(!empty($message) ? "border-top" : "")." pt-4 mb-3 text-center'><span class='btn btn-outline-secondary' data-dismiss='modal'>Close Modal</span></div>
                 </div>";
 
         }

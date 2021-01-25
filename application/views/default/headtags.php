@@ -97,6 +97,9 @@ load_helpers(['menu_helper']);
         <link rel="stylesheet" href="<?= $baseUrl ?><?= $eachCSS ?>">
     <?php } ?>
     <link id="user_current_url" name="user_current_url" value="<?= $user_current_url ?>">
+    <script>
+        var myPrefs = <?= json_encode($userData->client->client_preferences) ?>
+    </script>
 </head>
 <body class="<?= $sidebar_pref ?> <?=  $theme_color ?> bg">
 	<div class="loader"></div>
