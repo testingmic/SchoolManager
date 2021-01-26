@@ -1,4 +1,4 @@
-a<?php 
+<?php 
 //: set the page header type
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -28,6 +28,7 @@ $item_list = load_class("departments", "controllers")->list($department_param);
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
+
 $hasDelete = $accessObject->hasAccess("delete", "department");
 $hasUpdate = $accessObject->hasAccess("update", "department");
 

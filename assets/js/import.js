@@ -11,6 +11,10 @@ acceptedArray["student"] = [
     "Courses Taught", "User Type", "Employer", "Occupation"
 ], acceptedArray["course"] = [
     "Course Code", "Title", "Credit Hours", "Weekly Meetings", "Description"
+], acceptedArray["parent"] = [
+    "Guardian ID", "Firstname", "Lastname", "Othernames", "Email", "Primary Contact",
+    "Secondary Contact", "Postal Address", "Blood Group", "Residence",
+    "Date of Birth", "Gender", "Description", "Religion", "City", "Employer", "Occupation"
 ], current_column = "";
 
 $(`input[id="student_csv_file"]`).change(function() {
@@ -33,6 +37,13 @@ $(`input[id="course_csv_file"]`).change(function() {
     fd.append('csv_file', files);
     fd.append('column', "course");
     load_csv_file_data(fd, "course");
+});
+$(`input[id="parent_csv_file"]`).change(function() {
+    var fd = new FormData();
+    var files = $('input[id="parent_csv_file"]')[0].files[0];
+    fd.append('csv_file', files);
+    fd.append('column', "parent");
+    load_csv_file_data(fd, "parent");
 });
 
 
@@ -164,7 +175,7 @@ var populate_select_fields = (headerData, mainContent, column) => {
     $(`div[data-csv_import_column="${column}"] select[class~="selectpicker"]`).select2({ width: "100%" });
 }
 
-function load_csv_file_data(formdata, column) {
+var load_csv_file_data = (formdata, column) => {
     $(`div[data-csv_import_column="${column}"] div[class="form-content-loader"]`).css("display", "flex");
     $.ajax({
         type: 'POST',
@@ -282,6 +293,14 @@ var import_csv_data = (this_column) => {
                 'title': ''
             }).html(`<i class="fa fa-upload"></i> Continue Data Import`);
             $(`div[data-csv_import_column="${this_column}"] div[class="form-content-loader"]`).css("display", "none");
+        }
+    });
+}
+
+var download_sample_csv = (column) => {
+    $.get(`${baseUrl}api/account/download_temp`, { file: column }).then((response) => {
+        if (response.code === 200) {
+
         }
     });
 }

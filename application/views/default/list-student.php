@@ -45,6 +45,8 @@ $accessObject->clientId = $clientId;
 $hasDelete = $accessObject->hasAccess("delete", "student");
 $hasUpdate = $accessObject->hasAccess("update", "student");
 
+$hasFiltering = $accessObject->hasAccess("filters", "settings");
+
 $students = "";
 foreach($student_list["data"] as $key => $each) {
     
@@ -91,7 +93,7 @@ $response->html = '
             </div>
         </div>
         <div class="row" id="filter_Department_Class">
-            <div class="col-xl-4 col-md-4 col-12 form-group">
+            <div class="col-xl-4 '.(!$hasFiltering ? 'hidden': '').' col-md-4 col-12 form-group">
                 <label>Select Department</label>
                 <select class="form-control selectpicker" id="department_id" name="department_id">
                     <option value="">Please Select Department</option>';
@@ -101,7 +103,7 @@ $response->html = '
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-xl-3 col-md-3 col-12 form-group">
+            <div class="col-xl-3 '.(!$hasFiltering ? 'hidden': '').' col-md-3 col-12 form-group">
                 <label>Select Class</label>
                 <select class="form-control selectpicker" name="class_id">
                     <option value="">Please Select Class</option>';
@@ -111,7 +113,7 @@ $response->html = '
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-xl-3 col-md-3 col-12 form-group">
+            <div class="col-xl-3 '.(!$hasFiltering ? 'hidden': '').' col-md-3 col-12 form-group">
                 <label>Select Gender</label>
                 <select class="form-control selectpicker" name="gender">
                     <option value="">Please Select Gender</option>';
@@ -121,7 +123,7 @@ $response->html = '
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-xl-2 col-md-2 col-12 form-group">
+            <div class="col-xl-2 '.(!$hasFiltering ? 'hidden': '').' col-md-2 col-12 form-group">
                 <label for="">&nbsp;</label>
                 <button id="filter_Students_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>

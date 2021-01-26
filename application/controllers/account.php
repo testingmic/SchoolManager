@@ -169,6 +169,16 @@ class Account extends Myschoolgh {
                 "courses_id" => "Courses Taught", "user_type" => "User Type", 
                 "employer" => "Employer", "occupation" => "Occupation"
             ];
+        } elseif($params->column === "parent") {
+            $accepted_column = [
+                "unique_id" => "Employee ID", "firstname" => "Firstname", "lastname" => "Lastname", 
+                "othername" => "Othernames", "email" => "Email", "phone_number" => "Primary Contact",
+                "phone_number_2" => "Secondary Contact", "blood_group" => "Blood Group", 
+                "residence" => "Residence", "date_of_birth" => "Date of Birth", 
+                "gender" => "Gender", "description" => "Description",
+                "religion" => "Religion", "city" => "City", 
+                "employer" => "Employer", "occupation" => "Occupation"
+            ];
         } elseif($params->column === "course") {
             $accepted_column = [
                 "course_code" => "Course Code", "name" => "Title", "credit_hours" => "Credit Hours", 
@@ -416,8 +426,12 @@ class Account extends Myschoolgh {
             "Course" => "courses"
         ];
         if(isset($tables[$column])) {
-            $value = create_slug($value);
-            $fetch = $this->db->prepare("SELECT item_id FROM {$tables[$column]} WHERE slug='{$value}' AND client_id='{$clientId}' AND status='1' ORDER BY id DESC LIMIT 1");
+            $n_value = create_slug($value);
+            
+            $t_code = strtoupper($value);
+            $item_code = strtolower($column)."_code";
+
+            $fetch = $this->db->prepare("SELECT item_id FROM {$tables[$column]} WHERE (slug='{$n_value}' OR {$item_code}='{$t_code}') AND client_id='{$clientId}' AND status='1' ORDER BY id DESC LIMIT 1");
             $fetch->execute();
             $result = $fetch->fetch(PDO::FETCH_OBJ);
 
@@ -425,4 +439,13 @@ class Account extends Myschoolgh {
         }
     }
 
+    /**
+     * Download Temporary CSV Files for Uploads
+     * 
+     * @return Array
+     */
+    public function download_temp(stdClass $params) {
+
+    }
+    
 }

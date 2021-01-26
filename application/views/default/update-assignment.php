@@ -391,25 +391,25 @@ if(!empty($item_id)) {
                     '.$assignmentClass->quick_data($data).'
                 </div>
                 <div class="card">
-                    <div class="card-header"><h4>Course Tutor Details</h4></div>
+                    <div class="card-header"><h4>Created By Details</h4></div>
                     <div class="card-body pt-0 pb-0">
                         <div class="py-3 pt-0">
                             <div class="d-flex justify-content-start">
                                 <div class="mr-0">
-                                    '.(isset($data->course_tutor_info->image) ? '<img src="'.$baseUrl.''.$data->course_tutor_info->image.'" class="rounded-circle cursor author-box-picture" width="50px">' : null).'
+                                    '.(isset($data->created_by_info->image) ? '<img src="'.$baseUrl.''.$data->created_by_info->image.'" class="rounded-circle cursor author-box-picture" width="50px">' : null).'
                                 </div>
                                 <div class="col-11">
                                     <div class="clearfix">
                                         <span class="mr-2 float-left">Fullname: </span>
-                                        <span class="mr-2 float-right text-muted">'.($data->course_tutor_info->name ?? null).'</span>
+                                        <span class="mr-2 float-right text-muted">'.($data->created_by_info->name ?? null).'</span>
                                     </div>
                                     <div class="clearfix">
                                         <span class="mr-2 float-left">Email: </span>
-                                        <span class="mr-2 float-right text-muted">'.($data->course_tutor_info->email ?? null).'</span>
+                                        <span class="mr-2 float-right text-muted">'.($data->created_by_info->email ?? null).'</span>
                                     </div>
                                     <div class="clearfix">
                                         <span class="mr-2 float-left">Contact: </span>
-                                        <span class="mr-2 float-right text-muted">'.($data->course_tutor_info->phone_number ?? null).'</span>
+                                        <span class="mr-2 float-right text-muted">'.($data->created_by_info->phone_number ?? null).'</span>
                                     </div>
                                 </div>
                             </div>

@@ -40,8 +40,11 @@ $item_list = load_class("assignments", "controllers")->list($assignments_param);
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
+
 $hasDelete = $accessObject->hasAccess("delete", "assignments");
 $hasUpdate = $accessObject->hasAccess("update", "assignments");
+
+$hasFiltering = $accessObject->hasAccess("filters", "settings");
 
 // unset the sessions if $session->currentQuestionId is not empty
 $assignments = "";
@@ -119,7 +122,7 @@ $response->html = '
             </div>
         </div>
         <div class="row" id="filter_Department_Class">
-            <div class="col-xl-4 col-md-4 col-12 form-group">
+            <div class="col-xl-4 '.(!$hasFiltering ? 'hidden': '').' col-md-4 col-12 form-group">
                 <label>Select Department</label>
                 <select class="form-control selectpicker" id="department_id" name="department_id">
                     <option value="">Please Select Department</option>';
@@ -129,7 +132,7 @@ $response->html = '
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-xl-3 col-md-3 col-12 form-group">
+            <div class="col-xl-3 '.(!$hasFiltering ? 'hidden': '').' col-md-3 col-12 form-group">
                 <label>Select Class</label>
                 <select class="form-control selectpicker" name="class_id">
                     <option value="">Please Select Class</option>';
@@ -139,7 +142,7 @@ $response->html = '
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-xl-3 col-md-3 col-12 form-group">
+            <div class="col-xl-3 '.(!$hasFiltering ? 'hidden': '').' col-md-3 col-12 form-group">
                 <label>Select Course</label>
                 <select class="form-control selectpicker" name="course_id">
                     <option value="">Please Select Course</option>';
@@ -149,7 +152,7 @@ $response->html = '
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-xl-2 col-md-2 col-12 form-group">
+            <div class="col-xl-2 '.(!$hasFiltering ? 'hidden': '').' col-md-2 col-12 form-group">
                 <label for="">&nbsp;</label>
                 <button id="filter_Assignments_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>

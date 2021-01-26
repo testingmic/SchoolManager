@@ -62,6 +62,9 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                         <a class="nav-link" id="staff-tab2" data-toggle="tab" href="#staff" role="tab" aria-selected="true">Import Staff</a>
                                     </li>
                                     <li class="nav-item">
+                                        <a class="nav-link" id="parent-tab2" data-toggle="tab" href="#parent" role="tab" aria-selected="true">Import Guardian / Parent</a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Import Courses</a>
                                     </li>
                                 </ul>
@@ -77,13 +80,15 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                             '.($the_form["staff"] ?? null).'
                                         </div>
                                     </div>
+                                    <div class="tab-pane fade" id="parent" role="tabpanel" aria-labelledby="parenttab2">
+                                        <div class="col-lg-12">
+                                            '.($the_form["parent"] ?? null).'
+                                        </div>
+                                    </div>
                                     <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="coursestab2">
                                         <div class="col-lg-12">
                                             '.($the_form["course"] ?? null).'
                                         </div>
-                                    </div>
-                                    <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="profile-tab2">
-
                                     </div>
                                 </div>
                             </div>

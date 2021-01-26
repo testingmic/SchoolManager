@@ -81,7 +81,6 @@ class Assignments extends Myschoolgh {
                 cl.name AS class_name,
                 (SELECT name FROM courses WHERE courses.item_id = a.course_id LIMIT 1) AS course_name,
                 (SELECT b.description FROM files_attachment b WHERE b.resource='assignments' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
-                (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.course_tutor LIMIT 1) AS course_tutor_info,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 {$query} FROM assignments a
                 LEFT JOIN classes cl ON cl.item_id = a.class_id
@@ -118,6 +117,18 @@ class Assignments extends Myschoolgh {
                         $result->students_assigned = ($result->assigned_to === "selected_students") ? count($this->stringToArray($result->assigned_to_list)) : $result->students_assigned;
                     }
 
+                    // set the course tutor into an array
+                    $result->course_tutor = json_decode($result->course_tutor, true);
+
+                    // loop through the array list
+                    foreach($result->course_tutor as $tutor) {
+                        // get the course tutor information
+                        $tutor_info = $this->pushQuery("name, item_id, unique_id, phone_number, email, image", "users", "item_id='{$tutor}' AND user_status='Active' LIMIT 1");
+                        if(!empty($tutor_info)) {
+                            $result->course_tutors[] = $tutor_info[0];
+                        }
+                    }
+
                     // if attachment variable was parsed
                     if($isAttachment) {
                         // if the assignment is an attachment type
@@ -130,7 +141,7 @@ class Assignments extends Myschoolgh {
                     }
 
                     // loop through the information
-                    foreach(["created_by_info", "course_tutor_info"] as $each) {
+                    foreach(["created_by_info"] as $each) {
                         // convert the created by string into an object
                         $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
                     }
@@ -959,7 +970,7 @@ class Assignments extends Myschoolgh {
                 </p>
                 <p class="clearfix">
                     <span class="float-left">Grade</span>
-                    <span class="float-right text-muted">'.($data->grading ?? null).'</span>
+                    <span class="float-right text-primary"><span style="font-size:30px">'.($data->grading ?? null).'</span>marks</span>
                 </p>
                 ' : null).'
                 <p class="clearfix">
@@ -982,7 +993,7 @@ class Assignments extends Myschoolgh {
                 '.($data->isGraded ? 
                     '<p class="clearfix">
                         <span class="float-left font-weight-bold">Awarded Mark:</span>
-                        <span class="float-right"><span style="font-size:30px">'.$data->awarded_mark.'</span>/<sub style="font-size:30px">'.$data->grading.'</sub></span>
+                        <span class="float-right text-primary"><span style="font-size:30px">'.$data->awarded_mark.'</span>/<sub style="font-size:30px">'.$data->grading.'</sub></span>
                     </p>' : ''
                 ).'
             </div>

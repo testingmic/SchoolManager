@@ -3193,6 +3193,11 @@ class Forms extends Myschoolgh {
                 "Section", "Department", "Description", "Religion", "City", 
                 "Courses Taught", "User Type", "Employer", "Occupation"
             ],
+            "parent" => [
+                "Guardian ID", "Firstname", "Lastname", "Othernames", "Email", "Primary Contact",
+                "Secondary Contact", "Postal Address", "Blood Group", "Residence", 
+                "Date of Birth", "Gender", "Description", "Religion", "City", "Employer", "Occupation"
+            ],
             "course" => [
                 "Course Code", "Title", "Credit Hours", "Weekly Meetings", "Description"
             ]
@@ -3204,16 +3209,16 @@ class Forms extends Myschoolgh {
             <div data-csv_import_column="'.$key.'">
                 <form method="post" action="'.$this->baseUrl.'api/account/import" class="csvDataImportForm" enctype="multipart/form-data">
                     <div class="row">
-                        <div id="dropify-space" class="col-md-8  mt-5 pb-4 text-center m-auto border pt-4 border-white">
+                        <div id="dropify-space" class="col-md-8  mt-5 text-center m-auto border pt-4 border-white">
                             <div class="form-content-loader" style="display: none;">
                                 <div class="offline-content text-center">
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                 </div>
                             </div>
                             <h2>Upload a CSV to import <strong>'.ucwords($key).' data</strong></h2>
+                            <a href="#" onclick="return download_sample_csv(\''.$key.'\')">Download Sample CSV File</a>
                             <hr>
                             <div class="form-controls col-md-4 m-auto">
-                                <hr>
                                 <div class="form-group text-center">
                                     <input style="height: 50px; line-height: 25px" data-file_unique_id="'.$key.'" accept=".csv" type="file" name="'.$key.'_csv_file" id="'.$key.'_csv_file" class="form-control btn bg-purple text-white no-border text-white cursor">
                                 </div>
