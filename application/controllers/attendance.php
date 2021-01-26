@@ -148,8 +148,13 @@ class Attendance extends Myschoolgh {
             // set the success message
             $data = "Attendance log for {$params->date} was successfully updated.";
 
+            // info
+            $info = "";
+
             // if the query was parsed
             if(isset($params->finalize)) {
+                
+                $info = "The record was finalized and cannot be changed again.";
 
                 // execute the statement
                 $this->db->query("UPDATE users_attendance_log SET date_finalized = now(), finalize = '1' WHERE id='{$params->finalize}' LIMIT 1");
@@ -161,10 +166,10 @@ class Attendance extends Myschoolgh {
             //log the user activity
             if(isset($classData)) {
                 // if the class data was parsed and set
-                $this->userLogs("attendance_log", $params->finalize, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}.", $params->userId);
+                $this->userLogs("attendance_log", $params->finalize, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}. {$info}", $params->userId);
             } else {
                 // update the for user type
-                $this->userLogs("attendance_log", $params->finalize, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$params->user_type}</strong> on {$params->date}.", $params->userId);
+                $this->userLogs("attendance_log", $params->finalize, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$params->user_type}</strong> on {$params->date}. {$info}", $params->userId);
             }
         }
 

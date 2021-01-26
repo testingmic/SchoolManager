@@ -494,14 +494,14 @@ class Assignments extends Myschoolgh {
                         $stmt->execute([$mark, 1, $student_id, $params->assignment_id]);
 
                         // Record the user activity
-                        $this->userLogs("assignment-grade", "{$params->assignment_id}_{$student_id}", null, "{$params->userData->name} graded the student: {$mark}", $params->userId);
+                        $this->userLogs("assignments", "{$params->assignment_id}_{$student_id}", null, "{$params->userData->name} graded the student: {$mark}", $params->userId);
                     }
                 } else {
                     // insert the new record since it does not exist
                     $stmt = $this->db->prepare("INSERT INTO assignments_submitted SET client_id = ?, score=?, graded=?, date_graded=now(), student_id=?, assignment_id = ?");
                     $stmt->execute([$params->clientId, $mark, 1, $student_id, $params->assignment_id]);
                     // Record the user activity
-                    $this->userLogs("assignment-grade", "{$params->assignment_id}_{$student_id}", null, "{$params->userData->name} graded the student: {$mark}", $params->userId);
+                    $this->userLogs("assignments", "{$params->assignment_id}_{$student_id}", null, "{$params->userData->name} graded the student: {$mark}", $params->userId);
                 }
             }
         }
@@ -538,6 +538,9 @@ class Assignments extends Myschoolgh {
         // update the status of the assignment
         $this->db->query("UPDATE assignments SET state='Closed', date_closed=now() WHERE item_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
 
+        // Record the user activity
+        $this->userLogs("assignment", "{$params->assignment_id}", null, "{$params->userData->name} closed the assignment thus prohibiting grading.", $params->userId);
+
         return [
             "data" => "Assignment was successfully closed."
         ];
@@ -562,6 +565,9 @@ class Assignments extends Myschoolgh {
         // update the status of the assignment
         $this->db->query("UPDATE assignments SET state='Graded', date_closed=NULL WHERE item_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
 
+        // Record the user activity
+        $this->userLogs("assignment", "{$params->assignment_id}", null, "{$params->userData->name} reopened the closed assignment for grading.", $params->userId);
+
         return [
             "data" => "Assignment was successfully reopened for grading."
         ];
@@ -585,6 +591,9 @@ class Assignments extends Myschoolgh {
 
         // update the status of the assignment
         $this->db->query("UPDATE assignments SET state='Pending', date_published=now() WHERE item_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+        // Record the user activity
+        $this->userLogs("assignment", "{$params->assignment_id}", null, "{$params->userData->name} published the assignment.", $params->userId);
 
         return [
             "data" => "Assignment was successfully published."
@@ -646,7 +655,7 @@ class Assignments extends Myschoolgh {
                     }
 
                     // Record the user activity
-                    $this->userLogs("assignment_doc", "{$item_id}_{$params->userId}", null, "{$params->userData->name} handed in the assignment for grading.", $params->userId);
+                    $this->userLogs("assignment", "{$item_id}_{$params->userId}", null, "{$params->userData->name} handed in the assignment for grading.", $params->userId);
 
                     // load the attachments
                     $code = 200;
@@ -707,7 +716,7 @@ class Assignments extends Myschoolgh {
                     $stmt->execute([$params->clientId, $item_id, $params->userId, $score, 1, "Submitted"]);
 
                     // Record the user activity
-                    $this->userLogs("assignment_doc", "{$item_id}_{$params->userId}", null, "{$params->userData->name} handed in the assignment for auto grading by the system.", $params->userId);
+                    $this->userLogs("assignment", "{$item_id}_{$params->userId}", null, "{$params->userData->name} handed in the assignment for auto grading by the system.", $params->userId);
 
                     // set the success message
                     $code = 200;

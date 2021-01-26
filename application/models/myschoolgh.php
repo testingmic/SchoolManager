@@ -296,10 +296,10 @@ class Myschoolgh extends Models {
 
 			// prepare the statement
 			$stmt = $this->db->prepare("
-				INSERT INTO users_activity_logs SET user_id = ?, subject = ?, 
+				INSERT INTO users_activity_logs SET client_id = ?, user_id = ?, subject = ?, 
 				previous_record = ?, item_id = ?, description = ?, user_agent = ?, source = ?
 			");
-			return $stmt->execute([($userId ?? $this->userId), $subject, $prevData, $itemId, $description, $ur_agent, $source]);
+			return $stmt->execute([$clientId, ($userId ?? $this->userId), $subject, $prevData, $itemId, $description, $ur_agent, $source]);
 
 		} catch(PDOException $e) {
 			print $e->getMessage();

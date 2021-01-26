@@ -586,19 +586,19 @@ class Users extends Myschoolgh {
 		}
 		
 		// confirm that a valid parent id was parsed
-		$p_data = $this->pushQuery("a.id", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND (a.item_id = '{$expl[0]}' OR a.unique_id = '{$expl[0]}') LIMIT 1");
+		$p_data = $this->pushQuery("a.id, a.name", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND (a.item_id = '{$expl[0]}' OR a.unique_id = '{$expl[0]}') LIMIT 1");
 		if(empty($p_data)) {
 			return ["code" => 203, "data" => "Sorry! An invalid guardian id was parsed"];
 		}
 
 		// confirm that a valid student id was parsed
-		$p_data = $this->pushQuery("a.guardian_id", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[1]}' LIMIT 1");
-		if(empty($p_data)) {
+		$u_data = $this->pushQuery("a.guardian_id, a.name", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[1]}' AND user_type='student' LIMIT 1");
+		if(empty($u_data)) {
 			return ["code" => 203, "data" => "Sorry! An invalid student id was parsed"];
 		}
 
 		// convert the guardian id into an array
-		$guardian_id = !empty($p_data[0]->guardian_id) ? $this->stringToArray($p_data[0]->guardian_id) : [];
+		$guardian_id = !empty($u_data[0]->guardian_id) ? $this->stringToArray($u_data[0]->guardian_id) : [];
 
 		// if in the array then remove the value
 		if(in_array($expl[0], $guardian_id)) {
@@ -622,6 +622,10 @@ class Users extends Myschoolgh {
 
 		// return the success response
 		if($params->todo == "remove") {
+
+			// log the user activity
+			$this->userLogs("guardian_ward", $expl[0], null, "{$params->userData->name} removed <strong>{$u_data[0]->name}</strong> as the ward of <strong>{$p_data[0]->name}</strong>.", $params->userId);
+
 			return [
 				"data" => [
 					"info" => "Guardian ward was successfully removed",
@@ -641,6 +645,9 @@ class Users extends Myschoolgh {
 
 			// format the list
 			$wards_list = $this->guardian_wardlist($data[0]->wards_list, $expl[0], true);
+			
+			// log the user activity
+			$this->userLogs("guardian_ward", $expl[0], null, "{$params->userData->name} appended <strong>{$u_data[0]->name}</strong> as a ward to <strong>{$p_data[0]->name}</strong>.", $params->userId);
 
 			// return the results
 			return [
@@ -672,19 +679,19 @@ class Users extends Myschoolgh {
 		}
 		
 		// confirm that a valid parent id was parsed
-		$p_data = $this->pushQuery("a.id", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[0]}' LIMIT 1");
+		$p_data = $this->pushQuery("a.id, a.name", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[0]}' LIMIT 1");
 		if(empty($p_data)) {
 			return ["code" => 203, "data" => "Sorry! An invalid guardian id was parsed"];
 		}
 
 		// confirm that a valid student id was parsed
-		$p_data = $this->pushQuery("a.guardian_id", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[1]}' LIMIT 1");
-		if(empty($p_data)) {
+		$u_data = $this->pushQuery("a.guardian_id, a.name", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[1]}' LIMIT 1");
+		if(empty($u_data)) {
 			return ["code" => 203, "data" => "Sorry! An invalid student id was parsed"];
 		}
 
 		// convert the guardian id into an array
-		$guardian_id = !empty($p_data[0]->guardian_id) ? $this->stringToArray($p_data[0]->guardian_id) : [];
+		$guardian_id = !empty($u_data[0]->guardian_id) ? $this->stringToArray($u_data[0]->guardian_id) : [];
 
 		// if in the array then remove the value
 		if(in_array($expl[0], $guardian_id)) {
@@ -708,6 +715,9 @@ class Users extends Myschoolgh {
 
 		// return the success response
 		if($params->todo == "remove") {
+			// log the user activity
+			$this->userLogs("guardian_ward", $expl[0], null, "{$params->userData->name} removed <strong>{$u_data[0]->name}</strong> as the ward of <strong>{$p_data[0]->name}</strong>.", $params->userId);
+			
 			return [
 				"data" => [
 					"info" => "Ward Guardian was successfully removed",
@@ -716,6 +726,9 @@ class Users extends Myschoolgh {
 				"code" => 200
 			];
 		} else if($params->todo == "append") {
+			// log the user activity
+			$this->userLogs("guardian_ward", $expl[0], null, "{$params->userData->name} appended <strong>{$u_data[0]->name}</strong> as a ward to <strong>{$p_data[0]->name}</strong>.", $params->userId);
+
 			// return the results
 			return [
 				"data" => [
