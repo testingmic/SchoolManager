@@ -129,13 +129,14 @@ else if($isTutorStudent) {
 
         $assigments_list .= "<tr data-row_id=\"{$each->id}\">";
         $assigments_list .= "<td>".($key+1)."</td>";
-        $assigments_list .= "<td>{$each->assignment_title} ".(
+        $assigments_list .= "<td><a href='{$baseUrl}update-assignment/{$each->item_id}/view'>{$each->assignment_title}</a> ".(
             $can_Update_Assign ? 
-                "<br><strong>Class:</strong> <a href=\"{$baseUrl}update-class/{$each->class_id}/view\">{$each->class_name}</a>
-                <br><strong>Course:</strong> <a href=\"{$baseUrl}update-course/{$each->course_id}/view\">{$each->course_name}</a>" : 
-                "<br><strong>Course:</strong> <a href=\"{$baseUrl}update-course/{$each->course_id}/view\">{$each->course_name}</a>"
-            )." ".($can_Update_Assign ? $myClass->the_status_label($each->state) : $each->handedin_label)."
-            </td>";
+                "<br>Class: <strong>{$each->class_name}</strong>
+                <br>Course: <strong>{$each->course_name}</strong>" : 
+                "<br>Course:</strong> {$each->course_name}</strong>"
+            )." ".($can_Update_Assign ? $myClass->the_status_label($each->state) : $each->handedin_label)."</td>";
+
+        
         $assigments_list .= "<td>{$each->due_date} @ {$each->due_time}</td>";
 
         // show this section if the user has the necessary permissions

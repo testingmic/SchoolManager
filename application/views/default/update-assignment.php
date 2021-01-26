@@ -61,7 +61,7 @@ if(!empty($item_id)) {
 
         // guardian information
         $isGraded = isset($data->awarded_mark) ? true : false;
-        $isActive = in_array($data->state, ["Graded", "Pending"]);
+        $isActive = in_array($data->state, ["Graded", "Pending", "Answered"]);
         $isMultipleChoice =  (bool) ($data->assignment_type == "multiple_choice");
 
         $data->isGraded = $isGraded;
@@ -153,9 +153,13 @@ if(!empty($item_id)) {
             
             /** Get the students list */
             $students_list = ($data->assigned_to == "selected_students") ? $myClass->stringToArray($data->assigned_to_list) 
-                : array_column($myClass->pushQuery("item_id, unique_id, name, email, phone_number, gender", "users", 
-                    "client_id='{$clientId}' AND class_id='{$data->class_id}' AND user_type='student' AND user_status='Active' AND status='1'"), "item_id");
-            
+                : array_column(
+                    $myClass->pushQuery(
+                        "a.item_id, a.unique_id, a.name, a.email, a.phone_number, a.gender", 
+                        "users a LEFT JOIN classes c ON c.id = a.class_id", 
+                        "a.client_id='{$clientId}' AND c.item_id='{$data->class_id}' AND a.user_type='student' AND a.user_status='Active' AND a.status='1'"
+                ), "item_id");
+
             /**
              * List the students to whom the assignment has been assigned to
              * 
@@ -168,7 +172,7 @@ if(!empty($item_id)) {
                 (SELECT score FROM assignments_submitted WHERE assignment_id = '{$data->item_id}' AND student_id = users.item_id) AS score,
                 (SELECT b.handed_in FROM assignments_submitted b WHERE b.assignment_id = '{$data->item_id}' AND b.student_id = users.item_id) AS handed_in
                 FROM users WHERE 
-                client_id='{$clientId}' AND class_id='{$data->class_id}' AND user_type='student' 
+                client_id='{$clientId}' AND user_type='student' 
                 AND user_status='Active' AND status='1' AND item_id IN ('".implode("', '", $students_list)."')
 			");
 			$the_students_list->execute();
@@ -254,7 +258,7 @@ if(!empty($item_id)) {
                 </div>';
 
             } else {
-               $grading_info .= '<div class="col-lg-12 text-center">No student has handed in their answers yet.</div>'; 
+               $grading_info .= '<div style="width:100%;" class="text-center">No student has handed in their answers yet.</div>'; 
             }
 
         }

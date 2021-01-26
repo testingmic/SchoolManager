@@ -49,7 +49,7 @@ class Assignments extends Myschoolgh {
             $query = ",
             (SELECT COUNT(*) FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.graded='1') AS students_graded,
             (SELECT COUNT(*) FROM assignments_submitted	c WHERE c.assignment_id=a.item_id AND c.handed_in='Submitted') AS students_handed_in,
-            (SELECT COUNT(*) FROM users c WHERE c.client_id=a.client_id AND a.class_id=c.class_id AND c.user_type='student' AND c.user_status='Active' AND c.status='1') AS students_assigned
+            (SELECT COUNT(*) FROM users c WHERE c.client_id=a.client_id AND c.class_id = cl.id AND c.user_type='student' AND c.user_status='Active' AND c.status='1') AS students_assigned
             ";
         }
 
@@ -78,12 +78,13 @@ class Assignments extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                (SELECT name FROM classes WHERE classes.item_id = a.class_id LIMIT 1) AS class_name,
+                cl.name AS class_name,
                 (SELECT name FROM courses WHERE courses.item_id = a.course_id LIMIT 1) AS course_name,
                 (SELECT b.description FROM files_attachment b WHERE b.resource='assignments' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.course_tutor LIMIT 1) AS course_tutor_info,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 {$query} FROM assignments a
+                LEFT JOIN classes cl ON cl.item_id = a.class_id
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([1]);
@@ -246,7 +247,7 @@ class Assignments extends Myschoolgh {
 			$return["additional"] = ["clear" => true];
 
             // if the request is to add a quiz
-            if(!$is_attached) {
+            if($is_attached) {
                 $return["data"] = "Assignment successfully created. Proceeding to add the questions";
                 $return["additional"]["href"] = "{$this->baseUrl}add-assignment/add_question?qid={$item_id}";
             }
@@ -683,7 +684,8 @@ class Assignments extends Myschoolgh {
 
                     // update the score for the user
                     $this->db->query("UPDATE assignments_answers SET scores = '{$score}' WHERE assignment_id='{$item_id}' AND student_id = '{$params->userId}' LIMIT 1");
-
+                    $this->db->query("UPDATE assignments SET state = 'Answered' WHERE assignment_id='{$item_id}' AND client_id = '{$params->clientId}' LIMIT 1");
+                    
                     // insert the record into the assignments_submitted table
                     $stmt = $this->db->prepare("INSERT INTO assignments_submitted SET client_id = ?, assignment_id = ?, student_id = ?, score = ?, graded = ?, handed_in = ?, date_graded = now()");
                     $stmt->execute([$params->clientId, $item_id, $params->userId, $score, 1, "Submitted"]);
@@ -695,7 +697,7 @@ class Assignments extends Myschoolgh {
                     $data = "Congrats, your assignment was successfully submitted.";
 
                     // unset all the sessions that are not needed
-                    // $this->session->remove(["currentQuestionId","previousQuestionId","showSubmitButton", "attachAssignmentDocs", "nextQuestionId", "questionNumber"]);
+                    $this->session->remove(["currentQuestionId","previousQuestionId","showSubmitButton", "attachAssignmentDocs", "nextQuestionId", "questionNumber"]);
                 }
 
             }
@@ -1255,13 +1257,13 @@ class Assignments extends Myschoolgh {
                     // if the answer type is option or multiple
                     if(in_array($answer_type, ["multiple", "option"])) {
                         // start the html content
-                        $question_html .= "<div class='col-lg-12'>";
+                        $question_html .= "<div style='width:100%;'>";
 
                         // if the show_answer parameter was parsed
                         if($showAnswer) {
                             // if the answer is correct
                             $question_html .= "
-                                <span style='position:absolute;right:5px;top:5px;'>
+                                <span style='float:right;right:0px;top:5px;'>
                                     ".($correct ? "<span class='badge badge-success'>Correct</span>" : "<span class='badge badge-danger'>Wrong</span>")."
                                 </span>";
                         }

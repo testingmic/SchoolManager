@@ -283,7 +283,7 @@ var load_singleStudentData = async(student_id, grading) => {
     htmlData += "<th width='100%' style='font-weight:bolder; font-size:16px'>";
     htmlData += the_data.name;
     htmlData += "</th>";
-    htmlData += `<th align='right'><!--${the_data.score}/${grading}--></th>`;
+    htmlData += `<th align='right'>${the_data.score}/${grading}</th>`;
     htmlData += "</tr></thead>";
     htmlData += "<tbody>";
     htmlData += "<tr><td colspan='2'>";

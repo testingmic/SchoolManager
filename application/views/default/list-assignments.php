@@ -59,11 +59,11 @@ foreach($item_list["data"] as $key => $each) {
 
     $assignments .= "<tr data-row_id=\"{$each->id}\">";
     $assignments .= "<td>".($key+1)."</td>";
-    $assignments .= "<td>{$each->assignment_title} ".(
+    $assignments .= "<td><a href='{$baseUrl}update-assignment/{$each->item_id}/view'>{$each->assignment_title}</a> ".(
         $hasUpdate ? 
-            "<br><strong>Class:</strong> <a href=\"{$baseUrl}update-class/{$each->class_id}/view\">{$each->class_name}</a>
-            <br><strong>Course:</strong> <a href=\"{$baseUrl}update-course/{$each->course_id}/view\">{$each->course_name}</a>" : 
-            "<br><strong>Course:</strong> <a href=\"{$baseUrl}update-course/{$each->course_id}/view\">{$each->course_name}</a>"
+            "<br>Class: <strong>{$each->class_name}</strong>
+            <br>Course: <strong>{$each->course_name}</strong>" : 
+            "<br>Course:</strong> {$each->course_name}</strong>"
         )."</td>";
     $assignments .= "<td>{$each->due_date} @ {$each->due_time}</td>";
 
