@@ -65,6 +65,11 @@ var remove_AssignmentQuestion = (assignment_id, question_id) => {
                         text: response.data.result,
                         icon: "success",
                     });
+                    let marks = 0;
+                    $.each($(`table[id='questionnaire_table'] tr td[data-column='mark']`), function(i, e) {
+                        marks += parseInt($(this).text());
+                    });
+                    $(`table[id='questionnaire_table'] tr td[data-column='total_marks']`).html(`<strong>${marks}</strong>`);
                 }
             });
         }
@@ -74,7 +79,6 @@ var remove_AssignmentQuestion = (assignment_id, question_id) => {
 var clear_questionForm = () => {
     $(`input[name="question_id"]`).val("");
     $(`textarea[name="question"]`).focus();
-    $(`input[name="marks"]`).val("1");
     $(`select[name="difficulty"]`).val("medium").change();
     $(`select[name="answer_type"]`).val("option").change();
     $(`input[name="answer_option"]:checkbox`).prop('checked', false);
@@ -106,6 +110,7 @@ var save_AssignmentQuestion = (assignment_id) => {
     let question = $(`textarea[name="question"]`).val(),
         answer_type = $(`select[name="answer_type"]`).val(),
         question_id = $(`input[name="question_id"]`).val(),
+        marks = $(`input[name="marks"]`).val(),
         numeric_answer = $(`input[name="numeric_answer"]`).val(),
         difficulty = $(`select[name="difficulty"]`).val();
     $.each(options, function(i, e) {
@@ -115,6 +120,7 @@ var save_AssignmentQuestion = (assignment_id) => {
     question_data["question"] = question;
     question_data["answer_type"] = answer_type;
     question_data["question_id"] = question_id;
+    question_data["marks"] = marks;
     question_data["numeric_answer"] = numeric_answer;
     question_data["assignment_id"] = assignment_id;
     question_data["difficulty"] = difficulty;
@@ -133,20 +139,24 @@ var save_AssignmentQuestion = (assignment_id) => {
                 if (response.code == 200) {
                     clear_questionForm();
                     let questions_list = "",
-                        count = 0;
+                        count = 0,
+                        marks = 0;
                     the_icon = "success";
                     $.each(response.data.additional.questions, function(i, e) {
                         count++;
+                        marks += parseInt(e.marks);
                         questions_list += `
                         <tr data-row_id="${e.item_id}">
                             <td>${count}</td>
                             <td>${e.question}</td>
+                            <td data-column='mark'>${e.marks}</td>
                             <td>
                                 <button class="btn btn-outline-success btn-sm" onclick="return review_AssignmentQuestion('${assignment_id}','${e.item_id}')"><i class="fa fa-edit"></i></button>
                                 <button class="btn btn-outline-danger btn-sm" onclick="return remove_AssignmentQuestion('${assignment_id}','${e.item_id}')"><i class="fa fa-trash"></i></button>
                             </td>
                         </tr>`;
                     });
+                    questions_list += `<tr><td></td><td align='right' data-column='total_marks'><strong>Total Marks:</strong></td><td><strong>${marks}</strong></td><td></td></tr>`;
                     $(`tbody[id='added_questions']`).html(questions_list);
                 }
                 swal({

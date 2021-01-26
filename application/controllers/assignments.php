@@ -77,13 +77,13 @@ class Assignments extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
-                (SELECT name FROM courses WHERE courses.id = a.course_id LIMIT 1) AS course_name,
+                (SELECT name FROM classes WHERE classes.item_id = a.class_id LIMIT 1) AS class_name,
+                (SELECT name FROM courses WHERE courses.item_id = a.course_id LIMIT 1) AS course_name,
                 (SELECT b.description FROM files_attachment b WHERE b.resource='assignments' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.course_tutor LIMIT 1) AS course_tutor_info,
                 (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 {$query} FROM assignments a
-                WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
+                WHERE {$params->query} AND a.status = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([1]);
 
@@ -161,7 +161,7 @@ class Assignments extends Myschoolgh {
         }
 
         /** Run a class check */
-        $classCheck = $this->pushQuery("id, department_id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        $classCheck = $this->pushQuery("id, department_id", "classes", "item_id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
         /** Confirm the class id */
         if(empty($classCheck)) {
@@ -169,7 +169,7 @@ class Assignments extends Myschoolgh {
         }
 
         /** Confirm the selected course */
-        $course_data = $this->pushQuery("id, course_tutor", "courses", "id='{$params->course_id}' AND class_id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        $course_data = $this->pushQuery("id, course_tutor", "courses", "item_id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         if(empty($course_data)) {
             return ["code" => 203, "data" => "Sorry! An invalid course id was submitted"];
         }
@@ -277,12 +277,12 @@ class Assignments extends Myschoolgh {
         }
 
         /** Confirm the class id */
-        if(empty($this->pushQuery("id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1'"))) {
+        if(empty($this->pushQuery("id", "classes", "item_id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1'"))) {
             return ["code" => 203, "data" => "Sorry! An invalid class id was submitted"];
         }
 
         /** Confirm the selected course */
-        $course_data = $this->pushQuery("id, course_tutor", "courses", "id='{$params->course_id}' AND class_id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1'");
+        $course_data = $this->pushQuery("id, course_tutor", "courses", "item_id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1'");
         if(empty($course_data)) {
             return ["code" => 203, "data" => "Sorry! An invalid course id was submitted"];
         }
@@ -397,12 +397,8 @@ class Assignments extends Myschoolgh {
         $result["students_list"] = $this->pushQuery("item_id, unique_id, name, email, phone_number, gender", "users", 
             "client_id='{$params->clientId}' AND class_id='{$params->class_id}' AND user_type='student' AND user_status='Active' AND status='1'");
         
-        /** Get the unique class id */
-        $class_id = $this->columnValue("item_id", "classes", "id='{$params->class_id}'");
-        $class_id = $class_id->item_id ?? null;
-
         /** Load the courses list */
-        $result["courses_list"] = $this->pushQuery("id, item_id, name", "courses", "class_id LIKE '%{$class_id}%' AND status='1'"); 
+        $result["courses_list"] = $this->pushQuery("id, item_id, name", "courses", "class_id LIKE '%{$params->class_id}%' AND status='1'"); 
 
         /** Return the results */
         return [
@@ -762,7 +758,7 @@ class Assignments extends Myschoolgh {
     public function questions_list(stdClass $params) {
 
         // columns to load
-        $columns = isset($params->columns)  ? $params->columns : "a.id, a.item_id, a.question";
+        $columns = isset($params->columns)  ? $params->columns : "a.id, a.item_id, a.marks, a.question";
 
         // make the request
         $questions = $this->pushQuery(
@@ -818,6 +814,26 @@ class Assignments extends Myschoolgh {
                 $params->answers = $params->numeric_answer;
             }
 
+            $append_msg = "";
+
+            // get the assignment_id marks already in the database
+            $assignment_marks = $this->pushQuery("SUM(marks) AS total_marks", 
+                "assignments_questions", 
+                (isset($params->question_id) ? "item_id != '{$params->question_id}' AND " : "")." 
+                assignment_id='{$params->assignment_id}' AND client_id='{$params->clientId}'");
+
+            if(!empty($assignment_marks)) {
+                $grading = $data->grading;
+                $the_marks = $assignment_marks[0]->total_marks;
+                $total_mark = isset($params->marks) ? ($params->marks + $the_marks) : $the_marks;
+
+                if($total_mark > $grading) {
+                    return ["code" => 203, "data" => "Sorry! Adding this question with the assign marks would result in a grade of: {$total_mark} which is more than: {$grading}."];
+                } elseif($total_mark == $grading) {
+                    $append_msg = "This should be your last question. Since the marking scheme matches the grade set.";
+                }
+            }
+
             // get the question information
             if(isset($params->question_id)) {
                 // get the assignment information
@@ -844,6 +860,7 @@ class Assignments extends Myschoolgh {
                     ".(isset($params->option_c) ? ",option_c='{$params->option_c}'" : null)."
                     ".(isset($params->option_d) ? ",option_d='{$params->option_d}'" : null)."
                     ".(isset($params->option_e) ? ",option_e='{$params->option_e}'" : null)."
+                    ".(isset($params->option_f) ? ",option_f='{$params->option_f}'" : null)."
                     ".(isset($params->answer_type) ? ",answer_type='{$params->answer_type}'" : null)."
                     ".(isset($params->difficulty) ? ",difficulty='{$params->difficulty}'" : null)."
                     ".(isset($params->correct_answer_description) ? ",correct_answer_description='{$params->correct_answer_description}'" : null)."
@@ -851,7 +868,7 @@ class Assignments extends Myschoolgh {
                 $stmt->execute([$item_id, $params->assignment_id, $params->question, $answers, $params->userId, $params->clientId]);
 
                 return [
-                    "data" => "Assignment Question successfully created",
+                    "data" => "Assignment Question successfully created. {$append_msg}",
                     "additional" => [
                         "questions" => $this->questions_list($params)
                     ]
@@ -868,6 +885,7 @@ class Assignments extends Myschoolgh {
                     ".(isset($params->option_c) ? ",option_c='{$params->option_c}'" : null)."
                     ".(isset($params->option_d) ? ",option_d='{$params->option_d}'" : null)."
                     ".(isset($params->option_e) ? ",option_e='{$params->option_e}'" : null)."
+                    ".(isset($params->option_f) ? ",option_f='{$params->option_f}'" : null)."
                     ".(isset($params->answer_type) ? ",answer_type='{$params->answer_type}'" : null)."
                     ".(isset($params->difficulty) ? ",difficulty='{$params->difficulty}'" : null)."
                     ".(isset($params->correct_answer_description) ? ",correct_answer_description='{$params->correct_answer_description}'" : null)."
@@ -1077,7 +1095,7 @@ class Assignments extends Myschoolgh {
             }
 
             // options array list
-            $options_array = ["option_a" => "A", "option_b" => "B", "option_c" => "C","option_d" => "D", "option_e" => "E"];
+            $options_array = ["option_a" => "A", "option_b" => "B", "option_c" => "C","option_d" => "D", "option_e" => "E", "option_f" => "F"];
 
             // process the question data and return the processed information
             $question_html = "
@@ -1097,7 +1115,7 @@ class Assignments extends Myschoolgh {
                     if(in_array($answer_type, ["multiple", "option"])) {
                         // loop through the array list
                         foreach($options_array as $key => $option) {
-                            if(isset($question->{$key})) {
+                            if(isset($question->{$key}) && !empty($question->{$key})) {
                                 $question_html .= "
                                 <div class='pt-2'>
                                     <input ".(in_array($key, $this_answer) ? "checked" : null)." name='answer_option' value='{$key}' id='{$key}' class='cursor checkbox' type='checkbox' style='height:20px; width:20px'>

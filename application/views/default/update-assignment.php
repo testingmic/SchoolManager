@@ -96,7 +96,8 @@ if(!empty($item_id)) {
                 $questions_list .= "<thead>";
                 $questions_list .= "<tr>";
                 $questions_list .= "<th width='5%'>#</th>";
-                $questions_list .= "<th width='80%'>Question Content</th>";
+                $questions_list .= "<th width='65%'>Question Content</th>";
+                $questions_list .= "<th>Marks</th>";
                 $questions_list .= "<th></th>";
                 $questions_list .= "</tr>";
                 $questions_list .= "</thead>";
@@ -105,16 +106,23 @@ if(!empty($item_id)) {
                 // make a query for the questions list
                 $questions_query = load_class("assignments", "controllers")->questions_list($params);
                 $questions_array = [];
+
                 // loop through the questions list
                 if(!empty($questions_query)) {
+                    // init the marks
+                    $marks = 0;
+
+                    // loop through the questions list
                     foreach($questions_query as $key => $question) {
                         $ii = $key+1;
                         $questions_array[$question->item_id] = $question;
+                        $marks += $question->marks;
 
                         $questions_list .= "
                         <tr data-row_id='{$question->item_id}'>
                             <td>{$ii}</td>
                             <td>{$question->question}</td>
+                            <td >{$question->marks}</td>
                             <td align='center'>";
                                 if(!$isActive) {
                                     $questions_list .= "<a href='{$baseUrl}add-assignment/add_question?qid={$item_id}&q_id={$question->item_id}' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>&nbsp;";
@@ -126,6 +134,8 @@ if(!empty($item_id)) {
                             $questions_list .= "</td>
                         </tr>";
                     }
+                    // append the tabulated marks
+                    $questions_list .= "<tr><td></td><td align='right'><strong>Total Marks:</strong></td><td><strong>{$marks}</strong></td><td></td></tr>";
                 } else {
                     $questions_list .= "<tr>
                         <td colspan='3' class='font-italic text-center'>No questions have been uploaded for this assignment</td>
@@ -242,6 +252,9 @@ if(!empty($item_id)) {
                     </div>
                     <div class="card card-default student-assignment-details"></div>
                 </div>';
+
+            } else {
+               $grading_info .= '<div class="col-lg-12 text-center">No student has handed in their answers yet.</div>'; 
             }
 
         }
@@ -300,12 +313,13 @@ if(!empty($item_id)) {
 
             // display the questions using an algorithm specified in the assignment class
             elseif($isMultipleChoice) {
+
                 // parameters to load the assignment information
                 $params = (object) [
                     "clientId" => $clientId,
                     "columns" => "a.*",
                     "show_answer" => true,
-                    "userId" => $session->userId,
+                    "userId" => $session->student_id,
                     "assignment_id" => $item_id
                 ];
                 
@@ -324,7 +338,7 @@ if(!empty($item_id)) {
                     $session->previousQuestionId = !empty($session->previousQuestionId) ? $session->previousQuestionId : null;
                     $session->currentQuestionId = !empty($session->currentQuestionId) ? $session->currentQuestionId : $questions_ids[0];
 
-                    $grading_info .= $assignmentClass->current_question($questions_array_list, $session->userId);
+                    $grading_info .= $assignmentClass->current_question($questions_array_list, $session->student_id);
                 
                 } elseif($data->handed_in === "Submitted") {
                     
@@ -377,7 +391,7 @@ if(!empty($item_id)) {
                         <div class="py-3 pt-0">
                             <div class="d-flex justify-content-start">
                                 <div class="mr-0">
-                                    <img src="'.$baseUrl.''.$data->course_tutor_info->image.'" class="rounded-circle cursor author-box-picture" width="50px">
+                                    '.(isset($data->course_tutor_info->image) ? '<img src="'.$baseUrl.''.$data->course_tutor_info->image.'" class="rounded-circle cursor author-box-picture" width="50px">' : null).'
                                 </div>
                                 <div class="col-11">
                                     <div class="clearfix">

@@ -376,8 +376,8 @@ class Forms extends Myschoolgh {
         $html_content .= "<label>Select Class <span class='required'>*</span></label>";
         $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='class_id' id='class_id'>";
         $html_content .= "<option value='null'>Select Class</option>";
-        foreach($this->pushQuery("name, id", "classes", "client_id='{$params->clientId}' AND status='1'") as $class) {
-            $html_content .= "<option ".($class_id == $class->id ? "selected" : null)." value='{$class->id}'>{$class->name}</option>";
+        foreach($this->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'") as $class) {
+            $html_content .= "<option ".($class_id == $class->item_id ? "selected" : null)." value='{$class->item_id}'>{$class->name}</option>";
         }
         $html_content .= "</select>";
         $html_content .= "</div>";
@@ -391,7 +391,7 @@ class Forms extends Myschoolgh {
         // display the courses list
         if(isset($ass_data)) {
             foreach($ass_data["courses_list"] as $course) {
-                $html_content .= "<option ".($course_id == $course->id ? "selected" : null)." value='{$course->id}'>{$course->name}</option>";
+                $html_content .= "<option ".($course_id == $course->item_id ? "selected" : null)." value='{$course->item_id}'>{$course->name}</option>";
             }
         }
 
@@ -401,13 +401,13 @@ class Forms extends Myschoolgh {
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Submission Date <span class='required'>*</span></label>";
-        $html_content .= "<input {$disabled} type='date' class='form-control' value='".($params->data->due_date ?? null)."' name='date_due' id='date_due'>";
+        $html_content .= "<input {$disabled} type='date' class='form-control' value='".($params->data->due_date ?? date("Y-m-d", strtotime("next week")))."' name='date_due' id='date_due'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Time Due</label>";
-        $html_content .= "<input {$disabled} type='time' class='form-control' value='".($params->data->due_time ?? null)."' name='time_due' id='time_due'>";
+        $html_content .= "<input {$disabled} type='time' class='form-control' value='".($params->data->due_time ?? "09:00")."' name='time_due' id='time_due'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
 
@@ -540,8 +540,8 @@ class Forms extends Myschoolgh {
         // initial variables
         $options_array = [
             "option_a" => "Option A", "option_b" => "Option B",
-            "option_c" => "Option C","option_d" => "Option D",
-            "option_e" => "Option E",
+            "option_c" => "Option C", "option_d" => "Option D",
+            "option_e" => "Option E" //, "option_f" => "Option F",
         ];
         $answer_types = [
             "option" => "Single Answer Option",
@@ -570,7 +570,7 @@ class Forms extends Myschoolgh {
                     </div>
                     <input type="hidden" name="question_id" id="question_id" value="'.($data->item_id ?? null).'" class="form-control">
                     <input type="hidden" name="assignment_id" id="assignment_id" value="'.$assignment_id.'" class="form-control">
-                    <textarea type="text" '.$disabled.' placeholder="Enter the question here" name="question" id="question" class="form-control">'.($data->question ?? null).'</textarea>
+                    <textarea type="text" '.$disabled.' placeholder="" name="question" id="question" class="form-control">'.($data->question ?? null).'</textarea>
                 </div>
             </div>
             <div class="row">
@@ -601,7 +601,7 @@ class Forms extends Myschoolgh {
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="marks"><strong>Question Mark</strong> <span class="required">*</span></label>
-                        <input '.$disabled.' type="number" id="marks" value="'.($data->marks ??  1).'" max="100" name="marks" placeholder="Please enter the mark" step="2" class="form-control">
+                        <input '.$disabled.' type="number" min="1" max="100" id="marks" value="'.($data->marks ??  1).'" max="100" name="marks" placeholder="Please enter the mark" step="1" class="form-control">
                     </div>
                 </div>
             </div>
@@ -621,7 +621,7 @@ class Forms extends Myschoolgh {
 
                         $html_content .= '
                         <tr>
-                            <td width="13%"><strong>'.$value.'</strong> '.($i < 4 ? " <span class='required'>*</span>" : "").'</td>
+                            <td width="13%"><strong>'.$value.'</strong> '.($i < 3 ? " <span class='required'>*</span>" : "").'</td>
                             <td><input '.$disabled.' type="text" name="'.$option.'" id="'.$option.'" value="'.($data->{$option} ?? null).'" class="col-lg-12 objective_question form-control"></td>
                             <td width="7%"><input '.$disabled.' type="checkbox" '.((!empty($data->correct_answer) && in_array($option, $answer_array)) ? "checked" : null).' value="'.$option.'" name="answer_option" style="height:20px; width:20px" class="checkbox cursor"></td>
                         </tr>';

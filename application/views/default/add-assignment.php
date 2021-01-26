@@ -95,11 +95,12 @@ if(isset($_GET["qid"]) && !empty($_GET["qid"]) || !empty($session->assignment_up
         $session->assignment_uploadID = $assignment_id;
 
         // get the questions list for this assignment
-        $questions_list = "<table class='table table-bordered'>";
+        $questions_list = "<table id='questionnaire_table' class='table table-bordered'>";
         $questions_list .= "<thead>";
         $questions_list .= "<tr>";
         $questions_list .= "<th width='8%'>#</th>";
-        $questions_list .= "<th width='75%'>Question Content</th>";
+        $questions_list .= "<th width='55%'>Question Content</th>";
+        $questions_list .= "<th>Marks</th>";
         $questions_list .= "<th></th>";
         $questions_list .= "</tr>";
         $questions_list .= "</thead>";
@@ -116,21 +117,29 @@ if(isset($_GET["qid"]) && !empty($_GET["qid"]) || !empty($session->assignment_up
 
         // loop through the questions list
         if(!empty($questions_query)) {
+            // init the marks
+            $marks = 0;
+            
+            // loop through the list
             foreach($questions_query as $key => $question) {
                 $ii = $key+1;
+                $marks += $question->marks;
                 $questions_list .= "
                 <tr data-row_id='{$question->item_id}'>
                     <td>{$ii}</td>
                     <td>{$question->question}</td>
+                    <td data-column='mark'>{$question->marks}</td>
                     <td align='center'>
                         <button class='btn btn-outline-success btn-sm' onclick='return review_AssignmentQuestion(\"{$assignment_id}\",\"{$question->item_id}\")'><i class='fa ".($isActive ? "fa-edit" : "fa-eye")."'></i></button>
                         ".($isActive ? "<button class='btn btn-outline-danger btn-sm' onclick='return remove_AssignmentQuestion(\"{$assignment_id}\",\"{$question->item_id}\")'><i class='fa fa-trash'></i></button>" : "")."
                     </td>                
                 </tr>";
             }
+            // append the tabulated marks
+            $questions_list .= "<tr><td></td><td align='right'><strong>Total Marks:</strong></td><td data-column='total_marks'><strong>{$marks}</strong></td><td></td></tr>";
         } else {
             $questions_list .= "<tr>
-                <td colspan='3' class='font-italic text-center'>No questions have been uploaded for this assignment</td>
+                <td colspan='4' class='font-italic text-center'>No questions have been uploaded for this assignment</td>
             </tr>";
         }
         $questions_list .= "</tbody>";
@@ -172,7 +181,9 @@ if(isset($_GET["qid"]) && !empty($_GET["qid"]) || !empty($session->assignment_up
                     </div>
                     <h6>QUESTIONS LIST</h6>
                     <div id="added_questions_list" class="table-responsive">
-                        '.$questions_list.'
+                        <div class="trix-slim-scroll" style="overflow-y:auto;max-height:350px">
+                            '.$questions_list.'
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-7">

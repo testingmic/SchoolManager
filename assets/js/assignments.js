@@ -26,7 +26,7 @@ $(`div[id='create_assignment'] select[name='class_id']`).on("change", function()
                 $(`div[id='create_assignment'] select[name='course_id']`).find('option').remove().end();
                 $(`div[id='create_assignment'] select[name='course_id']`).append(`<option value="null" selected="selected">Select Course</option>`);
                 $.each(response.data.result.courses_list, (_, e) => {
-                    $(`div[id='create_assignment'] select[name='course_id']`).append(`<option data-item_id="${e.id}" value='${e.id}'>${e.name}</option>'`);
+                    $(`div[id='create_assignment'] select[name='course_id']`).append(`<option data-item_id="${e.item_id}" value='${e.item_id}'>${e.name}</option>'`);
                 });
 
                 $(`div[id='create_assignment'] select[name='assigned_to_list']`).find('option').remove().end();
