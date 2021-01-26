@@ -180,6 +180,8 @@ if(!empty($item_id)) {
 
             // ensure the result is not empty
             if(!empty($result)) {
+                
+                $function = $isMultipleChoice ? "review_QuizAssignment" : "load_singleStudentData";
 
                 $grading_info .= '
                 <div class="col-lg-6" id="assignment-content">
@@ -214,7 +216,7 @@ if(!empty($item_id)) {
                                         <div class="d-flex justify-content-start">
                                             <div class="mr-2">
                                                 '.($isSubmitted ?
-                                                    '<a title="Click to view document submitted by '.$student->name.'" style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return load_singleStudentData(\''.$student->item_id.'\',\''.$data->grading.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">
+                                                    '<a title="Click to view document submitted by '.$student->name.'" style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">
                                                         <img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt="">
                                                     </a>' : 
                                                     '<img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt="">'
@@ -222,7 +224,7 @@ if(!empty($item_id)) {
                                             </div>
                                             <div>
                                                 <p class="p-0 m-0">
-                                                    '.($isSubmitted ? '<a style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return load_singleStudentData(\''.$student->item_id.'\',\''.$data->grading.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'"><strong>'.$student->name.'</strong></a>' : "<strong>{$student->name}</strong>").'
+                                                    '.($isSubmitted ? '<a style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'"><strong>'.$student->name.'</strong></a>' : "<strong>{$student->name}</strong>").'
                                                 </p>
                                                 <p class="p-0 m-0">'.$myClass->the_status_label($student->handed_in).'</p>
                                             </div>
@@ -281,7 +283,7 @@ if(!empty($item_id)) {
             ];
 
             // check if the use has handed in the assignment
-            $nothanded_in = (bool) ($data->handed_in === "Pending");
+            $nothanded_in = (bool) (($data->handed_in === "Pending") || empty($data->handed_in));
 
             if($nothanded_in) {
                 // append the upload script
@@ -295,19 +297,17 @@ if(!empty($item_id)) {
                 $grading_info .= 
                 ($nothanded_in ?
                     '<div class="col-lg-'.($nothanded_in ? 12 : 4).'" id="handin_upload">
-                        <div><h5 class="text-uppercase">Upload Document</h5></div>
+                        <div><h5 class="text-uppercase">Upload Assignment Answer</h5></div>
                         <div class="col-lg-12" id="upload_question_set_template">
                             <div class="form-group text-center mb-1">
                                 <div class="row">'.load_class("forms", "controllers")->form_attachment_placeholder($file_params).'</div>
                             </div>
                         </div>
-                        '.(!empty($session->{$module}) ?
-                            '<div class="text-right">
-                                <a href="javascript:void(0)" onclick="submit_Answers(\''.$item_id.'\');" class="btn anchor btn-outline-primary">
-                                    <i class="fa fa-save"></i> Submit Answer
-                                </a>
-                            </div>' : ''
-                        ).'
+                        <div class="text-right mb-3">
+                            <a href="javascript:void(0)" onclick="return submit_Answers(\''.$item_id.'\');" class="btn anchor btn-outline-primary">
+                                <i class="fa fa-save"></i> Submit Answer
+                            </a>
+                        </div>
                     </div>' : ''
                 ).'
                 <div class="col-lg-'.($nothanded_in ? 4 : 12).'" id="handin_documents">

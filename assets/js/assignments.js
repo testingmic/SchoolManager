@@ -72,7 +72,12 @@ var save_AssignmentMarks = () => {
                     text: response.data.result,
                     icon: the_icon,
                 });
-            })
+            }).catch(() => {
+                swal({
+                    text: "Sorry! There was an error while processing the request.",
+                    icon: "error",
+                });
+            });
         }
     });
 }
@@ -176,6 +181,11 @@ var remove_AssignmentQuestion = (assignment_id, question_id) => {
                         icon: "success",
                     });
                 }
+            }).catch(() => {
+                swal({
+                    text: "Sorry! There was an error while processing the request.",
+                    icon: "error",
+                });
             });
         }
     });
@@ -201,12 +211,16 @@ var publish_AssignmentQuestion = (assignment_id, questions_count) => {
             $.post(`${baseUrl}api/assignments/publish`, { assignment_id }).then((response) => {
                 if (response.code == 200) {
                     swal({
-                        position: "top",
                         text: "Congrats! The assignment was successfully published.",
                         icon: "success",
                     });
                     loadPage(`${baseUrl}update-assignment/${assignment_id}/view`);
                 }
+            }).catch(() => {
+                swal({
+                    text: "Sorry! There was an error while processing the request.",
+                    icon: "error",
+                });
             });
         }
     });
@@ -228,11 +242,15 @@ var close_Assignment = () => {
                     $(`input[name="test_grading"]`).attr("disabled", "disabled");
                     $(`span[id="assignment_state"]`).html(`<span class="badge badge-danger">Closed</span>`);
                     swal({
-                        position: "top",
                         text: response.data.result,
                         icon: "success",
                     });
                 }
+            }).catch(() => {
+                swal({
+                    text: "Sorry! There was an error while processing the request.",
+                    icon: "error",
+                });
             });
         }
     });
@@ -254,11 +272,15 @@ var reopen_Assignment = () => {
                     $(`input[name="test_grading"]`).prop("disabled", false);
                     $(`span[id="assignment_state"]`).html(`<span class="badge badge-success">Graded</span>`);
                     swal({
-                        position: "top",
                         text: response.data.result,
                         icon: "success",
                     });
                 }
+            }).catch(() => {
+                swal({
+                    text: "Sorry! There was an error while processing the request.",
+                    icon: "error",
+                });
             });
         }
     });
@@ -271,6 +293,16 @@ var load_studentInfo = async(student_id, assignment_id) => {
         data: { student_id, assignment_id, preview: 1 }
     }).then(resp => resp);
     return returnVal;
+}
+
+var review_QuizAssignment = (student_id, grading, assignment_id) => {
+    $(`div[id="viewOnlyModal"]`).modal("show");
+    $(`div[id="viewOnlyModal"] [class="modal-title pt-2"]`).html(`Review Answers`);
+    $.post(`${baseUrl}api/assignments/review_answers`, { assignment_id, student_id, show_answer:true }).then((response) => {
+        if (response.code = 200) {
+            $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html(response.data.result);
+        }
+    }).catch(() => {});
 }
 
 var load_singleStudentData = async(student_id, grading) => {
@@ -307,7 +339,22 @@ var submit_Answers = (assignment_id) => {
                     $(`div[id="handin_upload"]`).remove();
                     $(`div[id="handin_documents"]`).removeClass("col-lg-4").addClass("col-lg-12");
                     $(`div[id="handin_documents"]`).html(response.data.additional);
+
+                    swal({
+                        text: response.data.result,
+                        icon: "success",
+                    });
+                } else {
+                    swal({
+                        text: response.data.result,
+                        icon: "error",
+                    });
                 }
+            }).catch(() => {
+                swal({
+                    text: "Sorry! There was an error while processing the request.",
+                    icon: "error",
+                });
             });
         }
     });

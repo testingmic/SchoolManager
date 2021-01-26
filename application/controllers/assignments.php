@@ -465,19 +465,23 @@ class Assignments extends Myschoolgh {
             $exp = explode("|", $student);
             $mark = $exp[1];
             $student_id = $exp[0];
+
             // insert the data into the database
             if(!empty($mark)) {
                 // push into the array list
                 $graded_count += 1;
                 $student_marks[$student_id] = $mark;
+
                 // check if the record exits
                 $mark_check = $this->confirm_student_marked($params->assignment_id, $student_id);
+
                 if($mark_check) {
-                    // update the record if it already exists
-                    $stmt = $this->db->prepare("UPDATE assignments_submitted SET score=?, graded=?, date_graded=now() WHERE student_id=? AND assignment_id = ? LIMIT 1");
-                    $stmt->execute([$mark, 1, $student_id, $params->assignment_id]);
                     // log the user activity
                     if($mark_check->score !== $mark) {
+                        // update the record if it already exists
+                        $stmt = $this->db->prepare("UPDATE assignments_submitted SET score=?, graded=?, date_graded=now() WHERE student_id=? AND assignment_id = ? LIMIT 1");
+                        $stmt->execute([$mark, 1, $student_id, $params->assignment_id]);
+
                         // Record the user activity
                         $this->userLogs("assignment-grade", "{$params->assignment_id}_{$student_id}", null, "{$params->userData->name} graded the student: {$mark}", $params->userId);
                     }
@@ -634,6 +638,7 @@ class Assignments extends Myschoolgh {
                     $this->userLogs("assignment_doc", "{$item_id}_{$params->userId}", null, "{$params->userData->name} handed in the assignment for grading.", $params->userId);
 
                     // load the attachments
+                    $code = 200;
                     $data = "Congrats, your assignment was successfully submitted.";
 
                     // load the file attachments
@@ -694,6 +699,7 @@ class Assignments extends Myschoolgh {
                     $this->userLogs("assignment_doc", "{$item_id}_{$params->userId}", null, "{$params->userData->name} handed in the assignment for auto grading by the system.", $params->userId);
 
                     // set the success message
+                    $code = 200;
                     $data = "Congrats, your assignment was successfully submitted.";
 
                     // unset all the sessions that are not needed
@@ -702,7 +708,14 @@ class Assignments extends Myschoolgh {
 
             }
 
+            // set the data to error 
+            else {
+                $code = 203;
+                $data = "Sorry! You have not attached any document. Please upload a document before submitting.";
+            }
+
             return [
+                "code" => $code,
                 "data" => $data,
                 "additional" => $files
             ];
@@ -1222,84 +1235,92 @@ class Assignments extends Myschoolgh {
         <div class='col-lg-12 {$class}'>
         <table class='table table-bordered'>";
 
-        // loop through the questions list
-        foreach($questions_array_list as $qkey => $question) {
-            
-            // set the answer type and the number
-            $number = $qkey + 1;
-            $answer_type = $question->answer_type;
+        // if no result was found
+        if(empty($questions_array_list)) {
+            // return error
+            $question_html .= "<tr><td align='center'>Sorry! No result was found for the request.</td></tr>";
+        } else {
 
-            // answer mechanism
-            if(isset($answers_list[$qkey])) {
-                $correct = (bool) ($answers_list[$qkey]["status"] === "correct");
-            }
+            // loop through the questions list
+            foreach($questions_array_list as $qkey => $question) {
+                
+                // set the answer type and the number
+                $number = $qkey + 1;
+                $answer_type = $question->answer_type;
 
-            $this_answer = $answers_list[$qkey]["answer"] ?? null;
-            $this_answer = in_array($answer_type, ["multiple", "option"]) ? $this->stringToArray($this_answer) : $this_answer;
-            
-            // if the answer is empty but yet a multiple or option then replace with empty array
-            if(in_array($answer_type, ["multiple", "option"]) && empty($this_answer)) {
-                $this_answer = [];
-            }
+                // answer mechanism
+                if(isset($answers_list[$qkey])) {
+                    $correct = (bool) ($answers_list[$qkey]["status"] === "correct");
+                }
 
-            // correct answer
-            $correctAnswer = $this->stringToArray($question->correct_answer);
+                $this_answer = $answers_list[$qkey]["answer"] ?? null;
+                $this_answer = in_array($answer_type, ["multiple", "option"]) ? $this->stringToArray($this_answer) : $this_answer;
+                
+                // if the answer is empty but yet a multiple or option then replace with empty array
+                if(in_array($answer_type, ["multiple", "option"]) && empty($this_answer)) {
+                    $this_answer = [];
+                }
 
-            // process the question data and return the processed information
-            $question_html .= "
-                <tr>
-                    <td width='5%'>{$number}</td>
-                    <td>{$question->question}</td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>";
-                    // if the answer type is option or multiple
-                    if(in_array($answer_type, ["multiple", "option"])) {
-                        // start the html content
-                        $question_html .= "<div style='width:100%;'>";
+                // correct answer
+                $correctAnswer = $this->stringToArray($question->correct_answer);
 
-                        // if the show_answer parameter was parsed
-                        if($showAnswer) {
-                            // if the answer is correct
-                            $question_html .= "
-                                <span style='float:right;right:0px;top:5px;'>
-                                    ".($correct ? "<span class='badge badge-success'>Correct</span>" : "<span class='badge badge-danger'>Wrong</span>")."
-                                </span>";
-                        }
-                        // loop through the array list
-                        foreach($options_array as $key => $option) {
-                            if(isset($question->{$key})) {
-                                $question_html .= "
-                                <div class='pt-2'>
-                                    <input disabled='disabled' ".(in_array($key, $this_answer) ? "checked" : null)." name='answer_option' value='{$key}' id='{$key}' class='cursor checkbox' type='checkbox' style='height:20px; width:20px'>
-                                    <label ".(in_array($key, $this_answer) ? "style='color:#2196F3 !important'" : null)." class='cursor' for='{$key}'>
-                                        <strong>{$option}.</strong> {$question->{$key}} ".(in_array($key, $correctAnswer) ? "<span class='text-success'><i class='fa fa-check'></i></span>" : "")."
-                                    </label>
-                                </div>";
-                            }
-                        }
-                        $question_html .= "</div>";
-                    }
-                    // if the answer must be a numeric value
-                    elseif($answer_type == "numeric") {
-                        $question_html .= "
-                        <div class='pt-2'>
-                            <label>Provide Correct Answer</label>
-                            <input disabled='disabled' value='{$this_answer}' name='answer_option' id='answer_option' class='form-control' type='number'>
-                        </div>";
-                    }
-                    // if the answer requires a text
-                    elseif($answer_type == "input") {
-                        $question_html .= "
-                        <div class='pt-2'>
-                            <label>Provide Correct Answer</label>
-                            <textarea disabled='disabled' name='answer_option' id='answer_option' class='form-control'>{$this_answer}</textarea>
-                        </div>";
-                    }
+                // process the question data and return the processed information
                 $question_html .= "
-                    </td>
-                </tr>";
+                    <tr>
+                        <td width='5%'>{$number}</td>
+                        <td>{$question->question}</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>";
+                        // if the answer type is option or multiple
+                        if(in_array($answer_type, ["multiple", "option"])) {
+                            // start the html content
+                            $question_html .= "<div style='width:100%;'>";
+
+                            // if the show_answer parameter was parsed
+                            if($showAnswer) {
+                                // if the answer is correct
+                                $question_html .= "
+                                    <span style='float:right;right:0px;margin-top:10px;'>
+                                        ".($correct ? "<span class='badge badge-success'>Correct</span>" : "<span class='badge badge-danger'>Wrong</span>")."
+                                    </span>";
+                            }
+                            // loop through the array list
+                            foreach($options_array as $key => $option) {
+                                if(isset($question->{$key})) {
+                                    $question_html .= "
+                                    <div class='pt-2'>
+                                        <input disabled='disabled' ".(in_array($key, $this_answer) ? "checked" : null)." name='answer_option' value='{$key}' id='{$key}' class='cursor checkbox' type='checkbox' style='height:20px; width:20px'>
+                                        <label ".(in_array($key, $this_answer) ? "style='color:#2196F3 !important'" : null)." class='cursor' for='{$key}'>
+                                            <strong>{$option}.</strong> {$question->{$key}} ".(in_array($key, $correctAnswer) ? "<span class='text-success'><i class='fa fa-check'></i></span>" : "")."
+                                        </label>
+                                    </div>";
+                                }
+                            }
+                            $question_html .= "</div>";
+                        }
+                        // if the answer must be a numeric value
+                        elseif($answer_type == "numeric") {
+                            $question_html .= "
+                            <div class='pt-2'>
+                                <label>Provide Correct Answer</label>
+                                <input disabled='disabled' value='{$this_answer}' name='answer_option' id='answer_option' class='form-control' type='number'>
+                            </div>";
+                        }
+                        // if the answer requires a text
+                        elseif($answer_type == "input") {
+                            $question_html .= "
+                            <div class='pt-2'>
+                                <label>Provide Correct Answer</label>
+                                <textarea disabled='disabled' name='answer_option' id='answer_option' class='form-control'>{$this_answer}</textarea>
+                            </div>";
+                        }
+                    $question_html .= "
+                        </td>
+                    </tr>";
+            }
+            
         }
         $question_html .= "</table></div>";
 
