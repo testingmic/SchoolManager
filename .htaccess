@@ -5,4 +5,4 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 SetEnvIf Authorization .+ HTTP_AUTHORIZATION=$0
 RewriteRule ^(.*)$ index.php/$1 [L,QSA]
-RewriteRule !\.(txt|xml|gif|jpg|png|css|js|ico|pdf|jpeg|json|woff2|mp4|map|otf|svg|xlsx|xls|ttf|woff)$ index.php
+RewriteRule !\.(txt|xml|gif|jpg|png|css|js|ico|pdf|jpeg|json|woff2|mp4|map|otf|svg|xlsx|xls|ttf|woff|csv)$ index.php

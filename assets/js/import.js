@@ -300,7 +300,9 @@ var import_csv_data = (this_column) => {
 var download_sample_csv = (column) => {
     $.get(`${baseUrl}api/account/download_temp`, { file: column }).then((response) => {
         if (response.code === 200) {
-
+            $.each(response.data.result, function(i, e) {
+                window.location.href = `${baseUrl}${e}`;
+            });
         }
     });
 }

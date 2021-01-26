@@ -2,8 +2,48 @@
 
 class Account extends Myschoolgh {
 
+    private $accepted_column;
+
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
+
+        $this->accepted_column["student"] = [
+            "unique_id" => "Student ID", "firstname" => "Firstname", "lastname" => "Lastname", 
+            "othername" => "Othernames", "email" => "Email", "phone_number" => "Contact Number",
+            "blood_group" => "Blood Group", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
+            "enrollment_date" => "Admission Date", "gender" => "Gender", "section" => "Section", 
+            "department" => "Department", "class_id" => "Class", "description" => "Description",
+            "religion" => "Religion", "city" => "City", 
+            "previous_school" => "Previous School", "previous_school_qualification" => "Previous School Qualification",
+            "previous_school_remarks" => "Previous School Remarks"
+        ];
+
+        $this->accepted_column["staff"] = [
+            "unique_id" => "Employee ID", "firstname" => "Firstname", "lastname" => "Lastname", 
+            "othername" => "Othernames", "email" => "Email", "phone_number" => "Contact Number",
+            "blood_group" => "Blood Group", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
+            "enrollment_date" => "Date of Employment", "gender" => "Gender", "section" => "Section", 
+            "department" => "Department", "description" => "Description",
+            "religion" => "Religion", "city" => "City", 
+            "courses_id" => "Courses Taught", "user_type" => "User Type", 
+            "employer" => "Employer", "occupation" => "Occupation"
+        ];
+    
+        $this->accepted_column["parent"] = [
+            "unique_id" => "Employee ID", "firstname" => "Firstname", "lastname" => "Lastname", 
+            "othername" => "Othernames", "email" => "Email", "phone_number" => "Primary Contact",
+            "phone_number_2" => "Secondary Contact", "blood_group" => "Blood Group", 
+            "residence" => "Residence", "date_of_birth" => "Date of Birth", 
+            "gender" => "Gender", "description" => "Description",
+            "religion" => "Religion", "city" => "City", 
+            "employer" => "Employer", "occupation" => "Occupation"
+        ];
+
+        $this->accepted_column["course"] = [
+            "course_code" => "Course Code", "name" => "Title", "credit_hours" => "Credit Hours", 
+            "weekly_meeting" => "Weekly Meetings",  "description" => "Description"
+        ];
+
 	}
 
     /**
@@ -147,44 +187,7 @@ class Account extends Myschoolgh {
     public function import(stdClass $params) {
 
         // columns to use for the query
-        if($params->column === "student") {
-            $accepted_column = [
-                "unique_id" => "Student ID", "firstname" => "Firstname", "lastname" => "Lastname", 
-                "othername" => "Othernames", "email" => "Email", "phone_number" => "Contact Number",
-                "blood_group" => "Blood Group", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
-                "enrollment_date" => "Admission Date", "gender" => "Gender", "section" => "Section", 
-                "department" => "Department", "class_id" => "Class", "description" => "Description",
-                "religion" => "Religion", "city" => "City", 
-                "previous_school" => "Previous School", "previous_school_qualification" => "Previous School Qualification",
-                "previous_school_remarks" => "Previous School Remarks"
-            ];
-        } elseif($params->column === "staff") {
-            $accepted_column = [
-                "unique_id" => "Employee ID", "firstname" => "Firstname", "lastname" => "Lastname", 
-                "othername" => "Othernames", "email" => "Email", "phone_number" => "Contact Number",
-                "blood_group" => "Blood Group", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
-                "enrollment_date" => "Date of Employment", "gender" => "Gender", "section" => "Section", 
-                "department" => "Department", "description" => "Description",
-                "religion" => "Religion", "city" => "City", 
-                "courses_id" => "Courses Taught", "user_type" => "User Type", 
-                "employer" => "Employer", "occupation" => "Occupation"
-            ];
-        } elseif($params->column === "parent") {
-            $accepted_column = [
-                "unique_id" => "Employee ID", "firstname" => "Firstname", "lastname" => "Lastname", 
-                "othername" => "Othernames", "email" => "Email", "phone_number" => "Primary Contact",
-                "phone_number_2" => "Secondary Contact", "blood_group" => "Blood Group", 
-                "residence" => "Residence", "date_of_birth" => "Date of Birth", 
-                "gender" => "Gender", "description" => "Description",
-                "religion" => "Religion", "city" => "City", 
-                "employer" => "Employer", "occupation" => "Occupation"
-            ];
-        } elseif($params->column === "course") {
-            $accepted_column = [
-                "course_code" => "Course Code", "name" => "Title", "credit_hours" => "Credit Hours", 
-                "weekly_meeting" => "Weekly Meetings",  "description" => "Description"
-            ];
-        }
+        $accepted_column = $this->accepted_column[$params->column] ?? [];
 
         // not found
         $notFound = 0;
@@ -445,7 +448,102 @@ class Account extends Myschoolgh {
      * @return Array
      */
     public function download_temp(stdClass $params) {
+        
+        // init
+        $file_list = [];
+
+        // convert the files to generate in an array
+        $columns = $this->stringToArray($params->file);
+
+        // upload file
+        $temp_dir = "assets/uploads/{$params->clientId}/temp";
+        
+        // if not a directory then create it
+        if(!is_dir($temp_dir)) {
+            mkdir($temp_dir, 0777, true);
+        }
+
+        foreach($columns as $file) {
+
+            // input item
+            $content = "";
+        
+            if(isset($this->accepted_column[$file])) {
+
+                // set the content
+                $columns = array_values($this->accepted_column[$file]);
+                $step = count($columns)+3;
+
+                $table = [
+                    "department" => ["column" => "name, department_code"]
+                ];
+
+                // set the content of the file to download
+                $content = implode(",", $columns)."\n";
+
+                // run this section for student and staff
+                if(in_array($file, ["student", "staff"])) {
+                    
+                    //append some empty fields
+                    $content .= str_repeat(',', $step)."\n";
+                    $content .= str_repeat(',', $step)."\n";
+
+                    // load this section for only student
+                    if($file === "staff") {
+                        $content .= str_repeat(',', $step)."USER TYPES\n";
+                        foreach(["teacher", "employee", "accountant", "admin"] as $user_type) {
+                            $content .= str_repeat(',', $step).ucwords($user_type)."\n";
+                        }
+                        $content .= str_repeat(',', $step)."\n";
+                        $content .= str_repeat(',', $step)."\n";
+                    }
+
+                    // general queries
+                    $dept_stmt = $this->db->prepare("SELECT {$table["department"]["column"]} FROM departments WHERE client_id = '{$params->clientId}' AND status='1'");
+                    $dept_stmt->execute();
+
+                    // if the row count is not zero
+                    if($dept_stmt->rowCount()) {
+                        // append the header
+                        $content .= str_repeat(',', $step)."DEPARTMENT NAME,,,,DEPARTMENT CODE\n";
+                        // loop through the list of programmes
+                        while($result = $dept_stmt->fetch(PDO::FETCH_OBJ)) {
+                            // print the course information
+                            $content .= str_repeat(',', $step)."{$result->name},,,,{$result->department_code}\n";
+                        }
+                    }
+
+                    // load this section for only student
+                    if($file === "student") {
+                        //append some empty fields
+                        $content .= str_repeat(',', $step)."\n";
+                        $content .= str_repeat(',', $step)."\n";
+
+                        //append some empty fields
+                        $content .= str_repeat(',', $step)."\n";
+                        $content .= str_repeat(',', $step)."\n";
+
+                    }
+                }
+
+                $filename = "{$temp_dir}/{$file}.csv";
+
+                // return $content;
+
+                // write the content to the sample file
+                $op = fopen($filename, 'w');
+                fwrite($op, $content);
+                fclose($op);
+
+                $file_list[] = $filename;
+            }
+        }
+
+        return [
+            "code" => 200,
+            "data" => $file_list
+        ];
 
     }
-    
+
 }
