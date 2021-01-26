@@ -91,7 +91,7 @@ $response->html = '
         <div class="section-header">
             <h1>'.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'">Dashboard</a></div>
+                <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 '.($isPermitted ? '<div class="breadcrumb-item active"><a href="'.$baseUrl.'timetable">Timetables List</a></div>' : null).'
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>

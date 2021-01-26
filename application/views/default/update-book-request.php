@@ -125,7 +125,7 @@ if(!empty($item_id)) {
             <div class="section-header">
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'">Dashboard</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'issued-books">'.$tTitle.'</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
