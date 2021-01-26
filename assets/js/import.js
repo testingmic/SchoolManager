@@ -298,11 +298,15 @@ var import_csv_data = (this_column) => {
 }
 
 var download_sample_csv = (column) => {
+    $(`button[data-download_button="${column}"]`).prop("disabled", true).html(`Processing... <i class="fa fa-spin fa-spinner"></i>`);
     $.get(`${baseUrl}api/account/download_temp`, { file: column }).then((response) => {
         if (response.code === 200) {
             $.each(response.data.result, function(i, e) {
                 window.location.href = `${baseUrl}${e}`;
             });
         }
+        $(`button[data-download_button="${column}"]`).prop("disabled", false).html(`<i class="fa fa-download"></i> Download Sample CSV File`);
+    }).catch(() => {
+        $(`button[data-download_button="${column}"]`).prop("disabled", false).html(`<i class="fa fa-download"></i> Download Sample CSV File`);
     });
 }

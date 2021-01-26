@@ -3216,7 +3216,7 @@ class Forms extends Myschoolgh {
                                 </div>
                             </div>
                             <h2>Upload a CSV to import <strong>'.ucwords($key).' data</strong></h2>
-                            <a href="#" onclick="return download_sample_csv(\''.$key.'\')">Download Sample CSV File</a>
+                            <button href="#" class="btn btn-outline-primary" data-download_button="'.$key.'" onclick="return download_sample_csv(\''.$key.'\')"><i class="fa fa-download"></i> Download Sample CSV File</button>
                             <hr>
                             <div class="form-controls col-md-4 m-auto">
                                 <div class="form-group text-center">
