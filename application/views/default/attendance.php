@@ -41,7 +41,7 @@ if(!empty($clientId)) {
                     <div class="breadcrumb-item">Attendance Log</div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row default_period" data-current_period="this_month">
             '.($isAdminAccountant ? 
                 '<div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">

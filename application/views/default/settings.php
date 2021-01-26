@@ -25,7 +25,7 @@ $accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 
 // unset all existing sessions
-// $session->remove(["student_csv_file", "course_csv_file", "staff_csv_file"]);
+$session->remove(["student_csv_file", "course_csv_file", "staff_csv_file"]);
 
 // confirm that the user has the required permissions
 if(!$accessObject->hasAccess("manage", "settings")) {

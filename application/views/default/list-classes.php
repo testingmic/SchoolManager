@@ -27,6 +27,8 @@ $item_list = load_class("classes", "controllers")->list($classes_param);
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
+$accessObject->userPermits = $defaultUser->user_permissions;
+
 $hasDelete = $accessObject->hasAccess("delete", "class");
 $hasUpdate = $accessObject->hasAccess("update", "class");
 

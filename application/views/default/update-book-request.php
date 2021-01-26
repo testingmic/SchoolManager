@@ -23,6 +23,7 @@ $pageTitle = "Summary Requestion Information";
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
+
 $hasIssue = $accessObject->hasAccess("issue", "library");
 
 $tTitle = $hasIssue ? "Issued Books List" : "My Books List";

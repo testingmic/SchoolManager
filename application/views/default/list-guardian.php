@@ -29,6 +29,8 @@ $guardian_list = load_class("users", "controllers")->list($guardian_param)["data
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
+$accessObject->userPermits = $defaultUser->user_permissions;
+
 $hasDelete = $accessObject->hasAccess("delete", "guardian");
 $hasUpdate = $accessObject->hasAccess("update", "guardian");
 

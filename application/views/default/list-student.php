@@ -42,6 +42,8 @@ $student_list = load_class("users", "controllers")->list($student_param);
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $clientId;
+$accessObject->userPermits = $defaultUser->user_permissions;
+
 $hasDelete = $accessObject->hasAccess("delete", "student");
 $hasUpdate = $accessObject->hasAccess("update", "student");
 

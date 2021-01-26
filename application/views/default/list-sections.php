@@ -28,6 +28,8 @@ $department_list = load_class("sections", "controllers")->list($department_param
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
+$accessObject->userPermits = $defaultUser->user_permissions;
+
 $hasDelete = $accessObject->hasAccess("delete", "section");
 $hasUpdate = $accessObject->hasAccess("update", "section");
 

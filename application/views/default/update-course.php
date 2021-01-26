@@ -23,6 +23,7 @@ $response->title = "{$pageTitle} : {$appName}";
 
 $accessObject->userId = $userId;
 $accessObject->clientId = $session->clientId;
+$accessObject->userPermits = $defaultUser->user_permissions;
 
 // item id
 $item_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;

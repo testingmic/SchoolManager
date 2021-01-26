@@ -37,6 +37,8 @@ $item_list = load_class("courses", "controllers")->list($courses_param);
 
 $accessObject->clientId = $clientId;
 $accessObject->userId = $session->userId;
+$accessObject->userPermits = $defaultUser->user_permissions;
+
 $hasDelete = $accessObject->hasAccess("delete", "course");
 $hasUpdate = $accessObject->hasAccess("update", "course");
 
