@@ -454,7 +454,7 @@ $response->html = '
                 </div>
             </div>' : ''
         ).'
-        <div class="row">
+        <div class="row default_period" data-current_period="last_14days">
             '.($isAdminAccountant ?
             '<div class="col-md-12">
                 <div class="card">
@@ -467,7 +467,9 @@ $response->html = '
                                 <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                             </div>
                         </div>
-                        <canvas id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></canvas>
+                        <div class="card-body" data-chart="revenue_flow_chart">
+                            <canvas id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>' : '').'
@@ -754,7 +756,9 @@ $response->html = '
                                     </div>
                                 </div>
                             </div>
-                            <div id="revenue_category_chart"></div>
+                            <div class="card-body" data-chart="revenue_category_chart">
+                                <div id="revenue_category_chart"></div>
+                            </div>
                         </div>
                     </div>
                 </div>

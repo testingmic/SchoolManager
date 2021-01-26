@@ -42,6 +42,86 @@ class Models {
             "update_assignment" => "Update Assignment Details",
         ];
 
+        $this->accepted_period = [
+            "today" => [
+                "title" => "Today",
+                "alt" => [
+                    "key" => "",
+                    "value" => ""
+                ]
+            ],
+            "this_week" => [
+                "title" => "This Week",
+                "alt" => [
+                    "key" => "last_week",
+                    "value" => "Last Week"
+                ]
+            ], 
+            "last_week" => [
+                "title" => "Last Week",
+                "alt" => [
+                    "key" => "last_14days",
+                    "value" => "Last"
+                ]
+            ], 
+            "last_14days" => [
+                "title" => "Last 14 Days",
+                "alt" => [
+                    "key" => "",
+                    "value" => ""
+                ]
+            ], 
+            "last_30days" => [
+                "title" => "Last 30 Days",
+                "alt" => [
+                    "key" => "",
+                    "value" => ""
+                ]
+            ], 
+            "this_month" => [
+                "title" => "This Month",
+                "alt" => [
+                    "key" => "",
+                    "value" => ""
+                ]
+            ], 
+            "last_month" => [
+                "title" => "Last Month",
+                "alt" => [
+                    "key" => "",
+                    "value" => ""
+                ]
+            ], 
+            "last_3months" => [
+                "title" => "Last 3 Months",
+                "alt" => [
+                    "key" => "",
+                    "value" => ""
+                ]
+            ], 
+            "last_6months" => [
+                "title" => "Last 6 Months",
+                "alt" => [
+                    "key" => "",
+                    "value" => ""
+                ]
+            ], 
+            "this_year" => [
+                "title" => "This Year",
+                "alt" => [
+                    "key" => "",
+                    "value" => ""
+                ]
+            ],
+            "last_year" => [
+                "title" => "Last Year",
+                "alt" => [
+                    "key" => "",
+                    "value" => ""
+                ]
+            ],
+        ];
+
         $this->event_audience = [
             "all" => "All Users",
             "student" => "Students",

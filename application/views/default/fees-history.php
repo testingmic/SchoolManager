@@ -30,6 +30,7 @@ $accessObject->userPermits = $defaultUser->user_permissions;
 
 // default class_list
 $class_list = [];
+
 // if the class_id is not empty
 if(!empty($filter->department_id)) {
     $classes_param = (object) [

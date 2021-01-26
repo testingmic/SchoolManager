@@ -17,11 +17,6 @@ class Analitics extends Myschoolgh {
             "departments_report", "attendance_report", "class_attendance_report"
         ];
 
-        $this->accepted_period = [
-            "this_week", "last_week", "last_14days", "last_30days", "today",
-            "this_month", "last_month", "last_3months", "last_6months", "this_year", "last_year", 
-        ];
-
         $this->error_codes = [
             "invalid-date" => "Sorry! An invalid date was parsed for the start date.",
             "invalid-range" => "Sorry! An invalid date was parsed for the end date.",
@@ -56,7 +51,7 @@ class Analitics extends Myschoolgh {
         $this->info_to_stream = $params->stream;
 
         /** Preformat date */
-        if(in_array($params->period, $this->accepted_period)) {
+        if(in_array($params->period, array_keys($this->accepted_period))) {
 
             /** Get the date formatter */
             $the_date = $this->format_date($params->period);
@@ -76,6 +71,9 @@ class Analitics extends Myschoolgh {
         } else {
             $the_date = $this->preformat_date($params->period);
         }
+
+        // set the period in session
+        $this->session->set("reportPeriod", $params->period);
 
         /** If invalid date then end the query */
         if(in_array($the_date, array_keys($this->error_codes))) {
@@ -319,6 +317,7 @@ class Analitics extends Myschoolgh {
                 "userId" => $params->userId,
                 "userData" => $params->userData,
                 "category_id" => $value->id,
+                "date_range" => "{$this->start_date}:{$this->end_date}",
                 "return_where_clause" => true
             ];
             $where_clause = $feesClass->list($fees_param);

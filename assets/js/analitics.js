@@ -6,6 +6,20 @@ var filter = $(`select[id="filter-dashboard"]`),
     ],
     to_stream = "";
 
+$(`[id="reports_insight"] select[name="department_id"]`).on("change", function() {
+    let value = $(this).val();
+    $(`[id="reports_insight"] select[name='class_id']`).find('option').remove().end();
+    $(`[id="reports_insight"] select[name='class_id']`).append(`<option value="">Please Select Class</option>`);
+
+    $.get(`${baseUrl}api/classes/list?columns=id,name`, { department_id: value }).then((response) => {
+        if (response.code == 200) {
+            $.each(response.data.result, function(i, e) {
+                $(`[id="reports_insight"] select[name='class_id']`).append(`<option value='${e.id}'>${e.name}</option>'`);
+            });
+        }
+    });
+});
+
 function format_currency(total) {
     var neg = false;
     if (total < 0) {
@@ -44,6 +58,9 @@ var revenueReporting = (revenue) => {
                 }
             }
         });
+
+        $(`div[data-chart="revenue_flow_chart"]`).html(``);
+        $(`div[data-chart="revenue_flow_chart"]`).html(`<canvas id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></canvas>`);
 
         var ctx = document.getElementById('revenue_flow_chart').getContext("2d");
 
@@ -301,6 +318,9 @@ var summaryReporting = (t_summary, date_range) => {
 
 
         if ($(`canvas[id="revenue_category_group"]`).length) {
+            $(`div[data-chart="revenue_category_group"]`).html(``);
+            $(`div[data-chart="revenue_category_group"]`).html(`<canvas style="max-height:420px;height:420px;" id="revenue_category_group"></canvas>`);
+
             var ctx = document.getElementById("revenue_category_group").getContext('2d');
             var myChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -452,9 +472,9 @@ var attendanceReport = (_attendance) => {
 
 }
 
-var loadDashboardAnalitics = () => {
+var loadDashboardAnalitics = (period) => {
     let to_stream = $(`div[id="data-report_stream"]`).attr(`data-report_stream`);
-    $.get(`${baseUrl}api/analitics/generate?label[stream]=${to_stream}`).then((response) => {
+    $.get(`${baseUrl}api/analitics/generate?period=${period}&label[stream]=${to_stream}`).then((response) => {
         if (response.code === 200) {
             if (response.data.result.summary_report !== undefined) {
                 summaryReporting(response.data.result, response.data.result.date_range);
@@ -512,8 +532,10 @@ var filter_UserGroup_Attendance = () => {
 }
 
 if ($(`div[id="data-report_stream"]`).length) {
-    loadDashboardAnalitics();
+    let d_period = $(`div[class~="default_period"]`).attr("data-current_period");
+    loadDashboardAnalitics(d_period);
     filter.on("change", function() {
-        loadDashboardAnalitics();
+        let _period = $(this).val();
+        loadDashboardAnalitics(_period);
     });
 }

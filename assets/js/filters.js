@@ -40,6 +40,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
     });
 
     if ($(`select[name="student_id"]`).length) {
+
         $(`select[name="class_id"]`).on("change", function() {
             let value = $(this).val();
             $(`div[id="make_payment_button"]`).addClass("hidden");
@@ -73,6 +74,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                 $(`div[id="fees_payment_preload"] select[name='category_id']`).prop("disabled", false);
             }
         });
+
     }
 
     if ($(`select[name="course_id"]`).length) {

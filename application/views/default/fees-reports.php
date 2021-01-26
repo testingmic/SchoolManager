@@ -23,8 +23,15 @@ $response->scripts = ["assets/js/analitics.js"];
 // the default data to stream
 $data_stream = 'id="data-report_stream" data-report_stream="summary_report,revenue_flow"';
 
+// if the class_id is not empty
+$classes_param = (object) [
+    "clientId" => $clientId,
+    "columns" => "id, name"
+];
+$class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+
 $response->html = '
-    <section class="section">
+    <section class="section" id="reports_insight">
         <div class="section-header">
             <h1>'.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
@@ -33,26 +40,46 @@ $response->html = '
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>
-        <div class="row" '.$data_stream.'>
+        <div data-current_period="'.($session->reportPeriod ? $session->reportPeriod : "last_14days").'" class="row default_period" '.$data_stream.'>
+            
+            <div class="col-xl-4 col-md-4 col-12 form-group">
+                <label>Select Department</label>
+                <select class="form-control selectpicker" id="department_id" name="department_id">
+                    <option value="">Please Select Department</option>';
+                    foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
+                        $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Select Class</label>
+                <select class="form-control selectpicker" name="class_id">
+                    <option value="">Please Select Class</option>';
+                    foreach($class_list as $each) {
+                        $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Period Filter</label>
+                <select class="form-control selectpicker" id="filter-dashboard" name="period">
+                    <option value="">Please Select Period</option>';
+                    foreach($myClass->accepted_period as $key => $value) {
+                        $response->html .= "<option ".($session->reportPeriod === $key ? "selected" : "")." value=\"{$key}\">{$value["title"]}</option>";                            
+                    }
+                $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-2 col-md-2 col-12 form-group">
+                <label for="">&nbsp;</label>
+                <button id="filter_Fees_Report" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+            </div>
+
             <div class="col-12 col-sm-12 col-lg-12">
 
                 <div class="row">
-
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Revenue Flow Chart</h4>
-                            </div>
-                            <div class="card-body quick_loader">
-                                <div class="form-content-loader" style="display: flex; position: absolute">
-                                    <div class="offline-content text-center">
-                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
-                                    </div>
-                                </div>
-                                <canvas id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></canvas>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="col-lg-8 col-md-12 col-12 col-sm-12">
                         <div class="card">
@@ -81,7 +108,9 @@ $response->html = '
                                         </div>
                                     </div>
                                 </div>
-                                <div id="revenue_category_chart"></div>
+                                <div class="card-body" data-chart="revenue_category_chart">
+                                    <div id="revenue_category_chart"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -95,6 +124,25 @@ $response->html = '
                             </div>
                         </div>
                     </div>
+
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Revenue Flow Chart</h4>
+                            </div>
+                            <div class="card-body quick_loader">
+                                <div class="form-content-loader" style="display: flex; position: absolute">
+                                    <div class="offline-content text-center">
+                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                    </div>
+                                </div>
+                                <div class="card-body" data-chart="revenue_flow_chart">
+                                    <canvas id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="col-lg-12" id="revenue_category_counts"></div>
 
                 </div>
