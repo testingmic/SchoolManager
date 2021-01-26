@@ -308,7 +308,7 @@ var linkHandler = (target, pushstate) => {
     devlog("linkHandler(). I called =>")
 
     if (target.slice(0, -1) === $.baseurl || target === $.baseurl || target === $.default) {
-        target = $.baseurl + "/fees-reports";
+        target = $.baseurl + "/dashboard";
     }
     loadPage(target, pushstate)
 }

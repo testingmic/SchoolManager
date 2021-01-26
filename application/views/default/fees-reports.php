@@ -55,7 +55,7 @@ $response->html = '
             <div class="col-xl-3 col-md-3 col-12 form-group">
                 <label>Select Class</label>
                 <select class="form-control selectpicker" name="class_id">
-                    <option value="">Please Select Class</option>';
+                    <option value="null">Please Select Class</option>';
                     foreach($class_list as $each) {
                         $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
                     }
@@ -142,7 +142,7 @@ $response->html = '
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="col-lg-12" id="revenue_category_counts"></div>
 
                 </div>

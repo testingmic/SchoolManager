@@ -53,7 +53,7 @@ class Fees extends Myschoolgh {
         $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
 
         $filters = "1";
-		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : "";
+		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id IN {$this->inList($params->class_id)}" : "";
         $filters .= isset($params->department_id) && !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : "";
         $filters .= !empty($student_id) ? " AND a.student_id IN {$this->inList($student_id)}" : "";
         $filters .= isset($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";

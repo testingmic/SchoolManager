@@ -1,4 +1,4 @@
-var filter = $(`select[id="filter-dashboard"]`),
+var filter = $(`[id="reports_insight"] button[id="filter_Fees_Report"]`),
     bg_colors = [
         "l-bg-green", "l-bg-orange", "l-bg-purple", "l-bg-red", "l-bg-cyan",
         "l-bg-yellow", "l-bg-purple-dark", "bg-deep-orange", "bg-brown", "bg-pink",
@@ -235,7 +235,7 @@ var summaryReporting = (t_summary, date_range) => {
         let revenue_category_counts = "<div class='row'>";
         $.each(fees.count, function(i, e) {
             let amount = fees.amount[i];
-            let percentage = ((amount / total_revenue) * 100).toFixed(2);
+            let percentage = (amount > 0) ? ((amount / total_revenue) * 100).toFixed(2) : 0;
             revenue_category_counts += `
             <div class="col-lg-3 col-md-4">
                 <div class="card">
@@ -534,8 +534,14 @@ var filter_UserGroup_Attendance = () => {
 if ($(`div[id="data-report_stream"]`).length) {
     let d_period = $(`div[class~="default_period"]`).attr("data-current_period");
     loadDashboardAnalitics(d_period);
-    filter.on("change", function() {
-        let _period = $(this).val();
+
+    filter.on("click", function() {
+        let class_id = $(`[id="reports_insight"] select[name="class_id"]`).val(),
+            _period = $(`[id="reports_insight"] select[id="filter-dashboard"]`).val();
+
+        if (class_id !== "null") {
+            _period = `${_period}&label[class_id]=${class_id}`;
+        }
         loadDashboardAnalitics(_period);
     });
 }

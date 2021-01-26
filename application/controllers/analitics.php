@@ -8,6 +8,9 @@ class Analitics extends Myschoolgh {
     public $previous_title = "Yesterday";
     public $final_report = [];
 
+    private $class_id_query;
+    private $class_idm_query;
+
     public function __construct(stdClass $params) {
 
         parent::__construct();
@@ -96,6 +99,9 @@ class Analitics extends Myschoolgh {
 
         // confirm if the user pushed a query set
         $this->user_status = isset($params->label["user_status"]) ? $params->label["user_status"] : "Active";
+        $this->class_id_query = isset($params->label["class_id"]) ? $params->label["class_id"] : null;
+        $this->class_idm_query = isset($params->label["class_id"]) ? " AND a.class_id IN {$this->inList($params->label["class_id"])}" : null;
+        $this->class_idd_query = isset($params->label["class_id"]) ? " AND a.id IN {$this->inList($params->label["class_id"])}" : null;
         $this->student_id_query = isset($params->label["student_id"]) ? " AND a.student_id = '{$params->label["student_id"]}'" : null;
         $this->fees_category_id = isset($params->label["category_id"]) ? " AND a.category_id IN {$this->inList($params->label["category_id"])}" : null;
         $this->query_date_range = isset($params->label["stream_period"]) ? $this->stringToArray($params->label["stream_period"]) : ["current", "previous"];
@@ -242,7 +248,7 @@ class Analitics extends Myschoolgh {
          * Run a comparison between the current and previous record set
          */
         // get the fees categories
-        $class_list = $this->pushQuery("id, name", "classes", "status='1' AND client_id='{$params->clientId}'");
+        $class_list = $this->pushQuery("a.id, a.name", "classes a", "a.status='1' AND a.client_id='{$params->clientId}' {$this->class_idd_query}");
         $result["students_class_record_count"]["total_classes_count"] = count($class_list);
 
         // load the fees records
@@ -316,11 +322,14 @@ class Analitics extends Myschoolgh {
                 "limit" => 100000,
                 "userId" => $params->userId,
                 "userData" => $params->userData,
+                "class_id" => $this->class_id_query,
                 "category_id" => $value->id,
                 "date_range" => "{$this->start_date}:{$this->end_date}",
                 "return_where_clause" => true
             ];
             $where_clause = $feesClass->list($fees_param);
+
+            // print $where_clause;
 
             // value_name
             $raw_name = create_slug($value->name, "_");
@@ -543,7 +552,7 @@ class Analitics extends Myschoolgh {
                             a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
                             AND (
                                 DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
-                            )
+                            ) {$this->class_idm_query}
                         GROUP BY {$this->group_by}(a.recorded_date)
                     ");
                     $stmt->execute();
@@ -567,7 +576,7 @@ class Analitics extends Myschoolgh {
                         WHERE a.status = '1' AND a.reversed = '0' {$this->student_id_query} {$this->fees_category_id}
                         AND (
                             DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
-                        )
+                        ) {$this->class_idm_query}
                         GROUP BY {$this->group_by}(a.recorded_date)
                     ");
                     $stmt->execute();
@@ -987,23 +996,22 @@ class Analitics extends Myschoolgh {
 
         // split the section
         $section = explode(".", $section);
-        $report = $section[0];
         $array_list = $array_data[$section[0]];
 
         // set the item
         if(isset($section[1])) {
-            $array_list = $array_data[$section[0]][$section[1]];
+            $array_list = $array_data[$section[0]][$section[1]] ?? [];
         }
         // set the item
         if(isset($section[2])) {
-            $array_list = $array_data[$section[0]][$section[1]][$section[2]];
+            $array_list = $array_data[$section[0]][$section[1]][$section[2]] ?? [];
         }
 
         // get the array key
         $total_value = array_sum(array_column($array_list, "value"));
 
         foreach($array_list as $key => $value) {
-            $percentage = (($value["value"] / $total_value) * 100);
+            $percentage = $value["value"] > 0 ? (($value["value"] / $total_value) * 100) : 0;
             $array_data[$section[0]][$section[1]][$section[2]][$key]["percentage"] = $percentage;
         }
 
