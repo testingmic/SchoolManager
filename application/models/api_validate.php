@@ -191,9 +191,9 @@ class Api_validate {
 				// loop through the url items
 				foreach($get as $key => $value) {
 					// only parse if the value is not empty
-					if( (!empty($value) && ($key != "access_token")) || ($value === 0) ) {
+					if( (!empty($value) && ($key != "access_token")) || ($value == 0) ) {
 						// append the parameters
-						$params[$key] = is_array($value) ? $value : xss_clean($value);
+						$params[$key] = (is_array($value)) ? array_map("xss_clean", $value) : xss_clean($value);
 					}
 				}
 			}
@@ -209,9 +209,15 @@ class Api_validate {
 				// loop through the url items
 				foreach($post as $key => $value) {
 					// only parse if the value is not empty
-					if( (!empty($value) && ($key != "access_token")) || ($value === 0) ) {
+					if( (!empty($value) && ($key != "access_token")) || ($value == 0)) {
 						// append the parameters
-						$params[$key] = is_array($value) ? $value : xss_clean($value);
+						if(!is_array($value)) {
+							$params[$key] = xss_clean($value);	
+						} else {
+							foreach($value as $kkey => $kvalue) {
+								$params[$key][$kkey] = (is_array($kvalue)) ? array_map("xss_clean", $kvalue) : xss_clean($kvalue);
+							}
+						}
 					}
 				}
 			}

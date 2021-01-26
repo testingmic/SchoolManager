@@ -60,12 +60,13 @@ class Assignments extends Myschoolgh {
 
         // append the class_id if the user type is student
         if($params->userData->user_type == "student") {
-            $params->class_id = $params->userData->class_id;
+            $params->class_id = $params->userData->class_guid;
             $params->query .= " AND a.state NOT IN ('Cancelled', 'Draft')";
         }
 
         $params->query .= " AND a.academic_year='{$params->academic_year}'";
         $params->query .= " AND a.academic_term='{$params->academic_term}'";
+
         $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
         $params->query .= (isset($params->due_date)) ? " AND a.due_date='{$params->due_date}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
@@ -650,6 +651,13 @@ class Assignments extends Myschoolgh {
 
             // handin assignment for quiz like mode
             elseif(!empty($this->session->currentQuestionId) && $this->session->showSubmitButton) {
+
+                // only save if the question id and answers were parsed
+                if(isset($params->question_id) && isset($params->answers)) {
+                    // save the answer for the last question
+                    $params->save_answer_only = true;
+                    $this->save_answer($params);
+                }
                 
                 // load the user answers list
                 $answer_info = $this->pushQuery(
@@ -661,6 +669,7 @@ class Assignments extends Myschoolgh {
                 if(empty($answer_info)) {
                     $data = "Sorry! You have not yet attempted to solve the questions";
                 } else {
+
                     // get the answers parameter
                     $the_answers = json_decode($answer_info[0]->answers);
                     $score = 0;
@@ -686,7 +695,7 @@ class Assignments extends Myschoolgh {
                     $data = "Congrats, your assignment was successfully submitted.";
 
                     // unset all the sessions that are not needed
-                    $this->session->remove(["currentQuestionId","previousQuestionId","showSubmitButton", "attachAssignmentDocs", "nextQuestionId", "questionNumber"]);
+                    // $this->session->remove(["currentQuestionId","previousQuestionId","showSubmitButton", "attachAssignmentDocs", "nextQuestionId", "questionNumber"]);
                 }
 
             }
@@ -1128,7 +1137,7 @@ class Assignments extends Myschoolgh {
                     elseif($answer_type == "numeric") {
                         $question_html .= "
                         <div class='pt-2'>
-                            <label>Enter correct answer</label>
+                            <label>Provide Correct Answer</label>
                             <input value='{$this_answer}' name='answer_option' id='answer_option' class='form-control' type='number'>
                         </div>";
                     }
@@ -1136,7 +1145,7 @@ class Assignments extends Myschoolgh {
                     elseif($answer_type == "input") {
                         $question_html .= "
                         <div class='pt-2'>
-                            <label>Enter correct answer</label>
+                            <label>Provide Correct Answer</label>
                             <textarea name='answer_option' id='answer_option' class='form-control'>{$this_answer}</textarea>
                         </div>";
                     }
@@ -1151,7 +1160,7 @@ class Assignments extends Myschoolgh {
                     </div>
                     <div>
                         ".($session->showSubmitButton && $number == $questions_count ? "
-                            <button onclick='return reviewQuizAssignment(\"{$question->assignment_id}\")' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i> Review Answers</button>
+                            <button onclick='return reviewQuizAssignment(\"{$question->assignment_id}\", \"{$session->previousQuestionId}\")' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i> Review Answers</button>
                             <button onclick='return submitQuizAssignment(\"{$question->assignment_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i> Sumit Assignment</button>
                         " : "<button onclick='return loadQuestionInfo();' class='btn-sm btn-outline-primary btn'>Next Question <i class='fa fa-fast-forward'></i></button>")."
                     </div>
@@ -1173,24 +1182,37 @@ class Assignments extends Myschoolgh {
      * answers to it
      * 
      * @param String        $params->assignment_id
+     * @param String        $params->show_correct_answer
+     * @param String        $params->student_id
      * 
      * @return
      */
     public function review_answers($params, $class = "p-0 mb-0") {
+
         // get the questions array list
         $params->columns = "a.*";
         $questions_array_list = $this->questions_list($params);
 
+        // only save if the question id and answers were parsed
+        if(isset($params->question_id) && isset($params->answers)) {
+            // save the answer for the last question
+            $params->save_answer_only = true;
+            $this->save_answer($params);
+        }
+
+        $showAnswer = (bool) isset($params->show_answer);
+        $t_student_id = isset($params->student_id) ? $params->student_id : $params->userId;
+
         // load the existing user record (if any)
         $answer_info = $this->pushQuery(
             "*", "assignments_answers", 
-            "assignment_id='{$params->assignment_id}' AND student_id = '{$params->userId}' AND client_id='{$params->clientId}' LIMIT 1"
+            "assignment_id='{$params->assignment_id}' AND student_id = '{$t_student_id}' AND client_id='{$params->clientId}' LIMIT 1"
         );
         // convert to array
         $answers_list = !empty($answer_info) ? json_decode($answer_info[0]->answers, true) : [];
 
         // options array list
-        $options_array = ["option_a" => "A", "option_b" => "B", "option_c" => "C","option_d" => "D", "option_e" => "E"];
+        $options_array = ["option_a" => "A", "option_b" => "B", "option_c" => "C","option_d" => "D", "option_e" => "E", "option_f" => "F"];
 
         // init the information to parse
         $correct = null;
@@ -1206,15 +1228,20 @@ class Assignments extends Myschoolgh {
             $answer_type = $question->answer_type;
 
             // answer mechanism
-            $correct = (bool) ($answers_list[$qkey]["status"] == "correct");
+            if(isset($answers_list[$qkey])) {
+                $correct = (bool) ($answers_list[$qkey]["status"] === "correct");
+            }
 
-            $this_answer = $answers_list[$qkey]["answer"];
+            $this_answer = $answers_list[$qkey]["answer"] ?? null;
             $this_answer = in_array($answer_type, ["multiple", "option"]) ? $this->stringToArray($this_answer) : $this_answer;
             
             // if the answer is empty but yet a multiple or option then replace with empty array
             if(in_array($answer_type, ["multiple", "option"]) && empty($this_answer)) {
                 $this_answer = [];
             }
+
+            // correct answer
+            $correctAnswer = $this->stringToArray($question->correct_answer);
 
             // process the question data and return the processed information
             $question_html .= "
@@ -1231,7 +1258,7 @@ class Assignments extends Myschoolgh {
                         $question_html .= "<div class='col-lg-12'>";
 
                         // if the show_answer parameter was parsed
-                        if(isset($params->show_answer)) {
+                        if($showAnswer) {
                             // if the answer is correct
                             $question_html .= "
                                 <span style='position:absolute;right:5px;top:5px;'>
@@ -1244,8 +1271,8 @@ class Assignments extends Myschoolgh {
                                 $question_html .= "
                                 <div class='pt-2'>
                                     <input disabled='disabled' ".(in_array($key, $this_answer) ? "checked" : null)." name='answer_option' value='{$key}' id='{$key}' class='cursor checkbox' type='checkbox' style='height:20px; width:20px'>
-                                    <label class='cursor' for='{$key}'>
-                                        <strong>{$option}.</strong> {$question->{$key}}
+                                    <label ".(in_array($key, $this_answer) ? "style='color:#2196F3 !important'" : null)." class='cursor' for='{$key}'>
+                                        <strong>{$option}.</strong> {$question->{$key}} ".(in_array($key, $correctAnswer) ? "<span class='text-success'><i class='fa fa-check'></i></span>" : "")."
                                     </label>
                                 </div>";
                             }
@@ -1256,7 +1283,7 @@ class Assignments extends Myschoolgh {
                     elseif($answer_type == "numeric") {
                         $question_html .= "
                         <div class='pt-2'>
-                            <label>Enter correct answer</label>
+                            <label>Provide Correct Answer</label>
                             <input disabled='disabled' value='{$this_answer}' name='answer_option' id='answer_option' class='form-control' type='number'>
                         </div>";
                     }
@@ -1264,7 +1291,7 @@ class Assignments extends Myschoolgh {
                     elseif($answer_type == "input") {
                         $question_html .= "
                         <div class='pt-2'>
-                            <label>Enter correct answer</label>
+                            <label>Provide Correct Answer</label>
                             <textarea disabled='disabled' name='answer_option' id='answer_option' class='form-control'>{$this_answer}</textarea>
                         </div>";
                     }
@@ -1339,95 +1366,106 @@ class Assignments extends Myschoolgh {
         }
         $data = $question_info[0];
 
-        // convert the answers into an array
-        $answers = $this->stringToArray($params->answers);
+        // jump if no answer was supplied
+        if(isset($params->answers)) {
 
-        // get the answer type
-        if($data->answer_type == "option" && count($answers) > 1) {
-            return ["code" => 203, "data" => "Sorry! This question requires a single answer. Multiple answers were given"];
-        }
+            // convert the answers into an array
+            $answers = $this->stringToArray($params->answers);
 
-        // append to the correct answer if the answer_type is multiple
-        if($data->answer_type == "multiple") {
-            $data->correct_answer = "match::{$data->correct_answer}";
-        }
+            // get the answer type
+            if($data->answer_type == "option" && count($answers) > 1) {
+                return ["code" => 203, "data" => "Sorry! This question requires a single answer. Multiple answers were given"];
+            }
 
-        // load the existing user record (if any)
-        $answer_info = $this->pushQuery(
-            "*", "assignments_answers", 
-            "assignment_id='{$data->assignment_id}' AND student_id = '{$params->userId}' AND client_id='{$params->clientId}' LIMIT 1"
-        );
+            // append to the correct answer if the answer_type is multiple
+            if($data->answer_type == "multiple") {
+                $data->correct_answer = "match::{$data->correct_answer}";
+            }
 
-        // create a new object of the answers mechanism
-        $answerClass = load_class("answers", "controllers");
-        $clean_answer = implode(",", $answers);
+            // load the existing user record (if any)
+            $answer_info = $this->pushQuery(
+                "*", "assignments_answers", 
+                "assignment_id='{$data->assignment_id}' AND student_id = '{$params->userId}' AND client_id='{$params->clientId}' LIMIT 1"
+            );
 
-        // if empty the form a new string of data
-        if(empty($answer_info)) {
-            // check the answer
-            $checker = $answerClass->answerMechanism($clean_answer, $data->correct_answer);
-            $score = $checker == "correct" ? $data->marks : 0;
+            // create a new object of the answers mechanism
+            $answerClass = load_class("answers", "controllers");
+            $clean_answer = implode(",", $answers);
 
-            // generate a array of the question
-            $the_answer = [
-                [
+            // if empty the form a new string of data
+            if(empty($answer_info)) {
+
+                // check the answer
+                $checker = $answerClass->answerMechanism($clean_answer, $data->correct_answer);
+                $score = $checker == "correct" ? $data->marks : 0;
+
+                // generate a array of the question
+                $the_answer = [
+                    [
+                        "question_id" => $params->question_id,
+                        "answer" => $clean_answer,
+                        "date_answered" => date("Y-m-d h:iA"),
+                        "assigned_mark" => $data->marks,
+                        "status" => $answerClass->answerMechanism($clean_answer, $data->correct_answer)
+                    ]
+                ];
+
+                // insert the user answer information
+                $stmt = $this->db->prepare("INSERT INTO assignments_answers SET client_id =?, assignment_id = ?, student_id = ?, answers = ?, scores = ?");
+                $stmt->execute([$params->clientId, $data->assignment_id, $params->userId, json_encode($the_answer), $score]);
+
+            } else {
+                // convert the answers into an array
+                $existing_answer = json_decode($answer_info[0]->answers, true);
+
+                // check the answer
+                $checker = $answerClass->answerMechanism($clean_answer, $data->correct_answer);
+
+                // add to the existing scroe
+                $score = $checker == "correct" ? ($answer_info[0]->scores + $data->marks) : $answer_info[0]->scores;
+
+                // generate a array of the question
+                $the_answer = [
                     "question_id" => $params->question_id,
                     "answer" => $clean_answer,
-                    "data_answered" => date("Y-m-d h:iA"),
                     "assigned_mark" => $data->marks,
+                    "date_answered" => date("Y-m-d h:iA"),
                     "status" => $answerClass->answerMechanism($clean_answer, $data->correct_answer)
-                ]
-            ];
+                ];
 
-            // insert the user answer information
-            $stmt = $this->db->prepare("INSERT INTO assignments_answers SET client_id =?, assignment_id = ?, student_id = ?, answers = ?, scores = ?");
-            $stmt->execute([$params->clientId, $data->assignment_id, $params->userId, json_encode($the_answer), $score]);
+                // init
+                $the_key = null;
 
-        } else {
-            // convert the answers into an array
-            $existing_answer = json_decode($answer_info[0]->answers, true);
-
-            // check the answer
-            $checker = $answerClass->answerMechanism($clean_answer, $data->correct_answer);
-
-            // add to the existing scroe
-            $score = $checker == "correct" ? ($answer_info[0]->scores + $data->marks) : $answer_info[0]->scores;
-
-            // generate a array of the question
-            $the_answer = [
-                "question_id" => $params->question_id,
-                "answer" => $clean_answer,
-                "assigned_mark" => $data->marks,
-                "data_answered" => date("Y-m-d h:iA"),
-                "status" => $answerClass->answerMechanism($clean_answer, $data->correct_answer)
-            ];
-
-            // init
-            $the_key = null;
-
-            // loop through the record to ascertain whether the record already exist
-            // replace it if it exists
-            foreach($existing_answer as $key => $this_answer) {
-                if($this_answer["question_id"] == $params->question_id) {
-                    $the_key = [
-                        "key" => $key
-                    ];
-                    break;
+                // loop through the record to ascertain whether the record already exist
+                // replace it if it exists
+                foreach($existing_answer as $key => $this_answer) {
+                    if($this_answer["question_id"] == $params->question_id) {
+                        $the_key = [
+                            "key" => $key
+                        ];
+                        break;
+                    }
                 }
-            }
-            // append to the array list if $the_key value is empty
-            if(empty($the_key)) {
-                array_push($existing_answer, $the_answer);
-            } else {
-                // replace the value for the specific key
-                $existing_answer[$the_key["key"]] = $the_answer;
+                // append to the array list if $the_key value is empty
+                if(empty($the_key)) {
+                    array_push($existing_answer, $the_answer);
+                } else {
+                    // replace the value for the specific key
+                    $existing_answer[$the_key["key"]] = $the_answer;
+                }
+
+                // update the existing record
+                $stmt = $this->db->prepare("UPDATE assignments_answers SET answers = ? WHERE client_id =? AND assignment_id = ? AND student_id = ? LIMIT 1");
+                $stmt->execute([json_encode($existing_answer), $params->clientId, $data->assignment_id, $params->userId]);
             }
 
-            // update the existing record
-            $stmt = $this->db->prepare("UPDATE assignments_answers SET answers = ? WHERE client_id =? AND assignment_id = ? AND student_id = ? LIMIT 1");
-            $stmt->execute([json_encode($existing_answer), $params->clientId, $data->assignment_id, $params->userId]);
         }
 
+        // end the query if save only is set
+        if(isset($params->save_answer_only)) {
+            return "Yes it was saved only";
+        }
+        
         // set the nextQuestionId as the currentQuestionId
         $this->session->currentQuestionId = isset($params->previous_id) ? $params->previous_id : $this->session->nextQuestionId;
 

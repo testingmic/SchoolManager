@@ -37,7 +37,21 @@ var loadQuestionInfo = (previous_id = "") => {
 var reviewQuizAssignment = (assignment_id) => {
     $(`div[id="viewOnlyModal"]`).modal("show");
     $(`div[id="viewOnlyModal"] [class="modal-title pt-2"]`).html(`Review Selected Answers`);
-    $.get(`${baseUrl}api/assignments/review_answers`, { assignment_id }).then((response) => {
+
+    let answers = {},
+        question_id = $(`table[id="multichoice_question"]`).attr("data-question_id");
+
+    if ($(`input[name='answer_option'][type='checkbox']`).length) {
+        $.each($(`table[id="multichoice_question"] input[name='answer_option']:checked`), function(i, e) {
+            answers[i] = $(this).val();
+        });
+    } else if ($(`input[name='answer_option'][type='number']`).length) {
+        answers[0] = $(`input[name='answer_option'][type='number']`).val();
+    } else if ($(`textarea[name='answer_option']`).length) {
+        answers[0] = $(`input[name='answer_option'][type='number']`).val();
+    }
+
+    $.post(`${baseUrl}api/assignments/review_answers`, { assignment_id, question_id, answers }).then((response) => {
         if (response.code = 200) {
             $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html(response.data.result);
         }
@@ -53,12 +67,31 @@ var submitQuizAssignment = (assignment_id) => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-            $.post(`${baseUrl}api/assignments/handin`, { assignment_id }).then((response) => {
+
+            let answers = {},
+                question_id = $(`table[id="multichoice_question"]`).attr("data-question_id");
+
+            if ($(`input[name='answer_option'][type='checkbox']`).length) {
+                $.each($(`table[id="multichoice_question"] input[name='answer_option']:checked`), function(i, e) {
+                    answers[i] = $(this).val();
+                });
+            } else if ($(`input[name='answer_option'][type='number']`).length) {
+                answers[0] = $(`input[name='answer_option'][type='number']`).val();
+            } else if ($(`textarea[name='answer_option']`).length) {
+                answers[0] = $(`input[name='answer_option'][type='number']`).val();
+            }
+
+            $.post(`${baseUrl}api/assignments/handin`, { assignment_id, question_id, answers }).then((response) => {
                 if (response.code == 200) {
                     swal({
-                        position: "top",
                         text: response.data.result,
                         icon: "success",
+                    });
+                    loadPage(`${baseUrl}update-assignment/${assignment_id}/view`);
+                } else {
+                    swal({
+                        text: response.data.result,
+                        icon: "error",
                     });
                 }
             });

@@ -324,7 +324,7 @@ if(!empty($item_id)) {
                 ];
                 
                 // if the assignment has not yet been handed in
-                if($data->handed_in === "Pending") {
+                if(($data->handed_in === "Pending") || empty($data->handed_in)) {
 
                     // set the scripts to load for this user
                     $response->scripts = ["assets/js/multichoice.js"];
@@ -341,7 +341,8 @@ if(!empty($item_id)) {
                     $grading_info .= $assignmentClass->current_question($questions_array_list, $session->student_id);
                 
                 } elseif($data->handed_in === "Submitted") {
-                    
+                    $params->show_correct_answer = true;
+                    $params->student_id = $session->student_id;
                     $grading_info .= $assignmentClass->review_answers($params, "p-3")["data"];
 
                 }
@@ -497,7 +498,9 @@ if(!empty($item_id)) {
                             </div>'
                         ).'
                         <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
-                            '.$grading_info.'
+                            <div class="trix-slim-scroll" style="max-height:900px;overflow-y:auto;">
+                                '.$grading_info.'
+                            </div>
                         </div>';
                         
                         if($hasUpdate) {
