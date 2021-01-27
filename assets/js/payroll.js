@@ -162,7 +162,17 @@ var save_staff_allowances = () => {
             });
 
             $.post(`${baseUrl}api/payroll/paymentdetails`, { basic_salary, allowances, deductions, employee_id }).then((response) => {
-
+                let s_icon = "error";
+                if (response.code === 200) {
+                    s_icon = "success";
+                    setTimeout(() => {
+                        loadPage(`${baseUrl}hr-payroll-view/${employee_id}`);
+                    }, 1000);
+                }
+                swal({
+                    text: response.data.result,
+                    icon: s_icon,
+                });
             });
         }
     });

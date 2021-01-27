@@ -60,8 +60,9 @@ foreach($api_staff_list["data"] as $key => $each) {
         </div></td>";
     $staff_list .= "<td>{$each->position}</td>";
     $staff_list .= "<td>{$each->enrollment_date}</td>";
-    $staff_list .= "<td>{$each->gross_salary}</td>";
-    $staff_list .= "<td>{$each->net_allowance}</td>";
+    $staff_list .= "<td>{$each->basic_salary}</td>";
+    $staff_list .= "<td>{$each->allowances}</td>";
+    $staff_list .= "<td>{$each->deductions}</td>";
     $staff_list .= "<td>{$each->basic_salary}</td>";
     $staff_list .= "<td class='text-center'>{$action}</td>";
     $staff_list .= "</tr>";
@@ -122,9 +123,10 @@ $response->html = '
                                         <th>Staff Name</th>
                                         <th>Staff Role</th>
                                         <th>Appointment Date</th>
-                                        <th>Gross Salary</th>
-                                        <th>Allowances</th>
                                         <th>Basic Salary</th>
+                                        <th>Allowances</th>
+                                        <th>Deductions</th>
+                                        <th>Net Salary</th>
                                         <th width="5%" align="center"></th>
                                     </tr>
                                 </thead>

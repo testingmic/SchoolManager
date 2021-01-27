@@ -180,7 +180,7 @@ class Users extends Myschoolgh {
 			$appendClient = isset($params->append_client) ? true : false;
 			$leftJoin = isset($params->user_payroll) ? "LEFT JOIN payslips_users_payroll up ON up.employee_id = a.item_id" : null;
 			$leftJoinQuery = !empty($leftJoin) ? ", 
-				up.gross_salary, up.net_allowance, up.allowances, up.deductions, up.basic_salary,
+				up.gross_salary, up.net_allowance, up.allowances, up.deductions, up.net_salary, up.basic_salary,
 				up.account_name, up.account_number, up.bank_name, up.bank_branch, up.ssnit_number, up.tin_number" : null;
 
 			// prepare and execute the statement
@@ -289,7 +289,7 @@ class Users extends Myschoolgh {
 
 				if($leftJoin) {
 					$result->_allowances = $this->pushQuery('*', "payslips_employees_allowances", "type='Allowance' AND employee_id='{$result->user_id}' AND client_id='{$result->client_id}'");
-					$result->_deductions = $this->pushQuery('*', "payslips_employees_allowances", "type='Deductions' AND employee_id='{$result->user_id}' AND client_id='{$result->client_id}'");
+					$result->_deductions = $this->pushQuery('*', "payslips_employees_allowances", "type='Deduction' AND employee_id='{$result->user_id}' AND client_id='{$result->client_id}'");
 				}
 
 				// if the user wants to load wards as well

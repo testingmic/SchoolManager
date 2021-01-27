@@ -3427,7 +3427,7 @@ class Forms extends Myschoolgh {
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon1"><i class="fa fa-user"></i></span>
                         </div>
-                        <input type="text" value="'.($data->account_name ?? null).'" name="account_name" id="account_name" class="form-control">
+                        <input type="text" value="'.($data->account_name ?? null).'" maxlength="255" name="account_name" id="account_name" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -3436,7 +3436,7 @@ class Forms extends Myschoolgh {
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon1"><i class="fa fa-paperclip"></i></span>
                         </div>
-                        <input type="text" value="'.($data->account_number ?? null).'" maxlength="25" name="account_number" id="account_number" class="form-control">
+                        <input type="text" maxlength="24" value="'.($data->account_number ?? null).'" name="account_number" id="account_number" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -3445,7 +3445,7 @@ class Forms extends Myschoolgh {
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon1"><i class="fa fa-tablet"></i></span>
                         </div>
-                        <input type="text" value="'.($data->bank_name ?? null).'" maxlength="25" name="bank_name" id="bank_name" class="form-control">
+                        <input type="text" value="'.($data->bank_name ?? null).'" maxlength="40" name="bank_name" id="bank_name" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -3454,7 +3454,7 @@ class Forms extends Myschoolgh {
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon1"><i class="fa fa-home"></i></span>
                         </div>
-                        <input type="text" value="'.($data->bank_branch ?? null).'" maxlength="25" name="bank_branch" id="bank_branch" class="form-control">
+                        <input type="text" value="'.($data->bank_branch ?? null).'" maxlength="40" name="bank_branch" id="bank_branch" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -3463,7 +3463,7 @@ class Forms extends Myschoolgh {
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon1"><i class="fa fa-tablet"></i></span>
                         </div>
-                        <input type="text" value="'.($data->ssnit_number ?? null).'" maxlength="25" name="ssnit_number" id="ssnit_number" class="form-control">
+                        <input type="text" value="'.($data->ssnit_number ?? null).'" maxlength="40" name="ssnit_number" id="ssnit_number" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-6">
@@ -3472,7 +3472,7 @@ class Forms extends Myschoolgh {
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon1"><i class="fa fa-tablet"></i></span>
                         </div>
-                        <input type="text" value="'.($data->tin_number ?? null).'" maxlength="25" name="tin_number" id="tin_number" class="form-control">
+                        <input type="text" value="'.($data->tin_number ?? null).'" maxlength="40" name="tin_number" id="tin_number" class="form-control">
                     </div>
                     <input type="hidden" value="'.$userId.'" id="employee_id" name="employee_id" readonly>
                 </div>

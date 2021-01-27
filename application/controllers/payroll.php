@@ -90,11 +90,12 @@ class Payroll extends Myschoolgh {
 
             /** Simple calculations */
             $net_salary = $params->basic_salary + $t_allowances - $t_deductions;
-            $gross_salary = $params->basic_salary + $t_deductions;
+            $gross_salary = $params->basic_salary + $t_allowances;
             $net_allowance = $t_allowances - $t_deductions;
             
             /** Insert/Update the basic salary information */
             if(empty($the_user->basic_salary)) {
+
                 /** Insert a new record */
                 $stmt = $this->db->prepare("INSERT INTO payslips_users_payroll SET 
                 client_id = ?, employee_id = ?, basic_salary = ?, gross_salary = ?,
@@ -103,16 +104,8 @@ class Payroll extends Myschoolgh {
                 $stmt->execute([$params->clientId, $params->employee_id, $params->basic_salary, 
                     $gross_salary, $t_allowances, $t_deductions, $net_allowance, $net_salary]);
                 
-                /** Data to save */
-                $log = "
-                <p><strong>Gross Salary:</strong> {$params->basic_salary}</p>
-                <p><strong>Total Allowances:</strong> {$t_allowances}</p>
-                <p><strong>Total Deductions:</strong> {$t_deductions}</p>
-                <p><strong>Total Allowances:</strong> {$net_allowance}</p>
-                <p><strong>Basic Salary:</strong> {$net_salary}</p>";
-
                 // log the user activity
-                $this->userLogs("salary_allowances", $params->employee_id, $log, "{$params->userData->name} inserted the Salary Allowances of: {$the_user->name}", $params->userId);
+                $this->userLogs("salary_allowances", $params->employee_id, null, "<strong>{$params->userData->name}</strong> inserted the Salary Allowances of: <strong>{$the_user->name}</strong>", $params->userId);
 
             } else {
 
@@ -124,10 +117,58 @@ class Payroll extends Myschoolgh {
                 $stmt->execute([$params->basic_salary, $gross_salary, $t_allowances, $t_deductions, $net_allowance, 
                     $net_salary, $params->clientId, $params->employee_id]);
 
+                /** Data to save */
+                $log = "
+                <p class='mb-0 pb-0'><strong>Gross Salary:</strong> {$the_user->basic_salary} => {$params->basic_salary}</p>
+                <p class='mb-0 pb-0'><strong>Total Allowances:</strong> {$the_user->allowances} => {$t_allowances}</p>
+                <p class='mb-0 pb-0'><strong>Gross Salary:</strong> {$the_user->gross_salary} => {$gross_salary}</p>
+                <p class='mb-0 pb-0'><strong>Total Deductions:</strong> {$the_user->deductions} => {$t_deductions}</p>
+                <p class='mb-0 pb-0'><strong>Total Allowances:</strong> {$the_user->net_allowance} => {$net_allowance}</p>
+                <p class='mb-0 pb-0'><strong>Basic Salary:</strong> {$the_user->net_salary} => {$net_salary}</p>";
+
                 // log the user activity
-                $this->userLogs("salary_allowances", $params->employee_id, null, "{$params->userData->name} updated the Salary Allowances of: {$the_user->name}", $params->userId);
+                $this->userLogs("salary_allowances", $params->employee_id, $log, "<strong>{$params->userData->name}</strong> updated the Salary Allowances of: <strong>{$the_user->name}</strong>", $params->userId);
             }
             $data = "Employee Allowances was successfully updated";
+        }
+
+        else if(isset($params->account_name)) {
+            
+            /** Insert/Update the basic salary information */
+            if(empty($the_user->basic_salary)) {
+                /** Insert a new record */
+                $stmt = $this->db->prepare("INSERT INTO payslips_users_payroll SET 
+                client_id = ?, employee_id = ?, account_name = ?, account_number = ?,
+                bank_name = ?, bank_branch = ?, ssnit_number = ?, tin_number = ?");
+                
+                $stmt->execute([$params->clientId, $params->employee_id, $params->account_name, 
+                    $params->account_number, $params->bank_name, $params->bank_branch, $params->ssnit_number, $params->tin_number]);
+
+                // log the user activity
+                $this->userLogs("bank_details", $params->employee_id, null, "<strong>{$params->userData->name}</strong> inserted the Bank Details of: <strong>{$the_user->name}</strong>", $params->userId);
+                
+            } else {
+                /** Insert a new record */
+                $stmt = $this->db->prepare("UPDATE  payslips_users_payroll SET 
+                account_name = ?, account_number = ?, bank_name = ?, bank_branch = ?, ssnit_number = ?, tin_number = ?
+                WHERE client_id = ? AND employee_id = ? LIMIT 1");
+                
+                $stmt->execute([$params->account_name,  $params->account_number, $params->bank_name, 
+                    $params->bank_branch, $params->ssnit_number, $params->tin_number, $params->clientId, $params->employee_id]);
+                
+                /** Data to save */
+                $log = "
+                <p class='mb-0 pb-0'><strong>Account Name:</strong> {$the_user->account_name} => {$params->account_name}</p>
+                <p class='mb-0 pb-0'><strong>Account Number:</strong> {$the_user->account_number} => {$params->account_number}</p>
+                <p class='mb-0 pb-0'><strong>Bank Name:</strong> {$the_user->bank_name} => {$params->bank_name}</p>
+                <p class='mb-0 pb-0'><strong>Branch:</strong> {$the_user->bank_branch} => {$params->bank_branch}</p>
+                <p class='mb-0 pb-0'><strong>SSNIT No.:</strong> {$the_user->ssnit_number} => {$params->ssnit_number}</p>
+                <p class='mb-0 pb-0'><strong>Tin No.:</strong> {$the_user->tin_number} => {$params->tin_number}</p>";
+            
+                // log the user activity
+                $this->userLogs("bank_details", $params->employee_id, $log, "<strong>{$params->userData->name}</strong> updated the Bank Details of: <strong>{$the_user->name}</strong>", $params->userId);
+
+            }
         }
 
 
