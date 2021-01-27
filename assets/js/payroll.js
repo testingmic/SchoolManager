@@ -203,21 +203,25 @@ var generate_payslip = () => {
     let month_id = $(`div[id="payslip_container"] select[name="month_id"]`).val(),
         year_id = $(`div[id="payslip_container"] select[name="year_id"]`).val(),
         employee_id = $(`div[id="payslip_container"] select[name="employee_id"]`).val(),
-        basic_salary = $(`div[id="payslip_container"] input[name="basic_salary"]`).val(),
-        payment_mode = $(`div[id="payslip_container"] select[name="payment_mode"]`).val(),
-        payment_status = $(`div[id="payslip_container"] select[name="payment_status"]`).val(),
-        comments = $(`div[id="payslip_container"] textarea[name="comments"]`).val();
+        basic_salary = $(`div[class~="summary-div"] input[name="basic_salary"]`).val(),
+        payment_mode = $(`div[class~="summary-div"] select[name="payment_mode"]`).val(),
+        payment_status = $(`div[class~="summary-div"] select[name="payment_status"]`).val(),
+        comments = $(`div[class~="summary-div"] textarea[name="comments"]`).val();
 
-    let allowances = [];
+    let allowances = {};
     $.each($(`div[class~="allowance-div"] div[class~="initial"]`), function(i, e) {
-        let rowNumber = $(this).attr('data-row');
-        allowances.push($(`select[id^="allowance_${rowNumber}"]`).val() + "=" + $(`input[id^="allowance_amount_${rowNumber}"]`).val());
+        let rowNumber = $(this).attr('data-row'),
+            allowance_id = $(`select[id^="allowance_${rowNumber}"]`).val(),
+            allowance_amount = $(`input[id^="allowance_amount_${rowNumber}"]`).val();
+        allowances[allowance_id] = allowance_amount;
     });
 
-    let deductions = [];
+    let deductions = {};
     $.each($(`div[class~="deductions-div"] div[class~="initial"]`), function(i, e) {
-        let rowNumber = $(this).attr('data-row');
-        deductions.push($(`select[id^="deductions_${rowNumber}"]`).val() + "=" + $(`input[id^="deductions_amount_${rowNumber}"]`).val());
+        let rowNumber = $(this).attr('data-row'),
+            deductions_id = $(`select[id^="deductions_${rowNumber}"]`).val(),
+            deductions_amount = $(`input[id^="deductions_amount_${rowNumber}"]`).val();
+        deductions[deductions_id] = deductions_amount;
     });
 
     if (employee_id == 'null') {
@@ -266,13 +270,20 @@ var generate_payslip = () => {
                         $(`div[class~="summary-list"] textarea`).prop('disabled', false);
                         $(`div[class~="summary-list"] button`).prop('disabled', false);
                         $(`div[class~="allowances-div"] button, div[class~="deductions-div"] button`).prop('disabled', false);
+                        $(`div[class~="summary-list"] input[name="basic_salary"]`).prop('disabled', true);
                     } else {
+                        $(`div[class~="allowance-div"] div[class~="allowances-list"]`).html(``);
+                        $(`div[class~="deductions-div"] div[class~="deductions-list"]`).html(``);
                         setTimeout(function() {
-                            window.location.href = `${baseUrl}hr-payslip`;
+                            loadPage(`${baseUrl}hr-payslip`);
                         }, 1000);
                     }
                 }).catch(() => {
-                    $(`div[class~="generate-result"]`).html(`<div class="alert alert-danger">Sorry! An error was encountered while processing the request.</div>`);
+                    swal({
+                        text: "Sorry! An error was encountered while processing the request.",
+                        icon: "error",
+                    });
+                    $(`div[class~="summary-list"] input[name="basic_salary"]`).prop('disabled', true);
                     $(`div[class~="allowance-div"] div[class~="allowances-list"] input, div[class~="deductions-div"] div[class~="deductions-list"] input, div[class~="deductions-div"] div[class~="deductions-list"] select, div[class~="allowance-div"] div[class~="allowances-list"] select`).prop('disabled', false);
                     $(`div[class~="summary-list"] select`).prop('disabled', false);
                     $(`div[class~="summary-list"] input`).prop('disabled', false);
@@ -309,7 +320,6 @@ var load_employee_payslip = (employee_id) => {
             $(`div[class~="summary-list"] select[name="payment_mode"]`).val(result.payslip_data.payment_mode).change();
             $(`div[class~="summary-list"] select[name="payment_status"]`).val(result.payslip_data.status).change();
             $(`div[class~="allowance-note"]`).html(result.note);
-            $(`div[class~="summary-list"] input[name="basic_salary"]`).prop('readonly', false);
 
             if (result.payslip_data.status == 1) {
                 $(`div[class~="summary-list"] select`).prop('disabled', true);
@@ -320,6 +330,7 @@ var load_employee_payslip = (employee_id) => {
                 $(`div[class~="summary-list"] select`).prop('disabled', false);
                 $(`div[class~="summary-list"] input`).prop('disabled', false);
             }
+            $(`div[class~="summary-list"] input[name="basic_salary"]`).prop('disabled', true);
 
             $(`div[class~="summary-div"]`).removeClass('hidden');
             $(`div[class~="allowance-div"]`).removeClass('hidden');

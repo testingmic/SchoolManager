@@ -3649,6 +3649,8 @@ class Forms extends Myschoolgh {
 
     /**
      * Generate Payslip form
+     * 
+     * @return String
      */
     public function payslip_form() {
 
@@ -3700,7 +3702,7 @@ class Forms extends Myschoolgh {
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text" id="basic-addon1">GH&cent;</span>
                                             </div>
-                                            <input type="text" name="basic_salary" readonly="" id="basic_salary" class="form-control">
+                                            <input type="text" name="basic_salary" readonly disabled="disabled" id="basic_salary" class="form-control">
                                         </div>
                                     </div>
 
