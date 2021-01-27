@@ -3017,6 +3017,145 @@ class Forms extends Myschoolgh {
     }
 
     /**
+     * Profile form
+     * 
+     * @param String $clientId
+     * @param String $baseUrl
+     * 
+     * @return String
+     */
+    public function profile_form($clientId, $baseUrl, $userData = null) {
+
+        $isData = !empty($userData) && isset($userData->country) ? true : false;
+
+        $guardian = "";
+
+        $response = '
+        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+            <div class="row mb-4 border-bottom pb-3">
+                <div class="col-lg-12">
+                    <h5>BIO INFORMATION</h5>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="image">Image</label>
+                        <input type="file" name="image" id="image" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="unique_id">Unique ID (optional)</label>
+                        <input type="text" disabled value="'.($userData->unique_id ?? null).'" name="unique_id" id="unique_id" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
+                            <option value="null">Select Gender</option>';
+                            foreach($this->pushQuery("*", "users_gender") as $each) {
+                                $response .= "<option ".($isData && ($each->name == $userData->gender) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
+                            }
+                    $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="firstname">Firstname <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->firstname ?? null).'" name="firstname" id="firstname" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="lastname">Lastname <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->lastname ?? null).'" name="lastname" id="lastname" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="othername">Othernames</label>
+                        <input type="text" value="'.($userData->othername ?? null).'" name="othername" id="othername" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
+                        <input type="date" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" value="'.($userData->email ?? null).'" name="email" id="email" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="phone">Primary Contact</label>
+                        <input type="text" name="phone" value="'.($userData->phone_number ?? null).'" id="phone" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="phone_2">Secondary Contact</label>
+                        <input type="text" name="phone_2" value="'.($userData->phone_number_2 ?? null).'" id="phone_2" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select data-width="100%" name="country" id="country" class="form-control selectpicker">
+                            <option value="null">Select Country</option>';
+                            foreach($this->pushQuery("*", "country") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $userData->country) ? "selected" : null)." value=\"{$each->id}\">{$each->country_name}</option>";                            
+                            }
+                    $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="residence">Place of Residence <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->residence ?? null).'" name="residence" id="residence" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="blood_group">Blood Broup</label>
+                        <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
+                            <option value="null">Select Blood Group</option>';
+                            foreach($this->pushQuery("id, name", "blood_groups") as $each) {
+                                $response .= "<option ".($isData && ($each->id == $userData->blood_group) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-8 col-md-6">
+                    <div class="form-group">
+                        <label for="position">Position / Role <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->position ?? null).'" name="position" id="position" class="form-control">
+                        <input type="hidden" hidden value="'.($userData->user_id ?? null).'" name="user_id" id="user_id" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea type="text" name="description" id="description" class="form-control">'.($userData->description ?? null).'</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 text-right">
+                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>
+        </form>';
+
+        return $response;
+
+    }
+
+    /**
      * Settings Form
      * 
      * @param String    $clientId

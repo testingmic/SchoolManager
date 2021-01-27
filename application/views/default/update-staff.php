@@ -289,7 +289,7 @@ if(!empty($user_id)) {
                 <div class="card-body pt-0 pb-0">
                     <div class="py-4">
                         <p class="clearfix">
-                            <span class="float-left">Enrollment Date</span>
+                            <span class="float-left">Date of Employment</span>
                             <span class="float-right text-muted">'.$data->enrollment_date.'</span>
                         </p>
                         <p class="clearfix">
@@ -305,9 +305,19 @@ if(!empty($user_id)) {
                             <span class="float-right text-muted">'.$data->date_of_birth.'</span>
                         </p>
                         <p class="clearfix">
-                            <span class="float-left">Phone</span>
+                            <span class="float-left">Primary Contact</span>
                             <span class="float-right text-muted">'.$data->phone_number.'</span>
                         </p>
+                        '.(!empty($data->phone_number_2) ? 
+                        '<p class="clearfix">
+                            <span class="float-left">Secondary Contact</span>
+                            <span class="float-right text-muted">'.$data->phone_number_2.'</span>
+                        </p>' : '').'
+                        '.(!empty($data->position) ? 
+                        '<p class="clearfix">
+                            <span class="float-left">Position</span>
+                            <span class="float-right text-muted">'.$data->position.'</span>
+                        </p>' : '').'
                         <p class="clearfix">
                             <span class="float-left">E-Mail</span>
                             <span class="float-right text-muted">'.$data->email.'</span>
@@ -343,10 +353,6 @@ if(!empty($user_id)) {
                             aria-selected="true">Course List</a>
                         </li>' : null
                     ).'
-                    <li class="nav-item">
-                        <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab"
-                        aria-selected="true">Timetable</a>
-                    </li>
                     <li class="nav-item">
                         <a class="nav-link" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab"
                         aria-selected="true">Attendance</a>
@@ -427,10 +433,6 @@ if(!empty($user_id)) {
                                 </form>
                             </div>' : null
                         ).'
-                        <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">
-                            
-
-                        </div>
                         <div class="tab-pane fade" id="attendance" role="tabpanel" aria-labelledby="attendance-tab2">
                             
                             
