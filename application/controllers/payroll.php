@@ -522,7 +522,7 @@ class Payroll extends Myschoolgh {
             ");
             $stmt->execute([$params->clientId, $params->employee_id, $params->basic_salary, 
                 $t_allowances, $t_deductions, $net_salary, $params->month_id,
-                date("Y-m-t", strtotime("last day of {$params->month_id} {$params->year_id}")),
+                date("Y-m-t", strtotime("today +0 day")),
                 $params->year_id, $params->payment_mode ?? null,
                 $params->comments ?? null, $gross_salary, $params->userId
             ]);
@@ -530,7 +530,7 @@ class Payroll extends Myschoolgh {
             $payslip_id = $this->lastRowId("payslips WHERE client_id='{$params->clientId}'");
 
             // log the user activity
-            $this->userLogs("payslip", $params->employee_id, null, "<strong>{$params->userData->name}</strong> generated a payslip for: <strong>{$the_user->name}</strong> for the month: <strong>{$params->month_id} {$params->year_id}</strong>", $params->userId);
+            $this->userLogs("payslip", $params->employee_id, null, "<strong>{$params->userData->name}</strong> generated a payslip for: <strong>{$data->name}</strong> for the month: <strong>{$params->month_id} {$params->year_id}</strong>", $params->userId);
 
         } else {
             /** Payslip details */
