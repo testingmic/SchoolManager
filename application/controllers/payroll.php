@@ -40,13 +40,16 @@ class Payroll extends Myschoolgh {
         if(isset($params->allowances) && !empty($params->allowances)) {
             // loop through the allowance list
             foreach($params->allowances as $key => $value) {
-                // set the value
-                $allowances[] = [
-                    'allowance_id' => (int) $key,
-                    'allowance_amount' => $value,
-                    'allowance_type' => 'Allowance'
-                ];
-                $t_allowances += $value;
+                // check if the key is not null
+                if($key !== "null") {
+                    // set the value
+                    $allowances[] = [
+                        'allowance_id' => (int) $key,
+                        'allowance_amount' => $value,
+                        'allowance_type' => 'Allowance'
+                    ];
+                    $t_allowances += $value;
+                }
             }
         }
 
@@ -54,13 +57,16 @@ class Payroll extends Myschoolgh {
         if(isset($params->deductions) && !empty($params->deductions)) {
             // loop through the allowance list
             foreach($params->deductions as $key => $value) {
-                // set the value
-                $allowances[] = [
-                    'allowance_id' => (int) $key,
-                    'allowance_amount' => $value,
-                    'allowance_type' => 'Deduction'
-                ];
-                $t_deductions += $value;
+                // check if the key is not null
+                if($key !== "null") {
+                    // set the value
+                    $allowances[] = [
+                        'allowance_id' => (int) $key,
+                        'allowance_amount' => $value,
+                        'allowance_type' => 'Deduction'
+                    ];
+                    $t_deductions += $value;
+                }
             }
         }
 

@@ -26,7 +26,7 @@ $accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 
 // staff id
-$userId = $session->userId;
+$userId = confirm_url_id(1) ? xss_clean($SITEURL[1]) : $session->userId;
 $pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty
@@ -37,12 +37,11 @@ if(!empty($userId)) {
         "user_id" => $userId,
         "limit" => 1,
         "user_payroll" => true,
-        "no_limit" => 1,
-        "user_type" => $defaultUser->user_type
+        "no_limit" => 1
     ];
 
     $data = load_class("users", "controllers")->list($staff_param);
-    
+
     // if no record was found
     if(empty($data["data"])) {
         $response->html = page_not_found();
@@ -68,7 +67,7 @@ if(!empty($userId)) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'hr-payroll">Staff List</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'hr-payroll">Staff Payroll List</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>
@@ -88,7 +87,7 @@ if(!empty($userId)) {
                     </div>
                     <div class="card">
                         <div class="card-header">
-                            <h4>Personal Details</h4>
+                            <h4>Salary Details</h4>
                         </div>
                         <div class="card-body pt-0 pb-0 mb-0">
                             <div class="py-4">
@@ -182,6 +181,9 @@ if(!empty($userId)) {
                                 <li class="nav-item">
                                     <a class="nav-link" id="allowances-tab2" data-toggle="tab" href="#allowances" role="tab" aria-selected="true">Allowances</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="payslips-tab2" data-toggle="tab" href="#payslips" role="tab" aria-selected="true">Payslips</a>
+                                </li>
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="bank_details" role="tabpanel" aria-labelledby="bank_details-tab2">
@@ -189,6 +191,12 @@ if(!empty($userId)) {
                                 </div>
                                 <div class="tab-pane fade" id="allowances" role="tabpanel" aria-labelledby="allowances-tab2">
                                     '.$payroll_form["allowance_detail"].'
+                                </div>
+                                <div class="tab-pane fade" id="payslips" role="tabpanel" aria-labelledby="payslips-tab2">
+                                    <div class="d-flex justify-content-between">
+                                        <div><h5>EMPLOYEE PAYSLIPS</h5></div>
+                                        <div><a class="btn btn-outline-primary" href="'.$baseUrl.'hr-payslip-generate/'.$userId.'"><i class="fa fa-plus"></i> Create Payslip</a></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

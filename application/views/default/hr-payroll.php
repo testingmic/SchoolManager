@@ -47,8 +47,18 @@ $color = [
     "teacher" => "warning"
 ];
 
+$basic_salary = 0;
+$allowances = 0;
+$deductions = 0;
+$net_salary = 0;
+
 foreach($api_staff_list["data"] as $key => $each) {
     
+    $basic_salary += $each->basic_salary;
+    $allowances += $each->allowances;
+    $deductions += $each->deductions;
+    $net_salary += $each->net_salary;
+
     $action = "<a href='{$baseUrl}hr-payroll-view/{$each->user_id}' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
@@ -63,7 +73,7 @@ foreach($api_staff_list["data"] as $key => $each) {
     $staff_list .= "<td>{$each->basic_salary}</td>";
     $staff_list .= "<td>{$each->allowances}</td>";
     $staff_list .= "<td>{$each->deductions}</td>";
-    $staff_list .= "<td>{$each->basic_salary}</td>";
+    $staff_list .= "<td>{$each->net_salary}</td>";
     $staff_list .= "<td class='text-center'>{$action}</td>";
     $staff_list .= "</tr>";
 }
