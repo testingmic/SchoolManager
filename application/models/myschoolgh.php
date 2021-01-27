@@ -158,7 +158,7 @@ class Myschoolgh extends Models {
 			return $stmt->fetchAll(PDO::FETCH_OBJ);
 
 		} catch(PDOException $e) {
-			return [];
+			return $e->getMessage();
 		}
 
 	}

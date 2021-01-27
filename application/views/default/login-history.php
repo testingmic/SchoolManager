@@ -23,11 +23,11 @@ $accessObject->clientId = $clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 
 $response = (object) [];
-$pageTitle = "User Activity Timelines";
+$pageTitle = "User Login History";
 $response->title = "{$pageTitle} : {$appName}";
 
 // if the user has no permissions
-if(!$accessObject->hasAccess("activities", "settings")) {
+if(!$accessObject->hasAccess("login_history", "settings")) {
     // show the error page
     $response->html = page_not_found();
 } else {
@@ -35,13 +35,13 @@ if(!$accessObject->hasAccess("activities", "settings")) {
     $response->scripts = ["assets/js/timeline.js"];
 
     // get the array list of values
-    $activity_list = $myClass->pushQuery("a.*, u.name AS fullname, u.unique_id, u.email, 
-        u.phone_number, u.image, u.description AS user_description", 
-        "users_activity_logs a LEFT JOIN users u ON u.item_id = a.user_id",
-        "(a.client_id='{$clientId}' OR a.user_id='{$userId}') AND a.status = '1' AND a.subject NOT IN ('endpoints') ORDER BY a.id DESC");
-
+    $activity_list = $myClass->pushQuery(
+        "a.*, u.name AS fullname, u.unique_id, u.email, u.phone_number, u.image, u.description, u.user_type", 
+        "users_login_history a LEFT JOIN users u ON u.item_id = a.user_id",
+        "(a.client_id='{$clientId}' OR a.user_id='{$userId}') ORDER BY a.id DESC");
+    
     $activities = "";
-    $activity_list_array = [];
+    $user_login_history = [];
 
     $icons = [
         "assignment" => "fa-book-reader",
@@ -57,43 +57,31 @@ if(!$accessObject->hasAccess("activities", "settings")) {
     ];
     foreach($activity_list as $activity) {
         
-        $activity_list_array[$activity->id] = $activity;
-        $time_ago = time_diff($activity->date_recorded);
-        
-        $icon = isset($icons[$activity->subject]) ? $icons[$activity->subject] : "fa-comment-alt";
+        $user_login_history[$activity->id] = $activity;
+        $time_ago = time_diff($activity->lastlogin);
         
         $activities .= '
         <div class="activity">
             <div class="activity-icon bg-primary text-white">
-                <i class="fas '.$icon.'"></i>
+                <i class="fas fa-lock"></i>
             </div>
             <div class="activity-detail">
                 <div class="mb-2">
                     <span class="text-job text-primary">'.$time_ago.'</span>
                     <span class="bullet"></span>
-                    <a class="text-job" onclick="return view_activity_log(\''.$activity->id.'\')" href="#">View</a>
-                    <div class="float-right dropdown">
-                        <a href="#" data-toggle="dropdown"><i class="fas fa-ellipsis-h"></i></a>
-                        <div class="dropdown-menu">
-                            <div class="dropdown-title">Options</div>
-                            <a href="#" onclick="return view_activity_log(\''.$activity->id.'\')" class="dropdown-item has-icon"><i class="fas fa-list"></i> View Details</a>
-                            <div class="dropdown-divider"></div>
-                            <a href="#" class="dropdown-item has-icon text-danger">
-                                <i class="fas fa-trash-alt"></i> Archive Record
-                            </a>
-                        </div>
-                    </div>
+                    <a class="text-job" onclick="return view_login_history_log(\''.$activity->id.'\')" href="#">View</a>
                 </div>
-                <div>'.$activity->description.'</div>
+                <div><i class="fa fa-globe"></i> '.$activity->log_browser.'</div>
+                <div class="mb-2"><i class="fa fa-broadcast-tower"></i> '.$activity->log_ipaddress.'</div>
+                <div>'.$activity->log_platform.'</div>
             </div>
         </div>';
     }
-    $response->array_stream["activity_list_array"] = $activity_list_array;
-    $response->array_stream["activity_list_icons"] = $icons;
+    $response->array_stream["user_login_history"] = $user_login_history;
 
     // if the activility list
     if(empty($activity_list)) {
-        $activities = "No activity has been logged for now. Please check back for more detailed activity logged";
+        $activities = "No login history has been logged for now. Please check back for more detailed activity logged";
     }
 
     $response->html = '
