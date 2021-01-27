@@ -1,9 +1,9 @@
 var view_activity_log = (activity_id) => {
-    if ($.array_stream["activity_list_array"] !== undefined) {
-        let activity_log = $.array_stream["activity_list_array"];
-        if (activity_log[activity_id] !== undefined) {
-            let activity = activity_log[activity_id];
-            $(`div[id="activity_log_detail"]`).html(`
+        if ($.array_stream["activity_list_array"] !== undefined) {
+            let activity_log = $.array_stream["activity_list_array"];
+            if (activity_log[activity_id] !== undefined) {
+                let activity = activity_log[activity_id];
+                $(`div[id="activity_log_detail"]`).html(`
                 <div>
                     <h4 class="text-center border-bottom pb-2">ACTIVITY LOG DETAIL</h4>
                     <div class="mt-2">
@@ -27,6 +27,9 @@ var view_activity_log = (activity_id) => {
                                 <p class="mb-0 pb-0"><i class="fa fa-phone"></i> ${activity.phone_number}</p>
                             </div>
                         </div>
+                    </div>
+                    <div class="mt-3 border-top pt-3">
+                        ${activity.previous_record !== null ? `<h5>PREVIOUS RECORD</h5>${activity.previous_record}` : ""}
                     </div>
                 </div>
             `);

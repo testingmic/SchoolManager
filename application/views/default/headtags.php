@@ -209,14 +209,14 @@ load_helpers(['menu_helper']);
                     <a href="<?= $baseUrl ?>profile" class="dropdown-item has-icon">
                         <i class="far fa-user"></i> Profile
                     </a>
-                    <?php if($accessObject->hasAccess("activities", "settings")) { ?>
-                    <a href="<?= $baseUrl ?>timeline" class="dropdown-item has-icon">
-                        <i class="fas fa-bolt"></i> Activities
-                    </a>
-                    <?php } ?>
                     <?php if($accessObject->hasAccess("manage", "settings")) { ?>
                     <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon">
                         <i class="fas fa-cog"></i> Settings
+                    </a>
+                    <?php } ?>
+                    <?php if($accessObject->hasAccess("activities", "settings")) { ?>
+                    <a href="<?= $baseUrl ?>timeline" class="dropdown-item has-icon">
+                        <i class="fas fa-bolt"></i> Activities
                     </a>
                     <?php } ?>
                     <?php if($accessObject->hasAccess("login_history", "settings")) { ?>
@@ -254,7 +254,7 @@ load_helpers(['menu_helper']);
                             $menu_function();
                         }
                         ?>
-                        <li><a href="<?= $baseUrl ?>chat" class="nav-link"><i class="fas fa-envelope-open-text"></i><span>Live Chat</span></a></li>
+                        <li class="mb-5"><a href="<?= $baseUrl ?>chat" class="nav-link"><i class="fas fa-envelope-open-text"></i><span>Live Chat</span></a></li>
                     </ul>
                 </aside>
             </div>

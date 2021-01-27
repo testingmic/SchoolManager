@@ -308,7 +308,7 @@ var linkHandler = (target, pushstate) => {
     devlog("linkHandler(). I called =>")
 
     if (target.slice(0, -1) === $.baseurl || target === $.baseurl || target === $.default) {
-        target = $.baseurl + "/timeline";
+        target = $.baseurl + "/dashboard";
     }
     loadPage(target, pushstate)
 }
@@ -1077,18 +1077,6 @@ var fetchUserChats = () => {
     }, $.chatinterval);
 }
 
-var saveMenuPreference = (menutype) => {
-    $.post($.baseurl + "/process/savemenupreference", { menutype: menutype }, () => {});
-}
-
-var saveThemePreference = (theme) => {
-    $.post($.baseurl + "/process/savethemepreference", { theme: theme }, () => {});
-}
-
-var setApplicationLock = (type) => {
-    return $.post($.baseurl + "/process/setapplicationlock", { type: type }, () => {});
-}
-
 var capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -1343,9 +1331,15 @@ var trigger_form_submit = () => {
                                     });
                                 }
                                 if (response.data.additional.href !== undefined) {
-                                    setTimeout(() => {
-                                        loadPage(response.data.additional.href);
-                                    }, 2000);
+                                    if (theButton.attr("href") !== undefined) {
+                                        setTimeout(() => {
+                                            loadPage(theButton.attr("href"));
+                                        }, 1000);
+                                    } else {
+                                        setTimeout(() => {
+                                            loadPage(response.data.additional.href);
+                                        }, 2000);
+                                    }
                                 }
                                 if (response.data.additional.data !== undefined) {
                                     preload_AjaxData(response.data.additional.data);

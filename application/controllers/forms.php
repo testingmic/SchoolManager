@@ -3031,7 +3031,7 @@ class Forms extends Myschoolgh {
         $guardian = "";
 
         $response = '
-        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
                     <h5>BIO INFORMATION</h5>
@@ -3139,14 +3139,15 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
                         <label for="description">Description</label>
-                        <textarea type="text" name="description" id="description" class="form-control">'.($userData->description ?? null).'</textarea>
+                        <input type="hidden" hidden id="trix-editor-input" value="'.($userData->description ?? null).'">
+                        <trix-editor name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
                     </div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-lg-12 text-right">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                    <button type="button-submit" href="'.$this->baseUrl.'profile" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
         </form>';

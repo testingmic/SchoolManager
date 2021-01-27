@@ -71,8 +71,9 @@ if(!$accessObject->hasAccess("login_history", "settings")) {
                     <span class="bullet"></span>
                     <a class="text-job" onclick="return view_login_history_log(\''.$activity->id.'\')" href="#">View</a>
                 </div>
-                <div><i class="fa fa-globe"></i> '.$activity->log_browser.'</div>
-                <div class="mb-2"><i class="fa fa-broadcast-tower"></i> '.$activity->log_ipaddress.'</div>
+                <div><i class="fa fa-user mr-2 text-danger"></i> '.$activity->fullname.'</div>
+                <div><i class="fa fa-globe mr-2 text-primary"></i> '.$activity->log_browser.'</div>
+                <div class="mb-2"><i class="fa mr-2 text-success fa-broadcast-tower"></i> '.$activity->log_ipaddress.'</div>
                 <div>'.$activity->log_platform.'</div>
             </div>
         </div>';

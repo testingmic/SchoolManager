@@ -276,10 +276,6 @@ if(!empty($user_id)) {
                         '.($data->class_name ? '<div class="author-box-job">'.$data->class_name.'</div>' : '').'
                         '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : '').'
                     </div>
-                    <div class="text-center">
-                        <div class="author-box-description">'.$data->description.'</div>
-                        <div class="w-100 d-sm-none"></div>
-                    </div>
                 </div>
                 </div>
                 <div class="card">

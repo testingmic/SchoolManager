@@ -265,6 +265,10 @@ class Users extends Myschoolgh {
 				if(isset($params->append_waspresent)) {
 					$result->is_present = false;
 				}
+
+				if(isset($result->description)) {
+					$result->description = custom_clean(htmlspecialchars_decode($result->description));
+				}
 				
 				// online algorithm (user is online if last activity is at most 5minutes ago)
 				if(isset($result->online)) {
@@ -1350,8 +1354,8 @@ class Users extends Myschoolgh {
             }
 
 			// save the phone_number change
-            if(isset($params->phone) && ($prevData->phone_number !== $params->phone)) {
-                $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->phone_number, "Primary Contact was been changed from {$prevData->phone_number}", $params->userId);
+            if(isset($params->description) && ($prevData->description !== $params->description)) {
+                $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->description, "User description was altered.", $params->userId);
 				// set the value
 				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
             }
@@ -1387,7 +1391,7 @@ class Users extends Myschoolgh {
 			// insert the user activity
 			if($params->user_id == $params->userId) {
 				// Insert the log
-				$this->userLogs("{$params->user_type}_account", $params->user_id, $prevData, "You updated your account information", $params->userId);
+				$this->userLogs("{$params->user_type}_account", $params->user_id, null, "You updated your account information", $params->userId);
 				// set the value
 				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
 			} else {
@@ -1395,7 +1399,7 @@ class Users extends Myschoolgh {
 				global $noticeClass;
 				
 				// Insert the log
-				$this->userLogs("{$params->user_type}_account", $params->user_id, $prevData, "<strong>{$params->userData->name}</strong> updated the account information of <strong>{$the_user[0]->name}</strong>", $params->userId);
+				$this->userLogs("{$params->user_type}_account", $params->user_id, null, "<strong>{$params->userData->name}</strong> updated the account information of <strong>{$the_user[0]->name}</strong>", $params->userId);
 				
 				// Notify the user that his/her account has been modified
 				$param = (object) [
