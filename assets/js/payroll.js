@@ -178,6 +178,174 @@ var save_staff_allowances = () => {
     });
 }
 
-removeRow();
-addAllowance();
-addDeductions();
+var cancelPayslip = () => {
+    swal({
+        title: "Cancel Payslip Generation",
+        text: "Are you sure you want to cancel the generation of the payslip for this employee?.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $(`div[class~="summary-div"]`).addClass('hidden');
+            $(`div[class~="allowance-note"]`).html('');
+            $(`div[class~="allowance-div"] div[class~="allowances-list"]`).html(`<div class="text-center">Load Employee Allowance Data</div>`);
+            $(`div[class~="deductions-div"] div[class~="deductions-list"]`).html(`<div class="text-center">Load Employee Deductions Data</div>`);
+            $(`div[class~="summary-list"] textarea`).val('');
+            $(`div[class~="summary-list"] select`).val('null').change();
+            $(`div[class~="summary-list"] input`).val('');
+        }
+    });
+}
+
+var generate_payslip = () => {
+
+    let month_id = $(`div[id="payslip_container"] select[name="month_id"]`).val(),
+        year_id = $(`div[id="payslip_container"] select[name="year_id"]`).val(),
+        employee_id = $(`div[id="payslip_container"] select[name="employee_id"]`).val(),
+        basic_salary = $(`div[id="payslip_container"] input[name="basic_salary"]`).val(),
+        payment_mode = $(`div[id="payslip_container"] select[name="payment_mode"]`).val(),
+        payment_status = $(`div[id="payslip_container"] select[name="payment_status"]`).val(),
+        comments = $(`div[id="payslip_container"] textarea[name="comments"]`).val();
+
+    let allowances = [];
+    $.each($(`div[class~="allowance-div"] div[class~="initial"]`), function(i, e) {
+        let rowNumber = $(this).attr('data-row');
+        allowances.push($(`select[id^="allowance_${rowNumber}"]`).val() + "=" + $(`input[id^="allowance_amount_${rowNumber}"]`).val());
+    });
+
+    let deductions = [];
+    $.each($(`div[class~="deductions-div"] div[class~="initial"]`), function(i, e) {
+        let rowNumber = $(this).attr('data-row');
+        deductions.push($(`select[id^="deductions_${rowNumber}"]`).val() + "=" + $(`input[id^="deductions_amount_${rowNumber}"]`).val());
+    });
+
+    if (employee_id == 'null') {
+        $(`div[class~="generate-result"]`).html('<div class="alert alert-danger">Select an Employee to continue.</div>');
+        clearIt();
+    } else if (month_id == 'null') {
+        $(`div[class~="generate-result"]`).html('<div class="alert alert-danger">Select the Month to continue.</div>');
+        clearIt();
+    } else if (year_id == 'null') {
+        $(`div[class~="generate-result"]`).html('<div class="alert alert-danger">Select the Year to continue.</div>');
+        clearIt();
+    } else {
+        swal({
+            title: "Generate Payslip",
+            text: "Are you sure you want to generate the payslip for this employee?.",
+            icon: 'warning',
+            buttons: true,
+            dangerMode: true,
+        }).then((proceed) => {
+            if (proceed) {
+                $(`div[class~="allowance-div"] div[class~="allowances-list"] input, div[class~="deductions-div"] div[class~="deductions-list"] input, div[class~="deductions-div"] div[class~="deductions-list"] select, div[class~="allowance-div"] div[class~="allowances-list"] select`).prop('disabled', true);
+                $(`div[class~="summary-list"] select`).prop('disabled', true);
+                $(`div[class~="summary-list"] input`).prop('disabled', true);
+                $(`div[class~="summary-list"] textarea`).prop('disabled', true);
+                $(`div[class~="allowances-div"] button, div[class~="deductions-div"] button`).prop('disabled', true);
+                let the_data = {
+                    allowances,
+                    deductions,
+                    basic_salary,
+                    comments,
+                    payment_mode,
+                    payment_status,
+                    month_id,
+                    year_id,
+                    employee_id
+                };
+                $.post(`${baseUrl}api/payroll/generatepayslip`, the_data).then((response) => {
+                    swal({
+                        text: response.data.result,
+                        icon: responseCode(response.code),
+                    });
+                    if (response.code !== 200) {
+                        $(`div[class~="allowance-div"] div[class~="allowances-list"] input, div[class~="deductions-div"] div[class~="deductions-list"] input, div[class~="deductions-div"] div[class~="deductions-list"] select, div[class~="allowance-div"] div[class~="allowances-list"] select`).prop('disabled', false);
+                        $(`div[class~="summary-list"] select`).prop('disabled', false);
+                        $(`div[class~="summary-list"] input`).prop('disabled', false);
+                        $(`div[class~="summary-list"] textarea`).prop('disabled', false);
+                        $(`div[class~="summary-list"] button`).prop('disabled', false);
+                        $(`div[class~="allowances-div"] button, div[class~="deductions-div"] button`).prop('disabled', false);
+                    } else {
+                        setTimeout(function() {
+                            window.location.href = `${baseUrl}hr-payslip`;
+                        }, 1000);
+                    }
+                }).catch(() => {
+                    $(`div[class~="generate-result"]`).html(`<div class="alert alert-danger">Sorry! An error was encountered while processing the request.</div>`);
+                    $(`div[class~="allowance-div"] div[class~="allowances-list"] input, div[class~="deductions-div"] div[class~="deductions-list"] input, div[class~="deductions-div"] div[class~="deductions-list"] select, div[class~="allowance-div"] div[class~="allowances-list"] select`).prop('disabled', false);
+                    $(`div[class~="summary-list"] select`).prop('disabled', false);
+                    $(`div[class~="summary-list"] input`).prop('disabled', false);
+                    $(`div[class~="summary-list"] textarea`).prop('disabled', false);
+                    $(`div[class~="summary-list"] button`).prop('disabled', false);
+                    $(`div[class~="allowances-div"] button, div[class~="deductions-div"] button`).prop('disabled', false);
+                });
+            }
+        });
+    }
+}
+
+var load_employee_payslip = (employee_id) => {
+
+    let month_id = $(`div[id="payslip_container"] select[name="month_id"]`).val(),
+        year_id = $(`div[id="payslip_container"] select[name="year_id"]`).val();
+
+    $(`div[class~="summary-div"]`).addClass('hidden');
+    $(`div[class~="allowance-div"]`).addClass('hidden');
+    $(`div[class~="deductions-div"]`).addClass('hidden');
+
+    $.get(`${baseUrl}api/payroll/payslipdetails`, { employee_id, month_id, year_id }).then((response) => {
+
+        if (response.code === 200) {
+            let result = response.data.result;
+            $(`div[class~="allowance-div"] div[class~="allowances-list"]`).html(result.allowance_data);
+            $(`div[class~="deductions-div"] div[class~="deductions-list"]`).html(result.deductions_data);
+
+            $(`div[class~="summary-list"] input[name="basic_salary"]`).val(result.payslip_data.basic_salary);
+            $(`div[class~="summary-list"] input[name="total_allowances"]`).val(result.payslip_data.total_allowance);
+            $(`div[class~="summary-list"] input[name="total_deductions"]`).val(result.payslip_data.total_deductions);
+            $(`div[class~="summary-list"] input[name="net_salary"]`).val(result.payslip_data.total_takehome);
+            $(`div[class~="summary-list"] textarea[name="comments"]`).val(result.payslip_data.comments);
+            $(`div[class~="summary-list"] select[name="payment_mode"]`).val(result.payslip_data.payment_mode).change();
+            $(`div[class~="summary-list"] select[name="payment_status"]`).val(result.payslip_data.status).change();
+            $(`div[class~="allowance-note"]`).html(result.note);
+            $(`div[class~="summary-list"] input[name="basic_salary"]`).prop('readonly', false);
+
+            if (result.payslip_data.status == 1) {
+                $(`div[class~="summary-list"] select`).prop('disabled', true);
+                $(`div[class~="summary-list"] input`).prop('disabled', true);
+                $(`div[class~="summary-list"] textarea`).prop('disabled', true);
+            } else {
+                $(`div[class~="summary-list"] textarea`).prop('disabled', false);
+                $(`div[class~="summary-list"] select`).prop('disabled', false);
+                $(`div[class~="summary-list"] input`).prop('disabled', false);
+            }
+
+            $(`div[class~="summary-div"]`).removeClass('hidden');
+            $(`div[class~="allowance-div"]`).removeClass('hidden');
+            $(`div[class~="deductions-div"]`).removeClass('hidden');
+
+            addAllowance();
+            addDeductions();
+            removeRow();
+            allowanceKeyControl();
+            deductionsKeyControl();
+            triggerCalculator();
+            recalculateTotal();
+            $(`select[class~="selectpicker"]`).select2();
+
+        } else {
+            swal({
+                text: response.data.result,
+                icon: responseCode(response.code),
+            });
+        }
+
+    });
+}
+
+if ($(`input[id^="deductions_amount_"]`).length) {
+    removeRow();
+    addAllowance();
+    addDeductions();
+}

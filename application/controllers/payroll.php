@@ -184,4 +184,224 @@ class Payroll extends Myschoolgh {
         ];
     }
 
+    /**
+     * Load the Payslip of an Employee for a specific period
+     * 
+     * @param String $params->employee_id
+     * @param String $params->month_id
+     * @param String $params->year_id
+     * 
+     * @return Array
+     */
+    public function payslipdetails(stdClass $params) {
+        
+        // global variable
+        global $usersClass;
+
+        if((strlen($params->year_id) !== 4)  || ($params->year_id === "null")) {
+            return ["code" => 203, "data" => "Please select a valid year to load record."];
+        }
+
+        // return error
+        if(strlen($params->month_id) < 3 || ($params->month_id === "null")) {
+            return ["code" => 203, "data" => "Please select a valid month to load record."];
+        }
+
+        // confirm that the user_id does not already exist
+		$i_params = (object) [
+            "limit" => 1, "user_id" => $params->employee_id, 
+            "user_payroll" => true, "minified" => "minified_content"
+        ];
+		$the_user = $usersClass->list($i_params)["data"];
+
+		// get the user data
+		if(empty($the_user)) {
+			return ["code" => 201, "data" => "Sorry! Please provide a valid user id."];
+		}
+        $data = $the_user[0];
+
+        // fetch the allowances of the employee
+        $allowances_list = "";
+        $deductions_list = "";
+        $employeeAllowances = $data->_allowances;
+        $employeeDeductions = $data->_deductions;
+
+        // load the allowance for the specified month and year
+        $employeePayslip = $this->pushQuery("*", "payslips", "payslip_month='{$params->month_id}' AND payslip_year='{$params->year_id}' AND client_id='{$params->clientId}' AND deleted='0'");
+        if(!empty($employeePayslip)) {
+            $employeeAllowances = $this->pushQuery("*", "payslips_details", "detail_type='Allowance' AND payslip_month='{$params->month_id}' AND payslip_year='{$params->year_id}' AND client_id='{$params->clientId}'");
+            $employeeDeductions = $this->pushQuery("*", "payslips_details", "detail_type='Deduction' AND payslip_month='{$params->month_id}' AND payslip_year='{$params->year_id}' AND client_id='{$params->clientId}'");
+        }
+
+        // fetch all allowances
+        $allowances_types = $this->pushQuery('*', "payslips_allowance_types", "type='Allowance' AND status='1' AND client_id='{$params->clientId}'");
+        $deductions_types = $this->pushQuery('*', "payslips_allowance_types", "type='Deduction' AND status='1' AND client_id='{$params->clientId}'");
+
+        // initials
+        $generated = 0;
+		$totalAllowance = 0;
+		$totalDeduction = 0;
+
+        // count the number of rows found
+        if(!empty($employeeAllowances)) {
+            $ii = 0;
+            // loop through the list of allowances
+            foreach($employeeAllowances as $eachAllowance) {
+                // Increment 
+                $ii++;
+                $totalAllowance += $eachAllowance->amount;
+                // append to the list
+                $allowances_list .= '
+                <div class="initial mb-2" data-row="'.$ii.'">
+                    <div class="row">
+                        <div class="col-lg-'.(($ii == 1) ? 7 : 6).' mb-2 col-md-'.(($ii == 1) ? 7 : 6).'">
+                            <select data-width="100%" name="allowance[]" id="allowance_'.$ii.'" class="form-control selectpicker">
+                                <option value="null">Please Select</option>';
+                                foreach($allowances_types as $each) {
+                                    $allowances_list .= "<option ".(($eachAllowance->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
+                                }
+                            $allowances_list .= '
+                            </select>
+                        </div>
+                        <div class="col-lg-5 mb-2 col-md-5">
+                            <input value="'.$eachAllowance->amount.'" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="allowance_amount[]" id="allowance_amount_'.$ii.'">
+                        </div>';
+                        if($ii > 1) {
+                            $allowances_list .= '
+                            <div class="text-center">
+                                <span class="remove-row cursor btn btn-outline-danger" data-type="allowance" data-value="'.$ii.'"><i class="fa fa-trash"></i></span>
+                            </div>';
+                        }
+                $allowances_list .= '</div></div>';
+            }
+        } else {
+            $allowances_list = '
+            <div class="initial mb-2" data-row="1">
+                <div class="row">
+                    <div class="col-lg-7 mb-2 col-md-7">
+                        <select data-width="100%" name="allowance" id="allowance_1" class="form-control selectpicker">
+                            <option value="null">Please Select</option>';
+                            foreach($allowances_types as $each) {
+                                $allowances_list .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                            }
+                            $allowances_list .= '
+                        </select>
+                    </div>
+                    <div class="col-lg-5 mb-2 col-md-5">
+                        <input placeholder="Amount" min="0" max="20000" class="form-control" type="number" name="allowance_amount_1" id="allowance_amount_1">
+                    </div>
+                </div>
+            </div>';
+        }
+
+        // count the number of rows found
+        if(!empty($employeeDeductions)) {
+            $ii = 0;
+            // loop through the list of allowances
+            foreach($employeeDeductions as $eachDeduction) {
+                // Increment 
+                $ii++;
+                $totalDeduction += $eachDeduction->amount;
+                // append to the list
+                $deductions_list .= '
+                <div class="initial mb-2" data-row="'.$ii.'">
+                    <div class="row">
+                        <div class="col-lg-'.(($ii == 1) ? 7 : 6).' mb-2 col-md-'.(($ii == 1) ? 7 : 6).'">
+                            <select data-width="100%" name="deductions[]" id="deductions_'.$ii.'" class="form-control selectpicker">
+                                <option value="null">Please Select</option>';
+                                foreach($deductions_types as $each) {
+                                    $deductions_list .= "<option ".(($eachDeduction->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
+                                }
+                            $deductions_list .= '
+                            </select>
+                        </div>
+                        <div class="col-lg-5 mb-2">
+                            <input value="'.$eachDeduction->amount.'" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="deductions_amount[]" id="deductions_amount_'.$ii.'">
+                        </div>';
+                        if($ii > 1) {
+                            $deductions_list .= '
+                            <div class="text-center">
+                                <span class="remove-row cursor btn btn-outline-danger" data-type="deductions" data-value="'.$ii.'"><i class="fa fa-trash"></i></span>
+                            </div>';
+                        }
+                $deductions_list .= '</div></div>';
+            }
+        } else {
+            $deductions_list = '
+            <div class="initial mb-2" data-row="1">
+                <div class="row">
+                    <div class="col-lg-7 mb-2 col-md-7">
+                        <select data-width="100%" name="deductions" id="deductions_1" class="form-control selectpicker">
+                            <option value="null">Please Select</option>';
+                            foreach($deductions_types as $each) {
+                                $deductions_list .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                            }
+                            $deductions_list .= '
+                        </select>
+                    </div>
+                    <div class="col-lg-5 mb-2 col-md-5">
+                        <input placeholder="Amount" min="0" max="20000" class="form-control" type="number" name="deductions_amount_1" id="deductions_amount_1">
+                    </div>
+                </div>
+            </div>';
+        }
+
+        //: if the payslip is empty then query the employee information for basic salary
+		if(empty($employeePayslip)) {
+
+			$employeePayslip = [];
+
+			//: Assign variables
+			$employeePayslip['basic_salary'] = $data->basic_salary;
+			$employeePayslip['total_allowance'] = $totalAllowance;
+			$employeePayslip['total_deductions'] = $totalDeduction;
+			$employeePayslip['total_incentives'] = 0.00;
+			$employeePayslip['total_takehome'] = (($employeePayslip['basic_salary'] + $employeePayslip['total_allowance'] + $employeePayslip['total_incentives']) - $employeePayslip['total_deductions']);
+
+			$employeePayslip['payment_mode'] = 'null';
+			$employeePayslip['status'] = 0;
+			
+			$note = "
+                <div class=\"text-primary mb-3 text-center\">
+                    You are about to generate a Payslip for <strong>{$params->month_id} {$params->year_id}</strong>.
+                </div>
+                <div class='row justify-content-between'>
+                    <div><button onclick='return cancelPayslip()' type=\"reset\" class=\"btn btn-outline-danger\"><i class='fa fa-exclamation-circle'></i>  Cancel</a></div>
+                    <div><button onclick='return generate_payslip()' data-action=\"generate\" type=\"submit\" class=\"btn btn-outline-success\"><i class='fa fa-save'></i> Generate Payslip</button></div>
+                </div>";
+		} else {
+			$employeePayslip = $employeePayslip[0];
+
+			if($employeePayslip->status == 1) {
+				$note = "<div class=\"text-success mb-3 text-center\">
+						This Payslip has already been redeemed.</div>
+						<div class=\"text-center\">
+						<a href=\"{$this->baseUrl}dowload?py_id={$employeePayslip->id}&dw=true\" target=\"_blank\" class=\"btn btn-outline-danger\"><i class='fa fa-file-pdf-o'></i> Download</a> &nbsp; 
+						<a href=\"{$this->baseUrl}download?py_id={$employeePayslip->id}&dw=false\" target=\"_blank\" class=\"btn btn-outline-primary\"><i class='fa fa-print'></i>  Print</a></div>
+				";
+			} else {
+				$note = "<div class=\"text-danger mb-3 text-center\">
+						This paylip was generated on <strong>{$employeePayslip->date_log}</strong> awaiting redemption. Any updates made will replace the current record.
+						</div>
+						<div class='row justify-content-between'>
+							<div><button onclick='return cancelPayslip()' type=\"reset\" class=\"btn btn-outline-danger\"><i class='fa fa-exclamation-circle'></i>  Cancel</a></div>
+							<div><button onclick='return generate_payslip()' data-action=\"update\" type=\"submit\" class=\"btn btn-outline-success\"><i class='fa fa-save'></i> Update Payslip</button></div>
+						</div>";
+			}
+        }
+
+        return [
+            "code" => 200,
+            "data" => [
+                'payslip_data' => empty($employeePayslip) ? [] : $employeePayslip,
+                'allowance_data' => $allowances_list,
+                'deductions_data' => $deductions_list,
+                'note' => $note,
+                'generated' => $generated
+            ]
+		];
+        
+
+    }
+
 }

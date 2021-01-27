@@ -3510,9 +3510,7 @@ class Forms extends Myschoolgh {
                         <div class="col-lg-'.(($ii == 1) ? 7 : 6).' mb-2 col-md-'.(($ii == 1) ? 7 : 6).'">
                             <select data-width="100%" name="allowance[]" id="allowance_'.$ii.'" class="form-control selectpicker">
                                 <option value="null">Please Select</option>';
-                                // using foreach loop
                                 foreach($allowances as $each) {
-                                    // print the list of countries
                                     $allowances_list .= "<option ".(($eachAllowance->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
                                 }
                             $allowances_list .= '
@@ -3537,9 +3535,7 @@ class Forms extends Myschoolgh {
                     <div class="col-lg-7 mb-2 col-md-7">
                         <select data-width="100%" name="allowance" id="allowance_1" class="form-control selectpicker">
                             <option value="null">Please Select</option>';
-                            // using foreach loop
                             foreach($allowances as $each) {
-                                // print the list of countries
                                 $allowances_list .= "<option value=\"{$each->id}\">{$each->name}</option>";
                             }
                             $allowances_list .= '
@@ -3649,6 +3645,142 @@ class Forms extends Myschoolgh {
 
         return $forms;
 
+    }
+
+    /**
+     * Generate Payslip form
+     */
+    public function payslip_form() {
+
+        $html = '
+            <div class="row">                
+                <div class="col-lg-6 allowance-div hidden">
+                    <div class="card">
+                        <div class="text-center mt-2">
+                            <h4> Allowances </h4>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="allowances-list">
+                                <div class="text-center">Load Employee Allowance Data</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 deductions-div hidden">
+                    <div class="card">
+                        <div class="text-center mt-2">
+                            <h4> Deductions </h4>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="deductions-list">
+                                <div class="text-center">Load Employee Deductions Data</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="col-lg-3"></div>
+                <div class="col-lg-6 summary-div hidden">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="summary-list">
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="text-center">
+                                            <h2> Summary </h2>
+                                            <div class="clearfix"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 text-right font-weight-bold">Basic:</div>
+                                    <div class="col-lg-8">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="basic-addon1">GH&cent;</span>
+                                            </div>
+                                            <input type="text" name="basic_salary" readonly="" id="basic_salary" class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 text-right font-weight-bold">Total Allowances:</div>
+                                    <div class="col-lg-8">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="basic-addon1">GH&cent;</span>
+                                            </div>
+                                            <input type="text" name="total_allowances" id="total_allowances" readonly class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 text-right font-weight-bold">Total Deductions:</div>
+                                    <div class="col-lg-8">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="basic-addon1">GH&cent;</span>
+                                            </div>
+                                            <input type="text" name="total_deductions" id="total_deductions" readonly class="form-control">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 text-right font-weight-bold">Net Salary:</div>
+                                    <div class="col-lg-8">
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="basic-addon1">GH&cent;</span>
+                                            </div>
+                                            <input type="text" name="net_salary" id="net_salary" readonly class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 text-right font-weight-bold">Payment Mode:</div>
+                                    <div class="col-lg-8">
+                                        <div class="input-group mb-3">
+                                            <select name="payment_mode" id="payment_mode" class="form-control selectpicker2">
+                                                <option value="null">Select</option>
+                                                <option value="Cash">Cash</option>
+                                                <option value="Bank">Bank</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 text-right font-weight-bold">Status:</div>
+                                    <div class="col-lg-8">
+                                        <div class="input-group mb-3">
+                                            <select name="payment_status" id="payment_status" class="form-control selectpicker2">
+                                                <option value="1">Paid</option>
+                                                <option value="0">Unpaid</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 text-right font-weight-bold">Comments:</div>
+                                    <div class="col-lg-8">
+                                        <div class="input-group mb-3">
+                                            <textarea name="comments" id="comments" cols="30" rows="3" style="min-height: 80px;max-height: 80px" class="form-control"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-12 mt-3">
+                                        <div class="allowance-note"></div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12 mt-3">
+                                        <div class="generate-result text-center"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>';
+        
+        return $html;
     }
 
 }

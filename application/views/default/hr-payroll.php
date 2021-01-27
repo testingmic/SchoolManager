@@ -148,6 +148,7 @@ $response->html = '
             </div>
         </div>
     </section>';
+    
 // print out the response
 echo json_encode($response);
 ?>
