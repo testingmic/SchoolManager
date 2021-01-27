@@ -18,12 +18,13 @@ jump_to_main($baseUrl);
 $response = (object) [];
 $filter = (object) $_POST;
 
-$response->title = "Staff List : {$appName}";
+$response->title = "Staff Payroll List : {$appName}";
 $response->scripts = ["assets/js/filters.js"];
 
 $filter->user_type = !empty($filter->user_type) ? $filter->user_type : "employee,teacher,admin,accountant";
 
 $staff_param = (object) [
+    "user_payroll" => true,
     "clientId" => $session->clientId,
     "user_type" => $filter->user_type,
     "department_id" => $filter->department_id ?? null,
@@ -48,28 +49,20 @@ $color = [
 
 foreach($api_staff_list["data"] as $key => $each) {
     
-    $action = "<a href='{$baseUrl}update-staff/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
-
-    if($accessObject->hasAccess("update", $each->user_type)) {
-        $action .= "&nbsp;<a href='{$baseUrl}update-staff/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-    }
-
-    if($accessObject->hasAccess("delete", $each->user_type)) {
-        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
-    }
+    $action = "<a href='{$baseUrl}hr-payroll-view/{$each->user_id}' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
     $staff_list .= "<td>".($key+1)."</td>";
     $staff_list .= "<td>
         <div class='d-flex justify-content-start'>
             <div class='mr-2'><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
-            <div><a href='{$baseUrl}update-staff/{$each->user_id}'>{$each->name}</a> <br><span class='text-uppercase badge badge-{$color[$each->user_type]} p-2'>{$each->user_type}</span></div>
+            <div><a href='{$baseUrl}hr-payroll-view/{$each->user_id}'>{$each->name}</a> <br><span class='text-uppercase badge badge-{$color[$each->user_type]} p-2'>{$each->user_type}</span></div>
         </div></td>";
     $staff_list .= "<td>{$each->position}</td>";
-    $staff_list .= "<td>{$each->gender}</td>";
-    $staff_list .= "<td>{$each->date_of_birth}</td>";
     $staff_list .= "<td>{$each->enrollment_date}</td>";
-    $staff_list .= "<td>{$each->department_name}</td>";
+    $staff_list .= "<td>{$each->gross_salary}</td>";
+    $staff_list .= "<td>{$each->net_allowance}</td>";
+    $staff_list .= "<td>{$each->basic_salary}</td>";
     $staff_list .= "<td class='text-center'>{$action}</td>";
     $staff_list .= "</tr>";
 }
@@ -77,10 +70,10 @@ foreach($api_staff_list["data"] as $key => $each) {
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Staff List</h1>
+            <h1>Staff Payroll List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item">Staff List</div>
+                <div class="breadcrumb-item">Payroll List</div>
             </div>
         </div>
         <div class="row">
@@ -116,7 +109,7 @@ $response->html = '
             </div>
             <div class="col-xl-2 col-md-2 col-12 form-group">
                 <label for="">&nbsp;</label>
-                <button id="filter_Staff_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+                <button id="filter_Staff_Payroll_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
@@ -128,11 +121,11 @@ $response->html = '
                                         <th width="5%" class="text-center">#</th>
                                         <th>Staff Name</th>
                                         <th>Staff Role</th>
-                                        <th>Gender</th>
-                                        <th>Date of Birth</th>
-                                        <th>Date Employed</th>
-                                        <th>Department</th>
-                                        <th width="10%" align="center"></th>
+                                        <th>Appointment Date</th>
+                                        <th>Gross Salary</th>
+                                        <th>Allowances</th>
+                                        <th>Basic Salary</th>
+                                        <th width="5%" align="center"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$staff_list.'</tbody>

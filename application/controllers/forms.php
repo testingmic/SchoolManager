@@ -3403,4 +3403,252 @@ class Forms extends Myschoolgh {
         return $forms;
     }
 
+    /**
+     * Generate the Payroll Form
+     * 
+     * @param String    $clientId
+     * @param String    $userId
+     * 
+     * @return Array 
+     */
+    public function payroll_form($clientId, $userId, $data) {
+
+        $forms = [];
+
+        $bank = '
+        <form class="ajax-data-form" action="'.$this->baseUrl.'api/payroll/paymentdetails" method="POST" id="ajax-data-form-content">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h5>BANK DETAILS</h5>
+                </div>
+                <div class="col-lg-6">
+                    <label for="account_name">Account Holder Name</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1"><i class="fa fa-user"></i></span>
+                        </div>
+                        <input type="text" value="'.($data->account_name ?? null).'" name="account_name" id="account_name" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <label for="account_number">Account Number</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1"><i class="fa fa-paperclip"></i></span>
+                        </div>
+                        <input type="text" value="'.($data->account_number ?? null).'" maxlength="25" name="account_number" id="account_number" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <label for="bank_name">Bank Name</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1"><i class="fa fa-tablet"></i></span>
+                        </div>
+                        <input type="text" value="'.($data->bank_name ?? null).'" maxlength="25" name="bank_name" id="bank_name" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <label for="bank_branch">Bank Branch</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1"><i class="fa fa-home"></i></span>
+                        </div>
+                        <input type="text" value="'.($data->bank_branch ?? null).'" maxlength="25" name="bank_branch" id="bank_branch" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <label for="ssnit_number">SSNIT Number</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1"><i class="fa fa-tablet"></i></span>
+                        </div>
+                        <input type="text" value="'.($data->ssnit_number ?? null).'" maxlength="25" name="ssnit_number" id="ssnit_number" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <label for="tin_number">Tax Identification Number</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1"><i class="fa fa-tablet"></i></span>
+                        </div>
+                        <input type="text" value="'.($data->tin_number ?? null).'" maxlength="25" name="tin_number" id="tin_number" class="form-control">
+                    </div>
+                    <input type="hidden" value="'.$userId.'" id="employee_id" name="employee_id" readonly>
+                </div>
+                <div class="col-md-12 text-right">
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>
+        </form>';
+
+        // fetch the allowances of the employee
+        $employeeAllowances = $this->pushQuery('*', "payslips_employees_allowances", "type='Allowance' AND employee_id='{$userId}' AND client_id='{$clientId}'");
+        $employeeDeductions = $this->pushQuery('*', "payslips_employees_allowances", "type='Allowance' AND employee_id='{$userId}' AND client_id='{$clientId}'");
+        
+        // fetch all allowances
+        $allowances = $this->pushQuery('*', "payslips_allowance_types", "type='Allowance' AND status='1' AND client_id='{$clientId}'");
+        $deductions = $this->pushQuery('*', "payslips_allowance_types", "type='Deduction' AND status='1' AND client_id='{$clientId}'");
+        
+        // initializing
+        $ii = 0;
+        $allowances_list = "";
+        $deductions_list = "";
+        
+        // count the number of rows found
+        if(!empty($employeeAllowances)) {
+
+            // loop through the list of allowances
+            foreach($employeeAllowances as $eachAllowance) {
+                // Increment 
+                $ii++;
+
+                // append to the list
+                $allowances_list .= '
+                <div class="initial mb-2" data-row="'.$ii.'">
+                    <div class="row">
+                        <div class="col-lg-'.(($ii == 1) ? 7 : 6).' mb-2 col-md-'.(($ii == 1) ? 7 : 6).'">
+                            <select data-width="100%" name="allowance[]" id="allowance_'.$ii.'" class="form-control selectpicker">
+                                <option value="null">Please Select</option>';
+                                // using foreach loop
+                                foreach($allowances as $each) {
+                                    // print the list of countries
+                                    $allowances_list .= "<option ".(($eachAllowance->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
+                                }
+                            $allowances_list .= '
+                            </select>
+                        </div>
+                        <div class="col-lg-5 mb-2 col-md-5">
+                            <input value="'.$eachAllowance->amount.'" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="allowance_amount[]" id="allowance_amount_'.$ii.'">
+                        </div>';
+                        if($ii > 1) {
+                            $allowances_list .= '
+                            <div class="text-center">
+                                <span class="remove-row cursor btn btn-outline-danger" data-type="allowance" data-value="'.$ii.'"><i class="fa fa-trash"></i></span>
+                            </div>';
+                        }
+                $allowances_list .= '</div></div>';
+            }
+
+        } else {
+            $allowances_list = '
+            <div class="initial mb-2" data-row="1">
+                <div class="row">
+                    <div class="col-lg-7 mb-2 col-md-7">
+                        <select data-width="100%" name="allowance" id="allowance_1" class="form-control selectpicker">
+                            <option value="null">Please Select</option>';
+                            // using foreach loop
+                            foreach($allowances as $each) {
+                                // print the list of countries
+                                $allowances_list .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                            }
+                            $allowances_list .= '
+                        </select>
+                    </div>
+                    <div class="col-lg-5 mb-2 col-md-5">
+                        <input placeholder="Amount" min="0" max="20000" class="form-control" type="number" name="allowance_amount_1" id="allowance_amount_1">
+                    </div>
+                </div>
+            </div>';
+        }
+
+        // count the number of rows found
+        if(!empty($employeeDeductions)) {
+
+            // loop through the list of allowances
+            foreach($employeeDeductions as $eachDeduction) {
+                // Increment 
+                $ii++;
+
+                // append to the list
+                $deductions_list .= '
+                <div class="initial mb-2" data-row="'.$ii.'">
+                    <div class="row">
+                        <div class="col-lg-'.(($ii == 1) ? 7 : 6).' mb-2 col-md-'.(($ii == 1) ? 7 : 6).'">
+                            <select data-width="100%" name="deductions[]" id="deductions_'.$ii.'" class="form-control selectpicker">
+                                <option value="null">Please Select</option>';
+                                // using foreach loop
+                                foreach($deductions as $each) {
+                                    // print the list of countries
+                                    $deductions_list .= "<option ".(($eachDeduction->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
+                                }
+                            $deductions_list .= '
+                            </select>
+                        </div>
+                        <div class="col-lg-5 mb-2">
+                            <input value="'.$eachDeduction->amount.'" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="deductions_amount[]" id="deductions_amount_'.$ii.'">
+                        </div>';
+                        if($ii > 1) {
+                            $deductions_list .= '
+                            <div class="text-center">
+                                <span class="remove-row cursor btn btn-outline-danger" data-type="deductions" data-value="'.$ii.'"><i class="fa fa-trash"></i></span>
+                            </div>';
+                        }
+                $deductions_list .= '</div></div>';
+            }
+
+        } else {
+            $deductions_list = '
+            <div class="initial mb-2" data-row="1">
+                <div class="row">
+                    <div class="col-lg-7 mb-2 col-md-7">
+                        <select data-width="100%" name="deductions" id="deductions_1" class="form-control selectpicker">
+                            <option value="null">Please Select</option>';
+                            // using foreach loop
+                            foreach($deductions as $each) {
+                                // print the list of countries
+                                $deductions_list .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                            }
+                            $deductions_list .= '
+                        </select>
+                    </div>
+                    <div class="col-lg-5 mb-2 col-md-5">
+                        <input placeholder="Amount" min="0" max="20000" class="form-control" type="number" name="deductions_amount_1" id="deductions_amount_1">
+                    </div>
+                </div>
+            </div>';
+        }
+
+        $allowance = '
+            <div class="row">
+                <div class="col-lg-12"><h5>BASIC SALARY</h5></div>
+                <div class="col-lg-6">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1"><i class="fa fa-american-sign-language-interpreting"></i> '.($data->client->client_preferences->labels->currency ?? null).'</span>
+                        </div>
+                        <input type="text" value="'.($data->basic_salary ?? null).'" name="basic_salary" id="basic_salary" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-12 mt-3 border-top pt-3"><h5>ALLOWANCES</h5></div>
+                <div class="col-lg-10">
+                    <div width="100%" class="text-right mb-2">
+                        <button type="button" class="btn btn-info add-allowance"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <div class="allowance-div mb-4">
+                        '.$allowances_list.'
+                    </div>
+                </div>
+                <div class="col-lg-12 mt-3 border-top pt-3"><h5>DEDUCTIONS</h5></div>
+                <div class="col-lg-10">
+                    <div width="100%" class="text-right mb-2">
+                        <button type="button" class="btn btn-info add-deductions"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <div class="deductions-div mb-4">
+                        '.$deductions_list.'
+                    </div>
+                </div>
+                <div class="col-md-10 text-right">
+                    <input type="hidden" value="'.$userId.'" id="employee_id" name="employee_id" readonly>
+                    <button onclick="return save_staff_allowances(\''.$userId.'\')" type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
+            </div>';
+        
+        $forms["bank_detail"] = $bank;
+        $forms["allowance_detail"] = $allowance;
+
+        return $forms;
+
+    }
+
 }

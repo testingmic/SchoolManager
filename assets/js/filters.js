@@ -119,3 +119,11 @@ $(`button[id="filter_Staff_List"]`).on("click", function() {
     $.form_data = { department_id, user_type, gender };
     loadPage(`${baseUrl}list-staff`);
 });
+
+$(`button[id="filter_Staff_Payroll_List"]`).on("click", function() {
+    department_id = $(`select[name="department_id"]`).val(),
+        user_type = $(`select[name="user_type"]`).val(),
+        gender = $(`select[name="gender"]`).val();
+    $.form_data = { department_id, user_type, gender };
+    loadPage(`${baseUrl}hr-payroll`);
+});

@@ -178,6 +178,10 @@ class Users extends Myschoolgh {
 			$loadWards = isset($params->append_wards) ? true : false;
 			$noKeyLoad = !isset($params->key_data_load) ? true : false;
 			$appendClient = isset($params->append_client) ? true : false;
+			$leftJoin = isset($params->user_payroll) ? "LEFT JOIN users_payroll up ON up.employee_id = a.item_id" : null;
+			$leftJoinQuery = !empty($leftJoin) ? ", 
+				up.gross_salary, up.net_allowance, up.allowances, up.deductions, up.basic_salary,
+				up.account_name, up.account_number, up.bank_name, up.bank_branch, up.ssnit_number, up.tin_number" : null;
 
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT 
@@ -191,10 +195,11 @@ class Users extends Myschoolgh {
 					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name,
 					(SELECT phone_number FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_phone
 				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions, 
-					a.course_ids, cl.name AS class_name, cl.item_id AS class_guid
+					a.course_ids, cl.name AS class_name, cl.item_id AS class_guid {$leftJoinQuery}
 				FROM users a 
 				LEFT JOIN country c ON c.id = a.country
 				LEFT JOIN classes cl ON cl.id = a.class_id
+				{$leftJoin}
 				WHERE {$params->query} AND a.deleted='0' AND a.status='1' {$order_by} LIMIT {$params->limit}
 			");
 			$sql->execute();
