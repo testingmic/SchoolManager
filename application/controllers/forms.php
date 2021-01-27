@@ -3483,8 +3483,8 @@ class Forms extends Myschoolgh {
         </form>';
 
         // fetch the allowances of the employee
-        $employeeAllowances = $this->pushQuery('*', "payslips_employees_allowances", "type='Allowance' AND employee_id='{$userId}' AND client_id='{$clientId}'");
-        $employeeDeductions = $this->pushQuery('*', "payslips_employees_allowances", "type='Allowance' AND employee_id='{$userId}' AND client_id='{$clientId}'");
+        $employeeAllowances = $data->_allowances;
+        $employeeDeductions = $data->_deductions;
         
         // fetch all allowances
         $allowances = $this->pushQuery('*', "payslips_allowance_types", "type='Allowance' AND status='1' AND client_id='{$clientId}'");
@@ -3611,7 +3611,7 @@ class Forms extends Myschoolgh {
 
         $allowance = '
             <div class="row">
-                <div class="col-lg-12"><h5>BASIC SALARY</h5></div>
+                <div class="col-lg-12"><h5>GROSS SALARY</h5></div>
                 <div class="col-lg-6">
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">

@@ -93,20 +93,24 @@ if(!empty($userId)) {
                         <div class="card-body pt-0 pb-0 mb-0">
                             <div class="py-4">
                                 <p class="clearfix">
-                                    <span class="float-left">Gross Salary</span>
-                                    <span class="float-right text-muted">'.$data->gross_salary.'</span>
+                                    <span class="float-left">Basic Salary</span>
+                                    <span class="float-right text-muted">'.$data->basic_salary.'</span>
                                 </p>
                                 <p class="clearfix">
                                     <span class="float-left">Allowances</span>
                                     <span class="float-right text-muted">'.$data->allowances.'</span>
                                 </p>
                                 <p class="clearfix">
+                                    <span class="float-left">Gross Salary</span>
+                                    <span class="float-right text-muted">'.$data->gross_salary.'</span>
+                                </p>
+                                <p class="clearfix">
                                     <span class="float-left">Deductions</span>
                                     <span class="float-right text-muted">'.$data->deductions.'</span>
                                 </p>
                                 <p class="clearfix">
-                                    <span class="float-left">Basic Salary</span>
-                                    <span class="float-right text-muted">'.$data->basic_salary.'</span>
+                                    <span class="float-left">Net Salary</span>
+                                    <span class="float-right text-muted">'.$data->net_salary.'</span>
                                 </p>
                             </div>
                         </div>
