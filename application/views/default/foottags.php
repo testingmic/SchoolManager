@@ -89,6 +89,9 @@
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/grid.js"></script>
     
     <script src="<?= $baseUrl; ?>assets/js/myschoolgh.js"></script>
+    <?php if($isAdminAccountant) { ?>
+    <script src="<?= $baseUrl; ?>assets/js/calculator.js"></script>
+    <?php } ?>
     <script src="<?= $baseUrl; ?>assets/js/app.js"></script>
 
     <?php if(isset($formToShow)) { ?>

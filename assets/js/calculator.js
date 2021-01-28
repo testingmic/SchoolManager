@@ -182,3 +182,12 @@ document.addEventListener('keydown', (event) => {
         document.getElementById('decimal').click();
     }
 });
+
+$(`div[class~="toggle-calculator"]`).on("click", function() {
+    if ($(this).text() == "Show Calculator") {
+        $(this).text("Hide Calculator");
+    } else {
+        $(this).text("Show Calculator");
+    }
+    $(`div[class="calculator"] div[class~="display"], div[class="calculator"] div[class~="all-buttons"]`).toggleClass("hidden");
+});

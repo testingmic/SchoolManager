@@ -14,7 +14,7 @@ $baseUrl = $config->base_url();
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$userId = confirm_url_id(1) ? xss_clean($SITEURL[1]) : $userId;
+$userId = confirm_url_id(1) ? xss_clean($SITEURL[1]) : $session->userId;
 
 $clientId = $session->clientId;
 $response = (object) [];

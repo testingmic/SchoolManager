@@ -90,6 +90,7 @@ load_helpers(['menu_helper']);
 
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/table.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/chosen.css">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/calculator.css">
     
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/fullcalendar/fullcalendar.min.css">
     <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
@@ -103,6 +104,42 @@ load_helpers(['menu_helper']);
 </head>
 <body class="<?= $sidebar_pref ?> <?=  $theme_color ?> bg">
 	<div class="loader"></div>
+    <?php if($isAdminAccountant) { ?>
+    <section class="container-parent">
+        <div class="container__child">
+            <div class="calculator">
+                <div class="hidden display">
+                    <div class="calculator-display">
+                        <output class="user-input" type="text" id="user-input">0</output>	
+                        <output class="result" type="text" id="result">&nbsp;</output>	
+                    </div>					
+                </div>
+                <div class="hidden all-buttons">
+                    <button class="allclear" data-type="reset" id="allclear" >AC</button>
+                    <button class="clear" data-type="backspace" id="clear" >C</button>
+                    <button class="operators" data-type="operator" id="remainder" value="%" >&#37</button>
+                    <button class="operators" data-type="operator" id="divide" value="/" >&#247</button>
+                    <button class="digits" data-type="number" id="digit-7" value="7" >7</button>
+                    <button class="digits" data-type="number" id="digit-8" value="8" >8</button>
+                    <button class="digits" data-type="number" id="digit-9" value="9" >9</button>
+                    <button class="operators" data-type="operator" id="plus" value="+" >&#43</button>
+                    <button class="digits" data-type="number" id="digit-4" value="4" >4</button>
+                    <button class="digits" data-type="number" id="digit-5" value="5" >5</button>
+                    <button class="digits" data-type="number" id="digit-6" value="6" >6</button>
+                    <button class="operators" data-type="operator" id="minus" value="-" >&#45</button>
+                    <button class="digits" data-type="number" id="digit-1" value="1" >1</button>
+                    <button class="digits" data-type="number" id="digit-2" value="2" >2</button>
+                    <button class="digits" data-type="number" id="digit-3" value="3" >3</button>
+                    <button class="operators" data-type="operator" id="multiply" value="x" >&#215</button>
+                    <button class="digits" data-type="number" id="digit-0" value="0" >0</button>
+                    <button class="decimal" data-type="decimal" id="decimal" value="." >.</button>
+                    <button class="equals" data-type="equal" id="equals" value="=" >&#61</button>
+                </div>
+                <div class="toggle-calculator hidden">Show Calculator</div>
+            </div>
+        </div>
+    </section>
+    <?php } ?>
     <div id="app">
         <div class="main-wrapper main-wrapper-1">
             <div class="navbar-bg"></div>

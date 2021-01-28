@@ -322,8 +322,10 @@ var load_employee_payslip = (employee_id) => {
             $(`div[class~="allowance-note"]`).html(result.note);
 
             if (result.payslip_data.status == 1) {
-                $(`div[class~="summary-list"] select`).prop('disabled', true);
-                $(`div[class~="summary-list"] input`).prop('disabled', true);
+                $(`div[class~="deductions-list"] select, div[class~="allowances-list"] select, div[class~="summary-list"] select`).prop('disabled', true);
+                $(`div[class~="deductions-list"] input, div[class~="allowances-list"] input, div[class~="summary-list"] input`).prop('disabled', true);
+                $(`div[class~="deductions-list"] button, div[class~="allowances-list"] button, div[class~="summary-list"] button`).prop('disabled', true);
+                $(`div[class~="deductions-list"] button, div[class~="allowances-list"] button`).remove();
                 $(`div[class~="summary-list"] textarea`).prop('disabled', true);
             } else {
                 $(`div[class~="summary-list"] textarea`).prop('disabled', false);

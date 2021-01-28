@@ -411,7 +411,6 @@ var loadPage = (loc, pushstate) => {
     devlog("loadPage(", loc, ") I called =>")
 
     if (appxhr.length > 0) abortscripts();
-    // if (callback === undefined) callback = getCallback(loc);
 
     if (loc == `${$.baseurl}` || loc == `${$.baseurl}/dashboard`) {
         $(`[id="history-refresh"]`).addClass("hidden");
@@ -431,6 +430,8 @@ var loadPage = (loc, pushstate) => {
             $.pageoverlay.show();
         },
         success: (result) => {
+            $(`div[class~="toggle-calculator"]`).addClass("hidden");
+            $(`div[class~="calculator"] div[class~="display"], div[class~="calculator"] div[class~="all-buttons"]`).addClass("hidden");
             if (result.redirect !== undefined) {
                 let redirectUrl = $.baseurl + "/" + result.redirect;
                 window.location = redirectUrl

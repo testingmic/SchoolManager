@@ -341,7 +341,7 @@ class Payroll extends Myschoolgh {
                         if($ii > 1) {
                             $allowances_list .= '
                             <div class="text-center">
-                                <span class="remove-row cursor btn btn-outline-danger" data-type="allowance" data-value="'.$ii.'"><i class="fa fa-trash"></i></span>
+                                <button class="remove-row cursor btn btn-outline-danger" data-type="allowance" data-value="'.$ii.'"><i class="fa fa-trash"></i></button>
                             </div>';
                         }
                 $allowances_list .= '</div></div>';
@@ -399,7 +399,7 @@ class Payroll extends Myschoolgh {
                         if($ii > 1) {
                             $deductions_list .= '
                             <div class="text-center">
-                                <span class="remove-row cursor btn btn-outline-danger" data-type="deductions" data-value="'.$ii.'"><i class="fa fa-trash"></i></span>
+                                <button class="remove-row cursor btn btn-outline-danger" data-type="deductions" data-value="'.$ii.'"><i class="fa fa-trash"></i></button>
                             </div>';
                         }
                 $deductions_list .= '</div></div>';
