@@ -489,6 +489,7 @@ var loadDashboardAnalitics = (period) => {
                 $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
             }, 1000);
         }
+        $(`div[class~="toggle-calculator"]`).addClass("hidden");
     }).catch(() => {
         $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
     });

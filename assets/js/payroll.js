@@ -346,7 +346,7 @@ var load_employee_payslip = (employee_id) => {
             triggerCalculator();
             recalculateTotal();
             $(`select[class~="selectpicker"]`).select2();
-
+            $(`div[class~="toggle-calculator"]`).removeClass("hidden");
         } else {
             swal({
                 text: response.data.result,

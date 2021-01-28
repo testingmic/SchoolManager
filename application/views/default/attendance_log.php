@@ -20,6 +20,24 @@ $response = (object) [];
 $pageTitle = "Attendance Log";
 $response->title = "{$pageTitle} : {$appName}";
 
+// permissive users to be created by each access level
+$permissions = [
+    "teacher" => [
+        "student" => "Students"
+    ],
+    "accountant" => [
+        "student" => "Student",
+        "business" => "Business Firm",
+    ],
+    "admin" => [
+        "student" => "Students",
+        "teacher" => "Teachers",
+        "employee" => "Employees",
+        "accountant" => "Accountants",
+        "admin" => "Admin Users",
+    ]
+];
+
 // if the client information is not empty
 if(!empty($session->clientId)) {
     // convert to lowercase
@@ -63,13 +81,11 @@ if(!empty($session->clientId)) {
                                     <div class="form-group">
                                         <label>Select Category</label>
                                         <select data-width="100%" class="form-control selectpicker" name="attendance_category" id="attendance_category">
-                                            <option value="null">Please select group</option>
-                                            <option value="student">Students</option>
-                                            <option value="teacher">Teaching Staff</option>
-                                            <option value="employee">Non-Teaching Staff</option>
-                                            <option value="accountant">Accountant</option>
-                                            <option value="admin">Admin</option>
-                                        </select>
+                                            <option value="null">Please select group</option>';
+                                            foreach($permissions[$defaultUser->user_type] as $key => $value) {
+                                                $response->html .= "<option value=\"{$key}\">{$value}</option>";
+                                            }
+                                        $response->html .= '</select>
                                     </div>
                                     <div class="form-group attendance_category_list hidden">
                                         <label>Select Class</label>

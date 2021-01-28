@@ -157,7 +157,7 @@ class Attendance extends Myschoolgh {
                 $info = "The record was finalized and cannot be changed again.";
 
                 // execute the statement
-                $this->db->query("UPDATE users_attendance_log SET date_finalized = now(), finalize = '1' WHERE id='{$params->finalize}' LIMIT 1");
+                $this->db->query("UPDATE users_attendance_log SET date_finalized = now(), finalize = '1', finalized_by='{$params->userId}' WHERE id='{$params->finalize}' LIMIT 1");
 
                 // set a new message
                 $data = "Attendance log for {$params->date} was successfully finalized.";
@@ -248,6 +248,9 @@ class Attendance extends Myschoolgh {
         $params->append_waspresent = true;
         $params->no_permissions = true;
 
+        // global items
+        global $accessObject, $defaultUser;
+
         // date range mechanism
         $this_date = isset($params->date_range) ? $params->date_range : date("Y-m-d");
         $explode = explode(":", $this_date);
@@ -296,14 +299,14 @@ class Attendance extends Myschoolgh {
         
         $class_id = isset($params->class_id) && ($params->class_id !== "null") ? $params->class_id : null;
 
-        $query = !empty($params->user_type) ? " AND user_type='{$params->user_type}'" : null;
-        $query .= !empty($class_id) ? " AND class_id='{$params->class_id}'" : null;
+        $query = !empty($params->user_type) ? " AND a.user_type='{$params->user_type}'" : null;
+        $query .= !empty($class_id) ? " AND a.class_id='{$params->class_id}'" : null;
         
         // loop through the days range list
         foreach($list_days as $each_day) {
 
             // get the attendance log for the day
-            $check = $this->pushQuery("users_list, users_data, user_type, class_id", "users_attendance_log", "log_date='{$each_day}' {$query} LIMIT 1");
+            $check = $this->pushQuery("a.users_list, a.users_data, a.user_type, a.class_id", "users_attendance_log a", "a.log_date='{$each_day}' {$query} LIMIT 1");
             
             // append the user type is there is a record but the user_type was not initially appended
             if(!empty($check)) {
@@ -368,7 +371,17 @@ class Attendance extends Myschoolgh {
         $summary = [];
 
         // confirm existing record
-        $check = $this->pushQuery("id, users_list, users_data, finalize, date_finalized", "users_attendance_log", "log_date='{$list_days[0]}' AND status='1' {$query} LIMIT 1");
+        $check = $this->pushQuery(
+            "a.id, a.users_list, a.users_data, a.finalize, a.date_finalized, a.date_created, 
+                c.name AS created_by_name, c.image AS created_by_image, c.email AS created_by_email,
+                f.name AS finalized_by_name, f.image AS finalized_by_image, f.email AS finalized_by_email
+            ",
+            "users_attendance_log a 
+            LEFT JOIN users c ON a.created_by = c.item_id
+            LEFT JOIN users f ON a.finalized_by = f.item_id
+            ", 
+            "a.log_date='{$list_days[0]}' AND a.status='1' {$query} LIMIT 1");
+
         $attendance_log = !empty($check) ? json_decode($check[0]->users_data) : [];
         $final = !empty($check) ? $check[0]->finalize : null;
 
@@ -396,6 +409,9 @@ class Attendance extends Myschoolgh {
             <th><span class='float-left'>Status</span></th>
         </thead>
         <tbody>";
+        
+        // can finalize the attendance log
+        $canFinalize = $accessObject->hasAccess("finalize","attendance");
 
         // if attendance was parsed and an array
         if(isset($attendance["attendance"]) && is_array($attendance["attendance"])) {
@@ -440,9 +456,18 @@ class Attendance extends Myschoolgh {
                 // append the buttons to the table
                 $table_content .= "
                 <tr class='attendance_control_buttons'>
-                    <td align='right' colspan='4'>
+                    <td colspan='2'>".(
+                        !empty($check) ? 
+                            "
+                                <p class='mb-0 pb-0'>Created By: <strong>{$check[0]->created_by_name}</strong></p>
+                                <p class='mb-0 pb-0'>Email Address: <strong>{$check[0]->created_by_email}</strong></p>
+                                <p class='mb-0 pb-0'>Last Updated: <strong>{$check[0]->date_created}</strong></p>
+                            " : 
+                        "")."
+                    </td>
+                    <td align='right' colspan='2'>
                         <button onclick='return save_AttendanceLog(\"{$list_days[0]}\",\"{$user_type}\",\"{$class_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i> Save Attendance</button>
-                        ".(!empty($attendance_log) && !$check[0]->finalize ? 
+                        ".(!empty($attendance_log) && $canFinalize && !$check[0]->finalize ? 
                             "<button onclick='return finalize_AttendanceLog(\"{$list_days[0]}\",\"{$user_type}\",\"{$class_id}\", \"{$check[0]->id}\")' class='btn btn-sm btn-outline-primary'><i class='fa'></i> Finalize</button>" : 
                             ""
                         )."
@@ -451,16 +476,29 @@ class Attendance extends Myschoolgh {
             } else {
                 $table_content .= "
                 <tr>
-                    <td align='center' colspan='2'>
+                    <td colspan='2'>
                         <div class='text-left'>
                             <p class='p-0 pt-2 m-0'><label class='p-0 m-0 font-weight-bold'><i class='fa fa-chart-bar'></i> Summary:</label></p>";
                             foreach($summary as $key => $value) {
                                 $table_content .= "<div class='p-0 m-0'><strong class='mr-3'>".ucwords($key).":</strong> {$value}</div>";
                             }
-                $table_content .= "</div>
+                        $table_content .= "
+                        </div>
+                        ".(!empty($check) ? "
+                            <div class='pt-2 border-top mt-2'>
+                                <p class='mb-0 pb-0'>Created By: <strong>{$check[0]->created_by_name}</strong></p>
+                                <p class='mb-0 pb-0'>Email Address: <strong>{$check[0]->created_by_email}</strong></p>
+                                <p class='mb-0 pb-0'>Last Updated: <strong>{$check[0]->date_created}</strong></p>
+                            </div>
+                            " : 
+                        "")."
                     </td>
                     <td colspan='2' valign='top'>
                         <div class='text-right'>
+                            <p class='mb-0 pb-0'>Finanlized By: <strong>{$check[0]->finalized_by_name}</strong></p>
+                            <p class='mb-0 pb-0'>Email Address: <strong>{$check[0]->finalized_by_email}</strong></p>
+                        </div>
+                        <div class='pt-2 text-right border-top mt-2'>
                             <span class='p-0 m-0'><label class='p-0 m-0 font-weight-bold'>Date Finalized:</label></span>
                             <p class='p-0 m-0'><i class='fa fa-calendar-check'></i> {$check[0]->date_finalized}</p>
                         </div>
