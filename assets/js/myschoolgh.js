@@ -328,3 +328,30 @@ var set_default_Student = (student_id) => {
         }
     });
 }
+
+var validate_item = (record_id, record, redirect) => {
+    let label = {
+        record_id,record
+    };
+    swal({
+        title: "Validate Payslip",
+        text: "Are you sure you want to validate the payslip(s)",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if(proceed) {
+            $.post(`${baseUrl}api/records/validate`, {label}).then((response) => {
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code)
+                });
+                if(response.code === 200) {
+                    if(redirect !== undefined) {
+                        loadPage(`${redirect}`);
+                    }
+                }
+            });
+        }
+    });
+}

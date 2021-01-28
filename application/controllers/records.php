@@ -89,6 +89,12 @@ class Records extends Myschoolgh {
                 "where" => "item_id='{$record_id}' AND status='1'",
                 "query" => "SELECT name FROM timetables WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
             ],
+            "payslip" => [
+                "table" => "payslips",
+                "update" => "deleted='1', status='0'",
+                "where" => "item_id='{$record_id}' AND activated='0' AND deleted='0'",
+                "query" => "SELECT name FROM payslips WHERE id='{$record_id}' AND status ='0' AND client_id='{$userData->client_id}' LIMIT 1"
+            ],
             "user" => [
                 "table" => "users",
                 "update" => "status='0', deleted='1'",
@@ -173,6 +179,36 @@ class Records extends Myschoolgh {
 
         } else {
             return ["code" => 203, "data" => "Sorry! There was no record found for the specified id."];
+        }
+
+    }
+
+    /**
+     * Validate record
+     */
+    public function validate(stdClass $params) {
+        
+        // confirm that all required parameters has been parsed
+        if(!isset($params->label["record_id"]) || !isset($params->label["record"])) {
+            return ["code" => 203, "data" => "Sorry! Please ensure all required parameters has been parsed."];
+        }
+
+        $record = $params->label["record"];
+        $record_id = $params->label["record_id"];
+
+        // validate the payslip record
+        if($record === "payslip") {
+            $payslip = $this->pushQuery("a.payslip_month, a.id, a.payslip_year, (SELECT b.name FROM users b WHERE b.item_id = a.employee_id ORDER BY b.id DESC LIMIT 1) AS employee_name", 
+            "payslips a", "a.client_id='{$params->clientId}' AND a.deleted='0' AND a.id='{$record_id}' AND a.validated='0' LIMIT 1");
+            if(empty($payslip)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied or the payslip has already been validated."];
+            }
+            $this->db->query("UPDATE payslips SET validated='1', validated_date = now(), status='1' WHERE id='{$record_id}' LIMIT 1");
+
+            // log the user activity
+            $this->userLogs("payslip", $record_id, null, "<strong>{$params->userData->name}</strong> validated the payslip: <strong>{$payslip[0]->employee_name}</strong> for the month: <strong>{$payslip[0]->payslip_month} {$payslip[0]->payslip_year}</strong>", $params->userId);
+
+            return ["code" => 200, "data" => "Payslip successfully validated."];
         }
 
     }

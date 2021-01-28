@@ -177,9 +177,8 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-payroll">Payroll</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-history">List History</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-leave_manager">Leave Management</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>hr-payslip">Payslip List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
         </ul>
     </li>
     <li class="menu-header">Communication</li>
@@ -306,9 +305,8 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-payroll">Payroll</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-history">List History</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-leave_manager">Leave Management</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>hr-payslip">Payslip List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
         </ul>
     </li>
     <li class="menu-header">Communication</li>

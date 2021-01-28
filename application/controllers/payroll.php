@@ -10,6 +10,66 @@ class Payroll extends Myschoolgh {
     }
 
     /**
+     * List Payrolls
+     * 
+     * @return Array
+     */
+    public function paysliplist(stdClass $params) {
+
+        
+        global $accessObject;
+
+        if(isset($params->employee_id)) {
+            $params->employee_id = $params->employee_id;
+        } else {
+            if(!$accessObject->hasAccess("generate", "payslip")) {
+                $params->employee_id = $params->userId ?? $this->session->userId;
+            }
+        }
+
+        $params->query = "1";
+
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+        $params->query .= (isset($params->year_id)) ? " AND a.year_id='{$params->year_id}'" : null;
+        $params->query .= (isset($params->month_id)) ? " AND a.month_id='{$params->month_id}'" : null;
+        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->employee_id)) ? " AND a.employee_id='{$params->employee_id}'" : null;
+
+        try {
+
+            $stmt = $this->db->prepare("
+                SELECT a.*,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.employee_id LIMIT 1) AS employee_info,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                FROM payslips a
+                WHERE {$params->query} AND a.deleted = ? ORDER BY a.id DESC LIMIT {$params->limit}
+            ");
+            $stmt->execute([0]);
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // loop through the information
+                foreach(["employee_info", "created_by_info"] as $each) {
+                    // convert the created by string into an object
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                }
+
+                $data[] = $result;
+            }
+
+            return [
+                "code" => 200,
+                "data" => $data
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+    }
+
+    /**
      * Payment Details
      * 
      * Save the payment allowances and deductions of the employee
@@ -394,8 +454,8 @@ class Payroll extends Myschoolgh {
 				$note = "<div class=\"text-success mb-3 text-center\">
 						This Payslip has already been redeemed.</div>
 						<div class=\"text-center\">
-						<a href=\"{$this->baseUrl}dowload?py_id={$employeePayslip->id}&dw=true\" target=\"_blank\" class=\"btn btn-outline-danger\"><i class='fa fa-file-pdf-o'></i> Download</a> &nbsp; 
-						<a href=\"{$this->baseUrl}download?py_id={$employeePayslip->id}&dw=false\" target=\"_blank\" class=\"btn btn-outline-primary\"><i class='fa fa-print'></i>  Print</a></div>
+						<a href=\"{$this->baseUrl}download?pay_id={$employeePayslip->id}&dw=true\" target=\"_blank\" class=\"btn btn-outline-danger\"><i class='fa fa-file-pdf-o'></i> Download</a> &nbsp; 
+						<a href=\"{$this->baseUrl}download?pay_id={$employeePayslip->id}&dw=false\" target=\"_blank\" class=\"btn btn-outline-primary\"><i class='fa fa-print'></i>  Print</a></div>
 				";
 			} else {
 				$note = "<div class=\"text-danger mb-3 text-center\">
