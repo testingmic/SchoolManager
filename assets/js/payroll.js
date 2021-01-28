@@ -362,3 +362,29 @@ if ($(`input[id^="deductions_amount_"]`).length) {
     addAllowance();
     addDeductions();
 }
+
+var update_allowance = (allowance_id) => {
+    if ($.array_stream["allowance_array_list"] !== undefined) {
+        let activity_log = $.array_stream["allowance_array_list"];
+        if (activity_log[allowance_id] !== undefined) {
+            let allowance = activity_log[allowance_id];
+            $(`div[id="allowanceTypesModal"] h5[class="modal-title"]`).html(`Update ${allowance.type} Record`);
+            $(`div[id="allowanceTypesModal"]`).modal("show");
+            $(`div[id="allowanceTypesModal"] input[name="name"]`).val(allowance.name);
+            $(`div[id="allowanceTypesModal"] input[name="allowance_id"]`).val(allowance_id);
+            $(`div[id="allowanceTypesModal"] select[name="type"]`).val(allowance.type).change();
+            $(`div[id="allowanceTypesModal"] textarea[name="description"]`).val(allowance.description);
+            setTimeout(() => {
+                $(`div[class~="modal-backdrop"]`).addClass("hidden");
+            }, 200);
+        }
+    }
+}
+
+
+var add_allowance = () => {
+    $(`div[id="allowanceTypesModal"]`).modal("show");
+    $(`div[class~="modal-backdrop"]`).addClass("hidden");
+    $(`div[id="allowanceTypesModal"] h5[class="modal-title"]`).html(`Add Allowance Item`);
+    $(`div[id="allowanceTypesModal"] input, div[id="allowanceTypesModal"] textarea`).val("");
+}
