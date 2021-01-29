@@ -478,8 +478,8 @@ class Analitics extends Myschoolgh {
             if(isset($params->load_summary_info)) {
                 
                 // set additional parameters
-                $params->start_date = isset($params->label["start_date"]) ? $params->label["start_date"] : date("Y-m-d", strtotime("last week monday"));
-                $params->end_date = isset($params->label["end_date"]) ? $params->label["end_date"] : date("Y-m-d", strtotime("this week friday"));
+                $params->start_date = isset($params->label["start_date"]) ? $params->label["start_date"] : $this->start_date;
+                $params->end_date = isset($params->label["end_date"]) ? $params->label["end_date"] : $this->end_date;
 
                 // set the quick information
                 $user_type = $params->userData->user_type;

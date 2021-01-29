@@ -646,7 +646,7 @@ class Attendance extends Myschoolgh {
                         $present = json_decode($today->users_list, true);
                         
                         // set a new variable for the day
-                        $the_day = date("D, jS M", strtotime($day));
+                        $the_day = date("Y-m-d", strtotime($day));
 
                         // if the user is not an admin/accountant then verify if the user was present or absent
                         if($checkPresent) {
@@ -661,14 +661,15 @@ class Attendance extends Myschoolgh {
                         } else {
                            
                             // set a new label to be used
-                            if(in_array($params->the_user_type, ["admin", "accountant"]) && ($today->user_type !== "student")) { 
-                                $n_label = "all_employees";
+                            if(in_array($params->the_user_type, ["admin", "accountant", "teacher", "employee"])) { 
+                                $n_label = "Others";
                                 $users_count["summary"][$n_label] = isset($users_count["summary"][$n_label]) ? ($users_count["summary"][$n_label] + count($present)) : count($present);
                                 $users_count["days_list"][$the_day][$n_label] = isset($users_count["days_list"][$the_day][$n_label]) ? ($users_count["days_list"][$the_day][$n_label] + count($present)) : count($present);
                             }
 
                             // label to use
-                            $the_label = $user.'_count';
+                            $the_label = ucfirst($user)."s";
+
                             // append to the summary
                             $users_count["summary"][$the_label] = isset($users_count["summary"][$the_label]) ? ($users_count["summary"][$the_label] + count($present)) : count($present);
                             $users_count["days_list"][$the_day][$the_label] = isset($users_count["days_list"][$the_day][$the_label]) ? ($users_count["days_list"][$the_day][$the_label] + count($present)) : count($present);

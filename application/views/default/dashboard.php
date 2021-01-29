@@ -164,7 +164,7 @@ $data_stream = 'id="data-report_stream" data-report_stream="attendance_report,li
 
 // set the data to stream for an admin user
 if($isAdminAccountant) {
-    $data_stream = 'id="data-report_stream" data-report_stream="summary_report,revenue_flow,library_report,departments_report"';
+    $data_stream = 'id="data-report_stream" data-report_stream="attendance_report,summary_report,revenue_flow,library_report,departments_report"';
 }
 
 // append the scripts to the page
@@ -367,7 +367,7 @@ $response->html = '
             </div>
         </div>
         '.($isAdminAccountant ?
-            '<div class="row">
+            '<div class="row hidden">
                 <div class="col-xl-3 col-lg-6">
                     <div class="card">
                         <div class="card-body card-type-3">
@@ -455,7 +455,7 @@ $response->html = '
                 </div>
             </div>' : ''
         ).'
-        <div class="row default_period" data-current_period="this_month">
+        <div class="row default_period hidden" data-current_period="this_month">
             '.($isAdminAccountant ?
             '<div class="col-md-12">
                 <div class="card">
@@ -716,7 +716,7 @@ $response->html = '
         ).'
         <div class="row">
             '.($isAdminAccountant ? 
-                '<div class="col-lg-4 col-md-12 col-12 col-sm-12">
+                '<div class="col-lg-4 hidden col-md-12 col-12 col-sm-12">
                     <div class="card">
                         <div class="card-header">
                         <h4>Class Count</h4>
@@ -730,7 +730,7 @@ $response->html = '
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-8 col-md-12 col-12 col-sm-12">
+                <div class="col-lg-8 hidden col-md-12 col-12 col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4>Revenue</h4>
@@ -759,6 +759,18 @@ $response->html = '
                             </div>
                             <div class="card-body" data-chart="revenue_category_chart">
                                 <div id="revenue_category_chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>Attendance Logs</h4>
+                        </div>
+                        <div class="card-body pb-0">
+                            <div data-chart_container="attendance_log_chart">
+                                <div id="attendance_log_chart" style="min-height:350px;"></div>
                             </div>
                         </div>
                     </div>

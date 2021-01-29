@@ -406,6 +406,66 @@ var attendanceReport = (_attendance) => {
             );
             chart.render();
         }
+
+        if ($(`div[id="attendance_log_chart"]`).length) {
+            var _log_chart_label = new Array(),
+                _array_data = new Array();
+            $.each(attendance.days_list, function(i, day) {
+                _log_chart_label.push(i);
+            });
+            console.log(_log_chart_label);
+
+            $(`div[data-chart_container="attendance_log_chart"]`).html(`<div id="attendance_log_chart" style="min-height:350px;"></div>`);
+
+            $.each(attendance.chart_grouping, function(i, e) {
+                if ($.inArray(e.name, ["Students", "Teachers"]) > -1) {
+                    _array_data.push(e);
+                }
+            });
+
+            var _attendance_options = {
+                chart: {
+                    height: 350,
+                    type: 'area',
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth'
+                },
+                series: _array_data,
+                xaxis: {
+                    type: 'datetime',
+                    categories: _log_chart_label,
+                    labels: {
+                        style: {
+                            colors: '#9aa0ac',
+                        }
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            color: '#9aa0ac',
+                        }
+                    }
+                },
+                tooltip: {
+                    x: {
+                        format: 'dd/MM/yy'
+                    },
+                }
+            }
+
+            var _attendance_chart = new ApexCharts(
+                document.querySelector("#attendance_log_chart"),
+                _attendance_options
+            );
+
+            _attendance_chart.render();
+
+        }
     }
 
     if (_attendance.class_summary !== undefined) {
@@ -453,7 +513,6 @@ var attendanceReport = (_attendance) => {
 
     if ($(`div[id="attendance_chart_list"]`).length) {
         let attendance_chart_list = "<div class='row'>";
-        console.log(_attendance.attendance.days_list);
         $.each(_attendance.attendance.days_list, function(day, status) {
             attendance_chart_list += `
             <div class='col-lg-3 col-md-4'>

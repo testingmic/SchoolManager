@@ -1,0 +1,1 @@
+[29-Jan-2021 09:53:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$finalize in C:\xampp\htdocs\myschool_gh\application\controllers\attendance.php on line 172

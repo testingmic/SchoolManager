@@ -49,7 +49,7 @@ if(!empty($clientId)) {
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
-                                    <h3 data-attendance_count="student_count" class="font-light mb-0">0</h3>
+                                    <h3 data-attendance_count="Students" class="font-light mb-0">0</h3>
                                     <span class="text-muted">Students</span>
                                 </div>
                             </div>
@@ -62,7 +62,7 @@ if(!empty($clientId)) {
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
-                                    <h3 data-attendance_count="teacher_count" class="font-light mb-0">0</h3>
+                                    <h3 data-attendance_count="Teachers" class="font-light mb-0">0</h3>
                                     <span class="text-muted">Teachers</span>
                                 </div>
                             </div>
@@ -75,8 +75,8 @@ if(!empty($clientId)) {
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
-                                    <h3 data-attendance_count="all_employees" class="font-light mb-0">0</h3>
-                                    <span class="text-muted">Employees</span>
+                                    <h3 data-attendance_count="Others" class="font-light mb-0">0</h3>
+                                    <span class="text-muted">Employees / Account / Admin</span>
                                 </div>
                             </div>
                         </div>

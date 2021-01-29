@@ -21,8 +21,14 @@ class Classes extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
+        if(isset($params->filter)) {
+            if(in_array($params->filter, ["teacher"])) {
+                $params->class_teacher = $params->userId;
+            }
+        }
+
         $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
-        $params->query .= (isset($params->class_teacher)) ? " AND a.class_teacher='{$params->class_teacher}'" : null;
+        $params->query .= (isset($params->class_teacher)) ? " AND a.class_teacher LIKE '%{$params->class_teacher}%'" : null;
         $params->query .= (isset($params->class_assistant)) ? " AND a.class_assistant='{$params->class_assistant}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= (isset($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
