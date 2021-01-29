@@ -99,6 +99,12 @@ $response->html = '
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
+                                        <label for="default_amount">Default Amount or Percentage</label>
+                                        <input type="text" placeholder="Type default amount or percentage" name="default_amount" id="default_amount" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
                                         <label for="description">Description</label>
                                         <textarea placeholder="" name="description" id="description" rows="5" class="form-control"></textarea>
                                     </div>
@@ -131,7 +137,7 @@ $response->html = '
                                         <th width="5%" class="text-center">#</th>
                                         <th>Name</th>
                                         <th>Description</th>
-                                        <th width="5%">Default Amt.</th>
+                                        <th width="10%">Default Amt OR %</th>
                                         <th>Type</th>
                                         <th width="8%" align="center"></th>
                                     </tr>

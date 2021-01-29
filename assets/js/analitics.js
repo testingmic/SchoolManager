@@ -408,6 +408,7 @@ var attendanceReport = (_attendance) => {
         }
 
         if ($(`div[id="attendance_log_chart"]`).length) {
+
             var _log_chart_label = new Array(),
                 _array_data = new Array();
             $.each(attendance.days_list, function(i, day) {

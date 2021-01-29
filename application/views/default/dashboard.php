@@ -367,7 +367,7 @@ $response->html = '
             </div>
         </div>
         '.($isAdminAccountant ?
-            '<div class="row hidden">
+            '<div class="row">
                 <div class="col-xl-3 col-lg-6">
                     <div class="card">
                         <div class="card-body card-type-3">
@@ -436,26 +436,9 @@ $response->html = '
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 hidden col-lg-6">
-                    <div class="card">
-                        <div class="card-body card-type-3">
-                            <div class="row">
-                                <div class="col">
-                                    <h6 class="text-muted mb-0">Attendance</h6>
-                                    <span class="font-weight-bold mb-0">0</span>
-                                </div>
-                                <div class="col-auto">
-                                    <div class="card-circle l-bg-purple text-white">
-                                        <i class="fas fa-chart-bar"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>' : ''
         ).'
-        <div class="row default_period hidden" data-current_period="this_month">
+        <div class="row default_period" data-current_period="last_14days">
             '.($isAdminAccountant ?
             '<div class="col-md-12">
                 <div class="card">
@@ -626,21 +609,6 @@ $response->html = '
                 </div>
             </div>
             ' : '').'
-            <div class="col-md-6 hidden">
-                <div class="card">
-                <div class="card-header">
-                    <h4>Attendance Chart</h4>
-                </div>
-                <div class="card-body quick_loader" style="max-height:405px;height:405px;">
-                    <div class="form-content-loader" style="display: flex; position: absolute">
-                        <div class="offline-content text-center">
-                            <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
-                        </div>
-                    </div>
-                    <canvas id="myChart"></canvas>
-                </div>
-                </div>
-            </div>
         </div>
         '.($isAdminAccountant ?
             '<div class="row">
@@ -716,7 +684,7 @@ $response->html = '
         ).'
         <div class="row">
             '.($isAdminAccountant ? 
-                '<div class="col-lg-4 hidden col-md-12 col-12 col-sm-12">
+                '<div class="col-lg-4 col-md-12 col-12 col-sm-12">
                     <div class="card">
                         <div class="card-header">
                         <h4>Class Count</h4>
@@ -730,7 +698,7 @@ $response->html = '
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-8 hidden col-md-12 col-12 col-sm-12">
+                <div class="col-lg-8 col-md-12 col-12 col-sm-12">
                     <div class="card">
                         <div class="card-header">
                             <h4>Revenue</h4>

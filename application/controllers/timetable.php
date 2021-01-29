@@ -657,18 +657,20 @@ class Timetable extends Myschoolgh {
             $summary = '<table width="100%" class="'.$table_class.'" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
             $summary .= "<tr>\n
                     <td>
-                        <strong style=\"padding-top:0px;font-size:20px\">".strtoupper($data->client_details->client_name)."</strong><br>
-                        <strong style=\"padding-top:0px;font-size:13px\">".$data->client_details->client_email."</strong><br>
-                        <strong style=\"padding-top:0px;font-size:13px\">".$data->client_details->client_contact."</strong><br>
+                        <strong style=\"font-size:13px;\">Class Name:</strong> {$data->class_name}<br>
+                        <strong style=\"font-size:13px;\">Department:</strong> {$data->class_name}
+                    </td>
+                    <td align=\"center\">
+                        <strong style=\"padding-top:0px;font-size:17px\">".strtoupper($data->client_details->client_name)."</strong><br>
+                        <strong style=\"padding-top:0px;font-size:12px\">".$data->client_details->client_email."</strong><br>
+                        <strong style=\"padding-top:0px;font-size:12px\">".$data->client_details->client_contact."</strong><br>
                         <strong>".$data->client_details->client_address."</strong><br>
                     </td>
                     <td>
-                        <strong style=\"font-size:13px;\">Academic Year:</strong> {$prefs->academics->academic_year}<br>
-                        <strong style=\"font-size:13px;\">Academic Term:</strong> {$prefs->academics->academic_term}<br>
+                        <strong style=\"font-size:12px;\">Academic Year:</strong> {$prefs->academics->academic_year}<br>
+                        <strong style=\"font-size:12px;\">Academic Term:</strong> {$prefs->academics->academic_term}<br>
                         ".(isset($data->last_updated) ? "
-                            <strong style=\"font-size:13px;\">Generated On:</strong> {$data->last_updated}<br>
-                            <strong style=\"font-size:14px;\">CLASS NAME:</strong> {$data->class_name}<br>
-                            <strong style=\"font-size:14px;\">DEPARTMENT:</strong> {$data->class_name}" : ""
+                            <strong style=\"font-size:12px;\">Generated On:</strong> {$data->last_updated}<br>" : ""
                         )."
                     </td>\n
                 </tr>\n
@@ -692,7 +694,7 @@ class Timetable extends Myschoolgh {
             $end_time = $this->add_time($start_time, $data->duration);
 
             // show the time
-            $html_table .= "\t<td width=\"{$width}%\" style=\"background-color:#607d8b;color:#fff\">
+            $html_table .= "\t<td width=\"{$width}%\" style=\"background-color:#607d8b;font-size:12px;color:#fff\">
                 <div align=\"center\"><strong>{$start_time}</strong><br>-<br><strong>{$end_time}</strong></div>
             </td>\n";
             $start_time = $end_time;
@@ -700,7 +702,7 @@ class Timetable extends Myschoolgh {
         $html_table .= "</tr>\n";
 
         // days of the week
-        $d_style = "style=\"background-color:#795548;font-weight:bold;text-align:center;color:#fff;".(isset($params->height) && $params->height ? "height:{$params->height}px;" : "")."\"";
+        $d_style = "style=\"background-color:#795548;font-weight:bold;font-size:12px;text-align:center;color:#fff;".(isset($params->height) && $params->height ? "height:{$params->height}px;" : "")."\"";
 
         // set the array of days
         $days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -759,7 +761,7 @@ class Timetable extends Myschoolgh {
                             
                             // set the information to display
                             if(!empty($cleaned)) {
-                                $bg_color = "style=\"padding:10px;background-color:".($color_set[$cleaned->course_id] ?? "#000").";color:#fff\"";
+                                $bg_color = "style=\"padding:5px;font-size:13px;background-color:".($color_set[$cleaned->course_id] ?? "#000").";color:#fff\"";
                                 $info = !$codeOnly ? $cleaned->course_name. " (" : null; 
                                 $info .= "<strong>{$cleaned->course_code}</strong>";
                                 $info .= !$codeOnly ? " )" : null; 
@@ -767,7 +769,7 @@ class Timetable extends Myschoolgh {
                                 $course .=  "<div {$bg_color}>{$info}</div>";
                             }
                             if(in_array($key, $data->disabled_inputs)) {
-                                $bg_color = "style=\"padding:10px;background-color:#cccccc;color:#888888;\"";
+                                $bg_color = "style=\"padding:5px;background-color:#cccccc;color:#888888;\"";
                                 $course .=  "<div {$bg_color}>DISABLED</div>";
                             }
                             

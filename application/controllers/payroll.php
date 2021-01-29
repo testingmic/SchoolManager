@@ -648,4 +648,52 @@ class Payroll extends Myschoolgh {
         ];
     }
 
+    /**
+     * Save Allowance
+     * 
+     * @param String $params->description
+     * @param String $params->allowance_id
+     * @param String $params->name
+     * @param String $params->type
+     * 
+     * @return Array
+     */
+    public function saveallowance(stdClass $params) {
+        
+        if(!in_array($params->type, ["Allowance", "Deduction"])) {
+            return ["code" => 203, "data" => "Sorry! The type must either be Allowance or Deduction."];
+        }
+        
+        $found = false;
+        if(isset($params->allowance_id) && !empty($params->allowance_id)) {
+            $allowance = $this->pushQuery("*", "payslips_allowance_types", "id='{$params->allowance_id}' AND client_id='{$params->clientId}'");
+            if(empty($allowance)) {
+                return ["code" => 203, "data" => "Sorry! An invalid allowance id was parsed."];
+            }
+            $found = true;
+        }
+
+        if(!$found) {
+            $stmt = $this->db->prepare("INSERT INTO payslips_allowance_types SET default_amount = ?, name = ?, description = ?, type = ?, client_id = ?");
+            $stmt->execute([$params->default_amount ?? null, $params->name, $params->description ?? null, $params->type, $params->clientId]);
+            // log the user activity
+            $this->userLogs("payslip", $this->lastRowId("payslips_allowance_types"), null, "<strong>{$params->userData->name}</strong> added a new {$params->type} record under the payroll section", $params->userId);
+        } else {
+            $stmt = $this->db->prepare("UPDATE payslips_allowance_types SET default_amount = ?, name = ?, description = ?, type = ? WHERE id = ? AND client_id = ?");
+            $stmt->execute([$params->default_amount ?? null, $params->name, $params->description ?? null, $params->type, $params->allowance_id, $params->clientId]);
+            // log the user activity
+            $this->userLogs("payslip", $params->allowance_id, null, "<strong>{$params->userData->name}</strong> updated the {$params->type} record under the payroll section", $params->userId);
+        }
+
+        # set the output to return when successful
+        $return = ["code" => 200, "data" => "Request was successfully executed.", "refresh" => 2000];
+        
+        # append to the response
+        $return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}hr-category"];
+
+        // return the output
+        return $return;
+        
+    }
+
 }

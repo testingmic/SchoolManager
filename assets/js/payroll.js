@@ -374,6 +374,7 @@ var update_allowance = (allowance_id) => {
             $(`div[id="allowanceTypesModal"] input[name="allowance_id"]`).val(allowance_id);
             $(`div[id="allowanceTypesModal"] select[name="type"]`).val(allowance.type).change();
             $(`div[id="allowanceTypesModal"] textarea[name="description"]`).val(allowance.description);
+            $(`div[id="allowanceTypesModal"] input[name="default_amount"]`).val(allowance.default_amount);
             setTimeout(() => {
                 $(`div[class~="modal-backdrop"]`).addClass("hidden");
             }, 200);
