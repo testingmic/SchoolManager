@@ -329,7 +329,7 @@ class Payroll extends Myschoolgh {
                             <select data-width="100%" name="allowance[]" id="allowance_'.$ii.'" class="form-control selectpicker">
                                 <option value="null">Please Select</option>';
                                 foreach($allowances_types as $each) {
-                                    $allowances_list .= "<option ".(($eachAllowance->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
+                                    $allowances_list .= "<option data-default_value='{$each->default_amount}' ".(($eachAllowance->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
                                 }
                             $allowances_list .= '
                             </select>
@@ -354,7 +354,7 @@ class Payroll extends Myschoolgh {
                         <select data-width="100%" name="allowance" id="allowance_1" class="form-control selectpicker">
                             <option value="null">Please Select</option>';
                             foreach($allowances_types as $each) {
-                                $allowances_list .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                                $allowances_list .= "<option data-default_value='{$each->default_amount}' value=\"{$each->id}\">{$each->name}</option>";
                             }
                             $allowances_list .= '
                         </select>
@@ -387,7 +387,7 @@ class Payroll extends Myschoolgh {
                             <select data-width="100%" name="deductions[]" id="deductions_'.$ii.'" class="form-control selectpicker">
                                 <option value="null">Please Select</option>';
                                 foreach($deductions_types as $each) {
-                                    $deductions_list .= "<option ".(($eachDeduction->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
+                                    $deductions_list .= "<option data-default_value='{$each->default_amount}' ".(($eachDeduction->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
                                 }
                             $deductions_list .= '
                             </select>
@@ -412,7 +412,7 @@ class Payroll extends Myschoolgh {
                         <select data-width="100%" name="deductions" id="deductions_1" class="form-control selectpicker">
                             <option value="null">Please Select</option>';
                             foreach($deductions_types as $each) {
-                                $deductions_list .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                                $deductions_list .= "<option data-default_value='{$each->default_amount}' value=\"{$each->id}\">{$each->name}</option>";
                             }
                             $deductions_list .= '
                         </select>
@@ -454,8 +454,8 @@ class Payroll extends Myschoolgh {
 				$note = "<div class=\"text-success mb-3 text-center\">
 						This Payslip has already been redeemed.</div>
 						<div class=\"text-center\">
-						<a href=\"{$this->baseUrl}download?pay_id={$employeePayslip->id}&dw=true\" target=\"_blank\" class=\"btn btn-outline-danger\"><i class='fa fa-file-pdf-o'></i> Download</a> &nbsp; 
-						<a href=\"{$this->baseUrl}download?pay_id={$employeePayslip->id}&dw=false\" target=\"_blank\" class=\"btn btn-outline-primary\"><i class='fa fa-print'></i>  Print</a></div>
+						<a href=\"{$this->baseUrl}download?pay_id={$employeePayslip->item_id}&dw=true\" target=\"_blank\" class=\"btn btn-outline-danger\"><i class='fa fa-file-pdf-o'></i> Download</a> &nbsp; 
+						<a href=\"{$this->baseUrl}download?pay_id={$employeePayslip->item_id}&dw=false\" target=\"_blank\" class=\"btn btn-outline-primary\"><i class='fa fa-print'></i>  Print</a></div>
 				";
 			} else {
 				$note = "<div class=\"text-danger mb-3 text-center\">
@@ -575,12 +575,15 @@ class Payroll extends Myschoolgh {
         
         /** If there is already a record */
         if(empty($payslip_id)) {
+            /** Create new record id */
+            $item_id = random_string("alnum", 52);
+
             /** Insert the Payslip Record */
-            $stmt = $this->db->prepare("INSERT INTO payslips SET client_id =?, employee_id=?, basic_salary=?, 
+            $stmt = $this->db->prepare("INSERT INTO payslips SET item_id = ?, client_id =?, employee_id=?, basic_salary=?, 
                 total_allowance =?, total_deductions=?, net_salary=?, payslip_month = ?, payslip_month_id=?, 
                 payslip_year=?, payment_mode =?, comments =?, gross_salary = ?, created_by = ?
             ");
-            $stmt->execute([$params->clientId, $params->employee_id, $params->basic_salary, 
+            $stmt->execute([$item_id, $params->clientId, $params->employee_id, $params->basic_salary, 
                 $t_allowances, $t_deductions, $net_salary, $params->month_id,
                 date("Y-m-t", strtotime("today +0 day")),
                 $params->year_id, $params->payment_mode ?? null,
@@ -686,7 +689,7 @@ class Payroll extends Myschoolgh {
         }
 
         # set the output to return when successful
-        $return = ["code" => 200, "data" => "Request was successfully executed.", "refresh" => 2000];
+        $return = ["code" => 200, "data" => "Request was successfully executed.", "refresh" => 800];
         
         # append to the response
         $return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}hr-category"];

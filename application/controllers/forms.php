@@ -3511,7 +3511,7 @@ class Forms extends Myschoolgh {
                             <select data-width="100%" name="allowance[]" id="allowance_'.$ii.'" class="form-control selectpicker">
                                 <option value="null">Please Select</option>';
                                 foreach($allowances as $each) {
-                                    $allowances_list .= "<option ".(($eachAllowance->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
+                                    $allowances_list .= "<option data-default_value='{$each->default_amount}' ".(($eachAllowance->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
                                 }
                             $allowances_list .= '
                             </select>
@@ -3536,7 +3536,7 @@ class Forms extends Myschoolgh {
                         <select data-width="100%" name="allowance" id="allowance_1" class="form-control selectpicker">
                             <option value="null">Please Select</option>';
                             foreach($allowances as $each) {
-                                $allowances_list .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                                $allowances_list .= "<option data-default_value='{$each->default_amount}' value=\"{$each->id}\">{$each->name}</option>";
                             }
                             $allowances_list .= '
                         </select>
@@ -3566,7 +3566,7 @@ class Forms extends Myschoolgh {
                                 // using foreach loop
                                 foreach($deductions as $each) {
                                     // print the list of countries
-                                    $deductions_list .= "<option ".(($eachDeduction->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
+                                    $deductions_list .= "<option data-default_value='{$each->default_amount}' ".(($eachDeduction->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
                                 }
                             $deductions_list .= '
                             </select>
@@ -3593,7 +3593,7 @@ class Forms extends Myschoolgh {
                             // using foreach loop
                             foreach($deductions as $each) {
                                 // print the list of countries
-                                $deductions_list .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                                $deductions_list .= "<option data-default_value='{$each->default_amount}' value=\"{$each->id}\">{$each->name}</option>";
                             }
                             $deductions_list .= '
                         </select>
@@ -3740,8 +3740,8 @@ class Forms extends Myschoolgh {
                                         <div class="input-group mb-3">
                                             <select name="payment_mode" id="payment_mode" class="form-control selectpicker2">
                                                 <option value="null">Select</option>
-                                                <option value="Cash">Cash</option>
                                                 <option value="Bank">Bank</option>
+                                                <option value="Cash">Cash</option>
                                                 <option value="Other">Other</option>
                                             </select>
                                         </div>

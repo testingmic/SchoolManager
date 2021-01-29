@@ -99,18 +99,17 @@
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>hr-payroll">Payroll</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>hr-payslip">Payslip List</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-category">Category</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-expenditure">Expenditure</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>hr-category">Allowance Category</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
         </ul>
     </li>
-    <li class="dropdown">
+    <!-- <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-tie"></i><span>HR</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>hr-leave_manager">Leave Management</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
         </ul>
-    </li>
+    </li> -->
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
     <li class="dropdown">
@@ -178,7 +177,6 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>hr-payslip">Payslip List</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
         </ul>
     </li>
     <li class="menu-header">Communication</li>
@@ -306,7 +304,6 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>hr-payslip">Payslip List</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
         </ul>
     </li>
     <li class="menu-header">Communication</li>

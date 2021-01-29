@@ -176,7 +176,7 @@ class Auth extends Myschoolgh {
                             $this->addAttempt($params->username, "login", 1);
                             $this->db->commit();
                             //return the error message
-                            return ["code" => 201, "data" => "Sorry! Invalid Username/Password.3"];
+                            return ["code" => 201, "data" => "Sorry! Invalid Username/Password."];
                         }
                     }
                     
@@ -188,7 +188,7 @@ class Auth extends Myschoolgh {
                 // add user attempt
                 $this->addAttempt($params->username);
                 $this->db->commit();
-                return ["code" => 201, "data" => "Sorry! Invalid Username/Password.1"];
+                return ["code" => 201, "data" => "Sorry! Invalid Username/Password."];
             }
 
             // return the success response

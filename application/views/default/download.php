@@ -162,6 +162,7 @@ if((isset($_GET["file"]) && !empty($_GET["file"])) || (isset($_GET["file_id"], $
     }
     
 }
+
 /** Download timetables */
 elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) {
 
@@ -192,6 +193,9 @@ elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) 
 
     exit;
 }
+
+/** Download payslips */
+
 
 // if nothing was set
 print "Access Denied!";

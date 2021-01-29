@@ -296,10 +296,11 @@ var generate_payslip = () => {
     }
 }
 
-var load_employee_payslip = (employee_id) => {
+var load_employee_payslip = () => {
 
     let month_id = $(`div[id="payslip_container"] select[name="month_id"]`).val(),
-        year_id = $(`div[id="payslip_container"] select[name="year_id"]`).val();
+        year_id = $(`div[id="payslip_container"] select[name="year_id"]`).val(),
+        employee_id = $(`div[id="payslip_container"] select[name="employee_id"]`).val();
 
     $(`div[class~="summary-div"]`).addClass('hidden');
     $(`div[class~="allowance-div"]`).addClass('hidden');

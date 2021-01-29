@@ -62,15 +62,15 @@ foreach($payslips_list["data"] as $key => $each) {
         // if the user has the permission to validate a payslip
         if($validatePayslip) {
             $validated = false;
-            $action .= "&nbsp;<a onclick='return validate_item(\"{$each->id}\",\"payslip\",\"{$baseUrl}hr-payslip\")' class=\"btn btn-sm btn-outline-success mb-1\" title=\"Validate Payslip\" href=\"#\"><i class='fa fa-check'></i></a>";
+            $action .= "&nbsp;<a onclick='return validate_item(\"{$each->item_id}\",\"payslip\",\"{$baseUrl}hr-payslip\")' class=\"btn btn-sm btn-outline-success mb-1\" title=\"Validate Payslip\" href=\"#\"><i class='fa fa-check'></i></a>";
         }
     }
     
-    $action .= "&nbsp; <a href=\"{$baseUrl}download?pay_id={$each->id}&dw=true\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-warning\"><i class='fa fa-download'></i></a>&nbsp; 
-            <a href=\"{$baseUrl}download?pay_id={$each->id}&dw=false\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-primary\"><i class='fa fa-print'></i> </a>";    
+    $action .= "&nbsp; <a href=\"{$baseUrl}download?pay_id={$each->item_id}&dw=true\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-warning\"><i class='fa fa-download'></i></a>&nbsp; 
+            <a href=\"{$baseUrl}download?pay_id={$each->item_id}&dw=false\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-primary\"><i class='fa fa-print'></i> </a>";    
     
     if($generatePermission && !$each->status) {
-        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"payslip\");' class='btn mb-1 btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"payslip\");' class='btn mb-1 btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
     // set the summary data
     $summary = "<div class='row'>";

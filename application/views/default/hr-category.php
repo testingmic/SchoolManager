@@ -84,7 +84,7 @@ $response->html = '
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="name">Name</label>
-                                        <input type="text" placeholder="Type name" name="name" id="name" class="form-control">
+                                        <input type="text" maxlength="100" placeholder="Type name" name="name" id="name" class="form-control">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -100,13 +100,13 @@ $response->html = '
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="default_amount">Default Amount or Percentage</label>
-                                        <input type="text" placeholder="Type default amount or percentage" name="default_amount" id="default_amount" class="form-control">
+                                        <input type="text" maxlength="20" placeholder="Type default amount or percentage" name="default_amount" id="default_amount" class="form-control">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="description">Description</label>
-                                        <textarea placeholder="" name="description" id="description" rows="5" class="form-control"></textarea>
+                                        <textarea placeholder="" maxlength="255" name="description" id="description" rows="5" class="form-control"></textarea>
                                     </div>
                                 </div>
                             </div>
