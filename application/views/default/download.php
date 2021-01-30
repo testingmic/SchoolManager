@@ -5,7 +5,7 @@ if(confirm_url_id(1)) {
     return;
 }
 
-function show_content($title = null, $file_name, $content) {
+function show_content($title = null, $file_name, $content, $orientation = "L") {
 
     // base url
     $appName = config_item("site_name");
@@ -53,14 +53,12 @@ function show_content($title = null, $file_name, $content) {
 	$pdf->SetFont('dejavusans', '', 10);
 
 	// add a page
-	$pdf->AddPage("L", 'A4');
+	$pdf->AddPage($orientation, 'A4');
 
 	// output the HTML content
     if(isset($_GET["dw"])) {
-        $pdf->writeHTML($content["table"], false, false, true, false, '');
+        $pdf->writeHTML($content, false, false, true, false, '');
 	    $pdf->Output($file_name, 'I');
-    } else {
-       print $content["table"];
     }
 }
 
@@ -181,21 +179,44 @@ elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) 
     }
     
     // load the table
-    $html_table = $timetableClass->draw($param);
+    $content = $timetableClass->draw($param);
     
     // end query if no result found
-    if(!isset($html_table["result"])) {
-        print_r($html_table);
+    if(!isset($content["result"])) {
+        print_r($content);
         return;
     }
 
-    show_content("Timetable", $file_name, $html_table);
+    if(!isset($_GET["dw"])) {
+        print_r($content["table"]);
+        return;
+    }
+
+    show_content("Timetable", $file_name, $content["table"]);
 
     exit;
 }
 
 /** Download payslips */
+elseif(isset($_GET["pay_id"])) {
 
+    $payslip_id = xss_clean($_GET["pay_id"]);
+    $param = (object) ["payslip_id" => $payslip_id, "download" => true, "clientId" => $session->clientId];
+
+    // load the table
+    $content = load_class("payroll", "controllers")->draw($param);
+    $file_name = "Employee_Payslip.pdf";
+
+    // end query if no result found
+    if(!isset($_GET["dw"])) {
+        print $content["data"];
+        return;
+    }
+
+    show_content("Employee Payslip", $file_name, $content["data"], "P");
+
+    exit;
+}
 
 // if nothing was set
 print "Access Denied!";

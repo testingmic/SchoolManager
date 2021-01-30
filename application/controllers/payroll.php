@@ -2,11 +2,14 @@
 
 class Payroll extends Myschoolgh {
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
 
-        global $accessObject;
-        $this->hasit = $accessObject;
+        // set the colors to use for the loading of pages
+        $this->color_set = ["#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
+                    "#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
+                    "#007bff", "#6c757d", "#28a745", "#17a2b8", "#ffc107", "#dc3545"];
     }
 
     /**
@@ -22,7 +25,7 @@ class Payroll extends Myschoolgh {
         if(isset($params->employee_id)) {
             $params->employee_id = $params->employee_id;
         } else {
-            if(!$accessObject->hasAccess("generate", "payslip")) {
+            if(!$accessObject->hasAccess("generate", "payslip") && !isset($params->payslip_id)) {
                 $params->employee_id = $params->userId ?? $this->session->userId;
             }
         }
@@ -30,18 +33,21 @@ class Payroll extends Myschoolgh {
         $params->query = "1";
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
-
+        
         $params->query .= (isset($params->year_id)) ? " AND a.year_id='{$params->year_id}'" : null;
         $params->query .= (isset($params->month_id)) ? " AND a.month_id='{$params->month_id}'" : null;
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->employee_id)) ? " AND a.employee_id='{$params->employee_id}'" : null;
+        $params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->employee_id) && !empty($params->employee_id)) ? " AND a.employee_id='{$params->employee_id}'" : null;
+        $params->query .= (isset($params->payslip_id) && !empty($params->payslip_id)) ? " AND a.item_id='{$params->payslip_id}'" : null;
 
         try {
 
+            $payslipDetails = (bool) (isset($params->payslip_detail) && $params->payslip_detail);
+
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.employee_id LIMIT 1) AS employee_info,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                    (SELECT CONCAT(c.item_id,'|',c.name,'|',c.phone_number,'|',c.email,'|',c.image,'|',c.unique_id,'|',c.last_seen,'|',c.online,'|',c.user_type) FROM users c WHERE c.item_id = a.employee_id LIMIT 1) AS employee_info,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.unique_id,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM payslips a
                 WHERE {$params->query} AND a.deleted = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
@@ -53,7 +59,18 @@ class Payroll extends Myschoolgh {
                 // loop through the information
                 foreach(["employee_info", "created_by_info"] as $each) {
                     // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","unique_id","last_seen","online","user_type"]);
+                }
+
+                if($payslipDetails) {
+                    $detail = $this->pushQuery("a.*, at.name AS allowance_type", 
+                        "payslips_details a LEFT JOIN payslips_allowance_types at ON at.id = a.allowance_id", 
+                        "a.payslip_id='{$result->id}' AND a.employee_id='{$result->employee_id}'");
+                    $result->payslip_details = [];
+                    foreach($detail as $each) {
+                        $result->payslip_details[$each->detail_type][] = $each;
+                    }
+                    $result->client_details = $this->pushQuery("a.*", "clients_accounts a", "a.client_id = '{$result->client_id}' AND a.client_status='1' LIMIT 1")[0];
                 }
 
                 $data[] = $result;
@@ -697,6 +714,168 @@ class Payroll extends Myschoolgh {
         // return the output
         return $return;
         
+    }
+
+    /**
+     * Draw Table
+     * 
+     * This is a full detail of the payroll information
+     * 
+     * @return Array
+     */
+    public function draw(stdClass $params) {
+
+        $printing = true;
+        $border = "border='0px'";
+        $params->payslip_detail = true;
+        $payroll = $this->paysliplist($params)["data"];
+
+        if(empty($payroll)) {
+            return ["code" => 203, "data" => "Sorry! An invalid Payslip ID was parsed"];
+        }
+        $data = $payroll[0];
+
+        $result = "";
+        $payslipId = $data->id;
+        $client = $data->client_details;
+
+        $allowancesQuery = $data->payslip_details["Allowance"] ?? [];
+        $deductionsQuery = $data->payslip_details["Deduction"] ?? [];
+
+        if($printing) {
+            $cellpadding = "";
+            // $result .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"{$this->baseUrl}assets/css/app.min.css\">";
+        }
+        
+        // set the header content
+        $result .= "<div style=\"width: 80%; margin: auto auto;\">
+                    <table style=\"background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: open sans; width:100%;margin-bottom:2px\" border=\"0\" cellpadding=\"5px\" cellspacing=\"5px\">
+                    <tbody>";
+                    $result .= '<tr style="padding: 5px; border-bottom: solid 1px #ccc;">
+                            <td colspan="4" align="center" style="padding: 10px;">
+                                <h1 style="margin-bottom: 0px; margin-top:0px; color:#9932cc">'.strtoupper($client->client_name).'</h1>
+                                '.($client->client_contact . " / " .$client->client_secondary_contact).'<br>
+                                '.($client->client_email).'
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="left" style="padding-bottom: 10px; font-family: Calibri Light;font-size: 12px;">';
+                            if($printing) {
+                                $result .= '<strong style="font-size: 15px;">'.$data->employee_info->name.'</strong><br>
+                                '.(!empty($data->employee_info->unique_id) ? "<strong>Employee ID:</strong> {$data->employee_info->unique_id}<br>" : null).'
+                                '.(!empty($data->employee_info->phone_number) ? "<strong>Contact:</strong> {$data->employee_info->phone_number}<br>" : null).'
+                                '.(!empty($data->employee_info->email) ? "<strong>Email:</strong> {$data->employee_info->email}<br>" : null).'';
+                            }
+                            $result .= '</td>
+                            <td colspan="2">
+                                <div align="center" style="font-family: Calibri Light; font-size: 12px">
+                                Payslip ID #: <strong>'.$payslipId.'</strong><br>
+                                <strong>Month / Year</strong>: '.$data->payslip_month.' '.$data->payslip_year.'<br>
+                                <strong>Date Created</strong>: '.date("d M Y h:ia", strtotime($data->date_log)).'<br>
+                                </div>
+                                '.(($printing) ? '<hr style="border: dashed 1px #ccc;">' : null).'
+                            </td>
+                        </tr>';
+                        $result .= "
+                    </tbody>
+                    </table>";
+                    
+        if(!$printing) {
+            $result .= "<table border=\"0\" width=\"100%\" cellpadding=\"20px\" cellspacing=\"0px\">
+                <tbody>
+                    <tr>
+                        <td valign=\"top\">&nbsp;<strong></strong></td>
+                    </tr>
+                </tbody>
+            </table>";
+        }
+
+        $result .= "
+        <table border=\"0\" width=\"100%\" cellpadding=\"10px\" cellspacing=\"0px\">
+            <tbody>
+                <tr>
+                    <td style=\"background-color:#f4f4f4\" valign=\"top\">&nbsp;<strong></strong></td>
+                </tr>
+            </tbody>
+        </table>";
+        $result .= "<table class=\"table\">
+            <tbody>
+                <tr>
+                    <td width=\"50%\">
+                        <span style=\"font-size:16px\"><strong>EARNINGS</strong></span>
+                        <div class=\"row justify-content-between\">
+                            <table class=\"table\" border=\"0\" cellpadding=\"5px\">
+                                <tr>
+                                    <td>Basic Salary</td>
+                                    <td>GH&cent;{$data->basic_salary}</td>
+                                </tr>";
+                                foreach($allowancesQuery as $eachAllowance) {
+                                    $result .= "<tr>
+                                        <td>{$eachAllowance->allowance_type}</td>
+                                        <td>GH&cent;{$eachAllowance->amount}</td>
+                                    </tr>";
+                                }
+                                $result .= "<tr>
+                                    <td><strong>Gross Salary</strong></td>
+                                    <td><strong>GH&cent;".number_format(($data->basic_salary + array_sum(array_column($data->payslip_details["Allowance"], 'amount'))), 2)."</strong></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                    <td width=\"50%\">
+                        <span style=\"font-size:16px\"><strong>DEDUCTIONS</strong></span>
+                        <div class=\"row justify-content-between\">
+                            <table class=\"table\" {$border} cellpadding=\"5px\">";
+                                foreach($deductionsQuery as $eachAllowance) {
+                                    $result .= "<tr>
+                                        <td>{$eachAllowance->allowance_type}</td>
+                                        <td>GH&cent;{$eachAllowance->amount}</td>
+                                    </tr>";
+                                }
+                                $result .= "<tr>
+                                    <td><strong>Total Deductions</strong></td>
+                                    <td><strong>GH&cent;".number_format(array_sum(array_column($deductionsQuery, 'amount')), 2)."</strong></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan=\"1\"></td>
+                    <td>
+                        <div class=\"row justify-content-between\">
+                            <table cellpadding=\"10px\" class=\"table\" {$border}>
+                                <tr>";
+                                    $result .= "<td width=\"50%\" style=\"background-color:#9d3ea1; color:#fff; padding:10px;font-weight:bolder;text-transform:uppercase\"><strong>Net Salary</strong></td>
+                                    <td style=\"background-color:#f4f4f4;padding:10px;font-weight:bolder;text-transform:uppercase\">
+                                        <strong>GH&cent;".number_format((($data->basic_salary + array_sum(array_column($allowancesQuery, 'amount')))-array_sum(array_column($deductionsQuery, 'amount'))), 2)."</strong>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>";
+        $result .= '<table width="100%" align="center" border="0">
+            <tbody style="text-align: center;">
+                <tr>
+                    <td colspan="4">
+                        <p style="font-size:12px">
+                            Phone:  '.$client->client_contact.' | 
+                            Email: '.$client->client_email.' | 
+                            Website: '.$client->client_website.'
+                        </p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>';
+
+        return [
+            "code" => 200,
+            "data" => $result
+        ];
+
     }
 
 }
