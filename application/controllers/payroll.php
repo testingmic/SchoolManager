@@ -602,7 +602,7 @@ class Payroll extends Myschoolgh {
             ");
             $stmt->execute([$item_id, $params->clientId, $params->employee_id, $params->basic_salary, 
                 $t_allowances, $t_deductions, $net_salary, $params->month_id,
-                date("Y-m-t", strtotime("today +0 day")),
+                date("Y-m-t", strtotime("{$params->month_id} {$params->year_id}")),
                 $params->year_id, $params->payment_mode ?? null,
                 $params->comments ?? null, $gross_salary, $params->userId
             ]);
@@ -623,12 +623,12 @@ class Payroll extends Myschoolgh {
             /** Insert the Payslip Record */
             $stmt = $this->db->prepare("UPDATE payslips SET basic_salary=?, 
                 total_allowance =?, total_deductions=?, net_salary=?, payment_mode =?, 
-                comments =?, gross_salary = ? WHERE
+                comments =?, gross_salary = ?, payslip_month_id=? WHERE
                 client_id =? AND employee_id=? AND payslip_month = ? AND payslip_year=?
             ");
             $stmt->execute([$params->basic_salary, 
                 $t_allowances, $t_deductions, $net_salary, $params->payment_mode ?? null, 
-                $params->comments ?? null, $gross_salary, 
+                $params->comments ?? null, $gross_salary, date("Y-m-t", strtotime("{$params->month_id} {$params->year_id}")),
                 $params->clientId, $params->employee_id, $params->month_id, $params->year_id
             ]);
 

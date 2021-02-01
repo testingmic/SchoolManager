@@ -10,6 +10,7 @@ class Analitics extends Myschoolgh {
 
     private $class_id_query;
     private $class_idm_query;
+    private $employee_id_query;
 
     public function __construct(stdClass $params) {
 
@@ -100,10 +101,11 @@ class Analitics extends Myschoolgh {
 
         // confirm if the user pushed a query set
         $this->user_status = isset($params->label["user_status"]) ? $params->label["user_status"] : "Active";
-        $this->class_id_query = isset($params->label["class_id"]) ? $params->label["class_id"] : null;
-        $this->class_idm_query = isset($params->label["class_id"]) ? " AND a.class_id IN {$this->inList($params->label["class_id"])}" : null;
-        $this->class_idd_query = isset($params->label["class_id"]) ? " AND a.id IN {$this->inList($params->label["class_id"])}" : null;
-        $this->student_id_query = isset($params->label["student_id"]) ? " AND a.student_id = '{$params->label["student_id"]}'" : null;
+        $this->class_id_query = (isset($params->label["class_id"]) && !empty($params->label["class_id"])) ? $params->label["class_id"] : null;
+        $this->class_idm_query = (isset($params->label["class_id"]) && !empty($params->label["class_id"])) ? " AND a.class_id IN {$this->inList($params->label["class_id"])}" : null;
+        $this->class_idd_query = (isset($params->label["class_id"]) && !empty($params->label["class_id"])) ? " AND a.id IN {$this->inList($params->label["class_id"])}" : null;
+        $this->student_id_query = (isset($params->label["student_id"])&& !empty($params->label["student_id"])) ? " AND a.student_id = '{$params->label["student_id"]}'" : null;
+        $this->employee_id_query = (isset($params->label["employee_id"]) && !empty($params->label["employee_id"])) ? " AND a.employee_id IN {$this->inList($params->label["employee_id"])}" : null;
         $this->fees_category_id = isset($params->label["category_id"]) ? " AND a.category_id IN {$this->inList($params->label["category_id"])}" : null;
         $this->query_date_range = isset($params->label["stream_period"]) ? $this->stringToArray($params->label["stream_period"]) : ["current", "previous"];
 
@@ -696,28 +698,62 @@ class Analitics extends Myschoolgh {
         $result = [];
 
         // get the fees categories
-        foreach(["Allowance", "Deduction"] as $value) {
-            
-            $allowance_types = $this->pushQuery(
-                "a.id, a.name, (SELECT SUM(b.amount) FROM payslips_details b WHERE b.allowance_id = a.id) AS amount",
-                "payslips_allowance_types a", 
-                "a.status='1' AND a.client_id='{$params->clientId}' AND a.type='{$value}'"
-            );
-            $result["payslip_record"]["allowance_types"]["summary"][$value] = [
-                "count" => count($allowance_types),
-                "amount" => $allowance_types[0]->amount
-            ];
+        $stmt = $this->db->prepare("
+            SELECT 
+                MONTH(a.payslip_month_id) AS month_id,
+                MONTHNAME(a.payslip_month_id) AS month_name,
+                SUM(a.basic_salary) AS basic_salary,
+                SUM(a.total_allowance) AS total_allowance,
+                SUM(a.gross_salary) AS gross_salary,
+                SUM(a.total_deductions) AS total_deductions,
+                SUM(a.net_salary) AS net_salary
+            FROM payslips a
+            WHERE 
+                a.client_id = ? AND a.validated = ? AND a.deleted = ? 
+                AND YEAR(a.payslip_month_id) = ? {$this->employee_id_query}
+            GROUP BY MONTH(a.payslip_month_id)
+        ");
+        $stmt->execute([$params->clientId, 1, 0, 2020]);
+        $summary = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-        }
+        $summation = [];
+        
+        $months_labels = array_column($summary, "month_name");
+        $net_salary_array = array_column($summary, "net_salary");
+        $allowances_array = array_column($summary, "total_allowance");
+        $deductions_array = array_column($summary, "total_deductions");
 
-        $allowance_types = $this->pushQuery(
-            "a.id, a.name, a.type, (SELECT SUM(b.amount) FROM payslips_details b WHERE b.allowance_id = a.id) AS amount",
-            "payslips_allowance_types a", 
-            "a.status='1' AND a.client_id='{$params->clientId}'"
-        );
-        foreach($allowance_types as $allowance) {
-            $result["payslip_record"]["allowance_types"]["summation"]["list"][] = $allowance;
-        }
+        $result["chart_data"]["labels"] = $months_labels;
+        $result["chart_data"]["data"] = $net_salary_array;
+
+        $result["chart_data"]["comparison"] = [
+            "allowances" => $allowances_array,
+            "deductions" => $deductions_array
+        ];
+
+        $result["summary"]["totals"]["basic_salary"] = [
+            "title" => "Basic Salary",
+            "total" => array_sum(array_column($summary, "basic_salary"))
+        ];
+        $result["summary"]["totals"]["total_allowance"] = [
+            "title" => "Total Allowances",
+            "total" => array_sum($allowances_array)
+        ];
+        $result["summary"]["totals"]["gross_salary"] = [
+            "title" => "Gross Salary",
+            "total" => array_sum(array_column($summary, "gross_salary"))
+        ];
+        $result["summary"]["totals"]["total_deductions"] = [
+            "title" => "Total Deductions",
+            "total" => array_sum($deductions_array)
+        ];
+        $result["summary"]["totals"]["net_salary"] = [
+            "title" => "Net Salary",
+            "total" => array_sum($net_salary_array)
+        ];
+        
+
+        $result["monthly_salary_list"] = $summary;
         
         return $result;
 
