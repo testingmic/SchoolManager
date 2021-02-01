@@ -694,18 +694,38 @@ class Analitics extends Myschoolgh {
     public function salary_report(stdClass $params) {
 
         /** Salary Category Logs */
-        $feesClass = load_class("fees", "controllers");
         $result = [];
+
+        // get the salary categories
+        $stmt = $this->db->prepare("
+            SELECT 
+                c.name, c.type,
+                SUM(a.amount) AS amount,
+                MONTH(b.payslip_month_id) AS month_id, MONTHNAME(b.payslip_month_id) AS month_name
+            FROM payslips_details a
+            LEFT JOIN payslips b ON b.id = a.payslip_id
+            LEFT JOIN payslips_allowance_types c ON c.id = a.allowance_id
+            WHERE 
+                a.client_id = ? AND b.validated = ? AND b.deleted = ? 
+                AND YEAR(b.payslip_month_id) = ? {$this->employee_id_query}
+            GROUP BY MONTH(b.payslip_month_id), a.allowance_id
+        ");
+        $stmt->execute([$params->clientId, 1, 0, 2020]);
+        $category_list = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        $category_array = [];
+        foreach($category_list as $category) {
+            $category_array[$category->type][$category->month_name][] = $category;
+        }
+
+        $result["category"] = $category_array;
 
         // get the fees categories
         $stmt = $this->db->prepare("
             SELECT 
-                MONTH(a.payslip_month_id) AS month_id,
-                MONTHNAME(a.payslip_month_id) AS month_name,
-                SUM(a.basic_salary) AS basic_salary,
-                SUM(a.total_allowance) AS total_allowance,
-                SUM(a.gross_salary) AS gross_salary,
-                SUM(a.total_deductions) AS total_deductions,
+                MONTH(a.payslip_month_id) AS month_id, MONTHNAME(a.payslip_month_id) AS month_name,
+                SUM(a.basic_salary) AS basic_salary, SUM(a.total_allowance) AS total_allowance,
+                SUM(a.gross_salary) AS gross_salary, SUM(a.total_deductions) AS total_deductions,
                 SUM(a.net_salary) AS net_salary
             FROM payslips a
             WHERE 
@@ -716,20 +736,16 @@ class Analitics extends Myschoolgh {
         $stmt->execute([$params->clientId, 1, 0, 2020]);
         $summary = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-        $summation = [];
-        
         $months_labels = array_column($summary, "month_name");
         $net_salary_array = array_column($summary, "net_salary");
         $allowances_array = array_column($summary, "total_allowance");
         $deductions_array = array_column($summary, "total_deductions");
 
-        $result["chart_data"]["labels"] = $months_labels;
-        $result["chart_data"]["data"] = $net_salary_array;
+        $result["salary_list"] = $summary;
 
-        $result["chart_data"]["comparison"] = [
-            "allowances" => $allowances_array,
-            "deductions" => $deductions_array
-        ];
+        $result["chart"]["labels"] = $months_labels;
+        $result["chart"]["data"] = $net_salary_array;
+        $result["chart"]["comparison"] = ["allowances" => $allowances_array, "deductions" => $deductions_array];
 
         $result["summary"]["totals"]["basic_salary"] = [
             "title" => "Basic Salary",
@@ -751,9 +767,6 @@ class Analitics extends Myschoolgh {
             "title" => "Net Salary",
             "total" => array_sum($net_salary_array)
         ];
-        
-
-        $result["monthly_salary_list"] = $summary;
         
         return $result;
 
