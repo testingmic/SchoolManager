@@ -747,7 +747,7 @@ class Forms extends Myschoolgh {
                         $thumbnail = "
                             <div><span class=\"text text-{$eachFile->color}\"><i class=\"{$eachFile->favicon} fa-6x\"></i></span></div>
                             <div title=\"Click to preview: {$eachFile->name}\" data-toggle=\"tooltip\">
-                                <a href=\"javascript:void(0)\" {$preview_link}><strong class=\"text-primary\">{$eachFile->name}</strong></a> <span class=\"text-muted tx-11\">({$eachFile->size})</span>
+                                <a href=\"#\" {$preview_link}><strong class=\"text-primary\">{$eachFile->name}</strong></a> <span class=\"text-muted tx-11\">({$eachFile->size})</span>
                             </div>";
 
                         $view_option = "";
@@ -756,7 +756,7 @@ class Forms extends Myschoolgh {
 
                         // display this if the object is deletable.
                         if($is_deletable) {
-                            $delete_btn = "&nbsp;<a href=\"javascript:void(0)\" onclick=\"return delete_existing_file_attachment('{$record_id}_{$eachFile->unique_id}');\" style=\"padding:5px\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+                            $delete_btn = "&nbsp;<a href=\"#\" onclick=\"return delete_existing_file_attachment('{$record_id}_{$eachFile->unique_id}');\" style=\"padding:5px\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
                         }
                         $the_class = "attachment-item";
                         $padding = "style='padding:10px'";

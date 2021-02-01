@@ -215,7 +215,7 @@ class Api_validate {
 							$params[$key] = xss_clean($value);	
 						} else {
 							foreach($value as $kkey => $kvalue) {
-								$params[$key][$kkey] = (is_array($kvalue)) ? array_map("xss_clean", $kvalue) : xss_clean($kvalue);
+								$params[$key][$kkey] = (is_array($kvalue)) ? $kvalue : xss_clean($kvalue);
 							}
 						}
 					}

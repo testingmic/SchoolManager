@@ -154,7 +154,9 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                                         </span>
                                                         <form method="post" class="hidden" action="'.$baseUrl.'api/timetable/allocate" id="courseAlloc">';
                                                             foreach($timetable_allocations as $key => $value) {
-                                                                $response->html .= "<input type=\"hidden\" name=\"{$value->day}_{$value->slot}\" value=\"{$value->course_id}:{$value->room_id}\">";
+                                                                foreach($value as $kkey => $vvalue) {
+                                                                    $response->html .= "<input type=\"hidden\" name=\"{$vvalue->day}_{$vvalue->slot}\" value=\"{$vvalue->course_id}:{$vvalue->room_id}\">";
+                                                                }
                                                             }
                                                         $response->html .= '
                                                             <button type="submit">Save</button>

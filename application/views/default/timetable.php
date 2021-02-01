@@ -171,7 +171,7 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Class</span>
                                                 </div>
-                                                <select class="form-control '.($timetable_found ? "selectpicker" : null).'" name="class_id">
+                                                <select class="form-control '.($timetable_found ? "selectpicker" : "").'" name="class_id">
                                                     <option value="">Please Select Class</option>';
                                                     foreach($class_list as $each) {
                                                         $response->html .= "<option ".($class_id == $each->item_id ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";

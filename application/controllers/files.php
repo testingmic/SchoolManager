@@ -318,7 +318,7 @@ class Files extends Myschoolgh {
                         
                         // display the delete button
                         $attachments .= "<span class=\"float-right\">
-                            <button type=\"button\" href=\"javascript:void(0)\" onclick=\"return delete_existing_file_attachment('{$each_file->record_id}_{$each_file->unique_id}');\" class=\"btn btn-outline-danger p-1 pr-2 btn-sm delete-attachment-file\">
+                            <button type=\"button\" href=\"#\" onclick=\"return delete_existing_file_attachment('{$each_file->record_id}_{$each_file->unique_id}');\" class=\"btn btn-outline-danger p-1 pr-2 btn-sm delete-attachment-file\">
                                 <i class=\"fas font-12px fa-trash ml-1\"></i>                    
                             </button></span>";
                     }
@@ -449,7 +449,7 @@ class Files extends Myschoolgh {
             }
             $attachments .= "<div title=\"Click to download the file: {$each_file["second"]}.{$each_file["fifth"]}\" class=\"col-md-12 pb-1 text-left\" data-document-link=\"{$each_file["first"]}\">";
             $attachments .= "<div class=\"bg-inverse-primary p-2\"><strong onclick=\"return download_ajax_temp_file('{$module}','{$each_file["first"]}');\" class=\"cursor download-temp-file\"><span class=\"text-{$color}\"><i class=\"{$this->favicon_array[$each_file["fifth"]]} fa-1x\"></i></span> ".substr($each_file["second"], 0, 40).".{$each_file["fifth"]}</strong> ({$each_file["forth"]})";
-            $attachments .= "<span class=\"float-right\"><button href=\"javascript:void(0)\" onclick=\"return delete_ajax_file_uploaded('{$module}','{$each_file["first"]}')\" data-document-module=\"{$module}\" data-document-link=\"{$each_file["first"]}\" class=\"btn btn-outline-danger p-1 pr-2 btn-sm delete-attachment-file\"><i class=\"fas font-12px fa-trash ml-1\"></i></button></span>";
+            $attachments .= "<span class=\"float-right\"><button href=\"#\" onclick=\"return delete_ajax_file_uploaded('{$module}','{$each_file["first"]}')\" data-document-module=\"{$module}\" data-document-link=\"{$each_file["first"]}\" class=\"btn btn-outline-danger p-1 pr-2 btn-sm delete-attachment-file\"><i class=\"fas font-12px fa-trash ml-1\"></i></button></span>";
             $attachments .= "</div>";
             $attachments .= "</div>";
         }

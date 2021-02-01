@@ -295,7 +295,7 @@ class Timetable extends Myschoolgh {
                         return ["code" => 203, "data" => "Sorry! There was no room assigned to the course."];
                     }
                 }
-
+                
                 // load the meeting periods for each course
                 $courses_list = $this->pushQuery("name, weekly_meeting, item_id", "courses", "item_id IN {$this->inList(array_keys($course_ids))} AND client_id='{$params->clientId}' LIMIT 200");
                 

@@ -17,7 +17,8 @@ class Analitics extends Myschoolgh {
 
         $this->default_stream = [
             "summary_report", "students_report", "revenue_flow", "library_report", 
-            "departments_report", "attendance_report", "class_attendance_report"
+            "departments_report", "attendance_report", "class_attendance_report",
+            "salary_report"
         ];
 
         $this->error_codes = [
@@ -121,6 +122,12 @@ class Analitics extends Myschoolgh {
         if(in_array("revenue_flow", $params->stream)) {
             // query the revenue data
             $this->final_report["revenue_flow"] = $this->revenue_flow($params);
+        }
+
+        // get the salary information if not parsed in the stream
+        if(in_array("salary_report", $params->stream)) {
+            // query the salary data
+            $this->final_report["salary_report"] = $this->salary_report($params);
         }
 
         // get the library information if not parsed in the stream
@@ -672,6 +679,48 @@ class Analitics extends Myschoolgh {
         } catch(PDOException $e) {
             return [];
         }
+
+    }
+
+    /**
+     * Generate report on the salary payment flow
+     * 
+     * This gets the amount received grouped by hour/day/months as the case may be
+     * 
+     * @return Array
+     */
+    public function salary_report(stdClass $params) {
+
+        /** Salary Category Logs */
+        $feesClass = load_class("fees", "controllers");
+        $result = [];
+
+        // get the fees categories
+        foreach(["Allowance", "Deduction"] as $value) {
+            
+            $allowance_types = $this->pushQuery(
+                "a.id, a.name, (SELECT SUM(b.amount) FROM payslips_details b WHERE b.allowance_id = a.id) AS amount",
+                "payslips_allowance_types a", 
+                "a.status='1' AND a.client_id='{$params->clientId}' AND a.type='{$value}'"
+            );
+            $result["payslip_record"]["allowance_types"]["summary"][$value] = [
+                "count" => count($allowance_types),
+                "amount" => $allowance_types[0]->amount
+            ];
+
+        }
+
+        $allowance_types = $this->pushQuery(
+            "a.id, a.name, a.type, (SELECT SUM(b.amount) FROM payslips_details b WHERE b.allowance_id = a.id) AS amount",
+            "payslips_allowance_types a", 
+            "a.status='1' AND a.client_id='{$params->clientId}'"
+        );
+        foreach($allowance_types as $allowance) {
+            $result["payslip_record"]["allowance_types"]["summation"]["list"][] = $allowance;
+        }
+        
+        return $result;
+
 
     }
 

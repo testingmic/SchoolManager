@@ -1,0 +1,6 @@
+[30-Jan-2021 21:39:58 Africa/Accra] PHP Warning:  count(): Parameter must be an array or an object that implements Countable in C:\xampp\htdocs\myschool_gh\application\controllers\analitics.php on line 706
+[30-Jan-2021 21:39:58 Africa/Accra] PHP Warning:  count(): Parameter must be an array or an object that implements Countable in C:\xampp\htdocs\myschool_gh\application\controllers\analitics.php on line 706
+[30-Jan-2021 21:41:00 Africa/Accra] PHP Parse error:  syntax error, unexpected ']', expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in C:\xampp\htdocs\myschool_gh\application\controllers\analitics.php on line 709
+[30-Jan-2021 21:41:05 Africa/Accra] PHP Parse error:  syntax error, unexpected ']', expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in C:\xampp\htdocs\myschool_gh\application\controllers\analitics.php on line 709
+[30-Jan-2021 21:41:06 Africa/Accra] PHP Notice:  Trying to get property 'amount' of non-object in C:\xampp\htdocs\myschool_gh\application\controllers\analitics.php on line 708
+[30-Jan-2021 21:41:06 Africa/Accra] PHP Notice:  Trying to get property 'amount' of non-object in C:\xampp\htdocs\myschool_gh\application\controllers\analitics.php on line 708

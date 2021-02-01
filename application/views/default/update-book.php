@@ -24,11 +24,6 @@ $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 
-$response->scripts = [
-    "assets/js/comments.js",
-    "assets/js/library.js"
-];
-
 // item id
 $item_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
 $pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
@@ -40,6 +35,12 @@ if(!empty($item_id)) {
         "clientId" => $clientId,
         "book_id" => $item_id,
         "limit" => 1
+    ];
+
+    $response->scripts = [
+        "assets/js/comments.js",
+        "assets/js/library.js",
+        "assets/js/comments_upload.js"
     ];
 
     $data = load_class("library", "controllers")->list($item_param);

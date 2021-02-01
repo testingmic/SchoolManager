@@ -414,7 +414,6 @@ var attendanceReport = (_attendance) => {
             $.each(attendance.days_list, function(i, day) {
                 _log_chart_label.push(i);
             });
-            console.log(_log_chart_label);
 
             $(`div[data-chart_container="attendance_log_chart"]`).html(`<div id="attendance_log_chart" style="min-height:350px;"></div>`);
 

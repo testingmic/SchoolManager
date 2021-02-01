@@ -66,7 +66,7 @@ if(!empty($item_id)) {
             $books_list .= "<tr class='each_book_item' data-request_id='{$item_id}' data-book_id='{$book->book_id}'>";
             $books_list .= "<td>
                 <div class='d-flex justify-content-start'>
-                    <div class='mr-2'>".(!empty($book->book_image) ? "<img src='{$baseUrl}{$book->book_image}' width='50px' height='40px'>" : "")."</div>
+                    <div class='mr-2'>".(!empty($book->book_image) ? "<img class='rounded-circle author-box-picture' src='{$baseUrl}{$book->book_image}' width='40px' height='40px'>" : "")."</div>
                     <div><a href='#' onclick='return loadPage(\"{$baseUrl}update-book/{$book->book_id}\");'>{$book->title}</a> <br> <strong>{$book->isbn}</strong></div>
                 </div>
             </td>";
@@ -141,7 +141,7 @@ if(!empty($item_id)) {
                             <div class="py-3 pt-0">
                                 <div class="d-flex justify-content-start">
                                     <div class="mr-2">
-                                        <img src="'.$baseUrl.''.$data->user_info->image.'" width="60px">
+                                        <img class="rounded-circle author-box-picture" src="'.$baseUrl.''.$data->user_info->image.'" width="60px">
                                     </div>
                                     <div style="width:100%">
                                         <p class="clearfix">
