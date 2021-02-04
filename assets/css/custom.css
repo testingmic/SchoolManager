@@ -212,6 +212,10 @@ textarea.form-control {
     height: 100px !important;
 }
 
+.attachment-container .attachment-item {
+    border-radius: 10px 10px 0px 0px;
+}
+
 .attachment-container .file-options {
     position: absolute;
     right: 2px;
@@ -224,8 +228,18 @@ textarea.form-control {
 
 .attachment-container .attachment-item {
     padding-top: 10px;
-    max-height: 180px;
+    height: 150px!important;
+    max-height: 150px!important;
     overflow: hidden;
+}
+
+.attachment-container .file_caption {
+    padding-top: 5px;
+    background: #607d8b;
+    color: #fff;
+    height: 70px;
+    padding: 5px;
+    border-radius: 0px 0px 10px 10px;
 }
 
 .message_list_day_divider_label {

@@ -745,10 +745,13 @@ class Forms extends Myschoolgh {
                         
                         // set init
                         $thumbnail = "
+                        <div style=\"height:140px\" title=\"Click to preview: {$eachFile->name}\" data-toggle=\"tooltip\">
                             <div><span class=\"text text-{$eachFile->color}\"><i class=\"{$eachFile->favicon} fa-6x\"></i></span></div>
-                            <div title=\"Click to preview: {$eachFile->name}\" data-toggle=\"tooltip\">
-                                <a href=\"#\" {$preview_link}><strong class=\"text-primary\">{$eachFile->name}</strong></a> <span class=\"text-muted tx-11\">({$eachFile->size})</span>
-                            </div>";
+                        </div>";
+                        $caption = "
+                        <div class=\"file_caption text-left\">
+                            <a {$preview_link}><strong>{$eachFile->name}</strong></a> <span class=\"text-muted tx-11\">({$eachFile->size})</span>
+                        </div>";
 
                         $view_option = "";
                         $image_desc = "";
@@ -773,7 +776,7 @@ class Forms extends Myschoolgh {
                                 // create a new thumbnail of the file
                                 create_thumbnail($eachFile->path, $filename);
                             } else {
-                                $thumbnail = "<img height=\"100%\" width=\"100%\" src=\"{$this->baseUrl}{$filename}\">";
+                                $thumbnail = "<div style=\"height:100%\"><img height=\"100%\" width=\"100%\" src=\"{$this->baseUrl}{$filename}\"></div>";
                             }
                             $image_desc = "
                                 <div class=\"gallery-desc\">
@@ -794,15 +797,17 @@ class Forms extends Myschoolgh {
                         $files_list .= "<div data-file_container='{$record_id}_{$eachFile->unique_id}' class=\"{$list_class} attachment-container text-center p-3\">";
                         $files_list .= $isImage ? "<div class=\"gallery-item\">" : null;
                             $files_list .= "
-                                <div class=\"col-lg-12 {$the_class} border\" {$padding} data-attachment_item='{$record_id}_{$eachFile->unique_id}'>
+                                <div class=\"col-lg-12 p-0 {$the_class} border\" {$padding} data-attachment_item='{$record_id}_{$eachFile->unique_id}'>
                                     <span style=\"display:none\" class=\"file-options\" data-attachment_options='{$record_id}_{$eachFile->unique_id}'>
                                         {$view_option}
                                         <a title=\"Click to Download\" target=\"_blank\" class=\"btn btn-sm btn-success\" style=\"padding:5px\" href=\"{$this->baseUrl}download?file={$file_to_download}\">
                                             <i style=\"font-size:12px\" class=\"fa fa-download fa-1x\"></i>
                                         </a>
                                         {$delete_btn}    
-                                    </span> {$thumbnail} {$image_desc}
+                                    </span> 
+                                    {$thumbnail} {$image_desc}
                                 </div>
+                                {$caption}
                             </div>";
                         $files_list .= $isImage ? "</div>" : null;
                     }

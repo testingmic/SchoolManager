@@ -500,7 +500,7 @@ screen and (max-height: 300px) {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(33, 33, 33, 0.8);
+    /* background-color: rgba(33, 33, 33, 0.8); */
     opacity: 0;
     transition: all 0.3s ease 0s;
 }

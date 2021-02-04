@@ -71,6 +71,18 @@ class Records extends Myschoolgh {
                 "where" => "item_id='{$record_id}'",
                 "query" => "SELECT id FROM books_type WHERE item_id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
             ],
+            "course_unit" => [
+                "table" => "courses_plan",
+                "update" => "status='0'",
+                "where" => "item_id='{$record_id}'",
+                "query" => "SELECT id FROM courses_plan WHERE plan_type='unit' AND item_id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+            ],
+            "course_lesson" => [
+                "table" => "courses_plan",
+                "update" => "status='0'",
+                "where" => "item_id='{$record_id}'",
+                "query" => "SELECT id FROM courses_plan WHERE plan_type='lesson' AND item_id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+            ],
             "incident" => [
                 "table" => "incidents",
                 "update" => "deleted='0'",
@@ -160,8 +172,8 @@ class Records extends Myschoolgh {
 
             // if the result is in this list
             if(in_array($params->resource, [
-                "event_type", "event", "class", "department", "course", "incident", "user", "guardian", 
-                "book", "book_category", "fees_category", "class_room", "timetable", "allowance", "payslip"
+                "event_type", "event", "class", "department", "course", "incident", "user", "guardian", "course_unit",
+                "course_lesson", "book", "book_category", "fees_category", "class_room", "timetable", "allowance", "payslip"
             ])) {
                 // update the database record
                 $this->db->query("UPDATE {$featured["table"]} SET {$featured["update"]} WHERE {$featured["where"]} LIMIT 1");

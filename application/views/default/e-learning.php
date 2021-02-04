@@ -16,9 +16,9 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Courses E-Resources";
+$pageTitle = "E-Learning";
 $response->title = "{$pageTitle} : {$appName}";
-$response->scripts = ["assets/js/resources.js"];
+$response->scripts = ["assets/js/page/index.js"];
 
 $params = (object)[
     "class_ids" => [],
@@ -31,7 +31,6 @@ $response->html = '
             <h1>'.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-courses">Courses List</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>
@@ -42,17 +41,12 @@ $response->html = '
                         <input placeholder="Search for a e-learning resource" id="search_term" name="search_term" type="text" class="form-control">
                     </div>
                     <div class="col-md-2 col-lg-2">
-                        <button onclick="return search_Resource()" class="btn-block btn btn-outline-primary">Search <i class="fa fa-search"></i></button>
+                        <button class="btn-block btn btn-outline-primary">Search <i class="fa fa-search"></i></button>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div id="total_count"></div>
-                        <div id="courses_resources_list" style="min-height:300px"></div>
-                    </div>
-                </div>
+                <div id="courses_resources_list" style="min-height:300px"></div>
             </div>
         </div>
     </section>';

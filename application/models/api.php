@@ -88,14 +88,14 @@ class Api {
             // remove the key from the list
             unset($this->endpoints["devlog"]);
             // return the error response
-            return $this->output(404, ['accepted' => ["endpoints" => array_keys( $this->endpoints ) ] ]);
+            return $this->output(404, ['accepted' => ["endpoints" => $this->endpoints ] ]);
         }
         elseif( !isset( $this->endpoints[$this->inner_url][$this->method] ) ) {
-            return $this->output(400, ['accepted' => ["method" => array_keys( $this->endpoints[$this->inner_url] ) ] ]);
+            return $this->output(400, ['accepted' => ["method" => $this->endpoints[$this->inner_url] ] ]);
         }
         // continue process
         elseif(!isset($this->endpoints[$this->inner_url][$this->method][$this->outer_url])) {
-            return $this->output(404, ['accepted' => ["endpoints" => array_keys( $this->endpoints[$this->inner_url][$this->method] ) ] ]);
+            return $this->output(404, ['accepted' => ["endpoints" => $this->endpoints[$this->inner_url][$this->method]] ]);
         } else {
             // set the acceptable parameters
             $accepted =  $this->endpoints[$this->inner_url][$this->method][$this->outer_url];
@@ -105,10 +105,8 @@ class Api {
                 // return all tests parsed
                 return $this->output(100);
             } 
-            //elseif( count($params) > count($accepted['params'])) {
-                // return $this->output(405, ['accepted' => ["parameters" => $accepted['params'] ]]);
-            //} 
             else {
+                
                 // get the keys of all the acceptable parameters
                 $endpointKeys = array_keys($accepted['params']);
                 $errorFound = false;
@@ -122,7 +120,6 @@ class Api {
                         break;
                     }
                 }
-
                 // if an invalid parameter was parsed
                 if($errorFound) {
                     return $this->output(405, ['accepted' => ["parameters" => $accepted['params'] ]]);

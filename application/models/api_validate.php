@@ -203,13 +203,12 @@ class Api_validate {
 		else if( ($method == "POST") ) {
 			// empty the parameters list
 			$params = [];
-			
 			// run this section if the content is not empty
 			if(!empty($post)) {
 				// loop through the url items
 				foreach($post as $key => $value) {
 					// only parse if the value is not empty
-					if( (!empty($value) && ($key != "access_token")) || ($value == 0)) {
+					if( (!empty($value) && ($key != "access_token")) || ($value === 0)) {
 						// append the parameters
 						if(!is_array($value)) {
 							$params[$key] = xss_clean($value);	
@@ -260,31 +259,47 @@ class Api_validate {
 			 *  
 			 * $this->endpoints = json_decode(file_get_contents('assets/endpoints.json'), true)
 			 */
+			/** Split the endpoint */
+			$expl = explode("/", $endpoint);
+			$endpoint = isset($expl[1]) ? $endpoint : null;
+
 			/** The request query */
 			$stmt = $this->db->prepare("SELECT 
-					resource, method, description, parameter AS params, description 
+					endpoint, resource, method, description, parameter AS params, description 
 				FROM users_api_endpoints 
-				WHERE method='{$method}' AND endpoint='{$endpoint}'
-				LIMIT 1
+				WHERE 1 ".(!empty($endpoint) ? " AND method='{$method}' AND endpoint='{$endpoint}' ORDER BY endpoint LIMIT 1 " : (!empty($expl[0]) ? " AND resource='{$expl[0]}' ORDER BY endpoint" : ""))."
 			");
 			$stmt->execute();
-
-			// preset the data
 			$data = [];
-
+			$count = $stmt->rowCount();
+			$results = $stmt->fetchAll(PDO::FETCH_OBJ);
+			// print_r($results);
 			/** Loop through the list */
-			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+			foreach($results as $result) {
 				$result->params = json_decode($result->params, true);
 				$result->method = strtoupper($result->method);
-				$data = [
-					$result->resource => [
-						"{$result->method}" => [
-							"{$resource}" => [
-								"params" => $result->params
+
+				if($count == 1) {
+					$data = [
+						$result->resource => [
+							"{$result->method}" => [
+								$resource => [
+									"params" => $result->params
+								]
 							]
 						]
-					]
-				];
+					];
+				} else {
+					$data[$result->resource][] = [
+						$result->endpoint => [
+							"{$result->method}" => [
+								"{$result->resource}" => [
+									"params" => $result->params
+								]
+							]
+						]
+					];
+				}
 			}
 
 			return $data;

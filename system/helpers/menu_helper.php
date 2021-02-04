@@ -54,6 +54,13 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Course Resources</a></li>
         </ul>
     </li>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-open"></i><span>E-Learning</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>e-learning">E-Books / Videos</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>e-learning_upload">Upload Resource</a></li>
+        </ul>
+    </li>
     <?php } ?>
     <?php if($isAdmin) { ?>
     <li class="dropdown">
@@ -103,13 +110,6 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
         </ul>
     </li>
-    <!-- <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-tie"></i><span>HR</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-leave_manager">Leave Management</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
-        </ul>
-    </li> -->
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
     <li class="dropdown">
@@ -154,6 +154,12 @@
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-courses">List Courses</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Course Resources</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-open"></i><span>E-Learning</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>e-learning">E-Books / Videos</a></li>
         </ul>
     </li>
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
@@ -244,6 +250,12 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-courses">List Courses</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-open"></i><span>E-Learning</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>e-learning">E-Books / Videos</a></li>
         </ul>
     </li>
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>

@@ -150,9 +150,10 @@ class Models {
         $this->unexpected_error = ["code" => 203, "data" => "Sorry! An unexpected error occured.\nPlease contact the admin if problem persists"];
 
 		$this->accepted_attachment_file_types = [
-			'jpg', 'png', 'jpeg', 'txt', 'pdf', 'sql', 'docx', 'doc', 'xls', 'xlsx', 'mpeg',
-			'ppt', 'pptx', 'php', 'css', 'csv', 'rtf', 'gif', 'pub', 'json', 'zip', 
-			'mpg', 'flv', 'webm', 'movie', 'mov', 'qt', 'pjpeg', 'webp', 'mp4'
+			'jpg', 'png', 'jpeg', 'txt', 'pdf', 'docx', 'doc', 
+            'xls', 'xlsx', 'mpeg', 'ppt', 'pptx', 'csv', 'gif', 
+            'pub',	'mpg', 'flv', 'webm', 'movie', 'mov', 
+            'pjpeg', 'webp', 'mp4'
 		];
 
         $this->fake_files = [

@@ -159,11 +159,11 @@ if(!empty($item_id)) {
                     if($hasPlanner) {
                         // show the lesson content
                         $action .= "&nbsp;<button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}_{$lesson->id}\");' class='btn  btn-sm btn-outline-success' type='button'><i class='fa fa-edit'></i></button>";
-                        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$lesson->id}\", \"course_lesson\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+                        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$lesson->item_id}\", \"course_lesson\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
                     }
 
                     // list the actions
-                    $unit_lessons .= "<tr>";
+                    $unit_lessons .= "<tr data-row_id=\"{$lesson->item_id}\">";
                     $unit_lessons .= "<td>{$ikey}</td>";
                     $unit_lessons .= "<td><a title='Click to view lesson details' href='#' onclick='return load_quick_form(\"course_lesson_form_view\",\"{$plan->course_id}_{$plan->id}_{$lesson->id}\");'>{$lesson->name}</a></td>";
                     $unit_lessons .= "<td>{$lesson->start_date}</td>";
@@ -174,7 +174,7 @@ if(!empty($item_id)) {
             }
 
             $lessons_list .= "
-                <div id=\"accordion\" data-row_id=\"{$plan->id}\">
+                <div id=\"accordion\" data-row_id=\"{$plan->item_id}\">
                     <div class=\"accordion\">
                     <div class=\"accordion-header ".($plan->id == $session->thisLast_UnitId ? null : "collapsed")."\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\" ".($plan->id == $session->thisLast_UnitId ? "aria-expanded=\"true\"" : null)."\">
                         <div class=\"d-flex justify-content-between\">
@@ -192,7 +192,7 @@ if(!empty($item_id)) {
                             <div>
                                 <button onclick='return load_quick_form(\"course_unit_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-success btn-sm' type='button'><i class='fa fa-edit'></i> Edit</button>
                                 <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-plus'></i> New Lesson</button>
-                                <a href='#' onclick='return delete_record(\"{$plan->id}\", \"course_unit\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>
+                                <a href='#' onclick='return delete_record(\"{$plan->item_id}\", \"course_unit\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>
                             </div>
                             " : null)."
                         </div>

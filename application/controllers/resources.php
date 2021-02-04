@@ -158,5 +158,48 @@ class Resources extends Myschoolgh {
 
     }
 
+    /**
+     * List all Course Resources
+     * 
+     * @return Array
+     */
+    public function courses_list(stdClass $params) {
+
+        try {
+
+            $params->minified = true;
+            $params->attachments_only = true;
+            
+            $list_courses = load_class("courses", "controllers")->list($params)["data"];
+            
+            $resources_array = [];
+            foreach($list_courses as $each) {
+                foreach($each["files_list"] as $file) {
+                    $resources_array[] = $file;
+                }
+            }
+
+            $total_count = count($resources_array);
+
+            $attachment_html = load_class("forms", "controllers")->list_attachments($resources_array, $params->userId, "col-lg-3 col-md-4", false, false);
+
+            return [
+                "data" => [
+                    "array" => $resources_array,
+                    "pagination" => [
+                        "first" => 1,
+                        "last" => 20,
+                        "page" => 1,
+                        "page_count" => 1,
+                        "per_page" => 20,
+                        "total_count" => $total_count
+                    ],
+                    "html" => $attachment_html
+                ]
+            ];
+
+        } catch(PDOException $e) {}
+    }
+
 }
 ?>

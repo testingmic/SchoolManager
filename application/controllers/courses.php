@@ -45,6 +45,8 @@ class Courses extends Myschoolgh {
         // append the class_id if the user type is student
         if(($params->userData->user_type === "student") && !isset($params->bypass)) {
             $params->class_id = $params->userData->class_id;
+        } elseif(($params->userData->user_type === "teacher")) {
+            $params->course_tutor = $params->userData->user_id;
         }
 
         $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
@@ -65,7 +67,7 @@ class Courses extends Myschoolgh {
                     (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM courses a
-                WHERE {$params->query} AND a.deleted = ? ORDER BY a.id LIMIT {$params->limit}
+                WHERE {$params->query} AND a.deleted = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([0]);
 
@@ -81,6 +83,8 @@ class Courses extends Myschoolgh {
                     "userId" => $params->userId,
                     "feedback_type" => "comment"
                 ];
+            } else {
+                $filesObject = load_class("files", "controllers");
             }
             
             $data = [];
@@ -91,7 +95,7 @@ class Courses extends Myschoolgh {
                 
                     // if the files is set
                     if(isset($params->full_attachments)) {
-                    $result->attachment = $filesObject->resource_attachments_list("courses_plan", $result->id);
+                        $result->attachment = $filesObject->resource_attachments_list("courses_plan", $result->id);
                     }
 
                     // load the course links
@@ -150,7 +154,12 @@ class Courses extends Myschoolgh {
                     }
                 }
 
-                $data[] = $result;
+                // if the files is set
+                if(isset($params->attachments_only)) {
+                    $data[] = $filesObject->resource_attachments_list("courses_plan", $result->id, $params->rq ?? null);
+                } else {
+                    $data[] = $result;
+                }
             }
 
             return [

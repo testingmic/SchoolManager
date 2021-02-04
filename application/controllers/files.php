@@ -675,14 +675,17 @@ class Files extends Myschoolgh {
      * 
      * @param String $resource
      * @param String $resource_id
+     * @param String $search_term
      * 
      * @return Array
      */
-    public function resource_attachments_list($resource, $resource_id) {
+    public function resource_attachments_list($resource, $resource_id, $search_term = null) {
 
         try {
 
-            $stmt = $this->db->prepare("SELECT description AS attachments, attachment_size FROM files_attachment WHERE resource = ? AND resource_id = ?");
+            $search = !empty($search_term) ? " AND description LIKE '%{$search_term}%'" : "";
+            
+            $stmt = $this->db->prepare("SELECT description AS attachments, attachment_size FROM files_attachment WHERE resource = ? AND resource_id = ? {$search}");
             $stmt->execute([$resource, $resource_id]);
 
             $data = [];
