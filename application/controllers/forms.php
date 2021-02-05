@@ -3815,11 +3815,10 @@ class Forms extends Myschoolgh {
         $html_content = '
         <form class="ajax-data-form" action="'.$this->baseUrl.'api/resources/'.(isset($params->data) ? "update_4elearning" : "upload_4elearning").'" method="POST" id="ajax-data-form-content">
             <div class="row">
-
                 <div class="col-lg-9">
                     <div class="row">
                         <div class="col-xl-4 col-md-4 col-12 form-group">
-                            <label>Select Class</label>
+                            <label>Select Class <span class="required">*</span></label>
                             <select class="form-control selectpicker" name="class_id">
                                 <option value="">Please Select Class</option>';
                                 foreach($class_list as $each) {
@@ -3829,7 +3828,7 @@ class Forms extends Myschoolgh {
                             </select>
                         </div>
                         <div class="col-xl-4 col-md-4 col-12 form-group">
-                            <label>Select Course</label>
+                            <label>Select Course <span class="required">*</span></label>
                             <select class="form-control selectpicker" name="course_id">
                                 <option value="">Please Select Course</option>
                             </select>
@@ -3842,13 +3841,13 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class="col-lg-12 col-md-6">
                             <div class="form-group">
-                                <label for="subject">Subject</label>
-                                <input type="text" name="subject" value="'.($params->data->subject ?? null).'" id="subject" class="form-control">
+                                <label for="subject">Title of the Material <span class="required">*</span></label>
+                                <input type="text" name="title" value="'.($params->data->subject ?? null).'" id="title" class="form-control">
                             </div>
                         </div>
                         <div class="col-lg-12 col-md-12">
                             <div class="form-group">
-                                <label for="description">Description</label>
+                                <label for="description">Summary Description of the Material</label>
                                 <input type="hidden" hidden id="trix-editor-input" value="'.($params->data->description ?? null).'">
                                 <trix-editor style="height:150px;" name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
                             </div>
@@ -3865,7 +3864,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-3">
                     <div class="form-group">
                         <label>Allow / Disallow Comments</label>
-                        <select class="form-control selectpicker" name="comments">
+                        <select class="form-control selectpicker" name="allow_comment">
                             <option value="allow">Allow Comments</option>
                             <option value="disallow">Disallow Comments</option>
                         </select>

@@ -210,5 +210,71 @@ class Resources extends Myschoolgh {
 
     }
 
+    /**
+     * Upload E-Learning Material
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function upload_4elearning(stdClass $params) {
+
+        $check = $this->pushQuery("id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        if(empty($check)) {
+            return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+        }
+
+        $check = $this->pushQuery("id", "courses", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        if(empty($check)) {
+            return ["code" => 203, "data" => "Sorry! An invalid course id was supplied."];
+        }
+
+        $item_id = random_string("alnum", 32);
+
+        try {
+            
+            // create a new object
+            $filesObj = load_class("files", "controllers");
+
+            // confirm that a file has been upload
+            if(empty($this->session->elearning_resource)) {
+                return ["code" => 203, "data" => "Sorry! You must upload a file."];
+            }
+            
+            // attachments
+            $attachments = $filesObj->prep_attachments("elearning_resource", $params->userId, $item_id);
+
+            // prepare and upload the file
+            $stmt = $this->db->prepare("INSERT INTO e_learning SET 
+                client_id = ?, subject = ?, description = ?, class_id = ?, allow_comments = ?, course_id = ?,
+                unit_id = ?, state = ?
+            ");
+            $stmt->execute([
+                $params->clientId, $params->title, $params->description ?? null, $params->class_id,
+                $params->allow_comment ?? "allow", $params->course_id, $params->unit_id, $params->state ?? "Published"
+            ]);
+
+            // insert the record if not already existing
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
+            $files->execute(["e_learning", "{$params->course_id}_{$item_id}", json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
+
+            // log the user activity
+            $this->userLogs("e_learning", $item_id, null, "{$params->userData->name} uploaded a new e-learning resource.", $params->userId);
+
+			// return the output
+            return [
+                "code" => 200, 
+                "data" => "E-Learning Material was successfully uploaded.", 
+                "additional" => [
+                    // "clear" => true, 
+                    "refresh" => 1000,
+                    "href" => "{$this->baseUrl}e-learning_view/{$item_id}/view"
+                ]
+            ];
+
+        } catch(PDOException $e) {}
+
+    }
+
 }
 ?>
