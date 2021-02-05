@@ -480,6 +480,7 @@ class Files extends Myschoolgh {
     public function prep_attachments($module, $user_id, $record_id = null, $existing_data = []) {
 
         // initial variables
+        global $defaultUser;
         $n_FileSize = 0;
         $attachments_list = $this->session->$module;
 
@@ -567,8 +568,8 @@ class Files extends Myschoolgh {
                         "datetime" => date("l, jS F Y \\a\\t h:i:sA"),
                         "favicon" => "{$this->favicon_array[$each_file["fifth"]]} fa-1x",
                         "color" => $color,
-                        "uploaded_by" => $this->session->userName,
-                        "uploaded_by_id" => $this->session->userId
+                        "uploaded_by" => "{$defaultUser->name} . ".date("jS M Y"),
+                        "uploaded_by_id" => $defaultUser->user_id
                     ];
 
                     // remove the file
@@ -685,7 +686,7 @@ class Files extends Myschoolgh {
 
             $search = !empty($search_term) ? " AND description LIKE '%{$search_term}%'" : "";
             
-            $stmt = $this->db->prepare("SELECT description AS attachments, attachment_size FROM files_attachment WHERE resource = ? AND resource_id = ? {$search}");
+            $stmt = $this->db->prepare("SELECT description AS attachments, attachment_size FROM files_attachment WHERE resource = ? AND resource_id = ? {$search} ORDER BY id DESC");
             $stmt->execute([$resource, $resource_id]);
 
             $data = [];

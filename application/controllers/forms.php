@@ -750,7 +750,8 @@ class Forms extends Myschoolgh {
                         </div>";
                         $caption = "
                         <div class=\"file_caption text-left\">
-                            <a {$preview_link}><strong>{$eachFile->name}</strong></a> <span class=\"text-muted tx-11\">({$eachFile->size})</span>
+                            <span {$preview_link}><strong>{$eachFile->name}</strong></span> <span class=\"text-muted tx-11\">({$eachFile->size})</span>
+                            <br><strong class=\"mt-2\">{$eachFile->uploaded_by}</strong>
                         </div>";
 
                         $view_option = "";
@@ -3788,6 +3789,103 @@ class Forms extends Myschoolgh {
             </div>';
         
         return $html;
+    }
+
+    /**
+     * E-Learning Upload Form
+     * 
+     * @return String
+     */
+    public function elearning_form($params) {
+
+        /** Set parameters for the data to attach */
+        $form_params = (object) [
+            "module" => "elearning_resource",
+            "userData" => $params->thisUser,
+            "item_id" => $params->data->item_id ?? null
+        ];
+
+        // load the classes list
+        $classes_param = (object) [
+            "clientId" => $params->clientId,
+            "columns" => "id, name"
+        ];
+        $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+
+        $html_content = '
+        <form class="ajax-data-form" action="'.$this->baseUrl.'api/resources/'.(isset($params->data) ? "update_4elearning" : "upload_4elearning").'" method="POST" id="ajax-data-form-content">
+            <div class="row">
+
+                <div class="col-lg-9">
+                    <div class="row">
+                        <div class="col-xl-4 col-md-4 col-12 form-group">
+                            <label>Select Class</label>
+                            <select class="form-control selectpicker" name="class_id">
+                                <option value="">Please Select Class</option>';
+                                foreach($class_list as $each) {
+                                    $html_content .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                                }
+                                $html_content .= '
+                            </select>
+                        </div>
+                        <div class="col-xl-4 col-md-4 col-12 form-group">
+                            <label>Select Course</label>
+                            <select class="form-control selectpicker" name="course_id">
+                                <option value="">Please Select Course</option>
+                            </select>
+                        </div>
+                        <div class="col-xl-4 col-md-4 col-12 form-group">
+                            <label>Select Course Unit</label>
+                            <select class="form-control selectpicker" name="unit_id">
+                                <option value="">Please Select Unit</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-12 col-md-6">
+                            <div class="form-group">
+                                <label for="subject">Subject</label>
+                                <input type="text" name="subject" value="'.($params->data->subject ?? null).'" id="subject" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12">
+                            <div class="form-group">
+                                <label for="description">Description</label>
+                                <input type="hidden" hidden id="trix-editor-input" value="'.($params->data->description ?? null).'">
+                                <trix-editor style="height:150px;" name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-group text-center mb-1">
+                                <div class="row">'.$this->form_attachment_placeholder($form_params).'</div>
+                            </div>
+                        </div>                            
+                    </div>
+
+                </div>
+
+                <div class="col-lg-3">
+                    <div class="form-group">
+                        <label>Allow / Disallow Comments</label>
+                        <select class="form-control selectpicker" name="comments">
+                            <option value="allow">Allow Comments</option>
+                            <option value="disallow">Disallow Comments</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Material State</label>
+                        <select class="form-control selectpicker" name="state">
+                            <option value="Published">Published</option>
+                            <option value="Draft">Draft</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12 text-right">
+                    <button class="btn btn-success btn-sm" data-function="save" type="button-submit"><i class="fa fa-upload"></i> Upload E-Learning Material</button>
+                </div>
+            </div>
+        </form>';
+
+        return $html_content;
+
     }
 
 }

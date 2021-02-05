@@ -67,7 +67,7 @@ class Courses extends Myschoolgh {
                     (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM courses a
-                WHERE {$params->query} AND a.deleted = ? ORDER BY a.id DESC LIMIT {$params->limit}
+                WHERE {$params->query} AND a.deleted = ? ORDER BY TIMESTAMP(a.date_updated) DESC LIMIT {$params->limit}
             ");
             $stmt->execute([0]);
 
@@ -104,12 +104,17 @@ class Courses extends Myschoolgh {
                     // if a request was made for full details
                     if(isset($params->full_details)) {
                         
+                        // set aa new param
+                        $para = (object) [
+                            "clientId" => $params->clientId,
+                            "course_id" => $result->id
+                        ];
                         // create a new object
                         $threadInteraction->resource_id = $result->id;
                         $result->comments_list = $commentsObj->list($threadInteraction);
                         
                         // if the user is permitted
-                        $result->lesson_plan = $this->course_lessons($result->client_id, $result->id);
+                        $result->lesson_plan = $this->course_unit_lessons_list($para);
                     }
 
                     // set the course tutor into an array
@@ -174,57 +179,66 @@ class Courses extends Myschoolgh {
     }
 
     /**
-     * List Lessons
+     * List Units / Lessons
      * 
-     * @param Int $course_id
-     * @param Int $client_id
+     * @param stdClass $course_id
      * 
      * @return Array
      */
-    public function course_lessons($client_id, $course_id, $type = "unit", $unit_id = null) {
+    public function course_unit_lessons_list(stdClass $params, $type = "", $unit_id = "") {
 
         try {
+            
+            $query = "";
+            $type = (isset($params->type) && !empty($params->type)) ? $params->type : (!empty($type) ? $type : "unit");
+            
+            $query .= (isset($params->unit_id) && !empty($params->unit_id)) ? " AND unit_id = '{$params->unit_id}'" : (!empty($unit_id) ? " AND unit_id = '{$unit_id}'" : null);
+            $query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND course_id='{$params->course_id}'" : "";
 
-            $query = !empty($unit_id) ? " AND unit_id = '{$unit_id}'" : null;
+            $isMinified = (bool) isset($params->minified);
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
                     (SELECT b.description FROM files_attachment b WHERE b.resource='courses_plan' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM courses_plan a
-                WHERE client_id=? AND course_id = ? AND plan_type = ? AND a.status = ? {$query} ORDER BY a.id
+                WHERE client_id=? AND plan_type = ? AND a.status = ? {$query} ORDER BY a.id
             ");
-            $stmt->execute([$client_id, $course_id, $type, 1]);
+            $stmt->execute([$params->clientId, $type, 1]);
 
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-
-                // loop through the information
-                foreach(["created_by_info"] as $each) {
-                    // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
-                }
-
-                // if attachment variable was parsed
-                $result->attachment = json_decode($result->attachment);
-
-                // if the files is set
-                if(!isset($result->attachment->files)) {
-                   $result->attachment = (object) [
-                        "files" => [],
-                        "files_count" => 0,
-                        "files_size" => 0,
-                        "raw_size_mb" => 0
-                    ];
-                }
-
-                // clean the description attached to the list
-                $result->description = htmlspecialchars_decode($result->description);
-                $result->description = custom_clean($result->description);
                 
-                if($result->plan_type == "unit") {
-                    // load the course links
-                    $result->lessons_list = $this->course_lessons($client_id, $course_id, "lesson", $result->id);
+                // if not a minified request
+                if(!$isMinified) {
+
+                    // loop through the information
+                    foreach(["created_by_info"] as $each) {
+                        // convert the created by string into an object
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                    }
+
+                    // if attachment variable was parsed
+                    $result->attachment = json_decode($result->attachment);
+
+                    // if the files is set
+                    if(!isset($result->attachment->files)) {
+                    $result->attachment = (object) [
+                            "files" => [],
+                            "files_count" => 0,
+                            "files_size" => 0,
+                            "raw_size_mb" => 0
+                        ];
+                    }
+
+                    // clean the description attached to the list
+                    $result->description = htmlspecialchars_decode($result->description);
+                    $result->description = custom_clean($result->description);
+                    
+                    if($result->plan_type == "unit") {
+                        // load the course links
+                        $result->lessons_list = $this->course_unit_lessons_list($params, "lesson", $result->id);
+                    }
                 }
 
                 $data[] = $result;
@@ -496,6 +510,9 @@ class Courses extends Myschoolgh {
             ");
             $stmt->execute([$params->clientId, $params->userId]);
             
+            // update the course date
+            $this->db->query("UPDATE courses SET date_updated=now(), units_count=(units_count+1) WHERE id='{$params->course_id}' LIMIT 1");
+
             // set the last unit id
             $unit_id = $this->lastRowId("courses_plan");
             $this->session->set("thisLast_UnitId", $unit_id);
@@ -552,6 +569,9 @@ class Courses extends Myschoolgh {
 
             // set the last unit id
             $this->session->set("thisLast_UnitId", $params->unit_id);
+
+            // update the course date
+            $this->db->query("UPDATE courses SET date_updated=now() WHERE id='{$params->course_id}' LIMIT 1");
             
             // log the user activity
             $this->userLogs("courses_plan", $params->unit_id, $prevData[0], "{$params->userData->name} Updated Course Unit: {$params->name}", $params->userId);
@@ -627,6 +647,9 @@ class Courses extends Myschoolgh {
             // append the attachments
             $lesson_id = $this->lastRowId("courses_plan");
             $filesObj = load_class("files", "controllers");
+
+            // update the course date
+            $this->db->query("UPDATE courses SET date_updated=now(), lessons_count=(lessons_count+1) WHERE id='{$params->course_id}' LIMIT 1");
 
             // attachments
             $attachments = $filesObj->prep_attachments("course_lesson_{$params->unit_id}", $params->userId, $item_id);
@@ -711,7 +734,10 @@ class Courses extends Myschoolgh {
                 WHERE client_id = ? AND course_id = ? AND id = ? LIMIT 1
             ");
             $stmt->execute([$params->clientId, $params->course_id, $params->lesson_id]);
-            
+
+            // update the course date
+            $this->db->query("UPDATE courses SET date_updated=now() WHERE id='{$params->course_id}' LIMIT 1");
+
             // update attachment if already existing
             if(isset($db_attachments)) {
                 $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? LIMIT 1");

@@ -18,7 +18,7 @@ $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "E-Learning";
 $response->title = "{$pageTitle} : {$appName}";
-$response->scripts = ["assets/js/page/index.js"];
+$response->scripts = ["assets/js/resources.js"];
 
 $params = (object)[
     "class_ids" => [],
@@ -34,7 +34,7 @@ $response->html = '
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="e_resources">
             <div class="col-sm-12 col-lg-12">
                 <div class="row mb-2">
                     <div class="col-md-10 col-lg-10">
@@ -46,7 +46,12 @@ $response->html = '
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">
-                <div id="courses_resources_list" style="min-height:300px"></div>
+                <div class="card">
+                    <div class="card-body">
+                        <div id="total_count"></div>
+                        <div id="elearning_resources_list" style="min-height:300px"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>';

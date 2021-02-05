@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass;
+global $myClass, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -16,14 +16,17 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Courses E-Resources";
+$pageTitle = "Upload E-Learning Material";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = ["assets/js/resources.js"];
 
 $params = (object)[
     "class_ids" => [],
+    "thisUser" => $defaultUser,
     "clientId" => $clientId
 ];
+
+$the_form = load_class("forms", "controllers")->elearning_form($params);
 
 $response->html = '
     <section class="section">
@@ -31,26 +34,15 @@ $response->html = '
             <h1>'.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-courses">Courses List</a></div>
+                <div class="breadcrumb-item active"><a href="'.$baseUrl.'e-learning">E-Learning</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>
-        <div class="row" id="course_resource">
-            <div class="col-sm-12 col-lg-12">
-                <div class="row mb-2">
-                    <div class="col-md-10 col-lg-10">
-                        <input placeholder="Search for a e-learning resource" id="search_term" name="search_term" type="text" class="form-control">
-                    </div>
-                    <div class="col-md-2 col-lg-2">
-                        <button onclick="return search_Resource()" class="btn-block btn btn-outline-primary">Search <i class="fa fa-search"></i></button>
-                    </div>
-                </div>
-            </div>
+        <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">
-                        <div id="total_count"></div>
-                        <div id="courses_resources_list" style="min-height:300px"></div>
+                        '.$the_form.'
                     </div>
                 </div>
             </div>

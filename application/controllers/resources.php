@@ -163,7 +163,7 @@ class Resources extends Myschoolgh {
      * 
      * @return Array
      */
-    public function courses_list(stdClass $params) {
+    public function e_courses(stdClass $params) {
 
         try {
 
@@ -199,6 +199,15 @@ class Resources extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {}
+    }
+
+    /**
+     * E-Resources List
+     * 
+     * @return Array
+     */
+    public function e_resources(stdClass $params) {
+
     }
 
 }
