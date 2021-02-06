@@ -158,7 +158,7 @@ class Myschoolgh extends Models {
 			return $stmt->fetchAll(PDO::FETCH_OBJ);
 
 		} catch(PDOException $e) {
-			return $e->getMessage();
+			return [];
 		}
 
 	}
@@ -302,7 +302,7 @@ class Myschoolgh extends Models {
 			return $stmt->execute([$clientId, ($userId ?? $this->userId), $subject, $prevData, $itemId, $description, $ur_agent, $source]);
 
 		} catch(PDOException $e) {
-			print $e->getMessage();
+			return [];
 		}
 
 	}
@@ -637,10 +637,8 @@ class Myschoolgh extends Models {
     public function replied_by($user_id) {
 
         try {
-
             $stmt = $this->db->prepare("SELECT name AS fullname, email, phone_number, image, user_type, position, description, username FROM users WHERE item_id = ? LIMIT 1");
             $stmt->execute([$user_id]);
-
             return $stmt->fetch(PDO::FETCH_OBJ);
         } catch(PDOException $e) {
             return false;
@@ -695,7 +693,6 @@ class Myschoolgh extends Models {
 				}
 			}
 		} catch(PDOException $e) {
-			print $e->getMessage();
 			return false;
 		}
 	}

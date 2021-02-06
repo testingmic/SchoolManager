@@ -218,6 +218,7 @@ textarea.form-control {
 
 .attachment-container .file-options {
     position: absolute;
+    z-index: 9999;
     right: 2px;
     top: 3px;
 }
@@ -228,8 +229,8 @@ textarea.form-control {
 
 .attachment-container .attachment-item {
     padding-top: 10px;
-    height: 150px!important;
-    max-height: 150px!important;
+    height: 160px!important;
+    max-height: 160px!important;
     overflow: hidden;
 }
 
@@ -375,4 +376,22 @@ textarea.form-control {
 
 .main-footer {
     margin-top: 0px!important;
+}
+
+.border-radius {
+    border-radius: 10px;
+}
+
+.public_comment {
+    border-bottom: solid #ccc 1px;
+    cursor: text;
+    padding: 10px;
+    padding-bottom: 0px;
+    max-height: 200px;
+    overflow-y: auto;
+    outline: none;
+}
+
+.public_comment:focus-within {
+    border-bottom: solid 1px #000;
 }

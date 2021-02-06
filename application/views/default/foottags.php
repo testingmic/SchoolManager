@@ -10,9 +10,11 @@
         ?>
         <footer class="main-footer">
             <div class="footer-left">
-            Copyright &copy; <?= date("Y") ?> <div class="bullet"></div> <a href="<?= $baseUrl; ?>"><?= $appName ?></a>. All rights reserved
+                Copyright &copy; <?= date("Y") ?> <div class="bullet"></div> <a href="<?= $baseUrl; ?>"><?= $appName ?></a>. All rights reserved
             </div>
-            <div class="footer-right"></div>
+            <div class="footer-right">
+                <div class="network-notifier"></div>
+            </div>
         </footer>
     </div>
     <div class="email-notification" style="display:none">

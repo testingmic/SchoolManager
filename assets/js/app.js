@@ -53,8 +53,8 @@ $(window).on("beforeunload", (evt) => {
 });
 
 var strings = {
-    nextwork_online: "<span class='text-success'>Online</span>",
-    nextwork_offline: "<span class='text-danger'>Offline</span>",
+    nextwork_online: "<span class='text-success'>App is Online</span>",
+    nextwork_offline: "<span class='text-danger'>App is currently Offline</span>",
 }
 
 if (navigator.onLine) {
@@ -69,7 +69,7 @@ window.addEventListener("online", () => {
 
 window.addEventListener("offline", () => {
     $(".network-notifier").html(strings.nextwork_offline);
-})
+});
 
 var appxhr;
 
@@ -135,39 +135,6 @@ $("#history-refresh").on("click", function() {
     loadPage($.current_page);
 });
 
-var require = require || undefined
-
-if (typeof module === "undefined" && require !== undefined) {
-    const electron = require("electron");
-    const { ipcRenderer } = electron;
-    var webContents = electron.remote.getCurrentWebContents();
-
-    ipcRenderer.on("menu:shortcut", (event, shortcut) => {
-        switch (shortcut) {
-            case "goback":
-                window.history.back()
-                break;
-            case "goforward":
-                window.history.forward()
-                break;
-            case "search":
-                $('.navbar-toggler.aside-menu-toggler.search-button').trigger('click');
-                break;
-            case "dictionary":
-                $('.navbar-toggler.aside-menu-toggler.dictionary-button').trigger('click');
-                break;
-            case "calculator":
-                $('.navbar-toggler.aside-menu-toggler.calculator-button').trigger('click');
-                break;
-            case "lockpage":
-                setApplicationLock("lock").then(() => {
-                    $(".lockbox").removeClass("invisible").addClass("visible");
-                });
-                break;
-        }
-    });
-}
-
 $.cachedScript = function(url, options) {
     options = $.extend(options || {}, {
         dataType: "script",
@@ -181,7 +148,6 @@ var logout = async() => {
     await $.post(`${baseUrl}api/auth/logout`).then((resp) => {
         if (resp.result.code == 200) {
             swal({
-                position: 'top',
                 text: "You have successfully been logged out.",
                 icon: "success",
             });
@@ -219,11 +185,7 @@ $(() => {
     });
 
     initMainMenu()
-    initQuickSearch()
-    initDictionary()
     processPreferences()
-    processActivation()
-    processAppLock()
 
     if ($("#chat-page").length === 0 && $.env !== "development") {
         // fetchUserChats();
@@ -308,7 +270,7 @@ var linkHandler = (target, pushstate) => {
     devlog("linkHandler(). I called =>")
 
     if (target.slice(0, -1) === $.baseurl || target === $.baseurl || target === $.default) {
-        target = $.baseurl + "/e-learning";
+        target = $.baseurl + "/dashboard";
     }
     loadPage(target, pushstate)
 }
@@ -343,74 +305,8 @@ var apply_comment_click_handlers = () => {
     deleteReply();
 }
 
-let getCallback = (target) => {
-
-    var splitlink = String(target).split("/")
-    var mainpage = splitlink[3] || ""
-    var subpage = splitlink[4]
-    let callback;
-    devlog("mainpage: ", mainpage)
-
-    switch (mainpage) {
-        case "myschool_gh":
-            callback = initDashboard;
-            break;
-        case "dashboard":
-            callback = initDashboard;
-            break
-        case "academic":
-            callback = initAcademic
-            break
-        case "students":
-            callback = initStudents
-            break
-        case "staff":
-            callback = initStaff
-            break
-        case "finances":
-            callback = initFinances
-            break
-        case "account":
-        case "settings":
-            callback = initSettings
-            break
-        case "sms":
-            callback = initSms
-            break
-        case "library":
-            callback = initLibrary
-            break
-        case "messages":
-            callback = initMessages
-            break
-        case "transportation":
-            callback = initTransportation
-            break
-        case "access":
-            callback = initAccess
-            break
-        case "reports":
-            callback = initReports
-            break
-        default:
-            if (mainpage.indexOf("search") === 0) {
-                callback = initSearch
-            } else callback = () => {}
-            break
-    }
-    return callback
-}
-
-var abortscripts = () => {
-    appxhr.forEach((xhrr) => { xhrr.abort() });
-    appxhr = []
-        // $.post($.baseurl+"/process/abortscripts", {abort: true})
-}
-
 var loadPage = (loc, pushstate) => {
     devlog("loadPage(", loc, ") I called =>")
-
-    if (appxhr.length > 0) abortscripts();
 
     if (loc == `${$.baseurl}` || loc == `${$.baseurl}/dashboard`) {
         $(`[id="history-refresh"]`).addClass("hidden");
@@ -544,46 +440,6 @@ var loadFormAction = (form) => {
     })
 }
 
-var loadFormSubmitAction = (form, container) => {
-    var container = container || form
-    let progress = moveProgress()
-    let bar = $("." + form.attr("data-progress"));
-    $.ajax({
-        url: form[0].action,
-        method: form[0].method,
-        dataType: "JSON",
-        data: form.serialize(),
-        beforeSend: () => {
-            bar.show()
-            progress.move(bar, 5, true)
-            container.append("<div class='throbber-light temp-throbber'></div>");
-        },
-        success: (res) => {
-            if (res.status === "success") {
-                $(".modal").each(function() {
-                    $(this).modal("hideModal")
-                })
-                if (res.redirectpage !== undefined) {
-                    location = res.redirectpage
-                    return
-                }
-                notify(res.message, "success")
-                if (res.extra !== undefined) {
-                    notify(res.extra.message, res.extra.status)
-                }
-                loadPage(res.loadpage)
-            } else {
-                notify(res.message)
-                $(".temp-throbber").remove();
-            }
-            progress.complete(bar, false)
-        },
-        error: (err) => {
-            devlog(err)
-        }
-    })
-}
-
 var processPreferences = () => {
     // ---------- Save preference ---------- 
     $("input[name='menutype']").change((event) => {
@@ -617,43 +473,6 @@ var processPreferences = () => {
             $('body').removeClass('dark');
             saveThemePreference('light');
         }
-    });
-}
-
-var processAppLock = () => {
-    $('#applock_form').on("submit", (event) => {
-        event.preventDefault();
-        var password_input = $("#applock_password_input");
-        if (password_input.val().trim().length < 1) {
-            notify("Please enter password");
-            hasError(password_input);
-            return false;
-        }
-        $.ajax({
-            url: $.baseurl + "/process/verifyapplicationunlock",
-            data: { password: password_input.val() },
-            method: "POST",
-            dataType: "JSON",
-            beforeSend: () => {
-                $(".lockboxcontent").append("<div class='throbber unlockthrobber'></div>");
-            },
-            success: (res) => {
-                $(".unlockthrobber").remove();
-                if (res.status == "success") {
-                    notify(res.message, "success");
-                    setApplicationLock("unlock");
-                    $(".lockbox").removeClass("visible").addClass("invisible");
-                    password_input.val("");
-                } else {
-                    notify(res.message);
-                    hasError(password_input);
-                }
-            },
-            error: (res) => {
-                notify("Error Processing Request");
-                $(".unlockthrobber").remove();
-            }
-        })
     });
 }
 
@@ -833,7 +652,7 @@ var initPlugins = () => {
 }
 
 var setActiveNavLink = () => {
-    devlog("setActiveNavLink() I called =>")
+    devlog("setActiveNavLink() I called =>");
     var splitter = String(window.location).split('/');
     var cUrl = splitter[0];
 
@@ -859,66 +678,6 @@ var setActiveNavLink = () => {
             $("ul.dropdown-menu").not(parentDropdown).css("display", "none");
             $(el).parent("li").parent("ul").parent("li").addClass('active');
         } else {}
-    });
-}
-
-var initQuickSearch = () => {
-    let searchForm = $("#quicksearchform");
-    searchForm.submit((event) => {
-        event.preventDefault();
-        if ($("#fullsearch")[0].checked) {
-            loadFormAction(searchForm)
-            $('body').addClass('aside-menu-hidden');
-            return false;
-        }
-
-        var keyword = $("#quicksearchinput").val().trim();
-
-        if (keyword.length < 1) {
-            notify("Please enter a search keyword", null, null);
-            hasError($("#quicksearchinput"));
-            return false;
-        }
-        $.ajax({
-            // url: $(this).attr('action')+'/'+encodeURIComponent(btoa(keyword.replace(' ', '_'))),
-            url: searchForm.attr('action'),
-            data: { suggestions: true, q: keyword },
-            method: 'post',
-            beforeSend: () => {
-                $("#searchresults").html("<div class='text-center text-muted'><i class='fa fa-spin fa-3x icon-support'></i><br>searching...</div>");
-            },
-            success: (result) => {
-                $("#searchresults").html(result);
-                linkClickStopper($("#searchresults"))
-            }
-        })
-        event.preventDefault();
-    });
-}
-
-var initDictionary = () => {
-    let dicForm = $("#dictionaryform")
-    dicForm.submit((event) => {
-        var keyword = $("#dictionaryinput").val().trim();
-
-        if (keyword.length <= 0) {
-            notify("Please enter a search keyword", null, null);
-            hasError($("#dictionaryinput"));
-            return false;
-        }
-        $.ajax({
-            url: dicForm.attr('action'),
-            data: { suggestions: true, w: keyword },
-            method: 'post',
-            beforeSend: () => {
-                $("#dictionaryresults").html("<div class='text-center text-muted'><i class='fa fa-spin fa-3x icon-support'></i><br>searching...</div>");
-            },
-            success: (result) => {
-                $("#dictionaryresults").html(result);
-                linkClickStopper($("#dictionaryresults"))
-            }
-        })
-        event.preventDefault();
     });
 }
 
@@ -978,84 +737,13 @@ var initDataTables = () => {
     }
 }
 
-var processActivation = () => {
-    if ($("#activationform").length) {
-        let activationForm = $("#activationform")
-        activationForm.on("submit", (event) => {
-            event.preventDefault();
-            let activationkey = $("#activationkey"),
-                activationsubmit = $("#activationsubmit"),
-                ref = window.location.href,
-                action = activationForm.attr("action");
-
-            if (activationkey.val().trim().length < 1) {
-                notify("Please Enter Activation Key");
-                hasError(activationkey);
-                return false;
-            }
-            $.ajax({
-                url: action,
-                data: { key: activationkey.val(), ref: ref },
-                dataType: "JSON",
-                method: "POST",
-                beforeSend: () => {
-                    activationsubmit.append("<div class='throbber activationthrobber'></div>").attr({ disabled: "on" });
-                },
-                success: (result) => {
-                    $(".activationthrobber").remove();
-                    activationsubmit.removeAttr("disabled");
-                    if (result.status == "success") {
-                        notify(result.message, "success", 10000);
-                        activationForm.trigger("reset");
-                        $(".trialboxcontent").html("<div class='card card-success'>" +
-                            "<div class='card-block text-center'>" +
-                            "<div class='h4'><i class='icon-like'></i> Activation Successful</div>" +
-                            "<div class='py-4 font-lg'>Thank you for purchasing software</div>" +
-                            "<div><button class='btn btn-inverse btn-lg activationdismiss'>OK</button></div>" +
-                            "</div>" +
-                            "</div>");
-
-                        $('.activationdismiss').on("click", () => {
-                            $(".trialbox").fadeOut();
-                        });
-                    } else {
-                        notify(result.message);
-                        hasError(activationkey);
-                    }
-                },
-                error: (res) => {
-                    $(".activationthrobber").remove();
-                    activationsubmit.removeAttr("disabled");
-                }
-            });
-        });
-    }
-}
-
-var getSmsBalance = () => {
-    var smsbalance = $(".smscreditsbalance");
-    appxhr.push($.ajax({
-        url: $.baseurl + "/sms_process/get_sms_balance",
-        method: "POST",
-        beforeSend: () => {
-            smsbalance.html("<i class='fa fa-gear fa-spin'></i>");
-        },
-        success: (result) => {
-            smsbalance.html(result);
-        },
-        error: (result) => {
-            smsbalance.html("N/A");
-        }
-    }));
-}
-
 var moneyFormat = (value, decimals) => {
     value = value.toFixed(decimals)
     value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
     return value
 }
 
-var fetchUserChats = () => {
+var fetch_user_chats = () => {
     appxhr.push(
         $.ajax({
             url: $.baseurl + "/messages_process/fetch_user_chats",
@@ -1073,13 +761,7 @@ var fetchUserChats = () => {
             }
         })
     );
-    setTimeout(() => {
-        // fetchUserChats()
-    }, $.chatinterval);
-}
-
-var capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    setTimeout(() => {}, $.chatinterval);
 }
 
 var resizeBroadcast = () => {
@@ -1144,67 +826,6 @@ var moveProgress = () => {
 
 var notify = (text, type = "error") => {
     $.notify(text, type);
-}
-
-var hasError = (element) => {
-    if (element.is("select") && element.hasClass("selectpicker")) {
-        let elementid = element.attr("id");
-        let elementselect = $("[data-id='" + elementid + "'");
-        element.parents(".form-group").addClass("has-danger");
-        elementselect.removeClass("btn-outline-primary").addClass("btn-outline-danger");
-        prepareForErrorFix(element);
-        element = elementselect;
-    } else {
-        element.parents(".form-group").addClass("has-danger");
-        element.focus();
-        prepareForErrorFix(element);
-    }
-
-    if (element.hasClass('animated shake')) {
-        element.removeClass('animated shake');
-        element.addClass('animated headShake');
-    } else if (element.hasClass('animated headShake')) {
-        element.removeClass('animated headShake');
-        element.addClass('animated shake');
-    } else {
-        element.addClass('animated shake');
-    }
-}
-
-var prepareForErrorFix = (element) => {
-    if (element.is("select") && element.hasClass("selectpicker")) {
-        element.on("change", () => {
-            let elementid = element.attr("id");
-            let elementselect = $("[data-id='" + elementid + "'");
-            elementselect.removeClass("btn-outline-danger").addClass("btn-outline-primary");
-            element.parents(".form-group").removeClass("has-danger");
-            $.notifyClose();
-        });
-    } else if (element.is("input") && !element.hasClass("selectpicker")) {
-        element.on("change", () => {
-            element.parents(".form-group").removeClass("has-danger");
-            $.notifyClose();
-        });
-    } else {
-        element.on("change", () => {
-            element.parents(".form-group").removeClass("has-danger");
-            $.notifyClose();
-        });
-    }
-
-    if (element.is("input")) {
-        element.on("input", () => {
-            element.parents(".form-group").removeClass("has-danger");
-            $.notifyClose();
-        });
-    }
-}
-
-var isValidFloat = (number) => {
-    var num = parseFloat(number);
-    if (isNaN(num)) return false;
-    else if (num < 0) return false;
-    else return true;
 }
 
 var playAudio = (file) => {

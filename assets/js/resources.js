@@ -27,7 +27,6 @@ $(`div[id="course_resource"] input[name="search_term"]`).on("keyup", function(ev
     }
 });
 
-
 var elearning_resources_list = (search_term = "") => {
     let content = $(`div[id="elearning_resources_list"]`);
     $.get(`${baseUrl}api/resources/e_resources?rq=${search_term}`).then((response) => {
@@ -59,7 +58,7 @@ if ($(`select[name="course_id"]`).length) {
     $(`select[name="class_id"]`).on("change", function() {
         let value = $(this).val();
         $(`select[name='course_id']`).find('option').remove().end();
-        $(`select[name='course_id']`).append(`<option value="">Please Select Course</option>`);
+        $(`select[name='course_id']`).append(`<option value="null">Please Select Course</option>`);
         if (value.length && value !== "null") {
             $.get(`${baseUrl}api/courses/list?class_id=${value}&minified=true`).then((response) => {
                 if (response.code == 200) {
@@ -76,7 +75,7 @@ if ($(`select[name="unit_id"]`).length) {
     $(`select[name="course_id"]`).on("change", function() {
         let value = $(this).val();
         $(`select[name='unit_id']`).find('option').remove().end();
-        $(`select[name='unit_id']`).append(`<option value="">Please Select Unit</option>`);
+        $(`select[name='unit_id']`).append(`<option value="null">Please Select Unit</option>`);
         if (value.length && value !== "null") {
             $.get(`${baseUrl}api/courses/course_unit_lessons_list?course_id=${value}&minified=true`).then((response) => {
                 if (response.code == 200) {

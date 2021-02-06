@@ -492,7 +492,7 @@ function custom_clean($str) {
 		// Remove really unwanted tags
 		$old_data = $str;
 		
-		$str = preg_replace('#</*(?:applet|b(?:ase|gsound|link)|embed|frame(?:set)?|i(?:frame|layer)|l(?:ayer|ink)|meta|object|s(?:cript|tyle)|title|xml)[^>]*+>#i', '', $str);
+		$str = preg_replace('#</*(?:applet|b(?:ase|gsound|link)|embed|frame(?:set)?|i(?:frame|layer)|l(?:ayer|ink)|meta|object|s(?:cript|tyle)|title|xml|pre)[^>]*+>#i', '', $str);
 	} while ($old_data !== $str);
 	
 	// we are done...

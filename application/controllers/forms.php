@@ -683,7 +683,7 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function list_attachments($attachment_list = null, $user_id = null, $list_class = "col-lg-4 col-md-6", $is_deletable = false, $show_view = true) {
+    public function list_attachments($attachment_list = null, $user_id = null, $list_class = "col-lg-4 col-md-6", $is_deletable = false, $show_view = false) {
 
         // variables
         $list_class = empty($list_class) ? "col-lg-4 col-md-6" : $list_class;
@@ -691,7 +691,7 @@ class Forms extends Myschoolgh {
         // images mimetypes for creating thumbnails
         $image_mime = ["jpg", "jpeg", "png", "gif"];
         $docs_mime = ["pdf", "doc", "docx", "txt", "rtf", "jpg", "jpeg", "png", "gif"];
-        $video_mime = ["mp4", "mpeg", "movie", "webm", "mov", "mpg", "mpeg", "qt"];
+        $video_mime = ["mp4", "mpeg", "movie", "webm", "mov", "mpg", "mpeg", "qt", "flv"];
 
         // set the thumbnail path
         $tmp_path = "assets/uploads/{$user_id}/tmp/thumbnail/";
@@ -743,9 +743,12 @@ class Forms extends Myschoolgh {
                         // preview link
                         $preview_link = "data-function=\"load-form\" data-resource=\"file_attachments\" data-module-id=\"{$user_id}_{$eachFile->unique_id}\" data-module=\"preview_file_attachment\"";
                         
+                        // set the new name to push
+                        $eachFile->name = isset($eachFile->related_info->name) ? $eachFile->related_info->name : $eachFile->name;
+
                         // set init
                         $thumbnail = "
-                        <div style=\"height:140px\" title=\"Click to preview: {$eachFile->name}\" data-toggle=\"tooltip\">
+                        <div style=\"height:150px\" title=\"Click to preview: {$eachFile->name}\" data-toggle=\"tooltip\">
                             <div><span class=\"text text-{$eachFile->color}\"><i class=\"{$eachFile->favicon} fa-6x\"></i></span></div>
                         </div>";
                         $caption = "
@@ -754,7 +757,7 @@ class Forms extends Myschoolgh {
                             <br><strong class=\"mt-2\">{$eachFile->uploaded_by}</strong>
                         </div>";
 
-                        $view_option = "";
+                        $view_option = $show_view ? "<a href=\"#\" onclick=\"return loadPage('{$this->baseUrl}{$show_view}/{$record_id}_{$eachFile->unique_id}');\" title=\"Click to view details of file\" class=\"btn btn-sm btn-primary\"><i class=\"fa fa-eye\"></i></a>" : "";
                         $image_desc = "";
                         $delete_btn = "";
 
@@ -790,7 +793,7 @@ class Forms extends Myschoolgh {
                             $filename = "{$eachFile->path}";
                             $padding = "style='padding:0px'";
                             // set the video file
-                            $thumbnail = "<video  style='display: block; cursor:pointer; width:100%' controls='true' src='{$this->baseUrl}{$filename}'></video>";
+                            $thumbnail = "<video  style='display: block; cursor:pointer; width:100%;' controls='true' src='{$this->baseUrl}{$filename}#t=1'></video>";
                         }
                         
 
@@ -801,7 +804,7 @@ class Forms extends Myschoolgh {
                                 <div class=\"col-lg-12 p-0 {$the_class} border\" {$padding} data-attachment_item='{$record_id}_{$eachFile->unique_id}'>
                                     <span style=\"display:none\" class=\"file-options\" data-attachment_options='{$record_id}_{$eachFile->unique_id}'>
                                         {$view_option}
-                                        <a title=\"Click to Download\" target=\"_blank\" class=\"btn btn-sm btn-success\" style=\"padding:5px\" href=\"{$this->baseUrl}download?file={$file_to_download}\">
+                                        <a title=\"Click to Download\" target=\"_blank\" class=\"btn btn-sm btn-success\" style=\"padding:;\" href=\"{$this->baseUrl}download?file={$file_to_download}\">
                                             <i style=\"font-size:12px\" class=\"fa fa-download fa-1x\"></i>
                                         </a>
                                         {$delete_btn}    
@@ -886,7 +889,7 @@ class Forms extends Myschoolgh {
                         }
                     $html_content .= "
                             <div class=\"ml-3\">
-                                <input class='form-control cursor attachment_file_upload' data-form_item_id=\"".($params->item_id ?? "temp_attachment")."\" data-form_module=\"".($params->module ?? null)."\" type=\"file\" name=\"attachment_file_upload\" id=\"attachment_file_upload\">
+                                <input ".(isset($params->accept) ? "accept='{$params->accept}'" : null)." class='form-control cursor attachment_file_upload' data-form_item_id=\"".($params->item_id ?? "temp_attachment")."\" data-form_module=\"".($params->module ?? null)."\" type=\"file\" name=\"attachment_file_upload\" id=\"attachment_file_upload\">
                             </div>
                             <div class=\"upload-document-loader hidden\"><span class=\"float-right\">Uploading <i class=\"fa fa-spin fa-spinner\"></i></span></div>
                         </div>
@@ -3800,6 +3803,7 @@ class Forms extends Myschoolgh {
 
         /** Set parameters for the data to attach */
         $form_params = (object) [
+            "accept" => ".mp4,.mpg,.mpeg,.flv",
             "module" => "elearning_resource",
             "userData" => $params->thisUser,
             "item_id" => $params->data->item_id ?? null
@@ -3820,7 +3824,7 @@ class Forms extends Myschoolgh {
                         <div class="col-xl-4 col-md-4 col-12 form-group">
                             <label>Select Class <span class="required">*</span></label>
                             <select class="form-control selectpicker" name="class_id">
-                                <option value="">Please Select Class</option>';
+                                <option value="null">Please Select Class</option>';
                                 foreach($class_list as $each) {
                                     $html_content .= "<option value=\"{$each->id}\">{$each->name}</option>";
                                 }

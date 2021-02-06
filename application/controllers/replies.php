@@ -175,7 +175,7 @@ class Replies extends Myschoolgh {
                 "last_reply_id" => $last_reply_id
             ];
         } catch(PDOException $e) {
-            return $e->getMessage();
+            return [];
         }
     }
 
@@ -471,6 +471,67 @@ class Replies extends Myschoolgh {
             return false;
         }
 
+    }
+
+    /**
+     * Share a comment
+     * 
+     * @return Array
+     */
+    public function share(stdClass $params) {
+
+        // clean the string 
+        $comment = (htmlspecialchars_decode($params->comment));
+        $comment = str_ireplace("<div>", "<br>", $comment);
+        $comment = strip_tags(custom_clean($comment), "<br>");
+        $comment = htmlspecialchars($comment);
+
+        // get the type of message to push
+        $type = (isset($params->comment_id) && !empty($params->comment_id)) ? "reply" : "comment";
+
+        // insert the comments into the table
+        try {
+            
+            $stmt = $this->db->prepare("INSERT INTO e_learning_comments SET type = ?, comment_id = ?,
+                comment = ?, user_id = ?, record_id = ?, ipaddress = ?, user_agent = ?");
+            $stmt->execute([
+                $type, $params->comment_id ?? NULL, $comment, $params->userId, $params->record_id, 
+                $this->ip_address, $this->agent
+            ]);
+
+            // create an object
+            $resourceObj = load_class("resources", "controllers");
+
+            // get the comment id
+            $comment_id = $this->lastRowId("e_learning_comments");
+
+            // save the video time if parsed
+            if(isset($params->video_time)) {
+                // set the video id
+                $params->video_id = $params->record_id;
+                
+                // save the time for this video 
+                $resourceObj->save_time($params);
+            }
+
+            // add comments
+            if(empty($this->pushQuery("id", "e_learning_views", "video_id='{$params->record_id}' LIMIT 1"))) {
+                $this->db->query("INSERT INTO e_learning_views SET video_id='{$params->record_id}', comments='1'");
+            } else {
+                $this->db->query("UPDATE e_learning_views SET comments=(comments+1) WHERE video_id='{$params->record_id}' LIMIT 1");
+            }
+
+            // get the last comment information
+            $params->comment_id = $comment_id;
+            $params->limit = 1;
+            $comment = $resourceObj->comments_list($params)["comments_list"];
+            $comment = !empty($comment) ? $comment[0] : [];
+
+            return [
+                "data" => $comment
+            ];
+
+        } catch(PDOException $e) {}
     }
 
 }

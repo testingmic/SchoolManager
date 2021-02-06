@@ -18,7 +18,7 @@ $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Upload E-Learning Material";
 $response->title = "{$pageTitle} : {$appName}";
-$response->scripts = ["assets/js/resources.js"];
+$response->scripts = ["assets/js/resources.js", "assets/js/upload.js"];
 
 $params = (object)[
     "class_ids" => [],

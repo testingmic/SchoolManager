@@ -20,11 +20,6 @@ $pageTitle = "E-Learning";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = ["assets/js/resources.js"];
 
-$params = (object)[
-    "class_ids" => [],
-    "clientId" => $clientId
-];
-
 $response->html = '
     <section class="section">
         <div class="section-header">
@@ -49,7 +44,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div id="total_count"></div>
-                        <div id="elearning_resources_list" style="min-height:300px"></div>
+                        <div id="elearning_resources_list" style="min-height:100px"></div>
                     </div>
                 </div>
             </div>
