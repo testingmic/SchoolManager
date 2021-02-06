@@ -138,6 +138,37 @@ if(!empty($clientId)) {
                         </div>
                     </div>
                 </div>
+                <div class="col-lg-12 col-md-12 col-12 col-sm-12" id="data-report_stream" data-report_stream="'.$data_stream.'">
+                    <div class="card">
+                        <div class="row p-2">
+                            <div class="col-lg-7 col-md-5"><h4>Attendance Record</h4></div>
+                            <div class="col-lg-5 col-md-7 text-right">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fa fa-calendar-check"></i></span>
+                                    </div>
+                                    <input type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
+                                    <input type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
+                                    <div class="input-group-append">
+                                        <button style="border-radius:0px" onclick="return filter_UserGroup_Attendance()" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body quick_loader" id="users_attendance_loader">
+                            <div class="form-content-loader" style="display: flex; position: absolute">
+                                <div class="offline-content text-center">
+                                    <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                </div>
+                            </div>
+                            '.($isAdminAccountant ? '
+                                <div data-chart_container="users_attendance_chart">
+                                    <div style="width:100%;height:345px;" id="attendance_chart"></div>
+                                </div>' : 
+                            '<div id="attendance_chart_list"></div>').'
+                        </div>
+                    </div>
+                </div>
                 '.(
                     $isAdminAccountant ? '
                     <div class="col-lg-12 col-md-12 col-12 col-sm-12">
@@ -170,38 +201,6 @@ if(!empty($clientId)) {
                     </div>
                     ' : ''
                 ).'
-                <div class="col-lg-12 col-md-12 col-12 col-sm-12" id="data-report_stream" data-report_stream="'.$data_stream.'">
-                    <div class="card">
-                        <div class="row p-2">
-                            <div class="col-lg-7 col-md-5"><h4>Attendance Record</h4></div>
-                            <div class="col-lg-5 col-md-7 text-right">
-                                <div class="input-group mb-3">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i class="fa fa-calendar-check"></i></span>
-                                    </div>
-                                    <input type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
-                                    <input type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
-                                    <div class="input-group-append">
-                                        <button style="border-radius:0px" onclick="return filter_UserGroup_Attendance()" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-body quick_loader" id="users_attendance_loader">
-                            <div class="form-content-loader" style="display: flex; position: absolute">
-                                <div class="offline-content text-center">
-                                    <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
-                                </div>
-                            </div>
-                            '.($isAdminAccountant ? '
-                                <div data-chart_container="users_attendance_chart">
-                                    <div style="width:100%;height:345px;" id="attendance_chart"></div>
-                                </div>' : 
-                            '<div id="attendance_chart_list"></div>').'
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </section>';
 }

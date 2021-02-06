@@ -23,16 +23,6 @@ $response->scripts = ["assets/js/filters.js"];
 
 $filter->user_type = !empty($filter->user_type) ? $filter->user_type : "employee,teacher,admin,accountant";
 
-$staff_param = (object) [
-    "user_payroll" => true,
-    "clientId" => $session->clientId,
-    "user_type" => $filter->user_type,
-    "department_id" => $filter->department_id ?? null,
-    "gender" => $filter->gender ?? null
-];
-
-$api_staff_list = load_class("users", "controllers")->list($staff_param);
-
 $clientId = $session->clientId;
 $accessObject->clientId = $clientId;
 $accessObject->userId = $session->userId;
@@ -44,6 +34,17 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
 } else {
 
     $staff_list = "";
+
+    $staff_param = (object) [
+        "user_payroll" => true,
+        "clientId" => $session->clientId,
+        "user_type" => $filter->user_type,
+        "department_id" => $filter->department_id ?? null,
+        "gender" => $filter->gender ?? null
+    ];
+
+    $api_staff_list = load_class("users", "controllers")->list($staff_param);
+
 
     $color = [
         "admin" => "success",

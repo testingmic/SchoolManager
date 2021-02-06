@@ -709,9 +709,11 @@ class Attendance extends Myschoolgh {
         } else {
             // using the grouping format
             $new_group = [];
-            foreach($users_count["days_list"] as $day) {
-                foreach($day as $role => $count) {
-                    $new_group[$role][] = $count;
+            if(isset($users_count["days_list"])) {
+                foreach($users_count["days_list"] as $day) {
+                    foreach($day as $role => $count) {
+                        $new_group[$role][] = $count;
+                    }
                 }
             }
             $fresh_group = [];

@@ -707,18 +707,27 @@ class Analitics extends Myschoolgh {
             LEFT JOIN payslips_allowance_types c ON c.id = a.allowance_id
             WHERE 
                 a.client_id = ? AND b.validated = ? AND b.deleted = ? 
-                AND YEAR(b.payslip_month_id) = ? {$this->employee_id_query}
+                AND DATE(b.payslip_month_id) >= '{$this->start_date}' AND DATE(b.payslip_month_id) <= '{$this->end_date}'
+                {$this->employee_id_query}
             GROUP BY MONTH(b.payslip_month_id), a.allowance_id
         ");
-        $stmt->execute([$params->clientId, 1, 0, 2020]);
+        $stmt->execute([$params->clientId, 1, 0]);
         $category_list = $stmt->fetchAll(PDO::FETCH_OBJ);
 
+        $grouping = [];
         $category_array = [];
         foreach($category_list as $category) {
-            $category_array[$category->type][$category->month_name][] = $category;
+            $grouping[$category->type][] = $category->name;
+            $category_array[$category->type][$category->month_name][$category->name] = $category;
         }
 
         $result["category"] = $category_array;
+
+        $grouped = [];
+        foreach($grouping as $key => $array) {
+            $grouped[$key] = array_unique($grouping[$key]);
+        }
+        $result["grouping"] = $grouped;
 
         // get the fees categories
         $stmt = $this->db->prepare("
@@ -730,10 +739,11 @@ class Analitics extends Myschoolgh {
             FROM payslips a
             WHERE 
                 a.client_id = ? AND a.validated = ? AND a.deleted = ? 
-                AND YEAR(a.payslip_month_id) = ? {$this->employee_id_query}
+                AND DATE(a.payslip_month_id) >= '{$this->start_date}' AND DATE(a.payslip_month_id) <= '{$this->end_date}'
+                {$this->employee_id_query}
             GROUP BY MONTH(a.payslip_month_id)
         ");
-        $stmt->execute([$params->clientId, 1, 0, 2020]);
+        $stmt->execute([$params->clientId, 1, 0]);
         $summary = $stmt->fetchAll(PDO::FETCH_OBJ);
 
         $months_labels = array_column($summary, "month_name");

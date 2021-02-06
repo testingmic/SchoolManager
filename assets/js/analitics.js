@@ -531,6 +531,107 @@ var attendanceReport = (_attendance) => {
 
 }
 
+var salaryReport = (_salary) => {
+    if (_salary.salary_list !== undefined) {
+        let _labels = new Array(),
+            net_salary = new Array(),
+            gross_salary = new Array();
+        $.each(_salary.salary_list, function(i, e) {
+            _labels.push(e.month_name);
+            gross_salary.push(e.gross_salary);
+            net_salary.push(e.net_salary);
+        });
+        var ctx = document.getElementById("salary_flow_chart");
+        if (ctx !== undefined) {
+            ctx.height = 355;
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: _labels,
+                    datasets: [{
+                            label: "Gross Salary",
+                            borderColor: "rgba(0,0,0,.09)",
+                            borderWidth: "1",
+                            backgroundColor: "rgba(0,0,0,.07)",
+                            data: gross_salary
+                        },
+                        {
+                            label: "Net Salary",
+                            borderColor: "rgba(0, 123, 255, 0.9)",
+                            borderWidth: "1",
+                            backgroundColor: "rgba(0, 123, 255, 0.5)",
+                            pointHighlightStroke: "rgba(26,179,148,1)",
+                            data: net_salary
+                        }
+                    ]
+                },
+                options: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    responsive: true,
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                            }
+                        }]
+                    }
+
+                }
+            });
+        }
+    }
+    $.each(_salary.summary.totals, function(i, e) {
+        $(`span[data-count="${i}"]`).html(`${myPrefs.labels.currency}${format_currency(e.total)}`);
+    });
+
+    let deductions_list = _salary.category.Deduction,
+        allowances_list = _salary.category.Allowance;
+    let break_down = $(`div[data-chart="full_breakdown_chart"]`);
+    let table_html = `<table class="table table-bordered"><thead><tr><th width="15%">Deductions</th>`;
+    $.each(deductions_list, function(i, e) {
+        table_html += `<th>${i}</th>`;
+    });
+    table_html += `</tr></thead><tbody>`;
+    $.each(_salary.grouping.Deduction, function(i, e) {
+        table_html += `<tr>`;
+        table_html += `<td>${e}</td>`;
+        $.each(deductions_list, function(ii, ee) {
+            let amount = (deductions_list[ii][e].amount !== undefined) ? format_currency(deductions_list[ii][e].amount) : 0;
+            table_html += `<td>${myPrefs.labels.currency}${amount}</td>`;
+        });
+        table_html += `</tr>`;
+    });
+    table_html += `</tbody></table>`;
+
+    table_html += `<table class="table table-bordered"><thead><tr><th width="15%">Allowances</th>`;
+    $.each(allowances_list, function(i, e) {
+        table_html += `<th>${i}</th>`;
+    });
+    table_html += `</tr></thead><tbody>`;
+    $.each(_salary.grouping.Allowance, function(i, e) {
+        table_html += `<tr>`;
+        table_html += `<td>${e}</td>`;
+        $.each(allowances_list, function(ii, ee) {
+            let amount = (allowances_list[ii][e].amount !== undefined) ? format_currency(allowances_list[ii][e].amount) : 0;
+            table_html += `<td>${myPrefs.labels.currency}${amount}</td>`;
+        });
+        table_html += `</tr>`;
+    });
+    table_html += `</tbody></table>`;
+
+    break_down.html(table_html);
+}
+
 var loadDashboardAnalitics = (period) => {
     let to_stream = $(`div[id="data-report_stream"]`).attr(`data-report_stream`);
     $.get(`${baseUrl}api/analitics/generate?period=${period}&label[stream]=${to_stream}`).then((response) => {
@@ -544,9 +645,12 @@ var loadDashboardAnalitics = (period) => {
             if (response.data.result.attendance_report !== undefined) {
                 attendanceReport(response.data.result.attendance_report);
             }
+            if (response.data.result.salary_report !== undefined) {
+                salaryReport(response.data.result.salary_report);
+            }
             setTimeout(() => {
                 $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
-            }, 1000);
+            }, 800);
         }
         $(`div[class~="toggle-calculator"]`).addClass("hidden");
     }).catch(() => {
