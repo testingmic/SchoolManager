@@ -56,6 +56,15 @@ if(empty($item_id) || !isset($item[1])) {
     ];
 
     $resource_list = $resourceObj->e_resources($params);
+    
+    // end the query if the file was not found
+    if(!isset($resource_list["files"])) {
+        // page not found
+        $response->html = page_not_found();
+        echo json_encode($response);
+        exit;
+    }
+    // continue if all is set
     $video = null;
     $other_videos = [];
     foreach($resource_list["files"] as $resource) {
@@ -96,17 +105,29 @@ if(empty($item_id) || !isset($item[1])) {
             <div class=\"card-footer border-top p-2\">
                 <div class=\"row pr-0  border-bottom\">
                     <div class=\"col-lg-7\">
-                        <h5 class=\"pb-2\">{$elearning->subject}</h5>
+                        <h5 class=\"pb-2\">{$elearning->subject}
+                            ".($elearning->state === "Draft" ? 
+                                "<span class='tx-12 badge badge-primary'>Draft</span>" : 
+                                "<span class='tx-12 badge badge-success'>Active</span>"
+                            )."
+                        </h5>
                     </div>
                     <div class=\"col-lg-5 text-right\">
                         <span><strong>{$video->name}</strong></span> <span class=\"text-muted tx-11\">({$video->size})</span><br>
                         <strong>{$video->uploaded_by}</strong>
                     </div>
                 </div>
-                <div class=\"mt-2 pb-2\">
-                    <span><i class=\"fa fa-home\"></i> {$elearning->course_name}</span> | 
-                    <span><i class=\"fas fa-graduation-cap\"></i> {$elearning->class_name}</span> |
-                    <span><i class=\"fa fa-book-open\"></i> {$elearning->unit_name}</span>
+                <div class=\"row mt-2 pb-2\">
+                    <div class=\"col-lg-8\">
+                        <span><i class=\"fa fa-home\"></i> {$elearning->course_name}</span> | 
+                        <span><i class=\"fas fa-graduation-cap\"></i> {$elearning->class_name}</span> |
+                        <span><i class=\"fa fa-book-open\"></i> {$elearning->unit_name}</span>
+                    </div>
+                    <div class=\"text-right col-lg-4\">
+                        ".($elearning->created_by === $defaultUser->user_id ? 
+                            "<a class='btn btn-sm btn-outline-success' href='{$baseUrl}e-learning_update/{$elearning->item_id}'><i class='fa fa-edit'></i> Update Details</a>" : ""
+                        )."
+                    </div>
                 </div>
                 <div class=\"file_caption pt-3 pb-3 border-top text-left\">
                     {$elearning->description}
@@ -116,7 +137,11 @@ if(empty($item_id) || !isset($item[1])) {
 
         // if the other related videos arent empty
         if(!empty($other_videos)) {
+            
+            // begin the variable
             $related_videos = "";
+
+            // loop through the other attached videos
             foreach($other_videos as $video) {
                 $time = time_diff($video->datetime);
                 // set a new unique id
@@ -183,7 +208,7 @@ if(empty($item_id) || !isset($item[1])) {
                     <div class="col-12 col-md-3 col-lg-3">
                         <div class="card">
                             <div class="card-body p-2">
-                                <h5 class="mb-0 border-bottom pb-2">OTHER RELATED VIDEOS</h5>
+                                <h5 class="mb-0 border-bottom pb-2">PLAYLIST</h5>
                                 '.$related_videos.'
                             </div>
                         </div>
