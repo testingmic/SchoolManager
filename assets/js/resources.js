@@ -29,7 +29,7 @@ $(`div[id="course_resource"] input[name="search_term"]`).on("keyup", function(ev
 
 var elearning_resources_list = (search_term = "") => {
     let content = $(`div[id="elearning_resources_list"]`);
-    $.get(`${baseUrl}api/resources/e_resources?rq=${search_term}`).then((response) => {
+    $.get(`${baseUrl}api/resources/e_resources`, search_term).then((response) => {
         if (response.code === 200) {
             if (response.data.result.pagination !== undefined) {
                 $(`div[id="total_count"]`).html(`<strong>${response.data.result.pagination.total_count} results</strong>`);
@@ -43,14 +43,23 @@ if ($(`div[id="elearning_resources_list"]`).length) {
     elearning_resources_list();
 }
 var search_Resource = () => {
-    let term = $(`input[name="search_term"]`).val();
-    elearning_resources_list(term);
+    let rq = $(`input[name="search_term"]`).val(),
+        class_id = $(`select[name="class_id"]`).val(),
+        course_id = $(`select[name="course_id"]`).val(),
+        unit_id = $(`select[name="unit_id]`).val();
+
+    let data = {
+        class_id,
+        rq,
+        course_id,
+        unit_id
+    };
+    elearning_resources_list(data);
 }
 
 $(`div[id="e_resources"] input[name="search_term"]`).on("keyup", function(evt) {
     if (evt.keyCode == 13 && !evt.shiftKey) {
-        let term = $(`input[name="search_term"]`).val();
-        elearning_resources_list(term);
+        search_Resource();
     }
 });
 

@@ -42,23 +42,29 @@ class Courses extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
-        // append the class_id if the user type is student
-        if(($params->userData->user_type === "student") && !isset($params->bypass)) {
-            $params->class_id = $params->userData->class_id;
-        } elseif(($params->userData->user_type === "teacher")) {
-            $params->course_tutor = $params->userData->user_id;
+        // run this portion if the userData is parsed
+        if(isset($params->userData)) {
+            // append the class_id if the user type is student
+            if(($params->userData->user_type === "student") && !isset($params->bypass)) {
+                $params->class_id = $params->userData->class_id;
+            } elseif(($params->userData->user_type === "teacher")) {
+                $params->course_tutor = $params->userData->user_id;
+            }
         }
 
-        $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
-        $params->query .= (isset($params->course_tutor) && !empty($params->course_tutor)) ? " AND a.course_tutor LIKE '%{$params->course_tutor}%'" : null;
-        $params->query .= (isset($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
-        $params->query .= (isset($params->programme_id)) ? " AND a.programme_id='{$params->programme_id}'" : null;
-        $params->query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND (a.id='{$params->course_id}' OR a.item_id='{$params->course_id}')" : null;
         $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id LIKE '%{$params->class_id}%'" : null;
         $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
+        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+
+        if(!isset($params->minified)) {
+            $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
+            $params->query .= (isset($params->course_tutor) && !empty($params->course_tutor)) ? " AND a.course_tutor LIKE '%{$params->course_tutor}%'" : null;
+            $params->query .= (isset($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
+            $params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
+            $params->query .= (isset($params->programme_id)) ? " AND a.programme_id='{$params->programme_id}'" : null;
+            $params->query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND (a.id='{$params->course_id}' OR a.item_id='{$params->course_id}')" : null;
+        }
 
         try {
 

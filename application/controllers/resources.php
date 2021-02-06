@@ -318,6 +318,10 @@ class Resources extends Myschoolgh {
                         "date" => $this_data->date_created,
                         "description" => $this_data->description,
                     ];
+                    // if this user created it
+                    if($this_data->created_by === $params->userId) {
+                        $file_content->is_editable = "e-learning_update";
+                    }
                     // append to the resource array
                     $resources_array[] = $file_content;
                 }
@@ -340,7 +344,7 @@ class Resources extends Myschoolgh {
             $attachment_html = "<div class='text-center'>No e-learning materials have been uploaded yet. 
                 Please check back later for any.</div>";
         } else {
-            $attachment_html = load_class("forms", "controllers")->list_attachments($resources_array, $params->userId, "col-lg-3 col-md-4", false, "e-learning_view");
+            $attachment_html = load_class("forms", "controllers")->list_attachments($resources_array, $params->userId, "col-lg-3 col-md-4", false, "e-learning_view", false);
         }
 
         return [
@@ -369,34 +373,44 @@ class Resources extends Myschoolgh {
 
         $params->query = "1";
 
+        // set the limit for the records to load
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
         // append the class_id if the user type is student
         if(($params->userData->user_type === "student")) {
             $params->class_id = $params->userData->class_guid;
+            $params->state = "Published";
         } elseif(($params->userData->user_type === "teacher")) {
             $params->course_tutor = $params->userData->user_id;
+        } else {
+            $params->created_by = $params->userData->user_id;
         }
 
         $params->query .= (isset($params->rq)) ? " AND a.subject LIKE '%{$params->rq}%'" : null;
         $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
+        $params->query .= isset($params->state) ? " AND a.state='{$params->state}'" : "";
         $params->query .= (isset($params->resource_id) && !empty($params->resource_id)) ? " AND a.item_id='{$params->resource_id}'" : null;
         $params->query .= (isset($params->course_tutor) && !empty($params->course_tutor)) ? " AND a.course_tutors LIKE '%{$params->course_tutor}%'" : null;
-        $params->query .= (isset($params->unit_id) && !empty($params->unit_id)) ? " AND a.unit_id LIKE '%{$params->unit_id}%'" : null;
-        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id LIKE '%{$params->class_id}%'" : null;
-        $params->query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND a.course_id='{$params->course_id}'" : null;
+        $params->query .= (isset($params->unit_id) && !empty($params->unit_id) && $params->unit_id !== "null") ? " AND a.unit_id LIKE '%{$params->unit_id}%'" : null;
+        $params->query .= (isset($params->class_id) && !empty($params->class_id) && preg_match("/^[0-9]+$/", $params->class_id)) ? " AND cl.id = '{$params->class_id}'" : ((isset($params->class_id) && !empty($params->class_id) && ($params->class_id !== "null")) ? " AND a.class_id='{$params->class_id}'" : null);
+        $params->query .= (isset($params->course_id) && !empty($params->course_id) && $params->course_id !== "null") ? " AND cs.id='{$params->course_id}'" : null;
 
         try {
 
             $attachmentsOnly = (bool) isset($params->attachments_only);
             
             $stmt = $this->db->prepare("SELECT a.*,
-                    cl.name AS class_name, cs.name AS course_name, cp.name AS unit_name,
+                    u.name AS fullname, u.phone_number, u.email, u.image,
+                    cl.name AS class_name, cl.id AS class_row_id, 
+                    cs.id AS course_row_id, cs.name AS course_name, cp.name AS unit_name,
                     (SELECT b.description FROM files_attachment b WHERE b.resource='e_learning' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment
                 FROM e_learning a
+                    LEFT JOIN users u ON u.item_id = a.created_by
                     LEFT JOIN classes cl ON cl.item_id = a.class_id
                     LEFT JOIN courses cs ON cs.item_id = a.course_id
                     LEFT JOIN courses_plan cp ON cp.item_id = a.unit_id
-                WHERE {$params->query} AND a.client_id = ? AND a.status = ?
+                WHERE {$params->query} AND a.client_id = ? AND a.status = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([$params->clientId, 1]);
 
@@ -472,6 +486,11 @@ class Resources extends Myschoolgh {
             $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
             $files->execute(["e_learning", "{$course[0]->item_id}_{$item_id}", json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
 
+            // loop through the files list
+            foreach($attachments["files"] as $each) {
+                $this->db->query("INSERT INTO e_learning_views SET video_id='{$item_id}_{$each["unique_id"]}', comments='0', views='0'");
+            }
+
             // log the user activity
             $this->userLogs("e_learning", $item_id, null, "{$params->userData->name} uploaded a new e-learning resource.", $params->userId);
 
@@ -486,6 +505,129 @@ class Resources extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {}
+
+    }
+
+    /**
+     * Upload E-Learning Material
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function update_4elearning(stdClass $params) {
+
+        $class = $this->pushQuery("id, item_id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        if(empty($class)) {
+            return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+        }
+
+        $course = $this->pushQuery("id, item_id, course_tutor", "courses", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        if(empty($course)) {
+            return ["code" => 203, "data" => "Sorry! An invalid course id was supplied."];
+        }
+
+        $return = [];
+        $item_id = $params->resource_id;
+
+        try {
+
+            // old record
+            $prevData = $this->pushQuery(
+                "a.id, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment",
+                "e_learning a", 
+                "a.item_id='{$params->resource_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1"
+            );
+
+            // if empty then return
+            if(empty($prevData)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            // initialize
+            $initial_attachment = [];
+
+            /** Confirm that there is an attached document */
+            if(!empty($prevData[0]->attachment)) {
+                // decode the json string
+                $db_attachments = json_decode($prevData[0]->attachment, true);
+                // get the files
+                if(isset($db_attachments["files"])) {
+                    $initial_attachment = $db_attachments["files"];
+                }
+                $init_attachment = [];
+                foreach($initial_attachment as $attachment) {
+                    if(!$attachment["is_deleted"]) {
+                        $attachment["existing_already"] = true;
+                        $init_attachment[] = $attachment;
+                    }
+                }
+                $initial_attachment = $init_attachment;
+            }
+            
+            // confirm that a file has been upload
+            if(empty($this->session->elearning_resource) && empty($initial_attachment)) {
+                return ["code" => 203, "data" => "Sorry! You must upload a file."];
+            }
+
+            // prepare and upload the file
+            $stmt = $this->db->prepare("UPDATE e_learning SET 
+                updated_date = now(), updated_by = ?,
+                subject = ?, description = ?, class_id = ?, allow_comments = ?, course_id = ?,
+                unit_id = ?, state = ?, created_by = ?, academic_year = ?, academic_term = ?, course_tutors = ?
+                WHERE item_id = ? AND client_id = ?  LIMIT 1
+            ");
+            $stmt->execute([
+                $params->userId, $params->title, $params->description ?? null, $class[0]->item_id,
+                $params->allow_comment ?? "allow", $course[0]->item_id, $params->unit_id, 
+                $params->state ?? "Published", $params->userId, $params->academic_year, 
+                $params->academic_term, $course[0]->course_tutor, $item_id, $params->clientId
+            ]);
+
+            // if the user actually uploaded a new file
+            if(!empty($this->session->elearning_resource)) {
+                
+                // append the attachments
+                $filesObj = load_class("files", "controllers");
+                $module = "elearning_resource";
+                
+                // prepare the file to upload
+                $attachments = $filesObj->prep_attachments($module, $params->userId, $item_id, $initial_attachment);
+                
+                // reload the page if the user uploaded a file
+                $return = ["href" => "{$this->baseUrl}e-learning_update/{$item_id}"];
+
+                // insert the record if not already existing
+                $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? LIMIT 1");
+                $files->execute([json_encode($attachments), $attachments["raw_size_mb"], $item_id]);
+
+                // loop through the files list
+                foreach($attachments["files"] as $each) {
+                    // if the file does not already exist
+                    if(!isset($each["existing_already"])) {
+                        // confirm if the record does not already exist
+                        if(empty($this->pushQuery("id", "e_learning_views", "video_id='{$item_id}_{$each["unique_id"]}' LIMIT 1"))) {
+                            // insert the new record
+                            $this->db->query("INSERT INTO e_learning_views SET video_id='{$item_id}_{$each["unique_id"]}', comments='0', views='0'");
+                        }
+                    }
+                }
+
+            }
+            
+            // log the user activity
+            $this->userLogs("e_learning", $item_id, null, "{$params->userData->name} updated a new e-learning resource material.", $params->userId);
+
+			// return the output
+            return [
+                "code" => 200, 
+                "data" => "E-Learning Material was successfully updated.", 
+                "additional" => $return
+            ];
+
+        } catch(PDOException $e) {
+            print $e->getMessage();
+        }
 
     }
 
@@ -530,7 +672,11 @@ class Resources extends Myschoolgh {
         }
         
         // confirm if there is a record
-        $video = $this->pushQuery("timer", "e_learning_timer", "user_id='{$params->userId}' AND video_id='{$video_id}' LIMIT 1");
+        $video = $this->pushQuery(
+            "timer", 
+            "e_learning_timer", 
+            "user_id='{$params->userId}' AND video_id='{$video_id}' LIMIT 1"
+        );
         
         return !empty($video) ? $video[0]->timer : 1;
 

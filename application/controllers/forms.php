@@ -683,7 +683,7 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function list_attachments($attachment_list = null, $user_id = null, $list_class = "col-lg-4 col-md-6", $is_deletable = false, $show_view = false) {
+    public function list_attachments($attachment_list = null, $user_id = null, $list_class = "col-lg-4 col-md-6", $is_deletable = false, $show_view = false, $show_controls = true) {
 
         // variables
         $list_class = empty($list_class) ? "col-lg-4 col-md-6" : $list_class;
@@ -761,10 +761,16 @@ class Forms extends Myschoolgh {
                         $image_desc = "";
                         $delete_btn = "";
 
+                        // show the view of the item
+                        if(isset($eachFile->is_editable)) {
+                            $view_option .= "&nbsp;<a href=\"#\" onclick=\"return loadPage('{$this->baseUrl}{$eachFile->is_editable}/{$record_id}');\" title=\"Click to edit the material\" class=\"btn btn-sm btn-warning\"><i class=\"fa fa-edit\"></i></a>";
+                        }
+
                         // display this if the object is deletable.
                         if($is_deletable) {
                             $delete_btn = "&nbsp;<a href=\"#\" onclick=\"return delete_existing_file_attachment('{$record_id}_{$eachFile->unique_id}');\" style=\"padding:5px\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
                         }
+
                         $the_class = "attachment-item";
                         $padding = "style='padding:10px'";
                         
@@ -793,7 +799,7 @@ class Forms extends Myschoolgh {
                             $filename = "{$eachFile->path}";
                             $padding = "style='padding:0px'";
                             // set the video file
-                            $thumbnail = "<video  style='display: block; cursor:pointer; width:100%;' controls='true' src='{$this->baseUrl}{$filename}#t=1'></video>";
+                            $thumbnail = "<video ".($show_controls ? "controls='true'" : null)." style='display: block; cursor:pointer; width:100%;' src='{$this->baseUrl}{$filename}#t=1'></video>";
                         }
                         
 
@@ -3809,12 +3815,69 @@ class Forms extends Myschoolgh {
             "item_id" => $params->data->item_id ?? null
         ];
 
+        // predefined items
+        $courses_list = [];
+        $units_list = [];
+        $preloaded_attachments = "";
+        $comment = $params->data->allow_comments ?? null;
+        $state = $params->data->state ?? null;
+        $class = $params->data->class_id ?? null;
+
+        // other parameters
+        if($class) {
+
+            // set the parameters to load the information
+            $course_param = (object) [
+                "userData" => $params->thisUser,
+                "class_id" => $class,
+                "userId" => $params->userId,
+                "clientId" => $params->clientId,
+                "academic_year" => $params->data->academic_year,
+                "academic_term" => $params->data->academic_term
+            ];
+            $courses_list = load_class("courses", "controllers")->list($course_param)["data"];
+
+            // set the course and unit
+            $course = $params->data->course_id;
+            $unit = $params->data->unit_id;
+
+            // append the course id
+            $course_param->course_id = $params->data->course_row_id;
+            $units_list = load_class("courses", "controllers")->course_unit_lessons_list($course_param);
+            
+            // predefine the file attachments
+            // get the attachment list
+            if(isset($params->data->attachment)) {
+
+                $attachment = json_encode($params->data->attachment);
+                $attachment = json_decode($attachment);
+
+                // set a new parameter for the items
+                $files_param = (object) [
+                    "userData" => $params->thisUser,
+                    "label" => "list",
+                    "is_deletable" => true,
+                    "show_view" => "e-learning_view",
+                    "module" => "elearning_resource",
+                    "item_id" => $params->data->item_id,
+                    "attachments_list" => $attachment
+                ];
+
+                // create a new object
+                $attachments = load_class("files", "controllers")->attachments($files_param);
+            
+                // get the attachments list
+                $preloaded_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
+
+            }
+        }
+
         // load the classes list
         $classes_param = (object) [
             "clientId" => $params->clientId,
-            "columns" => "id, name"
+            "columns" => "id, item_id, name"
         ];
-        $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+        $classes_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
         $html_content = '
         <form class="ajax-data-form" action="'.$this->baseUrl.'api/resources/'.(isset($params->data) ? "update_4elearning" : "upload_4elearning").'" method="POST" id="ajax-data-form-content">
@@ -3825,8 +3888,8 @@ class Forms extends Myschoolgh {
                             <label>Select Class <span class="required">*</span></label>
                             <select class="form-control selectpicker" name="class_id">
                                 <option value="null">Please Select Class</option>';
-                                foreach($class_list as $each) {
-                                    $html_content .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                                foreach($classes_list as $each) {
+                                    $html_content .= "<option ".($class === $each->item_id ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
                                 }
                                 $html_content .= '
                             </select>
@@ -3834,13 +3897,21 @@ class Forms extends Myschoolgh {
                         <div class="col-xl-4 col-md-4 col-12 form-group">
                             <label>Select Course <span class="required">*</span></label>
                             <select class="form-control selectpicker" name="course_id">
-                                <option value="">Please Select Course</option>
+                                <option value="null">Please Select Course</option>';
+                                foreach($courses_list as $each) {
+                                    $html_content .= "<option ".($course === $each->item_id ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
+                                }
+                                $html_content .= '
                             </select>
                         </div>
                         <div class="col-xl-4 col-md-4 col-12 form-group">
                             <label>Select Course Unit</label>
                             <select class="form-control selectpicker" name="unit_id">
-                                <option value="">Please Select Unit</option>
+                                <option value="null">Please Select Unit</option>';
+                                foreach($units_list as $each) {
+                                    $html_content .= "<option ".($unit === $each->item_id ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";
+                                }
+                                $html_content .= '
                             </select>
                         </div>
                         <div class="col-lg-12 col-md-6">
@@ -3860,27 +3931,40 @@ class Forms extends Myschoolgh {
                             <div class="form-group text-center mb-1">
                                 <div class="row">'.$this->form_attachment_placeholder($form_params).'</div>
                             </div>
-                        </div>                            
+                        </div>  
+                        <div class="col-md-12 text-center mb-4">'.$preloaded_attachments.'</div>                          
                     </div>
-
                 </div>
 
                 <div class="col-lg-3">
                     <div class="form-group">
                         <label>Allow / Disallow Comments</label>
                         <select class="form-control selectpicker" name="allow_comment">
-                            <option value="allow">Allow Comments</option>
-                            <option value="disallow">Disallow Comments</option>
+                            <option '.($comment === "allow" ? "selected" : null).' value="allow">Allow Comments</option>
+                            <option '.($comment === "disallow" ? "selected" : null).' value="disallow">Disallow Comments</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Material State</label>
                         <select class="form-control selectpicker" name="state">
-                            <option value="Published">Published</option>
-                            <option value="Draft">Draft</option>
+                            <option '.($state === "Published" ? "selected" : null).' value="Published">Published</option>
+                            <option '.($state === "Draft" ? "selected" : null).' value="Draft">Draft</option>
                         </select>
                     </div>
+                    '.(isset($params->data->item_id) ? '
+                        <div class="form-group">
+                            <h6>CREATED BY</h6>
+                            <div><i class="fa fa-user"></i> '.$params->data->fullname.'</div>
+                            <div><i class="fa fa-phone"></i> '.$params->data->phone_number.'</div>
+                            <div><i class="fa fa-envelope"></i> '.$params->data->email.'</div>
+                            <div><i class="fa fa-calendar-check"></i> '.$params->data->date_created.'</div>
+                        </div>
+                        <div class="text-right">
+                            <!--<a href="'.$this->baseUrl.'e-learning_view" class="btn btn-sm btn-outline-primary"><i class="fa fa-eye"></i> View Material</a>-->
+                        </div>
+                    ':'').'
                 </div>
+                '.(isset($params->data->item_id) ? "<input value='{$params->data->item_id}' type='hidden' id='resource_id' name='resource_id'>" : null).'
                 <div class="col-md-12 text-right">
                     <button class="btn btn-success btn-sm" data-function="save" type="button-submit"><i class="fa fa-upload"></i> Upload E-Learning Material</button>
                 </div>

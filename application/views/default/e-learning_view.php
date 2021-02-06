@@ -47,6 +47,7 @@ if(empty($item_id) || !isset($item[1])) {
 
     // param
     $params = (object) [
+        "limit" => 1,
         "clientId" => $clientId,
         "userId" => $defaultUser->user_id,
         "resource_id" => $item[0],
@@ -72,7 +73,9 @@ if(empty($item_id) || !isset($item[1])) {
     $video_param = (object) ["userId" => $defaultUser->user_id];
     
     // if the data is empty
-    if(!empty($video)) {
+    if(empty($video)) {
+        $response->html = page_not_found();
+    } else {
 
         // get the learning
         $elearning = $resource_list["data"][0];
@@ -110,76 +113,82 @@ if(empty($item_id) || !isset($item[1])) {
                 </div>
             </div>
         ";
-    }
 
-    // if the other related videos arent empty
-    if(!empty($other_videos)) {
-        $related_videos = "";
-        foreach($other_videos as $video) {
-            // set a new unique id
-            $video_param->video_id = "{$video->record_id}_{$video->unique_id}";
-            // get the video timer
-            $timer = $resourceObj->video_time($video_param);
+        // if the other related videos arent empty
+        if(!empty($other_videos)) {
+            $related_videos = "";
+            foreach($other_videos as $video) {
+                $time = time_diff($video->datetime);
+                // set a new unique id
+                $video_param->video_id = "{$video->record_id}_{$video->unique_id}";
 
-            $related_videos .= "
-            <div class='mb-2 p-0' style='border-radius:0px 0px 10px 10px'>
-                <div class='card-body p-0 m-0' id='related_video'>
-                    <video width='100%' data-href='{$baseUrl}e-learning_view/{$video->record_id}_{$video->unique_id}?autoplay=true' data-src='{$baseUrl}{$video->path}#t={$timer}' title='Click to watch the video: {$video->name}' height='100%' class='cursor' src='{$baseUrl}{$video->path}#t={$timer}'></video>
-                </div>
-                <div class='card-footer pl-2 pr-2 pt-0 pb-0 m-0'>
-                    <h6 class='p-0 m-0'>{$video->name}<h6>
-                </div>
-            </div>";
-        }
-    }
+                // get the video timer
+                $timer = $resourceObj->video_time($video_param);
 
-    $response->html = '
-        <section class="section">
-            <div class="section-header">
-                <h1>'.$pageTitle.'</h1>
-                <div class="section-header-breadcrumb">
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'e-learning">E-Learning</a></div>
-                    <div class="breadcrumb-item">'.$pageTitle.'</div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 col-md-9 col-lg-9">
-                    <div class="card mb-0">
-                        '.$file_content.'
+                $related_videos .= "
+                <div class='mb-2 p-0' style='border-radius:0px 0px 10px 10px'>
+                    <div class='card-body p-0 m-0' id='related_video'>
+                        <video width='100%' data-href='{$baseUrl}e-learning_view/{$video->record_id}_{$video->unique_id}?autoplay=true' data-src='{$baseUrl}{$video->path}#t={$timer}' title='Click to watch the video: {$video->name}' height='100%' class='cursor' src='{$baseUrl}{$video->path}#t={$timer}'></video>
                     </div>
-                    <div class="card-body mt-0 pr-0 pl-0">
-                        <div id="video_comments">
-                            <div class="share_public_comment">
-                                <div class="d-flex justify-content-start">
-                                    <div class="pr-1"><img width="60px" class="rounded-circle cursor author-box-picture" src="'.$baseUrl.''.$defaultUser->image.'"></div>
-                                    <div class="p-0" style="width:100%">
-                                        <div id="public_comment" contenteditable="true" dir="auto" class="public_comment trix-slim-scroll" aria-label="Add a public comment..."></div>
-                                        <div class="d-flex justify-content-between">
-                                            <div class="comment_response"></div>
-                                            <div class="text-right mt-2 hidden" id="public_comment_button">
-                                                <button id="cancel_button" onclick="cancel_comment()" disabled class="btn btn-sm btn-outline-danger">CANCEL</button>
-                                                <button id="share_comment" onclick="share_comment()" disabled class="btn btn-sm btn-outline-primary">COMMENT</button>
+                    <div class='card-footer pl-2 pr-2 pt-0 pb-0 m-0'>
+                        <h6 class='p-0 m-0'>{$elearning->subject}</h6>
+                        <p style='line-height:13px' class='font-italic'>{$time}</p>
+                    </div>
+                </div>";
+            }
+        }
+
+        $response->html = '
+            <section class="section">
+                <div class="section-header">
+                    <h1>'.$pageTitle.'</h1>
+                    <div class="section-header-breadcrumb">
+                        <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
+                        <div class="breadcrumb-item active"><a href="'.$baseUrl.'e-learning">E-Learning</a></div>
+                        <div class="breadcrumb-item">'.$pageTitle.'</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-md-9 col-lg-9">
+                        <div class="card mb-0">
+                            '.$file_content.'
+                        </div>
+                        <div class="card-body mt-0 pr-0 pl-0">
+                            <div id="video_comments">
+                                <div class="share_public_comment">
+                                    '.($elearning->allow_comments === "allow" ? 
+                                        '<div class="d-flex justify-content-start">
+                                            <div class="pr-1"><img width="60px" class="rounded-circle cursor author-box-picture" src="'.$baseUrl.''.$defaultUser->image.'"></div>
+                                            <div class="p-0" style="width:100%">
+                                                <div id="public_comment" contenteditable="true" dir="auto" class="public_comment trix-slim-scroll" aria-label="Add a public comment..."></div>
+                                                <div class="d-flex justify-content-between">
+                                                    <div class="comment_response"></div>
+                                                    <div class="text-right mt-2 hidden" id="public_comment_button">
+                                                        <button id="cancel_button" onclick="cancel_comment()" disabled class="btn btn-sm btn-outline-danger">CANCEL</button>
+                                                        <button id="share_comment" onclick="share_comment()" disabled class="btn btn-sm btn-outline-primary">COMMENT</button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
+                                        </div>' : 
+                                        '<div class="alert alert-warning mb-0">Comments have been closed</div>').'
+                                    <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
+                                    <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-sm btn-outline-secondary">Loading comments</button></div>    
                                 </div>
-                                <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
-                                <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-sm btn-outline-secondary">Loading comments</button></div>    
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-3 col-lg-3">
+                        <div class="card">
+                            <div class="card-body p-2">
+                                <h5 class="mb-0 border-bottom pb-2">OTHER RELATED VIDEOS</h5>
+                                '.$related_videos.'
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-3 col-lg-3">
-                    <div class="card">
-                        <div class="card-body p-2">
-                            <h5 class="mb-0 border-bottom pb-2">OTHER RELATED VIDEOS</h5>
-                            '.$related_videos.'
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>';
+            </section>';
+    
+    }
 
 }
 // print out the response

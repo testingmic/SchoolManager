@@ -277,6 +277,7 @@ class Files extends Myschoolgh {
 
             // html string
             $attachments = "<div class='row'>";
+            $showView = (bool) isset($params->show_view);
 
             // loop through the list of files
             foreach($attachments_list->files as $each_file) {
@@ -317,10 +318,13 @@ class Files extends Myschoolgh {
                     if($params->is_deletable) {
                         
                         // display the delete button
-                        $attachments .= "<span class=\"float-right\">
-                            <button type=\"button\" href=\"#\" onclick=\"return delete_existing_file_attachment('{$each_file->record_id}_{$each_file->unique_id}');\" class=\"btn btn-outline-danger p-1 pr-2 btn-sm delete-attachment-file\">
-                                <i class=\"fas font-12px fa-trash ml-1\"></i>                    
-                            </button></span>";
+                        $attachments .= "
+                        <span class=\"float-right\">
+                            ".($showView ? "<a title='Click to view material' href='{$this->baseUrl}{$params->show_view}/{$each_file->record_id}_{$each_file->unique_id}' class='btn btn-sm btn-outline-primary'><i class=\"fa fa-eye\"></i></a>" : null)."
+                            <button type=\"button\" onclick=\"return delete_existing_file_attachment('{$each_file->record_id}_{$each_file->unique_id}');\" class=\"btn btn-outline-danger btn-sm delete-attachment-file\">
+                                <i class=\"fa fa-trash\"></i>
+                            </button>
+                        </span>";
                     }
 
                     $attachments .= "</div>";
@@ -565,7 +569,7 @@ class Files extends Myschoolgh {
                         "size_raw" => $n_FileSize_KB,
                         "is_deleted" => 0,
                         "record_id" => $record_id,
-                        "datetime" => date("l, jS F Y \\a\\t h:i:sA"),
+                        "datetime" => date("l, jS F Y h:i:sA"),
                         "favicon" => "{$this->favicon_array[$each_file["fifth"]]} fa-1x",
                         "color" => $color,
                         "uploaded_by" => "{$defaultUser->name} . ".date("jS M Y"),

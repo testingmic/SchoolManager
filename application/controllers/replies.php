@@ -515,11 +515,7 @@ class Replies extends Myschoolgh {
             }
 
             // add comments
-            if(empty($this->pushQuery("id", "e_learning_views", "video_id='{$params->record_id}' LIMIT 1"))) {
-                $this->db->query("INSERT INTO e_learning_views SET video_id='{$params->record_id}', comments='1'");
-            } else {
-                $this->db->query("UPDATE e_learning_views SET comments=(comments+1) WHERE video_id='{$params->record_id}' LIMIT 1");
-            }
+            $this->db->query("UPDATE e_learning_views SET comments=(comments+1) WHERE video_id='{$params->record_id}' LIMIT 1");
 
             // get the last comment information
             $params->comment_id = $comment_id;

@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass;
+global $myClass, $isAdminAccountant, $isTutorAdmin;
 
 // initial variables
 $appName = config_item("site_name");
@@ -20,6 +20,13 @@ $pageTitle = "E-Learning";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = ["assets/js/resources.js"];
 
+// load the classes list
+$classes_param = (object) [
+    "clientId" => $clientId,
+    "columns" => "id, name"
+];
+$class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+
 $response->html = '
     <section class="section">
         <div class="section-header">
@@ -29,14 +36,40 @@ $response->html = '
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>
-        <div class="row" id="e_resources">
+        <div class="row" id="e_resources">';
+        
+            if($isTutorAdmin || $isAdminAccountant) {
+                $response->html .= '<div class="col-xl-4 col-md-4 col-12 form-group">
+                    <label>Select Class <span class="required">*</span></label>
+                    <select class="form-control selectpicker" name="class_id">
+                        <option value="">Please Select Class</option>';
+                        foreach($class_list as $each) {
+                            $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                        }
+                        $response->html .= '
+                    </select>
+                </div>
+                <div class="col-xl-4 col-md-4 col-12 form-group">
+                    <label>Select Course <span class="required">*</span></label>
+                    <select class="form-control selectpicker" name="course_id">
+                        <option value="">Please Select Course</option>
+                    </select>
+                </div>
+                <div class="col-xl-4 col-md-4 col-12 form-group">
+                    <label>Select Course Unit</label>
+                    <select class="form-control selectpicker" name="unit_id">
+                        <option value="">Please Select Unit</option>
+                    </select>
+                </div>';
+            }
+            $response->html .= '
             <div class="col-sm-12 col-lg-12">
                 <div class="row mb-2">
                     <div class="col-md-10 col-lg-10">
                         <input placeholder="Search for a e-learning resource" id="search_term" name="search_term" type="text" class="form-control">
                     </div>
                     <div class="col-md-2 col-lg-2">
-                        <button class="btn-block btn btn-outline-primary">Search <i class="fa fa-search"></i></button>
+                        <button onclick="return search_Resource()" class="btn-block btn btn-outline-primary">Search <i class="fa fa-search"></i></button>
                     </div>
                 </div>
             </div>
