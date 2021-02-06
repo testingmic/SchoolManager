@@ -572,7 +572,7 @@ class Files extends Myschoolgh {
                         "datetime" => date("l, jS F Y h:i:sA"),
                         "favicon" => "{$this->favicon_array[$each_file["fifth"]]} fa-1x",
                         "color" => $color,
-                        "uploaded_by" => "{$defaultUser->name} . ".date("jS M Y"),
+                        "uploaded_by" => "{$defaultUser->name} &bull; ".date("jS M Y"),
                         "uploaded_by_id" => $defaultUser->user_id
                     ];
 

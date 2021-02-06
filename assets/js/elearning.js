@@ -1,4 +1,5 @@
-var comments_container = $(`div[id="comments-container"]`);
+var comments_container = $(`div[id="comments-container"]`),
+    loader = $(`div[class~="loader_display"]`);
 
 window.addEventListener("click", (element) => {
     if ($(`div[id="public_comment_button"]`).length) {
@@ -87,7 +88,7 @@ var format_comment = (comment) => {
                 <img src="${baseUrl}${comment.image}" class="rounded-circle author-box-picture" width="40px">
             </div>
             <div>
-                <div><strong>${comment.fullname}</strong> . ${comment.time_ago}</div>
+                <div><strong>${comment.fullname}</strong> &bull; ${comment.time_ago}</div>
                 <div>${comment.comment}</div>
             </div>
         </div>
@@ -106,23 +107,24 @@ var load_comments = async(data) => {
                         html += format_comment(value);
                     });
                     comments_container.append(html);
-                    $(`button[id="load-more-replies"]`).fadeIn("slow").html("Load more");
+                    $(`button[id="load-more-replies"]`).fadeIn("slow").html("Load more").removeClass("hidden");
                 }
                 if (!result.comments_list) {
-                    $(`button[id="load-more-replies"]`).html("No comments available").attr("disabled", true);
+                    $(`button[id="load-more-replies"]`).html("No comments available").attr("disabled", true).removeClass("hidden");
                 }
                 if ((result.last_comment_id == "no_more_record") || (result.first_reply_id == result.last_comment_id)) {
-                    $(`button[id="load-more-replies"]`).html("No comments available").attr("disabled", true);
+                    $(`button[id="load-more-replies"]`).html("No comments available").attr("disabled", true).removeClass("hidden");
                 }
             }
         }
+        loader.addClass("hidden");
     });
 }
 
 if (comments_container.length) {
-    $(`button[id="load-more-replies"]`).html("Loading replies...");
+    loader.removeClass("hidden");
+    $(`button[id="load-more-replies"]`).html("").addClass("hidden");
     let autoload = comments_container.attr("data-autoload");
-
     if (autoload === "true") {
         let data = {
             record_id: comments_container.attr("data-id"),
@@ -134,17 +136,18 @@ if (comments_container.length) {
     }
 }
 
-if (comments_container.length) {
-    $(`button[id="load-more-replies"]`).html("Loading replies...");
-    let autoload = comments_container.attr("data-autoload");
-
-    if (autoload === "true") {
-        let data = {
-            record_id: comments_container.attr("data-id"),
-            last_comment_id: comments_container.attr("data-last-reply-id"),
-            limit: 10
-        };
-        load_comments(data);
-        comments_container.attr("data-autoload", "false");
+$(`button[id="load-more-replies"]`).on("click", function() {
+    loader.removeClass("hidden");
+    $(`button[id="load-more-replies"]`).removeClass("hidden").html("Loading replies...");
+    let last_comment = comments_container.attr("data-last-reply-id");
+    if (last_comment == "no_more_record") {
+        $(`button[id="load-more-replies"]`).html("No comments available").attr("disabled", true);
+        return false;
     }
-}
+    let data = {
+        record_id: comments_container.attr("data-id"),
+        last_comment_id: last_comment,
+        limit: 10
+    };
+    load_comments(data);
+});

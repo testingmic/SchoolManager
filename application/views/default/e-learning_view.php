@@ -156,8 +156,9 @@ if(empty($item_id) || !isset($item[1])) {
                         <div class="card-body mt-0 pr-0 pl-0">
                             <div id="video_comments">
                                 <div class="share_public_comment">
+                                    <div class="comments_counter mb-3">0 Comments</div>
                                     '.($elearning->allow_comments === "allow" ? 
-                                        '<div class="d-flex justify-content-start">
+                                        '<div class="d-flex justify-content-start" style="min-height:70px">
                                             <div class="pr-1"><img width="60px" class="rounded-circle cursor author-box-picture" src="'.$baseUrl.''.$defaultUser->image.'"></div>
                                             <div class="p-0" style="width:100%">
                                                 <div id="public_comment" contenteditable="true" dir="auto" class="public_comment trix-slim-scroll" aria-label="Add a public comment..."></div>
@@ -170,9 +171,11 @@ if(empty($item_id) || !isset($item[1])) {
                                                 </div>
                                             </div>
                                         </div>' : 
-                                        '<div class="alert alert-warning mb-0">Comments have been closed</div>').'
-                                    <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-3 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
-                                    <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn btn-sm btn-outline-secondary">Loading comments</button></div>    
+                                        '<div class="alert alert-warning mb-0">Comments have been closed</div>'
+                                    ).'
+                                    <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-4 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
+                                    <div class="text-center loader_display hidden"><i class="text-primary fa fa-spin fa-spinner fa-2x"></i></div>
+                                    <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn hidden btn-sm btn-outline-secondary">Loading comments</button></div>    
                                 </div>
                             </div>
                         </div>

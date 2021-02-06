@@ -395,3 +395,7 @@ textarea.form-control {
 .public_comment:focus-within {
     border-bottom: solid 1px #000;
 }
+
+.comments_counter {
+    font-size: 20px;
+}
