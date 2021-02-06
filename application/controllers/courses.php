@@ -84,11 +84,14 @@ class Courses extends Myschoolgh {
                 $commentsObj = load_class("replies", "controllers");
                 $filesObject = load_class("files", "controllers");
 
-                // set param for the thread interactions
-                $threadInteraction = (object)[
-                    "userId" => $params->userId,
-                    "feedback_type" => "comment"
-                ];
+                // if the user isset
+                if(isset($params->userId)) {
+                    // set param for the thread interactions
+                    $threadInteraction = (object)[
+                        "userId" => $params->userId,
+                        "feedback_type" => "comment"
+                    ];
+                }
             } else {
                 $filesObject = load_class("files", "controllers");
             }
@@ -109,15 +112,18 @@ class Courses extends Myschoolgh {
                     
                     // if a request was made for full details
                     if(isset($params->full_details)) {
-                        
                         // set aa new param
                         $para = (object) [
                             "clientId" => $params->clientId,
                             "course_id" => $result->id
                         ];
-                        // create a new object
-                        $threadInteraction->resource_id = $result->id;
-                        $result->comments_list = $commentsObj->list($threadInteraction);
+
+                        // if the user isset
+                        if(isset($params->userId)) {
+                            // create a new object
+                            $threadInteraction->resource_id = $result->id;
+                            $result->comments_list = $commentsObj->list($threadInteraction);
+                        }
                         
                         // if the user is permitted
                         $result->lesson_plan = $this->course_unit_lessons_list($para);
@@ -960,6 +966,97 @@ class Courses extends Myschoolgh {
 
 	}
 
-    
+    /**
+     * Prepare the Course Material for Download
+     * 
+     * @param stdClass $content
+     * 
+     * @return String
+     */
+    public function draw($content) {
+
+        $html = "<table cellpadding=\"6px\" cellspacing=\"1px\" width=\"100%\">\n";
+        $html .= "
+            <tr>
+                <td style=\"border:dashed 1px #ccc\">
+                    <span style=\"font-size:13px\">Academic Year: ".strtoupper($content->academic_year)."</span><br>
+                    <span style=\"font-size:13px\">Academic Term: ".strtoupper($content->academic_term)."</span><br>
+                </td>
+                <td style=\"border:dashed 1px #ccc\">
+                    <span style=\"font-size:24px\">".strtoupper($content->name)."</span><br>
+                    <span style=\"font-size:13px;padding-right:40px;\"><strong>CODE:</strong> {$content->course_code}</span><br>
+                    <span style=\"font-size:13px\"><strong>WEEKLY MEETINGS:</strong> {$content->weekly_meeting}</span><br>
+                    <span style=\"font-size:13px\"><strong>CREDIT HOURS:</strong> {$content->credit_hours}</span>
+                </td>
+            </tr>
+            <tr><td colspan=\"2\">{$content->description}</td></tr>";
+            $html .= "<tr><td colspan=\"2\"><span style=\"font-size:24px\">LESSON PLAN</span></td></tr>";
+        foreach($content->lesson_plan as $key => $plan) {
+            $html .= "<tr>";
+            $html .= "<td width=\"70%\" style=\"border:dashed 1px #ccc; font-size:16px; color:#fff; background-color:#2196f3;\">Unit ".($key+1).". {$plan->name}</td>";
+            $html .= "<td width=\"30%\" style=\"border:dashed 1px #ccc; color:#fff; background-color:#2196f3;\"><strong>{$plan->start_date}</strong> to <strong>{$plan->end_date}</strong></td>";
+            $html .= "</tr>";
+            $html .= "<tr>";
+            $html .= "<td colspan=\"2\">{$plan->description}</td>";
+            $html .= "</tr>";
+            $html .= "<tr>";
+            $html .= "<td colspan=\"2\">";
+            foreach($plan->lessons_list as $lkey => $lesson) {
+                $html .= "<table width=\"100%\" style=\"padding:0px;margin:0px;\">";
+                $html .= "<tr>";
+                $html .= "<td width=\"70%\" style=\"background-color:#ff9800;color:#fff;line-height:30px;height:30px;\">&nbsp;&nbsp;Lesson ".($lkey+1).". <strong>{$lesson->name}</strong></td>";
+                $html .= "<td width=\"30%\" style=\"line-height:30px;height:30px;border:dashed 1px #ccc; color:#fff; background-color:#ff9800;\">&nbsp;&nbsp;<strong>{$lesson->start_date}</strong> to <strong>{$lesson->end_date}</strong></td>";
+                $html .= "</tr>";
+                $html .= "<tr>";
+                $html .= "<td colspan=\"2\">".(empty($lesson->description) ? "No content under this lesson": strip_tags($lesson->description, "<br><strong>"))."</td>";
+                $html .= "</tr>";
+                $html .= "<tr><td></td></tr>";
+                $html .= "</table>";
+            }
+            $html .= "</td>";
+            $html .= "</tr>";
+        }
+        $html .= "</table>";
+        $html .= "<table width=\"100%\">";
+        // run this section if there are any resource links
+        if(isset($content->resources_list["link"])) {
+            // header
+            $html .= "<tr><td style=\"line-height:30px;height:30px;border:dashed 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;ADDITIONAL COURSE RESOURCES</span></td></tr>";
+            // loop through the links list
+            foreach($content->resources_list["link"] as $key => $resource) {
+                $html .= "<tr>";
+                $html .= "<td>&nbsp;<span>".($key+1).". <strong>{$resource->link_name}</strong></span><br>";
+                $html .= "&nbsp;<span>{$resource->description}</span><br>";
+                $html .= "&nbsp;<a title=\"Click to visit resource\" href=\"{$resource->link_url}\" targe=\"_blank\">{$resource->link_url}</a><br>";
+                $html .= "</td>";
+                $html .= "</tr>";
+            }
+        }
+        $html .= "<tr><td style=\"border:dashed 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;COURSE TUTORS</span></td></tr>";
+        $html .= "</table>";
+        $html .= "
+        <table width=\"100%\">
+            <tr>
+                <td>
+                    <span style=\"font-size:13px\"><strong>Fullname:</strong></span><br>
+                    <span style=\"font-size:13px\"><strong>Employee ID:</strong></span><br>
+                    <span style=\"font-size:13px\"><strong>Phone Number:</strong></span><br>
+                    <span style=\"font-size:13px\"><strong>Email Address:</strong></span><br>
+                </td>";
+        foreach($content->course_tutors as $key => $value) {
+            $html .= "
+            <td>
+                <span style=\"font-size:13px\">".$value->name."</span><br>
+                <span style=\"font-size:13px\">".$value->unique_id."</span><br>
+                <span style=\"font-size:13px\">".$value->phone_number."</span><br>
+                <span style=\"font-size:13px\">".$value->email."</span><br>
+            </td>";
+        }
+        $html .= "</tr>";
+        $html .= "</table>";
+
+        return $html;
+    }
+
 }
 ?>

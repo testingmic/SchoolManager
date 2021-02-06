@@ -33,7 +33,7 @@ function show_content($title = null, $file_name, $content, $orientation = "L") {
 	$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
 	// set margins
-	$pdf->SetMargins(2, 2, 2);
+	$pdf->SetMargins(3, 3, 3);
 	$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
 	$pdf->SetFooterMargin(4);
 
@@ -161,7 +161,7 @@ if((isset($_GET["file"]) && !empty($_GET["file"])) || (isset($_GET["file_id"], $
     
 }
 
-/** Download timetables */
+/** Download Timetables */
 elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) {
 
     // set the timetable id
@@ -197,8 +197,8 @@ elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) 
     exit;
 }
 
-/** Download payslips */
-elseif(isset($_GET["pay_id"])) {
+/** Download Payslips */
+elseif(isset($_GET["pay_id"]) && !isset($_GET["cs_mat"])) {
 
     $payslip_id = xss_clean($_GET["pay_id"]);
     $param = (object) ["payslip_id" => $payslip_id, "download" => true, "clientId" => $session->clientId];
@@ -218,5 +218,42 @@ elseif(isset($_GET["pay_id"])) {
     exit;
 }
 
+/** Download Course Material (Units / Lessons) */
+elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"])) {
+    $course = base64_decode(xss_clean($_GET["cs_mat"]));
+    $course = explode("_", $course);
+
+    // continue
+    if(isset($course[2])) {
+        // create new object
+        $courseObj = load_class("courses", "controllers");
+        // get the parameters
+        $params = (object) [
+            "limit" => 1,
+            "full_details" => true,
+            "course_id" => $course[1],
+            "clientId" => $course[2]
+        ];
+        $course_info = $courseObj->list($params);
+
+        // if data was found
+        if(isset($course_info["data"][0])) {
+            // get the information
+            $course_info = $course_info["data"][0];
+            $content = $courseObj->draw($course_info);
+            
+            // file name
+            $file_name = "Course_Material.pdf";
+
+            if(!isset($_GET["dw"])) {
+                print $content;
+            }
+
+            show_content("Course Material", $file_name, $content, "L");
+            
+            exit;
+        }
+    }
+}
 // if nothing was set
 print "Access Denied!";

@@ -343,7 +343,7 @@ if(!empty($item_id)) {
                             <div class="d-flex justify-content-between">
                                 <div><h5>COURSE LESSONS</h5></div>
                                 <div>
-                                    '.($unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success" href="'.$baseUrl.'download?course='.base64_encode($data->id."_".$data->item_id).'"><i class="fa fa-download"></i> Download</a>' : '').'
+                                    '.($unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success" href="'.$baseUrl.'download?cs_mat='.base64_encode($data->id."_".$data->item_id."_".$data->client_id).'&dw=true"><i class="fa fa-download"></i> Download</a>' : '').'
                                     '.($hasPlanner ? '
                                         <button  onclick="return load_quick_form(\'course_unit_form\',\''.$item_id.'\');" class="btn btn-sm btn-outline-primary" type="button"><i class="fa fa-plus"></i> New Unit</button>'
                                     : null ).'

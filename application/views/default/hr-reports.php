@@ -39,7 +39,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>
-        <div class="row default_period" data-current_period="last_year">
+        <div class="row default_period" data-current_period="this_year">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="row">
                     <div class="col-xl-3 col-lg-6">

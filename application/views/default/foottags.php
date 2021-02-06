@@ -16,6 +16,27 @@
                 <div class="network-notifier"></div>
             </div>
         </footer>
+
+        <div class="settingSidebar">
+          <a href="javascript:void(0)" class="settingPanelToggle"> <i class="fa fa-book-reader"></i>
+          </a>
+          <div class="settingSidebar-body ps-container ps-theme-default">
+            <div class=" fade show active">
+              <div class="setting-panel-header">Quick Panel</div>
+              <div class="p-15 border-bottom">
+                <h6 class="font-medium m-b-10">Onboard Dictionary</h6>
+                <div class="selectgroup layout-color w-50">
+                  
+                </div>
+              </div>
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </div>
     <div class="email-notification" style="display:none">
         <div class="d-flex row justify-content-between">
