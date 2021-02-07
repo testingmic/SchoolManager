@@ -1,6 +1,8 @@
 var client_auto_save, disabled_inputs = new Array(),
     foundArrayList = new Array(),
-    csvContent = new Array();
+    csvContent = new Array(),
+    dictionary_div = $(`div[id="dictionary_search_term"]`),
+    dictionary_loader = $(`div[id="dictionary_loader"]`);
 var initDashboard = () => {}
 
 var responseCode = (code) => {
@@ -354,4 +356,54 @@ var validate_item = (record_id, record, redirect) => {
             });
         }
     });
+}
+
+$(`div[class~="settingSidebar"] input[name="dictionary"]`).on("keyup", function(evt) {
+    let search_term = $(this).val();
+    if (evt.keyCode == 13 && !evt.shiftKey) {
+        dictionary_loader.removeClass("hidden");
+        $.get(`${baseUrl}api/dictionary/search?term=${search_term}`).then((response) => {
+            if(response.code === 200) {
+                let result = response.data.result,
+                    html = "";
+                if(result.count) {
+                    $.each(result.meaning, function(i, e) {
+                        count = 0;
+                        html += `<div><h6 class="mt-2 pb-0">${i.toUpperCase()}<h6></div>`;
+                        $.each(e, function(ii, ee) {
+                            count++;
+                            let glossary = ee.glossary;
+                            glossary = glossary.replace(`${search_term}`, `<strong class="text-danger">${search_term}</strong>`);
+                            html += `<div class="mb-0">${count}. (${ee.tag_count}) ${glossary}</div>`;
+                            if(ee.hyponym!== undefined) {
+                                if(ee.hyponym.length) {
+                                    html +=`<div><strong>Similar Meaning & Example:</strong></div>`;
+                                    $.each(ee.hyponym, function(iv, ev) {
+                                        let hyp_glossy = ev.glossary;
+                                        hyp_glossy = hyp_glossy.replace(`${search_term}`, `<strong class="text-danger">${search_term}</strong>`);
+                                        html += `<div class="mb-1 font-italic">${hyp_glossy}</div>`;
+                                    });
+                                }
+                            }
+                            html +=`<div class="mb-2"></div>`;
+                        });
+                    });
+                    dictionary_div.html(html);
+                } else {
+                    dictionary_div.html(`<span class='text-danger'>Sorry! No results found for the search term</span>`);
+                }
+            } else {
+                dictionary_div.html(`<span class='text-danger'>Sorry! No results found for the search term</span>`);
+            }
+            dictionary_loader.addClass("hidden");
+        }).catch(() => {
+            dictionary_loader.addClass("hidden");
+            dictionary_div.html(`<span class='text-danger'>Sorry! An error occurred while processing the request</span>`);
+        });
+    }
+});
+
+var clear_dictionary_form = () => {
+    $(`div[class~="settingSidebar"] input[name="dictionary"]`).val('').focus();
+    dictionary_div.html(``);
 }

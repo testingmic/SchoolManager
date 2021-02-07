@@ -529,47 +529,6 @@ var initMainMenu = () => {
             $('body').toggleClass('sidebar-minimized');
             resizeBroadcast();
         }
-
-        if ($this.hasClass('aside-menu-toggler')) {
-
-            if ($this.hasClass("search-button")) {
-                $("[href='#quicksearch']").trigger('click');
-                $("#quicksearchinput").focus();
-                if ($('body').hasClass('aside-menu-hidden') == false) {
-                    return false
-                }
-            } else if ($this.hasClass("dictionary-button")) {
-                $("[href='#dictionary']").trigger('click');
-                $("#dictionaryinput").focus();
-                if ($('body').hasClass('aside-menu-hidden') == false) {
-                    return false
-                }
-            } else if ($this.hasClass("calculator-button")) {
-                $("[href='#calculator']").trigger('click');
-                $(".sidebarcalculator").trigger("click");
-                if ($('body').hasClass('aside-menu-hidden') == false) {
-                    return false
-                }
-            } else if ($this.hasClass("notifications-button")) {
-                $("[href='#notifications']").trigger('click');
-                if ($('body').hasClass('aside-menu-hidden') == false) {
-                    return false
-                }
-            }
-            $('body').toggleClass('aside-menu-hidden');
-            resizeBroadcast();
-            $(document).on('click', (ev) => {
-                if ($("body").hasClass('aside-menu-hidden') == false) {
-                    var asidemenuclicked = $(ev.target).parents('.aside-menu').length;
-                    var iscalculatorbutton = $(ev.target).hasClass('calcbtn');
-                    var istoggler = $(ev.target).hasClass('navbar-toggler') || $(ev.target).parents('a').hasClass('navbar-toggler');
-                    if (!(asidemenuclicked)) {
-                        if (istoggler || iscalculatorbutton) return false;
-                        $('body').addClass('aside-menu-hidden');
-                    }
-                }
-            })
-        }
         if ($this.hasClass('mobile-sidebar-toggler')) {
             $('body').toggleClass('sidebar-mobile-show');
             resizeBroadcast();

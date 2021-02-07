@@ -17,22 +17,30 @@
             </div>
         </footer>
 
-        <div class="settingSidebar">
-          <a href="javascript:void(0)" class="settingPanelToggle"> <i class="fa fa-book-reader"></i>
-          </a>
-          <div class="settingSidebar-body ps-container ps-theme-default">
-            <div class=" fade show active">
-              <div class="setting-panel-header">Quick Panel</div>
-              <div class="p-15 border-bottom">
-                <h6 class="font-medium m-b-10">Onboard Dictionary</h6>
-                <div class="selectgroup layout-color w-50">
-                  
+        <div class="settingSidebar showSettingPanel">
+          <a href="#" class="settingPanelToggle"> <i class="fa fa-book-reader"></i></a>
+            <div class="settingSidebar-body ps-container ps-theme-default">
+                <div class=" fade show active">
+                    <div class="setting-panel-header"><h6 class="font-medium m-b-0">Onboard Dictionary</h6></div>
+                    <div class="p-15 border-bottom">
+                        <div class="layout-color">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <label for="dictionary">Search for a Word <small class="text-success">(hit enter to search)</small></label>
+                                </div>
+                                <div>
+                                    <span onclick="return clear_dictionary_form()" class="cursor text-danger" title="Click to reset form">Clear</span>
+                                </div>
+                            </div>
+                            <input type="text" name="dictionary" id="dictionary" class="form-control">
+                        </div>
+                    </div>
+                    <div class="card-body pt-2 trix-slim-scroll" style="max-height:500px;overflow-y:auto;">
+                        <div class="text-center hidden" id="dictionary_loader"><i class="fa fa-spin fa-spinner text-primary"></i></div>
+                        <div id="dictionary_search_term"></div>
+                    </div>
                 </div>
-              </div>
-              
-              
             </div>
-          </div>
         </div>
       </div>
 

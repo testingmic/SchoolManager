@@ -403,3 +403,8 @@ textarea.form-control {
 .tx-12 {
     font-size: 12px!important;
 }
+
+.settingSidebar {
+    width: 350px;
+    right: -350px;
+}
