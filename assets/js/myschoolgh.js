@@ -367,7 +367,7 @@ $(`div[class~="settingSidebar"] input[name="dictionary"]`).on("keyup", function(
                 let result = response.data.result,
                     html = "";
                 if(result.count) {
-                    $.each(result.meaning, function(i, e) {
+                    $.each(result.search_list, function(i, e) {
                         count = 0;
                         html += `<div><h6 class="mt-2 pb-0">${i.toUpperCase()}<h6></div>`;
                         $.each(e, function(ii, ee) {

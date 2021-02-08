@@ -17,7 +17,7 @@
             </div>
         </footer>
 
-        <div class="settingSidebar showSettingPanel">
+        <div class="settingSidebar">
           <a href="#" class="settingPanelToggle"> <i class="fa fa-book-reader"></i></a>
             <div class="settingSidebar-body ps-container ps-theme-default">
                 <div class=" fade show active">

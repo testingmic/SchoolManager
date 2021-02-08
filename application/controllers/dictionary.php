@@ -37,13 +37,12 @@ class Dictionary extends Myschoolgh {
             $search->execute();
             $data = [];
             while($result = $search->fetch(PDO::FETCH_OBJ)) {
-                // $result->glossary = str_ireplace($params->term, "<strong class='text-danger'>{$params->term}</strong>", $result->glossary);
                 $result->hyponym = $this->hyponym($result->synset_id);
                 $data[$this->ss_type[$result->ss_type]][] = $result;
             }
 
             return [
-                "meaning" => $data,
+                "search_list" => $data,
                 "count" => count($data)
             ];
         } catch(PDOException $e) {
