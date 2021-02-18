@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass;
+global $myClass, $myschoolgh;
 
 // initial variables
 $appName = config_item("site_name");
@@ -33,9 +33,16 @@ if(!$accessObject->hasAccess("manage", "settings")) {
     $response->html = page_not_found();
 } else {
 
+    // get the settings form
     $the_form = load_class("forms", "controllers")->settings_form($clientId);
 
     $response->scripts = ["assets/js/import.js"];
+
+    // if the upload id is not empty
+    if(!empty($session->last_uploadId)) {
+        $stmt = $myschoolgh->prepare("UPDATE users SET name=CONCAT(firstname,' ', lastname,' ', othername) WHERE upload_id='{$session->last_uploadId}'");
+        $stmt->execute();
+    }
 
     $response->html = '
         <section class="section">
@@ -97,6 +104,9 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                 </div>
             </div>
         </section>';
+    
+    // unset the session if existing
+    $session->remove("last_uploadId");
 
 }
 // print out the response

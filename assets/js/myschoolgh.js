@@ -407,3 +407,7 @@ var clear_dictionary_form = () => {
     $(`div[class~="settingSidebar"] input[name="dictionary"]`).val('').focus();
     dictionary_div.html(``);
 }
+
+var print_receipt = (receipt_id) => {
+    window.open(`${baseUrl}receipt/${receipt_id}`, `Payment Receipt`, `menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes`);
+}

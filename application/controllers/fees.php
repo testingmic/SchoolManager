@@ -479,7 +479,7 @@ class Fees extends Myschoolgh {
                 <span class='last_payment_id'><strong>Payment ID:</strong> {$allocation->last_payment_uid}</span><br>
                 <span class='amount_paid'><i class='fa fa-money-bill'></i> {$allocation->last_payment_info["currency"]} {$allocation->last_payment_info["amount"]}</span><br>
                 <span class='last_payment_date'><i class='fa fa-calendar-check'></i> {$allocation->last_payment_date}</span><br>
-                <p class='mt-3 mb-0 pb-0' id='print_receipt'><a class='btn btn-sm btn-outline-primary' target='_blank' href='{$this->baseUrl}fees-view/{$allocation->last_payment_id}/print'><i class='fa fa-print'></i> Print Receipt</a></p>
+                <p class='mt-3 mb-0 pb-0' id='print_receipt'><a onclick='return print_receipt(\"{$allocation->last_payment_id}\")' class='btn btn-sm btn-outline-primary' target='_blank' href='#'><i class='fa fa-print'></i> Print Receipt</a></p>
             </td>";
             $html_form .= "</tr>";
             $html_form .= "</table>";

@@ -35,7 +35,7 @@ if(!empty($item_id)) {
         "item_id" => $item_id,
         "userData" => $defaultUser
     ];
-    $data = load_class("fees", "controllers", $item_param)->list($item_param);
+    $data = load_class("fees", "controllers", $item_param)->list($item_param)["data"];
 
     // if no record was found
     if(empty($data)) {
@@ -43,7 +43,7 @@ if(!empty($item_id)) {
     } else {
 
         // set the first key
-        $data = $data["data"][0];
+        $data = $data[0];
         $hasUpdate = true;
 
         // if the request is to view the student information
@@ -175,7 +175,7 @@ if(!empty($item_id)) {
                                                     <address>
                                                         <strong>Student Details:</strong><br>
                                                         '.$data->student_info->name.'<br>
-                                                        <strong>'.$data->student_info->unique_id.'</strong><br>
+                                                        '.$data->student_info->unique_id.'<br>
                                                         '.$data->class_name.'<br>
                                                         '.$data->department_name.'<br>
                                                     </address>
@@ -231,8 +231,8 @@ if(!empty($item_id)) {
                                             </div>
                                             <div class="row mt-4">
                                                 <div class="col-lg-8">
-                                                    <div class="section-title">Payment Method</div>
-                                                    <p class="section-lead">The payment method that we provide is to make it easier for you to pay invoices.</p>
+                                                    <div class="section-title">Description</div>
+                                                    <p class="section-lead">'.$data->description.'</p>
                                                 </div>
                                                 <div class="col-lg-4 text-right">
                                                     <div class="invoice-detail-item">
@@ -251,7 +251,7 @@ if(!empty($item_id)) {
                                 </div>
                                 <hr>
                                 <div class="text-md-right">
-                                    <button onclick="" class="btn btn-warning btn-icon icon-left"><i class="fas fa-print"></i> Print</button>
+                                    <button onclick="return print_receipt(\''.$item_id.'\')" class="btn btn-warning btn-icon icon-left"><i class="fas fa-print"></i> Print</button>
                                 </div>
                             </div>';
                         }

@@ -113,8 +113,9 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
                             <div class="row" id="timetable_form">';
                                 if(!$timetable_found) {
                                     $response->html .= '
-                                    <div class="col-lg-3">
-                                        <h5>CREATED TIMETABLES LIST</h5>';
+                                    <div class="col-lg-3 p-0">
+                                        <h5>CREATED TIMETABLES LIST</h5>
+                                        <div class="trix-slim-scroll p-2" style="max-height:500px; overflow-y:auto;">';
 
                                     if(empty($timetable_list)) {
                                         $response->html .= "
@@ -161,7 +162,9 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
                                             ";
                                         }
                                     }
-                                    $response->html .= '</div>';
+                                    $response->html .= '
+                                        </div>
+                                    </div>';
                                 }
                                 $response->html .= '
                                 <div class="col-lg-'.($timetable_found ? 12 : 9).' mb-3">

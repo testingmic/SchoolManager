@@ -517,6 +517,9 @@ class Replies extends Myschoolgh {
             // add comments
             $this->db->query("UPDATE e_learning_views SET comments=(comments+1) WHERE video_id='{$params->record_id}' LIMIT 1");
             
+            // add the activity for the activity
+            $this->userLogs("e_learning_video", $params->record_id, null, "<strong>{$params->userData->name}</strong> Shared the comment: <em>{$comment}</em> on the Video.", $params->userId, "{$this->appName} Calculation<br>Replies count increased by the creation of a new comment by <strong>{$params->userData->name}</strong>.");
+
             // get the last comment information
             $params->comment_id = $comment_id;
             $params->limit = 1;

@@ -144,6 +144,7 @@ var populate_select_fields = (headerData, mainContent, column) => {
 
     $(`div[data-csv_import_column="${column}"] div[class~="csv-rows-content"]`).html(``);
 
+    let h_count = 0;
     $.each(headerData, async function(i, e) {
         htmlData = `<div class="col-md-6 col-sm-12 col-lg-3" style="min-width:250px" data-row="${iv}">
             <div class="form-row">
@@ -156,8 +157,8 @@ var populate_select_fields = (headerData, mainContent, column) => {
             </div>`;
         $(`div[data-csv_import_column="${column}"] div[class~="csv-rows-content"]`).append(htmlData);
         iv++;
-
         await change_select_input_field(i, e, column);
+        h_count++;
     });
 
     var ii = 0;

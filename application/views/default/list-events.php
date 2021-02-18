@@ -160,15 +160,16 @@ if(!empty($session->clientId)) {
                     <div class="card">
                         <div class="card-body">
                             <div class="fc-overflow">
-                                <div id="events_management"></div>
+                                <div class="table-responsive slim-scroll" id="events_management"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                '.($hasEventAdd ? '<div class="col-sm-12 col-lg-3">
+                '.($hasEventAdd ? '
+                <div class="col-sm-12 col-lg-3">
                     <h5>EVENT TYPES <span class="float-right"><button onclick="return add_Event_Type()" class="btn btn-sm btn-outline-primary"><i class="fa fa-plus"></i> Add New</button></span></h5>
                     <div class="mt-3 slim-scroll p-2" style="max-height:700px;overflow-y:auto;" id="events_types_list">
-                        <div class="row">
+                        <div class="row p-3">
                             '.$event_types_list.'
                         </div>
                     </div>

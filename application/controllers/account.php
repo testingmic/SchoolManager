@@ -143,37 +143,59 @@ class Account extends Myschoolgh {
      */
     public function upload_csv(stdClass $params) {
 
+        if(!isset($this->accepted_column[$params->column])) {
+            return ["code" => 203, "data" => "Sorry! An invalid column value was parsed"];
+        }
+
         // reading tmp_file name
         $csv_file = fopen($params->csv_file['tmp_name'], 'r');
 
         // get the content of the file
-        $column = fgetcsv($csv_file);
-        $csv_data = array();
-        $csvSessionData = array();
-        $i = 0;
+        $headers = fgetcsv($csv_file);
+        $sample_csv_data = [];
+        $complete_csv_data = [];
 
         //using while loop to get the information
         while($row = fgetcsv($csv_file)) {
             // session data
-            $csvSessionData[] = $row;
+            $complete_csv_data[] = $row;
+        }
 
+        $i = 0;
+        $data = [];
+        $c_count = count($this->accepted_column[$params->column]);
+
+        // loop through the data received from the 
+        foreach($complete_csv_data as $each) {
+            // clean the array set
+            $clean_set = array_slice($each, 0, $c_count);
+            $data[] = $clean_set;
             // push the data parsed by the user to the page
             if($i < 10)  {
-                $csv_data[] = $row;
+                $sample_csv_data[] = $clean_set;
             }
             // increment
             $i++;
         }
 
+        $clean = function($v) {
+            return array_filter($v) != array();
+        };
+        $csv_data = array_filter($data, $clean);
+
+        // slice the header
+        $headers = array_slice($headers, 0, $c_count);
+
         // set the content in a session
-        $this->session->set("{$params->column}_csv_file", $csvSessionData);
+        $this->session->set("{$params->column}_csv_file", $csv_data);
 
         // set the data to send finally
         return  [
             "data" => [
-                'column'	=> $column,
+                'column'	=> $headers,
+                'sample_csv_data' => $sample_csv_data,
                 'csv_data'	=>  $csv_data,
-                'data_count' => count($csvSessionData)
+                'data_count' => count($csv_data)
             ]
         ];
 
@@ -231,6 +253,11 @@ class Account extends Myschoolgh {
         // begin the processing of the array data
         $sqlQuery = "INSERT INTO {$table[$params->column]} (`upload_id`,`created_by`,`item_id`,`client_id`,`academic_year`,`academic_term`,";
         
+        // if the user type is student
+        if(in_array($params->column, ["student", "parent"])) {
+            $sqlQuery .= "`user_type`,";
+        }
+
         // continue processing the request
         foreach($params->csv_keys as $thisKey) {
             // increment
@@ -249,15 +276,6 @@ class Account extends Myschoolgh {
 
         // set the values
         if(!empty($params->csv_values) and is_array($params->csv_values)) {
-            
-            // loop through the values list
-            foreach($params->csv_values as $key => $eachCsvValue) {
-                // print each csv value
-                foreach($eachCsvValue as $eKey => $eValue) {
-                    $newCSVArray[$eKey][] = $eachCsvValue[$eKey];
-                }
-            }
-
             $newCSVArray = [];
             foreach($this->session->{$session_key} as $key => $eachCsvValue) {
                 $newCSVArray[$key] = $eachCsvValue;
@@ -275,6 +293,8 @@ class Account extends Myschoolgh {
             $userPermission = null;
             $upload_id = random_string("alnum", 12);
 
+            $isUser = (bool) in_array($params->column, ["student", "staff", "parent"]);
+            
             // loop through each array dataset
             foreach($newCSVArray as $eachData) {
 
@@ -288,30 +308,50 @@ class Account extends Myschoolgh {
                 $sqlQuery .= "('{$upload_id}','{$params->userId}','{$unqData}','{$params->clientId}','{$params->academic_year}','{$params->academic_term}',";
                 $ik = 0;
 
+                if(in_array($params->column, ["student","parent"])) {
+                    $sqlQuery .= "'{$params->column}',";
+                }
+
                 // loop through each data
                 foreach($eachData as $eachKey => $eachValue) {
                     $ik++;
 
                     // perform these checks for the arrayed list
-                    if(in_array($params->column, ["student", "staff", "parent"])) {
+                    if($isUser) {
                         // if email then validate it
                         if(($params->csv_keys[$eachKey] === "Email") && !filter_var($eachValue, FILTER_VALIDATE_EMAIL)) {
                             $bugs["email"] = "Please ensure the email section contains only valid email addresses.";
                         }
                         if(($params->csv_keys[$eachKey] === "Employee ID") || ($params->csv_keys[$eachKey] === "Student ID")) {
+                            $eachValue = strtoupper($eachValue);
                             $unique_id[$eachValue] = isset($unique_id[$eachValue]) ? ($unique_id[$eachValue]+1) : 1;
                         }
                         if(($params->csv_keys[$eachKey] === "Contact Number") && !preg_match("/^[0-9+]+$/", $eachValue)) {
                             $bugs["phone_number"] = "Please ensure the contact number contains only numeric integers: eg. 0244444444 | +23324444444.";
                         }
-                        if(($params->csv_keys[$eachKey] === "Date of Birth") && !isvalid_date($eachValue)) {
-                            $bugs["date_of_birth"] = "Please ensure a valid Date of Birth was supplied: eg. YYYY-MM-DD";
+                        if(($params->csv_keys[$eachKey] === "Date of Birth")) {
+                            $eachValue = date("Y-m-d", strtotime($eachValue));
+                            if( !isvalid_date($eachValue) ) {
+                                $bugs["date_of_birth"] = "Please ensure a valid Date of Birth was supplied: eg. YYYY-MM-DD";
+                            }
                         }
-                        if(($params->csv_keys[$eachKey] === "Date of Employment") && !isvalid_date($eachValue)) {
-                            $bugs["date_of_employment"] = "Please ensure a valid Date of employment was supplied: eg. YYYY-MM-DD";
+                        if(($params->csv_keys[$eachKey] === "Gender")) {
+                            $eachValue = ucfirst(strtolower($eachValue));
                         }
-                        if(($params->csv_keys[$eachKey] === "Admission Date") && !isvalid_date($eachValue)) {
-                            $bugs["admission_date"] = "Please ensure a valid Admission Date was supplied: eg. YYYY-MM-DD";
+                        if(($params->csv_keys[$eachKey] === "Blood Group")) {
+                            $eachValue = strtoupper($eachValue);
+                        }
+                        if(($params->csv_keys[$eachKey] === "Date of Employment")) {
+                            $eachValue = date("Y-m-d", strtotime($eachValue));
+                            if( !isvalid_date($eachValue) ) {
+                                $bugs["date_of_employment"] = "Please ensure a valid Date of employment was supplied: eg. YYYY-MM-DD";
+                            }
+                        }
+                        if(($params->csv_keys[$eachKey] === "Admission Date")) {
+                            $eachValue = date("Y-m-d", strtotime($eachValue));
+                            if( !isvalid_date($eachValue) ) {
+                                $bugs["admission_date"] = "Please ensure a valid Admission Date was supplied: eg. YYYY-MM-DD";
+                            }
                         }
                         if(in_array($params->csv_keys[$eachKey], ["Department", "Section", "Class"])) {
                             $eachValue = $this->get_equivalent($params->csv_keys[$eachKey], $eachValue, $params->clientId);
@@ -360,9 +400,9 @@ class Account extends Myschoolgh {
                 foreach($unique_id as $key => $value) {
                     if($value > 1) {
                         $repeat += $value;
+                        $bugs["unique_id"] = "{$repeat} number of {$params->column} ids were repeated.";
                     }
                 }
-                $bugs["unique_id"] = "{$repeat} number of {$params->column} ids were repeated.";
             }
 
             // return the bugs found
@@ -375,11 +415,13 @@ class Account extends Myschoolgh {
                 }
                 return ["code" => 203, "data" => $bugs_list];
             }
+
+            // clean the fullname
+            if($isUser) {
+                $this->session->last_uploadId = $upload_id;
+            }
             
             try {
-                
-                // begin transaction
-                $this->db->beginTransaction();
 
                 // execute the sql statement
                 $query = $this->db->prepare($sqlQuery);
@@ -392,9 +434,6 @@ class Account extends Myschoolgh {
                     $permit->execute();
                 }
 
-                // commit the transactions
-                $this->db->commit();
-
                 // capitalize each first word
                 $import = ucfirst($params->column);
 
@@ -402,7 +441,6 @@ class Account extends Myschoolgh {
                 return ["data" => "{$import}s data was successfully imported."];
 
             } catch(PDOException $e) {
-                $this->db->rollBack();
                 return ["code" => 203, "data" => $e->getMessage()];
             }
 
@@ -434,11 +472,14 @@ class Account extends Myschoolgh {
             $t_code = strtoupper($value);
             $item_code = strtolower($column)."_code";
 
-            $fetch = $this->db->prepare("SELECT item_id FROM {$tables[$column]} WHERE (slug='{$n_value}' OR {$item_code}='{$t_code}') AND client_id='{$clientId}' AND status='1' ORDER BY id DESC LIMIT 1");
-            $fetch->execute();
-            $result = $fetch->fetch(PDO::FETCH_OBJ);
+            try {
+                $fetch = $this->db->prepare("SELECT item_id FROM {$tables[$column]} WHERE (slug='{$n_value}' OR {$item_code}='{$t_code}') AND client_id='{$clientId}' AND status='1' ORDER BY id DESC LIMIT 1");
+                $fetch->execute();
+                $result = $fetch->fetch(PDO::FETCH_OBJ);
 
-            return $result->item_id ?? null;
+                return $result->item_id ?? null;
+
+            } catch(PDOException $e) {} 
         }
     }
 

@@ -619,7 +619,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
             <div class="answers-div">
-                <div class="form-group">
+                <div class="form-group table-responsive trix-slim-scroll">
                     <table class="table">';
                     $i = 0;
                     foreach($options_array as $option => $value) {
@@ -1697,7 +1697,7 @@ class Forms extends Myschoolgh {
         }
 
         $response = '
-        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
                     <h5>BIO INFORMATION</h5>
@@ -1796,7 +1796,7 @@ class Forms extends Myschoolgh {
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="null">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
-                                $response .= "<option ".($isData && ($each->id == $userData->blood_group) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                                $response .= "<option ".($isData && ($each->name == $userData->blood_group) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
                         <input type="hidden" id="user_type" name="user_type" value="'.(!$isData ? "student" : null).'">
@@ -1923,7 +1923,7 @@ class Forms extends Myschoolgh {
             <input type="hidden" id="user_id" value="'.($userData->user_id ?? null).'" name="user_id">
             <div class="row">
                 <div class="col-lg-12 text-right">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
         </form>';
@@ -1945,7 +1945,7 @@ class Forms extends Myschoolgh {
         $isData = !empty($userData) && isset($userData->user_id) ? true : false;
 
         $response = '
-        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
                     <h5>BIO INFORMATION</h5>
@@ -2077,7 +2077,7 @@ class Forms extends Myschoolgh {
             <div class="row">
                 <div class="col-lg-12 text-right">
                     <input type="hidden" hidden name="user_type" value="parent">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
         </form>';
@@ -2101,7 +2101,7 @@ class Forms extends Myschoolgh {
         $guardian = "";
 
         $response = '
-        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/departments/'.( $isData ? "update" : "add").'" method="POST">
+        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/departments/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12"><h5>DEPARTMENT INFORMATION</h5></div>
                 <div class="col-lg-4 col-md-6">
@@ -2141,10 +2141,9 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-lg-12 text-right">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
         </form>';
@@ -2166,7 +2165,7 @@ class Forms extends Myschoolgh {
         $isData = !empty($itemData) && isset($itemData->id) ? true : false;
 
         $response = '
-        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/sections/'.( $isData ? "update" : "add").'" method="POST">
+        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/sections/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
                     <h5>SECTION INFORMATION</h5>
@@ -2208,10 +2207,9 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-lg-12 text-right">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
         </form>';
@@ -2235,7 +2233,7 @@ class Forms extends Myschoolgh {
         $guardian = "";
 
         $response = '
-        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/classes/'.( $isData ? "update" : "add").'" method="POST">
+        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/classes/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12"><h5>CLASS INFORMATION</h5></div>
                 <div class="col-lg-4 col-md-4">
@@ -2308,10 +2306,9 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-lg-12 text-right">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
         </form>';
@@ -2334,7 +2331,7 @@ class Forms extends Myschoolgh {
         $isAdmin = !empty($itemData) && !$itemData->isAdmin ? "disabled='disabled'" : "";
 
         $response = '
-        <form class="ajaxform" id="ajaxform" action="'.$baseUrl.'api/courses/'.( $isData ? "update" : "add").'" method="POST">
+        <form class="ajax-data-form" id="ajax-data-form-content" action="'.$baseUrl.'api/courses/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
                     <h5>COURSE DETAILS</h5>
@@ -2393,10 +2390,9 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-lg-12 text-right">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
         </form>';
@@ -2419,7 +2415,7 @@ class Forms extends Myschoolgh {
         $guardian = "";
 
         $response = '
-        <form class="ajaxform" id="ajaxform" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
                     <h5>BIO INFORMATION</h5>
@@ -2518,7 +2514,7 @@ class Forms extends Myschoolgh {
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="null">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
-                                $response .= "<option ".($isData && ($each->id == $userData->blood_group) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                                $response .= "<option ".($isData && ($each->name == $userData->blood_group) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
                     </div>
@@ -2604,10 +2600,9 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-lg-12 text-right">
-                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
         </form>';
@@ -3144,7 +3139,7 @@ class Forms extends Myschoolgh {
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
                             <option value="null">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
-                                $response .= "<option ".($isData && ($each->id == $userData->blood_group) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                                $response .= "<option ".($isData && ($each->name == $userData->blood_group) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
                         $response .= '</select>
                     </div>
