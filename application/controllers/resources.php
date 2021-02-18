@@ -236,6 +236,11 @@ class Resources extends Myschoolgh {
         try {
             // set initial results
             $results = [];
+
+            // load the very first record in the query parsed by the user
+            $comments_count = $this->db->prepare("SELECT COUNT(*) AS comments_count FROM e_learning_comments a WHERE {$params->query} {$where_clause} ORDER BY a.id ASC LIMIT 10000");
+            $comments_count->execute();
+            $comments_count = $comments_count->fetch(PDO::FETCH_OBJ)->comments_count ?? 0;
             
             // load the very first record in the query parsed by the user
             $last_one = $this->db->prepare("SELECT a.id AS first_item FROM e_learning_comments a WHERE {$params->query} {$where_clause} ORDER BY a.id ASC LIMIT 1");
@@ -279,6 +284,7 @@ class Resources extends Myschoolgh {
             // last row id record
             return [
                 "comments_list" => $data,
+                "comments_count" => $comments_count,
                 "first_reply_id" => isset($first_item->first_item) ? $first_item->first_item : 0,
                 "last_comment_id" => $last_comment_id
             ];

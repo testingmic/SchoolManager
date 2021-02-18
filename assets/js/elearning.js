@@ -50,6 +50,8 @@ var share_comment = (comment_id = "") => {
                 } else {
                     $(`div[id="comments-container"]`).append(comment);
                 }
+                let c_count = parseInt($(`span[class="comments_counter"]`).html()) + 1;
+                $(`span[class="comments_counter"]`).html(c_count);
 
             }
         });
@@ -107,6 +109,7 @@ var load_comments = async(data) => {
                         html += format_comment(value);
                     });
                     comments_container.append(html);
+                    $(`span[class="comments_counter"]`).html(`${result.comments_count}`);
                     $(`button[id="load-more-replies"]`).fadeIn("slow").html("Load more").removeClass("hidden");
                 }
                 if (!result.comments_list) {

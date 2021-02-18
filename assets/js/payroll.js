@@ -383,7 +383,6 @@ var update_allowance = (allowance_id) => {
     }
 }
 
-
 var add_allowance = () => {
     $(`div[id="allowanceTypesModal"]`).modal("show");
     $(`div[class~="modal-backdrop"]`).addClass("hidden");

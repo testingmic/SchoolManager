@@ -798,7 +798,7 @@ class Payroll extends Myschoolgh {
                 </tr>
             </tbody>
         </table>";
-        $result .= "<table class=\"table\">
+        $result .= "<table width=\"100%\" class=\"table\">
             <tbody>
                 <tr>
                     <td width=\"50%\">
@@ -822,7 +822,7 @@ class Payroll extends Myschoolgh {
                             </table>
                         </div>
                     </td>
-                    <td width=\"50%\">
+                    <td width=\"50%\" align=\"right\">
                         <span style=\"font-size:16px\"><strong>DEDUCTIONS</strong></span>
                         <div class=\"row justify-content-between\">
                             <table class=\"table\" {$border} cellpadding=\"5px\">";
@@ -842,7 +842,7 @@ class Payroll extends Myschoolgh {
                 </tr>
                 <tr>
                     <td colspan=\"1\"></td>
-                    <td>
+                    <td align=\"right\">
                         <div class=\"row justify-content-between\">
                             <table cellpadding=\"10px\" class=\"table\" {$border}>
                                 <tr>";

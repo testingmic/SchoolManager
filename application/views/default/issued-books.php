@@ -33,14 +33,14 @@ $item_list = load_class("library", "controllers")->issued_request_list($params);
 $books_list = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a href='{$baseUrl}update-book-request/{$each->item_id}' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to view details of this request' href='{$baseUrl}update-book-request/{$each->item_id}' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasIssue && in_array($each->status, ["Issued", "Requested"]) && ($each->state !== "Overdue")) {
-        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-stop'></i></a>";
+        $action .= "&nbsp;<a title='Click to delete this issued book record' href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-stop'></i></a>";
     }
 
     if(!$hasIssue && ($each->the_type == "request") && in_array($each->status, ["Requested"])) {
-        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-stop'></i></a>";
+        $action .= "&nbsp;<a title='Click to delete this requested book record' href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-stop'></i></a>";
     }
 
     $books_list .= "<tr data-row_id=\"{$each->item_id}\">";

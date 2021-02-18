@@ -301,7 +301,7 @@ class Users extends Myschoolgh {
 							a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
 							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name, a.enrollment_date,
 							(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
-						FROM users a WHERE a.status='1' AND a.guardian_id LIKE '%{$result->unique_id}%' AND a.user_type='student'
+						FROM users a WHERE a.status='1' AND a.guardian_id LIKE '%{$result->user_id}%' AND a.user_type='student'
 					");
 					$qr->execute();
 					$result->wards_list = $qr->fetchAll(PDO::FETCH_ASSOC);

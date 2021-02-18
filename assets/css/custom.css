@@ -408,3 +408,27 @@ textarea.form-control {
     width: 350px;
     right: -350px;
 }
+
+.font-18px {
+    font-size: 18px!important;
+}
+
+@media only screen and (max-width: 1024px) {
+    .settingSidebar {
+        display: block!important;
+    }
+    .settingSidebar {
+        width: 350px;
+        right: -350px;
+    }
+}
+
+@media only screen and (max-width: 575.98px) {
+    .settingSidebar {
+        display: block!important;
+    }
+    .settingSidebar {
+        width: 285px;
+        right: -289px;
+    }
+}

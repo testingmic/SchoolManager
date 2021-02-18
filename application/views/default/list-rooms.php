@@ -40,10 +40,10 @@ foreach($item_list["data"] as $key => $each) {
     $action = "";
     
     if($hasUpdate) {
-        $action .= "&nbsp;<a href='{$baseUrl}update-room/{$each->item_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a title='Click to update class room record' href='{$baseUrl}update-room/{$each->item_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
     if($hasDelete) {
-        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"class_room\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a href='#' title='Click to delete this class room' onclick='return delete_record(\"{$each->item_id}\", \"class_room\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     $rooms_list .= "<tr data-row_id=\"{$each->item_id}\">";

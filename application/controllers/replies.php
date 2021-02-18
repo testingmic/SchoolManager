@@ -516,7 +516,7 @@ class Replies extends Myschoolgh {
 
             // add comments
             $this->db->query("UPDATE e_learning_views SET comments=(comments+1) WHERE video_id='{$params->record_id}' LIMIT 1");
-
+            
             // get the last comment information
             $params->comment_id = $comment_id;
             $params->limit = 1;

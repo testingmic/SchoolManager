@@ -117,22 +117,22 @@ if(!empty($item_id)) {
             <div class="col-12 col-md-12 col-lg-8">
                 <div class="card">
                 <div class="padding-20">
-                    <ul class="nav nav-tabs" id="myTab2" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Payment Info</a>
-                    </li>';
+                    <ul class="nav nav-tabs" id="myTab2" role="tablist">';
 
                     if($hasUpdate) {
                         $response->html .= '
                         <li class="nav-item">
-                            <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab" aria-selected="false">Receipt</a>
+                            <a class="nav-link active" id="profile-tab2" data-toggle="tab" href="#settings" role="tab" aria-selected="false">Receipt</a>
                         </li>';
                     }
                     
                     $response->html .= '
+                        <li class="nav-item">
+                            <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Payment Info</a>
+                        </li>
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
-                        <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
+                        <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
                             <div class="mb-3">
                                 <div class="card-body p-2 pl-0">
                                     <div><h5>PAYMENT INFORMATION</h5></div>
@@ -157,7 +157,7 @@ if(!empty($item_id)) {
                                 </div>
                             </div>
                         </div>
-                        <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
+                        <div class="tab-pane fade show active" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                         
                         if($hasUpdate) {
                             $response->html .= '
@@ -173,16 +173,16 @@ if(!empty($item_id)) {
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <address>
-                                                    <strong>Billed To:</strong><br>
-                                                    Sarah Smith<br>
-                                                    6404 Cut Glass Ct,<br>
-                                                    Wendell,<br>
-                                                    NC, 27591, USA
+                                                        <strong>Student Details:</strong><br>
+                                                        '.$data->student_info->name.'<br>
+                                                        <strong>'.$data->student_info->unique_id.'</strong><br>
+                                                        '.$data->class_name.'<br>
+                                                        '.$data->department_name.'<br>
                                                     </address>
                                                 </div>
                                                 <div class="col-md-6 text-md-right">
                                                     <address>
-                                                    <strong>Shipped To:</strong><br>
+                                                    <strong>Billed To:</strong><br>
                                                     Keith Johnson<br>
                                                     197 N 2000th E<br>
                                                     Rexburg, ID,<br>
@@ -194,8 +194,7 @@ if(!empty($item_id)) {
                                                 <div class="col-md-6">
                                                     <address>
                                                     <strong>Payment Method:</strong><br>
-                                                    Visa ending **** 5687<br>
-                                                    test@example.com
+                                                    '.$data->payment_method.'<br>
                                                     </address>
                                                 </div>
                                                 <div class="col-md-6 text-md-right">
@@ -210,7 +209,6 @@ if(!empty($item_id)) {
                                     <div class="row mt-4">
                                         <div class="col-md-12">
                                             <div class="section-title">Order Summary</div>
-                                            <p class="section-lead">All items here cannot be deleted.</p>
                                             <div class="table-responsive">
                                                 <table class="table table-striped table-hover table-md">
                                                     <tbody>
@@ -253,7 +251,7 @@ if(!empty($item_id)) {
                                 </div>
                                 <hr>
                                 <div class="text-md-right">
-                                    <button class="btn btn-warning btn-icon icon-left"><i class="fas fa-print"></i> Print</button>
+                                    <button onclick="" class="btn btn-warning btn-icon icon-left"><i class="fas fa-print"></i> Print</button>
                                 </div>
                             </div>';
                         }

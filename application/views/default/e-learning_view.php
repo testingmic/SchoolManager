@@ -181,7 +181,7 @@ if(empty($item_id) || !isset($item[1])) {
                         <div class="card-body mt-0 pr-0 pl-0">
                             <div id="video_comments">
                                 <div class="share_public_comment">
-                                    <div class="comments_counter mb-3">0 Comments</div>
+                                    <div class="mb-3"><span class="comments_counter">0</span> Comments</div>
                                     '.($elearning->allow_comments === "allow" ? 
                                         '<div class="d-flex justify-content-start" style="min-height:70px">
                                             <div class="pr-1"><img width="60px" class="rounded-circle cursor author-box-picture" src="'.$baseUrl.''.$defaultUser->image.'"></div>

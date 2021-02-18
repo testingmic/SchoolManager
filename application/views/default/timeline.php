@@ -96,6 +96,27 @@ if(!$accessObject->hasAccess("activities", "settings")) {
         $activities = "No activity has been logged for now. Please check back for more detailed activity logged";
     }
 
+    // set the dates
+    $start_date = date("Y-m-d", strtotime("yesterday"));
+    $end_date = date("Y-m-d");
+
+    $sections = [
+        "admin_account" => "Account Modification",
+        "assignments" => "Assignments",
+        "assignment-grade" => "Assignment Grading",
+        "attendance_log" => "Attendance Logs",
+        "bank_details" => "Staff Account Details",
+        "courses" => "Courses",
+        "courses_plan" => "Course Lesson Plan",
+        "course_unit" => "Course Lesson Units",
+        "e_learning" => "E-Learning",
+        "fees_allocation" => "Fees Allocation",
+        "fees_payment" => "Fees Payment",
+        "guardian_ward" => "Guardian Ward",
+        "payslip" => "Payslips",
+        "salary_allowances" => "Salary Allowances"
+    ];
+
     $response->html = '
         <section class="section">
             <div class="section-header">
@@ -106,7 +127,31 @@ if(!$accessObject->hasAccess("activities", "settings")) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-sm-12 col-lg-12">
+                <div class="col-lg-2 col-md-3">
+                    <label>Start Date</label>
+                    <input type="text" class="form-control datepicker" value="'.$start_date.'" name="start_date">
+                </div>
+                <div class="col-lg-2 col-md-3">
+                    <label>End Date</label>
+                    <input type="text" class="form-control datepicker" value="'.$end_date.'" name="end_date">
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <label>Section</label>
+                    <select class="form-control selectpicker" name="section">
+                        <option>All Sections</option>';
+                        foreach($sections as $key => $section) {
+                            $response->html .= "<option value='{$key}'>{$section}</option>";
+                        }
+                        $response->html .= '
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-3">
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary btn-block"><i class="fa fa-filter"></i> Filter</button>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-12 col-lg-12 mt-2">
                     <div class="card">
                         <div class="card-body">
                             <div class="row">

@@ -47,13 +47,13 @@ $hasFiltering = $accessObject->hasAccess("filters", "settings");
 $courses = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a href='{$baseUrl}update-course/{$each->id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to view the course record' href='{$baseUrl}update-course/{$each->id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate) {
-        $action .= "&nbsp;<a href='{$baseUrl}update-course/{$each->id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a title='Click to update course record' href='{$baseUrl}update-course/{$each->id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
     if($hasDelete) {
-        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a href='#' title='Click to delete this Course' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     $courses .= "<tr data-row_id=\"{$each->id}\">";

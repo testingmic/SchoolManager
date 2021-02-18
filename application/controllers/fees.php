@@ -80,6 +80,7 @@ class Fees extends Myschoolgh {
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.phone_number,'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info
                 FROM fees_collection a
+                LEFT JOIN users u ON u.item_id = a.student_id
 				WHERE {$filters} AND a.client_id = ? ORDER BY DATE(a.recorded_date) DESC LIMIT {$params->limit}
             ");
 			$stmt->execute([$params->clientId]);
@@ -550,15 +551,16 @@ class Fees extends Myschoolgh {
             ]);
         }
 
-        /** Check if the class id is valid */
-        $class_check = $this->pushQuery("a.id, (SELECT b.name fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", "classes a", 
-            "a.id='{$params->class_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1");
-
-        if(empty($class_check)) {
-            return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
-        }
-
         try {
+
+             /** Check if the class id is valid */
+            $class_check = $this->pushQuery("a.id, (SELECT b.name FROM fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", 
+                "classes a", 
+                "a.id='{$params->class_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1");
+
+            if(empty($class_check)) {
+                return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+            }
 
             /** Start a transaction */
             $this->db->beginTransaction();
@@ -646,7 +648,7 @@ class Fees extends Myschoolgh {
                     ]);
 
                     // log the user activity
-                    $this->userLogs("fees_allocation", $params->student_id, null, 
+                    $this->userLogs("fees_allocation", $params->class_id, null, 
                         "{$params->userData->name} added the fee allocation for <strong>{$class_check[0]->category_name}</strong> of: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
                 }
 
@@ -673,7 +675,7 @@ class Fees extends Myschoolgh {
 
             }
         } catch(PDOException $e) {
-            $this->db->rollBack();
+            return $e->getMessage();
         }
     }
 
@@ -897,5 +899,49 @@ class Fees extends Myschoolgh {
         }
         
 	}
-    
+
+    /**
+     * Save Allowance
+     * 
+     * @param String $params->description
+     * @param String $params->category_id
+     * @param String $params->name
+     * @param String $params->type
+     * 
+     * @return Array
+     */
+    public function savecategory(stdClass $params) {
+                
+        $found = false;
+        if(isset($params->category_id) && !empty($params->category_id)) {
+            $category = $this->pushQuery("*", "fees_category", "id='{$params->category_id}' AND client_id='{$params->clientId}'");
+            if(empty($category)) {
+                return ["code" => 203, "data" => "Sorry! An invalid category id was parsed."];
+            }
+            $found = true;
+        }
+
+        if(!$found) {
+            $stmt = $this->db->prepare("INSERT INTO fees_category SET amount = ?, name = ?, description = ?, code = ?, client_id = ?");
+            $stmt->execute([$params->amount ?? null, $params->name, $params->description ?? null, $params->code ?? null, $params->clientId]);
+            // log the user activity
+            $this->userLogs("fees_category", $this->lastRowId("fees_category"), null, "<strong>{$params->userData->name}</strong> added a new category with name: {$params->name}", $params->userId);
+        } else {
+            $stmt = $this->db->prepare("UPDATE fees_category SET amount = ?, name = ?, description = ?, code = ? WHERE id = ? AND client_id = ?");
+            $stmt->execute([$params->amount ?? null, $params->name, $params->description ?? null, $params->code ?? null, $params->category_id, $params->clientId]);
+            // log the user activity
+            $this->userLogs("fees_category", $params->category_id, null, "<strong>{$params->userData->name}</strong> updated the category: {$params->name}", $params->userId);
+        }
+
+        # set the output to return when successful
+        $return = ["code" => 200, "data" => "Request was successfully executed.", "refresh" => 800];
+        
+        # append to the response
+        $return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}fees-category"];
+
+        // return the output
+        return $return;
+        
+    }
+
 }

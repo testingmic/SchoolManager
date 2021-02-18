@@ -223,5 +223,4 @@ $(`div[id="fees_allocation_form"] select[name="student_id"]`).on("change", funct
         load_Fees_Allocation_Amount();
     }
 });
-
 $(`div[class~="toggle-calculator"]`).removeClass("hidden");

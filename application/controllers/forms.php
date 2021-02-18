@@ -1004,14 +1004,19 @@ class Forms extends Myschoolgh {
             "guardian" => [
                 "title" => "Student Name",
                 "type" => "student",
+                "key" => "unique_id",
                 "attr" => "guardian_id"
             ],
             "student" => [
+                "key" => "user_id",
                 "title" => "Guardian Name",
                 "type" => "guardian",
                 "attr" => "student_id"
             ]
         ];
+
+        // set the key for the data to load
+        $key = $data->{$array[$data->user_type]["key"]};
 
         $html_content = "<div class='row'>";
         $html_content .= "<div class='col-md-10'>";
@@ -1026,7 +1031,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<button onclick='return search_usersList(\"{$array[$data->user_type]["type"]}\")' class='btn btn-outline-success btn-block'><i class='fa fa-filter'></i></button>";
         $html_content .= "</div>";
         $html_content .= "</div>";
-        $html_content .= "<div class='col-md-12 mt-2' data-{$array[$data->user_type]["attr"]}='{$data->unique_id}' id='user_search_list'>";
+        $html_content .= "<div class='col-md-12 mt-2' data-{$array[$data->user_type]["attr"]}='{$key}' id='user_search_list'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "

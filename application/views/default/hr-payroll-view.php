@@ -62,7 +62,48 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
             $payroll_form = load_class("forms", "controllers")->payroll_form($clientId, $userId, $data);
 
             // get the list of employee payslips
-            $payslips = "<div class='text-center mt-3 pt-2 border-top'>No payslips have currently been generated for this staff.</div>";
+            $payslips = "";
+
+            $staff_param = (object) ["clientId" => $clientId, "employee_id" => $userId];
+            $payslips_list = load_class("payroll", "controllers")->paysliplist($staff_param)["data"];
+            
+            // if the payslip information is not empty
+            if(!empty($payslips_list)) {
+                $basic_salary = 0;
+                $allowances = 0;
+                $deductions = 0;
+                $net_salary = 0;
+
+                foreach($payslips_list as $key => $each) {
+                    
+                    $basic_salary += $each->basic_salary;
+                    $allowances += $each->total_allowance;
+                    $deductions += $each->total_deductions;
+                    $net_salary += $each->net_salary;
+
+                    $action = "&nbsp; <a href=\"{$baseUrl}download?pay_id={$each->item_id}&dw=true\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-warning\"><i class='fa fa-download'></i></a>&nbsp; 
+                        <a href=\"{$baseUrl}download?pay_id={$each->item_id}\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-primary\"><i class='fa fa-print'></i> </a>";
+                    
+                    // set the summary data
+                    $summary = "<div class='row'>";
+                    $summary .= "<div class='col-lg-6'><strong>Basic Salary</strong>:</div> <div class='col-lg-6'>GH&cent;".number_format($each->basic_salary, 2)."</div>";
+                    $summary .= "<div class='col-lg-6'><strong>Total Allowances</strong>:</div> <div class='col-lg-6'>GH&cent;".number_format($each->total_allowance, 2)."</div>";
+                    $summary .= "<div class='col-lg-6'><strong>Less Deductions</strong>:</div> <div class='col-lg-6'>GH&cent;".number_format($each->total_deductions, 2)."</div>";
+                    $summary .= "<div class='col-lg-12'><hr class='mb-0 mt-0'></div><div class='col-lg-6'><strong>Net Salary:</strong></div> <div class='col-lg-6'><strong>GH&cent;".number_format($each->net_salary, 2)."</strong></div>";
+                    $summary .= "</div>";
+
+                    //: Set the new status
+                    $status = ($each->status == 1) ? "<span class='badge badge-success'><i class=\"fa fa-check-circle\"></i> Paid</span>" : "<span class='badge badge-primary'><i class=\"fa fa-check-circle\"></i> Pending</span>";
+
+                    $payslips .= "<tr data-row_id=\"{$each->id}\">";
+                    $payslips .= "<td>".($key+1)."</td>";
+                    $payslips .= "<td>{$each->payslip_month} {$each->payslip_year} <br>{$status}</td>";
+                    $payslips .= "<td width=\"50%\">{$summary}</td>";
+                    $payslips .= "<td width=\"15%\">{$action}</td>";
+                    $payslips .= "</tr>";
+                    
+                }
+            }
 
             // user  permission information
             $level_data = "<div class='row'>";
@@ -204,7 +245,19 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                             <div><h5>EMPLOYEE PAYSLIPS</h5></div>
                                             <div><a class="btn btn-outline-primary" href="'.$baseUrl.'hr-payslip-generate/'.$userId.'"><i class="fa fa-plus"></i> Create Payslip</a></div>
                                         </div>
-                                        <div>'.$payslips.'</div>
+                                        <div class="mt-3 border-top pt-3">
+                                            <table class="table table-responsive table-striped datatable">
+                                                <thead>
+                                                    <tr>
+                                                        <th width="5%" class="text-center">#</th>
+                                                        <th>Month / Year</th>
+                                                        <th>Summary</th>
+                                                        <th>Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>'.$payslips.'</tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

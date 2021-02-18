@@ -67,7 +67,7 @@ foreach($payslips_list["data"] as $key => $each) {
     }
     
     $action .= "&nbsp; <a href=\"{$baseUrl}download?pay_id={$each->item_id}&dw=true\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-warning\"><i class='fa fa-download'></i></a>&nbsp; 
-            <a href=\"{$baseUrl}download?pay_id={$each->item_id}&dw=false\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-primary\"><i class='fa fa-print'></i> </a>";    
+            <a href=\"{$baseUrl}download?pay_id={$each->item_id}\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-primary\"><i class='fa fa-print'></i> </a>";
     
     if($generatePermission && !$each->status) {
         $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"payslip\");' class='btn mb-1 btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -77,7 +77,7 @@ foreach($payslips_list["data"] as $key => $each) {
     $summary .= "<div class='col-lg-6'><strong>Basic Salary</strong>:</div> <div class='col-lg-6'>GH&cent;".number_format($each->basic_salary, 2)."</div>";
     $summary .= "<div class='col-lg-6'><strong>Total Allowances</strong>:</div> <div class='col-lg-6'>GH&cent;".number_format($each->total_allowance, 2)."</div>";
     $summary .= "<div class='col-lg-6'><strong>Less Deductions</strong>:</div> <div class='col-lg-6'>GH&cent;".number_format($each->total_deductions, 2)."</div>";
-    $summary .= "<div class='col-lg-12'><hr></div><div class='col-lg-6'><strong>Net Salary:</strong></div> <div class='col-lg-6'><strong>GH&cent;".number_format($each->net_salary, 2)."</strong></div>";
+    $summary .= "<div class='col-lg-12'><hr class='mb-1 mt-1'></div><div class='col-lg-6'><strong>Net Salary:</strong></div> <div class='col-lg-6'><strong>GH&cent;".number_format($each->net_salary, 2)."</strong></div>";
     $summary .= "</div>";
 
     //: Set the new status

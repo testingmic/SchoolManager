@@ -19,7 +19,7 @@
 
         <div class="settingSidebar">
           <a href="#" class="settingPanelToggle"> <i class="fa fa-book-reader"></i></a>
-            <div class="settingSidebar-body ps-container ps-theme-default">
+            <div class="settingSidebar-body ps ps-theme-default">
                 <div class=" fade show active">
                     <div class="setting-panel-header"><h6 class="font-medium m-b-0">Onboard Dictionary</h6></div>
                     <div class="p-15 border-bottom">
@@ -121,7 +121,7 @@
     
     <script src="<?= $baseUrl; ?>assets/js/myschoolgh.js"></script>
     <?php if($isAdminAccountant) { ?>
-    <!-- <script src="<?= $baseUrl; ?>assets/js/calculator.js"></script> -->
+    <script src="<?= $baseUrl; ?>assets/js/calculator.js"></script>
     <?php } ?>
     <script src="<?= $baseUrl; ?>assets/js/app.js"></script>
 

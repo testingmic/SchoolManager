@@ -50,14 +50,14 @@ $hasFiltering = $accessObject->hasAccess("filters", "settings");
 $assignments = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a href='{$baseUrl}update-assignment/{$each->item_id}/view' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to update assignment record' href='{$baseUrl}update-assignment/{$each->item_id}/view' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate && $each->assignment_type == "multiple_choice") {
-        $action .= "&nbsp;<a href='{$baseUrl}add-assignment/add_question?qid={$each->item_id}' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
+        $action .= "&nbsp;<a title='Click to manage questions for this assignment' href='{$baseUrl}add-assignment/add_question?qid={$each->item_id}' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
     }
 
     if($hasDelete && in_array($each->state, ["Pending", "Draft"])) {
-        $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"assignments\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a href='#' title='Click to delete this Assignment' onclick='return delete_record(\"{$each->id}\", \"assignments\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     $assignments .= "<tr data-row_id=\"{$each->id}\">";

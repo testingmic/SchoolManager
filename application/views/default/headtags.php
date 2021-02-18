@@ -1,6 +1,6 @@
 <?php
 // global variables
-global $usersClass, $accessObject, $medicsClass;
+global $usersClass, $accessObject, $myClass;
 
 // base url
 $baseUrl = config_item("base_url");
@@ -10,6 +10,7 @@ $appName = config_item("site_name");
 if(!$usersClass->loggedIn()) { require "login.php"; exit(-1); }
 
 // confirm that user id has been parsed
+$clientId = $session->clientId;
 $loggedUserId = $session->userId;
 $cur_user_id = (confirm_url_id(1)) ? xss_clean($SITEURL[1]) : $loggedUserId;
 
@@ -17,9 +18,10 @@ $cur_user_id = (confirm_url_id(1)) ? xss_clean($SITEURL[1]) : $loggedUserId;
 $userData = $defaultUser;
 
 // get the variables for the accessobject
+$accessObject->clientId = $clientId;
 $accessObject->userId = $loggedUserId;
-$accessObject->clientId = $session->clientId;
 $accessObject->userPermits = $userData->user_permissions;
+
 $userPrefs = $userData->preferences;
 $userPrefs->userId = $loggedUserId;
 
@@ -39,8 +41,7 @@ $text_editor = (!isset($userPrefs->text_editor) || (isset($userPrefs->text_edito
 $userNotifications = [];
 
 // set the current url in session
-$user_current_url = current_url();
-$session->user_current_url = $user_current_url;
+$user_current_url = $session->user_current_url;
 
 // notification handler
 $announcementNotice = $announcementClass->notice($userData);
@@ -50,6 +51,10 @@ $isAdmin = $userData->user_type == "admin" ? true : false;
 $isTeacher = $userData->user_type == "teacher" ? true : false;
 $isStudent = $userData->user_type == "student" ? true : false;
 $isEmployee = $userData->user_type == "employee" ? true : false;
+
+// clientdata
+$clientData = $myClass->client_data($clientId);
+$clientPrefs = $clientData->client_preferences;
 
 // user payment preference
 $userPrefs->payments = isset($userPrefs->payments) ? $userPrefs->payments : (object) [];
@@ -150,6 +155,15 @@ load_helpers(['menu_helper']);
                     <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg collapse-btn"><i class="fas fa-bars"></i></a></li>
                     <li><a href="#" class="nav-link nav-link-lg fullscreen-btn"><i class="fas fa-expand"></i></a></li>
                     <li><a href="#" class="nav-link nav-link-lg hidden" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
+                    <li class="border-left text-white d-none d-md-block"><a href="javascript:void(0)" class="nav-link text-white nav-link-lg">
+                            Academic Year/Term:
+                            <strong class="font-18px">
+                                <span><?= $clientPrefs->academics->academic_year ?></span> 
+                                <span>|</span>
+                                <span><?= $clientPrefs->academics->academic_term ?> Term</span>
+                            </strong>
+                        </a>
+                    </li>
                 </ul>
                 </div>
                 <ul class="navbar-nav navbar-right">

@@ -249,7 +249,7 @@ elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"
                 print $content;
             }
 
-            show_content("Course Material", $file_name, $content, "L");
+            show_content("Course Material", $file_name, $content, "P");
             
             exit;
         }

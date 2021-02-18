@@ -43,18 +43,6 @@ if(!$accessObject->hasAccess("login_history", "settings")) {
     $activities = "";
     $user_login_history = [];
 
-    $icons = [
-        "assignment" => "fa-book-reader",
-        "assignments" => "fa-book-reader",
-        "attendance_log" => "fa-user-check",
-        "guardian_ward" => "fa-user-graduate",
-        "student_account" => "fa-user-graduate",
-        "parent_account" => "fa-user-clock",
-        "employee_account" => "fa-users",
-        "accountant_account" => "fa-user-shield",
-        "teacher_account" => "fa-user-tie",
-        "admin_account" => "fa-user-cog"
-    ];
     foreach($activity_list as $activity) {
         
         $user_login_history[$activity->id] = $activity;
@@ -85,6 +73,14 @@ if(!$accessObject->hasAccess("login_history", "settings")) {
         $activities = "No login history has been logged for now. Please check back for more detailed activity logged";
     }
 
+    // set the dates
+    $start_date = date("Y-m-d", strtotime("yesterday"));
+    $end_date = date("Y-m-d");
+
+
+    // user types
+
+    
     $response->html = '
         <section class="section">
             <div class="section-header">
@@ -95,7 +91,33 @@ if(!$accessObject->hasAccess("login_history", "settings")) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-sm-12 col-lg-12">
+                <div class="col-lg-2 col-md-3">
+                    <label>Start Date</label>
+                    <input type="text" class="form-control datepicker" value="'.$start_date.'" name="start_date">
+                </div>
+                <div class="col-lg-2 col-md-3">
+                    <label>End Date</label>
+                    <input type="text" class="form-control datepicker" value="'.$end_date.'" name="end_date">
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <label>User Type</label>
+                    <select class="form-control selectpicker" name="user_type">
+                        <option>All Types</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <label>Select User</label>
+                    <select class="form-control selectpicker" name="user_id">
+                        <option>All Users</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-3">
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary btn-block"><i class="fa fa-filter"></i> Filter</button>
+                    </div>
+                </div>
+                <div class="col-12 mt-2 col-sm-12 col-lg-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="row">

@@ -40,8 +40,8 @@ $allowance_array_list = [];
 foreach($allowance_types as $key => $each) {
     $allowance_array_list[$each->id] = $each;
     // payslips_allowance_types
-    $action = "<a href='#' onclick='return update_allowance(\"{$each->id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-    $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"allowance\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+    $action = "<a href='#' title='Click to update this category' onclick='return update_allowance(\"{$each->id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+    $action .= "&nbsp;<a title='Click to delete this Allowance Category' href='#' onclick='return delete_record(\"{$each->id}\", \"allowance\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
 
     $staff_list .= "<tr data-row_id=\"{$each->id}\">";
     $staff_list .= "<td>".($key+1)."</td>";
@@ -69,8 +69,8 @@ $response->html = '
                 <div class="breadcrumb-item">Allowance Types</div>
             </div>
         </div>
-        <form action="'.$baseUrl.'api/payroll/saveallowance" class="ajax-data-form" id="ajax-data-form-content">
-            <div data-backdrop="static" data-keyboard="false" class="modal fade" id="allowanceTypesModal">
+        <div data-backdrop="static" data-keyboard="false" class="modal fade" id="allowanceTypesModal">
+            <form action="'.$baseUrl.'api/payroll/saveallowance" class="ajax-data-form" id="ajax-data-form-content">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -118,8 +118,8 @@ $response->html = '
                         </div>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
 
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">

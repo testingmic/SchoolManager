@@ -438,6 +438,8 @@ if ( ! function_exists('jump_to_main')) {
 	 */
 	function jump_to_main($baseUrl = null) {
 		global $_SERVER, $session;
+		// set the current url in session
+		$session->user_current_url = current_url();
 		if(!$session->clientId) {
 			$response = (object) [
 				"title" => "Session Expired!",
