@@ -125,11 +125,11 @@ else if($isTutorStudent) {
     // unset the sessions if $session->currentQuestionId is not empty
     foreach($assignments_array_list["data"] as $key => $each) {
         
-        $action = "<a href='{$baseUrl}update-assignment/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+        $action = "<a  href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
         $assigments_list .= "<tr data-row_id=\"{$each->id}\">";
         $assigments_list .= "<td>".($key+1)."</td>";
-        $assigments_list .= "<td><a href='{$baseUrl}update-assignment/{$each->item_id}/view'>{$each->assignment_title}</a> ".(
+        $assigments_list .= "<td><a  href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
             $can_Update_Assign ? 
                 "<br>Class: <strong>{$each->class_name}</strong>
                 <br>Course: <strong>{$each->course_name}</strong>" : 
@@ -266,7 +266,7 @@ if($isWardTutorParent) {
 
                 // list the items
                 $action = "";
-                $action .= "&nbsp;<a href='{$baseUrl}fees-view/{$each->item_id}/print' class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
+                $action .= "&nbsp;<a  href='#' onclick='return loadPage(\"{$baseUrl}fees-view/{$each->item_id}/print\");' class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
 
                 $fees_history .= "<tr data-row_id=\"{$each->item_id}\">";
                 $fees_history .= "<td>".($key+1)."</td>";
@@ -276,7 +276,7 @@ if($isWardTutorParent) {
                             ".(!empty($each->student_info->image) ? "
                             <div class='mr-2'><img src='{$baseUrl}{$each->student_info->image}' width='40px' height='40px'></div>" : "")."
                             <div>
-                                <a href='{$baseUrl}update-student/{$each->student_info->user_id}/'>{$each->student_info->name}</a> <br>
+                                <a  href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$each->student_info->user_id}\");'>{$each->student_info->name}</a> <br>
                                 <strong>{$each->student_info->unique_id}</strong><br>
                                 {$each->class_name}
                             </div>
