@@ -65,7 +65,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
         $deductions += $each->deductions;
         $net_salary += $each->net_salary;
 
-        $action = "<a href='{$baseUrl}hr-payroll-view/{$each->user_id}' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+        $action = "<a href='#' onclick='loadPage(\"{$baseUrl}hr-payroll-view/{$each->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
         $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
         $staff_list .= "<td>".($key+1)."</td>";
