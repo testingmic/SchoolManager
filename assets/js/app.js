@@ -105,17 +105,6 @@ var serializeSelect = (select) => {
     return array;
 }
 
-$("#lock-system").on("click", function(e) {
-    e.preventDefault();
-    if ($(this).hasClass("disabled")) {
-        $(".upgradebox").removeClass("invisible").addClass("visible");
-        return false;
-    }
-    setApplicationLock("lock").then(() => {
-        $(".lockbox").removeClass("invisible").addClass("visible");
-    })
-})
-
 $("#history-reload").on("click", function() {
     linkHandler(document.location.href, false)
 })
@@ -161,14 +150,11 @@ var logout = async() => {
 }
 
 $(() => {
-    init()
-    linkClickStopper($(document.body))
-    linkHandler(document.location.href, true)
-
-    // CARDS ACTIONS
+    init();
+    linkClickStopper($(document.body));
+    linkHandler(document.location.href, true);
     $(document).on('click', '.card-actions a', (e) => {
         e.preventDefault();
-
         if ($(this).hasClass('btn-close')) {
             $(this).parent().parent().parent().fadeOut();
         } else if ($(this).hasClass('btn-minimize')) {
@@ -178,45 +164,29 @@ $(() => {
             } else {
                 $('i', $(this)).removeClass($.panelIconClosed).addClass($.panelIconOpened);
             }
-
         } else if ($(this).hasClass('btn-setting')) {
             $('#myModal').modal('show');
         }
     });
-
-    initMainMenu()
-    processPreferences()
-
-    if ($("#chat-page").length === 0 && $.env !== "development") {
-        // fetchUserChats();
-    }
-
+    initMainMenu();
     $('.trialdismiss').on("click", function() {
         $(this).parents(".trialbox").fadeOut("fast");
     });
-
     $('.upgradedismiss').on("click", function() {
         $(this).parents(".trialbox").removeClass("visible").addClass("invisible");
     });
-
-    // $('.sidebarcalculator').calculator({ showFormula: true });
-
     $('.sidebar-close').click(() => {
         $('body').toggleClass('sidebar-opened').parent().toggleClass('sidebar-opened');
     });
-
-    // ---------- Disable moving to top ---------- 
     $('a[href="#"][data-top!=true]').click((e) => {
         e.preventDefault();
     });
 });
 
 var init = () => {
-
     $.chatinterval = 2000
     appxhr = []
     initPlugins()
-    initExportButtons()
 }
 
 var linkClickStopper = (element) => {
@@ -233,7 +203,7 @@ var linkClickStopper = (element) => {
             $(event.currentTarget).hasClass('anchor')) {
             return
         }
-        event.preventDefault()
+        event.preventDefault();
 
         let target = event.currentTarget.href
 
@@ -314,7 +284,6 @@ var loadPage = (loc, pushstate) => {
         $(`[id="history-refresh"]`).removeClass("hidden");
     }
 
-    let progress = moveProgress();
     $.ajax({
         url: loc,
         data: $.form_data,
@@ -322,7 +291,6 @@ var loadPage = (loc, pushstate) => {
         dataType: "JSON",
         beforeSend: () => {
             $.mainprogress.show()
-            progress.move($.mainprogress, 5, true)
             $.pageoverlay.show();
         },
         success: (result) => {
@@ -360,8 +328,9 @@ var loadPage = (loc, pushstate) => {
             }
 
             document.title = result.title
-            progress.complete($.mainprogress, false)
             $.pageoverlay.hide();
+        },
+        complete: () => {
             init();
             initDataTables();
             init_image_popup();
@@ -384,7 +353,6 @@ var loadPage = (loc, pushstate) => {
             $('body, html').scrollTop(0);
         },
         error: (err) => {
-            progress.complete($.mainprogress, false);
             $.pageoverlay.hide();
             // notify("Sorry! Error processing request.");
             if ([404, 500].includes(err.status)) {
@@ -440,98 +408,30 @@ var loadFormAction = (form) => {
     })
 }
 
-var processPreferences = () => {
-    // ---------- Save preference ---------- 
-    $("input[name='menutype']").change((event) => {
-        var menutype = $(event.target).val();
-        var menuclass;
-        switch (menutype) {
-            case "compact":
-                $('body').removeClass('sidebar-minimized sidebar-hidden').addClass('sidebar-compact');
-                saveMenuPreference('sidebar-compact');
-                break;
-            case "minimized":
-                $('body').removeClass('sidebar-compact sidebar-hidden').addClass('sidebar-minimized');
-                saveMenuPreference('sidebar-minimized');
-                break;
-            case "hidden":
-                $('body').removeClass('sidebar-compact sidebar-minimized').addClass('sidebar-hidden');
-                saveMenuPreference('sidebar-hidden');
-                break;
-            default:
-                $('body').removeClass('sidebar-compact sidebar-minimized sidebar-hidden');
-                saveMenuPreference('');
-                break;
-        }
-    });
-
-    $("input[name='theme']").change((event) => {
-        if ($(event.target).is(":checked")) {
-            $('body').removeClass('light').addClass('dark');
-            saveThemePreference('dark');
-        } else {
-            $('body').removeClass('dark');
-            saveThemePreference('light');
-        }
-    });
-}
-
 var initMainMenu = () => {
-    if ($(".notifications-button").length) {
-        if ($(".notifications-button").hasClass("hasnotification")) {
-            setTimeout(_swingBell(), 2000);
-        }
-    }
-    // Dropdown Menu
     $.navigation.on('click', 'a', (e) => {
-        let $this = $(e.currentTarget)
         if ($.ajaxLoad) {
             e.preventDefault();
         }
-        if ($this.hasClass('nav-dropdown-toggle')) {
-            $this.parent().toggleClass('open');
-            resizeBroadcast();
-        } else if ($('body').hasClass('sidebar-minimized')) {
-            resizeBroadcast();
-        }
     });
-    // ---------- Main Menu Open/Close, Min/Full ---------- 
     $(".aside-menu .nav-item").on("click", (e) => {
         let $this = $(e.currentTarget)
         $this.siblings(".nav-item").children('.nav-link').removeClass('active');
         $this.children('.nav-link').addClass('active');
-        // $(this).trigger('click');
     });
-
     $('.navbar-toggler').click((e) => {
         let $this = $(e.currentTarget)
-
         if ($this.hasClass('sidebar-toggler')) {
             if ($('body').hasClass('sidebar-minimized')) {
                 $(".nav-link.nav-dropdown-toggle, .nav-link.active").hide();
-                $('body')
-                    .addClass('sidebar-hidden')
-                    .removeClass('sidebar-minimized');
+                $('body').addClass('sidebar-hidden').removeClass('sidebar-minimized');
             } else if ($('body').hasClass('sidebar-hidden')) {
                 $(".nav-link.nav-dropdown-toggle, .nav-link.active").show();
-                $('body')
-                    .removeClass('sidebar-hidden');
-                // $('body').toggleClass('sidebar-minimized');
+                $('body').removeClass('sidebar-hidden');
             } else {
                 $(".nav-link.nav-dropdown-toggle, .nav-link.active").show();
-                $('body')
-                    .toggleClass('sidebar-minimized');
+                $('body').toggleClass('sidebar-minimized');
             }
-            resizeBroadcast();
-        }
-
-        if ($this.hasClass('sidebar-minimizer')) {
-            $('body').toggleClass('sidebar-minimized');
-            resizeBroadcast();
-        }
-        if ($this.hasClass('mobile-sidebar-toggler')) {
-            $('body').toggleClass('sidebar-mobile-show');
-            resizeBroadcast();
         }
     });
 }
@@ -640,53 +540,13 @@ var setActiveNavLink = () => {
     });
 }
 
-var initExportButtons = () => {
-    $(".btn-export, .export-btn").on("click", (event) => {
-        event.preventDefault();
-        $(window).on("beforeunload", () => {
-            $('.mainpageloader').css({ "visibility": "hidden" });
-        })
-
-        let button = $(event.target),
-            link = button.attr("href"),
-            exportContent = button.attr("data-controls"),
-            data1 = button.attr("data-input1") == undefined ? null : $(button.attr("data-input1")).val(),
-            data2 = button.attr("data-input2") == undefined ? null : $(button.attr("data-input2")).val();
-        $.ajax({
-            url: link,
-            dataType: "JSON",
-            data: { data1: data1, data2: data2 },
-            beforeSend: () => {
-                button.addClass("disabled");
-                $(exportContent).prepend("<div class='export-loader'></div>");
-            },
-            success: (res) => {
-                button.removeClass("disabled");
-                $('.export-loader').remove();
-                if (res.status == 'success') {
-                    notify(res.message, "success");
-                    // linkHandler(res.file)
-                    location.href = res.file;
-                } else {
-                    notify(res.message);
-                }
-            },
-            error: () => {
-                button.removeClass("disabled");
-                $('.export-loader').remove();
-                notify("Error Exporting Data");
-            }
-        });
-    });
-}
-
 var initDataTables = () => {
     if ($('.datatable').length > 0) {
         $('.datatable').dataTable({
             search: null,
             lengthMenu: [
-                [15, 30, 50, 75, 100, 200, -1],
-                [15, 30, 50, 75, 100, 200, "All"]
+                [10, 30, 50, 75, 100, 200, -1],
+                [10, 30, 50, 75, 100, 200, "All"]
             ],
             language: {
                 sEmptyTable: "Nothing Found",
@@ -710,7 +570,6 @@ var fetch_user_chats = () => {
             dataType: "JSON",
             success: (res) => {
                 if (res.count > 0) {
-                    playAudio("alert");
                     $('.messagescount-badge').text(res.count);
                     if ($('.messagescount-badge').length < 2) {
                         $('.messagescount').append("<span class='badge badge-pill badge-success messagescount-badge'>" + res.count + "</span>");
@@ -723,93 +582,8 @@ var fetch_user_chats = () => {
     setTimeout(() => {}, $.chatinterval);
 }
 
-var resizeBroadcast = () => {
-    var timesRun = 0;
-    var interval = setInterval(() => {
-        timesRun += 1;
-        if (timesRun === 5) {
-            clearInterval(interval);
-        }
-        window.dispatchEvent(new Event('resize'));
-    }, 62.5);
-}
-
-var _swingBell = () => {
-    $(".notifications-button").addClass("animated infinite swing");
-    var timeoutID = window.setTimeout(() => {
-        _stopSwingBell();
-    }, 10000);
-}
-
-var _stopSwingBell = () => {
-    $(".notifications-button").removeClass("animated infinite swing");
-    var timeoutID = window.setTimeout(() => {
-        _swingBell();
-    }, 10000);
-}
-
-let timeout
-var moveProgress = () => {
-    let move = (bar, startwidth, clear) => {
-        let width = startwidth || 5
-        if (clear) clearTimeout(timeout) // In case new loader needed 
-        timeout = setTimeout(() => {
-            bar.find(".progress-bar").css({ width: width + "%" })
-            if (width < 90) width += 5;
-            else width -= 3;
-            move(bar, width, false)
-        }, randomInt(400, 800))
-    }
-
-    let complete = (bar, removebar) => {
-        clearTimeout(timeout)
-        bar.find(".progress-bar").css({ width: "100%" })
-        setTimeout(() => { hide(bar, removebar) }, 1000)
-    }
-
-    let hide = (bar, removeBar) => {
-        let removebar = removeBar || false
-        if (removebar) {
-            bar.remove()
-        } else {
-            bar.hide()
-                .find(".progress-bar").css({ width: "5%" })
-        }
-    }
-
-    return {
-        move: move,
-        complete: complete
-    }
-}
-
 var notify = (text, type = "error") => {
     $.notify(text, type);
-}
-
-var playAudio = (file) => {
-    let alertaudio;
-    switch (file) {
-        case 'alert':
-            alertaudio = document.getElementById('audio-alert');
-            alertaudio.volume = 0.3;
-            break;
-        case 'load':
-            alertaudio = document.getElementById('audio-load');
-            alertaudio.volume = 0.7;
-            break;
-        case 'pop':
-            alertaudio = document.getElementById('audio-pop');
-            alertaudio.volume = 0.7;
-            break;
-        default:
-            alertaudio = document.getElementById('audio-warning');
-            alertaudio.volume = 0.1;
-            break;
-    }
-    alertaudio.pause();
-    alertaudio.currentTime = 0;
-    alertaudio.play();
 }
 
 var randomInt = (min, max) => {

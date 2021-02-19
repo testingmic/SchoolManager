@@ -36,10 +36,10 @@ $hasUpdate = $accessObject->hasAccess("update", "section");
 $sections = "";
 foreach($department_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view section record' href='{$baseUrl}update-section/{$each->id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to view section record' href='#' onclick='return loadPage(\"{$baseUrl}update-section/{$each->id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to update section record' href='{$baseUrl}update-section/{$each->id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a title='Click to update section record' href='#' onclick='return loadPage(\"{$baseUrl}update-section/{$each->id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Click to delete this Section' onclick='return delete_record(\"{$each->id}\", \"section\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";

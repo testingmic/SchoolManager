@@ -67,11 +67,11 @@ if(!empty($item_id)) {
         foreach($books_list["data"] as $key => $book) {
             
             // view link
-            $action = "<a href='{$baseUrl}update-book/{$book->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-book/{$book->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
             $category_books_list .= "<tr data-row_id=\"{$book->item_id}\">";
             $category_books_list .= "<td>".($key+1)."</td>";
-            $category_books_list .= "<td><a href='{$baseUrl}update-book/{$book->item_id}'>{$book->title}</a></td>";
+            $category_books_list .= "<td><a href='#' onclick='return loadPage(\"{$baseUrl}update-book/{$book->item_id}\");'>{$book->title}</a></td>";
             $category_books_list .= "<td>{$book->author}</td>";
             $category_books_list .= "<td>{$book->quantity}</td>";
             $category_books_list .= "<td><span class='underline'>".($book->isbn ?? null)."</span></td>";

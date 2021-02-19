@@ -648,33 +648,36 @@ class Timetable extends Myschoolgh {
         $width = round(100/($slots+1));
 
         // preferences
-        $prefs = !is_object($data->client_details->client_preferences) ? json_decode($data->client_details->client_preferences) : $data->client_details->client_preferences;
-        
-        // if the header parameter is not set
-        if(!isset($params->no_header)) {
+        if(isset($data->client_details)) {
+            // set the preferences
+            $prefs = !is_object($data->client_details->client_preferences) ? json_decode($data->client_details->client_preferences) : $data->client_details->client_preferences;
             
-            // set the header content
-            $summary = '<table width="100%" class="'.$table_class.'" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
-            $summary .= "<tr>\n
-                    <td>
-                        <strong style=\"font-size:13px;\">Class Name:</strong> {$data->class_name}<br>
-                        <strong style=\"font-size:13px;\">Department:</strong> {$data->class_name}
-                    </td>
-                    <td align=\"center\">
-                        <strong style=\"padding-top:0px;font-size:17px\">".strtoupper($data->client_details->client_name)."</strong><br>
-                        <strong style=\"padding-top:0px;font-size:12px\">".$data->client_details->client_email."</strong><br>
-                        <strong style=\"padding-top:0px;font-size:12px\">".$data->client_details->client_contact."</strong><br>
-                        <strong>".$data->client_details->client_address."</strong><br>
-                    </td>
-                    <td>
-                        <strong style=\"font-size:12px;\">Academic Year:</strong> {$prefs->academics->academic_year}<br>
-                        <strong style=\"font-size:12px;\">Academic Term:</strong> {$prefs->academics->academic_term}<br>
-                        ".(isset($data->last_updated) ? "
-                            <strong style=\"font-size:12px;\">Generated On:</strong> {$data->last_updated}<br>" : ""
-                        )."
-                    </td>\n
-                </tr>\n
-                </table>\n";
+            // if the header parameter is not set
+            if(!isset($params->no_header)) {
+                
+                // set the header content
+                $summary = '<table width="100%" class="'.$table_class.'" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
+                $summary .= "<tr>\n
+                        <td>
+                            <strong style=\"font-size:13px;\">Class Name:</strong> {$data->class_name}<br>
+                            <strong style=\"font-size:13px;\">Department:</strong> {$data->class_name}
+                        </td>
+                        <td align=\"center\">
+                            <strong style=\"padding-top:0px;font-size:17px\">".strtoupper($data->client_details->client_name)."</strong><br>
+                            <strong style=\"padding-top:0px;font-size:12px\">".$data->client_details->client_email."</strong><br>
+                            <strong style=\"padding-top:0px;font-size:12px\">".$data->client_details->client_contact."</strong><br>
+                            <strong>".$data->client_details->client_address."</strong><br>
+                        </td>
+                        <td>
+                            <strong style=\"font-size:12px;\">Academic Year:</strong> {$prefs->academics->academic_year}<br>
+                            <strong style=\"font-size:12px;\">Academic Term:</strong> {$prefs->academics->academic_term}<br>
+                            ".(isset($data->last_updated) ? "
+                                <strong style=\"font-size:12px;\">Generated On:</strong> {$data->last_updated}<br>" : ""
+                            )."
+                        </td>\n
+                    </tr>\n
+                    </table>\n";
+            }
         }
 
         // start drawing the table
@@ -717,9 +720,11 @@ class Timetable extends Myschoolgh {
         // init
         $t_course_ids = [];        
         // loop through all the allocations
-        foreach($data->allocations as $allot) {
-            foreach($allot as $all) {
-                $t_course_ids[] = $all->course_id;
+        if(isset($data->allocations)) {
+            foreach($data->allocations as $allot) {
+                foreach($allot as $all) {
+                    $t_course_ids[] = $all->course_id;
+                }
             }
         }
         $course_ids = array_unique($t_course_ids);

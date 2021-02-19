@@ -742,18 +742,14 @@ class Payroll extends Myschoolgh {
         $allowancesQuery = $data->payslip_details["Allowance"] ?? [];
         $deductionsQuery = $data->payslip_details["Deduction"] ?? [];
 
-        if($printing) {
-            $cellpadding = "";
-            // $result .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"{$this->baseUrl}assets/css/app.min.css\">";
-        }
-        
         // set the header content
         $result .= "<div style=\"width: 80%; margin: auto auto;\">
                     <table style=\"background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: open sans; width:100%;margin-bottom:2px\" border=\"0\" cellpadding=\"5px\" cellspacing=\"5px\">
                     <tbody>";
                     $result .= '<tr style="padding: 5px; border-bottom: solid 1px #ccc;">
                             <td colspan="4" align="center" style="padding: 10px;">
-                                <h1 style="margin-bottom: 0px; margin-top:0px; color:#9932cc">'.strtoupper($client->client_name).'</h1>
+                                '.(!empty($client->client_logo) ? "<img width='70px' src='{$this->baseUrl}{$client->client_logo}'>" : "").'
+                                <h2 style="margin-bottom: 0px; margin-top:0px; color:#6777ef">'.strtoupper($client->client_name).'</h2>
                                 '.($client->client_contact . " / " .$client->client_secondary_contact).'<br>
                                 '.($client->client_email).'
                             </td>
@@ -846,7 +842,7 @@ class Payroll extends Myschoolgh {
                         <div class=\"row justify-content-between\">
                             <table cellpadding=\"10px\" class=\"table\" {$border}>
                                 <tr>";
-                                    $result .= "<td width=\"50%\" style=\"background-color:#9d3ea1; color:#fff; padding:10px;font-weight:bolder;text-transform:uppercase\"><strong>Net Salary</strong></td>
+                                    $result .= "<td width=\"50%\" style=\"background-color:#6777ef; color:#fff; padding:10px;font-weight:bolder;text-transform:uppercase\"><strong>Net Salary</strong></td>
                                     <td style=\"background-color:#f4f4f4;padding:10px;font-weight:bolder;text-transform:uppercase\">
                                         <strong>GH&cent;".number_format((($data->basic_salary + array_sum(array_column($allowancesQuery, 'amount')))-array_sum(array_column($deductionsQuery, 'amount'))), 2)."</strong>
                                     </td>

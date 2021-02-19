@@ -37,10 +37,10 @@ $hasUpdate = $accessObject->hasAccess("update", "library");
 $category_list = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view the book category record' href='{$baseUrl}update-book-category/{$each->item_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to view the book category record' href='#' onclick='return loadPage(\"{$baseUrl}update-book-category/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to update book category record' href='{$baseUrl}update-book-category/{$each->item_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a title='Click to update book category record' href='#' onclick='return loadPage(\"{$baseUrl}update-book-category/{$each->item_id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Click to delete this Book Category' onclick='return delete_record(\"{$each->item_id}\", \"book_category\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -48,7 +48,7 @@ foreach($item_list["data"] as $key => $each) {
 
     $category_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $category_list .= "<td>".($key+1)."</td>";
-    $category_list .= "<td><a href='{$baseUrl}update-book-category/{$each->item_id}'>{$each->name}</a></td>";
+    $category_list .= "<td><a href='#' onclick='return loadPage(\"{$baseUrl}update-book-category/{$each->item_id}\");'>{$each->name}</a></td>";
     $category_list .= "<td>{$each->description}</td>";
     $category_list .= "<td>{$each->books_count}</td>";
     $category_list .= "<td align='center'>{$action}</td>";

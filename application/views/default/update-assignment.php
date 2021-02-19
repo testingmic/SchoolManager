@@ -122,7 +122,7 @@ if(!empty($item_id)) {
                         <tr data-row_id='{$question->item_id}'>
                             <td>{$ii}</td>
                             <td>{$question->question}</td>
-                            <td >{$question->marks}</td>
+                            <td>{$question->marks}</td>
                             <td align='center'>";
                                 if(!$isActive) {
                                     $questions_list .= "<a href='{$baseUrl}add-assignment/add_question?qid={$item_id}&q_id={$question->item_id}' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>&nbsp;";

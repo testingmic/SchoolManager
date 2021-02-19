@@ -39,7 +39,7 @@ if(!empty($item_id) && $session->clientId) {
                 <div class="text-dark bg-white col-md-12 p-3">
                     <div class="text-center">
                         '.(!empty($client->client_logo) ? "<img width='70px' src='{$baseUrl}{$client->client_logo}'>" : "").'
-                        <h3 class="mb-0 pb-0">'.$client->client_name.'</h3>
+                        <h3 class="mb-0 pb-0" style="color:#6777ef">'.$client->client_name.'</h3>
                         <div>'.$client->client_address.'</div>
                         <div>'.$client->client_contact.'
                             '.(!empty($client->client_secondary_contact) ? " | {$client->client_secondary_contact}" : "").'

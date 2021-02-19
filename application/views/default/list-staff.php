@@ -48,10 +48,10 @@ $color = [
 
 foreach($api_staff_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view staff information' href='{$baseUrl}update-staff/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to view staff information' href='#' onclick='return loadPage(\"{$baseUrl}update-staff/{$each->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($accessObject->hasAccess("update", $each->user_type)) {
-        $action .= "&nbsp;<a title='Click to update staff record' href='{$baseUrl}update-staff/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a title='Click to update staff record' href='#' onclick='return loadPage(\"{$baseUrl}update-staff/{$each->user_id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
 
     if($accessObject->hasAccess("delete", $each->user_type)) {
@@ -63,7 +63,7 @@ foreach($api_staff_list["data"] as $key => $each) {
     $staff_list .= "<td>
         <div class='d-flex justify-content-start'>
             <div class='mr-2'><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
-            <div><a href='{$baseUrl}update-staff/{$each->user_id}'>{$each->name}</a> <br><span class='text-uppercase badge badge-{$color[$each->user_type]} p-2'>{$each->user_type}</span></div>
+            <div><a href='#' onclick='return loadPage(\"{$baseUrl}update-staff/{$each->user_id}\");'>{$each->name}</a> <br><span class='text-uppercase badge badge-{$color[$each->user_type]} p-2'>{$each->user_type}</span></div>
         </div></td>";
     $staff_list .= "<td>{$each->position}</td>";
     $staff_list .= "<td>{$each->gender}</td>";

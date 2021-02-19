@@ -52,10 +52,10 @@ $hasFiltering = $accessObject->hasAccess("filters", "settings");
 $students = "";
 foreach($student_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view student record' href='{$baseUrl}update-student/{$each->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to view student record' href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$each->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to update student record' href='{$baseUrl}update-student/{$each->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a title='Click to update student record' href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$each->user_id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Click to delete this Student' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";

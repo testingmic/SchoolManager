@@ -1146,7 +1146,7 @@ class Users extends Myschoolgh {
 			$i_params = (object) ["limit" => 1, "email" => $params->email];
 			// get the user data
 			if(!empty($this->list($i_params)["data"])) {
-				return ["code" => 201, "response" => "Sorry! The email is already in use."];
+				// return ["code" => 201, "response" => "Sorry! The email is already in use."];
 			}
 		}
 

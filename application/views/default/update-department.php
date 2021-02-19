@@ -66,9 +66,9 @@ if(!empty($item_id)) {
         // loop through the students list
         foreach($student_list["data"] as $key => $student) {
             // view link
-            $action = "<a href='{$baseUrl}update-student/{$student->user_id}/view' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
             if($studentUpdate) {
-                $action .= "&nbsp;<a href='{$baseUrl}update-student/{$student->user_id}/update' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+                $action .= "&nbsp;<a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
             }
 
             $students .= "<tr data-row_id=\"{$student->user_id}\">";

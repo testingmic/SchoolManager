@@ -1638,7 +1638,7 @@ class Forms extends Myschoolgh {
      */
     public function student_form($clientId, $baseUrl, $userData = null) {
 
-        $isData = !empty($userData) && isset($userData->country) ? true : false;
+        $isData = !empty($userData) && isset($userData->user_id) ? true : false;
 
         $guardian = "";
 

@@ -210,6 +210,10 @@ elseif(isset($_GET["pay_id"]) && !isset($_GET["cs_mat"])) {
     // end query if no result found
     if(!isset($_GET["dw"])) {
         print $content["data"];
+        print '<script>
+                window.onload = (evt) => { window.print(); }
+                window.onafterprint = (evt) => { window.close(); }
+            </script>';
         return;
     }
 

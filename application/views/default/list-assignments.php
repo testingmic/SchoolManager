@@ -50,10 +50,10 @@ $hasFiltering = $accessObject->hasAccess("filters", "settings");
 $assignments = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to update assignment record' href='{$baseUrl}update-assignment/{$each->item_id}/view' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to update assignment record' href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate && $each->assignment_type == "multiple_choice") {
-        $action .= "&nbsp;<a title='Click to manage questions for this assignment' href='{$baseUrl}add-assignment/add_question?qid={$each->item_id}' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
+        $action .= "&nbsp;<a title='Click to manage questions for this assignment' href='#' onclick='return loadPage(\"{$baseUrl}add-assignment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
     }
 
     if($hasDelete && in_array($each->state, ["Pending", "Draft"])) {
@@ -62,7 +62,7 @@ foreach($item_list["data"] as $key => $each) {
 
     $assignments .= "<tr data-row_id=\"{$each->id}\">";
     $assignments .= "<td>".($key+1)."</td>";
-    $assignments .= "<td><a href='{$baseUrl}update-assignment/{$each->item_id}/view'>{$each->assignment_title}</a> ".(
+    $assignments .= "<td><a href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
         $hasUpdate ? 
             "<br>Class: <strong>{$each->class_name}</strong>
             <br>Course: <strong>{$each->course_name}</strong>" : 
