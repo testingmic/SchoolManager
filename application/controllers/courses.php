@@ -379,14 +379,16 @@ class Courses extends Myschoolgh {
             if(isset($params->course_code) && !empty($params->course_code) && ($prevData[0]->course_code !== $params->course_code)) {
                 // replace any empty space with 
                 $params->course_code = str_replace("/^[\s]+$/", "", $params->course_code);
+                $params->course_code = strtoupper($params->course_code);
                 // confirm if the class code already exist
                 if(!empty($this->pushQuery("id, name", "courses", "status='1' AND client_id='{$params->clientId}' AND course_code='{$params->course_code}'"))) {
                     return ["code" => 203, "data" => "Sorry! There is an existing Course with the same code."];
                 }
-            } elseif(empty($prevData[0]->course_code) || !isset($params->course_code)) {
+            } elseif(empty($prevData[0]->course_code) && !isset($params->course_code)) {
                 // generate a new class code
                 $counter = $this->append_zeros(($this->itemsCount("courses", "client_id = '{$params->clientId}'") + 1), 3);
                 $params->course_code = $this->client_data($params->clientId)->client_preferences->labels->{"course_label"}.$counter;
+                $params->course_code = strtoupper($params->course_code);
             }
 
             // init
@@ -434,9 +436,6 @@ class Courses extends Myschoolgh {
 			} else {
 				$this->remove_all_class_courses($params, $prevData[0]->item_id);
 			}          
-
-            // convert the code to uppercase
-            $params->course_code = strtoupper($params->course_code);
 
             // execute the statement
             $stmt = $this->db->prepare("

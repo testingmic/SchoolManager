@@ -498,12 +498,12 @@ class Replies extends Myschoolgh {
                 $type, $params->comment_id ?? NULL, $comment, $params->userId, $params->record_id, 
                 $this->ip_address, $this->agent
             ]);
-
-            // create an object
-            $resourceObj = load_class("resources", "controllers");
-
+            
             // get the comment id
             $comment_id = $this->lastRowId("e_learning_comments");
+            
+            // create an object
+            $resourceObj = load_class("resources", "controllers");
 
             // save the video time if parsed
             if(isset($params->video_time)) {
@@ -511,7 +511,7 @@ class Replies extends Myschoolgh {
                 $params->video_id = $params->record_id;
                 
                 // save the time for this video 
-                $resourceObj->save_time($params);
+                //$resourceObj->save_time($params);
             }
 
             // add comments

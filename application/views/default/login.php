@@ -37,6 +37,13 @@ if($usersClass->loggedIn()) {
       <div class="container mt-5">
         <div class="row">
           <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
+            <div class="text-left border-radius mb-2 p-2 bg-white">
+                <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="80px" /></div>
+                <div>
+                    <div class="font-25px text-center font-weight-bold text-dark"><?= config_item('site_name') ?></div> 
+                    <div class="text-dark text-center">Your advanced school management system.</div>
+                </div>
+            </div>
             <div class="card card-primary">
               <div class="card-header">
                 <h4>Login</h4>
@@ -67,12 +74,6 @@ if($usersClass->loggedIn()) {
                   </div>
                   <input type="hidden" name="verify" value="true" id="verify" hidden>
                   <div class="form-group">
-                    <div class="custom-control custom-checkbox">
-                      <input type="checkbox" name="remember" class="custom-control-input" tabindex="3" id="remember-me">
-                      <label class="custom-control-label" for="remember-me">Remember Me</label>
-                    </div>
-                  </div>
-                  <div class="form-group">
                     <button type="submit" class="btn btn-primary btn-lg btn-block" tabindex="4">
                       Login
                     </button>
@@ -82,8 +83,8 @@ if($usersClass->loggedIn()) {
                 <div class="form-results"></div>
               </div>
             </div>
-            <div class="mt-5 text-muted text-center">
-              Don't have an account? <a href="auth-register.html">Create One</a>
+            <div class="mt-5 text-white text-center">
+              Don't have an account? <a href="<?= $baseUrl ?>register">Create One</a>
             </div>
           </div>
         </div>

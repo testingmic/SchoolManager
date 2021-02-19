@@ -870,7 +870,7 @@ class Users extends Myschoolgh {
 		}
 
 		// if admin access is false and yet the access id is more than 7 then throw an error
-		if($accessPermissions[0]->id > 8 && !isset($params->adminAccess)) {
+		if($accessPermissions[0]->id > 5 && !isset($params->adminAccess)) {
 			return ["code" => 203, "data" => "Sorry! An invalid user_type was provided for processing."];
 		}
 

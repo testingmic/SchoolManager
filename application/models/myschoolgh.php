@@ -109,8 +109,10 @@ class Myschoolgh extends Models {
 
 	/**
 	 * @method lastRowId()
+	 * 
 	 * @param $tableName The user needs to specify the table name for the query
-	 * @return $rowId
+	 * 
+	 * @return Int
 	 **/
 	final function lastRowId($tableName) {
 
@@ -743,6 +745,17 @@ class Myschoolgh extends Models {
 			return false;
 		}
 	}
+
+    /**
+     * Format the Contact Number properly
+     * 
+     * @return Array
+     */
+    public function format_contact($contact) {
+        $contact = str_ireplace(" ", "", $contact);
+        $contact = "233".substr($contact, -9);
+        return $contact;
+    }
 
 }
 ?>

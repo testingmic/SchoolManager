@@ -32,7 +32,7 @@ class Auth extends Myschoolgh {
      * 
      * @return String
      */
-    public function processLogin(stdClass $params) {
+    public function login(stdClass $params) {
 
         global $session, $noticeClass;
 
@@ -138,7 +138,7 @@ class Auth extends Myschoolgh {
                             // if a remote call was made for the access token
                             if($params->remote) {
                                 // get any active access token available or generate a new one if none exists
-                                $access = $this->temporaryAccess($results);
+                                $access = $this->temporary_access($results);
 
                                 // commit the transactions
                                 $this->db->commit();
@@ -235,7 +235,7 @@ class Auth extends Myschoolgh {
      * 
      * @return Array
      */
-    public function temporaryAccess(stdClass $params) {
+    public function temporary_access(stdClass $params) {
         // create the temporary accesstoken
         $token = random_string("alnum", mt_rand(68, 70));
         $expiry = date("Y-m-d H:i:s", strtotime("+2 hours"));
@@ -444,7 +444,7 @@ class Auth extends Myschoolgh {
      * 
      * @return Bool
      */
-    public function sendPasswordResetToken($params) {
+    public function send_password_reset_token($params) {
 
         // if the email parameter was not parsed
         if(!isset($params->email)) {
@@ -483,8 +483,10 @@ class Auth extends Myschoolgh {
 
                     // set the status variable to true
                     $this->status = true;
+                    
                     // add the reset attempt
                     $this->addAttempt($params->email, "reset", 1);
+
                     // using the foreach to fetch the information
                     while($results = $stmt->fetch(PDO::FETCH_OBJ)) {
 
@@ -576,6 +578,7 @@ class Auth extends Myschoolgh {
         } catch(PDOException $e) {
             // rollback all transactions if at least one fails
             $this->db->rollBack();
+            print $e->getMessage();
             return ["code" => 201, "data" => "Sorry! An error was encountered while processing the request."];
         }
     }
@@ -590,7 +593,7 @@ class Auth extends Myschoolgh {
      * 
      * @return Bool
      */
-    public function resetUserPassword(stdClass $params) {
+    public function reset_user_password(stdClass $params) {
 
         // set the url
         $baseUrl = config_item("base_url");
@@ -701,9 +704,10 @@ class Auth extends Myschoolgh {
 
                     // commit all transactions
                     $this->db->commit();
+                    $this->session->redirect = "{$this->baseUrl}";
 
                     // response to return
-                    return ["code" => 200, "data" => "Your password was successfully changed. Click to <a href='{$baseUrl}login'>Login</a>", "refresh" => 2000];
+                    return ["code" => 200, "data" => "Your password was successfully changed.", "refresh" => 2000];
 
                 }
 
@@ -741,6 +745,143 @@ class Auth extends Myschoolgh {
 
         // return success
         return ["code" => 200, "data" => "You have successfully been logged out."];
+    }
+
+    /**
+     * Register a New School Account
+     * 
+     * Run tests for the email address that have been used to register for the account
+     * 
+     * @return Array
+     */
+    public function create(stdClass $params) {
+
+        global $accessObject;
+
+        if(!filter_var($params->email, FILTER_VALIDATE_EMAIL)) {
+            return ["code" => 201, "data" => "Sorry! Please provide a valid email address."];
+        }
+        
+        $username = explode("@", $params->email)[0];
+        $contact = isset($params->school_contact) ? $this->format_contact($params->school_contact) : null;
+        $contact_2 = isset($params->school_contact_2) ? $this->format_contact($params->school_contact_2) : null;
+
+        if(empty($contact)) {
+            return ["code" => 201, "data" => "Sorry! The contact number is required."];
+        }
+        
+        try {
+
+            $a_check = $this->pushQuery("client_status", "clients_accounts", "client_email='{$params->email}' LIMIT 1");
+            if(!empty($a_check)) {
+                if($a_check[0]->client_status == 0) {
+                    return ["code" => 201, "data" => "Sorry! You already have an account pending verification. Please wait while we verify."];
+                } elseif($a_check[0]->client_status == 1) {
+                    return ["code" => 201, "data" => "Sorry! You already have an account. Please try login instead."];
+                }
+            }
+            $u_check = $this->pushQuery("username", "users", "username='{$username}' LIMIT 1");
+            if(!empty($u_check)){
+                return ["code" => 201, "data" => "Sorry! There is an existing account with the same email address. Please try login instead."];
+            }
+
+            // get the last client id
+            $last_id = $this->lastRowId("clients_accounts") + 1;
+
+            // get the prefix from the school name
+            $name = explode(" ", $params->school_name);
+            $prefix = "";
+
+            foreach($name as $word) {
+                $prefix .= $word[0];
+            }
+
+            // create a client id
+            $client_id = "{$prefix}".$this->append_zeros($last_id, 7);
+            $user_id = "{$prefix}U".$this->append_zeros(1, 7);
+            $item_id = random_string("alnum", 32);
+            $token = random_string("alnum", 54);
+
+            $preference = (object) [
+                "account" => [
+                    "type" => "trial",
+                    "activation_code" => $token,
+                    "date_created" => date("Y-m-d h:iA"),
+                    "expiry" => date("Y-m-d h:iA", strtotime("+2 months"))
+                ]
+            ];
+
+            // check the user password to see if it meets the requirements
+            if(!passwordTest($params->password)) {
+                return ["code" => 201, "data" => $this->password_ErrorMessage];
+            }
+            $password =  password_hash($params->password, PASSWORD_DEFAULT);
+
+            // insert the client details
+            $stmt = $this->db->prepare("
+                INSERT INTO clients_accounts SET 
+                    client_id = ?, client_name = ?, client_contact = ?, client_email = ?, client_preferences = ?
+                    ".(isset($params->school_address) ? ",client_address='{$params->school_address}'" : null)."
+                    ".(isset($params->school_contact_2) ? ",client_secondary_contact='{$params->school_contact_2}'" : null)."
+            ");
+            $stmt->execute([$client_id, $params->school_name, $params->school_contact, $params->email, json_encode($preference)]);
+
+            // get the user permissions
+		    $accessPermissions = $accessObject->getPermissions("admin");
+
+            // load the access level permissions
+			$permissions = $accessPermissions[0]->user_permissions;
+			$access_level = $accessPermissions[0]->id;
+
+            // insert the user account details
+            $ac_stmt = $this->db->prepare("
+                INSERT INTO users SET item_id = ?, unique_id = ?, client_id = ?, access_level = ?, password = ?,
+                user_type = ?, address = ?, username = ?, verify_token = ?, status = ?
+            ");
+            $ac_stmt->execute([
+                $item_id, $user_id, $client_id, $access_level, $password, "admin", 
+                $params->school_address, $username, $token, "Pending"
+            ]);
+
+            // log the user access level
+			$stmt2 = $this->db->prepare("INSERT INTO users_roles SET user_id = ?, client_id = ?, permissions = ?");
+			$stmt2->execute([$item_id, $client_id, $permissions]);
+
+            // send a message to the user email
+            $message = "Thank you for registering your School: <strong>{$params->school_name}</strong> with ".config_item('site_name').".
+                        We are pleased to have you join and benefit from our platform.\n\n
+                        Your can login with your 
+                        <strong>Email Address:</strong> {$params->email} or <strong>Username:</strong> {$username}
+                        and the password that was provided during signup.\n\n";
+			$message .= "One of our personnel will get in touch shortly to assist you with additional setup processes that is required to aid you quick start the usage of the application.\n";
+			$message .= "<a href='{$this->baseUrl}verify?account=true&token={$token}'><strong>Click Here</strong></a> to verify your Email Address and also to activate the account.\n\n";
+
+            // recipient list
+            $reciepient = ["recipients_list" => [["fullname" => $params->school_name, "email" => $params->email, "customer_id" => $item_id]]];
+            
+            // insert the email content to be processed by the cron job
+            $m_stmt = $this->db->prepare("
+                INSERT INTO users_messaging_list 
+                SET  template_type = ?, client_id = ?, item_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?, users_id = ?
+            ");
+            $m_stmt->execute([
+                'verify_account', $client_id, $item_id, json_encode($reciepient),
+                $user_id, "[".config_item('site_name')."] Account Verification", $message, $item_id
+            ]);
+
+            // insert the user activity
+            $this->userLogs("verify_account", $item_id, null, "{$params->school_name} created a new Account.", $item_id, $client_id);
+
+            // create the account
+            return [
+                "code" => 200,
+                "data" => "Your account has successfully been created. Please check your email a verification link.",
+                "refresh" => 5000
+            ];
+        } catch(PDOException $e) {
+            return ["code" => 201, "data" => "Sorry! An error occured while processing the request."];
+        }
+
     }
 
 }

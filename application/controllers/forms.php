@@ -3411,7 +3411,6 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>';
-            
             $forms[$key] = $form;
         }
 

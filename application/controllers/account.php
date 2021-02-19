@@ -68,6 +68,7 @@ class Account extends Myschoolgh {
 
         // confirm that a logo was parsed
         if(isset($params->logo)) {
+
             // set the upload directory
             $uploadDir = "assets/img/accounts/";
 
@@ -119,12 +120,11 @@ class Account extends Myschoolgh {
 
             // run the update of the account information
             $stmt = $this->db->prepare("UPDATE clients_accounts 
-                SET {$query} client_preferences	= ? ".(isset($image) ? ", client_logo='{$image}'" : "")."
-            WHERE client_id = ? LIMIT 1");
+                SET {$query} client_preferences	= ? ".(isset($image) ? ", client_logo='{$image}'" : "")." WHERE client_id = ? LIMIT 1");
             $stmt->execute([json_encode($preference), $params->clientId]);
 
             // log the user activity
-            // $this->userLogs("account", $params->clientId, $client_data, "{$params->userData->name} updated the Account Information", $params->userId);
+            $this->userLogs("account", $params->clientId, $client_data, "{$params->userData->name} updated the Account Information", $params->userId);
 
             return [
                 "data" => "Account information successfully updated."

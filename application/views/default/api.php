@@ -48,9 +48,7 @@ $params = $apisObject->paramFormat($method, $incomingData, $_POST, $_GET, $_FILE
 // control
 if((($inner_url == "devlog") && ($outer_url == "auth")) || ($inner_url == "auth" && !$outer_url) || ($inner_url == "auth" && $outer_url == "logout")) {
     // get the list access token
-    $response = (object) [
-        "result" => "Sorry! User credentials could not be authenticated"
-    ];
+    $response = (object) ["result" => "Sorry! User credentials could not be authenticated"];
 
     // Auth object
     $logObj = load_class("auth", "controllers");
@@ -74,18 +72,16 @@ if((($inner_url == "devlog") && ($outer_url == "auth")) || ($inner_url == "auth"
             "rememberme" => $params->rememberme ?? null
         ];
         // Auth the user credentials
-        $response->result = $logObj->processLogin($parameters);
+        $response->result = $logObj->login($parameters);
     } elseif(isset($params->recover, $params->email)) {
         // request password reset
-        $response->result = $logObj->sendPasswordResetToken($params);
+        $response->result = $logObj->send_password_reset_token($params);
     } elseif(isset($params->reset_token, $params->password, $params->password_2)) {
         // request password reset
-        $response->result = $logObj->resetUserPassword($params);
-    } elseif(isset($params->firstname, $params->password, $params->firstname)) {
-        // add additional parameter
-        $params->portal_registration = true;
+        $response->result = $logObj->reset_user_password($params);
+    } elseif(isset($params->portal_registration, $params->school_name, $params->school_address, $params->school_contact, $params->email)) {
         // request password reset
-        $response->result = $usersClass->add($params);
+        $response->result = $logObj->create($params);
     }
 
     // print the error description

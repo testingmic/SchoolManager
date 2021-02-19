@@ -6,8 +6,6 @@ global $usersClass, $accessObject, $myClass;
 $baseUrl = config_item("base_url");
 $appName = config_item("site_name");
 
-// if the user is not loggedin then show the login form
-if(!$usersClass->loggedIn()) { require "login.php"; exit(-1); }
 
 // confirm that user id has been parsed
 $clientId = $session->clientId;
@@ -16,6 +14,12 @@ $cur_user_id = (confirm_url_id(1)) ? xss_clean($SITEURL[1]) : $loggedUserId;
 
 // get the user data
 $userData = $defaultUser;
+
+// if no user credentials was found
+if(!$userData) { $session->remove(["userId", "clientId"]); }
+
+// if the user is not loggedin then show the login form
+if(!$usersClass->loggedIn()) { require "login.php"; exit(-1); }
 
 // get the variables for the accessobject
 $accessObject->clientId = $clientId;
@@ -42,9 +46,6 @@ $userNotifications = [];
 
 // set the current url in session
 $user_current_url = $session->user_current_url;
-
-// notification handler
-$announcementNotice = $announcementClass->notice($userData);
 
 // is this the current user?
 $isAdmin = $userData->user_type == "admin" ? true : false;
@@ -79,10 +80,7 @@ load_helpers(['menu_helper']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title><?= $page_title ?? "Dashboard" ?> : <?= $appName ?></title>
-
-    <!-- General CSS Files -->
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
-    <!-- Template CSS -->
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/components.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/gallery.css">
@@ -92,11 +90,9 @@ load_helpers(['menu_helper']);
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/vendors/trix/trix.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/select2/select2.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
-
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/table.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/chosen.css">
-    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/calculator.css">
-    
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/calculator.css">    
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/fullcalendar/fullcalendar.min.css">
     <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
     <?php foreach($loadedCSS as $eachCSS) { ?>

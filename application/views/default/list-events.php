@@ -58,6 +58,7 @@ if(!empty($session->clientId)) {
         // loop through the list
         foreach($event_types as $type) {
             $event_types_list .= "
+            <div class='col-lg-12'>
                 <div class='card mb-2' data-row_id='{$type->item_id}'>
                     <div class='card-header p-2 text-uppercase'>{$type->name}</div>
                     ".(!empty($type->description) ? "<div class='card-body p-2'>{$type->description}</div>" : "")."
@@ -67,7 +68,8 @@ if(!empty($session->clientId)) {
                             ".($hasEventDelete ? "<div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a></div>" : "")."
                         </div>
                     </div>
-                </div>";
+                </div>
+            </div>";
         }
 
         // append the questions list to the array to be returned
@@ -152,7 +154,7 @@ if(!empty($session->clientId)) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item">Attendance Log</div>
+                    <div class="breadcrumb-item">Events List</div>
                 </div>
             </div>
             <div class="row">

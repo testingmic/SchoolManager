@@ -80,28 +80,35 @@ $SITEURL = (($URL == '') || ($URL == 'index.php') || ($URL == 'index.html')) ? A
 */
 
 // call the user logged in class
+$defaultUser = [];
 $myClass = load_class('myschoolgh', 'models');
 $usersClass = load_class('users', 'controllers');
 $accessObject = load_class('accesslevel', 'controllers');
 $noticeClass = load_class('notification', 'controllers');
-$announcementClass = load_class('announcements', 'controllers');
+
+// Check the site status
+GLOBAL $SITEURL, $session;
 
 // if the session is set
 if(!empty($session->userId)) {
 	
 	// the query parameter to load the user information
 	$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "append_wards" => true, "filter_preferences" => true, "userId" => $session->userId, "append_client" => true];
-	$defaultUser = $usersClass->list($i_params)["data"][0];
+	$defaultUser = $usersClass->list($i_params)["data"];
 
-	$isAdmin = (bool) ($defaultUser->user_type == "admin");
-	$isTutor = (bool) ($defaultUser->user_type == "teacher");
-	$isParent = (bool) ($defaultUser->user_type == "parent");
-	$isStudent = (bool) ($defaultUser->user_type == "student");
-	$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
-	$isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
-    $isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
-	$isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
-	$isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
+	// if the result is not empty
+	if(!empty($defaultUser)) {
+		$defaultUser = $defaultUser[0];
+		$isAdmin = (bool) ($defaultUser->user_type == "admin");
+		$isTutor = (bool) ($defaultUser->user_type == "teacher");
+		$isParent = (bool) ($defaultUser->user_type == "parent");
+		$isStudent = (bool) ($defaultUser->user_type == "student");
+		$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
+		$isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
+		$isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
+		$isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
+		$isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
+	}
 }
 
 // To be used for inserting additional scripts
@@ -113,8 +120,6 @@ $defaultFile = config_item('default_view_path').strtolower(preg_replace('/[^\w_]
 $mainFile = config_item('default_view_path').'main.php';
 $errorFile = config_item('default_view_path').'404.php';
 
-// Check the site status
-GLOBAL $SITEURL, $session;
 
 // confirm if the first index has been parsed
 // however the api and auth endpoint are exempted from this file traversing loop
