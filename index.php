@@ -80,7 +80,7 @@ $SITEURL = (($URL == '') || ($URL == 'index.php') || ($URL == 'index.html')) ? A
 */
 
 // call the user logged in class
-$defaultUser = [];
+$defaultUser = (object) [];
 $myClass = load_class('myschoolgh', 'models');
 $usersClass = load_class('users', 'controllers');
 $accessObject = load_class('accesslevel', 'controllers');

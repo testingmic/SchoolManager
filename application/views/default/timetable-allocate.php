@@ -107,7 +107,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                         <input type="hidden" disabled value="'.($data->slots ?? null).'" name="t_slots">
                         <input type="hidden" disabled value="'.($data->duration ?? null).'" name="t_duration">
                         <input type="hidden" disabled value="'.($data->days ?? null).'" name="t_days">
-                        <input type="hidden" disabled value="'.date("h:i A", strtotime($data->start_time)).'" name="t_start_time">
+                        <input type="hidden" disabled value="'.(isset($data->start_time) ? date("h:i A", strtotime($data->start_time)) : null).'" name="t_start_time">
                         <input type="hidden" disabled value="'.($data->class_id ?? null).'" name="t_class_id">
                         <input type="hidden" disabled value="'.($timetable_id ?? null).'" name="timetable_id">
                         <div class="card-body">

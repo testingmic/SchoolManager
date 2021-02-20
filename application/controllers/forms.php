@@ -2410,7 +2410,7 @@ class Forms extends Myschoolgh {
      */
     public function staff_form($clientId, $baseUrl, $userData = null) {
 
-        $isData = !empty($userData) && isset($userData->country) ? true : false;
+        $isData = !empty($userData) && isset($userData->name) ? true : false;
 
         $guardian = "";
 
@@ -2594,7 +2594,7 @@ class Forms extends Myschoolgh {
                         <select data-width="100%" name="status" id="status" class="form-control selectpicker">
                             <option value="null">Select Employee Status</option>';
                             foreach($this->user_status_list as $key => $value) {
-                                $response .= "<option ".($isData && ($key == $userData->status) ? "selected" : null)." value=\"{$key}\">{$value}</option>";                            
+                                $response .= "<option ".($isData && ($key == $userData->user_status) ? "selected" : null)." value=\"{$key}\">{$value}</option>";                            
                             }
                         $response .= '</select>
                     </div>

@@ -325,15 +325,15 @@ var loadPage = (loc, pushstate) => {
 
             document.title = result.title
             $.pageoverlay.hide();
-        },
-        complete: () => {
+
             init();
             initDataTables();
             init_image_popup();
             linkClickStopper($.pagecontent);
             formSubmitStopper($.pagecontent);
             trigger_form_submit();
-
+        },
+        complete: () => {
             var prev = window.history.state === null ? null : window.history.state.current
             if (pushstate !== false) window.history.pushState({ previous: prev, current: loc }, "", loc)
 

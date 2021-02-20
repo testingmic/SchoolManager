@@ -10,7 +10,8 @@ class Account extends Myschoolgh {
         $this->accepted_column["student"] = [
             "unique_id" => "Student ID", "firstname" => "Firstname", "lastname" => "Lastname", 
             "othername" => "Othernames", "email" => "Email", "phone_number" => "Contact Number",
-            "blood_group" => "Blood Group", "city" => "City", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
+            "blood_group" => "Blood Group", "city" => "City", "residence" => "Residence", 
+            "country" => "Country Code", "date_of_birth" => "Date of Birth", 
             "enrollment_date" => "Admission Date", "gender" => "Gender", "section" => "Section", 
             "department" => "Department", "class_id" => "Class", "description" => "Description",
             "religion" => "Religion",  "previous_school" => "Previous School", 
@@ -21,7 +22,8 @@ class Account extends Myschoolgh {
         $this->accepted_column["staff"] = [
             "unique_id" => "Employee ID", "firstname" => "Firstname", "lastname" => "Lastname", 
             "othername" => "Othernames", "email" => "Email", "phone_number" => "Contact Number",
-            "blood_group" => "Blood Group", "city" => "City", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
+            "blood_group" => "Blood Group", "city" => "City", "residence" => "Residence", 
+            "country" => "Country Code", "date_of_birth" => "Date of Birth", 
             "enrollment_date" => "Date of Employment", "gender" => "Gender", "section" => "Section", 
             "department" => "Department", "description" => "Description",
             "religion" => "Religion", "course_ids" => "Courses Taught", "user_type" => "User Type", 
@@ -32,7 +34,8 @@ class Account extends Myschoolgh {
             "unique_id" => "Employee ID", "firstname" => "Firstname", "lastname" => "Lastname", 
             "othername" => "Othernames", "email" => "Email", "phone_number" => "Primary Contact",
             "phone_number_2" => "Secondary Contact", "blood_group" => "Blood Group", 
-            "city" => "City", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
+            "city" => "City", "residence" => "Residence", "country" => "Country Code", 
+            "date_of_birth" => "Date of Birth", 
             "gender" => "Gender", "description" => "Description",
             "religion" => "Religion", "employer" => "Employer",
             "occupation" => "Occupation", "position" => "Position"
@@ -372,6 +375,9 @@ class Account extends Myschoolgh {
                         if(in_array($params->csv_keys[$eachKey], ["Department", "Section", "Class"])) {
                             $eachValue = $this->get_equivalent($params->csv_keys[$eachKey], $eachValue, $params->clientId);
                         }
+                        if(in_array($params->csv_keys[$eachKey], ["Country Code"])) {
+                            $eachValue = $this->country_equivalent($eachValue);
+                        }
                         if(in_array($params->column, ["student", "parent"])) {
                             $t_user_type = $params->column;
                         }
@@ -498,6 +504,23 @@ class Account extends Myschoolgh {
 
             } catch(PDOException $e) {} 
         }
+    }
+
+    /**
+     * Get Equivalent Country ID
+     * 
+     * Get the unique id using the name slug of the name
+     * 
+     * @return Int 
+     */
+    public function country_equivalent($value) {
+        $n_value = strtoupper($value);
+        try {
+            $fetch = $this->db->prepare("SELECT id FROM country WHERE country_code='{$n_value}' LIMIT 1");
+            $fetch->execute();
+            $result = $fetch->fetch(PDO::FETCH_OBJ);
+            return $result->id ?? null;
+        } catch(PDOException $e) {} 
     }
 
     /**

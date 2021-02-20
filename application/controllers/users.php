@@ -49,7 +49,7 @@ class Users extends Myschoolgh {
 			
 			// set the user type
 			$d_data = isset($params->userData) ? $params->userData : $defaultUser;
-			$user_type = $d_data->user_type;
+			$user_type = $d_data->user_type ?? null;
 
 			// loop through the query
 			if(in_array($user_type, ["employee", "student"]) && !isset($params->bypass)) {

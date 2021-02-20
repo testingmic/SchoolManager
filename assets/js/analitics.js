@@ -251,70 +251,72 @@ var summaryReporting = (t_summary, date_range) => {
         revenue_category_counts += "</div>";
         $(`div[id="revenue_category_counts"]`).html(revenue_category_counts);
 
-        $.each(summary.fees_record_count.comparison.amount.previous, function(i, e) {
-            chartKeys.push(e.name);
-            previousValues.push(parseFloat(e.value));
-            previous_amount += parseFloat(e.value);
-            currentValues.push(parseFloat(summary.fees_record_count.comparison.amount.current[i].value));
-        });
+        if (summary.fees_record_count.comparison !== undefined) {
+            $.each(summary.fees_record_count.comparison.amount.previous, function(i, e) {
+                chartKeys.push(e.name);
+                previousValues.push(parseFloat(e.value));
+                previous_amount += parseFloat(e.value);
+                currentValues.push(parseFloat(summary.fees_record_count.comparison.amount.current[i].value));
+            });
 
-        $(`span[data-count="total_revenue_received"]`).html(format_currency(total_revenue));
-        $(`span[data-count="previous_amount_received"]`).html(format_currency(previous_amount));
+            $(`span[data-count="total_revenue_received"]`).html(format_currency(total_revenue));
+            $(`span[data-count="previous_amount_received"]`).html(format_currency(previous_amount));
 
-        var options = {
-            chart: {
-                height: 350,
-                type: 'bar',
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    endingShape: 'rounded',
-                    columnWidth: '25%',
+            var options = {
+                chart: {
+                    height: 350,
+                    type: 'bar',
                 },
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            series: [{
-                name: 'Previous Revenue',
-                data: previousValues
-            }, {
-                name: 'Current Revenue',
-                data: currentValues
-            }],
-            xaxis: {
-                categories: chartKeys,
-            },
-            yaxis: {
-                title: {
-                    text: '$ (thousands)'
-                }
-            },
-            fill: {
-                opacity: 1
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        endingShape: 'rounded',
+                        columnWidth: '25%',
+                    },
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    show: true,
+                    width: 2,
+                    colors: ['transparent']
+                },
+                series: [{
+                    name: 'Previous Revenue',
+                    data: previousValues
+                }, {
+                    name: 'Current Revenue',
+                    data: currentValues
+                }],
+                xaxis: {
+                    categories: chartKeys,
+                },
+                yaxis: {
+                    title: {
+                        text: '$ (thousands)'
+                    }
+                },
+                fill: {
+                    opacity: 1
 
-            },
-            tooltip: {
-                y: {
-                    formatter: function(val) {
-                        return "$" + format_currency(val)
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return "$" + format_currency(val)
+                        }
                     }
                 }
             }
+
+            var chart = new ApexCharts(
+                document.querySelector("#revenue_category_chart"),
+                options
+            );
+
+            chart.render();
         }
-
-        var chart = new ApexCharts(
-            document.querySelector("#revenue_category_chart"),
-            options
-        );
-
-        chart.render();
 
 
         if ($(`canvas[id="revenue_category_group"]`).length) {
