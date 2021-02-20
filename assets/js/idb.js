@@ -1,4 +1,4 @@
-const DB_NAME = "insuded-medics-db";
+const DB_NAME = "myschool_gh-db";
 const STORE_NAME = "persistent_store";
 const DB_VERSION = 1;
 
@@ -43,28 +43,11 @@ $(async() => {
 
     function init(result) {
         return new Promise((resolve, reject) => {
-            let $ic = result.insurance_companies ? result.insurance_companies : [],
-                $pf = result.policy_form ? result.policy_form : [],
-                $ip = result.insurance_policies ? result.insurance_policies : [],
-                $ui = result.user_information ? result.user_information : [],
-                $rc = result.records_count ? result.records_count : [],
-                $ul = result.users_list ? result.users_list : [];
+            let $ul = result.users_list ? result.users_list : [];
 
             var object = {
                 [this_user_unique_key]: {
-                    "temp_form": [],
-                    "user_list": $ul,
-                    "user_replies": [],
-                    "user_emails": [],
-                    "records_count": $rc,
-                    "user_information": $ui,
-                    "policy_form": $pf,
-                    "chats": [],
-                    "payment_history": [],
-                    "complaints": [],
-                    "user_activity": [],
-                    "notifications": [],
-                    "endpoints": [],
+                    "chats": []
                 }
             };
 
@@ -91,14 +74,12 @@ $(async() => {
                             var time = 500;
                             $.each($note, function(ii, ie) {
                                 setTimeout(function() {
-                                    console_log(`Populating ${ie}`);
                                     $(`div[id="populating-data"] div[id="populating-notice"]`).html(`Populating ${ie}`);
                                 }, time)
                                 time += 500;
                             });
                             setTimeout(() => {
                                 $(`div[id="populating-data"]`).addClass("hidden");
-                                console_log("Data populated successfully.");
                                 window.location.href = baseUrl;
                             }, time);
                         }

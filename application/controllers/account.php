@@ -80,8 +80,7 @@ class Account extends Myschoolgh {
      * @return String 
      */
     public function init_calender() {
-        return "
-var calendarEvents = {
+        return "var calendarEvents = {
     id: 1,
     backgroundColor: '#136ae3bf',
     borderColor: '#0168fa',

@@ -1598,16 +1598,6 @@ class Users extends Myschoolgh {
 							"messages" => [
 								"record_id" => $userData->user_id,
 								"column" => "messages_count"
-							],
-							"notifications" => [
-								"record_id" => $userData->user_id,
-								"column" => "notices_count"
-							],
-							"replies" => [
-								"column" => "replies_count"
-							],
-							"complaints" => [
-								"column" => "complaints_count"
 							]
 						]
 					]
@@ -1626,14 +1616,7 @@ class Users extends Myschoolgh {
 				$data = [
 					"user_preferences" => $userData->preferences,
 					"user_information" => $userData,
-					"records_count" => $records->threads($countVars)["data"]["records_count"],
-					"policy_form" => $this->prependData("id, name, type", "policy_form", "status='1'"),
-					"users_list" => $this->prependData("a.id, a.item_id, a.email, a.employer, a.date_created, a.last_login, a.description, a.position, a.name, a.phone_number, a.phone_number_2, a.date_of_birth, a.nationality, a.residence, a.occupation, a.image, a.address, (SELECT country_name b FROM country b WHERE b.id = a.country) AS country_name", "users a", "a.status='1' AND a.deleted='0'"),
-					"insurance_policies" => $this->prependData(
-							"a.id, a.item_id, a.requirements, a.policy_code, a.year_enrolled, a.category, a.name, a.description, a.payment_plans,
-							(SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id) AS attachment", "policy_types a", "a.status='1' AND a.deleted='0'"
-						),
-					"insurance_companies" => $this->prependData("establishment_date AS date_established, item_id, name, contact, contact_2, email, website, logo, address, description, awards, managers", "companies", "activated='1' AND deleted='0'"),
+					"users_list" => $this->prependData("a.id, a.item_id, a.unique_id, a.email, a.employer, a.date_created, a.last_login, a.user_type, a.description, a.position, a.name, a.phone_number, a.phone_number_2, a.date_of_birth, a.nationality, a.residence, a.occupation, a.image, a.address, (SELECT country_name b FROM country b WHERE b.id = a.country) AS country_name", "users a", "a.status='1' AND a.deleted='0' AND a.client_id='{$params->clientId}'"),
 				];
 
 				/** Update the table */

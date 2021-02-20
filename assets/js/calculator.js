@@ -125,33 +125,36 @@ function calculate(firstNumber, operator, secondNumber) {
 
 function handleEquation(equation) {
 
-    equation = equation.split(" ");
-    const operators = ['/', 'x', '%', '+', '-'];
-    let firstNumber;
-    let secondNumber;
-    let operator;
-    let operatorIndex;
-    let result;
+    try {
+        equation = equation.split(" ");
+        const operators = ['/', 'x', '%', '+', '-'];
+        let firstNumber;
+        let secondNumber;
+        let operator;
+        let operatorIndex;
+        let result;
 
-    /*  
-    	1. Perform calculations as per BODMAS Method
-    	2. For that use operators array
-    	3. after calculation of 1st numbers replace them with result
-    	4. use splice method
+        /*  
+        	1. Perform calculations as per BODMAS Method
+        	2. For that use operators array
+        	3. after calculation of 1st numbers replace them with result
+        	4. use splice method
 
-    */
-    for (var i = 0; i < operators.length; i++) {
-        while (equation.includes(operators[i])) {
-            operatorIndex = equation.findIndex(item => item === operators[i]);
-            firstNumber = equation[operatorIndex - 1];
-            operator = equation[operatorIndex];
-            secondNumber = equation[operatorIndex + 1];
-            result = calculate(firstNumber, operator, secondNumber);
-            equation.splice(operatorIndex - 1, 3, result);
+        */
+        for (var i = 0; i < operators.length; i++) {
+            while (equation.includes(operators[i])) {
+                operatorIndex = equation.findIndex(item => item === operators[i]);
+                firstNumber = equation[operatorIndex - 1];
+                operator = equation[operatorIndex];
+                secondNumber = equation[operatorIndex + 1];
+                result = calculate(firstNumber, operator, secondNumber);
+                equation.splice(operatorIndex - 1, 3, result);
+            }
         }
-    }
 
-    return result;
+        return result;
+    } catch (err) {}
+
 }
 
 // Event Listener for keyboard button press

@@ -236,7 +236,7 @@ var linkHandler = (target, pushstate) => {
     devlog("linkHandler(). I called =>");
 
     if (target.slice(0, -1) === $.baseurl || target === $.baseurl || target === $.default) {
-        target = $.baseurl + "/dashboard";
+        target = $.baseurl + "/chat";
     }
     loadPage(target, pushstate);
 }

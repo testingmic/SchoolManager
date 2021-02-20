@@ -2,7 +2,8 @@ var client_auto_save, disabled_inputs = new Array(),
     foundArrayList = new Array(),
     csvContent = new Array(),
     dictionary_div = $(`div[id="dictionary_search_term"]`),
-    dictionary_loader = $(`div[id="dictionary_loader"]`);
+    dictionary_loader = $(`div[id="dictionary_loader"]`),
+    current_focused_user_id, current_focused_msg_id, users_array_list = {};
 var initDashboard = () => {}
 
 var responseCode = (code) => {

@@ -34,6 +34,7 @@ $accessObject->userPermits = $userData->user_permissions;
 
 $userPrefs = $userData->preferences;
 $userPrefs->userId = $loggedUserId;
+$userPrefs->user_image = $userData->image;
 
 // user sidebar preference
 $sidebar_pref = $userPrefs->sidebar_nav ?? null;
@@ -207,22 +208,22 @@ load_helpers(['menu_helper']);
                         <a href="javascript:void(0)" data-function="mark_as_read" data-item="messages">Mark All As Read</a>
                         </div>
                     </div>
-                    <div class="dropdown-list-content dropdown-list-message">
+                    <div id="messages_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-message">
                         
                         <a href="#" class="dropdown-item">
-                        <span class="dropdown-item-avatar text-white">
-                            <img alt="image" src="assets/img/users/user-5.png" class="rounded-circle">
-                        </span>
-                        <span class="dropdown-item-desc">
-                            <span class="message-user">Jacob Ryan</span>
-                            <span class="time messege-text">Your payment invoice is generated.</span>
-                            <span class="time text-primary">12 Min Ago</span>
-                        </span>
+                            <span class="dropdown-item-avatar text-white">
+                                <img alt="image" src="assets/img/users/user-5.png" class="rounded-circle">
+                            </span>
+                            <span class="dropdown-item-desc">
+                                <span class="message-user">Jacob Ryan</span>
+                                <span class="time messege-text">Your payment invoice is generated.</span>
+                                <span class="time text-primary">12 Min Ago</span>
+                            </span>
                         </a>
 
                     </div>
                     <div class="dropdown-footer text-center">
-                        <a href="<?= $baseUrl ?>messages">View All <i class="fas fa-chevron-right"></i></a>
+                        <a href="<?= $baseUrl ?>chat">View All <i class="fas fa-chevron-right"></i></a>
                     </div>
                     </div>
                 </li>
@@ -234,15 +235,15 @@ load_helpers(['menu_helper']);
                         <a href="javascript:void(0)" data-function="mark_as_read" data-item="notifications">Mark All As Read</a>
                         </div>
                     </div>
-                    <div class="dropdown-list-content dropdown-list-icons">
+                    <div id="notifications_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-icons">
                         <a href="#" class="dropdown-item dropdown-item-unread">
-                        <span class="dropdown-item-icon bg-primary text-white">
-                            <i class="fas fa-code"></i>
-                        </span>
-                        <span class="dropdown-item-desc">
-                            Template update is available now!
-                            <span class="time text-primary">2 Min Ago</span>
-                        </span>
+                            <span class="dropdown-item-icon bg-primary text-white">
+                                <i class="fas fa-code"></i>
+                            </span>
+                            <span class="dropdown-item-desc">
+                                Template update is available now!
+                                <span class="time text-primary">2 Min Ago</span>
+                            </span>
                         </a>
                     </div>
                     <div class="dropdown-footer text-center">

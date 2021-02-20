@@ -113,6 +113,7 @@
     <script src="<?= $baseUrl; ?>assets/bundles/bootstrap-datepicker/datepicker.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/fullcalendar/fullcalendar.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
+    <script src="<?= $baseUrl; ?>assets/js/idb.js"></script>
     <?php if($isActiveAccount) { ?>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/ui.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/ui-touch-punch.min.js"></script>
