@@ -42,9 +42,8 @@
                 </div>
             </div>
         </div>
+
       </div>
-
-
     </div>
     <div class="email-notification" style="display:none">
         <div class="d-flex row justify-content-between">
@@ -89,42 +88,36 @@
         viewedAs = "<?= (bool) isset($_GET["viewas"]) ?>",
         this_user_unique_key = "persist:msgh-client-<?= $session->userId; ?>",
         form_modules = <?= json_encode($myClass->form_modules); ?>,
-        <?= isset($companyData->awards) ? "company_awards_array=".json_encode($companyData->awards)."," : ""; ?>
-        <?= isset($companyData->managers) ? "company_managers_array=".json_encode($companyData->managers)."," : ""; ?>
-        <?php if(isset($myClass->formPreloader) && in_array($SITEURL[0], ["policy-view", "policy-claim-form"])) { ?>formPreloader = <?= json_encode($myClass->formPreloader); ?>,<?php } ?>
         $myPrefs = <?= json_encode($userPrefs); ?>;
     </script>
 
-    <!-- General JS Scripts -->
     <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
-    <!-- JS Libraies -->
     <script src="<?= $baseUrl; ?>assets/bundles/chartjs/chart.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/apexcharts/apexcharts.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/select2/select2.js"></script>
-
     <script src="<?= $baseUrl; ?>assets/bundles/sweetalert/sweetalert.js"></script>
-    <script src="<?= $baseUrl; ?>assets/bundles/datatables/datatables.min.js"></script>
+    <script src="<?= $baseUrl; ?>assets/bundles/datatables/datatables.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/inputmask/jquery.inputmask.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/magnify.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/notify.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/trix/trix.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/bootstrap-daterangepicker/daterangepicker.js"></script>
+    <script src="<?= $baseUrl; ?>assets/bundles/bootstrap-datepicker/datepicker.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/fullcalendar/fullcalendar.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
-
+    <?php if($isActiveAccount) { ?>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/ui.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/ui-touch-punch.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/chosen.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/form.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/grid.js"></script>
-    
     <script src="<?= $baseUrl; ?>assets/js/myschoolgh.js"></script>
-    <?php if($isAdminAccountant) { ?>
     <script src="<?= $baseUrl; ?>assets/js/calculator.js"></script>
-    <?php } ?>
     <script src="<?= $baseUrl; ?>assets/js/app.js"></script>
-
+    <?php } else { ?>
+    <script src="<?= $baseUrl; ?>assets/js/setup.js"></script>
+    <?php } ?>
     <?php if(isset($formToShow)) { ?>
     <script>fieldDefault = <?= json_encode($formToShow) ?>, thisSelectRow = <?= $formData["thisSelectRow"] ?>, thisRowId = <?= $formData["thisRowId"] ?>;</script>
     <?php } ?>
@@ -135,9 +128,6 @@
         $(() => {
             <?php if(isset($verify_payment)) { ?>
             verify_payment();
-            <?php } ?>
-            <?php if(!empty($session->tempProfilePicture)) { ?>
-            save_profile_picture();
             <?php } ?>
             <?php if(!empty($announcementNotice)) { ?>
                 <?= $announcementNotice->modal_function_script; ?>

@@ -6,7 +6,6 @@ global $usersClass, $accessObject, $myClass;
 $baseUrl = config_item("base_url");
 $appName = config_item("site_name");
 
-
 // confirm that user id has been parsed
 $clientId = $session->clientId;
 $loggedUserId = $session->userId;
@@ -20,6 +19,13 @@ if(!$userData) { $session->remove(["userId", "clientId"]); }
 
 // if the user is not loggedin then show the login form
 if(!$usersClass->loggedIn()) { require "login.php"; exit(-1); }
+
+// clientdata
+$clientData = $myClass->client_data($clientId);
+$clientPrefs = $clientData->client_preferences;
+
+// confirm that the account is active
+$isActiveAccount = (bool) ($clientData->client_state === "Active");
 
 // get the variables for the accessobject
 $accessObject->clientId = $clientId;
@@ -53,10 +59,6 @@ $isTeacher = $userData->user_type == "teacher" ? true : false;
 $isStudent = $userData->user_type == "student" ? true : false;
 $isEmployee = $userData->user_type == "employee" ? true : false;
 
-// clientdata
-$clientData = $myClass->client_data($clientId);
-$clientPrefs = $clientData->client_preferences;
-
 // user payment preference
 $userPrefs->payments = isset($userPrefs->payments) ? $userPrefs->payments : (object) [];
 $userPrefs->payments->default_payment = isset($userPrefs->payments->default_payment) ? $userPrefs->payments->default_payment : null;
@@ -87,6 +89,7 @@ load_helpers(['menu_helper']);
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/datatables/datatables.min.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/datatables/DataTables-1.10.16/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-daterangepicker/daterangepicker.css">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-datepicker/datepicker.min.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/vendors/trix/trix.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/select2/select2.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
@@ -151,6 +154,7 @@ load_helpers(['menu_helper']);
                     <li><a href="#" data-toggle="sidebar" class="nav-link nav-link-lg collapse-btn"><i class="fas fa-bars"></i></a></li>
                     <li><a href="#" class="nav-link nav-link-lg fullscreen-btn"><i class="fas fa-expand"></i></a></li>
                     <li><a href="#" class="nav-link nav-link-lg hidden" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
+                    <?php if($isActiveAccount) { ?>
                     <li class="border-left text-white d-none d-md-block"><a href="javascript:void(0)" class="nav-link text-white nav-link-lg">
                             Academic Year/Term:
                             <strong class="font-18px">
@@ -160,6 +164,7 @@ load_helpers(['menu_helper']);
                             </strong>
                         </a>
                     </li>
+                    <?php } ?>
                 </ul>
                 </div>
                 <ul class="navbar-nav navbar-right">
@@ -252,24 +257,26 @@ load_helpers(['menu_helper']);
                         <span class="d-sm-none d-lg-inline-block"></span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right">
-                    <div class="dropdown-title">Hello <?= $userData->name ?></div>
-                    <a href="<?= $baseUrl ?>profile" class="dropdown-item has-icon">
-                        <i class="far fa-user"></i> Profile
-                    </a>
-                    <?php if($accessObject->hasAccess("manage", "settings")) { ?>
-                    <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon">
-                        <i class="fas fa-cog"></i> Settings
-                    </a>
-                    <?php } ?>
-                    <?php if($accessObject->hasAccess("activities", "settings")) { ?>
-                    <a href="<?= $baseUrl ?>timeline" class="dropdown-item has-icon">
-                        <i class="fas fa-bolt"></i> Activities
-                    </a>
-                    <?php } ?>
-                    <?php if($accessObject->hasAccess("login_history", "settings")) { ?>
-                    <a href="<?= $baseUrl ?>login-history" class="dropdown-item has-icon">
-                        <i class="fas fa-lock"></i> Login History
-                    </a>
+                    <div class="dropdown-title">Hello <?= !empty($userData->name) ? $userData->name : $clientData->client_name ?></div>
+                    <?php if($isActiveAccount) { ?>
+                        <a href="<?= $baseUrl ?>profile" class="dropdown-item has-icon">
+                            <i class="far fa-user"></i> Profile
+                        </a>
+                        <?php if($accessObject->hasAccess("manage", "settings")) { ?>
+                        <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <?php } ?>
+                        <?php if($accessObject->hasAccess("activities", "settings")) { ?>
+                        <a href="<?= $baseUrl ?>timeline" class="dropdown-item has-icon">
+                            <i class="fas fa-bolt"></i> Activities
+                        </a>
+                        <?php } ?>
+                        <?php if($accessObject->hasAccess("login_history", "settings")) { ?>
+                        <a href="<?= $baseUrl ?>login-history" class="dropdown-item has-icon">
+                            <i class="fas fa-lock"></i> Login History
+                        </a>
+                        <?php } ?>
                     <?php } ?>
                     <div class="dropdown-divider"></div>
                     <a href="#" onclick="return logout()" class="dropdown-item anchor has-icon text-danger">

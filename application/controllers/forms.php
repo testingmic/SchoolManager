@@ -3039,14 +3039,12 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function profile_form($clientId, $baseUrl, $userData = null) {
+    public function profile_form($baseUrl, $userData = null, $form_id = "ajax-data-form-content") {
 
-        $isData = !empty($userData) && isset($userData->country) ? true : false;
-
-        $guardian = "";
+        $isData = !empty($userData) && isset($userData->client_id) ? true : false;
 
         $response = '
-        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+        <form class="ajax-data-form" id="'.$form_id.'" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
                     <h5>BIO INFORMATION</h5>
@@ -3054,7 +3052,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Image</label>
-                        <input type="file" name="image" id="image" class="form-control">
+                        <input type="file" accept=".png,.jpeg,.jpg" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -3095,13 +3093,13 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
-                        <input type="date" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control">
+                        <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control _datepicker">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="email">Email Address</label>
-                        <input type="email" value="'.($userData->email ?? null).'" name="email" id="email" class="form-control">
+                        <input type="email" '.(isset($userData->disabled) ? "readonly" : null).' value="'.($userData->email ?? null).'" name="email" id="email" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -3153,6 +3151,12 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" value="'.($userData->address ?? null).'" name="address" id="address" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12">
+                    <div class="form-group">
                         <label for="description">Description</label>
                         <input type="hidden" hidden id="trix-editor-input" value="'.($userData->description ?? null).'">
                         <trix-editor name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
@@ -3162,7 +3166,7 @@ class Forms extends Myschoolgh {
 
             <div class="row">
                 <div class="col-lg-12 text-right">
-                    <button type="button-submit" href="'.$this->baseUrl.'profile" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                    <button type="button-submit" data-form_id="'.$form_id.'" href="'.$this->baseUrl.'profile" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
         </form>';
@@ -3178,7 +3182,7 @@ class Forms extends Myschoolgh {
      * 
      * @return Array
      */
-    public function settings_form($clientId) {
+    public function settings_form($clientId, $form_id = "ajax-data-form-content") {
 
         // get the client data
         $client_data = !empty($clientId) ? $this->client_data($clientId) : (object)[];
@@ -3202,56 +3206,56 @@ class Forms extends Myschoolgh {
         ];
 
         $general = '
-        <form class="ajax-data-form" action="'.$this->baseUrl.'api/account/'.(isset($client_data->client_name) ? "update" : "add").'" method="POST" id="ajax-data-form-content">
+        <form class="ajax-data-form" action="'.$this->baseUrl.'api/account/'.(isset($client_data->client_name) ? "update" : "add").'" method="POST" id="'.$form_id.'">
         <div class="row">
             <div class="col-lg-12"><h5>GENERAL SETTINGS</h5></div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="logo">Logo</label>
-                    <input type="file" name="logo" id="logo" class="form-control">
+                    <input type="file" name="logo" id="logo" accept=".png,.jpeg,.jpg" class="form-control">
                 </div>
             </div>
             <div class="col-lg-9 col-md-12">
                 <div class="form-group">
                     <label for="name">School Name</label>
-                    <input type="text" value="'.($client_data->client_name ?? null).'" name="general[name]" id="name" class="form-control">
+                    <input type="text" value="'.($client_data->client_name ?? null).'" name="general[name]" class="form-control">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="website">School Website</label>
-                    <input type="text" value="'.($client_data->client_website ?? null).'" name="general[website]" id="website" class="form-control">
+                    <input type="text" value="'.($client_data->client_website ?? null).'" name="general[website]" class="form-control">
                 </div>
             </div>
             <div class="col-lg-8 col-md-6">
                 <div class="form-group">
                     <label for="address">School Address</label>
-                    <input type="text" name="general[address]" value="'.($client_data->client_address ?? null).'"  id="address" class="form-control">
+                    <input type="text" name="general[address]" value="'.($client_data->client_address ?? null).'" class="form-control">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="email">School Email Address</label>
-                    <input type="email" value="'.($client_data->client_email ?? null).'" name="general[email]" id="email" class="form-control">
+                    <input type="email" value="'.($client_data->client_email ?? null).'" name="general[email]" class="form-control">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="contact">Contact Number</label>
-                    <input type="text" name="general[contact]" value="'.($client_data->client_contact ?? null).'"  id="contact" class="form-control">
+                    <input type="text" name="general[contact]" value="'.($client_data->client_contact ?? null).'" class="form-control">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="location">School Location</label>
-                    <input type="text" name="general[location]" value="'.($client_data->client_location ?? null).'"  id="location" class="form-control">
+                    <input type="text" name="general[location]" value="'.($client_data->client_location ?? null).'" class="form-control">
                 </div>
             </div>
             <div class="col-lg-12"><h5>ACADEMIC CALENDAR</h5></div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="academic_year">Academic Year</label>
-                    <select data-width="100%" name="general[academics][academic_year]" id="academic_year" class="form-control selectpicker">
+                    <select data-width="100%" name="general[academics][academic_year]" class="form-control selectpicker">
                         <option value="">Select Academic Year</option>';
                             foreach($this->pushQuery("id, year_group", "academic_years", "1") as $each) {
                                 $general .= "<option ".(($client_data && $each->year_group === $prefs->academics->academic_year) ? "selected" : null)." value=\"{$each->year_group}\">{$each->year_group}</option>";                            
@@ -3263,7 +3267,7 @@ class Forms extends Myschoolgh {
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="academic_term">Academic Term</label>
-                    <select data-width="100%" name="general[academics][academic_term]" id="academic_term" class="form-control selectpicker">
+                    <select data-width="100%" name="general[academics][academic_term]" class="form-control selectpicker">
                         <option value="">Select Academic Term</option>';
                             foreach($this->pushQuery("id, name, description", "academic_terms","1") as $each) {
                                 $general .= "<option ".(($client_data && $each->name === $prefs->academics->academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
@@ -3275,13 +3279,13 @@ class Forms extends Myschoolgh {
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="term_starts">Academic Term Start</label>
-                    <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[academics][term_starts]" id="term_starts" class="form-control datepicker">
+                    <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[academics][term_starts]" id="term_starts" class="form-control _datepicker">
                 </div>
             </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="term_ends">Academic Term Ends</label>
-                    <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" class="form-control datepicker">
+                    <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" class="form-control _datepicker">
                 </div>
             </div>
             <div class="col-lg-12"><h5>LABELS</h5></div>';
@@ -3327,9 +3331,8 @@ class Forms extends Myschoolgh {
                     </select>
                 </div>
             </div>
-            
             <div class="col-md-12 text-right">
-                <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                <button type="button-submit" data-form_id="'.$form_id.'" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
             </div>
         </form></div>';
         $forms["general"] = $general;

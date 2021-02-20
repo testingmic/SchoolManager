@@ -1,7 +1,3 @@
-/*****
- * CONFIGURATION
- */
-
 // Links
 $.form_data = {};
 $.current_page = "";
@@ -491,7 +487,7 @@ var initPlugins = () => {
                 maxOptions = select.attr("data-select-max");
 
             select.select2();
-        })
+        });
     }
     // ---------- Tooltip ---------- 
     $('[rel="tooltip"],[data-rel="tooltip"],[data-toggle="tooltip"]').tooltip();

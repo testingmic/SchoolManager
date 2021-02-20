@@ -83,7 +83,7 @@ if($usersClass->loggedIn()) {
                 <div class="form-results"></div>
               </div>
             </div>
-            <div class="mt-5 text-white text-center">
+            <div class="mt-3 border-radius text-dark p-3 bg-white text-center">
               Don't have an account? <a href="<?= $baseUrl ?>register">Create One</a>
             </div>
           </div>

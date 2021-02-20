@@ -1049,9 +1049,9 @@ class Users extends Myschoolgh {
 				// email comfirmation link
 				$message = "Hello {$params->firstname},";
 
-				$message .= '<a class="alert alert-success" href="'.config_item('base_url').'verify?account&token='.$token.'">Verify your account</a>';
+				$message .= '<a class="alert alert-success" href="'.$this->baseUrl.'verify?dw=user&token='.$token.'">Verify your account</a>';
 				$message .= '<br><br>If it does not work please copy this link and place it in your browser url.<br><br>';
-				$message .= config_item('base_url').'verify?account&token='.$token;
+				$message .= $this->baseUrl.'verify?dw=account&token='.$token;
 
 				// recipient list
 				$reciepient = ["recipients_list" => [["fullname" => $params->fullname,"email" => $params->email,"customer_id" => $params->user_id]]];

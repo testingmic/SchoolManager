@@ -52,7 +52,7 @@ if(!empty($user_id)) {
         $data = $data["data"][0];
 
         // guardian information
-        $user_form = load_class("forms", "controllers")->profile_form($clientId, $baseUrl, $data);
+        $user_form = load_class("forms", "controllers")->profile_form($baseUrl, $data);
 
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;

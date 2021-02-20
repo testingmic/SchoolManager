@@ -525,9 +525,9 @@ class Auth extends Myschoolgh {
                         #FORM THE MESSAGE TO BE SENT TO THE USER
                         $message = 'Hi '.$fullname.'<br>You have requested to reset your password at '.config_item('site_name');
                         $message .= '<br><br>Before you can reset your password please follow this link. The reset link expires after 2 hours<br><br>';
-                        $message .= '<a class="alert alert-success" href="'.config_item('base_url').'verify?password&token='.$request_token.'">Click Here to Reset Password</a>';
+                        $message .= '<a class="alert alert-success" href="'.config_item('base_url').'verify?dw=password&token='.$request_token.'">Click Here to Reset Password</a>';
                         $message .= '<br><br>If it does not work please copy this link and place it in your browser url.<br><br>';
-                        $message .= config_item('base_url').'verify?password&token='.$request_token;
+                        $message .= config_item('base_url').'verify?dw=password&token='.$request_token;
 
                         // recipient list
                         $reciepient = ["recipients_list" => [["fullname" => $fullname,"email" => $params->email,"customer_id" => $user_id]]];
@@ -706,6 +706,8 @@ class Auth extends Myschoolgh {
                     $this->db->commit();
                     $this->session->redirect = "{$this->baseUrl}";
 
+                    $this->session->remove("refresh_page");
+
                     // response to return
                     return ["code" => 200, "data" => "Your password was successfully changed.", "refresh" => 2000];
 
@@ -785,9 +787,6 @@ class Auth extends Myschoolgh {
                 return ["code" => 201, "data" => "Sorry! There is an existing account with the same email address. Please try login instead."];
             }
 
-            // get the last client id
-            $last_id = $this->lastRowId("clients_accounts") + 1;
-
             // get the prefix from the school name
             $name = explode(" ", $params->school_name);
             $prefix = "";
@@ -796,18 +795,26 @@ class Auth extends Myschoolgh {
                 $prefix .= $word[0];
             }
 
-            // create a client id
-            $client_id = "{$prefix}".$this->append_zeros($last_id, 7);
+            // create a token
             $user_id = "{$prefix}U".$this->append_zeros(1, 7);
             $item_id = random_string("alnum", 32);
             $token = random_string("alnum", 54);
 
             $preference = (object) [
+                "labels" => [
+                    "staff" => $prefix,
+                    "student" => $prefix,
+                    "parent" => $prefix
+                ],
+                "academics" => [
+                    "academic_year" => "",
+                    "academic_term" => ""
+                ],
                 "account" => [
                     "type" => "trial",
                     "activation_code" => $token,
                     "date_created" => date("Y-m-d h:iA"),
-                    "expiry" => date("Y-m-d h:iA", strtotime("+2 months"))
+                    "expiry" => date("Y-m-d h:iA", strtotime("+1 months"))
                 ]
             ];
 
@@ -817,6 +824,12 @@ class Auth extends Myschoolgh {
             }
             $password =  password_hash($params->password, PASSWORD_DEFAULT);
 
+            // get the last client id
+            $last_id = $this->lastRowId("clients_accounts") + 1;
+            
+            // create a client id
+            $client_id = "{$prefix}".$this->append_zeros($last_id, 7);
+            
             // insert the client details
             $stmt = $this->db->prepare("
                 INSERT INTO clients_accounts SET 
@@ -836,11 +849,11 @@ class Auth extends Myschoolgh {
             // insert the user account details
             $ac_stmt = $this->db->prepare("
                 INSERT INTO users SET item_id = ?, unique_id = ?, client_id = ?, access_level = ?, password = ?,
-                user_type = ?, address = ?, username = ?, verify_token = ?, status = ?
+                user_type = ?, address = ?, username = ?, verify_token = ?, status = ?, email = ?
             ");
             $ac_stmt->execute([
                 $item_id, $user_id, $client_id, $access_level, $password, "admin", 
-                $params->school_address, $username, $token, "Pending"
+                $params->school_address, $username, $token, "Pending", $params->email
             ]);
 
             // log the user access level
@@ -854,7 +867,7 @@ class Auth extends Myschoolgh {
                         <strong>Email Address:</strong> {$params->email} or <strong>Username:</strong> {$username}
                         and the password that was provided during signup.\n\n";
 			$message .= "One of our personnel will get in touch shortly to assist you with additional setup processes that is required to aid you quick start the usage of the application.\n";
-			$message .= "<a href='{$this->baseUrl}verify?account=true&token={$token}'><strong>Click Here</strong></a> to verify your Email Address and also to activate the account.\n\n";
+			$message .= "<a href='{$this->baseUrl}verify?dw=account=true&token={$token}'><strong>Click Here</strong></a> to verify your Email Address and also to activate the account.\n\n";
 
             // recipient list
             $reciepient = ["recipients_list" => [["fullname" => $params->school_name, "email" => $params->email, "customer_id" => $item_id]]];
@@ -870,7 +883,7 @@ class Auth extends Myschoolgh {
             ]);
 
             // insert the user activity
-            $this->userLogs("verify_account", $item_id, null, "{$params->school_name} created a new Account.", $item_id, $client_id);
+            $this->userLogs("verify_account", $item_id, null, "{$params->school_name} created a new Account pending Verification.", $item_id, $client_id);
 
             // create the account
             return [

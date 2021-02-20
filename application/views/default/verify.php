@@ -15,12 +15,41 @@ if($usersClass->loggedIn()) {
 
 // verify header
 $page_title = "Account Verification";
-$content = "Verify your Account";
+$key = "";
 
 // if password was set
-if(isset($_GET["password"])) {
+if(isset($_GET["dw"]) && ($_GET["dw"] == "account")) {
+    $key = "verify_account";
+}
+
+// if password was set
+elseif(isset($_GET["dw"]) && ($_GET["dw"] == "password")) {
     $page_title = "Reset Password";
-    $content = "Recover Password";
+    $key = "reset_password";
+}
+
+// if password was set
+elseif(isset($_GET["dw"]) && ($_GET["dw"] == "user")) {
+    $page_title = "Activate User Account";
+    $key = "verify_user";
+}
+
+// ensure the user does not over use the page
+$session->refresh_page = empty($session->refresh_page) ? 1 : ($session->refresh_page + 1);
+
+// end the page query if the user tries to refresh more than 10 times
+if($session->refresh_page >= 10) {
+  print '
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>403 Forbidden</title>
+</head><body>
+<h1>Forbidden</h1>
+<p>You don\'t have permission to access this resource.</p>
+<hr>
+<address>Apache/2.4.46 (Win64) OpenSSL/1.1.1h PHP/7.3.26 Server at localhost Port 80</address>
+</body></html>';
+  exit;
 }
 
 // set the token variable
@@ -31,7 +60,7 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title>Login - <?= config_item("site_name") ?></title>
+  <title><?= $page_title ?> - <?= config_item("site_name") ?></title>
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-social/bootstrap-social.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
@@ -64,60 +93,111 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
             </div>
             <div class="card card-primary">
               <div class="card-header">
-                <h4>Verify</h4>
+                <h4><?= $page_title ?></h4>
               </div>
               <div class="card-body">
-              <?php if($token && ($page_title == "Reset Password")) { ?>
-                <?= form_loader(); ?>
-                
+                <?php if($token && ($key == "reset_password")) { ?>
+                  <?= form_loader(); ?>
+                    <?php
+                    // reset the expiry
+                    $expiry_time = 60*60*6;
+                    
+                    // verify user account
+                    $stmt = $myschoolgh->prepare("SELECT * FROM users_reset_request WHERE request_token=? AND token_status=? LIMIT 1");
+                    $stmt->execute([$token, 'PENDING']);
+                    
+                    // failed
+                    $count = $stmt->rowCount();
+                    
+                    // if not empty
+                    if($count) {
+                        // get the results
+                        $data = $stmt->fetch(PDO::FETCH_OBJ);
+                        // time check
+                        $expiry_time = $data->expiry_time;
+                        $username = $data->username;
+                        $user_id = $data->user_id;
+                    }
+                    // confirm that the token hasnt yet expired
+                    if(!$count || ($expiry_time < time())) {
+                        print "<div class='alert alert-danger'>Sorry! The token could not be authenticated or has expired.</div>";
+                    }
+                    // present the user with the form to reset password
+                    if($count) {
+                    ?>
+                      <form method="POST" action="<?= $baseUrl ?>api/auth" id="auth-form" class="needs-validation" novalidate="">
+                        <div class="form-group">
+                          <label for="password">Password</label>
+                          <input id="password" type="password" class="form-control" name="password" tabindex="1" required>
+                        </div>
+                        <div class="form-group">
+                          <label for="password_2">Confirm Password</label>
+                          <input id="password_2" type="password" class="form-control" name="password_2" tabindex="1" required>
+                        </div>
+                        <input type="hidden" name="reset_token" value="<?= $token ?>" id="reset_token" hidden>
+                        <div class="form-group">
+                          <button type="submit" class="btn btn-primary btn-lg btn-block" tabindex="4">Reset Password</button>
+                        </div>
+                      </form>
+                      <div class="text-center mt-4 mb-3"></div>
+                      <div class="form-results"></div>                
+                  <?php } ?>
+                <?php } elseif($token && ($key == "verify_account" || $key == "verify_user")) {
+
+                  // verify user account
+                  $stmt = $myschoolgh->prepare("SELECT a.username, a.client_id, a.item_id, a.item_id AS user_id, u.client_preferences 
+                  FROM users a 
+                    LEFT JOIN clients_accounts u ON u.client_id = a.client_id
+                  WHERE a.verify_token=? LIMIT 1");
+                  $stmt->execute([$token]);
+                  $result = $stmt->fetch(PDO::FETCH_OBJ);
+
+                  // confirm that the token hasnt yet expired
+                  if(!isset($result->client_id)) {
+                      print "<div class='alert alert-danger'>Sorry! An invalid verification code was submitted for processing.</div>";
+                  } else {
+                    // convert the preferences to an object
+                    $prefs = json_decode($result->client_preferences);
+
+                    // set the expiry date to one month from activation
+                    $prefs->account->verified_date = date("Y-m-d h:iA");
+                    $prefs->account->expiry = date("Y-m-d h:iA", strtotime("+1 months"));
+                    
+                    // confirm that the verification code matches
+                    if(($key == "verify_account") && ($prefs->account->activation_code !== $token)) {
+                      print "<div class='alert alert-danger'>Sorry! An invalid verification code was submitted for processing.</div>";
+                    } else {
+     
+                      // activate the user account
+                      $stmt = $myschoolgh->prepare("UPDATE users SET verify_token = ?, token_expiry = ?, status = ?, user_status = ?, verified_email = ?, verified_date = now() WHERE item_id = ? AND client_id = ? LIMIT 1");
+                      $stmt->execute([NULL, NULL, 1, "Active", "Y", $result->user_id, $result->client_id]);
+
+                      // if the request is to verify a user account
+                      if($key == "verify_account") {
+                        $stmt = $myschoolgh->prepare("UPDATE clients_accounts SET client_state = ?, client_preferences = ? WHERE client_id = ? LIMIT 1");
+                        $stmt->execute(['Activated', json_encode($prefs), $result->client_id]);
+                      }
+
+                      // log the user activity
+                      $myClass->userLogs("verify_account", $result->user_id, null, "{$result->username}'s - account was successfully activated.", $result->user_id, $result->client_id, "Account was manually activated using the Activation link.");
+
+                      $session->remove("refresh_page");
+
+                      // print the success notification
+                      print "<div class='alert alert-success text-center'>Congrats! Your account was successfully activated. You can now login to continue.</div>";
+                  ?>
+
                 <?php
-                // reset the expiry
-                $expiry_time = 60*60*6;
-                
-                // verify user account
-                $stmt = $myschoolgh->prepare("SELECT * FROM users_reset_request WHERE request_token=? AND token_status=? LIMIT 1");
-                $stmt->execute([$token, 'PENDING']);
-                
-                // failed
-                $count = $stmt->rowCount();
-                
-                // if not empty
-                if($count) {
-                    // get the results
-                    $data = $stmt->fetch(PDO::FETCH_OBJ);
-                    // time check
-                    $expiry_time = $data->expiry_time;
-                    $username = $data->username;
-                    $user_id = $data->user_id;
-                }
-                // confirm that the token hasnt yet expired
-                if(!$count || ($expiry_time < time())) {
-                    print "<div class='alert alert-danger'>Sorry! The token could not be authenticated or has expired.</div>";
-                }
-                // present the user with the form to reset password
-                if($count) {
-                ?>
-                <form method="POST" action="<?= $baseUrl ?>api/auth" id="auth-form" class="needs-validation" novalidate="">
-                  <div class="form-group">
-                    <label for="password">Password</label>
-                    <input id="password" type="password" class="form-control" name="password" tabindex="1" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="password_2">Confirm Password</label>
-                    <input id="password_2" type="password" class="form-control" name="password_2" tabindex="1" required>
-                  </div>
-                  <input type="hidden" name="reset_token" value="<?= $token ?>" id="reset_token" hidden>
-                  <div class="form-group">
-                    <button type="submit" class="btn btn-primary btn-lg btn-block" tabindex="4">Reset Password</button>
-                  </div>
-                </form>
-                <div class="text-center mt-4 mb-3"></div>
-                <div class="form-results"></div>                
-                <?php } ?>
-                <?php } ?>
+                    } 
+                  }
+                } else { ?>
+                <div class="alert alert-danger text-center">
+                  Sorry! An invalid verification code was submitted for processing.
                 </div>
+                <?php } ?>
+              </div>
             </div>
-            <div class="mt-5 text-white text-center">
+            <div class="mt-3 border-radius text-dark p-3 bg-white text-center">
               Already have an account? <a href="<?= $baseUrl ?>login">Login</a>
             </div>
           </div>
