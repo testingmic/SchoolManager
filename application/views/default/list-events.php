@@ -25,7 +25,7 @@ $response->timer = 0;
 if(!empty($session->clientId)) {
 
     // convert to lowercase
-    $client_id = strtolower($session->clientId);
+    $client_id = strtoupper($session->clientId);
 
     // create new event class
     $data = (object) [];
@@ -82,10 +82,11 @@ if(!empty($session->clientId)) {
     $defaultUser->hasEventUpdate = $hasEventUpdate;
 
     // load the scripts
-    $response->scripts = [
-        "assets/js/scripts/{$client_id}_{$defaultUser->user_type}_events.js",
-        "assets/js/events.js",
-    ];
+    $response->scripts = ["assets/js/events.js"];
+
+    if(file_exists("assets/js/scripts/{$client_id}_{$defaultUser->user_type}_events.js")) {
+        $response->scripts[] = "assets/js/scripts/{$client_id}_{$defaultUser->user_type}_events.js";
+    }
 
     $response->html = '
         <div id="fullCalModal" class="modal fade" data-backdrop="static" data-keyboard="false">

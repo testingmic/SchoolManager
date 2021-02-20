@@ -304,10 +304,12 @@ var loadPage = (loc, pushstate) => {
                 let timer = 200,
                     increment = result.timer !== undefined ? result.timer : 1000;
                 $.each(result.scripts, function(ii, ie) {
-                    setTimeout(() => {
-                        $.cachedScript(`${baseUrl}${ie}`);
-                    }, timer);
-                    timer += increment;
+                    try {
+                        setTimeout(() => {
+                            $.cachedScript(`${baseUrl}${ie}`);
+                        }, timer);
+                        timer += increment;
+                    } catch (err) {}
                 });
             }
 

@@ -4,15 +4,13 @@ class Scripts extends Myschoolgh {
     
     public function attendance(stdClass $params) {
 
-        return "// Calendar Event Source
+        return "
     var calendarEvents = {
         id: 1,
         backgroundColor: '#136ae3bf',
         borderColor: '#0168fa',
         events: {$params->events_list->calendar_events_list}
     };
-
-    // Birthday Events Source
     var birthdayEvents = {
         id: 2,
         backgroundColor: '#128b10d9',
@@ -28,7 +26,6 @@ class Scripts extends Myschoolgh {
     };
 
     function initiateCalendar() {
-    // initialize the calendar
     $('#{$params->container}').fullCalendar({
         header: {
             left: 'prev,today,next',
@@ -40,7 +37,7 @@ class Scripts extends Myschoolgh {
         draggable: false,
         dragRevertDuration: 0,
         defaultView: 'month',
-        eventLimit: true, // allow  link when too many events
+        eventLimit: true,
         eventSources: [{$params->event_Sources}],
         eventClick:  function(event, jsEvent, view) {
             $('#modalTitle1').html(event.title);
@@ -49,29 +46,21 @@ class Scripts extends Myschoolgh {
             $('#fullCalModal').modal();
         },
         dayClick: function(date, jsEvent, view) {
-            $(\"#createEventModal\").modal(\"show\");
+            $(`#createEventModal`).modal(`show`);
             $(`#createEventModal input[name=\"date\"]`).val(`\${date.format()}:\${date.format()}`);
         }
     });
 }
 initiateCalendar();";
-
     }
 
     public function timetable() {
-
-        $data = "// Timetable
-    
-        ";
-
-        // generate a new script for this client
+        $data = "";
         $filename = "assets/js/timetable.js";
         $file = fopen($filename, "w");
         fwrite($file, $data);
         fclose($file);
-
-        return true;
-        
+        return true;        
     }
 
 }
