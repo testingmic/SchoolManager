@@ -10,7 +10,7 @@ $.mainprogress = $(".main-progress-bar");
 $.pageoverlay = $(".pageoverlay");
 $.pageloader = $(".loader");
 $.env = "development";
-$.chatinterval = 2000;
+$.chatinterval = 5000;
 
 $form_modal = $(`div[id="formsModal"]`);
 $replies_modal = $(`div[id="repliesModal"]`);
@@ -180,7 +180,7 @@ $(() => {
 });
 
 var init = () => {
-    $.chatinterval = 2000
+    $.chatinterval = 5000
     appxhr = []
     initPlugins()
 }
@@ -269,6 +269,155 @@ var apply_comment_click_handlers = () => {
 
     init_image_popup();
     deleteReply();
+}
+
+var trigger_form_submit = () => {
+    $(`form[class="ajax-data-form"] button[type="button-submit"]`).on("click", async function(evt) {
+
+        evt.preventDefault();
+        let theButton = $(this),
+            draftButton = $(`form[class="ajax-data-form"] button[type="button-submit"][data-function="draft"]`),
+            formAction = $(`form[class="ajax-data-form"]`).attr("action"),
+            formButton = $(`form[class="app-data-form"] button[type="button-submit"]`);
+
+        let optional_flow = "We recommend that you save the form as a draft, and review it before submitting. Do you wish to proceed with this action?";
+
+        formButton.prop("disabled", true);
+
+        let myForm = document.getElementById('ajax-data-form-content');
+        let theFormData = new FormData(myForm);
+
+        let button = theButton.attr("data-function");
+        theFormData.append("the_button", button);
+
+        if ($(`select[name='assigned_to_list']`).length) {
+            theFormData.delete("assigned_to_list");
+            theFormData.append("assigned_to_list", serializeSelect($(`select[name="assigned_to_list"]`)));
+        }
+
+        if ($(`textarea[name="faketext"]`).length) {
+            theFormData.delete("faketext");
+            let content = CKEDITOR.instances['ajax-form-content'].getData();
+            theFormData.append("description", htmlEntities(content));
+        }
+
+        if ($(`textarea[name="faketext_2"]`).length) {
+            theFormData.delete("faketext_2");
+            let content = CKEDITOR.instances['ajax-form-content_2'].getData();
+            theFormData.append("reason", htmlEntities(content));
+        }
+
+        if ($(`trix-editor[name="faketext"][id="ajax-form-content"]`).length) {
+            theFormData.delete("faketext");
+            let content = $(`trix-editor[id="ajax-form-content"]`).html();
+            theFormData.append("description", htmlEntities(content));
+        }
+
+        if ($(`trix-editor[name="faketext_2"][id="ajax-form-content_2"]`).length) {
+            theFormData.delete("faketext_2");
+            let content = $(`trix-editor[id="ajax-form-content_2"]`).html();
+            theFormData.append("reason", htmlEntities(content));
+        }
+
+        swal({
+            title: "Submit Form",
+            text: `Are you sure you want to Submit this form? ${draftButton.length ? optional_flow : ""}`,
+            icon: 'warning',
+            buttons: true,
+            dangerMode: true,
+        }).then((proceed) => {
+            if (proceed) {
+                $.ajax({
+                    url: `${formAction}`,
+                    data: theFormData,
+                    contentType: false,
+                    cache: false,
+                    type: `POST`,
+                    processData: false,
+                    success: function(response) {
+                        if (response.code == 200) {
+                            swal({
+                                position: 'top',
+                                text: response.data.result,
+                                icon: "success",
+                            });
+                            if (response.data.additional) {
+                                if (response.data.additional.clear !== undefined) {
+                                    if ($(`textarea[name="faketext"]`).length) {
+                                        CKEDITOR.instances['ajax-form-content'].setData("");
+                                    }
+                                    if ($(`trix-editor[name="faketext"][id="ajax-form-content"]`).length) {
+                                        $(`trix-editor[name="faketext"][id="ajax-form-content"]`).html("");
+                                    }
+                                    $replies_loaded.attr("value", "0");
+                                    $replies_loaded.attr("data-form", "none");
+                                    $(".modal").modal("hide");
+                                    $(`form[class="ajax-data-form"] select`).val("null").change();
+                                    $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
+                                }
+                                if (response.data.additional.append !== undefined) {
+                                    $(`div[id="${response.data.additional.append.div_id}"]`).html(response.data.additional.append.data);
+                                }
+                                if (response.data.additional.record !== undefined) {
+                                    $.each(response.data.additional.record, function(ie, iv) {
+                                        $(`form[class="ajax-data-form"] input[name="${ie}"]`).val(iv);
+                                        $(`[data-record="${ie}"]`).html(iv);
+                                    });
+                                }
+                                if (response.data.additional.href !== undefined) {
+                                    if (theButton.attr("href") !== undefined) {
+                                        setTimeout(() => {
+                                            loadPage(theButton.attr("href"));
+                                        }, 1000);
+                                    } else {
+                                        setTimeout(() => {
+                                            loadPage(response.data.additional.href);
+                                        }, 2000);
+                                    }
+                                }
+                                if (response.data.additional.data !== undefined) {
+                                    preload_AjaxData(response.data.additional.data);
+                                }
+                            }
+
+                            if (typeof initiateCalendar === "function") {
+                                initiateCalendar();
+                            }
+
+                            $form_modal.modal("hide");
+                            $(`form[class="ajax-data-form"] div[class~="file-preview"]`).html("");
+                        } else {
+                            if (response.data.result !== undefined) {
+                                swal({
+                                    position: 'top',
+                                    text: response.data.result,
+                                    icon: "error",
+                                });
+                            } else {
+                                swal({
+                                    position: 'top',
+                                    text: "Sorry! Error processing request.",
+                                    icon: "error",
+                                });
+                            }
+                        }
+                    },
+                    complete: function() {
+                        $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+                    },
+                    error: function() {
+                        $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+                        swal({
+                            position: 'top',
+                            text: "Sorry! Error processing request.",
+                            icon: "error",
+                        });
+                    }
+                });
+            }
+        });
+
+    });
 }
 
 var loadPage = (loc, pushstate) => {
@@ -363,6 +512,26 @@ var loadPage = (loc, pushstate) => {
         }
     })
 }
+
+var new_message_alert = () => {
+    if ($(`div[class~="chat-box"] div[class~="chat-content"]`).length) {
+        $.ajax({
+            url: `${baseUrl}api/chats/alerts`,
+            method: "POST",
+            dataType: "json",
+            success: (response) => {
+                if (response.code === 200) {
+                    $.each(response.data.result, function(i, e) {
+                        $(`span[data-user_id="${e.sender_id}"]`).html(`<i class="fa text-warning fa-comments"></i> ${e.chats_count}`);
+                    });
+                }
+            }
+        });
+    }
+    setTimeout(() => { new_message_alert() }, $.chatinterval);
+}
+
+new_message_alert();
 
 var loadFormAction = (form) => {
 
@@ -560,26 +729,6 @@ var moneyFormat = (value, decimals) => {
     return value
 }
 
-var fetch_user_chats = () => {
-    appxhr.push(
-        $.ajax({
-            url: $.baseurl + "/messages_process/fetch_user_chats",
-            method: 'POST',
-            dataType: "JSON",
-            success: (res) => {
-                if (res.count > 0) {
-                    $('.messagescount-badge').text(res.count);
-                    if ($('.messagescount-badge').length < 2) {
-                        $('.messagescount').append("<span class='badge badge-pill badge-success messagescount-badge'>" + res.count + "</span>");
-                    }
-                    notify(res.message);
-                }
-            }
-        })
-    );
-    setTimeout(() => {}, $.chatinterval);
-}
-
 var notify = (text, type = "error") => {
     $.notify(text, type);
 }
@@ -588,155 +737,6 @@ var randomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-}
-
-var trigger_form_submit = () => {
-    $(`form[class="ajax-data-form"] button[type="button-submit"]`).on("click", async function(evt) {
-
-        evt.preventDefault();
-        let theButton = $(this),
-            draftButton = $(`form[class="ajax-data-form"] button[type="button-submit"][data-function="draft"]`),
-            formAction = $(`form[class="ajax-data-form"]`).attr("action"),
-            formButton = $(`form[class="app-data-form"] button[type="button-submit"]`);
-
-        let optional_flow = "We recommend that you save the form as a draft, and review it before submitting. Do you wish to proceed with this action?";
-
-        formButton.prop("disabled", true);
-
-        let myForm = document.getElementById('ajax-data-form-content');
-        let theFormData = new FormData(myForm);
-
-        let button = theButton.attr("data-function");
-        theFormData.append("the_button", button);
-
-        if ($(`select[name='assigned_to_list']`).length) {
-            theFormData.delete("assigned_to_list");
-            theFormData.append("assigned_to_list", serializeSelect($(`select[name="assigned_to_list"]`)));
-        }
-
-        if ($(`textarea[name="faketext"]`).length) {
-            theFormData.delete("faketext");
-            let content = CKEDITOR.instances['ajax-form-content'].getData();
-            theFormData.append("description", htmlEntities(content));
-        }
-
-        if ($(`textarea[name="faketext_2"]`).length) {
-            theFormData.delete("faketext_2");
-            let content = CKEDITOR.instances['ajax-form-content_2'].getData();
-            theFormData.append("reason", htmlEntities(content));
-        }
-
-        if ($(`trix-editor[name="faketext"][id="ajax-form-content"]`).length) {
-            theFormData.delete("faketext");
-            let content = $(`trix-editor[id="ajax-form-content"]`).html();
-            theFormData.append("description", htmlEntities(content));
-        }
-
-        if ($(`trix-editor[name="faketext_2"][id="ajax-form-content_2"]`).length) {
-            theFormData.delete("faketext_2");
-            let content = $(`trix-editor[id="ajax-form-content_2"]`).html();
-            theFormData.append("reason", htmlEntities(content));
-        }
-
-        swal({
-            title: "Submit Form",
-            text: `Are you sure you want to Submit this form? ${draftButton.length ? optional_flow : ""}`,
-            icon: 'warning',
-            buttons: true,
-            dangerMode: true,
-        }).then((proceed) => {
-            if (proceed) {
-                $.ajax({
-                    url: `${formAction}`,
-                    data: theFormData,
-                    contentType: false,
-                    cache: false,
-                    type: `POST`,
-                    processData: false,
-                    success: function(response) {
-                        if (response.code == 200) {
-                            swal({
-                                position: 'top',
-                                text: response.data.result,
-                                icon: "success",
-                            });
-                            if (response.data.additional) {
-                                if (response.data.additional.clear !== undefined) {
-                                    if ($(`textarea[name="faketext"]`).length) {
-                                        CKEDITOR.instances['ajax-form-content'].setData("");
-                                    }
-                                    if ($(`trix-editor[name="faketext"][id="ajax-form-content"]`).length) {
-                                        $(`trix-editor[name="faketext"][id="ajax-form-content"]`).html("");
-                                    }
-                                    $replies_loaded.attr("value", "0");
-                                    $replies_loaded.attr("data-form", "none");
-                                    $(".modal").modal("hide");
-                                    $(`form[class="ajax-data-form"] select`).val("null").change();
-                                    $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
-                                }
-                                if (response.data.additional.append !== undefined) {
-                                    $(`div[id="${response.data.additional.append.div_id}"]`).html(response.data.additional.append.data);
-                                }
-                                if (response.data.additional.record !== undefined) {
-                                    $.each(response.data.additional.record, function(ie, iv) {
-                                        $(`form[class="ajax-data-form"] input[name="${ie}"]`).val(iv);
-                                        $(`[data-record="${ie}"]`).html(iv);
-                                    });
-                                }
-                                if (response.data.additional.href !== undefined) {
-                                    if (theButton.attr("href") !== undefined) {
-                                        setTimeout(() => {
-                                            loadPage(theButton.attr("href"));
-                                        }, 1000);
-                                    } else {
-                                        setTimeout(() => {
-                                            loadPage(response.data.additional.href);
-                                        }, 2000);
-                                    }
-                                }
-                                if (response.data.additional.data !== undefined) {
-                                    preload_AjaxData(response.data.additional.data);
-                                }
-                            }
-
-                            if (typeof initiateCalendar === "function") {
-                                initiateCalendar();
-                            }
-
-                            $form_modal.modal("hide");
-                            $(`form[class="ajax-data-form"] div[class~="file-preview"]`).html("");
-                        } else {
-                            if (response.data.result !== undefined) {
-                                swal({
-                                    position: 'top',
-                                    text: response.data.result,
-                                    icon: "error",
-                                });
-                            } else {
-                                swal({
-                                    position: 'top',
-                                    text: "Sorry! Error processing request.",
-                                    icon: "error",
-                                });
-                            }
-                        }
-                    },
-                    complete: function() {
-                        $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
-                    },
-                    error: function() {
-                        $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
-                        swal({
-                            position: 'top',
-                            text: "Sorry! Error processing request.",
-                            icon: "error",
-                        });
-                    }
-                });
-            }
-        });
-
-    });
 }
 
 var form_processing = () => {

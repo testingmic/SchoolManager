@@ -466,46 +466,49 @@ class Timetable extends Myschoolgh {
         $client_details = $this->pushQuery("a.*", "clients_accounts a", "a.client_id = '{$clientId}' AND a.client_status='1' LIMIT 1")[0];
         $client_details->client_preferences = json_decode($client_details->client_preferences);
         
-        // run a query for the teacher courses taught
-        $stmt = $this->db->prepare("SELECT ts.*, c.name AS course_name, r.name AS room_name,
-                    cl.name AS class_name, t.disabled_inputs, t.name AS timetable_name, ts.course_id,
-                    t.slots, t.days, t.duration, t.start_time, t.allow_conflicts, c.course_code
-                FROM timetables_slots_allocation ts 
-                    LEFT JOIN courses c ON c.item_id = ts.course_id
-                    LEFT JOIN classes cl ON cl.item_id = ts.class_id
-                    LEFT JOIN timetables t ON t.item_id = ts.timetable_id
-                    LEFT JOIN classes_rooms r ON r.item_id = ts.room_id
-                WHERE (c.id IN {$this->inList($course_ids)}) AND ts.status = ? AND 
-                        ts.client_id = ? {$query} AND t.published = ? AND t.status = ?
-                AND t.academic_year = ? AND t.academic_term = ?    
-        ");
-        $stmt->execute([1, $clientId, 1, 1, $client_details->client_preferences->academics->academic_year, $client_details->client_preferences->academics->academic_term]);
-        
         // init
         $data = [];
         $timetable = (object) [];
 
-        // loop through the result set
-        while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-            
-            // convert the disabled inputs into an array
-            $result->disabled_inputs = !empty($result->disabled_inputs) ? json_decode($result->disabled_inputs, true) : [];
-            
-            // main timetable information
-            $timetable = (object) [
-                "days" => $result->days,
-                "name" => $result->timetable_name,
-                "slots" => $result->slots,
-                "duration" => $result->duration,
-                "disabled_inputs" => $result->disabled_inputs,
-                "start_time" => $result->start_time,
-                "allow_conflicts" => $result->allow_conflicts,
-            ];
+        if(!empty($course_ids)) {
+            // run a query for the teacher courses taught
+            $stmt = $this->db->prepare("SELECT ts.*, c.name AS course_name, r.name AS room_name,
+                        cl.name AS class_name, t.disabled_inputs, t.name AS timetable_name, ts.course_id,
+                        t.slots, t.days, t.duration, t.start_time, t.allow_conflicts, c.course_code
+                    FROM timetables_slots_allocation ts 
+                        LEFT JOIN courses c ON c.item_id = ts.course_id
+                        LEFT JOIN classes cl ON cl.item_id = ts.class_id
+                        LEFT JOIN timetables t ON t.item_id = ts.timetable_id
+                        LEFT JOIN classes_rooms r ON r.item_id = ts.room_id
+                    WHERE (c.id IN {$this->inList($course_ids)}) AND ts.status = ? AND 
+                            ts.client_id = ? {$query} AND t.published = ? AND t.status = ?
+                    AND t.academic_year = ? AND t.academic_term = ?    
+            ");
+            $stmt->execute([1, $clientId, 1, 1, $client_details->client_preferences->academics->academic_year, $client_details->client_preferences->academics->academic_term]);
 
-            // set the last timetable id to a variable
-            $data[$result->day_slot][] = $result;
+            // loop through the result set
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                
+                // convert the disabled inputs into an array
+                $result->disabled_inputs = !empty($result->disabled_inputs) ? json_decode($result->disabled_inputs, true) : [];
+                
+                // main timetable information
+                $timetable = (object) [
+                    "days" => $result->days,
+                    "name" => $result->timetable_name,
+                    "slots" => $result->slots,
+                    "duration" => $result->duration,
+                    "disabled_inputs" => $result->disabled_inputs,
+                    "start_time" => $result->start_time,
+                    "allow_conflicts" => $result->allow_conflicts,
+                ];
+
+                // set the last timetable id to a variable
+                $data[$result->day_slot][] = $result;
+            }
+
         }
-
+        
         // courses list
         $courses_list = [];
         $t_course_ids = [];

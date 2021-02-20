@@ -33,8 +33,6 @@ $users_list = '<li id="temp_user_list" class="clearfix"><div>No user to display 
 // recent content
 $lastChat = (object) [];
 
-// print_r($recentChat);
-
 // if the messages is not empty
 if(!empty($recentChat["messages"])) {
     $users_list = "";
@@ -45,13 +43,14 @@ if(!empty($recentChat["messages"])) {
                 $online_text = $message->receipient_info->online ? "online" : "offline";
                 $online_msg = $message->receipient_info->online ? "Online" : "Left {$message->receipient_info->offline_ago}";
                 $users_list .= '
-                <li id="default_list" data-message_id="'.$message->message_unique_id.'" onclick="return display_messages(\''.$message->message_unique_id.'\',\''.$message->receiver_id.'\',\''.$message->receipient_info->name.'\',\''.$message->receipient_info->image.'\',\''.$message->receipient_info->offline_ago.'\')" class="clearfix '.(($key === 0) ? "actdive" : "").'">
+                <li id="default_list" style="width:100%" data-message_id="'.$message->message_unique_id.'" onclick="return display_messages(\''.$message->message_unique_id.'\',\''.$message->receiver_id.'\',\''.$message->receipient_info->name.'\',\''.$message->receipient_info->image.'\',\''.$message->receipient_info->offline_ago.'\')" class="clearfix d-flex '.(($key === 0) ? "actdive" : "").'">
                     <img src="'.$baseUrl.''.$message->receipient_info->image.'" alt="avatar">
-                    <div class="about">
+                    <div class="about" style="width:100%">
                         <div class="name">'.$message->receipient_info->name.'</div>
                         <div class="status">
                             <i class="material-icons '.$online_text.'">fiber_manual_record</i>
                             '.$online_msg.'
+                            <span data-user_id="'.$message->receiver_id.'" class="float-right"></span>
                         </div>
                     </div>
                 </li>';
@@ -104,8 +103,7 @@ $response->html = '
                     </div>
                   </div>
                   <div class="chat-box" id="mychatbox">
-                    <div class="card-body chat-content">
-                    </div>
+                    <div class="card-body chat-content"></div>
                     <div class="card-footer chat-form">
                       <form id="chat-form" method="POST">
                         <input id="chat-input" disabled type="text" class="form-control" placeholder="Type a message">

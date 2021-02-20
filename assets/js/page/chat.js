@@ -11,25 +11,16 @@ $.chatCtrl = function(element, chat) {
         onShow: function() {}
     }, chat);
 
-    var target = $(element),
-        element = '<div class="chat-item ' + chat.position + '" style="display:none">' +
-        '<img src="' + chat.picture + '">' +
-        '<div class="chat-details">' +
-        '<div class="chat-text">' + chat.text + '</div>' +
-        '<div class="chat-time">' + chat.time + '</div>' +
-        '</div>' +
-        '</div>',
-        typing_element = '<div class="chat-item chat-left chat-typing" style="display:none">' +
-        '<img src="' + chat.picture + '">' +
-        '<div class="chat-details">' +
-        '<div class="chat-text"></div>' +
-        '</div>' +
-        '</div>';
+    var target = $(element);
+    element = `<div class="chat-item ${chat.position}" style="display:none">
+          <img src="${chat.picture}">
+          <div class="chat-details">
+            <div class="chat-text">${chat.text}</div>
+            <div class="chat-time">${chat.time}</div>
+          </div>
+        </div>`;
 
     var append_element = element;
-    if (chat.type == 'typing') {
-        append_element = typing_element;
-    }
 
     if (chat.timeout > 0) {
         setTimeout(function() {
@@ -39,12 +30,8 @@ $.chatCtrl = function(element, chat) {
         target.find('.chat-content').append($(append_element).fadeIn());
     }
 
-    var target_height = 0;
-    target.find('.chat-content .chat-item').each(function() {
-        target_height += $(this).outerHeight();
-    });
     setTimeout(function() {
-        target.find('.chat-content').scrollTop(target_height, -1);
+        $(`div[class~="chat-content"]`).animate({ scrollTop: $(`div[class~="chat-content"]`).prop("scrollHeight") }, 1000);
     }, 100);
     chat.onShow.call(this, append_element);
 }
@@ -92,6 +79,17 @@ var reset_list = () => {
     $(`ul[class~="chat-list"] li[id="default_list"], li[id="temp_user_list"]`).removeClass("hidden");
 }
 
+var format_chat_message = (chat) => {
+    let position = (chat.sender_id == $myPrefs.userId) ? "chat-right" : "chat-left";
+    return `<div class="chat-item ${position}" style="display:none">
+          <img src="${baseUrl}${chat.sender_info.image}">
+          <div class="chat-details">
+            <div class="chat-text">${chat.raw_message}</div>
+            <div class="chat-time">${chat.sent_time}</div>
+          </div>
+        </div>`;
+}
+
 var display_messages = async(message_id, user_id, name, image, last_seen = "Online") => {
     reset_list();
     current_focused_user_id = user_id,
@@ -102,6 +100,7 @@ var display_messages = async(message_id, user_id, name, image, last_seen = "Onli
     `);
 
     $(`form[id="chat-form"] *`).prop("disabled", false);
+    $(`div[class~="chat-box"] div[class~="chat-content"]`).html(``);
 
     let user_chats = await load_idb_record("chats", current_focused_msg_id),
         the_chat_list = {};
@@ -126,17 +125,22 @@ var display_messages = async(message_id, user_id, name, image, last_seen = "Onli
 
     if (the_chat_list) {
         let chats_list = "",
-            prev_time = "",
             prev_date = "";
         $.each(the_chat_list, function(i, e) {
             if (!prev_date || prev_date !== e.raw_date) {
                 chats_list += `<div class="message_list_day_divider_label"><button class="message_list_day_divider_label_pill">${e.clean_date}</button></div>`;
             }
-            // chats_list += format_UserChats(e);
+            chats_list += format_chat_message(e);
             prev_date = e.raw_date;
         });
 
-        $(`div[class~="chat-body"] ul[class="messages"]`).html(chats_list);
+        $(`span[data-user_id="${current_focused_user_id}"]`).html(``);
+        $(`div[class~="chat-box"] div[class~="chat-content"]`).html(chats_list);
+
+        setTimeout(function() {
+            $(`div[class~="chat-box"] div[class~="chat-content"] div[class~="chat-item"]`).fadeIn();
+            $(`div[class~="chat-content"]`).animate({ scrollTop: $(`div[class~="chat-content"]`).prop("scrollHeight") }, 0);
+        }, 1000);
     }
 
 }
@@ -155,9 +159,9 @@ $(`div[class~="chat-search"] input[id="search_user"]`).on("keyup", function(even
                         let online_text = user.online ? "online" : "offline",
                             online_msg = user.online ? "Online" : `Left ${user.offline_ago}`;
                         users_list += `
-                        <li id="search_list" data-message_id="${user.message_unique_id}" onclick="return display_messages('${user.message_unique_id}','${user.user_id}','${user.name}','${user.image}','${user.offline_ago}')" class="clearfix">
+                        <li id="search_list" style="width:100%" data-message_id="${user.message_unique_id}" onclick="return display_messages('${user.message_unique_id}','${user.user_id}','${user.name}','${user.image}','${user.offline_ago}')" class="clearfix d-flex">
                             <img src="${baseUrl}${user.image}" alt="avatar">
-                            <div class="about">
+                            <div class="about" style="width:100%">
                                 <div class="name">${user.name}</div>
                                 <div class="status">
                                     <i class="material-icons ${online_text}">fiber_manual_record</i>

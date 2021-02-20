@@ -129,7 +129,8 @@ class Chats extends Myschoolgh {
                 SELECT 
                     DISTINCT a.message_unique_id, a.id AS item_id, a.message_unique_id, a.sender_id, a.receiver_id, a.message AS full_message, 
                     a.date_created, a.seen_status, a.seen_date, DATE(a.date_created) AS raw_date,
-                    (SELECT CONCAT(name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online) FROM users WHERE users.item_id = a.receiver_id LIMIT 1) AS receipient_info
+                    (SELECT CONCAT(name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online) FROM users WHERE users.item_id = a.receiver_id LIMIT 1) AS receipient_info,
+                    (SELECT CONCAT(name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online) FROM users WHERE users.item_id = a.sender_id LIMIT 1) AS sender_info
                 FROM users_chat a WHERE 
                     (a.receiver_id = '{$userId}' AND a.receiver_deleted = '0') OR
                     (a.sender_id = '{$userId}' AND a.sender_deleted = '0')
@@ -162,17 +163,23 @@ class Chats extends Myschoolgh {
                 }
 
                 // convert the sender and receiver information into an object
-                $result->receipient_info = (object) $this->stringToArray($result->receipient_info, "|", ["name", "contact", "email", "image", "last_seen", "online"]);
-                
+                if($result->sender_id === $userId) {
+                    $result->receipient_info = (object) $this->stringToArray($result->receipient_info, "|", ["name", "contact", "email", "image", "last_seen", "online"]);
+                    $result->receipient_info->online = $this->user_is_online($result->receipient_info->last_seen);
+                    $result->receipient_info->offline_ago = time_diff($result->receipient_info->last_seen);
+                } else {
+                    // set the information to submit
+                    $result->receiver_id = $result->sender_id;
+                    $result->receipient_info = (object) $this->stringToArray($result->sender_info, "|", ["name", "contact", "email", "image", "last_seen", "online"]);
+                    $result->receipient_info->online = $this->user_is_online($result->receipient_info->last_seen);
+                    $result->receipient_info->offline_ago = time_diff($result->receipient_info->last_seen);
+                }
+
                 // convert the seen and sent dates into ago state
                 $result->clean_date = date("l, F jS", strtotime($result->date_created));
                 $result->sent_time = date("h:i A", strtotime($result->date_created));
                 $result->seen_time = time_diff($result->seen_date);
                 $result->sent_ago = time_diff($result->date_created);
-
-                // online algorithm (user is online if last activity is at most 5minutes ago)
-                $result->receipient_info->online = $this->user_is_online($result->receipient_info->last_seen);
-                $result->receipient_info->offline_ago = time_diff($result->receipient_info->last_seen);
 
                 // send the raw message
                 $result->seen_status = (int) $result->seen_status;
@@ -212,6 +219,37 @@ class Chats extends Myschoolgh {
             return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
         }
 
+    }
+
+    /**
+     * Chat Alerts
+     * 
+     * Get the list of messages from various users
+     * 
+     * @return Array
+     */
+    public function alerts(stdClass $params) {
+
+        try {
+
+            $stmt = $this->db->prepare("SELECT COUNT(*) AS chats_count, a.sender_id, c.last_seen
+                FROM users_chat a
+                LEFT JOIN users c ON c.item_id = a.sender_id
+                WHERE a.receiver_id=? AND a.seen_status = ? GROUP BY a.sender_id
+            ");
+            $stmt->execute([$params->userId, 0]);
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                // set some more parameters
+                $result->online = $this->user_is_online($result->last_seen);
+                $result->offline_ago = time_diff($result->last_seen);
+                $data[] = $result;
+            }
+
+            return $data;
+
+        } catch(PDOException $e) {}
     }
 
     /**
@@ -306,73 +344,20 @@ class Chats extends Myschoolgh {
     public function send(stdClass $params) {
 
         // GET THE USER INFORMATION
-		$senderInfo = isset($params->sender_id) ? $this->userInfo($params->sender_id) : null;
-		$recipientInfo = isset($params->receiver_id) ? $this->userInfo($params->receiver_id) : null;
-
-        // set the user id and the chat message
-        $chatMsg = $params->message;
-
-        // return false if the message is empty
-        if(empty($chatMsg)) {
-            return;
-        }
-        $chatMsg = nl2br($params->message);
-
-        /** Trim the message to only 1000 characters long */
-        $chatMsg = substr($chatMsg, 0, 1000);
-        $clean_date = date("l, F jS");
-        $time_sent = date("h:i A");
-        $raw_date = date("Y-m-d");
+		$reciepient_info = isset($params->receiver_id) ? $this->userInfo($params->receiver_id) : null;
         
         /** Generate a new id if the message id is empty */
 		$params->message_id = (empty($params->message_id) || $params->message_id == "null") ? strtoupper(random_string("alnum", 24)) : $params->message_id;
 		$this->message_id = $params->message_id;
 
-        /** Load user chats that has not yet been seen */
-        $data = (object) [
-            "apply_seen_status" => true,
-            "userId" => $params->userId,
-            "message_id" => $params->message_id,
-            "user_id" => $params->receiver_id
-        ];
-        $prev_messages = $this->list($data)["data"];
-
         // initiate a connection and append the messages
-        $last_insert_id = $this->save_message($params);
-
-        // limit the message and send
-        $message = limit_words($params->message, 12);
-
-        
-        // the message information
-        $senderMessageContent = "
-        <li class=\"message-item me\" id=\"sender_msg\" data-chat_item_id=\"{$last_insert_id}\">
-            <img src=\"{$this->baseUrl}{$senderInfo->image}\" class=\"img-xs rounded-circle\" alt=\"avatar\">
-            <div class=\"content\">
-                <div class=\"message\"><div class=\"bubble\">
-                    <div class=\"d-flex align-items-center\">
-                        <div class=\"mr-3\">{$chatMsg}</div>
-                        <div class=\"cursor\"><span class=\"font-10px delete_msg\" data-chat_item_id=\"{$last_insert_id}\" title=\"Delete this message\"><i class=\"fa fa-trash\"></i></span></div>
-                    </div>
-                </div>
-                <span>{$time_sent}</span></div>
-            </div>
-        </li>";
-        
-        // output the message
-        $sender_msg_content = [
-            "formated_message" => $senderMessageContent, "sender_info" => $senderInfo, "receiver_info" => $recipientInfo, "raw_message" => $chatMsg,
-            "receiver_id" => $params->receiver_id, "sender_id" => $params->sender_id, "message_id" => $this->message_id, "type" => "message",
-            "timestamp" => time(), "sent_time" => $time_sent, "seen_status" => 0, "clean_date" => $clean_date, 
-            "raw_date" => $raw_date, "item_id" => $last_insert_id, "message" => $message
-        ];
+        $this->save_message($params);
 
         return [
             "code" => 200,
             "data" => [
                 "message_id" => $this->message_id,
-                "chat" => $sender_msg_content,
-                "prev_list" => $prev_messages
+                "reciepient_info" => $reciepient_info,
             ]
         ];
 
@@ -389,10 +374,6 @@ class Chats extends Myschoolgh {
 	private function save_message($data) {
 
 		try {
-			/** Update the seeen status for messages between these two users */
-			$s_stmt = $this->db->prepare("UPDATE users_chat SET seen_status = ?, seen_date=now() WHERE receiver_id = ? AND sender_id = ? AND seen_status = ? LIMIT 20");
-			$s_stmt->execute([1, $data->sender_id, $data->receiver_id, 0]);
-
 			/** Save the message log */
 			$stmt = $this->db->prepare("INSERT INTO users_chat SET message_unique_id = ?, sender_id = ?, receiver_id = ?, message = ?, user_agent = ?");
 			$stmt->execute([$this->message_id, $data->sender_id, $data->receiver_id, $data->message, $this->agent]);
@@ -401,7 +382,6 @@ class Chats extends Myschoolgh {
 
 		} catch(\PDOException $e) {}
 	}
-
 
     /**
 	 * Get the user information using the ID
@@ -414,10 +394,16 @@ class Chats extends Myschoolgh {
 
 		try {
 
-			$stmt = $this->db->prepare("SELECT firstname, name, email, item_id, image, phone_number FROM users WHERE item_id = ? LIMIT 1");
+            // set the messages to load
+			$stmt = $this->db->prepare("SELECT firstname, name, email, item_id, image, phone_number, last_seen FROM users WHERE item_id = ? LIMIT 1");
 			$stmt->execute([$userId]);
+			$result = $stmt->fetch(\PDO::FETCH_OBJ);
 
-			return $stmt->fetch(\PDO::FETCH_OBJ);
+            // set some more parameters
+            $result->online = $this->user_is_online($result->last_seen);
+            $result->offline_ago = time_diff($result->last_seen);
+
+            return $result;
 
 		} catch(\PDOException $e) {}
 	}
