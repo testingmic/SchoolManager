@@ -1,22 +1,3 @@
-var acceptedArray = new Array();
-acceptedArray["student"] = [
-    "Student ID", "Firstname", "Lastname", "Othernames", "Email", "Contact Number",
-    "Blood Group", "Residence", "Date of Birth", "Admission Date", "Gender",
-    "Section", "Department", "Class", "Description", "Religion", "City",
-    "Previous School", "Previous School Remarks", "Previous School Qualification"
-], acceptedArray["staff"] = [
-    "Employee ID", "Firstname", "Lastname", "Othernames", "Email", "Contact Number",
-    "Blood Group", "Residence", "Date of Birth", "Date Employed", "Gender",
-    "Section", "Department", "Description", "Religion", "City",
-    "Courses Taught", "User Type", "Employer", "Occupation"
-], acceptedArray["course"] = [
-    "Course Code", "Title", "Credit Hours", "Weekly Meetings", "Description"
-], acceptedArray["parent"] = [
-    "Guardian ID", "Firstname", "Lastname", "Othernames", "Email", "Primary Contact",
-    "Secondary Contact", "Postal Address", "Blood Group", "Residence",
-    "Date of Birth", "Gender", "Description", "Religion", "City", "Employer", "Occupation"
-], current_column = "";
-
 $(`input[id="student_csv_file"]`).change(function() {
     var fd = new FormData();
     var files = $('input[id="student_csv_file"]')[0].files[0];
@@ -45,7 +26,6 @@ $(`input[id="parent_csv_file"]`).change(function() {
     fd.append('column', "parent");
     load_csv_file_data(fd, "parent");
 });
-
 
 var select_change_handler = (column) => {
     $(`div[data-csv_import_column="${column}"] div[class~="csv-rows-content"] select`).on('change', function(i, e) {
@@ -267,6 +247,10 @@ var import_csv_data = (this_column) => {
                     });
                     if (response.code === 200) {
                         clear_csv_upload(this_column);
+                        $(`div[data-csv_import_column="${this_column}"] div[class~="file-checker"]`).html(`
+                            <h2 class="text-success">${response.data.result}.</h2>
+                        `);
+                        $(`div[data-csv_import_column="${this_column}"] div[class~="upload-buttons"]`).remove();
                     }
                 },
                 complete: function(data) {

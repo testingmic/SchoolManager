@@ -1,7 +1,19 @@
+var foundArrayList = new Array(),
+    csvContent = new Array();
+
 function htmlEntities(str) {
     return String(str).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+var loadPage = (page) => {}
+
+var responseCode = (code) => {
+    if (code == 200 || code == 201) {
+        return "success";
+    } else {
+        return "error";
+    }
+}
 var trigger_form_submit = () => {
     $(`form[class="ajax-data-form"] button[type="button-submit"]`).on("click", async function(evt) {
 
@@ -185,6 +197,33 @@ var initPlugins = () => {
     $('[rel="popover"],[data-rel="popover"],[data-toggle="popover"]').popover();
     $(`div[class~="trix-button-row"] span[class~="trix-button-group--file-tools"], div[class~="trix-button-row"] span[class~="trix-button-group-spacer"]`).remove();
 }
+
+var complete_setup_process = () => {
+    swal({
+        title: "Complete Setup",
+        text: `Are you sure you want to complete the setup process?`,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/account/complete_setup`).then((response) => {
+                swal({
+                    position: 'top',
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
+                if (response.code === 200) {
+                    setTimeout(() => {
+                        window.location.href = `${baseUrl}`;
+                    }, 2000);
+                }
+            });
+        }
+    });
+}
+
+
 $(() => {
     initPlugins();
     trigger_form_submit();

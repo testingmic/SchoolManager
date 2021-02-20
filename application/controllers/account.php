@@ -2,7 +2,7 @@
 
 class Account extends Myschoolgh {
 
-    private $accepted_column;
+    public $accepted_column;
 
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
@@ -10,33 +10,32 @@ class Account extends Myschoolgh {
         $this->accepted_column["student"] = [
             "unique_id" => "Student ID", "firstname" => "Firstname", "lastname" => "Lastname", 
             "othername" => "Othernames", "email" => "Email", "phone_number" => "Contact Number",
-            "blood_group" => "Blood Group", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
+            "blood_group" => "Blood Group", "city" => "City", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
             "enrollment_date" => "Admission Date", "gender" => "Gender", "section" => "Section", 
             "department" => "Department", "class_id" => "Class", "description" => "Description",
-            "religion" => "Religion", "city" => "City", 
-            "previous_school" => "Previous School", "previous_school_qualification" => "Previous School Qualification",
+            "religion" => "Religion",  "previous_school" => "Previous School", 
+            "previous_school_qualification" => "Previous School Qualification",
             "previous_school_remarks" => "Previous School Remarks"
         ];
 
         $this->accepted_column["staff"] = [
             "unique_id" => "Employee ID", "firstname" => "Firstname", "lastname" => "Lastname", 
             "othername" => "Othernames", "email" => "Email", "phone_number" => "Contact Number",
-            "blood_group" => "Blood Group", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
+            "blood_group" => "Blood Group", "city" => "City", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
             "enrollment_date" => "Date of Employment", "gender" => "Gender", "section" => "Section", 
             "department" => "Department", "description" => "Description",
-            "religion" => "Religion", "city" => "City", 
-            "courses_id" => "Courses Taught", "user_type" => "User Type", 
-            "employer" => "Employer", "occupation" => "Occupation"
+            "religion" => "Religion", "course_ids" => "Courses Taught", "user_type" => "User Type", 
+            "employer" => "Employer", "occupation" => "Occupation", "position" => "Position"
         ];
     
         $this->accepted_column["parent"] = [
             "unique_id" => "Employee ID", "firstname" => "Firstname", "lastname" => "Lastname", 
             "othername" => "Othernames", "email" => "Email", "phone_number" => "Primary Contact",
             "phone_number_2" => "Secondary Contact", "blood_group" => "Blood Group", 
-            "residence" => "Residence", "date_of_birth" => "Date of Birth", 
+            "city" => "City", "residence" => "Residence", "date_of_birth" => "Date of Birth", 
             "gender" => "Gender", "description" => "Description",
-            "religion" => "Religion", "city" => "City", 
-            "employer" => "Employer", "occupation" => "Occupation"
+            "religion" => "Religion", "employer" => "Employer",
+            "occupation" => "Occupation", "position" => "Position"
         ];
 
         $this->accepted_column["course"] = [
@@ -45,6 +44,23 @@ class Account extends Myschoolgh {
         ];
 
 	}
+
+    /**
+     * Complete the Account setup process
+     * 
+     * This will set the account state to Active
+     * 
+     * @return Array
+     */
+    public function complete_setup(stdClass $params) {
+        // get the client data
+        $stmt = $this->db->prepare("UPDATE clients_accounts SET client_state = ? WHERE client_id = ? LIMIT 1");
+        $stmt->execute(['Active', $params->clientId]);
+
+        return [
+            "data" => "Account setup is successfully completed."
+        ];
+    }
 
     /**
      * Update Account Information
@@ -364,7 +380,7 @@ class Account extends Myschoolgh {
                             if(!in_array($type, $user_type)) {
                                 $bugs["user_type"] = "Please ensure the user type is one of the following: teacher, employee, accountant, admin";
                             } else {
-                                $t_user_type = $user_type;
+                                $t_user_type = $type;
                             }
                         }
                     }
@@ -419,6 +435,7 @@ class Account extends Myschoolgh {
             // clean the fullname
             if($isUser) {
                 $this->session->last_uploadId = $upload_id;
+                $this->session->last_recordUpload = $params->column;
             }
             
             try {

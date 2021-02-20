@@ -7,6 +7,8 @@
         if(isset($_GET["force_cold_boot"]) && ($_GET["force_cold_boot"] == 1)) {
             $idb_init = true;
         }
+        // create a new account object
+        $accountObj = load_class("account", "controllers");
         ?>
         <footer class="main-footer">
             <div class="footer-left">
@@ -89,6 +91,11 @@
         this_user_unique_key = "persist:msgh-client-<?= $session->userId; ?>",
         form_modules = <?= json_encode($myClass->form_modules); ?>,
         $myPrefs = <?= json_encode($userPrefs); ?>;
+        var acceptedArray = new Array();
+            <?php foreach($accountObj->accepted_column as $key => $values) { ?>
+            acceptedArray["<?= $key ?>"] = <?php $values = array_values($accountObj->accepted_column[$key]); print "[\"". implode("\",\"", $values) ."\"]"; ?>, 
+            <?php } ?>
+            current_column = "";
     </script>
 
     <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
@@ -117,6 +124,7 @@
     <script src="<?= $baseUrl; ?>assets/js/app.js"></script>
     <?php } else { ?>
     <script src="<?= $baseUrl; ?>assets/js/setup.js"></script>
+    <script src="<?= $baseUrl; ?>assets/js/import.js"></script>
     <?php } ?>
     <?php if(isset($formToShow)) { ?>
     <script>fieldDefault = <?= json_encode($formToShow) ?>, thisSelectRow = <?= $formData["thisSelectRow"] ?>, thisRowId = <?= $formData["thisRowId"] ?>;</script>

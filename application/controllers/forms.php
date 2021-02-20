@@ -3337,29 +3337,15 @@ class Forms extends Myschoolgh {
         </form></div>';
         $forms["general"] = $general;
 
+        // create a new account object
+        $accountObj = load_class("account", "controllers");
+        $array_columns = $accountObj->accepted_column;
+
         // forms
-        $select = [
-            "student" => [
-                "Student ID", "Firstname", "Lastname", "Othernames", "Email", "Contact Number", 
-                "Blood Group", "Residence", "Date of Birth", "Admission Date", "Gender",
-                "Section", "Department", "Class", "Description", "Religion", "City",
-                "Previous School", "Previous School Remarks", "Previous School Qualification"
-            ],
-            "staff" => [
-                "Employee ID", "Firstname", "Lastname", "Othernames", "Email", "Contact Number", 
-                "Blood Group", "Residence", "Date of Birth", "Date Employed", "Gender",
-                "Section", "Department", "Description", "Religion", "City", 
-                "Courses Taught", "User Type", "Employer", "Occupation"
-            ],
-            "parent" => [
-                "Guardian ID", "Firstname", "Lastname", "Othernames", "Email", "Primary Contact",
-                "Secondary Contact", "Postal Address", "Blood Group", "Residence", 
-                "Date of Birth", "Gender", "Description", "Religion", "City", "Employer", "Occupation"
-            ],
-            "course" => [
-                "Course Code", "Title", "Credit Hours", "Weekly Meetings", "Description"
-            ]
-        ];
+        $select = [];
+        foreach($array_columns as $key => $value) {
+            $select[$key] = $value;
+        }
 
         // loop through the select form
         foreach($select as $key => $import) {
