@@ -43,7 +43,7 @@ class Account extends Myschoolgh {
 
         $this->accepted_column["course"] = [
             "course_code" => "Course Code", "name" => "Title", "credit_hours" => "Credit Hours", 
-            "weekly_meeting" => "Weekly Meetings",  "description" => "Description"
+            "weekly_meeting" => "Weekly Meetings",  "description" => "Description", "course_tutor" => "Course Tutor IDs"
         ];
 
 	}
@@ -250,7 +250,7 @@ initiateCalendar();";
         // loop through the data received from the 
         foreach($complete_csv_data as $each) {
             // clean the array set
-            $clean_set = array_slice($each, 0, $c_count);
+            $clean_set = array_slice($each, 0, $c_count-1);
             $data[] = $clean_set;
             // push the data parsed by the user to the page
             if($i < 10)  {
@@ -266,7 +266,7 @@ initiateCalendar();";
         $csv_data = array_filter($data, $clean);
 
         // slice the header
-        $headers = array_slice($headers, 0, $c_count);
+        $headers = array_slice($headers, 0, $c_count-1);
 
         // set the content in a session
         $this->session->set("{$params->column}_csv_file", $csv_data);
@@ -500,12 +500,6 @@ initiateCalendar();";
                 }
                 return ["code" => 203, "data" => $bugs_list];
             }
-
-            // clean the fullname
-            if($isUser) {
-                $this->session->last_uploadId = $upload_id;
-                $this->session->last_recordUpload = $params->column;
-            }
             
             try {
 
@@ -522,6 +516,24 @@ initiateCalendar();";
 
                 // capitalize each first word
                 $import = ucfirst($params->column);
+
+                // set a cron job activity for the users_uploaded
+                if($isUser) {
+                    // insert the activity into the cron_scheduler
+                    $query = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
+                    $query->execute([$upload_id, $params->userId, "users_upload"]);
+                    // set the sesssion value
+                    $this->session->last_recordUpload = $params->column;
+                }
+
+                // if the upload was for a course
+                if($params->column === "course") {
+                    // insert the activity into the cron_scheduler
+                    $query = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
+                    $query->execute([$upload_id, $params->userId, "course_tutor"]);
+                    // set the sesssion value
+                    $this->session->last_recordUpload = $params->column;
+                }
 
                 // return success
                 return ["data" => "{$import}s data was successfully imported."];

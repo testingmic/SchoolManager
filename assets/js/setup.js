@@ -223,7 +223,6 @@ var complete_setup_process = () => {
     });
 }
 
-
 $(() => {
     initPlugins();
     trigger_form_submit();

@@ -14,13 +14,8 @@ global $isActiveAccount, $clientData, $clientId;
 $formsObj = load_class("forms", "controllers");
 
 // if the upload id is not empty
-if(!empty($session->last_uploadId)) {
-    // set the fullname of the user
-    $stmt = $myschoolgh->prepare("UPDATE users SET 
-        name = CONCAT(firstname,' ', lastname,' ', othername), client_id = UPPER(client_id)
-    WHERE upload_id='{$session->last_uploadId}'");
-    $stmt->execute();
-    
+if(!empty($session->last_recordUpload)) {
+
     // check fi the setup_upload is not already set
     $clientPrefs->setup_upload = isset($clientPrefs->setup_upload) ? $clientPrefs->setup_upload : (object) [];
 
@@ -51,7 +46,7 @@ $notReady = (bool) (empty($clientPrefs->academics->academic_year) || empty($clie
 $the_form = $formsObj->settings_form($clientId, "ajax-account-form-content");
 
 // remove the last upload session id
-$session->remove(["last_uploadId", "last_recordUpload"]);
+$session->remove(["last_recordUpload"]);
 $session->remove(["course_csv_file", "staff_csv_file", "student_csv_file"]);
 
 load_helpers(['setup_helper']);

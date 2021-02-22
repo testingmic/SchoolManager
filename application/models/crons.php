@@ -6,19 +6,15 @@ class Crons {
 	public $userAccount;
 	public $mailAttachment = array();
 	public $rootUrl;
-	public $siteName = "Followin - Analitica Innovare";
+	public $siteName = "MySchoolGH - VisamiNetSolutions.Com";
 
 	public function __construct() {
-		$this->baseUrl = "https://insurehub365.com/";
-		$this->rootUrl = "/home/www/dev.insurehub365.com/";
-		// $this->rootUrl = "C:\\xampp\\htdocs\\analitica_innovare\\medics\\";
+		$this->baseUrl = "https://app.myschoolgh.com/";
+		$this->rootUrl = "/home/mineconr/app.myschoolgh.com/";
 		$this->dbConn();
 
 		require $this->rootUrl."system/libraries/phpmailer.php";
 		require $this->rootUrl."system/libraries/smtp.php";
-
-		// require $this->rootUrl."system\\libraries\\phpmailer.php";
-		// require $this->rootUrl."system\\libraries\\smtp.php";
 	}
 	
 	/**
@@ -31,9 +27,9 @@ class Crons {
 		// CONNECT TO THE DATABASE
 		$connectionArray = array(
 			'hostname' => "localhost",
-			'database' => "insured_medics",
-			'username' => "insurehub365_imp",
-			'password' => 'p3W0U1Hkee'
+			'database' => "mineconr_school",
+			'username' => "mineconr_school",
+			'password' => 'YdwQLVx4vKU_'
 		);
 		
 		// run the database connection
@@ -119,19 +115,19 @@ class Crons {
 			print "Looping through the emails list.\n";
 			// looping through the content
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-				
+			    
 				// set the store content
 				$this->userAccount = $result;
-				$this->siteName = "Insurehub365";
+				$this->siteName = "MySchoolGH.Com";
 
 				// commence the processing
-				if(in_array($result->template_type, array("login", "general", "recovery"))) {
-					$subject = $result->subject;
-					$dataToUse = $this->generateGeneralMessage($result->message, $subject, $result->template_type);
-				}
+				$subject = $result->subject;
+				$dataToUse = $this->generateGeneralMessage($result->message, $subject, $result->template_type);
 
 				// use the content submitted
 				if(!empty($dataToUse)) {
+				    // print progress
+				    print "Data found, processing the recipients list to send\n";
 
 					// convert the recipient list to an array
 					$recipient_list = json_decode($result->recipients_list, true);
@@ -242,11 +238,11 @@ class Crons {
 		// configuration settings
 		$config = (Object) array(
 			'subject' => $subject,
-			'headers' => "From: {$this->siteName} - Insurehub365<no-reply@insurehub365.com> \r\n Content-type: text/html; charset=utf-8",
+			'headers' => "From: {$this->siteName} - MySchoolGH.Com<app@school.mineconrsl.com> \r\n Content-type: text/html; charset=utf-8",
 			'Smtp' => true,
 			'SmtpHost' => 'mail.supremecluster.com',
 			'SmtpPort' => '465',
-			'SmtpUser' => 'no-reply@insurehub365.com',
+			'SmtpUser' => 'app@school.mineconrsl.com',
 			'SmtpPass' => 'C30C5aamUl',
 			'SmtpSecure' => 'ssl'
 		);
@@ -265,7 +261,7 @@ class Crons {
 			// loop through the attachments list
 			foreach($this->mailAttachment as $theAttachment) {
 				// file path
-				$filepath = $this->rootUrl.str_replace("/", "\\", $theAttachment["path"]); // $theAttachment["path"];
+				$filepath = $theAttachment["path"];
 				// append the attachment to the mail
 				$mail->AddAttachment($filepath, $theAttachment["name"]);
 			}
@@ -274,7 +270,7 @@ class Crons {
 		$mail->Port = $config->SmtpPort;
 
 		// set the user from which the email is been sent
-		$mail->setFrom('no-reply@insurehub365.com', $this->siteName .' - Insurehub365');
+		$mail->setFrom('app@school.mineconrsl.com', $this->siteName);
 
 		// loop through the list of recipients for this mail
         foreach($recipient_list as $emailRecipient) {
@@ -347,6 +343,7 @@ class Crons {
 						$this->notice_add($notice_param);
 					}
 				}
+
 				// if the request is email
 				if($result->cron_type == "email") {
 					// convert the list to an object
@@ -370,6 +367,11 @@ class Crons {
 					
 				}
 
+				// if a user information have been uploaded
+				if($result->cron_type == "users_upload") {
+					$this->users_upload_modification($result->item_id);
+				}
+
 				// update the cron status
 				$this->db->query("UPDATE cron_scheduler SET date_processed=now(), status='1' WHERE id='{$result->id}' LIMIT 1");
 
@@ -378,6 +380,21 @@ class Crons {
 		} catch(PDOException $e) {}
 
     }
+
+	/**
+	 * Perform some modification on the users list
+	 * 
+	 * @return Bool
+	 */
+	private function users_upload_modification($upload_id) {
+		// set the fullname of the user
+		$u_stmt = $this->db->prepare("UPDATE users SET name = CONCAT(firstname,' ', lastname,' ', othername), client_id = UPPER(client_id) WHERE upload_id='{$upload_id}'");
+		$u_stmt->execute();
+
+		// get the list of all users that was uploaded
+		$u_list = $this->db->prepare("UPDATE users a SET a.username = (SELECT SUBSTRING(b.email, 1, LOCATE('@', b.email) - 1) AS the_username FROM users b WHERE b.id = a.id) WHERE LENGTH(a.email) > 5 AND a.upload_id='{$upload_id}'");
+		$u_list->execute();
+	}
 
 	
     /**

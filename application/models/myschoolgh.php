@@ -756,6 +756,33 @@ class Myschoolgh extends Models {
         $contact = "233".substr($contact, -9);
         return $contact;
     }
+	
+	/**
+     * Confirm Last Message sent
+     * 
+     * Check the last time the user sent a message
+     * 
+     * @return Bool
+     */
+    public function check_time() {
+        
+        // get the last date created
+        $last_time = $this->columnValue("date_created", "users", "ip_address='{$this->ip_address}' ORDER BY id DESC");
+
+        // confirm if not empty
+        if(empty($last_time)) {
+            return true;
+        }
+		
+		// if no record was found
+		if(!isset($last_time->date_created)) {
+			return true;
+		}
+
+        // online algorithm (user is online if last activity is at most 2 minutes ago)
+        return (bool) (raw_time_diff($last_time->date_created) > 0.02);
+
+    }
 
 }
 ?>

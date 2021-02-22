@@ -91,6 +91,7 @@ if($usersClass->loggedIn()) {
                             <label for="password" class="control-label">Password</label>
                           </div>
                           <input id="password" type="password" class="form-control" name="password" tabindex="2" required>
+                          <input id="plan" value="<?= isset($_GET["plan"]) ? xss_clean($_GET["plan"]) : "basic"; ?>" type="hidden" class="form-control" name="plan">
                       </div>
                     </div>
                     <div class="col-lg-12">

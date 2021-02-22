@@ -134,6 +134,23 @@
         <script src="<?= $baseUrl; ?><?= $eachJS ?>"></script>
     <?php } ?>
     <script>
+    <?php if(!$isActiveAccount) { ?>
+        var logout = async() => {
+            await $.post(`${baseUrl}api/auth/logout`).then((resp) => {
+                if (resp.result.code == 200) {
+                    swal({
+                        text: "You have successfully been logged out.",
+                        icon: "success",
+                    });
+                    setTimeout(() => {
+                        window.location.href = `${baseUrl}`
+                    }, 1500)
+                } else {
+                    notify("Sorry! An unexpected error was encountered.");
+                }
+            });
+        }
+    <?php } ?>
         $(() => {
             <?php if(isset($verify_payment)) { ?>
             verify_payment();

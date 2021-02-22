@@ -1,15 +1,4 @@
 <?php
-/**
- * Common Functions
- *
- * Loads the base classes and executes the request.
- *
- * @package		Followin
- * @subpackage	Followin Super Class
- * @category	Core Functions
- * @author		Analitica Innovare Dev Team
- */
-
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**

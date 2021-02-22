@@ -811,7 +811,7 @@ class Auth extends Myschoolgh {
                     "academic_term" => ""
                 ],
                 "account" => [
-                    "type" => "trial",
+                    "type" => $params->plan ?? "basic",
                     "activation_code" => $token,
                     "date_created" => date("Y-m-d h:iA"),
                     "expiry" => date("Y-m-d h:iA", strtotime("+1 months"))
@@ -862,12 +862,11 @@ class Auth extends Myschoolgh {
 
             // send a message to the user email
             $message = "Thank you for registering your School: <strong>{$params->school_name}</strong> with ".config_item('site_name').".
-                        We are pleased to have you join and benefit from our platform.\n\n
-                        Your can login with your 
-                        <strong>Email Address:</strong> {$params->email} or <strong>Username:</strong> {$username}
-                        and the password that was provided during signup.\n\n";
-			$message .= "One of our personnel will get in touch shortly to assist you with additional setup processes that is required to aid you quick start the usage of the application.\n";
-			$message .= "<a href='{$this->baseUrl}verify?dw=account=true&token={$token}'><strong>Click Here</strong></a> to verify your Email Address and also to activate the account.\n\n";
+                        We are pleased to have you join and benefit from our platform.<br><br>
+                        Your can login with your <strong>Email Address:</strong> {$params->email} or <strong>Username:</strong> {$username}
+                        and the password that was provided during signup.<br><br>";
+			$message .= "One of our personnel will get in touch shortly to assist you with additional setup processes that is required to aid you quick start the usage of the application.<br></br>";
+			$message .= "<a href='{$this->baseUrl}verify?dw=account&token={$token}'><strong>Click Here</strong></a> to verify your Email Address and also to activate the account.<br><br>";
 
             // recipient list
             $reciepient = ["recipients_list" => [["fullname" => $params->school_name, "email" => $params->email, "customer_id" => $item_id]]];
