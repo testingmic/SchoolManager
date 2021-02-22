@@ -36,13 +36,7 @@ if(!$accessObject->hasAccess("manage", "settings")) {
     // get the settings form
     $the_form = load_class("forms", "controllers")->settings_form($clientId);
 
-    $response->scripts = ["assets/js/import.js"];
-
-    // if the upload id is not empty
-    if(!empty($session->last_uploadId)) {
-        $stmt = $myschoolgh->prepare("UPDATE users SET name=CONCAT(firstname,' ', lastname,' ', othername) WHERE upload_id='{$session->last_uploadId}'");
-        $stmt->execute();
-    }
+    $response->scripts = ["assets/js/import.js", "assets/js/grading.js"];
 
     $response->html = '
         <section class="section">
@@ -60,7 +54,10 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                             <div class="padding-20">
                                 <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                     <li class="nav-item">
-                                        <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
+                                        <a class="nav-link" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Examination Grading</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="import_students-tab2" data-toggle="tab" href="#import_students" role="tab" aria-selected="true">Import Students</a>
@@ -76,8 +73,11 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                     </li>
                                 </ul>
                                 <div class="tab-content tab-bordered" id="myTab3Content">
-                                    <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
+                                    <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab2">
                                         '.($the_form["general"] ?? null).'
+                                    </div>
+                                    <div class="tab-pane fade show active" id="examination" role="tabpanel" aria-labelledby="examination-tab2">
+                                        '.($the_form["examination"] ?? null).'
                                     </div>
                                     <div class="tab-pane fade" id="import_students" role="tabpanel" aria-labelledby="import_students-tab2">
                                         '.($the_form["student"] ?? null).'

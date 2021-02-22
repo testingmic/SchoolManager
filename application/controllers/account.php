@@ -148,6 +148,8 @@ initiateCalendar();";
         // get the client data
         $client_data = $this->client_data($params->clientId);
 
+        $return = ["data" => "Account information successfully updated."];
+
         // confirm that a logo was parsed
         if(isset($params->logo)) {
 
@@ -171,7 +173,10 @@ initiateCalendar();";
                 // set a new file_name
                 $image = $uploadDir . random_string('alnum', 32).".{$fileType}";
                 // Upload file to the server 
-                if(move_uploaded_file($params->logo["tmp_name"], $image)){}
+                if(move_uploaded_file($params->logo["tmp_name"], $image)){
+                    // set the redirection
+                    $return["additional"] = ["href" => "{$this->baseUrl}settings"];
+                }
             } else {
                 return ["code" => 203, "Sorry! The event file must be a valid image."];
             }
@@ -181,11 +186,13 @@ initiateCalendar();";
         $preference["academics"] = $params->general["academics"];
         $preference["labels"] = $params->general["labels"];
         $preference["opening_days"] = $params->general["opening_days"] ?? [];
+        // $preference["grading_system"] = $params->general["grading_system"] ?? [];
 
         // unset the values
         unset($params->general["opening_days"]);
         unset($params->general["academics"]);
         unset($params->general["labels"]);
+        // unset($params->general["grading_system"]);
 
         // format
         $query = "";
@@ -208,12 +215,41 @@ initiateCalendar();";
             // log the user activity
             $this->userLogs("account", $params->clientId, $client_data, "{$params->userData->name} updated the Account Information", $params->userId);
 
-            return [
-                "data" => "Account information successfully updated."
-            ];
+            return $return;
 
         } catch(PDOException $e) {}
 
+    }
+
+    /**
+     * Save the Academic Grading System
+     * 
+     * @return Array
+     */
+    public function update_grading(stdClass $params) {
+
+        // confirm its an array
+        if(!is_array($params->grading_values)) {
+            return ["code" => 203, "data" => "Sorry! An array data is expected"];
+        }
+
+        // get the client data
+        $client_data = $this->client_data($params->clientId);
+
+        // insert a new record
+        if(empty($client_data->grading_system)) {
+            $stmt = $this->db->prepare("INSERT INTO grading_system SET client_id = ?, grading = ?");
+            $stmt->execute([$params->clientId, json_encode($params->grading_values)]);
+
+            // return a success messsage
+            return ["data" => "The grading system have successfully been inserted"];
+        } else {
+            $stmt = $this->db->prepare("UPDATE grading_system SET grading = ? WHERE client_id = ? LIMIT 1");
+            $stmt->execute([json_encode($params->grading_values), $params->clientId]);
+
+            // return a success messsage
+            return ["data" => "The grading system have successfully been updated"];
+        }
     }
 
     /**

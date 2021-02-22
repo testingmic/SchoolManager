@@ -3205,17 +3205,25 @@ class Forms extends Myschoolgh {
             ["key" => "receipt", "label" => "Receipts"],
         ];
 
+        $logoUploaded = (bool) ($client_data && $client_data->client_logo);
+
         $general = '
-        <form class="ajax-data-form" action="'.$this->baseUrl.'api/account/'.(isset($client_data->client_name) ? "update" : "add").'" method="POST" id="'.$form_id.'">
+        <form class="ajax-data-form" action="'.$this->baseUrl.'api/account/update" method="POST" id="'.$form_id.'">
         <div class="row">
             <div class="col-lg-12"><h5>GENERAL SETTINGS</h5></div>
+            '.($logoUploaded ? 
+            '<div class="col-lg-2 col-md-4">
+                <div class="form-group">
+                    <img width="90px" src="'.$this->baseUrl.''.$client_data->client_logo.'">
+                </div>
+            </div>' : '').'
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="logo">Logo</label>
                     <input type="file" name="logo" id="logo" accept=".png,.jpeg,.jpg" class="form-control">
                 </div>
             </div>
-            <div class="col-lg-9 col-md-12">
+            <div class="col-lg-'.($logoUploaded ? 7 : 9).' col-md-12">
                 <div class="form-group">
                     <label for="name">School Name</label>
                     <input type="text" value="'.($client_data->client_name ?? null).'" name="general[name]" class="form-control">
@@ -3252,7 +3260,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
             <div class="col-lg-12"><h5>ACADEMIC CALENDAR</h5></div>
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="academic_year">Academic Year</label>
                     <select data-width="100%" name="general[academics][academic_year]" class="form-control selectpicker">
@@ -3264,7 +3272,7 @@ class Forms extends Myschoolgh {
                     </select>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="academic_term">Academic Term</label>
                     <select data-width="100%" name="general[academics][academic_term]" class="form-control selectpicker">
@@ -3276,16 +3284,52 @@ class Forms extends Myschoolgh {
                     </select>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="term_starts">Academic Term Start</label>
                     <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[academics][term_starts]" id="term_starts" class="form-control _datepicker">
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
+            <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="term_ends">Academic Term Ends</label>
                     <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" class="form-control _datepicker">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="next_academic_year">Next Academic Year</label>
+                    <select data-width="100%" name="general[academics][next_academic_year]" class="form-control selectpicker">
+                        <option value="">Select Academic Year</option>';
+                            foreach($this->pushQuery("id, year_group", "academic_years", "1") as $each) {
+                                $general .= "<option ".(($client_data && $each->year_group === $prefs->academics->next_academic_year) ? "selected" : null)." value=\"{$each->year_group}\">{$each->year_group}</option>";                            
+                            }
+                        $general .= '</select>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="next_academic_term">Next Academic Term</label>
+                    <select data-width="100%" name="general[academics][next_academic_term]" class="form-control selectpicker">
+                        <option value="">Select Academic Term</option>';
+                            foreach($this->pushQuery("id, name, description", "academic_terms","1") as $each) {
+                                $general .= "<option ".(($client_data && $each->name === $prefs->academics->next_academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
+                            }
+                        $general .= '</select>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="next_term_starts">Next Academic Term Start</label>
+                    <input type="text" value="'.($prefs->academics->next_term_starts ?? null).'" name="general[academics][next_term_starts]" id="next_term_starts" class="form-control _datepicker">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="next_term_ends">Next Academic Term Ends</label>
+                    <input type="text" value="'.($prefs->academics->next_term_ends ?? null).'" name="general[academics][next_term_ends]" id="next_term_ends" class="form-control _datepicker">
                 </div>
             </div>
             <div class="col-lg-12"><h5>LABELS</h5></div>';
@@ -3402,6 +3446,74 @@ class Forms extends Myschoolgh {
             </div>';
             $forms[$key] = $form;
         }
+
+        // set the grading system
+        $grading_list = "";
+        $grading_system = $client_data->grading_system ?? [];
+
+        // generate the first item for the grading
+        if(empty($grading_system)) {
+            $grading_list = "
+            <div class='row mb-2 grade_item' data-grading_id='1'>
+                <div class='col-lg-3'>
+                    <label>Mark Begin(%)</label>
+                    <input type='number' min='0' max='100' name='start_1' data-grading_id='1' class='form-control' width='100px'>
+                </div>
+                <div class='col-lg-3'>
+                    <label>Marks End Point(%)</label>
+                    <input type='number' min='0' max='100' name='end_1' data-grading_id='1' class='form-control' width='100px'>
+                </div>
+                <div class='col-lg-5'>
+                    <label>Interpretation</label>
+                    <input type='text' min='0' max='100' name='interpretation_1' data-grading_id='1' class='form-control'>
+                </div>
+                <div class='col-lg-1'>
+                    <label>&nbsp;</label>
+                    <button type='button' onclick='return remove_grading_mark(1)' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
+                </div>
+            </div>";
+        } else {
+            $grading = json_decode($client_data->grading_system);
+            foreach($grading as $key => $grade) {
+                $grading_list .= "
+                    <div class='row mb-2 grade_item' data-grading_id='{$key}'>
+                        <div class='col-lg-3'>
+                            <label>Mark Begin(%)</label>
+                            <input type='number' min='0' value='".($grade->start ?? "")."' max='100' name='start_{$key}' data-grading_id='{$key}' class='form-control' width='100px'>
+                        </div>
+                        <div class='col-lg-3'>
+                            <label>Marks End Point(%)</label>
+                            <input type='number' min='0' value='".($grade->end ?? "")."' max='100' name='end_{$key}' data-grading_id='{$key}' class='form-control' width='100px'>
+                        </div>
+                        <div class='col-lg-5'>
+                            <label>Interpretation</label>
+                            <input type='text' min='0' value='".($grade->interpretation ?? "")."' max='100' name='interpretation_{$key}' data-grading_id='{$key}' class='form-control'>
+                        </div>
+                        <div class='col-lg-1'>
+                            <label>&nbsp;</label>
+                            <button type='button' onclick='return remove_grading_mark({$key})' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
+                        </div>
+                    </div>";
+            }
+        }
+
+        // examination forms
+        $examination = '
+        <div class="row">
+            <div class="col-lg-7 col-md-12">
+                <div class="form-group">
+                    <div class="d-flex mb-3 border-bottom pb-3 justify-content-between">
+                        <div><h4>Grading System</h4></div>
+                        <div><button type="button" title="Add new Grading" onclick="return add_grading_mark()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
+                    </div>
+                    <div id="grading_system_list">'.$grading_list.'</div>
+                </div>
+                <div class="form-group text-right">
+                    <button type="button" onclick="return save_grading_mark()" id="save_grading_mark" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Grades</button>
+                </div>
+            </div>
+        </div>';
+        $forms["examination"] = $examination;
 
         return $forms;
     }

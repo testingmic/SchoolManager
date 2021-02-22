@@ -10,6 +10,9 @@
                     <a class="nav-link" aria-disabled="true" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General School Setup</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Examination</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Import Courses</a>
                 </li>
                 <li class="nav-item">
@@ -28,6 +31,15 @@
                 </div>
                 <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab2">
                     <?= $the_form["general"] ?? null; ?>
+                </div>
+                <div class="tab-pane fade" id="examination" role="tabpanel" aria-labelledby="examination-tab2">
+                    <?php if($notReady) { ?>
+                        <div class="alert alert-warning text-center">
+                            You must first set the Academic Year and Term to proceed.
+                        </div>
+                    <?php } else { ?>
+                        <?= $the_form["examination"] ?? null; ?>
+                    <?php } ?>
                 </div>
                 <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
                     <?php if($notReady) { ?>

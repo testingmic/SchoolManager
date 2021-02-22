@@ -54,7 +54,10 @@ class Myschoolgh extends Models {
 
 		try {
 
-			$stmt = $this->db->prepare("SELECT * FROM clients_accounts WHERE client_id = ? AND client_status = ? LIMIT 1");
+			$stmt = $this->db->prepare("SELECT a.*, c.grading AS grading_system
+			FROM clients_accounts a 
+				LEFT JOIN grading_system c ON c.client_id = a.client_id
+			WHERE a.client_id = ? AND a.client_status = ? LIMIT 1");
 			$stmt->execute([$clientId, 1]);
 			
 			$data = [];

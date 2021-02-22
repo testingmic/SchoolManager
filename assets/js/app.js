@@ -605,6 +605,10 @@ var initMainMenu = () => {
 
 var initPlugins = () => {
 
+    if ($('._datepicker').length > 0) {
+        $('._datepicker').datepicker();
+    }
+
     if ($('.datepicker').length > 0) {
         $('.datepicker').daterangepicker({
             locale: { format: 'YYYY-MM-DD' },

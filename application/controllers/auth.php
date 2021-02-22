@@ -808,7 +808,9 @@ class Auth extends Myschoolgh {
                 ],
                 "academics" => [
                     "academic_year" => "",
-                    "academic_term" => ""
+                    "academic_term" => "",
+                    "next_academic_year" => "",
+                    "next_academic_term" => ""
                 ],
                 "account" => [
                     "type" => $params->plan ?? "basic",

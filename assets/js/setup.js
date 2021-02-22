@@ -14,6 +14,7 @@ var responseCode = (code) => {
         return "error";
     }
 }
+
 var trigger_form_submit = () => {
     $(`form[class="ajax-data-form"] button[type="button-submit"]`).on("click", async function(evt) {
 
