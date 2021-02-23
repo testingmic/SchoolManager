@@ -3497,10 +3497,56 @@ class Forms extends Myschoolgh {
             }
         }
 
+        $columns_listing = "";
+        if(!empty($client_data->grading_structure)) {
+            $columns = json_decode($client_data->grading_structure);
+            if(isset($columns->columns)) {
+                $count = 0;
+                foreach($columns->columns as $key => $column) {
+                    $count++;
+                    $columns_listing .= "
+                    <div class='row mb-2 column_item' data-column_id='{$count}'>
+                        <div class='col-lg-7'>
+                            <label>Name</label>
+                            <input type='text' maxlength='20' value='{$key}' name='column_name_{$count}' data-column_id='{$count}' class='form-control'>
+                        </div>
+                        <div class='col-lg-3'>
+                            <label>Percentage(%)</label>
+                            <input type='number' min='0' value='{$column}' max='100' name='column_percentage_{$count}' data-column_id='{$count}' class='form-control'>
+                        </div>
+                        <div class='col-lg-2'>
+                            <label>&nbsp;</label>
+                            <button type='button' onclick='return remove_report_column({$count})' data-column_id='{$count}' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
+                        </div>
+                    </div>";
+                }
+            }
+        }
+
+        // terminal reports columns list
+        $default_columns_list[0] = "
+            <div class='row mb-2'>
+                <div class='col-lg-12'>
+                    <input type='text' readonly name='report_columns[course_title]' value='Course / Subject Name' class='form-control'>
+                </div>
+            </div>";
+        $default_columns_list[1] = "
+            <div class='row mb-2'>
+                <div class='col-lg-12'>
+                    <input type='text' readonly name='report_columns[average_score]' value='Average Score' class='form-control'>
+                </div>
+            </div>";
+        $default_columns_list[2] = "
+            <div class='row mb-2'>
+                <div class='col-lg-12'>
+                    <input type='text' readonly name='report_columns[teacher_comments]' value='Teacher Comments' class='form-control'>
+                </div>
+            </div>";
+
         // examination forms
         $examination = '
         <div class="row">
-            <div class="col-lg-7 col-md-12">
+            <div class="col-lg-7 col-md-12 mb-3">
                 <div class="form-group">
                     <div class="d-flex mb-3 border-bottom pb-3 justify-content-between">
                         <div><h4>Grading System</h4></div>
@@ -3508,6 +3554,33 @@ class Forms extends Myschoolgh {
                     </div>
                     <div id="grading_system_list">'.$grading_list.'</div>
                 </div>
+            </div>
+            <div class="col-lg-5 mb-3 col-md-12">
+                <div class="form-group">
+                    <div class="d-flex mb-3 border-bottom pb-3 justify-content-between">
+                        <div><h4>Terminal Report Structure</h4></div>
+                        <div><button type="button" title="Add new Column" onclick="return add_report_column()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
+                    </div>
+                    '.$default_columns_list[0].'
+                    <div class="font-italic text-success">Add to list</div>
+                    <div id="term_report_columns_list">'.$columns_listing.'</div>
+                    '.$default_columns_list[1].'
+                    <div class="form-group mt-3">
+                        <select class="form-control selectpicker" name="show_position" data-width="100%">
+                            <option '.($client_data->show_position == "true" ? "selected" : "").' value="true">Show position in class</option>
+                            <option '.($client_data->show_position == "false" ? "selected" : "").' value="false">Do not show position</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control selectpicker" name="show_teacher_name" data-width="100%">
+                            <option '.($client_data->show_teacher_name == "true" ? "selected" : "").' value="true">Show teacher\'s name</option>
+                            <option '.($client_data->show_teacher_name == "false" ? "selected" : "").' value="false">Do not show teacher\'s name</option>
+                        </select>
+                    </div>
+                    '.$default_columns_list[2].'
+                </div>
+            </div>
+            <div class="col-md-12 mb-3">
                 <div class="form-group text-right">
                     <button type="button" onclick="return save_grading_mark()" id="save_grading_mark" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Grades</button>
                 </div>
@@ -3516,6 +3589,21 @@ class Forms extends Myschoolgh {
         $forms["examination"] = $examination;
 
         return $forms;
+    }
+
+    /**
+     * Terminal Reports Form
+     * 
+     * @param String
+     * 
+     * @return Array
+     */
+    public function terminal_reports() {
+        $the_form = [];
+
+
+
+        return $the_form;
     }
 
     /**

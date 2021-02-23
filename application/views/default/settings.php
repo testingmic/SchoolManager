@@ -54,7 +54,7 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                             <div class="padding-20">
                                 <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                     <li class="nav-item">
-                                        <a class="nav-link" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
+                                        <a class="nav-link " id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link active" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Examination Grading</a>

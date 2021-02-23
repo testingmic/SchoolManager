@@ -236,16 +236,23 @@ initiateCalendar();";
         // get the client data
         $client_data = $this->client_data($params->clientId);
 
+
         // insert a new record
         if(empty($client_data->grading_system)) {
-            $stmt = $this->db->prepare("INSERT INTO grading_system SET client_id = ?, grading = ?");
-            $stmt->execute([$params->clientId, json_encode($params->grading_values)]);
+            $stmt = $this->db->prepare("INSERT INTO grading_system SET client_id = ?, grading = ?, structure = ?
+                ".(isset($params->report_columns["show_position"]) ? ",show_position='{$params->report_columns["show_position"]}'" : "")."
+                ".(isset($params->report_columns["show_teacher_name"]) ? ",show_teacher_name='{$params->report_columns["show_teacher_name"]}'" : "")."
+            ");
+            $stmt->execute([$params->clientId, json_encode($params->grading_values), json_encode($params->report_columns)]);
 
             // return a success messsage
             return ["data" => "The grading system have successfully been inserted"];
         } else {
-            $stmt = $this->db->prepare("UPDATE grading_system SET grading = ? WHERE client_id = ? LIMIT 1");
-            $stmt->execute([json_encode($params->grading_values), $params->clientId]);
+            $stmt = $this->db->prepare("UPDATE grading_system SET grading = ?, structure = ?
+                ".(isset($params->report_columns["show_position"]) ? ",show_position='{$params->report_columns["show_position"]}'" : "")."
+                ".(isset($params->report_columns["show_teacher_name"]) ? ",show_teacher_name='{$params->report_columns["show_teacher_name"]}'" : "")."
+            WHERE client_id = ? LIMIT 1");
+            $stmt->execute([json_encode($params->grading_values), json_encode($params->report_columns), $params->clientId]);
 
             // return a success messsage
             return ["data" => "The grading system have successfully been updated"];
