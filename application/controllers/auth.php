@@ -796,7 +796,7 @@ class Auth extends Myschoolgh {
             }
 
             // create a token
-            $user_id = "{$prefix}U".$this->append_zeros(1, 7);
+            $user_id = "{$prefix}U".$this->append_zeros(1, 6);
             $item_id = random_string("alnum", 32);
             $token = random_string("alnum", 54);
 

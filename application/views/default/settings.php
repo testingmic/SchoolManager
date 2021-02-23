@@ -54,10 +54,13 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                             <div class="padding-20">
                                 <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                     <li class="nav-item">
-                                        <a class="nav-link " id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
+                                        <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link active" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Examination Grading</a>
+                                        <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Examination Grading</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Import Courses</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="import_students-tab2" data-toggle="tab" href="#import_students" role="tab" aria-selected="true">Import Students</a>
@@ -68,15 +71,12 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                     <li class="nav-item">
                                         <a class="nav-link" id="parent-tab2" data-toggle="tab" href="#parent" role="tab" aria-selected="true">Import Guardian / Parent</a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Import Courses</a>
-                                    </li>
                                 </ul>
                                 <div class="tab-content tab-bordered" id="myTab3Content">
-                                    <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab2">
+                                    <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
                                         '.($the_form["general"] ?? null).'
                                     </div>
-                                    <div class="tab-pane fade show active" id="examination" role="tabpanel" aria-labelledby="examination-tab2">
+                                    <div class="tab-pane fade" id="examination" role="tabpanel" aria-labelledby="examination-tab2">
                                         '.($the_form["examination"] ?? null).'
                                     </div>
                                     <div class="tab-pane fade" id="import_students" role="tabpanel" aria-labelledby="import_students-tab2">

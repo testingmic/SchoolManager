@@ -3537,7 +3537,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>";
         $default_columns_list[2] = "
-            <div class='row mb-2'>
+            <div class='row mb-2 mt-1'>
                 <div class='col-lg-12'>
                     <input type='text' readonly name='report_columns[teacher_comments]' value='Teacher Comments' class='form-control'>
                 </div>
@@ -3565,19 +3565,25 @@ class Forms extends Myschoolgh {
                     <div class="font-italic text-success">Add to list</div>
                     <div id="term_report_columns_list">'.$columns_listing.'</div>
                     '.$default_columns_list[1].'
-                    <div class="form-group mt-3">
+                    <div class="form-group mb-3 mt-3">
                         <select class="form-control selectpicker" name="show_position" data-width="100%">
                             <option '.($client_data->show_position == "true" ? "selected" : "").' value="true">Show position in class</option>
                             <option '.($client_data->show_position == "false" ? "selected" : "").' value="false">Do not show position</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         <select class="form-control selectpicker" name="show_teacher_name" data-width="100%">
                             <option '.($client_data->show_teacher_name == "true" ? "selected" : "").' value="true">Show teacher\'s name</option>
                             <option '.($client_data->show_teacher_name == "false" ? "selected" : "").' value="false">Do not show teacher\'s name</option>
                         </select>
                     </div>
                     '.$default_columns_list[2].'
+                    <div class="form-group mt-3">
+                        <select class="form-control selectpicker" name="allow_submission" data-width="100%">
+                            <option '.($client_data->allow_submission == "true" ? "selected" : "").' value="true">Allow teachers to submit report</option>
+                            <option '.($client_data->allow_submission == "false" ? "selected" : "").' value="false">Disallow the submission of reports</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="col-md-12 mb-3">
@@ -3598,9 +3604,54 @@ class Forms extends Myschoolgh {
      * 
      * @return Array
      */
-    public function terminal_reports() {
+    public function terminal_reports($clientId) {
         $the_form = [];
 
+        // get the client data
+        $client_data = $this->client_data($clientId);
+
+        // get the list of all classes
+        $classes_param = (object) [
+            "columns" => "id, item_id, name",
+            "clientId" => $clientId,
+            "limit" => 99999
+        ];
+        $classes_list = load_class("classes", "controllers")->list($classes_param)["data"];
+        
+        // if the submission of report is false
+        if($client_data->allow_submission === "false") {
+            $the_form["general"] = "<div class='text-center alert alert-warning'>Sorry! You are not allowed submit a report at this period of the term.</div>";
+        } else {
+            $the_form["general"] = "
+                <div class='row' id='terminal_reports'>
+                    <div class='col-lg-3'>
+                        <select class='form-control selectpicker' name='class_id' id='class_id'>
+                            <option value='null'>Select the Class</option>";
+                            foreach($classes_list as $class) {
+                                $the_form["general"] .= "<option value='{$class->item_id}'>{$class->name}</option>";
+                            }
+            $the_form["general"] .= "</select>
+                    </div>
+                    <div class='col-lg-4'>
+                        <select class='form-control selectpicker' name='course_id' id='course_id'>
+                            <option value='null'>Select the Course</option>
+                        </select>
+                    </div>
+                    <div class='col-lg-3'>
+                        <select class='form-control selectpicker' name='upload_type' id='upload_type'>
+                            <option value='download'>Download CSV File</option>
+                            <!--<option value='online'>Input the Data Online</option>-->
+                        </select>
+                    </div>
+                    <div class='col-lg-2' id='download_button'>
+                        <button onclick='return download_report_csv()' disabled type='download_csv' class='btn btn-block btn-outline-primary'>Download Template</button>
+                    </div>
+                    <div class='col-lg-2 hidden' id='upload_button'>
+                        <button onclick='return download_student_list()' disabled type='upload_button' class='btn btn-block btn-outline-primary'>Load Students</button>
+                    </div>
+                    <div class='col-lg-12 mt-4' id='summary_report_sheet_content'></div>
+                </div>";
+        }
 
 
         return $the_form;

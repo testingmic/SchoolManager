@@ -21,14 +21,14 @@ $response->title = "{$pageTitle} : {$appName}";
 
 // specify some variables
 $accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
+$accessObject->clientId = $clientId;
 $accessObject->userPermits = $defaultUser->user_permissions;
 
 // confirm that the user has the required permissions
 // get the settings form
 $the_form = load_class("forms", "controllers")->terminal_reports($clientId);
 
-// $response->scripts = ["assets/js/import.js", "assets/js/grading.js"];
+$response->scripts = ["assets/js/grading.js"];
 
 $response->html = '
     <section class="section">
@@ -46,7 +46,7 @@ $response->html = '
                         <div class="padding-20">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
+                                    <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">Upload Report Sheet</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Examination Grading</a>

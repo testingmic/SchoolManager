@@ -13,7 +13,7 @@ class Account extends Myschoolgh {
             "blood_group" => "Blood Group", "city" => "City", "residence" => "Residence", 
             "country" => "Country Code", "date_of_birth" => "Date of Birth", 
             "enrollment_date" => "Admission Date", "gender" => "Gender", "section" => "Section", 
-            "department" => "Department", "class_id" => "Class", "description" => "Description",
+            "department" => "Department", "class_id" => "Class Code", "description" => "Description",
             "religion" => "Religion",  "previous_school" => "Previous School", 
             "previous_school_qualification" => "Previous School Qualification",
             "previous_school_remarks" => "Previous School Remarks"
@@ -43,7 +43,8 @@ class Account extends Myschoolgh {
 
         $this->accepted_column["course"] = [
             "course_code" => "Course Code", "name" => "Title", "credit_hours" => "Credit Hours", 
-            "weekly_meeting" => "Weekly Meetings",  "description" => "Description", "course_tutor" => "Course Tutor IDs"
+            "weekly_meeting" => "Weekly Meetings",  "description" => "Description", 
+            "course_tutor" => "Course Tutor IDs"
         ];
 
 	}
@@ -229,7 +230,7 @@ initiateCalendar();";
     public function update_grading(stdClass $params) {
 
         // confirm its an array
-        if(!is_array($params->grading_values)) {
+        if(!is_array($params->grading_values) || !is_array($params->report_columns)) {
             return ["code" => 203, "data" => "Sorry! An array data is expected"];
         }
 
@@ -242,6 +243,7 @@ initiateCalendar();";
             $stmt = $this->db->prepare("INSERT INTO grading_system SET client_id = ?, grading = ?, structure = ?
                 ".(isset($params->report_columns["show_position"]) ? ",show_position='{$params->report_columns["show_position"]}'" : "")."
                 ".(isset($params->report_columns["show_teacher_name"]) ? ",show_teacher_name='{$params->report_columns["show_teacher_name"]}'" : "")."
+                ".(isset($params->report_columns["allow_submission"]) ? ",allow_submission='{$params->report_columns["allow_submission"]}'" : "")."
             ");
             $stmt->execute([$params->clientId, json_encode($params->grading_values), json_encode($params->report_columns)]);
 
@@ -251,6 +253,7 @@ initiateCalendar();";
             $stmt = $this->db->prepare("UPDATE grading_system SET grading = ?, structure = ?
                 ".(isset($params->report_columns["show_position"]) ? ",show_position='{$params->report_columns["show_position"]}'" : "")."
                 ".(isset($params->report_columns["show_teacher_name"]) ? ",show_teacher_name='{$params->report_columns["show_teacher_name"]}'" : "")."
+                ".(isset($params->report_columns["allow_submission"]) ? ",allow_submission='{$params->report_columns["allow_submission"]}'" : "")."
             WHERE client_id = ? LIMIT 1");
             $stmt->execute([json_encode($params->grading_values), json_encode($params->report_columns), $params->clientId]);
 
@@ -568,9 +571,9 @@ initiateCalendar();";
                     // set the sesssion value
                     $this->session->last_recordUpload = $params->column;
                 }
-
+                
                 // if the upload was for a course
-                if($params->column === "course") {
+                if(in_array($params->column, ["course", "staff"])) {
                     // insert the activity into the cron_scheduler
                     $query = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
                     $query->execute([$upload_id, $params->userId, "course_tutor"]);
@@ -725,10 +728,9 @@ initiateCalendar();";
                     }
                 }
 
-                $filename = "{$temp_dir}/{$file}.csv";
-
-                // return $content;
-
+                // set the file name
+                $filename = "{$temp_dir}/{$file}_bulk_upload.csv";
+                
                 // write the content to the sample file
                 $op = fopen($filename, 'w');
                 fwrite($op, $content);

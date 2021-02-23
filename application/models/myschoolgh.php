@@ -56,7 +56,7 @@ class Myschoolgh extends Models {
 
 			$stmt = $this->db->prepare("SELECT a.*, 
 				c.grading AS grading_system, c.structure AS grading_structure, 
-				c.show_position, c.show_teacher_name
+				c.show_position, c.show_teacher_name, c.allow_submission
 			FROM clients_accounts a 
 				LEFT JOIN grading_system c ON c.client_id = a.client_id
 			WHERE a.client_id = ? AND a.client_status = ? LIMIT 1");

@@ -98,6 +98,7 @@ var save_grading_mark = () => {
         report_columns["average_score"] = true;
         report_columns["show_position"] = $(`select[name="show_position"]`).val();
         report_columns["show_teacher_name"] = $(`select[name="show_teacher_name"]`).val();
+        report_columns["allow_submission"] = $(`select[name="allow_submission"]`).val();
         report_columns["teacher_comments"] = true;
 
         swal({
@@ -125,3 +126,57 @@ var save_grading_mark = () => {
         });
     }
 }
+
+var download_report_csv = () => {
+    let class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
+        course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
+    $.get(`${baseUrl}api/terminal_reports/download_csv`, { class_id, course_id }).then((response) => {
+        if (response.code == 200) {
+            window.location.href = `${baseUrl}${response.data.result}`;
+        }
+    });
+}
+
+$(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() {
+    let class_id = $(this).val();
+    $(`div[id="terminal_reports"] select[name='course_id']`).find('option').remove().end();
+    $(`div[id="terminal_reports"] select[name='course_id']`).append(`<option value="null">Please Select Course</option>`);
+    if (class_id !== "null") {
+        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
+        if (class_id.length) {
+            $.get(`${baseUrl}api/courses/list?class_id=${class_id}&minified=true`).then((response) => {
+                if (response.code == 200) {
+                    $.each(response.data.result, function(i, e) {
+                        $(`select[name='course_id']`).append(`<option value='${e.item_id}'>${e.name}</option>'`);
+                    });
+                }
+            });
+        }
+    } else {
+        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", true);
+    }
+});
+
+$(`div[id="terminal_reports"] select[name="course_id"]`).on("change", function() {
+    let course_id = $(this).val();
+    if (course_id !== "null") {
+        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
+    } else {
+        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", true);
+    }
+});
+
+$(`div[id="terminal_reports"] select[name='upload_type']`).on("change", function() {
+    let value = $(this).val();
+    if (value === "download") {
+        $(`div[id="terminal_reports"] div[id='upload_button']`).addClass("hidden");
+        $(`div[id="terminal_reports"] div[id='download_button']`).removeClass("hidden");
+        $(`div[id="terminal_reports"] button[type='download_csv']`).prop("disabled", false);
+        $(`div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", true);
+    } else {
+        $(`div[id="terminal_reports"] div[id='download_button']`).addClass("hidden");
+        $(`div[id="terminal_reports"] div[id='upload_button']`).removeClass("hidden");
+        $(`div[id="terminal_reports"] button[type='download_csv']`).prop("disabled", true);
+        $(`div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
+    }
+});

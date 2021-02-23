@@ -48,6 +48,7 @@ foreach($item_list["data"] as $key => $each) {
     $classes .= "<td>".($key+1)."</td>";
     $classes .= "<td>{$each->name}</td>";
     $classes .= "<td>{$each->class_code}</td>";
+    $classes .= "<td>{$each->class_size}</td>";
     $classes .= "<td>{$each->students_count}</td>";
     $classes .= "<td><span class='underline'>".($each->class_teacher_info->name ?? null)."</span></td>";
     $classes .= "<td><span class='underline'>".($each->class_assistant_info->name ?? null)."</span></td>";
@@ -75,6 +76,7 @@ $response->html = '
                                         <th width="5%" class="text-center">#</th>
                                         <th>Class Name</th>
                                         <th>Class Code</th>
+                                        <th>Class Size</th>
                                         <th width="15%">Students Count</th>
                                         <th>Class Teacher</th>
                                         <th>Class Assistant</th>
