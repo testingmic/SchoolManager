@@ -131,14 +131,57 @@ var download_report_csv = () => {
     let class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
         course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
     $.get(`${baseUrl}api/terminal_reports/download_csv`, { class_id, course_id }).then((response) => {
-        if (response.code == 200) {
-            window.location.href = `${baseUrl}${response.data.result}`;
+        if (response.code === 200) {
+            $(`div[id='upload_file']`).removeClass("hidden");
+            setTimeout(() => {
+                window.location.href = `${baseUrl}${response.data.result}`;
+            }, 500);
+        }
+    });
+}
+
+var save_terminal_report = () => {
+    swal({
+        title: "Save Student Marks",
+        text: "Do you want to save this as the terminal report grades?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            let student_scores = {},
+                class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
+                course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
+            $.each($(`div[id="summary_report_sheet_content"] input[data-input_type="score"]`), function(i, e) {
+                let item = $(this),
+                    row_id = item.attr("data-input_row_id"),
+                    student_id = $(`span[data-student_row_id="${row_id}"]`).attr("data-student_id"),
+                    remarks = $(`input[data-input_row_id="${row_id}"][data-input_method='remarks']`).val();
+
+                student_scores[i] = {
+                    "item": item.attr("name"),
+                    "score": item.val(),
+                    "student_id": student_id,
+                    "remarks": remarks
+                };
+            });
+            let report_sheet = {
+                class_id,
+                course_id,
+                student_scores
+            };
+            $.post(`${baseUrl}api/terminal_reports/save_report`, { report_sheet }).then((response) => {
+                if (response.code === 200) {
+
+                }
+            });
         }
     });
 }
 
 $(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() {
     let class_id = $(this).val();
+    // $(`div[id='upload_file']`).addClass("hidden");
     $(`div[id="terminal_reports"] select[name='course_id']`).find('option').remove().end();
     $(`div[id="terminal_reports"] select[name='course_id']`).append(`<option value="null">Please Select Course</option>`);
     if (class_id !== "null") {
@@ -168,6 +211,7 @@ $(`div[id="terminal_reports"] select[name="course_id"]`).on("change", function()
 
 $(`div[id="terminal_reports"] select[name='upload_type']`).on("change", function() {
     let value = $(this).val();
+    // $(`div[id='upload_file']`).addClass("hidden");
     if (value === "download") {
         $(`div[id="terminal_reports"] div[id='upload_button']`).addClass("hidden");
         $(`div[id="terminal_reports"] div[id='download_button']`).removeClass("hidden");
@@ -180,3 +224,58 @@ $(`div[id="terminal_reports"] select[name='upload_type']`).on("change", function
         $(`div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
     }
 });
+
+$(`div[id="terminal_reports"] input[name="upload_report_file"]`).change(function() {
+    var fd = new FormData();
+    var files = $('div[id="terminal_reports"] input[name="upload_report_file"]')[0].files[0],
+        class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
+        course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
+    fd.append('report_file', files);
+    fd.append('class_id', class_id);
+    fd.append('course_id', course_id);
+    load_report_csv_file_data(fd, "course");
+});
+
+var total_score_checker = () => {
+    $(`div[id="summary_report_sheet_content"] input[data-input_type="score"]`).on("input", function(event) {
+        let input = $(this),
+            unq_id = input.attr("data-input_row_id"),
+            total_score = 0;
+        $.each($(`input[data-input_row_id="${unq_id}"]`), function(i, e) {
+            let value = parseInt($(this).val());
+            total_score += value;
+        });
+        if (total_score > 100) {
+            $(`div[id="summary_report_sheet_content"] input[data-input_total_id="${unq_id}"]`).addClass("bg-danger text-white");
+        } else {
+            $(`div[id="summary_report_sheet_content"] input[data-input_total_id="${unq_id}"]`).removeClass("bg-danger text-white").addClass("text-black");
+        }
+        $(`div[id="summary_report_sheet_content"] input[data-input_total_id="${unq_id}"]`).val(total_score);
+    });
+}
+
+var load_report_csv_file_data = (formdata) => {
+    $(`div[id='summary_report_sheet_content']`).html(``);
+    $.ajax({
+        type: 'POST',
+        url: `${baseUrl}api/terminal_reports/upload_csv`,
+        data: formdata,
+        dataType: 'JSON',
+        contentType: false,
+        cache: false,
+        processData: false,
+        success: function(response) {
+            if (response.code === 200) {
+                $(`div[id="terminal_reports"] input[name="upload_report_file"]`).val("");
+                $(`div[id='summary_report_sheet_content']`).html(response.data.result);
+                total_score_checker();
+            }
+        },
+        error: function(err) {
+            swal({
+                text: "Sorry! An unknown file type was uploaded.",
+                icon: "error",
+            });
+        }
+    });
+}

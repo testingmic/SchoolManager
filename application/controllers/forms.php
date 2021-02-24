@@ -3539,7 +3539,7 @@ class Forms extends Myschoolgh {
         $default_columns_list[2] = "
             <div class='row mb-2 mt-1'>
                 <div class='col-lg-12'>
-                    <input type='text' readonly name='report_columns[teacher_comments]' value='Teacher Comments' class='form-control'>
+                    <input type='text' readonly name='report_columns[teacher_comments]' value='Teacher Remarks' class='form-control'>
                 </div>
             </div>";
 
@@ -3648,6 +3648,13 @@ class Forms extends Myschoolgh {
                     </div>
                     <div class='col-lg-2 hidden' id='upload_button'>
                         <button onclick='return download_student_list()' disabled type='upload_button' class='btn btn-block btn-outline-primary'>Load Students</button>
+                    </div>
+                    <div class='col-lg-12 mt-4'></div>
+                    <div class='col-md-3 mt-3' id='upload_file'>
+                        <div class='form-group'>
+                            <label>Select file to upload</label>
+                            <input type='file' name='upload_report_file' accept='.csv' class='form-control'>
+                        </div>
                     </div>
                     <div class='col-lg-12 mt-4' id='summary_report_sheet_content'></div>
                 </div>";

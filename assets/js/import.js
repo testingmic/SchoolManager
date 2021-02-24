@@ -143,7 +143,6 @@ var populate_select_fields = (headerData, mainContent, column) => {
 
     var ii = 0;
     $.each(mainContent, function(i, e) {
-        var thisData;
         $.each(e, function(iv, v) {
             $(`div[data-csv_import_column="${column}"] div[class~="csv-row-data-${iv}"]`).append(`<p style="padding-left: 5px" data-row-id="${ii}" data-column-id="${iv}" class="border-bottom pb-2">${e[iv]}</p>`);
         });
