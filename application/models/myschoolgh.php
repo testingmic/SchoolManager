@@ -769,10 +769,10 @@ class Myschoolgh extends Models {
      * 
      * @return Bool
      */
-    public function check_time() {
+    public function check_time($table = "users", $timer = 0.02) {
         
         // get the last date created
-        $last_time = $this->columnValue("date_created", "users", "ip_address='{$this->ip_address}' ORDER BY id DESC");
+        $last_time = $this->columnValue("date_created", $table, "ip_address='{$this->ip_address}' ORDER BY id DESC");
 
         // confirm if not empty
         if(empty($last_time)) {
@@ -785,7 +785,7 @@ class Myschoolgh extends Models {
 		}
 
         // online algorithm (user is online if last activity is at most 2 minutes ago)
-        return (bool) (raw_time_diff($last_time->date_created) > 0.02);
+        return (bool) (raw_time_diff($last_time->date_created) > $timer);
 
     }
 

@@ -181,7 +181,7 @@ var save_terminal_report = () => {
 
 $(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() {
     let class_id = $(this).val();
-    // $(`div[id='upload_file']`).addClass("hidden");
+    $(`div[id='upload_file']`).addClass("hidden");
     $(`div[id="terminal_reports"] select[name='course_id']`).find('option').remove().end();
     $(`div[id="terminal_reports"] select[name='course_id']`).append(`<option value="null">Please Select Course</option>`);
     if (class_id !== "null") {
@@ -211,7 +211,7 @@ $(`div[id="terminal_reports"] select[name="course_id"]`).on("change", function()
 
 $(`div[id="terminal_reports"] select[name='upload_type']`).on("change", function() {
     let value = $(this).val();
-    // $(`div[id='upload_file']`).addClass("hidden");
+    $(`div[id='upload_file']`).addClass("hidden");
     if (value === "download") {
         $(`div[id="terminal_reports"] div[id='upload_button']`).addClass("hidden");
         $(`div[id="terminal_reports"] div[id='download_button']`).removeClass("hidden");
@@ -237,11 +237,11 @@ $(`div[id="terminal_reports"] input[name="upload_report_file"]`).change(function
 });
 
 var total_score_checker = () => {
-    $(`div[id="summary_report_sheet_content"] input[data-input_type="score"]`).on("input", function(event) {
+    $(`div[id="summary_report_sheet_content"] input[data-input_type="score"][data-input_type_q='marks']`).on("input", function(event) {
         let input = $(this),
             unq_id = input.attr("data-input_row_id"),
             total_score = 0;
-        $.each($(`input[data-input_row_id="${unq_id}"]`), function(i, e) {
+        $.each($(`input[data-input_row_id="${unq_id}"][data-input_type_q='marks']`), function(i, e) {
             let value = parseInt($(this).val());
             total_score += value;
         });

@@ -13,8 +13,8 @@ class Crons {
 		$this->rootUrl = "/home/mineconr/app.myschoolgh.com/";
 		$this->dbConn();
 
-		require $this->rootUrl."system/libraries/phpmailer.php";
-		require $this->rootUrl."system/libraries/smtp.php";
+		// require $this->rootUrl."system/libraries/phpmailer.php";
+		// require $this->rootUrl."system/libraries/smtp.php";
 	}
 	
 	/**
@@ -30,6 +30,13 @@ class Crons {
 			'database' => "mineconr_school",
 			'username' => "mineconr_school",
 			'password' => 'YdwQLVx4vKU_'
+		);
+
+		$connectionArray = array(
+			'hostname' => "localhost",
+			'database' => "myschoolgh",
+			'username' => "root",
+			'password' => ''
 		);
 		
 		// run the database connection
@@ -314,7 +321,7 @@ class Crons {
 		try {
 
 			// prepare and execute the statement
-			$stmt = $this->db->prepare("SELECT * FROM cron_scheduler WHERE status = ? AND CURRENT_TIME() > TIMESTAMP(active_date) ORDER BY id ASC LIMIT 1");
+			$stmt = $this->db->prepare("SELECT * FROM cron_scheduler WHERE status = ? AND CURRENT_TIME() > TIMESTAMP(active_date) ORDER BY id ASC LIMIT 10");
 			$stmt->execute([0]);
 
 			// loop through the result
@@ -345,7 +352,7 @@ class Crons {
 				}
 
 				// if the request is email
-				if($result->cron_type == "email") {
+				elseif($result->cron_type == "email") {
 					// convert the list to an object
 					$query = json_decode($result->query);
 
@@ -368,8 +375,13 @@ class Crons {
 				}
 
 				// if a user information have been uploaded
-				if($result->cron_type == "users_upload") {
+				elseif($result->cron_type == "users_upload") {
 					$this->users_upload_modification($result->item_id);
+				}
+
+				// if the type is to manage the terminal report functionality
+				elseif($result->cron_type == "terminal_report") {
+					$this->terminal_report_handler($result->item_id);
 				}
 
 				// update the cron status
@@ -377,7 +389,9 @@ class Crons {
 
 			}
 
-		} catch(PDOException $e) {}
+		} catch(PDOException $e) {
+			print $e->getMessage();
+		}
 
     }
 
@@ -394,8 +408,26 @@ class Crons {
 		// get the list of all users that was uploaded
 		$u_list = $this->db->prepare("UPDATE users a SET a.username = (SELECT SUBSTRING(b.email, 1, LOCATE('@', b.email) - 1) AS the_username FROM users b WHERE b.id = a.id) WHERE LENGTH(a.email) > 5 AND a.upload_id='{$upload_id}'");
 		$u_list->execute();
-	}
+	}	
 
+	/**
+	 * Perform some modification on the users list
+	 * 
+	 * @return Bool
+	 */
+	private function terminal_report_handler($upload_id) {
+		
+		// set the fullname of the user
+		$u_stmt = $this->db->prepare("UPDATE grading_terminal_scores a SET 
+			a.student_item_id = (SELECT u.item_id FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+			a.student_name = (SELECT u.name FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+			a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
+		WHERE a.upload_id='{$upload_id}'");
+		$u_stmt->execute();
+
+		// get the list of all users that was uploaded
+		
+	}
 	
     /**
      * Add a new notification
@@ -449,7 +481,7 @@ class Crons {
 
 // create new object
 $jobs = new Crons;
-$jobs->loadEmailRequests();
-$jobs->inApp_Emails();
+// $jobs->loadEmailRequests();
+// $jobs->inApp_Emails();
 $jobs->scheduler();
 ?>

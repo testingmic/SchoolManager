@@ -159,7 +159,7 @@ class Terminal_reports extends Myschoolgh {
             foreach($result as $kkey => $kvalue) {
                 if(in_array($file_headers[$kkey], array_keys($columns["columns"]))) {
                     $column = create_slug($file_headers[$kkey], "_");
-                    $report_table .= "<td><input ".($columns["columns"][$file_headers[$kkey]] == "100" ? "disabled='disabled' data-input_total_id='{$key}'" : "data-input_type='score' data-input_row_id='{$key}'" )." class='form-control font-18 text-center' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}'></td>";
+                    $report_table .= "<td><input ".($columns["columns"][$file_headers[$kkey]] == "100" ? "disabled='disabled' data-input_total_id='{$key}'" : "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." class='form-control font-18 text-center' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}'></td>";
                 } elseif($file_headers[$kkey] == "Class Teacher Remarks") {
                     $report_table .= "<td><input type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
                 } else {
@@ -264,15 +264,56 @@ class Terminal_reports extends Myschoolgh {
             $teacher_ids = $session_array["students"][0][$teacher_key];
 
             // prepare the statement
-            $stmt = $this->db->prepare("INSERT INTO grading_terminal_scores SET 
+            $insert_stmt = $this->db->prepare("INSERT INTO grading_terminal_scores SET 
                 course_id = ?, course_name = ?, course_code = ?, scores = ?, total_score = ?, 
-                average_score = ?, teacher_ids = ?, class_teacher_remarks = ?
+                average_score = ?, teacher_ids = ?, class_teacher_remarks = ?, created_by = ?,
+                academic_year = ?, academic_term = ?, student_unique_id = ?, client_id = ?, upload_id = ?
             ");
 
-            // loop through the list and insert the record
-            foreach($scores_array as $student) {
+            // prepare the statement
+            $update_stmt = $this->db->prepare("UPDATE grading_terminal_scores SET 
+                upload_id = ?, course_name = ?, course_code = ?, scores = ?, total_score = ?, 
+                average_score = ?, teacher_ids = ?, class_teacher_remarks = ?,
+                WHERE academic_year = ? AND academic_term = ? AND student_unique_id = ? 
+                AND course_id = ? AND client_id = ?
+            ");
 
+            // set a new log id
+            $upload_id = random_string("alnum", 12);
+
+            // loop through the list and insert the record
+            foreach($scores_array as $key => $student) {
+                
+                // confirm if there is an existing record that has already been approved
+                $check = $this->pushQuery("a.scores, a.total_score, a.average_score, a.class_position, u.name AS student_name", 
+                    "grading_terminal_scores a LEFT JOIN users u ON u.unique_id = a.student_unique_id", 
+                    "a.student_unique_id='{$key}' AND a.course_id='{$report->course_id}' AND a.status='Approved'
+                    AND a.academic_year = '{$params->academic_year}' AND a.academic_term='{$params->academic_term}' AND client_id = '{$params->clientId}'");
+            
+                // if there is no existing record
+                if(empty($check)) {
+                    // execute the statement
+                    $insert_stmt->execute([
+                        $report->course_id, $course_name, $course_code, json_encode($student["marks"]),
+                        $student["total_score"], $average_score, $teacher_ids, $student["remarks"], $params->userId,
+                        $params->academic_year, $params->academic_term, $key, $params->clientId, $upload_id
+                    ]);
+                    // log the user activity
+                    $this->userLogs("terminal_report", $key, json_encode($student), "{$params->userData->name} uploaded the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of Student With ID: {$key}", $params->userId);
+                } else {
+                    // execute the statement
+                    $update_stmt->execute([$upload_id, $course_name, $course_code, json_encode($student["marks"]),
+                        $student["total_score"], $average_score, $teacher_ids, $student["remarks"],
+                        $params->academic_year, $params->academic_term, $key, $report->course_id, $params->clientId
+                    ]);
+                    // log the user activity
+                    $this->userLogs("terminal_report", $key, $check[0], "{$params->userData->name} updated the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of <strong>{$check[0]->student_name}</strong> With ID: {$key}", $params->userId);
+                }
             }
+
+            // insert the activity into the cron_scheduler
+            $query = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
+            $query->execute([$upload_id, $params->userId, "terminal_report"]);
             
             return $scores_array;
 

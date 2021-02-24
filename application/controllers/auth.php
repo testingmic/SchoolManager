@@ -760,6 +760,11 @@ class Auth extends Myschoolgh {
 
         global $accessObject;
 
+        // check if the user has registered an account with the past 5 minutes
+        if(!$this->check_time("clients_accounts", 0.05)) {
+            return ["code" => 201, "data" => "Sorry! You are prohibited from registering multiple accounts within a short space of time."];
+        }
+
         if(!filter_var($params->email, FILTER_VALIDATE_EMAIL)) {
             return ["code" => 201, "data" => "Sorry! Please provide a valid email address."];
         }
@@ -835,11 +840,11 @@ class Auth extends Myschoolgh {
             // insert the client details
             $stmt = $this->db->prepare("
                 INSERT INTO clients_accounts SET 
-                    client_id = ?, client_name = ?, client_contact = ?, client_email = ?, client_preferences = ?
+                    client_id = ?, client_name = ?, client_contact = ?, client_email = ?, client_preferences = ?, ip_address = ?
                     ".(isset($params->school_address) ? ",client_address='{$params->school_address}'" : null)."
                     ".(isset($params->school_contact_2) ? ",client_secondary_contact='{$params->school_contact_2}'" : null)."
             ");
-            $stmt->execute([$client_id, $params->school_name, $params->school_contact, $params->email, json_encode($preference)]);
+            $stmt->execute([$client_id, $params->school_name, $params->school_contact, $params->email, json_encode($preference), ip_address()]);
 
             // get the user permissions
 		    $accessPermissions = $accessObject->getPermissions("admin");
