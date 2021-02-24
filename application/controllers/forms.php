@@ -3650,6 +3650,7 @@ class Forms extends Myschoolgh {
                         <button onclick='return download_student_list()' disabled type='upload_button' class='btn btn-block btn-outline-primary'>Load Students</button>
                     </div>
                     <div class='col-lg-12 mt-4'></div>
+                    <div class='col-lg-12 mt-1 text-center' id='notification'></div>
                     <div class='col-md-3 mt-3 hidden' id='upload_file'>
                         <div class='form-group'>
                             <label>Select file to upload</label>

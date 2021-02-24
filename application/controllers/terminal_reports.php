@@ -7,6 +7,54 @@ class Terminal_reports extends Myschoolgh {
     }
 
     /**
+     * Uploads List
+     * 
+     * List all uploaded terminal reports by a user
+     * 
+     * @return Array
+     */
+    public function uploads_list(stdClass $params) {
+        
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+        try {
+
+            $stmt = $this->db->prepare("SELECT a.*, u.name AS fullname, u.unique_id AS user_unique_id,
+                    (SELECT COUNT(*) FROM grading_terminal_scores b WHERE b.upload_id = a.upload_id) AS students_count,
+                    (SELECT b.average_score FROM grading_terminal_scores b WHERE b.upload_id = a.upload_id LIMIT 1) AS overall_score
+                FROM grading_terminal_logs a
+                LEFT JOIN users u ON u.item_id = a.created_by
+                WHERE 1 ORDER by a.id DESC LIMIT {$params->limit}
+            ");
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+    
+        } catch(PDOException $e) {}
+
+    }
+
+    /**
+     * Check Existence
+     * 
+     * Confirm that there is an existing record
+    */
+    public function check_existence(stdClass $params) {
+        $check = $this->pushQuery("status", "grading_terminal_logs", "course_id = '{$params->course_id}' AND class_id='{$params->class_id}' AND client_id='{$params->clientId}'");
+        if(!empty($check)) {
+            if($check[0]->status === "Pending") {
+                return ["code" => 200, "data" => "There is an existing record, trying to upload a new set of data will replace the existing one."];
+            } elseif($check[0]->status === "Approved") {
+                return ["code" => 203, "data" => "Sorry! This report has already been approved hence cannot be updated."];
+            } elseif($check[0]->status === "Submitted") {
+                return ["code" => 203, "data" => "Sorry! This report has been submitted pending approval hence cannot be updated."];
+            }
+        } else {
+            return ["code" => 200, "data" => "You can proceed to upload the terminal report of the class"];
+        }
+    }
+
+    /**
      * Download the CSV File
      * 
      * @return Array
@@ -193,11 +241,27 @@ class Terminal_reports extends Myschoolgh {
      */
     public function save_report(stdClass $params) {
 
+        // confirm that the record set is an array
         if(!is_array($params->report_sheet)) {
             return ["code" => 203, "data" => "Sorry! The report_sheet parameter must be an array."];
         }
 
+        // set the report
         $report = (object) $params->report_sheet;
+        $report->clientId = $params->clientId;
+
+        // check if a file has been uploaded
+        if(empty($this->session->get("terminal_report_{$report->class_id}_{$report->course_id}"))) {
+            return ["code" => 203, "data" => "Sorry! Upload a valid CSV file to proceed."];
+        }
+
+        // confirm that the valid information was parsed
+        $record_check = $this->check_existence($report);
+        
+        // return the response if not a code 200 was returned
+        if($record_check["code"] !== 200) {
+            return $record_check["data"];
+        }
 
         try {
 
@@ -249,7 +313,7 @@ class Terminal_reports extends Myschoolgh {
             }
 
             $course_item = $course_item[0];
-            $class_name = $class_item[0];
+            $class_item = $class_item[0];
 
             //set more values
             $average_score = $overall_score / count($scores_array);
@@ -265,6 +329,7 @@ class Terminal_reports extends Myschoolgh {
 
             // prepare the statement
             $insert_stmt = $this->db->prepare("INSERT INTO grading_terminal_scores SET 
+                class_id = ?, class_name = ?,
                 course_id = ?, course_name = ?, course_code = ?, scores = ?, total_score = ?, 
                 average_score = ?, teacher_ids = ?, class_teacher_remarks = ?, created_by = ?,
                 academic_year = ?, academic_term = ?, student_unique_id = ?, client_id = ?, upload_id = ?
@@ -272,52 +337,100 @@ class Terminal_reports extends Myschoolgh {
 
             // prepare the statement
             $update_stmt = $this->db->prepare("UPDATE grading_terminal_scores SET 
-                upload_id = ?, course_name = ?, course_code = ?, scores = ?, total_score = ?, 
-                average_score = ?, teacher_ids = ?, class_teacher_remarks = ?,
-                WHERE academic_year = ? AND academic_term = ? AND student_unique_id = ? 
-                AND course_id = ? AND client_id = ?
+                    class_id = ?, class_name = ?, upload_id = ?, course_name = ?, 
+                    course_code = ?, scores = ?, total_score = ?, 
+                    average_score = ?, teacher_ids = ?, class_teacher_remarks = ?
+                WHERE academic_year = ? AND academic_term = ? AND student_unique_id = ? AND course_id = ? AND client_id = ?
             ");
 
             // set a new log id
-            $upload_id = random_string("alnum", 12);
+            $upload_id = random_string("alnum", 16);
+            $isFound = false;
 
             // loop through the list and insert the record
             foreach($scores_array as $key => $student) {
                 
                 // confirm if there is an existing record that has already been approved
-                $check = $this->pushQuery("a.scores, a.total_score, a.average_score, a.class_position, u.name AS student_name", 
+                $check = $this->pushQuery("a.scores, a.total_score, a.average_score, 
+                    a.upload_id, a.class_position, u.name AS student_name, a.status", 
                     "grading_terminal_scores a LEFT JOIN users u ON u.unique_id = a.student_unique_id", 
-                    "a.student_unique_id='{$key}' AND a.course_id='{$report->course_id}' AND a.status='Approved'
-                    AND a.academic_year = '{$params->academic_year}' AND a.academic_term='{$params->academic_term}' AND client_id = '{$params->clientId}'");
+                    "a.student_unique_id='{$key}' AND a.course_id='{$report->course_id}'
+                    AND a.academic_year = '{$params->academic_year}' AND a.academic_term='{$params->academic_term}' AND a.client_id = '{$params->clientId}'");
             
                 // if there is no existing record
                 if(empty($check)) {
                     // execute the statement
                     $insert_stmt->execute([
+                        $report->class_id, $class_item->name,
                         $report->course_id, $course_name, $course_code, json_encode($student["marks"]),
                         $student["total_score"], $average_score, $teacher_ids, $student["remarks"], $params->userId,
                         $params->academic_year, $params->academic_term, $key, $params->clientId, $upload_id
                     ]);
+                    $data = "The Terminal Report was successfully inserted.";
                     // log the user activity
                     $this->userLogs("terminal_report", $key, json_encode($student), "{$params->userData->name} uploaded the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of Student With ID: {$key}", $params->userId);
                 } else {
-                    // execute the statement
-                    $update_stmt->execute([$upload_id, $course_name, $course_code, json_encode($student["marks"]),
-                        $student["total_score"], $average_score, $teacher_ids, $student["remarks"],
-                        $params->academic_year, $params->academic_term, $key, $report->course_id, $params->clientId
-                    ]);
-                    // log the user activity
-                    $this->userLogs("terminal_report", $key, $check[0], "{$params->userData->name} updated the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of <strong>{$check[0]->student_name}</strong> With ID: {$key}", $params->userId);
+                    // is found 
+                    $isFound = true;
+                    $upload_id = $check[0]->upload_id;
+                    // ensure it hasnt been approved
+                    if($check[0]->status === "Saved") {
+                        // execute the statement
+                        $update_stmt->execute([
+                            $report->class_id, $class_item->name, $upload_id, $course_name, 
+                            $course_code, json_encode($student["marks"]),
+                            $student["total_score"], $average_score, $teacher_ids, $student["remarks"],
+                            $params->academic_year, $params->academic_term, $key, $report->course_id, $params->clientId
+                        ]);
+                        // log the user activity
+                        $this->userLogs("terminal_report", $key, $check[0], "{$params->userData->name} updated the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of <strong>{$check[0]->student_name}</strong> With ID: {$key}", $params->userId);
+                    }
+                    $data = "The Terminal Report was successfully updated.";
                 }
             }
 
-            // insert the activity into the cron_scheduler
-            $query = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
-            $query->execute([$upload_id, $params->userId, "terminal_report"]);
-            
-            return $scores_array;
+            // if there is an existing record
+            if($isFound) {
+                // insert the activity into the cron_scheduler
+                $query = $this->db->prepare("UPDATE cron_scheduler SET status = ?, active_date = now() WHERE item_id = ? AND cron_type = ?");
+                $query->execute([0, $upload_id, "terminal_report"]);
 
-        } catch(PDOException $e) {}
+                // log the information
+                $log_stmt = $this->db->prepare("UPDATE grading_terminal_logs 
+                        SET class_name = ?, course_name = ?, course_code = ?
+                    WHERE upload_id = ? AND client_id = ? AND course_id = ? AND class_id = ? AND 
+                        academic_year = ? AND academic_term = ?
+                ");
+                $log_stmt->execute([
+                    $class_item->name, $course_name, strtoupper($course_item->course_code), $upload_id, 
+                    $params->clientId, $report->course_id, 
+                    $report->class_id, $params->academic_year, $params->academic_term
+                ]);
+            } else {
+
+                // log the information
+                $log_stmt = $this->db->prepare("INSERT INTO grading_terminal_logs SET upload_id = ?, client_id = ?, 
+                    class_id = ?, class_name = ?, course_id = ?, course_name = ?, academic_year = ?, academic_term = ?,
+                    created_by = ?, course_code = ?");
+                $log_stmt->execute([
+                    $upload_id, $params->clientId, $report->class_id, $class_item->name, 
+                    $report->course_id, $course_name, $params->academic_year, 
+                    $params->academic_term, $params->userId, strtoupper($course_item->course_code)
+                ]);
+
+                // insert the activity into the cron_scheduler
+                $query = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
+                $query->execute([$upload_id, $params->userId, "terminal_report"]);
+            }
+
+            // delete the session
+            $this->session->remove("terminal_report_{$report->class_id}_{$report->course_id}");
+
+            return $data;
+
+        } catch(PDOException $e) {
+            return $e->getMessage();
+        }
     }
 
 }

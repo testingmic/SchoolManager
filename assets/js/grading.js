@@ -172,69 +172,22 @@ var save_terminal_report = () => {
             };
             $.post(`${baseUrl}api/terminal_reports/save_report`, { report_sheet }).then((response) => {
                 if (response.code === 200) {
-
+                    swal({
+                        text: response.data.result,
+                        icon: "success",
+                    });
+                    $(`div[id='summary_report_sheet_content']`).html(``);
+                    loadPage(`${baseUrl}terminal_reports?pg=uploads`);
+                } else {
+                    swal({
+                        text: response.data.result,
+                        icon: "error",
+                    });
                 }
             });
         }
     });
 }
-
-$(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() {
-    let class_id = $(this).val();
-    $(`div[id='upload_file']`).addClass("hidden");
-    $(`div[id="terminal_reports"] select[name='course_id']`).find('option').remove().end();
-    $(`div[id="terminal_reports"] select[name='course_id']`).append(`<option value="null">Please Select Course</option>`);
-    if (class_id !== "null") {
-        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
-        if (class_id.length) {
-            $.get(`${baseUrl}api/courses/list?class_id=${class_id}&minified=true`).then((response) => {
-                if (response.code == 200) {
-                    $.each(response.data.result, function(i, e) {
-                        $(`select[name='course_id']`).append(`<option value='${e.item_id}'>${e.name}</option>'`);
-                    });
-                }
-            });
-        }
-    } else {
-        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", true);
-    }
-});
-
-$(`div[id="terminal_reports"] select[name="course_id"]`).on("change", function() {
-    let course_id = $(this).val();
-    if (course_id !== "null") {
-        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
-    } else {
-        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", true);
-    }
-});
-
-$(`div[id="terminal_reports"] select[name='upload_type']`).on("change", function() {
-    let value = $(this).val();
-    $(`div[id='upload_file']`).addClass("hidden");
-    if (value === "download") {
-        $(`div[id="terminal_reports"] div[id='upload_button']`).addClass("hidden");
-        $(`div[id="terminal_reports"] div[id='download_button']`).removeClass("hidden");
-        $(`div[id="terminal_reports"] button[type='download_csv']`).prop("disabled", false);
-        $(`div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", true);
-    } else {
-        $(`div[id="terminal_reports"] div[id='download_button']`).addClass("hidden");
-        $(`div[id="terminal_reports"] div[id='upload_button']`).removeClass("hidden");
-        $(`div[id="terminal_reports"] button[type='download_csv']`).prop("disabled", true);
-        $(`div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
-    }
-});
-
-$(`div[id="terminal_reports"] input[name="upload_report_file"]`).change(function() {
-    var fd = new FormData();
-    var files = $('div[id="terminal_reports"] input[name="upload_report_file"]')[0].files[0],
-        class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
-        course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
-    fd.append('report_file', files);
-    fd.append('class_id', class_id);
-    fd.append('course_id', course_id);
-    load_report_csv_file_data(fd, "course");
-});
 
 var total_score_checker = () => {
     $(`div[id="summary_report_sheet_content"] input[data-input_type="score"][data-input_type_q='marks']`).on("input", function(event) {
@@ -279,3 +232,80 @@ var load_report_csv_file_data = (formdata) => {
         }
     });
 }
+
+var submit_terminal_report = (report_id) => {
+    swal({
+        title: "Submit Terminal Report",
+        text: "You have opted to submit this Terminal Report. Please note that you will not be able to update the record once it has been submitted. Do you want to proceed?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+
+        }
+    });
+}
+
+$(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() {
+    let class_id = $(this).val();
+    $(`div[id="notification"]`).html(``);
+    $(`div[id='upload_file']`).addClass("hidden");
+    $(`div[id="terminal_reports"] select[name='course_id']`).find('option').remove().end();
+    $(`div[id="terminal_reports"] select[name='course_id']`).append(`<option value="null">Please Select Course</option>`);
+    if (class_id !== "null") {
+        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
+        if (class_id.length) {
+            $.get(`${baseUrl}api/courses/list?class_id=${class_id}&minified=true`).then((response) => {
+                if (response.code == 200) {
+                    $.each(response.data.result, function(i, e) {
+                        $(`select[name='course_id']`).append(`<option value='${e.item_id}'>${e.name}</option>'`);
+                    });
+                }
+            });
+        }
+    } else {
+        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", true);
+    }
+});
+
+$(`div[id="terminal_reports"] select[name="course_id"]`).on("change", function() {
+    let course_id = $(this).val();
+    $(`div[id="notification"]`).html(``);
+    if (course_id !== "null") {
+        let class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val();
+        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
+        $.get(`${baseUrl}api/terminal_reports/check_existence`, { course_id, class_id }).then((response) => {
+            $(`div[id="notification"]`).html(`<span class="text-${response.code == 200 ? "success" : "danger"}">${response.data.result}</span>`);
+        });
+    } else {
+        $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", true);
+    }
+});
+
+$(`div[id="terminal_reports"] select[name='upload_type']`).on("change", function() {
+    let value = $(this).val();
+    $(`div[id='upload_file']`).addClass("hidden");
+    if (value === "download") {
+        $(`div[id="terminal_reports"] div[id='upload_button']`).addClass("hidden");
+        $(`div[id="terminal_reports"] div[id='download_button']`).removeClass("hidden");
+        $(`div[id="terminal_reports"] button[type='download_csv']`).prop("disabled", false);
+        $(`div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", true);
+    } else {
+        $(`div[id="terminal_reports"] div[id='download_button']`).addClass("hidden");
+        $(`div[id="terminal_reports"] div[id='upload_button']`).removeClass("hidden");
+        $(`div[id="terminal_reports"] button[type='download_csv']`).prop("disabled", true);
+        $(`div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
+    }
+});
+
+$(`div[id="terminal_reports"] input[name="upload_report_file"]`).change(function() {
+    var fd = new FormData();
+    var files = $('div[id="terminal_reports"] input[name="upload_report_file"]')[0].files[0],
+        class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
+        course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
+    fd.append('report_file', files);
+    fd.append('class_id', class_id);
+    fd.append('course_id', course_id);
+    load_report_csv_file_data(fd, "course");
+});

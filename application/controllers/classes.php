@@ -21,9 +21,9 @@ class Classes extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
-        if(isset($params->filter)) {
+        if(isset($params->filter, $params->userId)) {
             if(in_array($params->filter, ["teacher"])) {
-                // $params->class_teacher = $params->userId;
+                $params->class_teacher = $params->userId;
             }
         }
 
