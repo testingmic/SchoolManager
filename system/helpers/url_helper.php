@@ -437,7 +437,7 @@ if ( ! function_exists('jump_to_main')) {
 	 * @return header
 	 */
 	function jump_to_main($baseUrl = null) {
-		global $_SERVER, $session;
+		global $_SERVER, $session, $myschoolgh;
 		// set the current url in session
 		$session->user_current_url = current_url();
 		if(!$session->clientId) {
@@ -452,10 +452,19 @@ if ( ! function_exists('jump_to_main')) {
 			echo json_encode($response);
 			exit;
 		}
+		// redirect the page to the appropriate one
 		if(!isset($_SERVER["HTTP_REFERER"]) || $_SERVER["REQUEST_METHOD"] !== "POST") {
+			// get the default user information
 			header("location: {$baseUrl}main");
 			exit;
 		}
+		// get the current url
+		$current_url = current_url();
+		$current_url = str_ireplace([$baseUrl], ["{{APPURL}}"], $current_url);
+
+		// save the current url and attach to the user information
+		$stmt = $myschoolgh->prepare("UPDATE users SET last_visited_page = ? WHERE item_id = ? LIMIT 1");
+		return $stmt->execute([$current_url, $session->userId]);
 	}
 
 }

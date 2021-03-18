@@ -77,13 +77,13 @@ class Analitics extends Myschoolgh {
             $the_date = $this->preformat_date($params->period);
         }
 
-        // set the period in session
-        $this->session->set("reportPeriod", $params->period);
-
         /** If invalid date then end the query */
         if(in_array($the_date, array_keys($this->error_codes))) {
             return ["code" => 203, "data" => $this->error_codes[$the_date]];
         }
+
+        // set the period in session
+        $this->session->set("reportPeriod", $params->period);
 
         // date ranges to use for the query
         $this->date_range = [

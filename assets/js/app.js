@@ -12,6 +12,7 @@ $.pageloader = $(".loader");
 $.env = "development";
 $.chatinterval = 5000;
 
+$.most_recent_page = $(`div[class="last_visited_page"]`).attr("value");
 $form_modal = $(`div[id="formsModal"]`);
 $replies_modal = $(`div[id="repliesModal"]`);
 $form_body = $(`div[id="formsModal"] div[class="modal-body"]`);
@@ -236,7 +237,7 @@ var linkHandler = (target, pushstate) => {
     devlog("linkHandler(). I called =>");
 
     if (target.slice(0, -1) === $.baseurl || target === $.baseurl || target === $.default) {
-        target = $.baseurl + "/terminal_reports";
+        target = $.most_recent_page;
     }
     loadPage(target, pushstate);
 }

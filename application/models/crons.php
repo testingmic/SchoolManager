@@ -415,18 +415,21 @@ class Crons {
 	 * 
 	 * @return Bool
 	 */
-	private function terminal_report_handler($upload_id) {
+	private function terminal_report_handler($report_id) {
 		
 		// set the fullname of the user
 		$u_stmt = $this->db->prepare("UPDATE grading_terminal_scores a SET 
 			a.student_item_id = (SELECT u.item_id FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
 			a.student_name = (SELECT u.name FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
 			a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
-		WHERE a.upload_id='{$upload_id}'");
+		WHERE a.report_id='{$report_id}'");
 		$u_stmt->execute();
 
 		// get the list of all users that was uploaded
-		
+		$u_stmt = $this->db->prepare("UPDATE grading_terminal_logs a SET 
+			a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
+		WHERE a.report_id='{$report_id}'");
+		$u_stmt->execute();		
 	}
 	
     /**

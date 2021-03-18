@@ -85,7 +85,7 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
         <div class="row">
           <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
             <div class="text-left border-radius mb-2 p-2 bg-white">
-                <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="80px" /></div>
+                <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="70px" /></div>
                 <div>
                     <div class="font-25px text-center font-weight-bold text-dark"><?= config_item('site_name') ?></div> 
                     <div class="text-dark text-center">Your advanced school management system.</div>
@@ -204,6 +204,12 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
         </div>
       </div>
     </section>
+  </div>
+  <div class="app-foottag">
+    <div class="d-flex justify-content-between">
+        <div>&copy; Copyright <strong><a href="<?= config_item("site_url") ?>"><?= config_item("site_name") ?></a></strong> &bull; All Rights Reserved</div>
+        <div>By: <strong><?= config_item("developer") ?></strong></div>
+    </div>
   </div>
   <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
   <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>

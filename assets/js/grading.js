@@ -171,19 +171,16 @@ var save_terminal_report = () => {
                 student_scores
             };
             $.post(`${baseUrl}api/terminal_reports/save_report`, { report_sheet }).then((response) => {
+                let s_code = "error";
                 if (response.code === 200) {
-                    swal({
-                        text: response.data.result,
-                        icon: "success",
-                    });
+                    s_code = "success";
                     $(`div[id='summary_report_sheet_content']`).html(``);
                     loadPage(`${baseUrl}terminal_reports?pg=uploads`);
-                } else {
-                    swal({
-                        text: response.data.result,
-                        icon: "error",
-                    });
                 }
+                swal({
+                    text: response.data.result,
+                    icon: s_code,
+                });
             });
         }
     });
@@ -233,16 +230,37 @@ var load_report_csv_file_data = (formdata) => {
     });
 }
 
-var submit_terminal_report = (report_id) => {
+var modify_terminal_report = (action, report_id) => {
+
+    let s_title = (action == "submit") ? "Submit Terminal Report" : (action == "cancel" ? "Cancel Report" : "Approve Report");
     swal({
-        title: "Submit Terminal Report",
-        text: "You have opted to submit this Terminal Report. Please note that you will not be able to update the record once it has been submitted. Do you want to proceed?",
+        title: s_title,
+        text: `You have opted to ${action} this Terminal Report. Please note that you will not be able to update the record once it has been submitted. Do you want to proceed?`,
         icon: 'warning',
         buttons: true,
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            let label = {
+                "action": action,
+                "report_id": report_id
+            };
+            $.post(`${baseUrl}api/terminal_reports/modify`, { label }).then((response) => {
+                let s_code = "error";
+                if (response.code == 200) {
+                    s_code = "success";
+                }
+                swal({
+                    text: response.data.result,
+                    icon: s_code,
+                });
 
+                if (response.data.additional.href !== undefined) {
+                    setTimeout(() => {
+                        loadPage(response.data.additional.href);
+                    }, 2000);
+                }
+            });
         }
     });
 }

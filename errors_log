@@ -1,0 +1,7 @@
+[18-Mar-2021 10:32:32 Africa/Accra] PHP Notice:  Undefined variable: current_url in C:\xampp\htdocs\myschool_gh\system\helpers\url_helper.php on line 467
+[18-Mar-2021 10:32:41 Africa/Accra] PHP Notice:  Undefined variable: current_url in C:\xampp\htdocs\myschool_gh\system\helpers\url_helper.php on line 467
+[18-Mar-2021 10:32:42 Africa/Accra] PHP Notice:  Undefined variable: current_url in C:\xampp\htdocs\myschool_gh\system\helpers\url_helper.php on line 467
+[18-Mar-2021 10:34:06 Africa/Accra] PHP Notice:  Undefined variable: report in C:\xampp\htdocs\myschool_gh\application\views\default\results-review.php on line 51
+[18-Mar-2021 10:34:06 Africa/Accra] PHP Notice:  Undefined property: stdClass::$enrollment_date in C:\xampp\htdocs\myschool_gh\application\views\default\results-review.php on line 75
+[18-Mar-2021 10:34:15 Africa/Accra] PHP Notice:  Undefined property: stdClass::$enrollment_date in C:\xampp\htdocs\myschool_gh\application\views\default\results-review.php on line 75
+[18-Mar-2021 10:34:28 Africa/Accra] PHP Notice:  Undefined property: stdClass::$enrollment_date in C:\xampp\htdocs\myschool_gh\application\views\default\results-review.php on line 75

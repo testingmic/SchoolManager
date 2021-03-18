@@ -1,5 +1,5 @@
-Student Name,Student ID,Subject Name,Subject Code,Class Score,Exams Score,Total Score,Class Teacher ID,Class Teacher Remarks
-Ebenezer Franklin Hyde,LJKDFLAA3,Introduction To Jquery,C001
-julian asamoah dadzie,IURIEKJFD,Introduction To Jquery,C001
-George Anderson Hyde,ALJKDFLAA3,Introduction To Jquery,C001
-Philip Anthony dadzie,AIURIEKJFD,Introduction To Jquery,C001
+Student Name,Student ID,Subject Name,Subject Code,Class Score,Exams Score,Total Score,Teacher ID,Teacher Remarks
+Ebenezer Franklin Hyde,LJKDFLAA3,Basics Of Programming,C002
+julian asamoah dadzie,IURIEKJFD,Basics Of Programming,C002
+George Anderson Hyde,ALJKDFLAA3,Basics Of Programming,C002
+Philip Anthony dadzie,AIURIEKJFD,Basics Of Programming,C002

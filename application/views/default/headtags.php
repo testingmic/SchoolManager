@@ -109,6 +109,7 @@ load_helpers(['menu_helper']);
 </head>
 <body class="<?= $sidebar_pref ?> <?=  $theme_color ?> bg">
 	<div class="loader"></div>
+    <div class="last_visited_page" value="<?= $userData->last_visited_page ?>"></div>
     <?php if($isAdminAccountant) { ?>
     <section class="container-parent">
         <div class="container__child">

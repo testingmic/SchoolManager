@@ -440,3 +440,11 @@ textarea.form-control {
         right: -289px;
     }
 }
+
+.app-foottag {
+    position: fixed;
+    bottom: 0px;
+    padding: 10px;
+    background-color: #fff;
+    width: 100%;
+}

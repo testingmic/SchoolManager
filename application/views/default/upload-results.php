@@ -16,7 +16,7 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Generate Terminal Reports";
+$pageTitle = "Upload Results";
 $response->title = "{$pageTitle} : {$appName}";
 
 // specify some variables
@@ -27,6 +27,7 @@ $accessObject->userPermits = $defaultUser->user_permissions;
 // confirm that the user has the required permissions
 $the_form = load_class("forms", "controllers")->terminal_reports($clientId);
 
+// add the scripts to load
 $response->scripts = ["assets/js/grading.js"];
 
 // get the list of all classes
@@ -34,14 +35,14 @@ $report_param = (object) [
     "userData" => $defaultUser,
     "clientId" => $clientId,
 ];
-$reports_list = load_class("terminal_reports", "controllers")->uploads_list($report_param);
+$reports_list = load_class("terminal_reports", "controllers")->reports_list($report_param)["data"];
 
 $terminal_reports_list = "";
 foreach($reports_list as $key => $report) {
 
-    $action = "<a href='#' title='Click to update the content of the report' class='btn mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a href='{$baseUrl}results-review/{$report->report_id}' title='Click to view the details of this report' class='btn mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
     if(($report->created_by == $defaultUser->user_id) && ($report->status == "Pending")) {
-        $action .= " <a onclick='return submit_terminal_report(\"{$report->upload_id}\")' href='#' title='Submit this terminal report to Admin for Review and Approval' class='btn mb-1 btn-outline-success'><i class='fa fa-check'></i></a>";
+        $action .= " <a onclick='return modify_terminal_report(\"submit\",\"{$report->report_id}\")' href='#' title='Submit this terminal report to Admin for Review and Approval' class='btn mb-1 btn-outline-success'><i class='fa fa-check'></i></a>";
     }
     $terminal_reports_list .= "
     <tr>
@@ -88,7 +89,7 @@ $response->html = '
                                 </div>
                                 <div class="tab-pane fade" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
                                     <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered">
+                                        <table class="table table-bordered datatable">
                                             <thead>
                                                 <th></th>
                                                 <th>Class Name</th>

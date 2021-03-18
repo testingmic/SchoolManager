@@ -47,11 +47,12 @@ class Auth extends Myschoolgh {
                     u.id, u.password, u.item_id AS user_id, 
                     u.access_level, u.username, u.client_id, 
                     u.status AS activated, u.email, u.user_type,
-                    u.last_timetable_id
+                    u.last_timetable_id, c.client_state
                 FROM users u
-                WHERE u.username = ? AND u.deleted =  ? LIMIT 1
+                LEFT JOIN clients_accounts c ON c.client_id = u.client_id
+                WHERE (u.username = ? OR u.email = ?) AND u.deleted =  ? LIMIT 1
             ");
-            $stmt->execute([$params->username, 0]);
+            $stmt->execute([$params->username, $params->username, 0]);
 
             // count the number of rows found
             if($stmt->rowCount() == 1) {
@@ -64,6 +65,11 @@ class Auth extends Myschoolgh {
 
                     // using the foreach to fetch the information
                     while($results = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                        // check the client state
+                        if($results->client_state === "Pending") {
+                            return ["code" => 201, "data" => "Sorry! You must first activate your account to continue."];
+                        }
 
                         // verify the password
                         if(password_verify($params->password, $results->password)) {
@@ -168,7 +174,12 @@ class Auth extends Myschoolgh {
                             $this->db->commit();
 
                             // response to return
-                            return ["code" => 200, "data" => "Login successful. Redirecting", "refresh" => 1000];
+                            return [
+                                "code" => 200,
+                                "clear" => true,
+                                "data" => "Login successful. Redirecting", 
+                                "refresh" => 1000
+                            ];
 
                         } else {
 
@@ -186,7 +197,7 @@ class Auth extends Myschoolgh {
                 }
             } else {
                 // add user attempt
-                $this->addAttempt($params->username);
+                //$this->addAttempt($params->username);
                 $this->db->commit();
                 return ["code" => 201, "data" => "Sorry! Invalid Username/Password."];
             }
@@ -203,7 +214,7 @@ class Auth extends Myschoolgh {
 
         } catch(PDOException $e) {
             $this->db->rollBack();
-            return false;
+            return "Sorry! The Username/Password could not be validated";
         }
     }
 
@@ -761,7 +772,7 @@ class Auth extends Myschoolgh {
         global $accessObject;
 
         // check if the user has registered an account with the past 5 minutes
-        if(!$this->check_time("clients_accounts", 0.05)) {
+        if(!$this->check_time("clients_accounts", 0.1)) {
             return ["code" => 201, "data" => "Sorry! You are prohibited from registering multiple accounts within a short space of time."];
         }
 
@@ -775,6 +786,10 @@ class Auth extends Myschoolgh {
 
         if(empty($contact)) {
             return ["code" => 201, "data" => "Sorry! The contact number is required."];
+        }
+
+        if($contact === $contact_2) {
+            return ["code" => 201, "data" => "Sorry! The contact numbers cannot be the same."];
         }
         
         try {
@@ -797,7 +812,7 @@ class Auth extends Myschoolgh {
             $prefix = "";
 
             foreach($name as $word) {
-                $prefix .= $word[0];
+                $prefix .= ucwords($word[0]);
             }
 
             // create a token
@@ -835,16 +850,16 @@ class Auth extends Myschoolgh {
             $last_id = $this->lastRowId("clients_accounts") + 1;
             
             // create a client id
-            $client_id = "{$prefix}".$this->append_zeros($last_id, 7);
+            $client_id = "MSGH".$this->append_zeros($last_id, 6);
             
             // insert the client details
             $stmt = $this->db->prepare("
                 INSERT INTO clients_accounts SET 
                     client_id = ?, client_name = ?, client_contact = ?, client_email = ?, client_preferences = ?, ip_address = ?
                     ".(isset($params->school_address) ? ",client_address='{$params->school_address}'" : null)."
-                    ".(isset($params->school_contact_2) ? ",client_secondary_contact='{$params->school_contact_2}'" : null)."
+                    ".(isset($contact_2) ? ",client_secondary_contact='{$contact_2}'" : null)."
             ");
-            $stmt->execute([$client_id, $params->school_name, $params->school_contact, $params->email, json_encode($preference), ip_address()]);
+            $stmt->execute([$client_id, $params->school_name, $contact, $params->email, json_encode($preference), ip_address()]);
 
             // get the user permissions
 		    $accessPermissions = $accessObject->getPermissions("admin");
@@ -856,11 +871,11 @@ class Auth extends Myschoolgh {
             // insert the user account details
             $ac_stmt = $this->db->prepare("
                 INSERT INTO users SET item_id = ?, unique_id = ?, client_id = ?, access_level = ?, password = ?,
-                user_type = ?, address = ?, username = ?, verify_token = ?, status = ?, email = ?
+                user_type = ?, address = ?, username = ?, verify_token = ?, status = ?, email = ?, phone_number = ?
             ");
             $ac_stmt->execute([
                 $item_id, $user_id, $client_id, $access_level, $password, "admin", 
-                $params->school_address, $username, $token, "Pending", $params->email
+                $params->school_address, $username, $token, "Pending", $params->email, $contact
             ]);
 
             // log the user access level
@@ -894,9 +909,10 @@ class Auth extends Myschoolgh {
             // create the account
             return [
                 "code" => 200,
-                "data" => "Your account has successfully been created. Please check your email a verification link.",
-                "refresh" => 5000
+                "data" => "Your account has successfully been created. Please check your email for the Verification Link.",
+                "clear" => true
             ];
+
         } catch(PDOException $e) {
             return ["code" => 201, "data" => "Sorry! An error occured while processing the request."];
         }

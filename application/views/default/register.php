@@ -23,7 +23,6 @@ if($usersClass->loggedIn()) {
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/components.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
   <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
-  <link id="current_url" name="current_url" value="<?= $user_current_url ?>">
   <style>
   .bg {
     background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');
@@ -41,7 +40,7 @@ if($usersClass->loggedIn()) {
         <div class="row">
           <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-8 offset-xl-2">
             <div class="text-left border-radius pb-4 mb-2 p-2 bg-white">
-                <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="80px" /></div>
+                <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="70px" /></div>
                 <div>
                     <div class="font-25px text-center font-weight-bold text-dark"><?= config_item('site_name') ?></div> 
                     <div class="text-dark text-center">Your advanced school management system.</div>

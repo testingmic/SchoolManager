@@ -48,7 +48,7 @@ $params = $apisObject->paramFormat($method, $incomingData, $_POST, $_GET, $_FILE
 // control
 if((($inner_url == "devlog") && ($outer_url == "auth")) || ($inner_url == "auth" && !$outer_url) || ($inner_url == "auth" && $outer_url == "logout")) {
     // get the list access token
-    $response = (object) ["result" => "Sorry! User credentials could not be authenticated"];
+    $response = (object) ["result" => "Sorry! Please ensure that all the required variables are not empty."];
 
     // Auth object
     $logObj = load_class("auth", "controllers");
@@ -195,6 +195,12 @@ if( $paramChecker['code'] !== 100) {
     if($remote) {
         http_response_code($ApiRequest["code"]);
     }
+    
+    // remove access token if in
+    if(isset($params["access_token"])) {
+        unset($params["access_token"]);
+    }
+
     // set the request payload parsed
     $ApiRequest["data"]["remote_request"]["payload"] = $params;
 

@@ -13,17 +13,25 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
                 $(`input[name="email"]`).val("");
                 $(`form[id="auth-form"] *`).prop("disabled", false);
             } else {
-                setTimeout(() => {
-                    if ($(`link[name="current_url"]`).length) {
+                if ($(`link[name="current_url"]`).length) {
+                    setTimeout(() => {
                         window.location.href = $(`link[name="current_url"]`).attr("value");
-                    } else {
-                        window.location.href = $(`link[name="current_url"]`).attr("value");
-                    }
-                }, data.result.refresh);
+                    }, data.result.refresh);
+                }
+                if (data.result.clear !== undefined) {
+                    $(`form[id="auth-form"] *`).val("");
+                    $(`form[id="auth-form"] *`).prop("disabled", false);
+                    $(`form[id="auth-form"] input[name="plan"]`).val("basic");
+                    $(`form[id="auth-form"] input[name="portal_registration"]`).val("true");
+                }
             }
         } else {
             $(`form[id="auth-form"] *`).prop("disabled", false);
-            $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-danger">${data.result.data}</div>`);
+            if (data.result.data !== undefined) {
+                $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-danger">${data.result.data}</div>`);
+            } else {
+                $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-danger">${data.result}</div>`);
+            }
         }
         $(`div[class="form-content-loader"]`).css("display", "none");
     }, "json").catch(() => {

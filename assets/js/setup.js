@@ -127,7 +127,9 @@ var trigger_form_submit = () => {
                             }
                         }
                     },
-                    complete: function() {},
+                    complete: function() {
+                        formButton.prop("disabled", false);
+                    },
                     error: function() {
                         swal({
                             position: 'top',
@@ -136,6 +138,8 @@ var trigger_form_submit = () => {
                         });
                     }
                 });
+            } else {
+                formButton.prop("disabled", false);
             }
         });
 
