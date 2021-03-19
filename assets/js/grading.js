@@ -149,6 +149,7 @@ var save_terminal_report = () => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            $.pageoverlay.show();
             let student_scores = {},
                 class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
                 course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
@@ -175,12 +176,15 @@ var save_terminal_report = () => {
                 if (response.code === 200) {
                     s_code = "success";
                     $(`div[id='summary_report_sheet_content']`).html(``);
-                    loadPage(`${baseUrl}terminal_reports?pg=uploads`);
+                    loadPage(`${baseUrl}results-upload/list`);
                 }
                 swal({
                     text: response.data.result,
                     icon: s_code,
                 });
+                $.pageoverlay.hide();
+            }).catch(() => {
+                $.pageoverlay.hide();
             });
         }
     });
@@ -206,6 +210,7 @@ var total_score_checker = () => {
 
 var load_report_csv_file_data = (formdata) => {
     $(`div[id='summary_report_sheet_content']`).html(``);
+    $.pageoverlay.show();
     $.ajax({
         type: 'POST',
         url: `${baseUrl}api/terminal_reports/upload_csv`,
@@ -221,26 +226,31 @@ var load_report_csv_file_data = (formdata) => {
                 total_score_checker();
             }
         },
+        complete: function() {
+            $.pageoverlay.hide();
+        },
         error: function(err) {
             swal({
                 text: "Sorry! An unknown file type was uploaded.",
                 icon: "error",
             });
+            $.pageoverlay.hide();
         }
     });
 }
 
-var modify_terminal_report = (action, report_id) => {
+var modify_report_result = (action, report_id) => {
 
-    let s_title = (action == "submit") ? "Submit Terminal Report" : (action == "cancel" ? "Cancel Report" : "Approve Report");
+    let s_title = (action == "submit") ? "Submit Results" : (action == "cancel" ? "Cancel Results" : "Approve Results");
     swal({
         title: s_title,
-        text: `You have opted to ${action} this Terminal Report. Please note that you will not be able to update the record once it has been submitted. Do you want to proceed?`,
+        text: `You have opted to ${action} this Results. Please note that you will not be able to update the record once it has been submitted. Do you want to proceed?`,
         icon: 'warning',
         buttons: true,
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            $.pageoverlay.show();
             let label = {
                 "action": action,
                 "report_id": report_id
@@ -254,12 +264,14 @@ var modify_terminal_report = (action, report_id) => {
                     text: response.data.result,
                     icon: s_code,
                 });
-
                 if (response.data.additional.href !== undefined) {
                     setTimeout(() => {
                         loadPage(response.data.additional.href);
                     }, 2000);
                 }
+                $.pageoverlay.hide();
+            }).catch(() => {
+                $.pageoverlay.hide();
             });
         }
     });

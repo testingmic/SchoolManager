@@ -71,7 +71,19 @@ class Terminal_reports extends Myschoolgh {
             $stmt = $this->db->prepare("SELECT * FROM grading_terminal_scores WHERE report_id = ?");
             $stmt->execute([$report_id]);
 
-            return $stmt->fetchAll(PDO::FETCH_OBJ);
+            $data = [];
+
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                $scores = json_decode($result->scores, true);
+                $scores_array = [];
+                foreach($scores as $key => $score) {
+                    $scores_array[$scores[$key]["item"]] = $scores[$key]["score"];
+                }
+                $result->scores = $scores_array;
+                $data[] = $result;
+            }
+
+            return $data;
 
         } catch(PDOException $e) {}
 
@@ -521,8 +533,16 @@ class Terminal_reports extends Myschoolgh {
                 return ["code" => 203, "data" => "Sorry! An invalid action was requested."];
             }
 
+            // confirm if the report contains the user id as well
+            $split = explode("_", $report_id);
+
+            if(isset($split[1])) {
+                $report_id = xss_clean($split[0]);
+                $student_id = xss_clean($split[1]);
+            }
+
             // get the details of the terminal report
-            $check = $this->pushQuery("a.status, a.course_name, a.class_name, a.course_code,
+            $check = $this->pushQuery("a.status, a.course_name, a.class_name, a.course_code, a.course_id,
                 (SELECT COUNT(*) FROM grading_terminal_scores b WHERE b.report_id = a.report_id) AS students_count", 
                 "grading_terminal_logs a", "a.report_id='{$report_id}' LIMIT 1");
 
@@ -531,29 +551,51 @@ class Terminal_reports extends Myschoolgh {
             }
 
             // set the report
+            $disabled = [];
+            $where_clause = "";
             $report = $check[0];
+            $status = $report->status;
             $students_count = $report->students_count;
 
+            // if the student id was parsed
+            if(isset($student_id)) {
+                // confirm that the student id is valid
+                $student_check = $this->pushQuery("a.status", 
+                    "grading_terminal_scores a", "a.report_id='{$report_id}' AND a.student_unique_id='{$student_id}' LIMIT 1");
+                
+                // if empty then return false
+                if(empty($student_check)) {
+                    return ["code" => 203, "data" => "Sorry! An invalid result id was parsed."];
+                }
+                $student_info = $student_check[0];
+                $status = $student_info->status;
+                $students_count = 1;
+                $where_clause = " AND student_unique_id='{$student_id}'";
+            }
+
             // continue to process the user request
-            if(in_array($report->status, ["Approved", "Cancelled"])) {
-                return ["code" => 203, "data" => "Sorry! The report has been {$report->status} and cannot be modified."];
+            if(in_array($status, ["Approved", "Cancelled"])) {
+                return ["code" => 203, "data" => "Sorry! The result has been {$status} and cannot be modified."];
             }
 
             // run more checks
             if(($action === "Approve")) {
 
                 // confirm that the report has already been submitted
-                if(($report->status !== "Submitted")) {
-                    return ["code" => 203, "data" => "Sorry! The report has not yet been submitted by the Teacher hence cannot be approved."];
+                if(($status !== "Submitted")) {
+                    return ["code" => 203, "data" => "Sorry! The result has not yet been submitted by the Teacher hence cannot be approved."];
                 }
-                
-                // approve the report
-                $stmt = $this->db->prepare("UPDATE grading_terminal_logs SET status = ? WHERE report_id = ? LIMIT 1");
-                $stmt->execute(["Approved", $report_id]);
+
+                // run this section if the student id was not parsed
+                if(!isset($student_id)) {
+                    // approve the report
+                    $stmt = $this->db->prepare("UPDATE grading_terminal_logs SET status = ? WHERE report_id = ? LIMIT 1");
+                    $stmt->execute(["Approved", $report_id]);
+                }
 
                 // update the student marks as well
-                $stmt = $this->db->prepare("UPDATE grading_terminal_scores SET date_approved = now(), status = ? WHERE report_id = ? LIMIT {$students_count}");
-                $stmt->execute(["Approved", $report_id]);
+                $stmt = $this->db->prepare("UPDATE grading_terminal_scores SET date_approved = now(), status = ? WHERE report_id = ? AND status = ? AND course_id = ? {$where_clause} LIMIT {$students_count}");
+                $stmt->execute(["Approved", $report_id, "Submitted", $report->course_id]);
 
                 // log the user activity
                 $this->userLogs("report_result", $report_id, null, "{$params->userData->name} approved the results of <strong>{$report->course_name} ({$report->course_code})</strong> for <strong>{$report->class_name}</strong>", $params->userId);
@@ -563,17 +605,19 @@ class Terminal_reports extends Myschoolgh {
             elseif(($action === "Submit")) {
 
                 // confirm that the report has already been submitted
-                if(($report->status === "Submitted")) {
-                    return ["code" => 203, "data" => "Sorry! The report has already been submitted by the Teacher hence cannot repeat same action."];
+                if(($status === "Submitted")) {
+                    return ["code" => 203, "data" => "Sorry! The result has already been submitted by the Teacher hence cannot repeat same action."];
                 }
                 
-                // approve the report
-                $stmt = $this->db->prepare("UPDATE grading_terminal_logs SET status = ? WHERE report_id = ? LIMIT 1");
-                $stmt->execute(["Submitted", $report_id]);
-
+                // run this section if the student id was not parsed
+                if(!isset($student_id)) {
+                    // approve the report
+                    $stmt = $this->db->prepare("UPDATE grading_terminal_logs SET status = ? WHERE report_id = ? LIMIT 1");
+                    $stmt->execute(["Submitted", $report_id]);
+                }
                 // update the student marks as well
-                $stmt = $this->db->prepare("UPDATE grading_terminal_scores SET date_submitted = now(), status = ? WHERE report_id = ? LIMIT {$students_count}");
-                $stmt->execute(["Submitted", $report_id]);
+                $stmt = $this->db->prepare("UPDATE grading_terminal_scores SET date_submitted = now(), status = ? WHERE report_id = ? AND course_id = ? {$where_clause} LIMIT {$students_count}");
+                $stmt->execute(["Submitted", $report_id, $report->course_id]);
 
                 // log the user activity
                 $this->userLogs("report_result", $report_id, null, "{$params->userData->name} submitted the results of <strong>{$report->course_name} ({$report->course_code})</strong> for <strong>{$report->class_name}</strong>", $params->userId);
@@ -583,17 +627,20 @@ class Terminal_reports extends Myschoolgh {
             elseif(($action === "Cancel")) {
                 
                 // confirm that the report has already been submitted
-                if(($report->status !== "Approved")) {
-                    return ["code" => 203, "data" => "Sorry! The report has not yet been Approved hence action cannot be reversed."];
+                if(($status !== "Approved")) {
+                    return ["code" => 203, "data" => "Sorry! The result has not yet been Approved hence action cannot be reversed."];
                 }
 
-                // approve the report
-                $stmt = $this->db->prepare("UPDATE grading_terminal_logs SET status = ? WHERE report_id = ? LIMIT 1");
-                $stmt->execute(["Cancelled", $report_id]);
+                // run this section if the student id was not parsed
+                if(!isset($student_id)) {
+                    // approve the report
+                    $stmt = $this->db->prepare("UPDATE grading_terminal_logs SET status = ? WHERE report_id = ? LIMIT 1");
+                    $stmt->execute(["Cancelled", $report_id]);
+                }
 
                 // update the student marks as well
-                $stmt = $this->db->prepare("UPDATE grading_terminal_scores SET status = ? WHERE report_id = ? LIMIT {$students_count}");
-                $stmt->execute(["Cancelled", $report_id]);
+                $stmt = $this->db->prepare("UPDATE grading_terminal_scores SET status = ? WHERE report_id = ? AND course_id = ? {$where_clause} LIMIT {$students_count}");
+                $stmt->execute(["Cancelled", $report_id, $report->course_id]);
 
                 // log the user activity
                 $this->userLogs("report_result", $report_id, null, "{$params->userData->name} cancelled the results of <strong>{$report->course_name} ({$report->course_code})</strong> for <strong>{$report->class_name}</strong>", $params->userId);
@@ -604,11 +651,14 @@ class Terminal_reports extends Myschoolgh {
                 "code" => 200,
                 "data" => "Congrats! The request was successfully processed.",
                 "additional" => [
-                    "href" => "{$this->baseUrl}terminal_reports/view"
+                    "disable" => !isset($student_id) ? "record" : "student",
+                    "href" => !isset($student_id) ? "{$this->baseUrl}results->upload/view" : "{$this->baseUrl}results-review/{$report_id}"
                 ]
             ];
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return $e->getMessage();
+        }
 
     }
 

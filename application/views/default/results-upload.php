@@ -28,7 +28,7 @@ $accessObject->userPermits = $defaultUser->user_permissions;
 $the_form = load_class("forms", "controllers")->terminal_reports($clientId);
 
 // add the scripts to load
-$response->scripts = ["assets/js/grading.js"];
+$response->scripts = ["assets/js/grading.js", "assets/js/results.js"];
 
 // get the list of all classes
 $report_param = (object) [
@@ -42,7 +42,7 @@ foreach($reports_list as $key => $report) {
 
     $action = "<a href='{$baseUrl}results-review/{$report->report_id}' title='Click to view the details of this report' class='btn mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
     if(($report->created_by == $defaultUser->user_id) && ($report->status == "Pending")) {
-        $action .= " <a onclick='return modify_terminal_report(\"submit\",\"{$report->report_id}\")' href='#' title='Submit this terminal report to Admin for Review and Approval' class='btn mb-1 btn-outline-success'><i class='fa fa-check'></i></a>";
+        $action .= " <a onclick='return modify_report_result(\"submit\",\"{$report->report_id}\")' href='#' title='Submit this terminal report to Admin for Review and Approval' class='btn mb-1 btn-outline-success'><i class='fa fa-check'></i></a>";
     }
     $terminal_reports_list .= "
     <tr>
@@ -80,7 +80,7 @@ $response->html = '
                                     <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">Upload Report Sheet</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="upload_reports-tab2" data-toggle="tab" href="#upload_reports" role="tab" aria-selected="true">Terminal Reports List</a>
+                                    <a class="nav-link" id="upload_reports-tab2" data-toggle="tab" href="#upload_reports" role="tab" aria-selected="true">Results List</a>
                                 </li>
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">

@@ -424,31 +424,24 @@ if ( ! function_exists('get_config'))
 	 * @param	array
 	 * @return	array
 	 */
-	function &get_config(Array $replace = array())
-	{
+	function &get_config(Array $replace = array()) {
 		static $config;
 
-		if (empty($config))
-		{
+		if (empty($config)) {
 			$file_path = BASEPATH.'config/config.php';
-			$found = FALSE;
-			if (file_exists($file_path))
-			{
-				$found = TRUE;
+			if (file_exists($file_path)) {
 				require($file_path);
 			}
 
 			// Does the $config array exist in the file?
-			if ( ! isset($config) OR ! is_array($config))
-			{
+			if ( ! isset($config) OR ! is_array($config)) {
 				echo 'Your config file does not appear to be formatted correctly.';
-				exit(3); // EXIT_CONFIG
+				exit(3);
 			}
 		}
 
 		// Are any values being dynamically added or replaced?
-		foreach ($replace as $key => $val)
-		{
+		foreach ($replace as $key => $val) {
 			$config[$key] = $val;
 		}
 

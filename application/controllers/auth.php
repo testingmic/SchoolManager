@@ -167,7 +167,7 @@ class Auth extends Myschoolgh {
                             $stmt->execute();
 
                             // update the last login for this user
-                            $stmt = $this->db->prepare("UPDATE users SET last_login=now(), last_seen = now() WHERE item_id=? LIMIT 1");
+                            $stmt = $this->db->prepare("UPDATE users SET last_login=now(), last_visited_page='{{APPURL}}dashboard', last_seen = now() WHERE item_id=? LIMIT 1");
                             $stmt->execute([$results->user_id]);
 
                             // commit all transactions
@@ -176,7 +176,6 @@ class Auth extends Myschoolgh {
                             // response to return
                             return [
                                 "code" => 200,
-                                "clear" => true,
                                 "data" => "Login successful. Redirecting", 
                                 "refresh" => 1000
                             ];

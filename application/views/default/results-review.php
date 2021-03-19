@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $myschoolgh, $defaultUser;
+global $myClass, $myschoolgh, $defaultUser, $accessObject;
 
 // initial variables
 $appName = config_item("site_name");
@@ -19,6 +19,11 @@ $response = (object) [];
 $pageTitle = "Review Result";
 $response->title = "{$pageTitle} : {$appName}";
 
+// the query parameter to load the user information
+$accessObject->userId = $session->userId;
+$accessObject->clientId = $session->clientId;
+$accessObject->userPermits = $defaultUser->user_permissions;
+
 // get the report id
 $report_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
 
@@ -27,11 +32,11 @@ if(empty($report_id)) {
     $response->html = page_not_found();
 } else {
 
+    // scripts to load
+    $response->scripts = ["assets/js/results.js"];
+
     // create new object
     $reportObj = load_class("terminal_reports", "controllers");
-        
-    // add the scripts to load
-    $response->scripts = ["assets/js/grading.js"];
 
     // get the list of all classes
     $report_param = (object) [
@@ -48,7 +53,59 @@ if(empty($report_id)) {
     } else {
         // get the first item
         $data = $reports_list[0];
-        // print_r($data);
+
+        // scores list
+        $scores_list = "";
+        $scores_array = [];
+
+        // check the user permissions
+        $modifyResult = $accessObject->hasAccess("modify", "results");
+        $approveResult = $accessObject->hasAccess("approve", "results");
+
+        // loop through the scores list
+        foreach($data->scores_list as $key => $score) {
+            // set the scores
+            $is_disabled = in_array($score->status, ["Submitted", "Saved"]) && $modifyResult ? null : "disabled='disabled'";
+            
+            // marks list
+            $marks_list = "";
+
+            // loop through the scores list
+            foreach($score->scores as $s_key => $s_value) {
+                $scores_array[] = $s_key;
+                $marks_list .= "
+                <td>
+                    <input ".(!$is_disabled ? "data-input_type_q='marks' data-input_row_id='{$score->student_unique_id}'" : "disabled='disabled'")." type='number' data-input_name='{$s_key}' data-input_type='score' style='width:7rem' value='{$s_value}' class='form-control text-center'>
+                </td>";
+            }
+            // append to the scores
+            $scores_list .= "
+            <tr data-result_row_id='{$score->report_id}_{$score->student_unique_id}'>
+                <td>".($key+1)."</td>
+                <td>
+                    {$score->student_name} <br>
+                    <strong class='text-primary'>{$score->student_unique_id}</strong>
+                </td>
+                ".$marks_list."
+                <td>
+                    <input type='number' style='width:7rem' value='{$score->total_score}' disabled='disabled' data-input_total_id='{$score->student_unique_id}' class='form-control text-center'>
+                </td>
+                <td>
+                    <input {$is_disabled} type='text' data-input_method='remarks' data-input_type='score' style='width:13rem' data-input_row_id='{$score->student_unique_id}' class='form-control' value='{$score->class_teacher_remarks}'>
+                </td>
+                <td>
+                    ".(!$is_disabled && $modifyResult ? "<span data-input_save_button='{$score->student_unique_id}' onclick='return save_result(\"$score->student_unique_id\",\"student\");' title='Save Student Marks' class='btn mb-2 hidden btn-sm btn-outline-success'><i class='fa fa-save'></i></span>" : null)."
+                    ".(!$is_disabled && $approveResult ? "<span data-input_approve_button='{$score->student_unique_id}' onclick='return modify_result(\"approve\",\"{$score->report_id}_{$score->student_unique_id}\");' title='Approve this Mark' class='btn btn-sm btn-outline-primary'><i class='fa fa-check-circle'></i></span>" : null)."
+                </td>
+            </tr>";
+        }
+        $scores_array = array_unique($scores_array);
+        $scores_header = "";
+
+        foreach($scores_array as $header) {
+            $header = ucwords(str_ireplace("_", " ", $header));
+            $scores_header .= "<th>{$header}</th>";
+        }
 
         // set the report information
         $response->html = '
@@ -57,12 +114,12 @@ if(empty($report_id)) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'upload-results/list">Results List</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'results-upload/list">Results List</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>
             <div class="row" id="books_request_details">
-                <div class="col-12 col-md-12 col-lg-4">
+                <div class="col-12 col-md-12 col-lg-3">
                     <div class="card">
                         <div class="card-header">
                             <h4>RESULT INFORMATION</h4>
@@ -123,10 +180,31 @@ if(empty($report_id)) {
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-12 col-lg-8">
+                <div class="col-12 col-md-12 col-lg-9">
                     <div class="card">
                         <div class="card-body">
-                            
+                            <div class="d-flex justify-content-between mb-3">
+                                <div>
+                                    <h5>Student Results List</h5>
+                                </div>
+                                <div>
+                                    '.($modifyResult ? "<span data-input_save_button='{$data->report_id}' onclick='return save_result(\"$data->report_id\",\"results\");' title='Save Student Marks' class='btn btn-outline-success'><i class='fa fa-save'></i> Save</span>" : null).'
+                                    '.($approveResult ? "<span data-input_approve_button='{$data->report_id}' onclick='return modify_result(\"approve\",\"{$data->report_id}\");' title='Approve this Mark' class='btn btn-outline-primary'><i class='fa fa-check-circle'></i> Approve</span>" : null).'
+                                </div>
+                            </div>
+                            <div class="table-responsive trix-slim-scroll">
+                                <table class="table table-bordered datatable">
+                                    <thead>
+                                        <th width="10%"></th>
+                                        <th>Student Name / ID</th>
+                                        '.$scores_header.'
+                                        <th>Total Score</th>
+                                        <th>Remarks</th>
+                                        <th></th>
+                                    </thead>
+                                    <tbody>'.$scores_list.'</tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
