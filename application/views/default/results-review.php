@@ -75,12 +75,12 @@ if(empty($report_id)) {
                 $scores_array[] = $s_key;
                 $marks_list .= "
                 <td>
-                    <input ".(!$is_disabled ? "data-input_type_q='marks' data-input_row_id='{$score->student_unique_id}'" : "disabled='disabled'")." type='number' data-input_name='{$s_key}' data-input_type='score' style='width:7rem' value='{$s_value}' class='form-control text-center'>
+                    <input ".(!$is_disabled ? "data-input_type_q='marks' data-input_row_id='{$score->student_item_id}'" : "disabled='disabled'")." type='number' data-input_name='{$s_key}' data-input_type='score' style='width:7rem' value='{$s_value}' class='form-control text-center'>
                 </td>";
             }
             // append to the scores
             $scores_list .= "
-            <tr data-result_row_id='{$score->report_id}_{$score->student_unique_id}'>
+            <tr data-result_row_id='{$score->report_id}_{$score->student_item_id}'>
                 <td>".($key+1)."</td>
                 <td>
                     {$score->student_name} <br>
@@ -88,14 +88,14 @@ if(empty($report_id)) {
                 </td>
                 ".$marks_list."
                 <td>
-                    <input type='number' style='width:7rem' value='{$score->total_score}' disabled='disabled' data-input_total_id='{$score->student_unique_id}' class='form-control text-center'>
+                    <input type='number' style='width:7rem' value='{$score->total_score}' disabled='disabled' data-input_total_id='{$score->student_item_id}' class='form-control text-center'>
                 </td>
                 <td>
-                    <input {$is_disabled} type='text' data-input_method='remarks' data-input_type='score' style='width:13rem' data-input_row_id='{$score->student_unique_id}' class='form-control' value='{$score->class_teacher_remarks}'>
+                    <input {$is_disabled} type='text' data-input_method='remarks' data-input_type='score' style='width:13rem' data-input_row_id='{$score->student_item_id}' class='form-control' value='{$score->class_teacher_remarks}'>
                 </td>
                 <td>
-                    ".(!$is_disabled && $modifyResult ? "<span data-input_save_button='{$score->student_unique_id}' onclick='return save_result(\"$score->student_unique_id\",\"student\");' title='Save Student Marks' class='btn mb-2 hidden btn-sm btn-outline-success'><i class='fa fa-save'></i></span>" : null)."
-                    ".(!$is_disabled && $approveResult ? "<span data-input_approve_button='{$score->student_unique_id}' onclick='return modify_result(\"approve\",\"{$score->report_id}_{$score->student_unique_id}\");' title='Approve this Mark' class='btn btn-sm btn-outline-primary'><i class='fa fa-check-circle'></i></span>" : null)."
+                    ".(!$is_disabled && $modifyResult ? "<span data-input_save_button='{$score->student_item_id}' onclick='return save_result(\"$score->student_item_id\",\"student\");' title='Save Student Marks' class='btn mb-2 hidden btn-sm btn-outline-success'><i class='fa fa-save'></i></span>" : null)."
+                    ".(!$is_disabled && $approveResult ? "<span data-input_approve_button='{$score->student_item_id}' onclick='return modify_result(\"approve\",\"{$score->report_id}_{$score->student_item_id}\");' title='Approve this Mark' class='btn btn-sm btn-outline-primary'><i class='fa fa-check-circle'></i></span>" : null)."
                 </td>
             </tr>";
         }

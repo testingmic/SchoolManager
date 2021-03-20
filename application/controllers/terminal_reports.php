@@ -4,6 +4,23 @@ class Terminal_reports extends Myschoolgh {
     public function __construct()
     {
         parent::__construct();
+
+        // prepare the statement
+        $this->insert_stmt = $this->db->prepare("INSERT INTO grading_terminal_scores SET 
+            class_id = ?, class_name = ?, date_modified = now(),
+            course_id = ?, course_name = ?, course_code = ?, scores = ?, total_score = ?, 
+            average_score = ?, teacher_ids = ?, class_teacher_remarks = ?, created_by = ?,
+            academic_year = ?, academic_term = ?, student_unique_id = ?, client_id = ?, report_id = ?
+        ");
+
+        // prepare the statement
+        $this->update_stmt = $this->db->prepare("UPDATE grading_terminal_scores SET 
+                class_id = ?, class_name = ?, report_id = ?, course_name = ?, 
+                course_code = ?, scores = ?, total_score = ?, date_modified = now(),
+                average_score = ?, teacher_ids = ?, class_teacher_remarks = ?
+            WHERE academic_year = ? AND academic_term = ? AND student_unique_id = ? AND course_id = ? AND client_id = ?
+        ");
+
     }
 
     /**
@@ -392,22 +409,6 @@ class Terminal_reports extends Myschoolgh {
             $teacher_key = array_search("Teacher ID", $session_array["headers"]);
             $teacher_ids = $session_array["students"][0][$teacher_key];
 
-            // prepare the statement
-            $insert_stmt = $this->db->prepare("INSERT INTO grading_terminal_scores SET 
-                class_id = ?, class_name = ?, date_modified = now(),
-                course_id = ?, course_name = ?, course_code = ?, scores = ?, total_score = ?, 
-                average_score = ?, teacher_ids = ?, class_teacher_remarks = ?, created_by = ?,
-                academic_year = ?, academic_term = ?, student_unique_id = ?, client_id = ?, report_id = ?
-            ");
-
-            // prepare the statement
-            $update_stmt = $this->db->prepare("UPDATE grading_terminal_scores SET 
-                    class_id = ?, class_name = ?, report_id = ?, course_name = ?, 
-                    course_code = ?, scores = ?, total_score = ?, date_modified = now(),
-                    average_score = ?, teacher_ids = ?, class_teacher_remarks = ?
-                WHERE academic_year = ? AND academic_term = ? AND student_unique_id = ? AND course_id = ? AND client_id = ?
-            ");
-
             // set a new log id
             $report_id = strtoupper(random_string("alnum", 16));
             $isFound = false;
@@ -425,7 +426,7 @@ class Terminal_reports extends Myschoolgh {
                 // if there is no existing record
                 if(empty($check)) {
                     // execute the statement
-                    $insert_stmt->execute([
+                    $this->insert_stmt->execute([
                         $report->class_id, $class_item->name,
                         $report->course_id, $course_name, $course_code, json_encode($student["marks"]),
                         $student["total_score"], $average_score, $teacher_ids, $student["remarks"], $params->userId,
@@ -444,7 +445,7 @@ class Terminal_reports extends Myschoolgh {
                     // ensure it hasnt been approved
                     if($check[0]->status === "Saved") {
                         // execute the statement
-                        $update_stmt->execute([
+                        $this->update_stmt->execute([
                             $report->class_id, $class_item->name, $report_id, $course_name, 
                             $course_code, json_encode($student["marks"]),
                             $student["total_score"], $average_score, $teacher_ids, $student["remarks"],
@@ -551,7 +552,6 @@ class Terminal_reports extends Myschoolgh {
             }
 
             // set the report
-            $disabled = [];
             $where_clause = "";
             $report = $check[0];
             $status = $report->status;
@@ -561,7 +561,7 @@ class Terminal_reports extends Myschoolgh {
             if(isset($student_id)) {
                 // confirm that the student id is valid
                 $student_check = $this->pushQuery("a.status", 
-                    "grading_terminal_scores a", "a.report_id='{$report_id}' AND a.student_unique_id='{$student_id}' LIMIT 1");
+                    "grading_terminal_scores a", "a.report_id='{$report_id}' AND a.student_item_id='{$student_id}' LIMIT 1");
                 
                 // if empty then return false
                 if(empty($student_check)) {
@@ -570,7 +570,7 @@ class Terminal_reports extends Myschoolgh {
                 $student_info = $student_check[0];
                 $status = $student_info->status;
                 $students_count = 1;
-                $where_clause = " AND student_unique_id='{$student_id}'";
+                $where_clause = " AND student_item_id='{$student_id}'";
             }
 
             // continue to process the user request
@@ -655,6 +655,124 @@ class Terminal_reports extends Myschoolgh {
                     "href" => !isset($student_id) ? "{$this->baseUrl}results->upload/view" : "{$this->baseUrl}results-review/{$report_id}"
                 ]
             ];
+
+        } catch(PDOException $e) {
+            return $e->getMessage();
+        }
+
+    }
+
+    /**
+     * Save the Class Results Set
+     * 
+     * Populate the Data and Save the new Data
+     * 
+     * @param       $params->label["record_type"]
+     * @param       $params->label["record_id"]
+     * @param       $params->label["results"]
+     * 
+     * @return Array
+     */
+    public function update_report(stdClass $params) {
+
+        // confirm that the label is an array variable
+        if(!is_array($params->label)) {
+            return ["code" => 203, "data" => "Sorry! The label variable must be a valid array."];
+        }
+
+        // confirm that the results and record_id has been parsed
+        if(!isset($params->label["results"], $params->label["record_id"])) {
+            return ["code" => 203, "data" => "Sorry! No result set has been parsed."];
+        }
+
+        try {
+
+            // report id
+            $record_id = $params->label["record_id"];
+            $record_type = $params->label["record_type"];
+
+            // if the type is results
+            if($record_type === "results") {
+                // get the details of the terminal report
+                $check = $this->pushQuery("a.status, a.course_name, a.class_name, a.course_code, a.course_id, a.report_id,
+                    (SELECT COUNT(*) FROM grading_terminal_scores b WHERE b.report_id = a.report_id AND a.status='Submitted') AS students_count", 
+                    "grading_terminal_logs a", "a.report_id='{$record_id}' LIMIT 1");
+            }
+            // if the student is empty
+            elseif($record_type === "student") {
+                // get the details of the terminal report
+                $check = $this->pushQuery("a.status, a.student_name, a.report_id, a.course_name, a.class_name, a.course_code, a.course_id", 
+                    "grading_terminal_scores a", "a.student_item_id='{$record_id}' LIMIT 1");
+            }
+
+            // confirm if the result is not empty
+            if(empty($check)) {
+                return ["code" => 203, "data" => "Sorry! An invalid report/student id was parsed."];
+            }
+
+            // set the report
+            $where_clause = "";
+            $report = $check[0];
+            $status = $report->status;
+            $report_id = $report->report_id;
+            $students_count = $report->students_count ?? 1;
+            $student_name = $report->student_name ?? ("{$report->course_name} {$report->class_name}");
+
+            // initial values
+            $overall_score = 0;
+            $scores_array = [];
+            $students_list = $params->label["results"];
+
+            // group the information in an array
+            foreach($students_list as $stu_id => $score) {
+                if(isset($score["marks"]) && is_array($score["marks"])) {
+                    $count = 0;
+                    foreach($score["marks"] as $item => $mark) {
+                        if(is_numeric($mark)) {
+                            $scores_array[$stu_id]["marks"][$count]["item"] = $item;
+                            $scores_array[$stu_id]["marks"][$count]["score"] = $mark;
+                            $overall_score += $mark;
+                            $count++;
+                        }
+                    }
+                }
+                // // append the teachers remarks to the array
+                $scores_array[$stu_id]["remarks"] = $score["remarks"];
+            }
+
+            // get the sum for all scores
+            foreach($scores_array as $key => $score) {
+                $total = array_column($score["marks"], "score");
+                $total = !empty($total) ? array_sum($total) : 0;
+                $scores_array[$key]["total_score"] = $total;
+            }
+
+            //set more values
+            $average_score = $overall_score / count($scores_array);
+
+            // update query
+            $update_stmt = $this->db->prepare("UPDATE grading_terminal_scores SET 
+                scores = ?, total_score = ?, date_modified = now(), average_score = ?, class_teacher_remarks = ?
+                WHERE academic_year = ? AND academic_term = ? AND student_item_id = ? AND report_id = ? AND client_id = ?
+            ");
+            
+            // loop through the list and insert the record
+            foreach($scores_array as $key => $student) {
+                
+                // execute the statement
+                $update_stmt->execute([
+                    json_encode($student["marks"]), $student["total_score"], $average_score, $student["remarks"],
+                    $params->academic_year, $params->academic_term, $key, $report_id, $params->clientId
+                ]);
+                // log the user activity
+                $this->userLogs("terminal_report", $key, null, "{$params->userData->name} updated the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of <strong>{$student_name}</strong> With ID: {$key}", $params->userId);
+                
+            }
+
+            return [
+                "data" => "The result marks was successfully updated."
+            ];
+
 
         } catch(PDOException $e) {
             return $e->getMessage();

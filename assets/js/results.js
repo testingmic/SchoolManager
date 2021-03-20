@@ -74,13 +74,10 @@ var save_result = (record_id, record_type) => {
                     if (results[record_id] === undefined) {
                         results[record_id] = {
                             ["remarks"]: remarks,
-                            ["scores"]: {}
+                            ["marks"]: {}
                         };
                     }
-                    student_ids.push(record_id);
-                    results[record_id]["scores"][i] = {
-                        [item]: score
-                    }
+                    results[record_id]["marks"][item] = score;
                 });
             } else if (record_type === "results") {
                 $.each($(`input[data-input_type_q="marks"]`), function(i, e) {
@@ -91,23 +88,31 @@ var save_result = (record_id, record_type) => {
                     if (results[item_id] === undefined) {
                         results[item_id] = {
                             ["remarks"]: remarks,
-                            ["scores"]: {}
+                            ["marks"]: {}
                         };
                     }
-                    student_ids.push(record_id);
-                    results[item_id]["scores"][i] = {
-                        [item]: score
-                    }
+                    results[item_id]["marks"][item] = score;
                 });
             }
             let label = {
-                results: results,
-                record: record_type
+                results,
+                record_type,
+                record_id
             };
             $.post(`${baseUrl}api/terminal_reports/update_report`, { label }).then((response) => {
+                let s_code = "error";
                 if (response.code == 200) {
-
+                    s_code = "success";
+                    if (record_type === "student") {
+                        $(`span[data-input_save_button="${record_id}"]`).addClass("hidden");
+                    } else {
+                        $(`span[data-input_save_button]`).addClass("hidden");
+                    }
                 }
+                swal({
+                    text: response.data.result,
+                    icon: s_code,
+                });
                 $.pageoverlay.hide();
             }).catch(() => {
                 $.pageoverlay.hide();
