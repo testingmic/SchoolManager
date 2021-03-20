@@ -55,9 +55,12 @@ var modify_result = (action, report_id) => {
 }
 
 var save_result = (record_id, record_type) => {
+    let s_title = (record_type == "approve_results") ? "Approve Results" : "Save Results",
+        s_message = (record_type == "approve_results") ? `You have opted to Approve this Results. Please note that you will not be able to update the record once it has been submitted. Do you want to proceed?` : "Do you want to save this updaed results?";
+
     swal({
-        title: "Save Results",
-        text: "Do you want to save this as the results?",
+        title: s_title,
+        text: s_message,
         icon: 'warning',
         buttons: true,
         dangerMode: true,
@@ -79,7 +82,7 @@ var save_result = (record_id, record_type) => {
                     }
                     results[record_id]["marks"][item] = score;
                 });
-            } else if (record_type === "results") {
+            } else if (record_type === "results" || record_type === "approve_results") {
                 $.each($(`input[data-input_type_q="marks"]`), function(i, e) {
                     let item_id = $(this).attr(`data-input_row_id`),
                         item = $(this).attr("data-input_name"),
@@ -107,6 +110,11 @@ var save_result = (record_id, record_type) => {
                         $(`span[data-input_save_button="${record_id}"]`).addClass("hidden");
                     } else {
                         $(`span[data-input_save_button]`).addClass("hidden");
+                        if (response.data.additional.href !== undefined) {
+                            setTimeout(() => {
+                                loadPage(response.data.additional.href);
+                            }, 2000);
+                        }
                     }
                 }
                 swal({

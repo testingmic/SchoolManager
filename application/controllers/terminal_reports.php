@@ -692,7 +692,7 @@ class Terminal_reports extends Myschoolgh {
             $record_type = $params->label["record_type"];
 
             // if the type is results
-            if($record_type === "results") {
+            if(in_array($record_type, ["results", "approve_results"])) {
                 // get the details of the terminal report
                 $check = $this->pushQuery("a.status, a.course_name, a.class_name, a.course_code, a.course_id, a.report_id,
                     (SELECT COUNT(*) FROM grading_terminal_scores b WHERE b.report_id = a.report_id AND a.status='Submitted') AS students_count", 
@@ -711,14 +711,13 @@ class Terminal_reports extends Myschoolgh {
             }
 
             // set the report
-            $where_clause = "";
             $report = $check[0];
-            $status = $report->status;
             $report_id = $report->report_id;
             $students_count = $report->students_count ?? 1;
             $student_name = $report->student_name ?? ("{$report->course_name} {$report->class_name}");
 
             // initial values
+            $additional = [];
             $overall_score = 0;
             $scores_array = [];
             $students_list = $params->label["results"];
@@ -769,8 +768,19 @@ class Terminal_reports extends Myschoolgh {
                 
             }
 
+            // approve the results
+            if($record_type === "approve_results") {
+                // update the student marks as well
+                $stmt = $this->db->prepare("UPDATE grading_terminal_scores SET date_approved = now(), status = ? WHERE report_id = ? AND status = ? AND course_id = ? LIMIT {$students_count}");
+                $stmt->execute(["Approved", $report_id, "Submitted", $report->course_id]);
+                
+                // set the redirect url
+                $additional["href"] = "{$this->baseUrl}results-review/{$report_id}";
+            }
+
             return [
-                "data" => "The result marks was successfully updated."
+                "data" => "The result marks was successfully updated.",
+                "additional" => $additional
             ];
 
 

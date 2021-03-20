@@ -62,8 +62,12 @@ if(empty($report_id)) {
         $modifyResult = $accessObject->hasAccess("modify", "results");
         $approveResult = $accessObject->hasAccess("approve", "results");
 
+        // set the scores
+        $isApproved = (bool) in_array($data->status, ["Approved", "Cancelled"]);
+
         // loop through the scores list
         foreach($data->scores_list as $key => $score) {
+
             // set the scores
             $is_disabled = in_array($score->status, ["Submitted", "Saved"]) && $modifyResult ? null : "disabled='disabled'";
             
@@ -92,12 +96,15 @@ if(empty($report_id)) {
                 </td>
                 <td>
                     <input {$is_disabled} type='text' data-input_method='remarks' data-input_type='score' style='width:13rem' data-input_row_id='{$score->student_item_id}' class='form-control' value='{$score->class_teacher_remarks}'>
-                </td>
-                <td>
-                    ".(!$is_disabled && $modifyResult ? "<span data-input_save_button='{$score->student_item_id}' onclick='return save_result(\"$score->student_item_id\",\"student\");' title='Save Student Marks' class='btn mb-2 hidden btn-sm btn-outline-success'><i class='fa fa-save'></i></span>" : null)."
-                    ".(!$is_disabled && $approveResult ? "<span data-input_approve_button='{$score->student_item_id}' onclick='return modify_result(\"approve\",\"{$score->report_id}_{$score->student_item_id}\");' title='Approve this Mark' class='btn btn-sm btn-outline-primary'><i class='fa fa-check-circle'></i></span>" : null)."
-                </td>
-            </tr>";
+                </td>";
+                // if the result has not yet been approved
+                if(!$isApproved) {
+                    $scores_list .= "<td>
+                        ".(!$is_disabled && $modifyResult ? "<span data-input_save_button='{$score->student_item_id}' onclick='return save_result(\"$score->student_item_id\",\"student\");' title='Save Student Marks' class='btn mb-2 hidden btn-sm btn-outline-success'><i class='fa fa-save'></i></span>" : null)."
+                        ".(!$is_disabled && $approveResult ? "<span data-input_approve_button='{$score->student_item_id}' onclick='return modify_result(\"approve\",\"{$score->report_id}_{$score->student_item_id}\");' title='Approve this Mark' class='btn btn-sm btn-outline-primary'><i class='fa fa-check-circle'></i></span>" : null)."
+                    </td>";
+                }
+            $scores_list .= "</tr>";
         }
         $scores_array = array_unique($scores_array);
         $scores_header = "";
@@ -188,8 +195,8 @@ if(empty($report_id)) {
                                     <h5>Student Results List</h5>
                                 </div>
                                 <div>
-                                    '.($modifyResult ? "<span data-input_save_button='{$data->report_id}' onclick='return save_result(\"$data->report_id\",\"results\");' title='Save Student Marks' class='btn btn-outline-success'><i class='fa fa-save'></i> Save</span>" : null).'
-                                    '.($approveResult ? "<span data-input_approve_button='{$data->report_id}' onclick='return modify_result(\"approve\",\"{$data->report_id}\");' title='Approve this Mark' class='btn btn-outline-primary'><i class='fa fa-check-circle'></i> Approve</span>" : null).'
+                                    '.($modifyResult && !$isApproved ? "<span data-input_save_button='{$data->report_id}' onclick='return save_result(\"$data->report_id\",\"results\");' title='Save Student Marks' class='btn btn-outline-success'><i class='fa fa-save'></i> Save</span>" : null).'
+                                    '.($approveResult && !$isApproved ? "<span data-input_approve_button='{$data->report_id}' onclick='return save_result(\"{$data->report_id}\",\"approve_results\");' title='Approve this Mark' class='btn btn-outline-primary'><i class='fa fa-check-circle'></i> Approve</span>" : null).'
                                 </div>
                             </div>
                             <div class="table-responsive trix-slim-scroll">
@@ -200,7 +207,7 @@ if(empty($report_id)) {
                                         '.$scores_header.'
                                         <th>Total Score</th>
                                         <th>Remarks</th>
-                                        <th></th>
+                                        '.(!$isApproved ? "<th></th>" : "").'
                                     </thead>
                                     <tbody>'.$scores_list.'</tbody>
                                 </table>
