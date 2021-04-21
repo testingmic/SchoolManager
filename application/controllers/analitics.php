@@ -71,10 +71,13 @@ class Analitics extends Myschoolgh {
                     ]
                 ]
             ];
-            // $usersClass->preference($user_pref);
-            
+            // $usersClass->preference($user_pref);            
         } else {
-            $the_date = $this->preformat_date($params->period);
+            // bypass the query period
+            $bypass = (bool) in_array("attendance_report", $params->stream);
+
+            // format the date to use
+            $the_date = $this->preformat_date($params->period, $bypass);
         }
 
         /** If invalid date then end the query */
@@ -790,7 +793,7 @@ class Analitics extends Myschoolgh {
      * 
      * @param String $period        This is the date to process
      */
-    public function preformat_date($period) {
+    public function preformat_date($period, $bypass = false) {
 
         /** initial variables */
         $today = date("Y-m-d");
@@ -808,7 +811,7 @@ class Analitics extends Myschoolgh {
         }
 
         /** Confirm that the last date is not more than today */
-        if(isset($explode[1]) && strtotime($explode[1]) > strtotime($today)) {
+        if(isset($explode[1]) && strtotime($explode[1]) > strtotime($today) && !$bypass) {
             return "exceeds-today";
         }
 

@@ -140,7 +140,7 @@ $response->html = '
                                     <th>Amount</th>
                                     <th>Date</th>
                                     <th>Recorded By</th>
-                                    <th align="center"></th>
+                                    <th align="center" width="12%"></th>
                                 </tr>
                             </thead>
                             <tbody>'.$fees_history.'</tbody>

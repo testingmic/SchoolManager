@@ -57,7 +57,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Reports / Promotion</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>results-upload">Upload Results</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>results-upload">Upload / Manage Results</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>student-promotion">Promote Students</a></li>
         </ul>

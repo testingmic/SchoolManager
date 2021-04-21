@@ -95,7 +95,8 @@ $(`select[id="attendance_category"]`).on("change", function() {
     if (value == "null") {
         $(`div[class~="attendance_category_list"], div[class~="refresh_attendance_list"]`).addClass("hidden");
     } else if (value == "student") {
-        $.get(`${baseUrl}api/classes/list?columns=id,item_id,name&filter=teacher`).then((response) => {
+        let category = $(`select[id="attendance_category"]`).val();
+        $.get(`${baseUrl}api/classes/list?columns=id,item_id,name&filter=${category}`).then((response) => {
             if (response.code == 200) {
                 $(`div[class~="attendance_category_list"]`).removeClass("hidden");
                 $(`select[name="attendance_class"]`).find('option').remove().end();

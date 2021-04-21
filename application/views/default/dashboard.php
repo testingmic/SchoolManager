@@ -96,14 +96,13 @@ if(!empty($events_list->birthday_list) && $isAdminAccountant) {
         $upcoming_birthday_list .= "
             <li class='media'>
                 <img title='Click to view student details' class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$event["description"]->image}\">
-                <div class='media-body' style='flex: 2;'>
+                <div class='media-body ml-2' style='flex: 2;'>
                     <div class='media-title'>
                         {$event["description"]->name}<br>
-                    </div>
-                    
+                    </div>                    
                 </div>
                 <div class='media-progressbar'>
-                    <div class='progress-text'>".date("l, jS M Y", strtotime($clean_date))."</div>
+                    <div class='progress-text'>".date("D, jS M Y", strtotime($clean_date))."</div>
                 </div>
             </li>";
     }

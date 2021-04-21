@@ -84,7 +84,7 @@ $response->html = '
                                         <th width="13%">Stock Quantity</th>
                                         <th>Category</th>
                                         <th>ISBN</th>
-                                        <th align="center" width="10%"></th>
+                                        <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$books_list.'</tbody>

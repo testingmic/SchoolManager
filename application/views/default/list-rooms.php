@@ -81,7 +81,7 @@ $response->html = '
                                         <th width="40%">Name</th>
                                         <th>Code</th>
                                         <th width="15%">Capacity</th>
-                                        <th align="center" width="10%"></th>
+                                        <th align="center" width="13%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$rooms_list.'</tbody>

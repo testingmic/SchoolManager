@@ -170,7 +170,7 @@
 }
 
 .select2-container {
-    min-width: 230px;
+    /* min-width: 230px; */
 }
 
 .modal-dialog-right.left .modal-dialog,

@@ -147,8 +147,8 @@ if(!empty($clientId)) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-calendar-check"></i></span>
                                     </div>
-                                    <input type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
-                                    <input type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
+                                    <input value="'.date("Y-m-d", strtotime("first day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
+                                    <input value="'.date("Y-m-d", strtotime("last day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
                                     <div class="input-group-append">
                                         <button style="border-radius:0px" onclick="return filter_UserGroup_Attendance()" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
                                     </div>

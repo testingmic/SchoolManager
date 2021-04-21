@@ -3473,7 +3473,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>";
         } else {
-            $grading = json_decode($client_data->grading_system);
+            $grading = !is_object($client_data->grading_system) ? json_decode($client_data->grading_system) : $client_data->grading_system;
             foreach($grading as $key => $grade) {
                 $grading_list .= "
                     <div class='row mb-2 grade_item' data-grading_id='{$key}'>
@@ -3499,7 +3499,7 @@ class Forms extends Myschoolgh {
 
         $columns_listing = "";
         if(!empty($client_data->grading_structure)) {
-            $columns = json_decode($client_data->grading_structure);
+            $columns = !is_object($client_data->grading_structure) ? json_decode($client_data->grading_structure) : $client_data->grading_structure;
             if(isset($columns->columns)) {
                 $count = 0;
                 foreach($columns->columns as $key => $column) {
@@ -3625,7 +3625,7 @@ class Forms extends Myschoolgh {
             $the_form["general"] = "
                 <div class='row' id='terminal_reports'>
                     <div class='col-lg-3'>
-                        <select class='form-control selectpicker' name='class_id' id='class_id'>
+                        <select data-width='100%' class='form-control selectpicker' name='class_id' id='class_id'>
                             <option value='null'>Select the Class</option>";
                             foreach($classes_list as $class) {
                                 $the_form["general"] .= "<option value='{$class->item_id}'>{$class->name}</option>";
@@ -3633,12 +3633,12 @@ class Forms extends Myschoolgh {
             $the_form["general"] .= "</select>
                     </div>
                     <div class='col-lg-4'>
-                        <select class='form-control selectpicker' name='course_id' id='course_id'>
+                        <select data-width='100%' class='form-control selectpicker' name='course_id' id='course_id'>
                             <option value='null'>Select the Course</option>
                         </select>
                     </div>
                     <div class='col-lg-3'>
-                        <select class='form-control selectpicker' name='upload_type' id='upload_type'>
+                        <select data-width='100%' class='form-control selectpicker' name='upload_type' id='upload_type'>
                             <option value='download'>Download CSV File</option>
                             <!--<option value='online'>Input the Data Online</option>-->
                         </select>
@@ -3661,6 +3661,76 @@ class Forms extends Myschoolgh {
                 </div>";
         }
 
+
+        return $the_form;
+    }
+
+    /**
+     * Terminal Reports Form
+     * 
+     * @param String
+     * 
+     * @return Array
+     */
+    public function generate_terminal_reports($clientId) {
+        $the_form = [];
+
+        // get the client data
+        $client_data = !empty($clientId) ? $this->client_data($clientId) : (object)[];
+
+        // run this query
+        $prefs = !empty($client_data) ? $client_data->client_preferences : (object)[];
+
+        // get the list of all classes
+        $classes_param = (object) [
+            "columns" => "id, item_id, name",
+            "clientId" => $clientId,
+            "limit" => 99999
+        ];
+        $classes_list = load_class("classes", "controllers")->list($classes_param)["data"];
+        
+        // if the submission of report is false
+        $the_form["general"] = "
+            <div class='row' id='terminal_reports'>
+                <div class='col-md-4 mb-2'>
+                    <select data-width='100%' class='form-control selectpicker' name='academic_year' id='academic_year'>
+                        <option value=''>Select Academic Year</option>";
+                            foreach($this->pushQuery("id, year_group", "academic_years", "1") as $each) {
+                                $the_form["general"] .= "<option ".(($client_data && $each->year_group === $prefs->academics->academic_year) ? "selected" : null)." value=\"{$each->year_group}\">{$each->year_group}</option>";                            
+                            }
+                        $the_form["general"] .= "</select>
+                    </select>
+                </div>
+                <div class='col-md-4 mb-2'>
+                    <select data-width='100%' class='form-control selectpicker' name='academic_term' id='academic_term'>
+                        <option value=''>Select Academic Term</option>";
+                            foreach($this->pushQuery("id, name, description", "academic_terms","1") as $each) {
+                                $the_form["general"] .= "<option ".(($client_data && $each->name === $prefs->academics->academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
+                            }
+                        $the_form["general"] .= "</select>
+                    </select>
+                </div>
+                <div class='col-md-4 mb-2'></div>
+                <div class='col-lg-4 col-md-4 mb-2'>
+                    <select data-width='100%' class='form-control selectpicker' name='class_id' id='class_id'>
+                        <option value=''>Select the Class</option>";
+                        foreach($classes_list as $class) {
+                            $the_form["general"] .= "<option value='{$class->item_id}'>{$class->name}</option>";
+                        }
+        $the_form["general"] .= "</select>
+                    </div>
+                    <div class='col-lg-6 col-md-6 mb-2'>
+                        <select data-width='100%' class='form-control selectpicker' name='student_id' id='student_id'>
+                            <option value=''>Select Student</option>
+                        </select>
+                    </div>
+                    <div class='col-md-2' id='generate_report_button'>
+                        <button onclick='return generate_terminal_report()' type='generate_report' class='btn btn-block btn-outline-primary'>Generate</button>
+                    </div>
+                    <div class='col-lg-12 mt-4'></div>
+                    <div class='col-lg-12 mt-1 text-center' id='notification'></div>
+                    <div class='col-lg-12 mt-4' id='summary_report_sheet_content'></div>
+                </div>";
 
         return $the_form;
     }

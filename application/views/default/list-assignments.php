@@ -173,7 +173,7 @@ $response->html = '
                                         ).'
                                         <th>Date Created</th>
                                         <th>Status</th>
-                                        <th align="center"></th>
+                                        <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$assignments.'</tbody>

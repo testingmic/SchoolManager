@@ -64,7 +64,10 @@ class Myschoolgh extends Models {
 			
 			$data = [];
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-				$result->client_preferences = json_decode($result->client_preferences);
+				// loop through the items and convert into an object
+				foreach(["client_preferences", "grading_system", "grading_structure"] as $value) {
+					$result->{$value} = json_decode($result->{$value});
+				}
 				$data[] = $result;
 			}
 			return !(empty($data)) ? $data[0] : (object) [];

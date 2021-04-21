@@ -40,76 +40,88 @@ $permissions = [
 
 // if the client information is not empty
 if(!empty($session->clientId)) {
-    // convert to lowercase
-    $client_id = strtolower($session->clientId);
+
+    // client data
+    $academics = $defaultUser->client->client_preferences->academics;
+
+    // ensure the school is not on vacation
+    if(time() > strtotime($academics->term_ends)) {
+        // found
+        $response->html = page_not_found("not_found", "Sorry! The Current Academic Term Ended on <strong>{$academics->term_ends}</strong>.");
+
+    } else {
+        // convert to lowercase
+        $client_id = strtolower($session->clientId);
     
-    // set the parameters
-    $params = (object) [
-        "baseUrl" => $baseUrl,
-        "clientId" => $clientId,
-        "userId" => $session->userId
-    ];
+        // set the parameters
+        $params = (object) [
+            "baseUrl" => $baseUrl,
+            "clientId" => $clientId,
+            "userId" => $session->userId
+        ];
 
-    // load the scripts
-    $response->scripts = [
-        "assets/js/attendance.js"
-    ];
+        // load the scripts
+        $response->scripts = [
+            "assets/js/attendance.js"
+        ];
 
-    // set the selected date
-    $selected_date = isset($_GET["date"]) && $myClass->validDate($_GET["date"]) ? xss_clean($_GET["date"]) : date("Y-m-d");
+        // set the selected date
+        $selected_date = isset($_GET["date"]) && $myClass->validDate($_GET["date"]) ? xss_clean($_GET["date"]) : date("Y-m-d");
 
-    $response->html = '
-        <section class="section">
-            <div class="section-header">
-                <h1>'.$pageTitle.'</h1>
-                <div class="section-header-breadcrumb">
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'attendance">Attendance</a></div>
-                    <div class="breadcrumb-item">Attendance Log</div>
+        $response->html = '
+            <section class="section">
+                <div class="section-header">
+                    <h1>'.$pageTitle.'</h1>
+                    <div class="section-header-breadcrumb">
+                        <div class="breadcrumb-item active"><a href="'.$baseUrl.'">Dashboard</a></div>
+                        <div class="breadcrumb-item active"><a href="'.$baseUrl.'attendance">Attendance</a></div>
+                        <div class="breadcrumb-item">Attendance Log</div>
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-12 col-sm-12 col-lg-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label>Selected Date</label>
-                                        <input type="text" value="'.$selected_date.'" class="att_datepicker form-control" name="attendance_date" id="attendance_date">
+                <div class="row">
+                    <div class="col-12 col-sm-12 col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Selected Date</label>
+                                            <input type="text" value="'.$selected_date.'" class="att_datepicker form-control" name="attendance_date" id="attendance_date">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Select Category</label>
+                                            <select data-width="100%" class="form-control selectpicker" name="attendance_category" id="attendance_category">
+                                                <option value="null">Please select group</option>';
+                                                foreach($permissions[$defaultUser->user_type] as $key => $value) {
+                                                    $response->html .= "<option value=\"{$key}\">{$value}</option>";
+                                                }
+                                            $response->html .= '</select>
+                                        </div>
+                                        <div class="form-group attendance_category_list hidden">
+                                            <label>Select Class</label>
+                                            <select data-width="100%" class="form-control selectpicker" name="attendance_class" id="attendance_class">
+                                                <option value="">Please select Class</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group refresh_attendance_list text-right hidden">
+                                            <button onclick="return refresh_AttendanceLog()" class="btn refresh btn-sm btn-outline-primary"><i class="fa fa-circle-notch"></i> Refresh</button>
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Select Category</label>
-                                        <select data-width="100%" class="form-control selectpicker" name="attendance_category" id="attendance_category">
-                                            <option value="null">Please select group</option>';
-                                            foreach($permissions[$defaultUser->user_type] as $key => $value) {
-                                                $response->html .= "<option value=\"{$key}\">{$value}</option>";
-                                            }
-                                        $response->html .= '</select>
-                                    </div>
-                                    <div class="form-group attendance_category_list hidden">
-                                        <label>Select Class</label>
-                                        <select data-width="100%" class="form-control selectpicker" name="attendance_class" id="attendance_class">
-                                            <option value="">Please select Class</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group refresh_attendance_list text-right hidden">
-                                        <button onclick="return refresh_AttendanceLog()" class="btn refresh btn-sm btn-outline-primary"><i class="fa fa-circle-notch"></i> Refresh</button>
-                                    </div>
-                                </div>
-                                <div class="col-md-9" id="attendance">
-                                    '.form_loader().'
-                                    <div id="attendance_log_list">
-                                        <div class="text-center font-italic">Users list is displayed here.</div>
+                                    <div class="col-md-9" id="attendance">
+                                        '.form_loader().'
+                                        <div id="attendance_log_list">
+                                            <div class="text-center font-italic">Users list is displayed here.</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>';
-    // print out the response
+            </section>';
+
+    }
+    
 }
 
 echo json_encode($response);

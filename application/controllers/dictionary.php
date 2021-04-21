@@ -26,6 +26,7 @@ class Dictionary extends Myschoolgh {
             $params->term = strtolower($params->term);
             
             $search_query = "";
+            $params->deep_search = true;
             $search_query .= isset($params->deep_search) ? "LIKE '%{$params->term}%'" : "LIKE '{$params->term}'";
 
             $search = $this->db->prepare("SELECT a.*,

@@ -12,16 +12,21 @@
 
 function time_diff($timestamp, $current_time = false) {
 	
-	$strTime = array("sec", "min", "hr", "day", "wk", "mnth", "yr");
-	$length = array("60","60","24","4","30","12","10");
+	$strTime = ["sec", "min", "hr", "day", "wk", "mnth", "yr"];
+	$length = ["60", "60", "24", "4.35", "30", "12", "10"];
 
     $timestamp = !preg_match("/^[0-9]+$/", $timestamp) ? strtotime($timestamp) : $timestamp;
 
-	$currentTime = !empty($current_time) ? $current_time : time();
-	
-    if($currentTime >= $timestamp) {
+	$current_time = !empty($current_time) ? $current_time : time();
 
-        $diff = $currentTime - $timestamp;
+    $the_diff = $current_time-$timestamp;
+    $clean = round($the_diff/(60*60*24*4.35*30*12));
+    // print $clean;
+
+	
+    if($current_time >= $timestamp) {
+
+        $diff = $current_time - $timestamp;
 
 		for($i = 0; $diff >= $length[$i] && $i < count($length)-1; $i++) {
 			$diff = $diff / $length[$i];
@@ -33,7 +38,7 @@ function time_diff($timestamp, $current_time = false) {
 
 	} else {
 		
-		$diff = $timestamp - $currentTime;
+		$diff = $timestamp - $current_time;
 		for($i = 0; $diff >= $length[$i] && $i < count($length)-1; $i++) {
 		$diff = $diff / $length[$i];
 		}
@@ -206,6 +211,22 @@ function convert_to_days($dateToBeginQuery, $dateToEndQuery) {
         $datetime2 = new DateTime($dateToEndQuery);
         $interval = $datetime1->diff($datetime2);
         return $interval->days;
+    } else {
+        return 1;
+    }
+}
+
+function convert_to_years($dateToBeginQuery, $dateToEndQuery) {
+    if(strtotime($dateToEndQuery) > strtotime($dateToBeginQuery)) {
+        $datetime1 = new DateTime($dateToBeginQuery);
+        $datetime2 = new DateTime($dateToEndQuery);
+        $interval = $datetime1->diff($datetime2);
+        $days = $interval->days;
+        $years = round(($days / 365), 1);
+        $expl = explode(".", $years);
+        $diff = $expl[0] . " YR ";
+        $diff .= isset($expl[1]) ? $expl[1]. " MON" : null;
+        return $diff;
     } else {
         return 1;
     }

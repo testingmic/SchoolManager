@@ -166,7 +166,7 @@ class Attendance extends Myschoolgh {
             //log the user activity
             if(isset($classData)) {
                 // if the class data was parsed and set
-                $this->userLogs("attendance_log", $params->finalize, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}. {$info}", $params->userId);
+                $this->userLogs("attendance_log", $params->finalize ?? null, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}. {$info}", $params->userId);
             } else {
                 // update the for user type
                 $this->userLogs("attendance_log", $params->finalize, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$params->user_type}</strong> on {$params->date}. {$info}", $params->userId);
@@ -611,7 +611,7 @@ class Attendance extends Myschoolgh {
     public function range_summary(stdClass $params) {
 
         // get the attendance log for the day
-        $days = $this->listDays($params->start_date, $params->end_date, 'Y-m-d', );
+        $days = $this->listDays($params->start_date, $params->end_date, 'Y-m-d');
 
         // group the user types
         $users = $params->user_types_list;
@@ -633,6 +633,17 @@ class Attendance extends Myschoolgh {
                 // run a query for the information
                 $theQuery = $this->pushQuery("user_type, users_list", "users_attendance_log", "log_date='{$day}' AND user_type IN ('{$user}') AND status='1' AND client_id='{$params->clientId}' {$query}");
 
+                // set a new variable for the day
+                $the_day = date("Y-m-d", strtotime($day));
+
+                // if the current date is greater than the date range
+                // if((strtotime($the_day) > time())){
+                //     break;
+                // }
+
+                // label to use
+                $the_label = ucfirst($user)."s";
+
                 // if the query is not empty
                 if(!empty($theQuery)) {
 
@@ -644,9 +655,6 @@ class Attendance extends Myschoolgh {
                         
                         // convert the users list into an array
                         $present = json_decode($today->users_list, true);
-                        
-                        // set a new variable for the day
-                        $the_day = date("Y-m-d", strtotime($day));
 
                         // if the user is not an admin/accountant then verify if the user was present or absent
                         if($checkPresent) {
@@ -667,9 +675,6 @@ class Attendance extends Myschoolgh {
                                 $users_count["days_list"][$the_day][$n_label] = isset($users_count["days_list"][$the_day][$n_label]) ? ($users_count["days_list"][$the_day][$n_label] + count($present)) : count($present);
                             }
 
-                            // label to use
-                            $the_label = ucfirst($user)."s";
-
                             // append to the summary
                             $users_count["summary"][$the_label] = isset($users_count["summary"][$the_label]) ? ($users_count["summary"][$the_label] + count($present)) : count($present);
                             $users_count["days_list"][$the_day][$the_label] = isset($users_count["days_list"][$the_day][$the_label]) ? ($users_count["days_list"][$the_day][$the_label] + count($present)) : count($present);
@@ -677,6 +682,14 @@ class Attendance extends Myschoolgh {
 
                     }
                     
+                } elseif(strtotime($the_day) < time()) {
+                    // if the is_present_check is empty
+                    if(empty($params->is_present_check)) {
+                        // append the absent log to it.
+                        // $users_count["days_list"][$the_day][$the_label] = 0;
+                    } else {
+                        $users_count["days_list"][$the_day] = "absent";
+                    }
                 }
 
             }

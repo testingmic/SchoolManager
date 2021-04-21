@@ -60,7 +60,15 @@ class Users extends Myschoolgh {
 
 		// boolean value
         $params->remote = (bool) (isset($params->remote) && $params->remote);
-		
+
+		// get the id equivalent of the class id
+		if(isset($params->class_id) && !preg_match("/^[0-9]+$/", $params->class_id)) {
+			$params->minified = "simplified";
+			$params->no_academic_year = true;
+			$params->class_id = $this->pushQuery("id", "classes", "item_id='{$params->class_id}' LIMIT 1")[0]->id ?? null;
+		}
+
+		// set more parameters
 		$params->query .= (isset($params->user_id) && !empty($params->user_id)) ? " AND a.item_id IN {$this->inList($params->user_id)}" : "";
 		$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
 		$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
@@ -130,7 +138,7 @@ class Users extends Myschoolgh {
 				";
 
 				// exempt current user
-				if(($params->minified == "chat_list_users")) {
+				if(($params->minified === "chat_list_users")) {
 					// set the order
 					$order_by = "ORDER BY a.name ASC";
 					
@@ -144,7 +152,7 @@ class Users extends Myschoolgh {
 					$params->query .= " AND a.item_id != '{$params->userId}' ";
 				}
 
-				if($params->minified == "simplied_load_withclass") {
+				if($params->minified === "simplied_load_withclass") {
 
 					// if the user type was parsed and the type is guardian
 					if($params->user_type == "guardian") {

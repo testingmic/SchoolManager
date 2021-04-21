@@ -145,7 +145,7 @@ $response->html = '
                                         <th>Credit Hours</th>
                                         <th width="15%">Classes</th>
                                         <th>Course Tutor</th>
-                                        <th align="center" width="10%"></th>
+                                        <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$courses.'</tbody>

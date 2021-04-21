@@ -105,7 +105,7 @@ $response->html = '
                                         <th>Email</th>
                                         <th>Contact</th>
                                         <th width="25%">Wards</th>
-                                        <th  align="center" width="10%"></th>
+                                        <th  align="center" width="13%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$guardians.'</tbody>

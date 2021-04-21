@@ -5,63 +5,6 @@ if(confirm_url_id(1)) {
     return;
 }
 
-function show_content($title = null, $file_name, $content, $orientation = "L") {
-
-    // base url
-    $appName = config_item("site_name");
-
-    // create a new object
-    require "./system/libraries/pdf/tcpdf_include.php";
-
-    // create new PDF document
-    $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-    //print $report_data;
-	// set document information
-	$pdf->SetCreator(PDF_CREATOR);
-	$pdf->SetAuthor($appName);
-	$pdf->SetTitle($appName.$title);
-	$pdf->SetSubject('Calendar');
-	$pdf->SetKeywords('score, ucc, nursing, attendance, timetable, manager');
-
-	$pdf->SetHeaderData(NULL);
-	// set header and footer fonts
-	$pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
-	$pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
-
-	// set default monospaced font
-	$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
-
-	// set margins
-	$pdf->SetMargins(3, 3, 3);
-	$pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
-	$pdf->SetFooterMargin(4);
-
-	// set auto page breaks
-	$pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
-
-	// set image scale factor
-	$pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
-
-	// set some language-dependent strings (optional)
-	if (@file_exists(dirname(__FILE__).'/lang/eng.php')) {
-		require_once(dirname(__FILE__).'/lang/eng.php');
-		$pdf->setLanguageArray($l);
-	}
-
-	// set font
-	$pdf->SetFont('dejavusans', '', 10);
-
-	// add a page
-	$pdf->AddPage($orientation, 'A4');
-
-	// output the HTML content
-    if(isset($_GET["dw"])) {
-        $pdf->writeHTML($content, false, false, true, false, '');
-	    $pdf->Output($file_name, 'I');
-    }
-}
-
 // check if the file to download has been parsed
 if((isset($_GET["file"]) && !empty($_GET["file"])) || (isset($_GET["file_id"], $_GET["file_uid"]))) {
     

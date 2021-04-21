@@ -1,10 +1,26 @@
 <?php 
 class Terminal_reports extends Myschoolgh {
 
-    public function __construct()
-    {
-        parent::__construct();
+    private $iclient;
 
+    public function __construct(stdClass $params = null) {
+        
+        // call the parent function
+		parent::__construct();
+
+        // get the client data
+        $client_data = $this->client_data($params->clientId ?? null);
+        
+        // end the query if no information was found
+        if(empty($client_data->client_preferences)) {
+            return;
+        }
+
+        // run this query
+        $this->iclient = $client_data;
+        $this->academic_term = $client_data->client_preferences->academics->academic_term;
+        $this->academic_year = $client_data->client_preferences->academics->academic_year;
+        
         // prepare the statement
         $this->insert_stmt = $this->db->prepare("INSERT INTO grading_terminal_scores SET 
             class_id = ?, class_name = ?, date_modified = now(),
@@ -44,8 +60,8 @@ class Terminal_reports extends Myschoolgh {
         $params->query .= isset($params->report_id) && !empty($params->report_id) ? " AND a.report_id='{$params->report_id}'" : null;
 
         // query the academic year and term
-        $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
-        $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
+        $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : " AND a.academic_year='{$this->academic_year}'";
+        $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : " AND a.academic_term='{$this->academic_term}'";
 
         try {
 
@@ -81,12 +97,28 @@ class Terminal_reports extends Myschoolgh {
      * 
      * @return Array
      */
-    public function result_score_list($report_id) {
+    public function result_score_list($report_id = null, $where = null) {
 
         try {
             
-            $stmt = $this->db->prepare("SELECT * FROM grading_terminal_scores WHERE report_id = ?");
-            $stmt->execute([$report_id]);
+            $groupStudent = false;
+            $where_clause = !empty($report_id) ? "a.report_id = '{$report_id}'" : $where;
+
+            if(!empty($where) && is_object($where)) {
+                $where_clause = "1";
+                $groupStudent = $where->group_by_student;
+                foreach($where as $key => $value) {
+                    $where_clause .= !empty($value) && $key !== "group_by_student" ? " AND a.{$key}='{$value}'" : null;
+                }
+            }
+
+            $stmt = $this->db->prepare("SELECT 
+                a.*, u.date_of_birth, u.unique_id
+                FROM grading_terminal_scores a
+                LEFT JOIN users u ON u.item_id = a.student_item_id
+                WHERE {$where_clause} LIMIT 150
+            ");
+            $stmt->execute();
 
             $data = [];
 
@@ -97,7 +129,27 @@ class Terminal_reports extends Myschoolgh {
                     $scores_array[$scores[$key]["item"]] = $scores[$key]["score"];
                 }
                 $result->scores = $scores_array;
-                $data[] = $result;
+
+                // if the request is to group by each student
+                if($groupStudent) {
+                    // if the student array has not been set already
+                    if(!isset($data[$result->student_item_id]["data"])) {
+                        // set the data
+                        $data[$result->student_item_id]["data"] = [
+                            "student_name" => $result->student_name,
+                            "unique_id" => $result->unique_id,
+                            "average_score" => $result->average_score,
+                            "class_name" => $result->class_name,
+                            "date_of_birth" => $result->date_of_birth,
+                            "student_age" => convert_to_years($result->date_of_birth, date("Y-m-d")),
+                            "academic_year" => $result->academic_year,
+                            "academic_term" => $result->academic_term,
+                        ];
+                    }
+                    $data[$result->student_item_id]["sheet"][] = $result;
+                } else {
+                    $data[] = $result;
+                }
             }
 
             return $data;
@@ -329,6 +381,10 @@ class Terminal_reports extends Myschoolgh {
         // set the report
         $report = (object) $params->report_sheet;
         $report->clientId = $params->clientId;
+
+        // set the academic year and term
+        $report->academic_year = $params->academic_year;
+        $report->academic_term = $params->academic_term;
 
         // check if a file has been uploaded
         if(empty($this->session->get("terminal_report_{$report->class_id}_{$report->course_id}"))) {
@@ -652,7 +708,7 @@ class Terminal_reports extends Myschoolgh {
                 "data" => "Congrats! The request was successfully processed.",
                 "additional" => [
                     "disable" => !isset($student_id) ? "record" : "student",
-                    "href" => !isset($student_id) ? "{$this->baseUrl}results->upload/view" : "{$this->baseUrl}results-review/{$report_id}"
+                    "href" => !isset($student_id) ? "{$this->baseUrl}results-upload/view" : "{$this->baseUrl}results-review/{$report_id}"
                 ]
             ];
 
@@ -773,7 +829,11 @@ class Terminal_reports extends Myschoolgh {
                 // update the student marks as well
                 $stmt = $this->db->prepare("UPDATE grading_terminal_scores SET date_approved = now(), status = ? WHERE report_id = ? AND status = ? AND course_id = ? LIMIT {$students_count}");
                 $stmt->execute(["Approved", $report_id, "Submitted", $report->course_id]);
-                
+
+                // update the student marks as well
+                $stmt = $this->db->prepare("UPDATE grading_terminal_logs SET status = ? WHERE report_id = ? AND status = ? AND course_id = ? LIMIT {$students_count}");
+                $stmt->execute(["Approved", $report_id, "Submitted", $report->course_id]);
+
                 // set the redirect url
                 $additional["href"] = "{$this->baseUrl}results-review/{$report_id}";
             }
@@ -790,4 +850,153 @@ class Terminal_reports extends Myschoolgh {
 
     }
 
+    /**
+     * Generate Report
+     * 
+     * @param       $params->academic_term
+     * @param       $params->academic_year
+     * @param       $params->class_id
+     * @param       $params->student_id
+     * 
+     * @return Array
+     */
+    public function generate(stdClass $params) {
+
+        try {
+
+            // if the class id was not found
+            if(empty($params->class_id) || empty($this->iclient->client_preferences)) {
+                return [
+                    "data" => [
+                        "sheets" => [
+                            $this->permission_denied
+                        ]
+                    ]
+                ];
+            }
+
+            $param = (object) [      
+                "group_by_student" => true,
+                "class_id" => $params->class_id,
+                "academic_year" => $params->academic_year ?? $this->academic_year,
+                "academic_term" => $params->academic_term ?? $this->academic_term,
+                "student_item_id" => isset($params->student_id) && ($params->student_id !== "null") ? $params->student_id : null,
+            ];
+            $report_data = $this->result_score_list(null, $param);
+
+            // init loop
+            $students = [];
+            $bg_color = "#777882";
+            $academics = $this->iclient->client_preferences->academics;
+            $grading = $this->iclient->grading_structure->columns;
+            $interpretation = $this->iclient->grading_system;
+
+            // set the grading column
+            $grading_column = "";
+
+            // loop through the grading columns
+            foreach($grading as $key => $value) {
+                $grading_column .= "<td align=\"center\" width=\"11%\">".strtoupper($key)."</td>";
+            }
+
+            // loop through the report set
+            foreach($report_data as $key => $student) {
+                // set the information
+                $table = "<table width=\"100%\" cellspacing=\"5px\" cellpadding=\"5px\" style=\"background-color:{$bg_color}; color:#fff\">";
+                // get the student information
+                $table .= "<tr>";
+                $table .= "<td><strong>".strtoupper($student["data"]["student_name"])."</strong></td>";
+                $table .= "<td><strong style=\"text-transform:uppercase\">YEAR: {$student["data"]["academic_year"]} / {$student["data"]["academic_term"]}</strong></td>";
+                $table .= "<td><strong>GRADE: {$student["data"]["class_name"]}</strong></td>";
+                $table .= "<td><strong>AGE: {$student["data"]["student_age"]}</strong></td>";
+                $table .= "</tr>";
+                $table .= "</table>";
+
+                // set the address and the other information
+                $table .= "<br><br><table cellpadding=\"5\" width=\"100%\">";
+                $table .= "<tr>
+                    <td width=\"25%\" valign=\"top\">
+                        <div style=\"background-color:{$bg_color}; padding:5px; color:#fff; height:80px\">Hello</div>
+                        <div style=\"padding:5px;\"><strong style=\"color:#6777ef\">CLASS AVERAGE: {$student["data"]["average_score"]}</strong></div>
+                        <div style=\"padding:5px; text-transform:uppercase;\"><strong>SCHOOL RESUMES ON:<br><span style=\"color:#6777ef\">".date("jS M Y", strtotime($academics->next_term_starts))."</span></strong></div>
+                    </td>";
+                $table .= "
+                    <td align=\"center\" width=\"45%\">
+                        <img src=\"{$this->baseUrl}{$this->iclient->client_logo}\" width=\"100px\"><br>
+                        <span style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</span><br>
+                        <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
+                        <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
+                    </td>";
+                $table .= "<td style=\"background-color:{$bg_color}; padding:5px; color:#fff;\" align=\"center\" valign=\"top\" width=\"30%\">
+                    <div style=\"50px\">
+                        <strong>MESSAGE</strong><br>
+                        Please visit www.myschoolgh.com/report/{$student["data"]["unique_id"]} for a
+                        graphical analysis of this report.
+                    </div></td>
+                    </tr>";
+                $table .= "</table>";
+                $table .= "<br><br><table style=\"font-size:11px\" cellpadding=\"5\" width=\"100%\" border=\"1\">";
+                $table .= "<tr style=\"font-weight:bold\">";
+                $table .= "<td width=\"25%\">SUBJECT</td>";
+                $table .= $grading_column;
+                $table .= "<td width=\"18%\">TEACHER</td>";
+                $table .= "<td>TEACHER'S COMMENT</td>";
+                $table .= "</tr>";
+
+                // // get the results submitted by the teachers for each subject
+                foreach($student["sheet"] as $score) {
+                    $table .= "<tr>";
+                    $table .= "<td>{$score->course_name}</td>";
+                    // get the scores
+                    foreach($score->scores as $s_score) {
+                        $table .= "<td align=\"center\">{$s_score}</td>";
+                    }
+                    $table .= "<td align=\"center\">{$score->total_score}</td>";
+                    $table .= "<td>".strtoupper($score->teachers_name)."</td>";
+                    $table .= "<td>{$score->class_teacher_remarks}</td>";
+                    $table .= "</tr>";
+                }
+                $table .= "</table>";
+
+                // set the grading system
+                $table .= "<br><br><table cellpadding=\"5\" border=\"0\" width=\"100%\">";
+                $table .= "<tr>";
+                $table .= "<td align=\"center\" width=\"40%\">";
+                $table .= "<span style=\"font-weight:bold; font-size:20px\">GRADING SYSTEM</span><br>";
+                $table .= "<table style=\"font-size:11px\" align=\"left\" cellpadding=\"5\" border=\"0\" width=\"100%\">\n";
+                $table .= "<tr style=\"font-weight:bold\">";
+                $table .= "<td>Marks in Percentage (%)</td>";
+                $table .= "<td>Interpretation</td>";
+                $table .= "</tr>";
+                // loop through the grading system
+                foreach($interpretation as $ikey => $ivalue) {
+                    $table .= "<tr>";
+                    $table .= "<td>{$ivalue->start} - {$ivalue->end}</td>";
+                    $table .= "<td>{$ivalue->interpretation}</td>";
+                    $table .= "</tr>";
+                }
+                $table .= "</table>";
+                $table .= "</td>";
+                $table .= "<td>";
+                
+                $table .= "</td>";
+                $table .= "<td>";
+                
+                $table .= "</td>";
+                $table .= "</tr>";
+                $table .= "</table>";
+
+                // append to the students list
+                $students[$key] = $table;
+            }
+
+            return [
+                "data" => [
+                    "sheets" => $students
+                ]
+            ];
+
+        } catch(PDOException $e) {}
+
+    }
 }

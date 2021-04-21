@@ -277,19 +277,59 @@ var modify_report_result = (action, report_id) => {
     });
 }
 
+var generate_terminal_report = () => {
+    let academic_term = $(`select[name="academic_term"]`).val(),
+        academic_year = $(`select[name="academic_year"]`).val(),
+        student_id = $(`select[name="student_id"]`).val(),
+        class_id = $(`select[name="class_id"]`).val();
+    if ((academic_term === "null") || (academic_year === "null")) {
+        swal({
+            text: "Sorry! The Academic Year & Term are required.",
+            icon: "error",
+        });
+        return false;
+    }
+    if ((class_id === "null")) {
+        swal({
+            text: "Sorry! Please select the class to generate the terminal report.",
+            icon: "error",
+        });
+        return false;
+    }
+
+    $.post(`${baseUrl}api/terminal_reports/generate`, { academic_term, academic_year, class_id, student_id }).then((response) => {
+        let s_code = "error";
+        if (response.code === 200) {
+            s_code = "success";
+        }
+        swal({
+            text: response.data.result,
+            icon: s_code,
+        });
+    }).catch(() => {
+        swal({
+            text: "Sorry! There was an error while processing the request.",
+            icon: "error",
+        });
+    });
+}
+
 $(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() {
     let class_id = $(this).val();
     $(`div[id="notification"]`).html(``);
     $(`div[id='upload_file']`).addClass("hidden");
-    $(`div[id="terminal_reports"] select[name='course_id']`).find('option').remove().end();
-    $(`div[id="terminal_reports"] select[name='course_id']`).append(`<option value="null">Please Select Course</option>`);
+    let option_link = $(`select[name="course_id"]`).length !== 0 ? "course_id" : "student_id";
+    $(`div[id="terminal_reports"] select[name='${option_link}']`).find('option').remove().end();
+    $(`div[id="terminal_reports"] select[name='${option_link}']`).append(`<option value="null">Please Select</option>`);
     if (class_id !== "null") {
+        let link = $(`select[name="course_id"]`).length !== 0 ? "courses" : "users";
         $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
         if (class_id.length) {
-            $.get(`${baseUrl}api/courses/list?class_id=${class_id}&minified=true`).then((response) => {
+            $.get(`${baseUrl}api/${link}/list?class_id=${class_id}&minified=true`).then((response) => {
                 if (response.code == 200) {
+                    // ${e.unique_id !== undefined ? `(${e.unique_id})` : ""}
                     $.each(response.data.result, function(i, e) {
-                        $(`select[name='course_id']`).append(`<option value='${e.item_id}'>${e.name}</option>'`);
+                        $(`select[name='${option_link}']`).append(`<option value='${e.item_id !== undefined ? e.item_id : e.user_id}'>${e.name}</option>'`);
                     });
                 }
             });

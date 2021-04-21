@@ -81,7 +81,7 @@ $response->html = '
                                         <th width="20%">Category Name</th>
                                         <th>Description</th>
                                         <th width="15%">Books Count</th>
-                                        <th align="center" width="10%"></th>
+                                        <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$category_list.'</tbody>
