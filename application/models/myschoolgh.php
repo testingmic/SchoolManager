@@ -69,14 +69,24 @@ class Myschoolgh extends Models {
 			$stmt->execute([$clientId, 1]);
 			
 			$data = [];
+
+			// loop through the list
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
 				// loop through the items and convert into an object
 				foreach(["client_preferences", "grading_system", "grading_structure"] as $value) {
 					$result->{$value} = json_decode($result->{$value});
 				}
+
+				// academic year logs
+				$result->academic_year_logs = $this->pushQuery("*", "academic_years", "client_id='{$result->client_id}'");
+
+				// append to the data
 				$data[] = $result;
 			}
+
 			return !(empty($data)) ? $data[0] : (object) [];
+			
 		} catch(PDOException $e) {
 			return (object) [];
 		}
@@ -805,7 +815,6 @@ class Myschoolgh extends Models {
 	 */
 	public function academic_years() {
 		/** Set the Parameters */
-		$years = [];
 		$previous_year = 2017;
 		$next_years = date("Y") + 2;
 		

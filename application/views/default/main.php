@@ -50,7 +50,6 @@ $session->remove(["last_recordUpload"]);
 $session->remove(["course_csv_file", "staff_csv_file", "student_csv_file"]);
 
 load_helpers(['setup_helper']);
-
 ?>
 <div class="main-content" id="pagecontent">
     <section class="section">

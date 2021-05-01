@@ -98,9 +98,16 @@ if(!empty($session->userId)) {
 
 	// if the result is not empty
 	if(!empty($defaultUser)) {
+		
+		// get the current user information
 		$defaultUser = $defaultUser[0];
 
-		// print_r($defaultUser);exit;
+		// set the parameters for the access object
+		$accessObject->userId = $defaultUser->user_id;
+		$accessObject->clientId = $defaultUser->client_id;
+		$accessObject->userPermits = json_decode($defaultUser->user_permissions);
+
+		// set additional parameters
 		$isAdmin = (bool) ($defaultUser->user_type == "admin");
 		$isTutor = (bool) ($defaultUser->user_type == "teacher");
 		$isParent = (bool) ($defaultUser->user_type == "parent");

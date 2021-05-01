@@ -9,7 +9,7 @@ class Terminal_reports extends Myschoolgh {
 		parent::__construct();
 
         // get the client data
-        $client_data = $this->client_data($params->clientId ?? null);
+        $client_data = $params->client_data;
         
         // end the query if no information was found
         if(empty($client_data->client_preferences)) {
@@ -17,9 +17,17 @@ class Terminal_reports extends Myschoolgh {
         }
 
         // run this query
+        $academics = $client_data->client_preferences->academics;
         $this->iclient = $client_data;
-        $this->academic_term = $client_data->client_preferences->academics->academic_term;
-        $this->academic_year = $client_data->client_preferences->academics->academic_year;
+        
+        $this->academic_term = $academics->academic_term;
+        $this->academic_year = $academics->academic_year;
+
+        $this->this_term_starts = $academics->term_starts;
+        $this->this_term_ends = $academics->term_ends;
+
+        $this->last_term_starts = $academics->last_term_starts ?? $academics->term_starts;
+        $this->last_term_ends = $academics->last_term_ends ?? $academics->term_ends;
         
         // prepare the statement
         $this->insert_stmt = $this->db->prepare("INSERT INTO grading_terminal_scores SET 
@@ -864,6 +872,12 @@ class Terminal_reports extends Myschoolgh {
 
         try {
 
+            // global variable
+            global $accessObject;
+
+            // set the student id if the user do not have the permission to view the report for the entire class
+            $params->student_id = $accessObject->hasAccess("generate", "results") ? null : $accessObject->userId;
+
             // if the class id was not found
             if(empty($params->class_id) || empty($this->iclient->client_preferences)) {
                 return [
@@ -875,18 +889,29 @@ class Terminal_reports extends Myschoolgh {
                 ];
             }
 
+            // set the parameters
             $param = (object) [      
                 "group_by_student" => true,
                 "class_id" => $params->class_id,
                 "academic_year" => $params->academic_year ?? $this->academic_year,
                 "academic_term" => $params->academic_term ?? $this->academic_term,
-                "student_item_id" => isset($params->student_id) && ($params->student_id !== "null") ? $params->student_id : null,
+                "student_item_id" => isset($params->student_id) && !empty($params->student_id) && ($params->student_id !== "null") ? $params->student_id : null,
             ];
             $report_data = $this->result_score_list(null, $param);
 
+            // get the user attendance results
+            $attendance_param = (object) [
+                "clientId" => $this->clientId, 
+                "user_types_list" => ["student"], "the_user_type" => "student",
+                "period" => "this_term", "is_finalized" => 1, "is_present_check" => 1,
+                "start_date" => $this->this_term_starts, "end_date" => $this->this_term_ends,
+            ];
+            // create a new object of the attendance class
+            $attendanceObj = load_class("attendance", "controllers", $params);
+
             // init loop
             $students = [];
-            $bg_color = "#777882";
+            $bg_color = "#03a9f4";//"#777882";
             $academics = $this->iclient->client_preferences->academics;
             $grading = $this->iclient->grading_structure->columns;
             $interpretation = $this->iclient->grading_system;
@@ -905,6 +930,7 @@ class Terminal_reports extends Myschoolgh {
 
             // loop through the report set
             foreach($report_data as $key => $student) {
+
                 // set the information
                 $table = "<table width=\"100%\" cellspacing=\"5px\" cellpadding=\"5px\" style=\"background-color:{$bg_color}; color:#fff\">";
                 // get the student information
@@ -941,7 +967,7 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "</table>";
                 $table .= "<br><br><table style=\"font-size:11px\" cellpadding=\"5\" width=\"100%\" border=\"1\">";
                 $table .= "<tr style=\"font-weight:bold;font-size:15px;background-color:{$bg_color};color:#fff;\">";
-                $table .= "<td align=\"center\" colspan=\"".($column_count + 2)."\">END OF YEAR REPORT CARD</td>";
+                $table .= "<td align=\"center\" colspan=\"".($column_count + 2)."\">END OF TERM REPORT CARD</td>";
                 $table .= "</tr>";
                 $table .= "<tr style=\"font-weight:bold\">";
                 $table .= "<td width=\"25%\">SUBJECT</td>";
@@ -966,11 +992,11 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "</table>";
 
                 // set the grading system
-                $table .= "<br><br><table cellpadding=\"5\" border=\"0\" width=\"100%\">";
+                $table .= "<br><br><table cellpadding=\"5px\" border=\"1\" width=\"100%\">";
                 $table .= "<tr>";
-                $table .= "<td align=\"center\" width=\"40%\">";
+                $table .= "<td align=\"center\" width=\"35%\">";
                 $table .= "<span style=\"font-weight:bold; font-size:20px\">GRADING SYSTEM</span><br>";
-                $table .= "<table style=\"font-size:11px\" align=\"left\" cellpadding=\"5\" border=\"0\" width=\"100%\">\n";
+                $table .= "<table style=\"font-size:11px\" align=\"left\" cellpadding=\"5px\" border=\"0\" width=\"100%\">\n";
                 $table .= "<tr style=\"font-weight:bold\">";
                 $table .= "<td>Marks in Percentage (%)</td>";
                 $table .= "<td>Interpretation</td>";
@@ -984,17 +1010,38 @@ class Terminal_reports extends Myschoolgh {
                 }
                 $table .= "</table>";
                 $table .= "</td>";
-                $table .= "<td>";
-                
-                $table .= "</td>";
-                $table .= "<td>";
-                
+                $table .= "<td  width=\"30%\">";
+                $table .= "<table cellpadding=\"5px\" border=\"1\">";
+                $table .= "<tr>";
+                $table .= "<td style=\"font-weight:bold\" align=\"center\" colspan=\"2\">ATTENDANCE</td>";
+                $table .= "</tr>";
+                $table .= "<tr>";
+                $table .= "<td style=\"font-weight:bold\">PRESENT</td>";
+                $table .= "<td style=\"font-weight:bold\"></td>";
+                $table .= "</tr>";
+                $table .= "<tr>";
+                $table .= "<td style=\"font-weight:bold\">ABSENT</td>";
+                $table .= "<td style=\"font-weight:bold\"></td>";
+                $table .= "</tr>";
+                $table .= "<tr>";
+                $table .= "<td style=\"font-weight:bold\">TERM DAYS</td>";
+                $table .= "<td style=\"font-weight:bold\"></td>";
+                $table .= "</tr>";
+                $table .= "</table>";
                 $table .= "</td>";
                 $table .= "</tr>";
                 $table .= "</table>";
 
+                // print_r($student);break;
+
+                $attendance_param->the_current_user_id = $key;
+                $attendance = $attendanceObj->range_summary($attendance_param)->summary;
+
                 // append to the students list
-                $students[$key] = $table;
+                $students[$key] = [
+                    "report" => $table,
+                    "attendance" => $attendance
+                ];
             }
 
             return [

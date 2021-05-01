@@ -374,12 +374,8 @@ class Attendance extends Myschoolgh {
         $check = $this->pushQuery(
             "a.id, a.users_list, a.users_data, a.finalize, a.date_finalized, a.date_created, 
                 c.name AS created_by_name, c.image AS created_by_image, c.email AS created_by_email,
-                f.name AS finalized_by_name, f.image AS finalized_by_image, f.email AS finalized_by_email
-            ",
-            "users_attendance_log a 
-            LEFT JOIN users c ON a.created_by = c.item_id
-            LEFT JOIN users f ON a.finalized_by = f.item_id
-            ", 
+                f.name AS finalized_by_name, f.image AS finalized_by_image, f.email AS finalized_by_email",
+            "users_attendance_log a LEFT JOIN users c ON a.created_by = c.item_id LEFT JOIN users f ON a.finalized_by = f.item_id", 
             "a.log_date='{$list_days[0]}' AND a.status='1' {$query} LIMIT 1");
 
         $attendance_log = !empty($check) ? json_decode($check[0]->users_data) : [];
@@ -709,6 +705,7 @@ class Attendance extends Myschoolgh {
                     // append to the array
                     $summary_set[$key] = isset($summary_set[$key]) ? ($summary_set[$key]+1) : 1;
                 }
+                $summary_set["Term"] = $logged_count + ($summary_set["Not Logged"] ?? 0);
                 $users_count["summary"] = $summary_set;
             } else {
                 $users_count["summary"] = ["present" => 0, "absent" => 0];

@@ -446,7 +446,7 @@ function get_file_mime($file_ext, $array_item) {
 }
 
 
-function show_content($title = null, $file_name, $content, $orientation = "L", $force = false) {
+function show_content($title = null, $file_name, $report_content, $orientation = "L", $force = false) {
 
     // base url
     $appName = config_item("site_name");
@@ -493,12 +493,24 @@ function show_content($title = null, $file_name, $content, $orientation = "L", $
 	// set font
 	$pdf->SetFont('dejavusans', '', 10);
 
-	// add a page
-	$pdf->AddPage($orientation, 'A4');
+	// if the content is not an array
+	if(!is_array($report_content)) {
+		// add the new page
+		$pdf->AddPage("L", "A4");
+		// write the content of the page
+		$pdf->writeHTML($report_content["report"] ?? null, false, false, true, false, '');
+	} else {
+		// reverse the array
+		// $report_content = array_reverse($report_content);
+		// loop through the pages
+		foreach($report_content as $content) {
+			// add the new page
+			$pdf->AddPage("L", "A4");
+			// write the content of the page
+			$pdf->writeHTML($content["report"] ?? null, false, false, true, false, '');
+		}
+	}
 
 	// output the HTML content
-    if(isset($_GET["dw"]) || $force) {
-        $pdf->writeHTML($content, false, false, true, false, '');
-	    $pdf->Output($file_name, 'I');
-    }
+    $pdf->Output($file_name, 'I');
 }

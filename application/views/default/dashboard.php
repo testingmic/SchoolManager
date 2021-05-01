@@ -793,7 +793,7 @@ $response->html = '
                 <div class="col-lg-8">
                     '.($data_stream ? 
                         '<div class="row">
-                            <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="col-lg-3 col-md-4 col-sm-12">
                                 <div class="card card-statistic-1">
                                     <i class="fas fa-user-check card-icon col-green"></i>
                                     <div class="card-wrap">
@@ -806,7 +806,7 @@ $response->html = '
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="col-lg-3 col-md-4 col-sm-12">
                                 <div class="card card-statistic-1">
                                     <i class="fas fa-user-alt-slash card-icon col-red"></i>
                                     <div class="card-wrap">
@@ -819,7 +819,7 @@ $response->html = '
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-md-4 col-sm-12">
+                            <div class="col-lg-3 col-md-4 col-sm-12">
                                 <div class="card card-statistic-1">
                                     <i class="fas fa-user-edit card-icon col-blue"></i>
                                     <div class="card-wrap">
@@ -827,6 +827,19 @@ $response->html = '
                                             <div class="text-right">
                                                 <h3 data-attendance_count="logs_count" class="font-light mb-0">0</h3>
                                                 <span class="text-muted">Logs Counter</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-sm-12">
+                                <div class="card card-statistic-1">
+                                    <i class="fas fa-list card-icon col-blue"></i>
+                                    <div class="card-wrap">
+                                        <div class="padding-20">
+                                            <div class="text-right">
+                                                <h3 data-attendance_count="Term" class="font-light mb-0">0</h3>
+                                                <span class="text-muted">Term Days</span>
                                             </div>
                                         </div>
                                     </div>

@@ -810,6 +810,7 @@ class Auth extends Myschoolgh {
             $name = explode(" ", $params->school_name);
             $prefix = "";
 
+            // get the name for a unique id
             foreach($name as $word) {
                 $prefix .= ucwords($word[0]);
             }
@@ -819,6 +820,7 @@ class Auth extends Myschoolgh {
             $item_id = random_string("alnum", 32);
             $token = random_string("alnum", 54);
 
+            // the preferences
             $preference = (object) [
                 "labels" => [
                     "staff" => $prefix,
@@ -826,7 +828,7 @@ class Auth extends Myschoolgh {
                     "parent" => $prefix
                 ],
                 "academics" => [
-                    "academic_year" => "",
+                    "academic_year" => date("Y") . "/" . (date("Y") - 1),
                     "academic_term" => "",
                     "next_academic_year" => "",
                     "next_academic_term" => ""
@@ -853,11 +855,10 @@ class Auth extends Myschoolgh {
             $client_id = "MSGH".$this->append_zeros($last_id, 6);
             
             // insert the client details
-            $stmt = $this->db->prepare("
-                INSERT INTO clients_accounts SET 
-                    client_id = ?, client_name = ?, client_contact = ?, client_email = ?, client_preferences = ?, ip_address = ?
-                    ".(isset($params->school_address) ? ",client_address='{$params->school_address}'" : null)."
-                    ".(isset($contact_2) ? ",client_secondary_contact='{$contact_2}'" : null)."
+            $stmt = $this->db->prepare("INSERT INTO clients_accounts SET 
+                client_id = ?, client_name = ?, client_contact = ?, client_email = ?, client_preferences = ?, ip_address = ?
+                ".(isset($params->school_address) ? ",client_address='{$params->school_address}'" : null)."
+                ".(isset($contact_2) ? ",client_secondary_contact='{$contact_2}'" : null)."
             ");
             $stmt->execute([$client_id, $params->school_name, $contact, $params->email, json_encode($preference), ip_address()]);
 
@@ -869,9 +870,9 @@ class Auth extends Myschoolgh {
 			$access_level = $accessPermissions[0]->id;
 
             // insert the user account details
-            $ac_stmt = $this->db->prepare("
-                INSERT INTO users SET item_id = ?, unique_id = ?, client_id = ?, access_level = ?, password = ?,
-                user_type = ?, address = ?, username = ?, verify_token = ?, status = ?, email = ?, phone_number = ?
+            $ac_stmt = $this->db->prepare("INSERT INTO users SET 
+                item_id = ?, unique_id = ?, client_id = ?, access_level = ?, password = ?, user_type = ?, 
+                address = ?, username = ?, verify_token = ?, status = ?, email = ?, phone_number = ?
             ");
             $ac_stmt->execute([
                 $item_id, $user_id, $client_id, $access_level, $password, "admin", 
@@ -894,9 +895,9 @@ class Auth extends Myschoolgh {
             $reciepient = ["recipients_list" => [["fullname" => $params->school_name, "email" => $params->email, "customer_id" => $item_id]]];
             
             // insert the email content to be processed by the cron job
-            $m_stmt = $this->db->prepare("
-                INSERT INTO users_messaging_list 
-                SET  template_type = ?, client_id = ?, item_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?, users_id = ?
+            $m_stmt = $this->db->prepare("INSERT INTO users_messaging_list SET  
+                template_type = ?, client_id = ?, item_id = ?, recipients_list = ?, 
+                created_by = ?, subject = ?, message = ?, users_id = ?
             ");
             $m_stmt->execute([
                 'verify_account', $client_id, $item_id, json_encode($reciepient),
