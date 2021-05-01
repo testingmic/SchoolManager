@@ -703,16 +703,48 @@ class Fees extends Myschoolgh {
             }
 
             /** Confirm if a record already exist */
-            $query = $this->pushQuery("amount_due", "fees_payments", "student_id='{$params->student_id}' AND category_id='{$params->category_id}' AND class_id='{$params->class_id}' AND status='1' AND client_id='{$params->clientId}' ORDER BY id DESC LIMIT 1");
+            $query = $this->pushQuery("amount_due AS default_amount", "fees_payments", "student_id='{$params->student_id}' AND category_id='{$params->category_id}' AND class_id='{$params->class_id}' AND status='1' AND client_id='{$params->clientId}' ORDER BY id DESC LIMIT 1");
+            
+            // run this query if the init is empty
+            if(empty($query)) {
+                // default amount
+                $query = $this->pushQuery(
+                    "b.amount AS default_amount", 
+                    "fees_category b", 
+                    "b.id='{$params->category_id}' AND b.client_id='{$params->clientId}' LIMIT 1"
+                );
+            }
 
-            return ["data" => $query[0]->amount_due ?? null];
+            // assign the amount
+            $amount = $query[0]->default_amount ?? 0;
+
+            // return the amount
+            return ["data" => $amount];
 
         } elseif($params->allocate_to === "class") {
 
             /** Confirm if a record already exist */
-            $query = $this->pushQuery("amount", "fees_allocations", "class_id='{$params->class_id}' AND category_id='{$params->category_id}' AND client_id='{$params->clientId}' AND status='1' ORDER BY id DESC LIMIT 1");
+            $query = $this->pushQuery(
+                "a.amount as default_amount, (SELECT b.amount FROM fees_category b WHERE b.id='{$params->category_id}' AND b.client_id='{$params->clientId}' LIMIT 1) AS default_amount", 
+                "fees_allocations a", 
+                "a.class_id='{$params->class_id}' AND a.category_id='{$params->category_id}' AND a.client_id='{$params->clientId}' AND a.status='1' ORDER BY a.id DESC LIMIT 1"
+            );
+            
+            // run this query if the init is empty
+            if(empty($query)) {
+                // default amount
+                $query = $this->pushQuery(
+                    "b.amount AS default_amount", 
+                    "fees_category b", 
+                    "b.id='{$params->category_id}' AND b.client_id='{$params->clientId}' LIMIT 1"
+                );
+            }
 
-            return ["data" => $query[0]->amount ?? null];
+            // assign the amount
+            $amount = $query[0]->default_amount ?? 0;
+
+            // return the amount
+            return ["data" => $amount];
 
         }
     }
