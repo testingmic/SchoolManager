@@ -80,10 +80,12 @@ var reset_list = () => {
 }
 
 var format_chat_message = (chat) => {
-    let position = (chat.sender_id == $myPrefs.userId) ? "chat-right" : "chat-left";
+    let position = (chat.sender_id == $myPrefs.userId) ? "chat-right" : "chat-left",
+        seen_notice = ((chat.sender_id == $myPrefs.userId) && (chat.seen_time !== null)) ? `<span title="Seen at: ${chat.seen_timer}" class="text-success" style="font-size:12px;float:right;left:0px"><i class="fa fa-check-circle"></i></span>` : "";
     return `<div class="chat-item ${position}" style="display:none">
           <img src="${baseUrl}${chat.sender_info.image}">
           <div class="chat-details">
+            ${seen_notice}
             <div class="chat-text">${chat.raw_message}</div>
             <div class="chat-time">${chat.sent_time}</div>
           </div>

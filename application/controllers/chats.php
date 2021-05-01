@@ -83,7 +83,8 @@ class Chats extends Myschoolgh {
                 // convert the seen and sent dates into ago state
                 $result->clean_date = date("l, F jS", strtotime($result->date_created));
                 $result->sent_time = date("h:i A", strtotime($result->date_created));
-                $result->seen_time = time_diff($result->seen_date);
+                $result->seen_time = !empty($result->seen_date) ? time_diff($result->seen_date) : null;
+                $result->seen_timer = !empty($result->seen_date) ? date("h:iA", strtotime($result->seen_date)) : null;
                 $result->sent_ago = time_diff($result->date_created);
 
                 // send the raw message
@@ -229,7 +230,7 @@ class Chats extends Myschoolgh {
      * @return Array
      */
     public function alerts(stdClass $params) {
-
+        return [];
         try {
 
             $stmt = $this->db->prepare("SELECT COUNT(*) AS chats_count, a.sender_id, c.last_seen
@@ -240,6 +241,7 @@ class Chats extends Myschoolgh {
             $stmt->execute([$params->userId, 0]);
 
             $data = [];
+            // loop through the list of alerts
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 // set some more parameters
                 $result->online = $this->user_is_online($result->last_seen);

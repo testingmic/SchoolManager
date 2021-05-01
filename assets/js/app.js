@@ -522,16 +522,22 @@ var new_message_alert = () => {
             dataType: "json",
             success: (response) => {
                 if (response.code === 200) {
+                    let counter = 0;
                     $.each(response.data.result, function(i, e) {
+                        counter += e.chats_count
                         $(`span[data-user_id="${e.sender_id}"]`).html(`<i class="fa text-warning fa-comments"></i> ${e.chats_count}`);
                     });
+                    if (counter !== 0) {
+                        $(`a[data-notification="message"]`).addClass("beep");
+                    } else {
+                        $(`a[data-notification="message"]`).removeClass("beep");
+                    }
                 }
             }
         });
     }
     setTimeout(() => { new_message_alert() }, $.chatinterval);
 }
-
 new_message_alert();
 
 var loadFormAction = (form) => {
