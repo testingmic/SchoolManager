@@ -911,7 +911,7 @@ class Terminal_reports extends Myschoolgh {
 
             // init loop
             $students = [];
-            $bg_color = "#03a9f4";//"#777882";
+            $bg_color = "#777882";//"#03a9f4";
             $academics = $this->iclient->client_preferences->academics;
             $grading = $this->iclient->grading_structure->columns;
             $interpretation = $this->iclient->grading_system;
@@ -930,6 +930,10 @@ class Terminal_reports extends Myschoolgh {
 
             // loop through the report set
             foreach($report_data as $key => $student) {
+                
+                // get the student attendance logs
+                $attendance_param->the_current_user_id = $key;
+                $attendance_log = $attendanceObj->range_summary($attendance_param)->summary;
 
                 // set the information
                 $table = "<table width=\"100%\" cellspacing=\"5px\" cellpadding=\"5px\" style=\"background-color:{$bg_color}; color:#fff\">";
@@ -992,7 +996,7 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "</table>";
 
                 // set the grading system
-                $table .= "<br><br><table cellpadding=\"5px\" border=\"1\" width=\"100%\">";
+                $table .= "<br><br><table cellpadding=\"5px\" border=\"0\" width=\"100%\">";
                 $table .= "<tr>";
                 $table .= "<td align=\"center\" width=\"35%\">";
                 $table .= "<span style=\"font-weight:bold; font-size:20px\">GRADING SYSTEM</span><br>";
@@ -1010,37 +1014,39 @@ class Terminal_reports extends Myschoolgh {
                 }
                 $table .= "</table>";
                 $table .= "</td>";
-                $table .= "<td  width=\"30%\">";
-                $table .= "<table cellpadding=\"5px\" border=\"1\">";
+                $table .= "<td width=\"33%\">";
+                $table .= "<table width=\"100%\" cellpadding=\"5px\" border=\"1\">";
                 $table .= "<tr>";
                 $table .= "<td style=\"font-weight:bold\" align=\"center\" colspan=\"2\">ATTENDANCE</td>";
                 $table .= "</tr>";
                 $table .= "<tr>";
                 $table .= "<td style=\"font-weight:bold\">PRESENT</td>";
-                $table .= "<td style=\"font-weight:bold\"></td>";
+                $table .= "<td style=\"font-weight:bold\">".($attendance_log["Present"] ?? 0)."</td>";
                 $table .= "</tr>";
                 $table .= "<tr>";
                 $table .= "<td style=\"font-weight:bold\">ABSENT</td>";
-                $table .= "<td style=\"font-weight:bold\"></td>";
+                $table .= "<td style=\"font-weight:bold\">".($attendance_log["Absent"] ?? 0)."</td>";
                 $table .= "</tr>";
                 $table .= "<tr>";
                 $table .= "<td style=\"font-weight:bold\">TERM DAYS</td>";
-                $table .= "<td style=\"font-weight:bold\"></td>";
+                $table .= "<td style=\"font-weight:bold\">".($attendance_log["Term"] ?? 0)."</td>";
+                $table .= "</tr>";
+                $table .= "</table>";
+                $table .= "</td>";
+                $table .= "<td width=\"32%\">";
+                 $table .= "<table width=\"100%\" cellpadding=\"5px\" border=\"1\">";
+                $table .= "<tr>";
+                $table .= "<td style=\"font-weight:bold\" align=\"center\" colspan=\"2\">NEXT TERM FEES</td>";
                 $table .= "</tr>";
                 $table .= "</table>";
                 $table .= "</td>";
                 $table .= "</tr>";
                 $table .= "</table>";
 
-                // print_r($student);break;
-
-                $attendance_param->the_current_user_id = $key;
-                $attendance = $attendanceObj->range_summary($attendance_param)->summary;
-
                 // append to the students list
                 $students[$key] = [
                     "report" => $table,
-                    "attendance" => $attendance
+                    "attendance" => $attendance_log
                 ];
             }
 

@@ -10,5 +10,5 @@ $reportObj = load_class("terminal_reports", "controllers", $params);
 $report = $reportObj->generate($params);
 
 // loop through the results set and print the student result sheet
-show_content("Terminal Report", "terminal_report.pdf", $report["data"]["sheets"], "L", true);
+show_content("Terminal Report", "terminal_report.pdf", $report["data"]["sheets"], "landscape", $reportObj);
 ?>

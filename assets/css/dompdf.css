@@ -1,0 +1,15 @@
+@page {
+    margin: 5px;
+}
+
+body {
+    margin: 5px;
+}
+
+.page_break {
+    page-break-before: always;
+}
+
+div.page_break+div.page_break {
+    page-break-before: always;
+}

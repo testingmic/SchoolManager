@@ -514,3 +514,48 @@ function show_content($title = null, $file_name, $report_content, $orientation =
 	// output the HTML content
     $pdf->Output($file_name, 'I');
 }
+
+// create a function
+function dompdf_show_content($title = null, $file_name, $report_content, $orientation = "landscape", $reportObj) {
+		
+	// instantiate and use the dompdf class
+	$dompdf = new Dompdf();
+
+	// get the content
+	$pages_content = "<link rel=\"stylesheet\" type=\"text/css\" href=\"assets/css/dompdf.css\">";
+
+	// if the content is not an array
+	if(!is_array($report_content)) {
+		// add the new page
+		$pages_content .= $report_content["report"];
+	} else {
+		// set the counter
+		$counter = count($report_content);
+		$count = 0;
+		// loop through the pages
+		foreach($report_content as $key => $data) {
+			$count++;
+			// add the new page
+			$pages_content .= $data["report"];
+			if($count !== $counter) {
+				$pages_content  .= "\n<div class=\"page_break\"></div>";
+			}
+		}
+	}
+
+	// load the html content
+	$dompdf->loadHtml($pages_content);
+
+	// (Optional) Setup the paper size and orientation
+	$dompdf->setPaper("A4", "landscape");
+
+	// Render the HTML as PDF
+	$dompdf->render();
+
+	// if the user wants to auto download
+	$download_file = (bool) isset($_GET["auto_download"]);
+
+	// Output the generated PDF to Browser
+	$dompdf->stream("terminal_report.pdf", ["compress" => 1, "Attachment" => $download_file]);
+
+}

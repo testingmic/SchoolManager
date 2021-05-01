@@ -1,0 +1,2 @@
+[01-May-2021 13:46:34 Africa/Accra] PHP Warning:  require(C:\xampp\htdocs\myschool_gh\system\libraries\dompdf\vendor\autoload.php): failed to open stream: No such file or directory in C:\xampp\htdocs\myschool_gh\system\helpers\file_helper.php on line 519
+[01-May-2021 13:46:34 Africa/Accra] PHP Fatal error:  require(): Failed opening required './system/libraries/dompdf/vendor/autoload.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\myschool_gh\system\helpers\file_helper.php on line 519
