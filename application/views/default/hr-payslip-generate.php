@@ -22,10 +22,6 @@ $pageTitle = "Payslip Generation";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = ["assets/js/payroll.js"];
 
-$accessObject->clientId = $clientId;
-$accessObject->userId = $session->userId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // access permissions check
 if(!$accessObject->hasAccess("generate", "payslip")) {
     $response->html = page_not_found();

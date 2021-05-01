@@ -17,10 +17,6 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 $hasIssue = $accessObject->hasAccess("issue", "library");
 
 $pageTitle = "Issue Book";

@@ -18,10 +18,6 @@ $userId = $session->userId;
 $clientId = $session->clientId;
 
 // specify some variables
-$accessObject->userId = $userId;
-$accessObject->clientId = $clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 $response = (object) [];
 $pageTitle = "User Activity Timelines";
 $response->title = "{$pageTitle} : {$appName}";

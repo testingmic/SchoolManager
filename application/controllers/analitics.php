@@ -4,9 +4,10 @@ class Analitics extends Myschoolgh {
 
     /** This variable will be used for the loading of the information */
     public $stream = [];
+    public $final_report = [];
+    private $iclient;
     public $current_title = "Today";
     public $previous_title = "Yesterday";
-    public $final_report = [];
 
     private $class_id_query;
     private $class_idm_query;
@@ -36,6 +37,7 @@ class Analitics extends Myschoolgh {
         // run this query
         $academics = $client_data->client_preferences->academics;
         
+        $this->iclient = $params;
         $this->academic_term = $academics->academic_term;
         $this->academic_year = $academics->academic_year;
 
@@ -328,7 +330,7 @@ class Analitics extends Myschoolgh {
          * Load the fees paid count by category and get the amounts paid per category
          * Run a comparison between the current and previous record set
          */
-        $feesClass = load_class("fees", "controllers");
+        $feesClass = load_class("fees", "controllers", $this->iclient);
 
         // get the fees categories
         $fees_category_list = $this->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$params->clientId}'");
@@ -348,8 +350,6 @@ class Analitics extends Myschoolgh {
                 "return_where_clause" => true
             ];
             $where_clause = $feesClass->list($fees_param);
-
-            // print $where_clause;
 
             // value_name
             $raw_name = create_slug($value->name, "_");

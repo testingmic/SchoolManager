@@ -37,10 +37,6 @@ $session->remove("assignment_uploadID");
 
 $item_list = load_class("assignments", "controllers")->list($assignments_param);
 
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 $hasDelete = $accessObject->hasAccess("delete", "assignments");
 $hasUpdate = $accessObject->hasAccess("update", "assignments");
 

@@ -22,11 +22,6 @@ $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [];
 $response->timer = 350;
 
-// specify some variables
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // confirm that the user has the required permissions
 if(!$accessObject->hasAccess("allocate", "timetable")) {
     // show the error page

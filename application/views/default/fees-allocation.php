@@ -20,10 +20,6 @@ $response = (object) [];
 $pageTitle = "Fees Allocation";
 $response->title = "{$pageTitle} : {$appName}";
 
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 $receivePayment = $accessObject->hasAccess("receive", "fees");
 
 /** confirm that the user has the permission to receive payment */

@@ -20,10 +20,6 @@ $pageTitle = "Payroll Report";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = ["assets/js/analitics.js"];
 
-$accessObject->clientId = $clientId;
-$accessObject->userId = $session->userId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // access permissions check
 if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
     $response->html = page_not_found();

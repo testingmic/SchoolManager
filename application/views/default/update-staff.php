@@ -20,11 +20,6 @@ $response = (object) [];
 $pageTitle = "Staff Details";
 $response->title = "{$pageTitle} : {$appName}";
 
-// the query parameter to load the user information
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 $response->scripts = [
     "assets/js/page/index.js"
 ];

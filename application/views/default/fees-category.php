@@ -19,15 +19,11 @@ $response = (object) [];
 $response->title = "Fees Category List : {$appName}";
 $response->scripts = ["assets/js/fees.js"];
 
-$department_param = (object) [
+$category_param = (object) [
     "client_data" => $defaultUser->client,
     "clientId" => $session->clientId
 ];
-$fees_category_array_list = load_class("fees", "controllers")->category_list($department_param);
-
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
+$fees_category_array_list = load_class("fees", "controllers", $category_param)->category_list($category_param);
 
 $hasAdd = $accessObject->hasAccess("add", "fees_category");
 $hasUpdate = $accessObject->hasAccess("update", "fees_category");

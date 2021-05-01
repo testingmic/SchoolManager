@@ -24,9 +24,6 @@ $response->scripts = ["assets/js/filters.js"];
 $filter->user_type = !empty($filter->user_type) ? $filter->user_type : "employee,teacher,admin,accountant";
 
 $clientId = $session->clientId;
-$accessObject->clientId = $clientId;
-$accessObject->userId = $session->userId;
-$accessObject->userPermits = $defaultUser->user_permissions;
 
 // access permissions check
 if(!$accessObject->hasAccess("modify_payroll", "payslip")) {

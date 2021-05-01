@@ -20,11 +20,6 @@ $response = (object) [];
 $pageTitle = "Profile";
 $response->title = "{$pageTitle} : {$appName}";
 
-// the query parameter to load the user information
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // staff id
 $user_id = $session->userId;
 $pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";

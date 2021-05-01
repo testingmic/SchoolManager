@@ -19,47 +19,11 @@ $response = (object) [];
 $pageTitle = "Generate Report Cards";
 $response->title = "{$pageTitle} : {$appName}";
 
-// specify some variables
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // confirm that the user has the required permissions
 $the_form = load_class("forms", "controllers")->generate_terminal_reports($clientId);
 
 // add the scripts to load
 $response->scripts = ["assets/js/grading.js"];
-
-// get the list of all classes
-$report_param = (object) [
-    "userData" => $defaultUser,
-    "clientId" => $clientId,
-];
-// $reports_list = load_class("terminal_reports", "controllers")->reports_list($report_param)["data"];
-
-$terminal_reports_list = "";
-// foreach($reports_list as $key => $report) {
-
-//     $action = "<a href='{$baseUrl}results-review/{$report->report_id}' title='Click to view the details of this report' class='btn mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
-//     if(($report->created_by == $defaultUser->user_id) && ($report->status == "Pending")) {
-//         $action .= " <a onclick='return modify_report_result(\"submit\",\"{$report->report_id}\")' href='#' title='Submit this terminal report to Admin for Review and Approval' class='btn mb-1 btn-outline-success'><i class='fa fa-check'></i></a>";
-//     }
-//     $terminal_reports_list .= "
-//     <tr>
-//         <td>".($key+1)."</td>
-//         <td>{$report->class_name}</td>
-//         <td>{$report->course_name} ({$report->course_code})</td>
-//         <td>{$report->academic_year}</td>
-//         <td>{$report->academic_term}</td>
-//         <td>
-//             <div>{$report->fullname}</div>
-//             <div class='font-weight-bold'>{$report->user_unique_id}</div>
-//             {$report->date_created}
-//         </td>
-//         <td>{$myClass->the_status_label($report->status)}</td>
-//         <td align='center'>{$action}</td>
-//     </tr>";
-// }
 
 $response->html = '
     <section class="section">
@@ -79,30 +43,10 @@ $response->html = '
                                 <li class="nav-item">
                                     <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">Generate Report Sheet</a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="upload_reports-tab2" data-toggle="tab" href="#upload_reports" role="tab" aria-selected="true">Terminal Reports List</a>
-                                </li>
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
                                     '.($the_form["general"] ?? null).'
-                                </div>
-                                <div class="tab-pane fade" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
-                                    <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered datatable">
-                                            <thead>
-                                                <th></th>
-                                                <th>Class Name</th>
-                                                <th>Course Name / Code</th>
-                                                <th>Academic Year</th>
-                                                <th>Academic Term</th>
-                                                <th>Created Details</th>
-                                                <th>Status</th>
-                                                <th></th>
-                                            </thead>
-                                            <tbody>'.$terminal_reports_list.'</tbody>
-                                        </table>
-                                    </div>
                                 </div>
                             </div>
                         </div>

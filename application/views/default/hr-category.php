@@ -22,9 +22,6 @@ $response->title = "Payroll Allowance Types : {$appName}";
 $response->scripts = ["assets/js/filters.js"];
 
 $clientId = $session->clientId;
-$accessObject->clientId = $clientId;
-$accessObject->userId = $session->userId;
-$accessObject->userPermits = $defaultUser->user_permissions;
 
 $staff_list = "";
 

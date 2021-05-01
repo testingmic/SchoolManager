@@ -24,10 +24,6 @@ $filter = (object) $_POST;
 
 $userId = $session->userId;
 
-$accessObject->userId = $userId;
-$accessObject->clientId = $clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // default class_list
 $class_list = [];
 

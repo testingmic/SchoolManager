@@ -19,11 +19,6 @@ $response = (object) [];
 $pageTitle = "Settings";
 $response->title = "{$pageTitle} : {$appName}";
 
-// specify some variables
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // unset all existing sessions
 $session->remove(["student_csv_file", "course_csv_file", "staff_csv_file", "last_recordUpload"]);
 

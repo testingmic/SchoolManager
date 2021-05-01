@@ -289,7 +289,7 @@ var generate_terminal_report = () => {
         });
         return false;
     }
-    if ((class_id === "null")) {
+    if ((class_id === "null") || !class_id) {
         swal({
             text: "Sorry! Please select the class to generate the terminal report.",
             icon: "error",
@@ -297,21 +297,7 @@ var generate_terminal_report = () => {
         return false;
     }
 
-    $.post(`${baseUrl}api/terminal_reports/generate`, { academic_term, academic_year, class_id, student_id }).then((response) => {
-        let s_code = "error";
-        if (response.code === 200) {
-            s_code = "success";
-        }
-        swal({
-            text: response.data.result,
-            icon: s_code,
-        });
-    }).catch(() => {
-        swal({
-            text: "Sorry! There was an error while processing the request.",
-            icon: "error",
-        });
-    });
+    window.open(`${baseUrl}reports/report?academic_term=${academic_term}&academic_year=${academic_year}&class_id=${class_id}&student_id=${student_id}`)
 }
 
 $(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() {

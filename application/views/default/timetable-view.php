@@ -22,11 +22,6 @@ $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [];
 $response->timer = 0;
 
-// specify some variables
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // confirm if the user has permission to manage
 $isPermitted = $accessObject->hasAccess("manage", "timetable");
 

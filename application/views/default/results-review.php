@@ -19,11 +19,6 @@ $response = (object) [];
 $pageTitle = "Review Result";
 $response->title = "{$pageTitle} : {$appName}";
 
-// the query parameter to load the user information
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // get the report id
 $report_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
 
@@ -32,19 +27,22 @@ if(empty($report_id)) {
     $response->html = page_not_found();
 } else {
 
-    // scripts to load
-    $response->scripts = ["assets/js/results.js"];
-
-    // create new object
-    $reportObj = load_class("terminal_reports", "controllers");
-
     // get the list of all classes
     $report_param = (object) [
         "userData" => $defaultUser,
+        "client_data" => $defaultUser->client,
         "clientId" => $clientId,
         "report_id" => $report_id,
         "show_scores" => true
     ];
+
+    // scripts to load
+    $response->scripts = ["assets/js/results.js"];
+
+    // create new object
+    $reportObj = load_class("terminal_reports", "controllers", $report_param);
+
+    // load the reports list
     $reports_list = $reportObj->reports_list($report_param)["data"];
 
     // return error if the report was not found

@@ -33,9 +33,6 @@ $staff_param = (object) [
 $api_staff_list = load_class("users", "controllers")->list($staff_param);
 
 $clientId = $session->clientId;
-$accessObject->clientId = $clientId;
-$accessObject->userId = $session->userId;
-$accessObject->userPermits = $defaultUser->user_permissions;
 
 $staff_list = "";
 

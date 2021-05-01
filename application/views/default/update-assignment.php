@@ -25,11 +25,6 @@ $response->scripts = [
     "assets/js/comments.js",
 ];
 
-// access permission variables
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // update the assignment permission
 $hasUpdate = $accessObject->hasAccess("update", "assignments");
 

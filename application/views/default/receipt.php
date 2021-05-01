@@ -2,6 +2,8 @@
 // set the item id
 $item_id = $SITEURL[1] ?? null;
 
+global $defaultUser;
+
 // base url
 $receipt = "";
 $baseUrl = config_item("base_url");
@@ -16,15 +18,16 @@ if(!empty($item_id) && $session->clientId) {
     $item_param = (object) [
         "clientId" => $clientId,
         "item_id" => $item_id,
-        "userData" => $defaultUser
+        "userData" => $defaultUser,
+        "client_data" => $defaultUser->client,
     ];
     $data = load_class("fees", "controllers", $item_param)->list($item_param)["data"];
 
-    // set the first key
-    $data = $data[0];
-
     // if the record was found
     if(!empty($data)) {
+
+        // set the first key
+        $data = $data[0];
 
         // get the client data
         $client = $myClass->client_data($clientId);

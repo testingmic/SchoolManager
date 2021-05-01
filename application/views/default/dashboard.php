@@ -22,11 +22,6 @@ $clientId = $session->clientId;
 $loggedUserId = $session->userId;
 $cur_user_id = (confirm_url_id(1)) ? xss_clean($SITEURL[1]) : $loggedUserId;
 
-// get the user data
-$accessObject->clientId = $clientId;
-$accessObject->userId = $loggedUserId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // filters
 $response = (object) [];
 $response->title = "Dashboard : {$appName}";
@@ -252,6 +247,7 @@ if($isWardTutorParent) {
             $params = (object) [
                 "clientId" => $clientId,
                 "userData" => $defaultUser,
+                "client_data" => $defaultUser->client,
                 "student_array_ids" => $defaultUser->wards_list_ids
             ];
             $item_list = load_class("fees", "controllers", $params)->list($params)["data"];
@@ -357,6 +353,8 @@ if($isWardTutorParent) {
 
 }
 
+$global_period = $isWardParent ? "this_term" : "last_14days";
+
 // set the response dataset
 $response->html = '
     <section class="section">
@@ -437,7 +435,7 @@ $response->html = '
                 </div>
             </div>' : ''
         ).'
-        <div class="row default_period" data-current_period="this_term">
+        <div class="row default_period" data-current_period="'.$global_period.'">
             '.($isAdminAccountant ?
             '<div class="col-md-12">
                 <div class="card">

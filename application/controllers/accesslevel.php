@@ -112,7 +112,7 @@ class Accesslevel {
     public function hasAccess($role, $currentPage = null) {
         
         // Check User Roles Table
-        $permits = !empty($this->userPermits) ? $this->userPermits : $this->getUserPermissions();
+        $permits = !empty($this->userPermits) ? $this->userPermits : [];
         
         // user permissions
         if ($permits != false) {

@@ -42,10 +42,6 @@ if(!empty($session->clientId)) {
     // load the event types
     $event_types_list = "";
 
-    $accessObject->userId = $session->userId;
-    $accessObject->clientId = $session->clientId;
-    $accessObject->userPermits = $defaultUser->user_permissions;
-
     $hasEventAdd = $accessObject->hasAccess("add", "events");
     $hasEventDelete = $accessObject->hasAccess("delete", "events");
     $hasEventUpdate = $accessObject->hasAccess("update", "events");

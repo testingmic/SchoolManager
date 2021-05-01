@@ -19,11 +19,6 @@ $response = (object) [];
 $pageTitle = "Upload Results";
 $response->title = "{$pageTitle} : {$appName}";
 
-// specify some variables
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // confirm that the user has the required permissions
 $the_form = load_class("forms", "controllers")->terminal_reports($clientId);
 
@@ -33,9 +28,10 @@ $response->scripts = ["assets/js/grading.js", "assets/js/results.js"];
 // get the list of all classes
 $report_param = (object) [
     "userData" => $defaultUser,
+    "client_data" => $defaultUser->client,
     "clientId" => $clientId,
 ];
-$reports_list = load_class("terminal_reports", "controllers")->reports_list($report_param)["data"];
+$reports_list = load_class("terminal_reports", "controllers", $report_param)->reports_list($report_param)["data"];
 
 $terminal_reports_list = "";
 foreach($reports_list as $key => $report) {

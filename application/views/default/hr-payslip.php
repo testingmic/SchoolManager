@@ -23,9 +23,6 @@ $response->scripts = ["assets/js/filters.js"];
 
 $userId = $session->userId;
 $clientId = $session->clientId;
-$accessObject->clientId = $clientId;
-$accessObject->userId = $session->userId;
-$accessObject->userPermits = $defaultUser->user_permissions;
 
 $generatePermission = $accessObject->hasAccess("generate", "payslip");
 $validatePayslip = $accessObject->hasAccess("validate", "payslip");

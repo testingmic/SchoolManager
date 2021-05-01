@@ -26,10 +26,6 @@ $params = (object) [
 
 $item_list = load_class("rooms", "controllers")->list($params);
 
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 $hasAdd = $accessObject->hasAccess("add", "library");
 $hasDelete = $accessObject->hasAccess("delete", "library");
 $hasUpdate = $accessObject->hasAccess("update", "library");

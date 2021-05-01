@@ -26,10 +26,6 @@ $department_param = (object) [
 
 $item_list = load_class("library", "controllers")->category_list($department_param);
 
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 $hasAdd = $accessObject->hasAccess("add", "library");
 $hasDelete = $accessObject->hasAccess("delete", "library");
 $hasUpdate = $accessObject->hasAccess("update", "library");

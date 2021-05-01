@@ -20,11 +20,6 @@ $response = (object) [];
 $pageTitle = "Staff Payroll Details";
 $response->title = "{$pageTitle} : {$appName}";
 
-// the query parameter to load the user information
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // access permissions check
 if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
     $response->html = page_not_found();

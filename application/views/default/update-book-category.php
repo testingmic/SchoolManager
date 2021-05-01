@@ -20,10 +20,6 @@ $response = (object) [];
 $pageTitle = "Book Category Details";
 $response->title = "{$pageTitle} : {$appName}";
 
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 $response->scripts = [
     "assets/js/library.js"
 ];

@@ -19,11 +19,6 @@ $response = (object) [];
 $pageTitle = "Timetable";
 $response->title = "{$pageTitle} : {$appName}";
 
-// specify some variables
-$accessObject->userId = $session->userId;
-$accessObject->clientId = $session->clientId;
-$accessObject->userPermits = $defaultUser->user_permissions;
-
 // confirm that the user has the required permissions
 if(!$accessObject->hasAccess("manage", "timetable")) {
     // show the error page

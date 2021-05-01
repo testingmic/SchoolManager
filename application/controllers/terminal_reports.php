@@ -876,7 +876,13 @@ class Terminal_reports extends Myschoolgh {
             global $accessObject;
 
             // set the student id if the user do not have the permission to view the report for the entire class
-            $params->student_id = $accessObject->hasAccess("generate", "results") ? null : $accessObject->userId;
+            if(isset($params->student_id)) {
+                $params->student_id = $params->student_id;
+            } elseif($accessObject->hasAccess("generate", "results") && !isset($params->student_id)) {
+                $params->student_id = null;
+            } else {
+                $params->student_id = $accessObject->userId;
+            }
 
             // if the class id was not found
             if(empty($params->class_id) || empty($this->iclient->client_preferences)) {
