@@ -33,6 +33,7 @@ if(!empty($item_id)) {
     $item_param = (object) [
         "clientId" => $clientId,
         "item_id" => $item_id,
+        "client_data" => $defaultUser->client,
         "userData" => $defaultUser
     ];
     $data = load_class("fees", "controllers", $item_param)->list($item_param)["data"];

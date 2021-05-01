@@ -50,6 +50,7 @@ if(!$receivePayment) {
         /** Create a parameter */
         $params = (object) [
             "clientId" => $clientId,
+            "client_data" => $defaultUser->client,
             "checkout_url" => $checkout_url
         ];
         /** Create a new object */

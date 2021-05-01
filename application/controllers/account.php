@@ -7,6 +7,7 @@ class Account extends Myschoolgh {
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
 
+        // set the columns for the import of csv files
         $this->accepted_column["student"] = [
             "unique_id" => "Student ID", "firstname" => "Firstname", "lastname" => "Lastname", 
             "othername" => "Othernames", "email" => "Email", "phone_number" => "Contact Number",

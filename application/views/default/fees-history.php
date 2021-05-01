@@ -45,6 +45,7 @@ if(!empty($filter->department_id)) {
 $params = (object) [
     "clientId" => $clientId,
     "userData" => $defaultUser,
+    "client_data" => $defaultUser->client,
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
     "category_id" => $filter->category_id ?? null

@@ -688,7 +688,7 @@ class Attendance extends Myschoolgh {
                         // append the absent log to it.
                         // $users_count["days_list"][$the_day][$the_label] = 0;
                     } else {
-                        $users_count["days_list"][$the_day] = "absent";
+                        $users_count["days_list"][$the_day] = "Not Logged";
                     }
                 }
 

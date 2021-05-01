@@ -43,11 +43,25 @@ class Models {
         ];
 
         $this->accepted_period = [
+            "this_term" => [
+                "title" => "This Term",
+                "alt" => [
+                    "key" => "last_term",
+                    "value" => "Last Term"
+                ]
+            ],
+            "last_term" => [
+                "title" => "Last Term",
+                "alt" => [
+                    "key" => "last_term",
+                    "value" => "Last Term"
+                ]
+            ],
             "today" => [
                 "title" => "Today",
                 "alt" => [
-                    "key" => "",
-                    "value" => ""
+                    "key" => "yesterday",
+                    "value" => "Yesterday"
                 ]
             ],
             "this_week" => [

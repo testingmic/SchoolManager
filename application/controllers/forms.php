@@ -3265,8 +3265,8 @@ class Forms extends Myschoolgh {
                     <label for="academic_year">Academic Year</label>
                     <select data-width="100%" name="general[academics][academic_year]" class="form-control selectpicker">
                         <option value="">Select Academic Year</option>';
-                            foreach($this->pushQuery("id, year_group", "academic_years", "1") as $each) {
-                                $general .= "<option ".(($client_data && $each->year_group === $prefs->academics->academic_year) ? "selected" : null)." value=\"{$each->year_group}\">{$each->year_group}</option>";                            
+                            foreach($this->academic_calendar_years as $year_group) {
+                                $general .= "<option ".(($client_data && $year_group === $prefs->academics->academic_year) ? "selected" : null)." value=\"{$year_group}\">{$year_group}</option>";                            
                             }
                         $general .= '</select>
                     </select>
@@ -3301,8 +3301,8 @@ class Forms extends Myschoolgh {
                     <label for="next_academic_year">Next Academic Year</label>
                     <select data-width="100%" name="general[academics][next_academic_year]" class="form-control selectpicker">
                         <option value="">Select Academic Year</option>';
-                            foreach($this->pushQuery("id, year_group", "academic_years", "1") as $each) {
-                                $general .= "<option ".(($client_data && $each->year_group === $prefs->academics->next_academic_year) ? "selected" : null)." value=\"{$each->year_group}\">{$each->year_group}</option>";                            
+                            foreach($this->academic_calendar_years as $year_group) {
+                                $general .= "<option ".(($client_data && $year_group === $prefs->academics->next_academic_year) ? "selected" : null)." value=\"{$year_group}\">{$year_group}</option>";                            
                             }
                         $general .= '</select>
                     </select>
@@ -3695,8 +3695,8 @@ class Forms extends Myschoolgh {
                 <div class='col-md-4 mb-2'>
                     <select data-width='100%' class='form-control selectpicker' name='academic_year' id='academic_year'>
                         <option value=''>Select Academic Year</option>";
-                            foreach($this->pushQuery("id, year_group", "academic_years", "1") as $each) {
-                                $the_form["general"] .= "<option ".(($client_data && $each->year_group === $prefs->academics->academic_year) ? "selected" : null)." value=\"{$each->year_group}\">{$each->year_group}</option>";                            
+                            foreach($this->academic_calendar_years as $year_group) {
+                                $the_form["general"] .= "<option ".(($client_data && $year_group === $prefs->academics->academic_year) ? "selected" : null)." value=\"{$year_group}\">{$year_group}</option>";                            
                             }
                         $the_form["general"] .= "</select>
                     </select>

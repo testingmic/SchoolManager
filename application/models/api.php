@@ -197,8 +197,13 @@ class Api {
         
         // get the client data
         $client_data = $this->myClass->client_data($this->clientId);
-        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $client_data->client_preferences->academics->academic_term;
-        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $client_data->client_preferences->academics->academic_year;
+        
+        // reassign the variable data
+        $academics = $client_data->client_preferences->academics;
+        
+        // set the academic year and term
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $academics->academic_term;
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $academics->academic_year;
 
         // set additional parameters
         $params->userId = $this->userId;
@@ -217,7 +222,7 @@ class Api {
         }
 
         // set the default object to parse when instantiating a class
-        $default = (object) ["clientId" => $this->clientId, "default_User_Id" => $this->userId];
+        $default = (object) ["clientId" => $this->clientId, "default_User_Id" => $this->userId, "client_data" => $client_data];
         
         // create a new class for handling the resource
         $classObject = load_class("{$this->inner_url}", "controllers", $default);

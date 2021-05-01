@@ -31,11 +31,19 @@ class Analitics extends Myschoolgh {
         ];
 
         // get the client data
-        $client_data = $this->client_data($params->clientId ?? null);
+        $client_data = $params->client_data;
 
         // run this query
-        $this->academic_term = $client_data->client_preferences->academics->academic_term;
-        $this->academic_year = $client_data->client_preferences->academics->academic_year;
+        $academics = $client_data->client_preferences->academics;
+        
+        $this->academic_term = $academics->academic_term;
+        $this->academic_year = $academics->academic_year;
+
+        $this->this_term_starts = $academics->term_starts;
+        $this->this_term_ends = $academics->term_ends;
+
+        $this->last_term_starts = $academics->last_term_starts ?? $academics->term_starts;
+        $this->last_term_ends = $academics->last_term_ends ?? $academics->term_ends;
 
     }
 
@@ -865,6 +873,16 @@ class Analitics extends Myschoolgh {
 
         // Check Sales Period
         switch ($datePeriod) {
+            case 'this_term':
+                $groupBy = "DATE";
+                $format = "jS M Y";
+                $currentTitle = "This Term";
+                $previousTitle = "Last Term";
+                $dateFrom = $this->this_term_starts;
+                $dateTo = $this->this_term_ends;
+                $prevFrom = $this->last_term_starts;
+                $prevTo = $this->last_term_ends;
+                break;
             case 'this_week':
                 $groupBy = "DATE";
                 $format = "jS M Y";

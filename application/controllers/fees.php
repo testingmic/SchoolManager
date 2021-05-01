@@ -19,7 +19,7 @@ class Fees extends Myschoolgh {
 		parent::__construct();
 
         // get the client data
-        $client_data = $this->client_data($params->clientId ?? null);
+        $client_data = $params->client_data;
 
         // run this query
         $this->academic_term = $client_data->client_preferences->academics->academic_term;

@@ -836,7 +836,8 @@ class Auth extends Myschoolgh {
                     "activation_code" => $token,
                     "date_created" => date("Y-m-d h:iA"),
                     "expiry" => date("Y-m-d h:iA", strtotime("+1 months"))
-                ]
+                ],
+                "opening_days" => $this->default_opening_days
             ];
 
             // check the user password to see if it meets the requirements

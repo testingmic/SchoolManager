@@ -892,10 +892,14 @@ class Terminal_reports extends Myschoolgh {
             $interpretation = $this->iclient->grading_system;
 
             // set the grading column
+            $column_count = 0;
             $grading_column = "";
 
             // loop through the grading columns
             foreach($grading as $key => $value) {
+                // increment the count
+                $column_count++;
+                // grading column
                 $grading_column .= "<td align=\"center\" width=\"11%\">".strtoupper($key)."</td>";
             }
 
@@ -936,6 +940,9 @@ class Terminal_reports extends Myschoolgh {
                     </tr>";
                 $table .= "</table>";
                 $table .= "<br><br><table style=\"font-size:11px\" cellpadding=\"5\" width=\"100%\" border=\"1\">";
+                $table .= "<tr style=\"font-weight:bold;font-size:15px;background-color:{$bg_color};color:#fff;\">";
+                $table .= "<td align=\"center\" colspan=\"".($column_count + 2)."\">END OF YEAR REPORT CARD</td>";
+                $table .= "</tr>";
                 $table .= "<tr style=\"font-weight:bold\">";
                 $table .= "<td width=\"25%\">SUBJECT</td>";
                 $table .= $grading_column;

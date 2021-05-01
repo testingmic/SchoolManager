@@ -43,11 +43,16 @@ if(!$receivePayment) {
 
     // load fees allocation list for class
     $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "receivePayment" => $receivePayment, "canAllocate" => $canAllocate];
-    $allocation_param->client = $defaultUser->client;
-    $class_allocation_list = load_class("fees", "controllers", $allocation_param)->class_allocation_array($allocation_param);
+    $allocation_param->client_data = $defaultUser->client;
+    
+    // create a new object
+    $feesObject = load_class("fees", "controllers", $allocation_param);
+
+    // load the class allocation list
+    $class_allocation_list = $feesObject->class_allocation_array($allocation_param);
 
     // load fees allocation list for the students
-    $student_allocation_list = load_class("fees", "controllers", $allocation_param)->student_allocation_array($allocation_param);
+    $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
 
     // info
     $info = "Use this form to assign fees to a class or to a particular student. Leave the student id field blank if you want to set for the entire class.";

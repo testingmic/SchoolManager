@@ -20,6 +20,10 @@ class Myschoolgh extends Models {
 	public $start_date;
     public $end_date;
 	public $client_data;
+	public $academic_calendar_years = [];
+	
+	// class opening days
+    public $default_opening_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 	public function __construct() {
 
@@ -39,6 +43,8 @@ class Myschoolgh extends Models {
 		$this->platform = $this->user_agent->platform();
 		$this->browser = $this->user_agent->browser();
 		$this->agent = $this->user_agent->agent_string();
+
+		$this->academic_years();
 	}
 
 	/**
@@ -791,6 +797,25 @@ class Myschoolgh extends Models {
         return (bool) (raw_time_diff($last_time->date_created) > $timer);
 
     }
+
+	/**
+	 * Construct the Academic Years to Load
+	 * 
+	 * @return Array
+	 */
+	public function academic_years() {
+		/** Set the Parameters */
+		$years = [];
+		$previous_year = 2017;
+		$next_years = date("Y") + 2;
+		
+		/** Loop through the list */
+		for($i = $previous_year; $i <= $next_years; $i++) {
+			$this->academic_calendar_years[] = ($i)."/".($i+1);
+		}
+
+		return $this;
+	}
 
 }
 ?>

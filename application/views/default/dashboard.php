@@ -437,7 +437,7 @@ $response->html = '
                 </div>
             </div>' : ''
         ).'
-        <div class="row default_period" data-current_period="last_14days">
+        <div class="row default_period" data-current_period="this_term">
             '.($isAdminAccountant ?
             '<div class="col-md-12">
                 <div class="card">

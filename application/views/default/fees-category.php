@@ -20,6 +20,7 @@ $response->title = "Fees Category List : {$appName}";
 $response->scripts = ["assets/js/fees.js"];
 
 $department_param = (object) [
+    "client_data" => $defaultUser->client,
     "clientId" => $session->clientId
 ];
 $fees_category_array_list = load_class("fees", "controllers")->category_list($department_param);

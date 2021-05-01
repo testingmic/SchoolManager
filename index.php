@@ -99,6 +99,8 @@ if(!empty($session->userId)) {
 	// if the result is not empty
 	if(!empty($defaultUser)) {
 		$defaultUser = $defaultUser[0];
+
+		// print_r($defaultUser);exit;
 		$isAdmin = (bool) ($defaultUser->user_type == "admin");
 		$isTutor = (bool) ($defaultUser->user_type == "teacher");
 		$isParent = (bool) ($defaultUser->user_type == "parent");
