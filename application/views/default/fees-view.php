@@ -184,10 +184,10 @@ if(!empty($item_id)) {
                                                 <div class="col-md-6 text-md-right">
                                                     <address>
                                                     <strong>Billed To:</strong><br>
-                                                    Keith Johnson<br>
-                                                    197 N 2000th E<br>
-                                                    Rexburg, ID,<br>
-                                                    Springfield Center, USA
+                                                    '.(!empty($data->student_info->guardian_id[0]->fullname) ? $data->student_info->guardian_id[0]->fullname : null).'
+                                                    '.(!empty($data->student_info->guardian_id[0]->address) ? "<br>" . $data->student_info->guardian_id[0]->address : null).'
+                                                    '.(!empty($data->student_info->guardian_id[0]->contact) ? "<br>" . $data->student_info->guardian_id[0]->contact : null).'
+                                                    '.(!empty($data->student_info->guardian_id[0]->email) ? "<br>" . $data->student_info->guardian_id[0]->email : null).'
                                                     </address>
                                                 </div>
                                             </div>
@@ -200,7 +200,7 @@ if(!empty($item_id)) {
                                                 </div>
                                                 <div class="col-md-6 text-md-right">
                                                     <address>
-                                                    <strong>Order Date:</strong><br>
+                                                    <strong>Payment Date:</strong><br>
                                                     '.$data->recorded_date.'<br><br>
                                                     </address>
                                                 </div>
@@ -209,7 +209,7 @@ if(!empty($item_id)) {
                                     </div>
                                     <div class="row mt-4">
                                         <div class="col-md-12">
-                                            <div class="section-title">Order Summary</div>
+                                            <div class="section-title">Payment Summary</div>
                                             <div class="table-responsive">
                                                 <table class="table table-striped table-hover table-md">
                                                     <tbody>

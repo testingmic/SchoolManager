@@ -76,7 +76,7 @@ if(!$receivePayment) {
                         </div>
                         <div class="card-body pt-0 pb-0">
                             <div class="py-3 pt-0" id="fees_allocation_form">
-
+                            
                                 <div class="form-group">
                                     <label>Allocate To <span class="required">*</span></label>
                                     <select class="form-control selectpicker" id="allocate_to" name="allocate_to">

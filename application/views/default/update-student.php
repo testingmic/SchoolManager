@@ -65,15 +65,37 @@ if(!empty($user_id)) {
         $receivePayment = !empty($canReceive) ? $canReceive : $isParent;
 
         // load fees allocation list for class
-        $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "student_id" => $user_id, "receivePayment" => $receivePayment];
+        $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "student_id" => $user_id, "receivePayment" => $receivePayment, "client_data" => $defaultUser->client];
         
         // load the class timetable
         $timetable = load_class("timetable", "controllers")->class_timetable($data->class_guid, $clientId);
 
+        $student_fees_payments = "";
+        $student_fees_list = [];
+        $amount = 0;
+
         // if the user has permissions to view fees allocation
         if($viewAllocation) {
+            // create a new object
+            $feesObject = load_class("fees", "controllers", $allocation_param);
+                        
             // load fees allocation list for the students
-            $student_allocation_list = load_class("fees", "controllers", $allocation_param)->student_allocation_array($allocation_param);
+            $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
+            $student_fees_list = $feesObject->list($allocation_param)["data"];
+
+            // loop through the list of all fees payment
+            foreach($student_fees_list as $key => $record) {
+                $amount += $record->amount;
+                $student_fees_payments .='
+                <tr>
+                    <td>'.($key+1).'</td>
+                    <td>'.$record->category_name.'</td>
+                    <td>'.$record->payment_method.'</td>
+                    <td>'.(!$record->description ? $record->description : null).'</td>
+                    <td>'.$record->recorded_date.'</td>
+                    <td class="text-right">'.$record->amount.'</td>
+                </tr>';
+            }
         }
 
         // populate the incidents
@@ -288,6 +310,10 @@ if(!empty($user_id)) {
                     '<li class="nav-item">
                         <a class="nav-link" id="fees-tab2" data-toggle="tab" href="#fees" role="tab"
                         aria-selected="true">Fees Allocation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab"
+                        aria-selected="true">Fees Payment</a>
                     </li>' : '').'
                     <li class="nav-item">
                         <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab"
@@ -354,6 +380,23 @@ if(!empty($user_id)) {
                                         </tr>
                                     </thead>
                                     <tbody>'.$student_allocation_list.'</tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="fees_payments" role="tabpanel" aria-labelledby="fees_payments-tab2">
+                            <div class="table-responsive">
+                                <table width="100%" class="table table-striped datatable">
+                                    <thead>
+                                        <tr>
+                                            <th data-width="40" style="width: 40px;">#</th>
+                                            <th>Item</th>
+                                            <th>Payment Method</th>
+                                            <th>Description</th>
+                                            <th>Record Date</th>
+                                            <th class="text-right">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>'.$student_fees_payments.'</tbody>
                                 </table>
                             </div>
                         </div>':'').'

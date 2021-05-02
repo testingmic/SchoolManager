@@ -78,11 +78,16 @@ var save_Receive_Payment = () => {
                     let payment_info = response.data.additional.payment;
                     $(`span[class="amount_paid"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.amount_paid}`);
                     $(`span[class="outstanding"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.balance}`);
-                    if (payment_info.paid_status === 1) {
+                    if (payment_info.paid_status === "1") {
                         $(`span[data-payment_label='status']`)
                             .removeClass('badge-danger badge-primary')
                             .addClass('badge-success')
                             .html("Paid");
+                    } else if (payment_info.paid_status === "2") {
+                        $(`span[data-payment_label='status']`)
+                            .removeClass('badge-danger badge-success')
+                            .addClass('badge-primary')
+                            .html("Partly Paid");
                     }
                     $(`div[class='last_payment_container']`).html(`
                     <table width="100%" class="t_table table-hover table-bordered">
@@ -93,11 +98,17 @@ var save_Receive_Payment = () => {
                                     <span class="last_payment_id"><strong>Payment ID:</strong> ${payment_info.last_payment_info.pay_id}</span><br>
                                     <span class="amount_paid"><i class="fa fa-money-bill"></i> ${payment_info.last_payment_info.currency} ${payment_info.last_payment_info.amount}</span><br>
                                     <span class="last_payment_date"><i class="fa fa-calendar-check"></i> ${payment_info.last_payment_info.created_date}</span><br>
-                                    <p class="mt-3 mb-0 pb-0" id="print_receipt"><a class="btn btn-sm btn-outline-primary" target="_blank" href="${baseUrl}print/${payment_info.last_payment_id}"><i class="fa fa-print"></i> Print Receipt</a></p>
+                                    <p class="mt-3 mb-0 pb-0" id="print_receipt"><a class="btn btn-sm btn-outline-primary" target="_blank" href="${baseUrl}receipt/${payment_info.last_payment_id}"><i class="fa fa-print"></i> Print Receipt</a></p>
                                 </td>
                             </tr>
                         </tbody>
                     </table>`);
+
+                    // reset the form
+                    $(`button[id="payment_cancel"]`).addClass("hidden");
+                    $(`div[id="fees_payment_form"] *`).prop("disabled", true);
+                    $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
+                    $(`div[id="fees_payment_form"] input, div[id="fees_payment_form"] textarea`).val("");
                 }
                 swal({
                     text: response.data.result,

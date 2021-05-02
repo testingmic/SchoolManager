@@ -1,15 +1,16 @@
 <?php 
 // set the item id
-$item_id = $SITEURL[1] ?? null;
+$receipt_id = $SITEURL[1] ?? null;
 
 global $defaultUser;
 
 // base url
-$receipt = "";
+$receipt = null;
 $baseUrl = config_item("base_url");
+$getObject = (object) $_GET;
 
 // if the item id was parsed
-if(!empty($item_id) && $session->clientId) {
+if($session->clientId) {
     
     // client id
     $clientId = $session->clientId;
@@ -17,19 +18,24 @@ if(!empty($item_id) && $session->clientId) {
     // set the parameters
     $item_param = (object) [
         "clientId" => $clientId,
-        "item_id" => $item_id,
+        "item_id" => $receipt_id,
         "userData" => $defaultUser,
         "client_data" => $defaultUser->client,
+        "student_id" => $getObject->student_id ?? null,
+        "category_id" => $getObject->category_id ?? null,
     ];
     $data = load_class("fees", "controllers", $item_param)->list($item_param)["data"];
 
     // if the record was found
     if(!empty($data)) {
 
-        // set the first key
-        $data = $data[0];
+        // if the receipt id was parsed
+        if(!empty($receipt_id)) {
+            $student_data = $data[0];
+        }
 
         // get the client data
+        $amount = 0;
         $client = $myClass->client_data($clientId);
         $clientPrefs = $client->client_preferences;
 
@@ -37,7 +43,7 @@ if(!empty($item_id) && $session->clientId) {
         $receipt = '
         <link rel="stylesheet" href="'.$baseUrl.'assets/css/app.min.css">
         <link rel="stylesheet" href="'.$baseUrl.'assets/css/style.css">
-        <div style="margin:auto auto; max-width:940px;">
+        <div style="margin:auto auto; max-width:1040px;">
             <div class="row mb-3">
                 <div class="text-dark bg-white col-md-12 p-3">
                     <div class="text-center">
@@ -54,83 +60,74 @@ if(!empty($item_id) && $session->clientId) {
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="invoice-title">
-                                        <h2>Invoice</h2>
-                                        <div style="font-size:20px" class="text-right">Order #'.$data->id.'</div>
+                                        <h2>Official Receipt</h2>
+                                        '.(!empty($receipt_id) ? '<div style="font-size:20px" class="text-right">Order #'.($student_data->id ?? null).'</div>' : null).'
                                     </div>
                                     <hr class="pb-0 mb-2 mt-0">
-                                    <div class="row">
+                                    '.(!empty($receipt_id) ?
+                                    '<div class="row">
                                         <div class="col-md-6">
                                             <address>
                                                 <strong>Student Details:</strong><br>
-                                                '.$data->student_info->name.'<br>
-                                                '.$data->student_info->unique_id.'<br>
-                                                '.$data->class_name.'<br>
-                                                '.$data->department_name.'<br>
+                                                '.($student_data->student_info->name ?? null).'<br>
+                                                '.($student_data->student_info->unique_id ?? null).'<br>
+                                                '.($student_data->class_name ?? null).'<br>
+                                                '.($student_data->department_name ?? null).'<br>
                                             </address>
                                         </div>
-                                        <div class="col-md-6 text-md-right">
+                                        '.(!empty($student_data->student_info->guardian_id) ?
+                                        '<div class="col-md-6 text-md-right">
                                             <address>
                                             <strong>Billed To:</strong><br>
-                                            Keith Johnson<br>
-                                            197 N 2000th E<br>
-                                            Rexburg, ID,<br>
-                                            Springfield Center, USA
+                                            '.(!empty($student_data->student_info->guardian_id[0]->fullname) ? $student_data->student_info->guardian_id[0]->fullname : null).'
+                                            '.(!empty($student_data->student_info->guardian_id[0]->address) ? "<br>" . $student_data->student_info->guardian_id[0]->address : null).'
+                                            '.(!empty($student_data->student_info->guardian_id[0]->contact) ? "<br>" . $student_data->student_info->guardian_id[0]->contact : null).'
+                                            '.(!empty($student_data->student_info->guardian_id[0]->email) ? "<br>" . $student_data->student_info->guardian_id[0]->email : null).'
                                             </address>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <address>
-                                            <strong>Payment Method:</strong><br>
-                                            '.$data->payment_method.'<br>
-                                            </address>
-                                        </div>
-                                        <div class="col-md-6 text-md-right">
-                                            <address>
-                                            <strong>Order Date:</strong><br>
-                                            '.$data->recorded_date.'<br><br>
-                                            </address>
-                                        </div>
-                                    </div>
+                                        </div>': '').'
+                                    </div>': '').'
                                 </div>
                             </div>
                             <div class="row mt-4">
                                 <div class="col-md-12">
-                                    <div class="section-title">Order Summary</div>
+                                    <div class="section-title">Payment Details</div>
                                     <div class="table-responsive">
                                         <table class="table table-striped table-hover table-md">
                                             <tbody>
                                             <tr>
                                                 <th data-width="40" style="width: 40px;">#</th>
+                                                '.(empty($receipt_id) ? '<th>Item</th>' : '').'
                                                 <th>Item</th>
-                                                <th class="text-center">Price</th>
-                                                <th class="text-center">Quantity</th>
-                                                <th class="text-right">Totals</th>
-                                            </tr>
-                                            <tr>
-                                                <td>1</td>
-                                                <td>'.$data->category_name.'</td>
-                                                <td class="text-center">'.$data->amount.'</td>
-                                                <td class="text-center">1</td>
-                                                <td class="text-right">'.$data->amount.'</td>
-                                            </tr>
-                                        </tbody>
+                                                <th>Payment Method</th>
+                                                <th>Description</th>
+                                                <th>Record Date</th>
+                                                <th class="text-right">Amount</th>
+                                            </tr>';
+                                            foreach($data as $key => $record) {
+                                                $amount += $record->amount;
+                                                $receipt .='<tr>
+                                                    <td>'.($key+1).'</td>
+                                                    '.(empty($receipt_id) ? '<td>
+                                                        '.$record->student_info->name.'
+                                                    </td>' : '').'
+                                                    <td>'.$record->category_name.'</td>
+                                                    <td>'.$record->payment_method.'</td>
+                                                    <td>'.(!$record->description ? $record->description : null).'</td>
+                                                    <td>'.$record->recorded_date.'</td>
+                                                    <td class="text-right">'.$record->amount.'</td>
+                                                </tr>';
+                                            }
+                                        $receipt .= '
+                                            </tbody>
                                         </table>
                                     </div>
                                     <div class="row mt-4">
-                                        <div class="col-lg-8">
-                                            <div class="section-title">Description</div>
-                                            <p class="section-lead">'.$data->description.'</p>
-                                        </div>
+                                        <div class="col-lg-8"></div>
                                         <div class="col-lg-4 text-right">
-                                            <div class="invoice-detail-item">
-                                                <div class="invoice-detail-name">Subtotal</div>
-                                                <div class="invoice-detail-value">'.$data->amount.'</div>
-                                            </div>
-                                            <hr class="mt-2 mb-2">
+                                            <hr class="mb-2">
                                             <div class="invoice-detail-item">
                                                 <div class="invoice-detail-name">Total</div>
-                                                <div class="invoice-detail-value invoice-detail-value-lg">'.$data->amount.'</div>
+                                                <div class="invoice-detail-value invoice-detail-value-lg">'.(number_format($amount, 2)).'</div>
                                             </div>
                                         </div>
                                     </div>
@@ -153,7 +150,8 @@ if(!empty($item_id) && $session->clientId) {
             window.onafterprint = (evt) => { window.close(); }
         </script>';
     }
+    print $receipt;
+} else {
+    no_file_log();
 }
-
-print $receipt;
 ?>

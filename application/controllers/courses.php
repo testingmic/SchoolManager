@@ -7,11 +7,11 @@ class Courses extends Myschoolgh {
         parent::__construct();
 
         // get the client data
-        $client_data = $this->client_data($params->clientId ?? null);
+        $client_data = $params->client_data ?? null;
 
         // run this query
-        $this->academic_term = $client_data->client_preferences->academics->academic_term;
-        $this->academic_year = $client_data->client_preferences->academics->academic_year;
+        $this->academic_term = $client_data->client_preferences->academics->academic_term ?? null;
+        $this->academic_year = $client_data->client_preferences->academics->academic_year ?? null;
     }
 
     /**
@@ -60,9 +60,9 @@ class Courses extends Myschoolgh {
         }
 
         $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id LIKE '%{$params->class_id}%'" : null;
-        $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : " AND a.academic_year='{$this->academic_year}'";
-        $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : " AND a.academic_term='{$this->academic_term}'";
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
+        $params->query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
+        $params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
 
         if(!isset($params->minified)) {
             $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;

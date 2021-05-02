@@ -167,6 +167,7 @@ elseif(isset($_GET["pay_id"]) && !isset($_GET["cs_mat"])) {
 
 /** Download Course Material (Units / Lessons) */
 elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"])) {
+    // assign the course variable
     $course = base64_decode(xss_clean($_GET["cs_mat"]));
     $course = explode("_", $course);
 
@@ -185,6 +186,7 @@ elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"
 
         // if data was found
         if(isset($course_info["data"][0])) {
+
             // get the information
             $course_info = $course_info["data"][0];
             $content = $courseObj->draw($course_info);

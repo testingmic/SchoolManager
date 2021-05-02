@@ -36,15 +36,17 @@ class Fees extends Myschoolgh {
 	 **/
 	public function list(stdClass $params) {
 
+        global $usersClass;
+
         $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
 
         /** Init the user type */
-        $student_id = $params->userData->user_id;
+        $student_id = $params->student_id ?? $params->userData->user_id;
         
         /** The user id algorithm */
-        if(in_array($params->userData->user_type, ["accountant", "admin"])) {
+        if(!isset($params->student_id) && in_array($params->userData->user_type, ["accountant", "admin"])) {
             $student_id = "";
-        } else if(in_array($params->userData->user_type, ["parent"])) {
+        } else if(!isset($params->student_id) && in_array($params->userData->user_type, ["parent"])) {
             // if the user is a parent
 			$student_id = isset($params->student_array_ids) ? $params->student_array_ids : $this->session->student_id;
         }
@@ -61,7 +63,7 @@ class Fees extends Myschoolgh {
         $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id IN {$this->inList($params->category_id)}" : ""; 
         $filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
-        $filters .= isset($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";
+        $filters .= isset($params->date) && !empty($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";
         $filters .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "recorded_date") : null;
 
         // if the return_where_clause was parsed
@@ -78,7 +80,7 @@ class Fees extends Myschoolgh {
                     (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
                     (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.phone_number,'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
-                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info
+                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.phone_number,'|',COALESCE(b.guardian_id,'NULL')) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info
                 FROM fees_collection a
                 LEFT JOIN users u ON u.item_id = a.student_id
 				WHERE {$filters} AND a.client_id = ? ORDER BY DATE(a.recorded_date) DESC LIMIT {$params->limit}
@@ -87,14 +89,13 @@ class Fees extends Myschoolgh {
 
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                // loop through the information
-                foreach(["student_info", "created_by_info"] as $each) {
-                    // confirm that it is set
-                    if(isset($result->{$each})) {
-                        // convert the created by string into an object
-                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["unique_id", "user_id", "name", "image","last_seen","online","user_type", "phone_number", "email"]);
-                    }
-                }
+                
+                // convert the created by string into an object
+                $result->created_by_info = (object) $this->stringToArray($result->created_by_info, "|", ["unique_id", "user_id", "name", "image","last_seen","online","user_type", "phone_number", "email"]);
+                $result->student_info = (object) $this->stringToArray($result->student_info, "|", ["unique_id", "user_id", "name", "image","last_seen","online","user_type", "phone_number", "guardian_id"]);
+
+                $result->student_info->guardian_id = isset($result->student_info->guardian_id) ? $usersClass->guardian_list($result->student_info->guardian_id, $result->client_id, true) : [];
+                
                 $data[] = $result;
             }
 
@@ -313,7 +314,7 @@ class Fees extends Myschoolgh {
                 $class_allocation_list .= "<td>{$each->class_name}</td>";
                 $class_allocation_list .= "<td>{$each->category_name}</td>";
                 $class_allocation_list .= "<td>{$each->currency} {$each->amount}</td>";
-                $class_allocation_list .= "<td></td>";
+                $class_allocation_list .= "<td align='center'></td>";
                 $class_allocation_list .= "</tr>";
             }
         }
@@ -352,7 +353,7 @@ class Fees extends Myschoolgh {
                 if($due === $balance) {
                     $label = "<br><span class='badge p-1 badge-danger'>Not Paid</span>";
                 } elseif($paid > 0 && !$isPaid) {
-                    $label = "<br><span class='badge p-1 badge-primary'>Part Paid</span>";
+                    $label = "<br><span class='badge p-1 badge-primary'>Partly Paid</span>";
                 }
 
                 // append to the url string
@@ -377,7 +378,7 @@ class Fees extends Myschoolgh {
 
                 // confirm if the user has the permission to make payment
                 if(!empty($params->receivePayment)) {
-                    $student_allocation_list .= "<td width='13%' class='pl-2'>";
+                    $student_allocation_list .= "<td width='13%' align='center' class='pl-2'>";
 
                     // confirm if the fee has been paid
                     if($isPaid) {
@@ -479,7 +480,7 @@ class Fees extends Myschoolgh {
                 <span class='last_payment_id'><strong>Payment ID:</strong> {$allocation->last_payment_uid}</span><br>
                 <span class='amount_paid'><i class='fa fa-money-bill'></i> {$allocation->last_payment_info["currency"]} {$allocation->last_payment_info["amount"]}</span><br>
                 <span class='last_payment_date'><i class='fa fa-calendar-check'></i> {$allocation->last_payment_date}</span><br>
-                <p class='mt-3 mb-0 pb-0' id='print_receipt'><a onclick='return print_receipt(\"{$allocation->last_payment_id}\")' class='btn btn-sm btn-outline-primary' target='_blank' href='#'><i class='fa fa-print'></i> Print Receipt</a></p>
+                <p class='mt-3 mb-0 pb-0' id='print_receipt'><a onclick='return paid_status(\"{$allocation->last_payment_id}\")' class='btn btn-sm btn-outline-primary' target='_blank' href='#'><i class='fa fa-print'></i> Print Receipt</a></p>
             </td>";
             $html_form .= "</tr>";
             $html_form .= "</table>";
@@ -863,7 +864,7 @@ class Fees extends Myschoolgh {
             $outstandingBalance = $paymentRecord->balance - $params->amount;
             $totalPayment = $paymentRecord->amount_paid + $params->amount;
 
-            $paid_status = (bool) ((round($totalPayment) === round($paymentRecord->amount_due)) || ($totalPayment > $paymentRecord->amount_due));
+            $paid_status = ((round($totalPayment) === round($paymentRecord->amount_due)) || ($totalPayment > $paymentRecord->amount_due)) ? 1 : 2;
 
             /* Confirm if the user has any credits */
             if($outstandingBalance < 0) {

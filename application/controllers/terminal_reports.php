@@ -108,6 +108,8 @@ class Terminal_reports extends Myschoolgh {
     public function result_score_list($report_id = null, $where = null) {
 
         try {
+
+            global $usersClass;
             
             $groupStudent = false;
             $where_clause = !empty($report_id) ? "a.report_id = '{$report_id}'" : $where;
@@ -121,7 +123,7 @@ class Terminal_reports extends Myschoolgh {
             }
 
             $stmt = $this->db->prepare("SELECT 
-                a.*, u.date_of_birth, u.unique_id
+                a.*, u.date_of_birth, u.unique_id, u.guardian_id
                 FROM grading_terminal_scores a
                 LEFT JOIN users u ON u.item_id = a.student_item_id
                 WHERE {$where_clause} LIMIT 150
@@ -148,6 +150,7 @@ class Terminal_reports extends Myschoolgh {
                             "unique_id" => $result->unique_id,
                             "average_score" => $result->average_score,
                             "class_name" => $result->class_name,
+                            "guardian_list" => $usersClass->guardian_list($result->guardian_id, $result->client_id, true),
                             "date_of_birth" => $result->date_of_birth,
                             "student_age" => convert_to_years($result->date_of_birth, date("Y-m-d")),
                             "academic_year" => $result->academic_year,
@@ -172,6 +175,8 @@ class Terminal_reports extends Myschoolgh {
      * Confirm that there is an existing record
     */
     public function check_existence(stdClass $params) {
+
+        // get the terminal logs
         $check = $this->pushQuery(
             "status", 
             "grading_terminal_logs", 
