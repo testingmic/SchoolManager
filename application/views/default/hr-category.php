@@ -34,6 +34,8 @@ $color = [
 $allowance_types = $myClass->pushQuery("*", "payslips_allowance_types", "client_id='{$clientId}' AND status='1' ORDER BY type");
 
 $allowance_array_list = [];
+
+// loop through the payslip category list
 foreach($allowance_types as $key => $each) {
     $allowance_array_list[$each->id] = $each;
     // payslips_allowance_types

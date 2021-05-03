@@ -18,12 +18,13 @@ jump_to_main($baseUrl);
 $response = (object) [];
 $response->title = "Books List : {$appName}";
 
-$department_param = (object) [
+$params = (object) [
     "clientId" => $session->clientId,
+    "client_data" => $defaultUser->client,
     "limit" => 99999
 ];
 
-$item_list = load_class("library", "controllers")->list($department_param);
+$item_list = load_class("library", "controllers", $params)->list($params);
 
 $hasAdd = $accessObject->hasAccess("add", "library");
 $hasDelete = $accessObject->hasAccess("delete", "library");

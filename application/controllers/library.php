@@ -12,8 +12,12 @@
  */
 class Library extends Myschoolgh {
 
-	public function __construct() {
+	private $iclient = [];
+
+	public function __construct(stdClass $params = null) {
 		parent::__construct();
+
+		$this->iclient = $params->client_data ?? [];
 	}
 
     /**
@@ -1168,7 +1172,7 @@ class Library extends Myschoolgh {
         $item_id = random_string("alnum", 32);
 		
 		$counter = $this->append_zeros(($this->itemsCount("books", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
-        $code = $this->client_data($params->clientId)->client_preferences->labels->book.$counter;
+        $code = $this->iclient->client_preferences->labels->book.$counter;
 
 		// confirm that a logo was parsed
         if(isset($params->book_image)) {

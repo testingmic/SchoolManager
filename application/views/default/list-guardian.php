@@ -22,10 +22,11 @@ $response->scripts = [];
 $guardian_param = (object) [
     "append_wards" => true,
     "user_type" => "parent",
-    "clientId" => $session->clientId
+    "clientId" => $session->clientId,
+    "client_data" => $defaultUser->client
 ];
 
-$guardian_list = load_class("users", "controllers")->list($guardian_param)["data"];
+$guardian_list = load_class("users", "controllers", $guardian_param)->list($guardian_param)["data"];
 
 $hasDelete = $accessObject->hasAccess("delete", "guardian");
 $hasUpdate = $accessObject->hasAccess("update", "guardian");

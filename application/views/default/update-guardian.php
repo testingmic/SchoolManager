@@ -36,9 +36,10 @@ if(!empty($user_id)) {
         "clientId" => $clientId,
         "user_id" => $user_id,
         "append_wards" => true,
+        "client_data" => $defaultUser->client
     ];
 
-    $data = load_class("users", "controllers")->list($guardian_param)["data"];
+    $data = load_class("users", "controllers", $guardian_param)->list($guardian_param)["data"];
     
     // if no record was found
     if(empty($data)) {

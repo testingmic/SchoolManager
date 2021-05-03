@@ -37,10 +37,11 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
         "clientId" => $session->clientId,
         "user_type" => $filter->user_type,
         "department_id" => $filter->department_id ?? null,
-        "gender" => $filter->gender ?? null
+        "gender" => $filter->gender ?? null,
+        "client_data" => $defaultUser->client
     ];
 
-    $api_staff_list = load_class("users", "controllers")->list($staff_param);
+    $api_staff_list = load_class("users", "controllers", $staff_param)->list($staff_param);
 
 
     $color = [

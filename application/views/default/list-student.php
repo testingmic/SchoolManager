@@ -29,7 +29,8 @@ $student_param = (object) [
     "userId" => $session->userId, 
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
-    "gender" => $filter->gender ?? null
+    "gender" => $filter->gender ?? null,
+    "client_data" => $defaultUser->client
 ];
 
 // if the current user is a parent then append this query
@@ -38,7 +39,7 @@ if($defaultUser->user_type === "parent") {
     $student_param->only_wards_list = true;
 }
 
-$student_list = load_class("users", "controllers")->list($student_param);
+$student_list = load_class("users", "controllers", $student_list)->list($student_param);
 
 $hasDelete = $accessObject->hasAccess("delete", "student");
 $hasUpdate = $accessObject->hasAccess("update", "student");

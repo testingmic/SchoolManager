@@ -28,11 +28,13 @@ if(!$hasIssue) {
 } else {
 
     $response->scripts = ["assets/js/library.js"];
+    $formsObject = load_class("forms", "controllers");
+
     $search = (object)["search_form" => true, "clientId" => $clientId];
-    $search_form = load_class("forms", "controllers")->library_book_issue_form($search);
+    $search_form = $formsObject->library_book_issue_form($search);
     
     $form = (object)["issue_form" => true, "clientId" => $clientId];
-    $issue_form = load_class("forms", "controllers")->library_book_issue_form($form);
+    $issue_form = $formsObject->library_book_issue_form($form);
 
     $response->html = '
         <section class="section">

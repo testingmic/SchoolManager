@@ -37,7 +37,8 @@ if(!empty($user_id)) {
         "limit" => 1,
         "full_details" => true,
         "no_limit" => 1,
-        "user_type" => "employee,teacher,admin,accountant"
+        "user_type" => "employee,teacher,admin,accountant",
+        "client_data" => $defaultUser->client
     ];
 
     // bypass check if the user is a student or parent
@@ -46,7 +47,7 @@ if(!empty($user_id)) {
         $staff_param->user_type = "teacher,accountant";
     }
 
-    $data = load_class("users", "controllers")->list($staff_param);
+    $data = load_class("users", "controllers", $staff_param)->list($staff_param);
     
     // if no record was found
     if(empty($data["data"])) {

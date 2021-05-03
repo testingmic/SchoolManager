@@ -29,16 +29,18 @@ $pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageT
 // if the user id is not empty
 if(!empty($user_id)) {
 
+    // set the student parameter
     $student_param = (object) [
         "clientId" => $clientId,
         "user_id" => $user_id,
         "limit" => 1,
         "full_details" => true,
         "no_limit" => 1,
-        "user_type" => "student"
+        "user_type" => "student",
+        "client_data" => $defaultUser->client
     ];
 
-    $data = load_class("users", "controllers")->list($student_param);
+    $data = load_class("users", "controllers", $student_param)->list($student_param);
     
     // if no record was found
     if(empty($data["data"])) {

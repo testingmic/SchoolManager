@@ -19,12 +19,13 @@ $response = (object) [];
 $pageTitle = "Books Category";
 $response->title = "{$pageTitle} : {$appName}";
 
-$department_param = (object) [
+$params = (object) [
     "clientId" => $session->clientId,
+    "client_data" => $defaultUser->client,
     "limit" => 9999
 ];
 
-$item_list = load_class("library", "controllers")->category_list($department_param);
+$item_list = load_class("library", "controllers", $params)->category_list($params);
 
 $hasAdd = $accessObject->hasAccess("add", "library");
 $hasDelete = $accessObject->hasAccess("delete", "library");

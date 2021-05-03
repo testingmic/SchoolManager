@@ -36,10 +36,11 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
             "user_id" => $userId,
             "limit" => 1,
             "user_payroll" => true,
-            "no_limit" => 1
+            "no_limit" => 1,
+            "client_data" => $defaultUser->client
         ];
 
-        $data = load_class("users", "controllers")->list($staff_param);
+        $data = load_class("users", "controllers", $staff_param)->list($staff_param);
 
         // if no record was found
         if(empty($data["data"])) {
