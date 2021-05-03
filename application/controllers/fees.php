@@ -424,10 +424,14 @@ class Fees extends Myschoolgh {
         if(!empty($allocation->last_payment_info)) {
             // assign a key to the concat value
             $allocation->last_payment_info = $this->stringToArray(
-                $allocation->last_payment_info, "|",
-                ["pay_id", "amount", "created_by", "created_date", "currency", "description"]
+                $allocation->last_payment_info, "|", [
+                    "pay_id", "amount", "created_by", "created_date", "currency",
+                    "description", "payment_method","cheque_bank", "cheque_number"
+                ]
             );
         }
+
+        // print_r($allocation->last_payment_info);
 
         /** Set the label for the amount */
         if(($allocation->amount_paid > 1) && (round($allocation->amount_due) > round($allocation->amount_paid))) {
@@ -448,7 +452,7 @@ class Fees extends Myschoolgh {
         $html_form .= "<div class='table-responsive'>";
         $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
         $html_form .= "<tr>";
-        $html_form .= "<td width='55%'>Amount Due:</td>";
+        $html_form .= "<td width='43%'>Amount Due:</td>";
         $html_form .= "<td>{$currency} {$allocation->amount_due}</td>";
         $html_form .= "</tr>";
         $html_form .= "<tr>";
@@ -477,15 +481,29 @@ class Fees extends Myschoolgh {
             $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
             // set the rows for the last payment id
             $html_form .= "<tr>";
-            $html_form .= "<td width='55%'>Last Payment Info:</td>";
-            $html_form .= "
-            <td>
-                <span class='last_payment_id'><strong>Payment ID:</strong> {$allocation->last_payment_uid}</span><br>
+            $html_form .= "<td width='43%'>Last Payment Info:</td><td>";
+            
+            // payment information
+            $html_form .= "<span class='last_payment_id'><strong>Payment ID:</strong> {$allocation->last_payment_uid}</span><br>
                 <span class='amount_paid'><i class='fa fa-money-bill'></i> {$allocation->last_payment_info["currency"]} {$allocation->last_payment_info["amount"]}</span><br>
-                <span class='last_payment_date'><i class='fa fa-calendar-check'></i> {$allocation->last_payment_date}</span><br>
-                <p class='mt-3 mb-0 pb-0' id='print_receipt'><a onclick='return paid_status(\"{$allocation->last_payment_id}\")' class='btn btn-sm btn-outline-primary' target='_blank' href='#'><i class='fa fa-print'></i> Print Receipt</a></p>
-            </td>";
-            $html_form .= "</tr>";
+                <span class='last_payment_date'><i class='fa fa-calendar-check'></i> {$allocation->last_payment_date}</span><br>";
+
+            // payment method
+            $html_form .= "<hr class=\"mt-1 mb-1\">
+                <span><strong>Payment Method:</strong> {$allocation->last_payment_info["payment_method"]}</span><br>";
+
+            // if the payment method is a cheque
+            if($allocation->last_payment_info["payment_method"] === "Cheque") {
+                // check bank
+                $cheque_bank = explode("::", $allocation->last_payment_info["cheque_bank"])[0];
+
+                // show the check number and bank name
+                $html_form .= "<span><strong>Bank:</strong> {$cheque_bank}</span><br>";
+                $html_form .= "<span><strong>Cheque Number:</strong> {$allocation->last_payment_info["cheque_number"]}</span><br>";
+            }
+            // show the paid button
+            $html_form .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a onclick='return paid_status(\"{$allocation->last_payment_id}\")' class='btn btn-sm btn-outline-primary' target='_blank' href='#'><i class='fa fa-print'></i> Print Receipt</a></p>";
+            $html_form .= "</td></tr>";
             $html_form .= "</table>";
         }
 
@@ -806,7 +824,13 @@ class Fees extends Myschoolgh {
                     u.name AS student_name, u.department AS department_id, a.currency,
                     (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
                     (
-                        SELECT CONCAT(b.id,'|',b.amount,'|',b.created_by,'|',b.recorded_date,'|',b.currency,'|',b.description) 
+                        SELECT 
+                            CONCAT(
+                                b.id,'|',b.amount,'|',b.created_by,'|',b.recorded_date,'|',
+                                b.currency,'|',COALESCE(b.description,'NULL'),'|',
+                                COALESCE(b.payment_method,'NULL'),'|',COALESCE(b.cheque_bank,'NULL'),'|',
+                                COALESCE(b.cheque_number,'NULL')                                
+                            ) 
                         FROM fees_collection b 
                         WHERE b.item_id = a.last_payment_id LIMIT 1
                     ) AS last_payment_info
@@ -878,22 +902,32 @@ class Fees extends Myschoolgh {
             // generate a unique id for the payment record
             $uniqueId = random_string('alnum', 32);
             $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
-            $receiptId = $this->iclient->client_preferences->labels->receipt.$counter;
+            $receiptId = $this->iclient->client_preferences->labels->receipt_label.$counter;
 
             // get the currency
+            $params->payment_method = isset($params->payment_method) ? ucfirst($params->payment_method) : "Cash";
             $currency = $defaultUser->client->client_preferences->labels->currency ?? null;
+
+            // ensure that the bank_id and the cheque number are not empty
+            if(empty($params->bank_id) || empty($params->cheque_number)) {
+                return ["code" => 203, "data" => "Sorry! The bank name and cheque number cannot be empty."];
+            }
+
+            // append additional sql
+            $append_sql = ($params->payment_method === "Cheque") ? ", cheque_bank='{$params->bank_id}', cheque_number='{$params->cheque_number}'" : null;
 
             /* Record the payment made by the user */
             $stmt = $this->db->prepare("INSERT INTO fees_collection
                 SET client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
                 category_id = ?, amount = ?, created_by = ?, academic_year = ?, 
-                academic_term = ?, description = ?, currency = ?, receipt_id = ?
+                academic_term = ?, description = ?, currency = ?, receipt_id = ?, payment_method = ?
+                {$append_sql}
             ");
             $stmt->execute([
                 $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id, 
                 $paymentRecord->class_id, $paymentRecord->category_id, $params->amount, $params->userId, 
                 $paymentRecord->academic_year, $paymentRecord->academic_term, 
-                $params->description ?? "null", $currency, $receiptId
+                $params->description ?? null, $currency, $receiptId, $params->payment_method
             ]);
 
             /* Update the user payment record */

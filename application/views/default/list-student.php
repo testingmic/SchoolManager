@@ -39,7 +39,7 @@ if($defaultUser->user_type === "parent") {
     $student_param->only_wards_list = true;
 }
 
-$student_list = load_class("users", "controllers", $student_list)->list($student_param);
+$student_list = load_class("users", "controllers", $student_param)->list($student_param);
 
 $hasDelete = $accessObject->hasAccess("delete", "student");
 $hasUpdate = $accessObject->hasAccess("update", "student");

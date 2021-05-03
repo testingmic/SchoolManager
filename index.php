@@ -101,7 +101,7 @@ if(!empty($session->userId)) {
 		
 		// get the current user information
 		$defaultUser = $defaultUser[0];
-
+		
 		// set the parameters for the access object
 		$accessObject->userId = $defaultUser->user_id;
 		$accessObject->clientId = $defaultUser->client_id;

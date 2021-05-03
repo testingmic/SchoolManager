@@ -71,10 +71,17 @@ foreach($item_list["data"] as $key => $each) {
             </div>
         </td>";
     $fees_history .= "<td>{$each->class_name}</td>";
-    $fees_history .= "<td>{$each->currency} {$each->amount}</td>";
     $fees_history .= "<td>{$each->category_name}</td>";
-    $fees_history .= "<td>{$each->recorded_date}</td>";
-    $fees_history .= "<td>{$each->created_by_info->name}</td>";
+    $fees_history .= "<td>{$each->currency} {$each->amount}</td><td>";
+    $fees_history .= "<strong>{$each->payment_method}</strong>";
+
+    // if the payment method was a cheque
+    if($each->payment_method === "Cheque") {
+        $cheque_bank = explode("::", $each->cheque_bank)[0];
+        $fees_history .= "<br><strong>{$cheque_bank}</strong>";
+        $fees_history .= "<br><strong>#{$each->cheque_number}</strong>";
+    }
+    $fees_history .= "</td><td>{$each->created_by_info->name} <br> <i class='fa fa-calendar'></i> {$each->recorded_date}</td>";
     $fees_history .= "<td width='10%' align='center'>{$action}</td>";
     $fees_history .= "</tr>";
 }
@@ -135,8 +142,8 @@ $response->html = '
                                     <th>Class</th>
                                     <th width="10%">Fees Type</th>
                                     <th>Amount</th>
-                                    <th>Date</th>
-                                    <th>Recorded By</th>
+                                    <th>Payment Method</th>
+                                    <th>Recorded By / Date</th>
                                     <th align="center" width="12%"></th>
                                 </tr>
                             </thead>

@@ -44,7 +44,7 @@ var save_Receive_Payment = () => {
     let $balance = parseInt($(`span[class="outstanding"]`).attr("data-amount_payable")),
         $amount = parseInt($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
         description = $(`div[id="fees_payment_form"] textarea[name="description"]`).val(),
-        payment_mode = $(`div[id="fees_payment_form"] select[name="payment_mode"]`).val(),
+        payment_method = $(`div[id="fees_payment_form"] select[name="payment_method"]`).val(),
         checkout_url = $(`span[class="outstanding"]`).attr("data-checkout_url"),
         t_message = "";
 
@@ -67,8 +67,12 @@ var save_Receive_Payment = () => {
                 "amount": $amount,
                 "description": description,
                 "checkout_url": checkout_url,
-                "payment_mode": payment_mode
+                "payment_method": payment_method
             };
+            if ($(`select[name="payment_method"]`).val() === "cheque") {
+                data["bank_id"] = $(`select[name="bank_id"]`).val();
+                data["cheque_number"] = $(`input[name="cheque_number"]`).val();
+            }
             $.post(`${baseUrl}api/fees/make_payment`, data).then((response) => {
                 let s_icon = "error";
                 if (response.code === 200) {
@@ -105,6 +109,7 @@ var save_Receive_Payment = () => {
                     </table>`);
 
                     // reset the form
+                    $(`div[id="cheque_payment_filter"]`).addClass("hidden");
                     $(`button[id="payment_cancel"]`).addClass("hidden");
                     $(`div[id="fees_payment_form"] *`).prop("disabled", true);
                     $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
@@ -114,7 +119,12 @@ var save_Receive_Payment = () => {
                     text: response.data.result,
                     icon: s_icon,
                 });
-            }).catch(() => {});
+            }).catch(() => {
+                swal({
+                    text: "Sorry! There was an error while trying to process the request.",
+                    icon: "error",
+                });
+            });
         }
     });
 }
@@ -235,3 +245,12 @@ $(`div[id="fees_allocation_form"] select[name="student_id"]`).on("change", funct
     }
 });
 $(`div[class~="toggle-calculator"]`).removeClass("hidden");
+
+$(`select[name="payment_method"]`).on("change", function() {
+    let mode = $(this).val();
+    if (mode === "cash") {
+        $(`div[id="cheque_payment_filter"]`).addClass("hidden");
+    } else {
+        $(`div[id="cheque_payment_filter"]`).removeClass("hidden");
+    }
+});

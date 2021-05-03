@@ -71,8 +71,8 @@ if(!$receivePayment) {
         $student_id = $data->student_id;
         $category_id = $data->category_id;
         $department_id = $data->department_id;
-        $disabled = $data->paid_status ? "disabled='disabled'" : null;
-        $search_disabled = $data->paid_status ? null : "disabled='disabled'";
+        $disabled = $data->paid_status === 1 ? "disabled='disabled'" : null;
+        $search_disabled = $data->paid_status === 1 ? null : "disabled='disabled'";
 
         // append the allocation information to the parameters before fetching the payment form
         $params->allocation_info = $data;
@@ -97,6 +97,9 @@ if(!$receivePayment) {
     // load the classes list
     $classes_param = (object) ["clientId" => $clientId, "columns" => "id, name"];
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+
+    // get the list of banks
+    $banks_list = $myClass->pushQuery("id, bank_name, phone_number", "fees_collection_banks", "1 ORDER BY bank_name");
 
     // append the html content
     $response->html = '
@@ -177,9 +180,24 @@ if(!$receivePayment) {
                             <div class="col-12 col-md-5" id="fees_payment_form">
                                 <div class="form-group">
                                     <label>Payment Medium</label>
-                                    <select '.$disabled.' class="form-control selectpicker" name="payment_mode" id="payment_mode">
+                                    <select '.$disabled.' class="form-control selectpicker" name="payment_method" id="payment_method">
                                         <option value="cash">Cash</option>
+                                        <option value="cheque">Cheque</option>
                                     </select>
+                                </div>
+                                <div class="form-group hidden" id="cheque_payment_filter">
+                                    <label>Bank Name</label>
+                                    <select '.$disabled.' data-width="100%" class="form-control selectpicker" id="bank_id" name="bank_id">
+                                        <option value="">Select Bank Name</option>';
+                                    foreach($banks_list as $bank) {
+                                        $response->html .= "<option value=\"{$bank->bank_name}::{$bank->id}\">{$bank->bank_name}</option>";
+                                    }
+                                    $response->html .=
+                                    '</select>
+                                </div>
+                                <div class="form-group hidden" id="cheque_payment_filter">
+                                    <label>Cheque Number</label>
+                                    <input '.$disabled.' class="form-control text-uppercase" name="cheque_number" id="cheque_number" type="number" min="0">
                                 </div>
                                 <div class="form-group">
                                     <label>Amount</label>

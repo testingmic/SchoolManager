@@ -566,7 +566,7 @@ class Analitics extends Myschoolgh {
                     /** The policies created for the period */
                     $stmt = $this->db->prepare("
                         SELECT 
-                            COUNT(*) AS value, {$this->group_by}(a.recorded_date) AS value_date
+                            COUNT(*) AS value, {$this->group_by}(a.recorded_date) AS value_date, SUM(a.amount) AS amount_value
                         FROM fees_collection a 
                         WHERE 
                             a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
@@ -579,11 +579,39 @@ class Analitics extends Myschoolgh {
                     $counter = $stmt->fetchAll(PDO::FETCH_OBJ);
                     $result["revenue_received_count"][$range_key]["data"] = $counter;
 
+                    /** The policies created for the period */
+                    $class_stmt = $this->db->prepare("
+                        SELECT 
+                            COUNT(*) AS value, {$this->group_by}(a.class_id) AS value_date, SUM(a.amount) AS amount_value
+                        FROM fees_collection a 
+                        WHERE 
+                            a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
+                            AND (
+                                DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
+                            ) {$this->class_idm_query}
+                        GROUP BY {$this->group_by}(a.recorded_date)
+                    ");
+                    $class_stmt->execute();
+                    $class_counter = $class_stmt->fetchAll(PDO::FETCH_OBJ);
+                    $result["revenue_received_byclass_count"][$range_key]["data"] = $class_counter;
+
+                    // create new array
+                    $class_count_converted = [];
+                    // convert to int
+                    foreach($class_counter as $count) {
+                        $count->value = (float) $count->value;
+                        $count->amount_value = (float) $count->amount_value;
+                        $class_count_converted[] = $count;
+                    }
+                    // assign the int cast value back to the array
+                    $result["revenue_received_byclass_count"][$range_key]["data"] = $class_count_converted;
+
                     // create new array
                     $count_converted = [];
                     // convert to int
                     foreach($counter as $count) {
                         $count->value = (float) $count->value;
+                        $count->amount_value = (float) $count->amount_value;
                         $count_converted[] = $count;
                     }
                     // assign the int cast value back to the array
@@ -608,16 +636,6 @@ class Analitics extends Myschoolgh {
                         $revenue_total_sum = !empty($amount_received) ? array_sum(array_column($amount_received, "value")) : 0;
                         $this->final_report["summary_report"][$range_key]["data"]["revenue_received_amount"] = $revenue_total_sum;
                     }
-
-                    // create new array
-                    $amount_converted = [];
-                    // convert to int
-                    foreach($amount_received as $amount) {
-                        $amount["value"] = (float) $amount["value"];
-                        $amount_converted[] = $amount;
-                    }
-                    // assign the int cast value back to the array
-                    $result["revenue_received_amount"][$range_key]["data"] = $amount_converted;
 
                     // loop through the results set
                     foreach($result as $the_key => $value) {
