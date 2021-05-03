@@ -2634,7 +2634,7 @@ class Forms extends Myschoolgh {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Type<span class="required">*</span></label>
-                            <select '.$disabled.' name="type" id="type" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
+                            <select '.$disabled.' data-width="100%" name="type" id="type" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
                                 <option value="null">Select</option>';
                                 if(isset($data->event_types)) {
                                     foreach($data->event_types as $key => $value) {
@@ -2648,7 +2648,7 @@ class Forms extends Myschoolgh {
                     <div class="col-md-4">
                         <div class="form-group">
                             <label>Audience<span class="required">*</span></label>
-                            <select '.$disabled.' name="audience" id="audience" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
+                            <select '.$disabled.' data-width="100%" name="audience" id="audience" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
                                 <option value="null">Select</option>';
                                 foreach($this->event_audience as $key => $value) {
                                     $html_content .= "<option ".(isset($data->item_id) && ($data->audience == $key) ? "selected='selected'" : "")." value='{$key}'>{$value}</option>";
@@ -2703,7 +2703,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4">
                     <div class="form-group pt-0">
                         <label for="">Event Status</label>
-                        <select '.$disabled.' class="form-control selectpicker" id="status" name="status">
+                        <select '.$disabled.' data-width="100%" class="form-control selectpicker" id="status" name="status">
                             <option '.($state == "Pending" ? "selected" : null).' value="Pending">Pending</option>
                             <option '.($state == "Ongoing" ? "selected" : null).' value="Ongoing">Ongoing</option>
                             <option '.($state == "Held" ? "selected" : null).' value="Held">Held</option>

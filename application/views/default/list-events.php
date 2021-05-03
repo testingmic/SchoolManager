@@ -54,15 +54,17 @@ if(!empty($session->clientId)) {
         // loop through the list
         foreach($event_types as $type) {
             $event_types_list .= "
-            <div class='col-lg-12'>
+            <div class='col-lg-12 col-md-6'>
                 <div class='card mb-2' data-row_id='{$type->item_id}'>
-                    <div class='card-header p-2 text-uppercase'>{$type->name}</div>
+                    <div class='card-header p-2 text-uppercase'><strong>{$type->name}</strong></div>
                     ".(!empty($type->description) ? "<div class='card-body p-2'>{$type->description}</div>" : "")."
                     <div class='card-footer p-2'>
-                        <div class='d-flex justify-content-between'>
-                            ".($hasEventUpdate ? "<div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</button></div>": "")."
-                            ".($hasEventDelete ? "<div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a></div>" : "")."
-                        </div>
+                        ".($type->slug !== "public-holiday" ? 
+                            "<div class='d-flex justify-content-between'>
+                                ".($hasEventUpdate ? "<div><button onclick='return update_Event_Type(\"{$type->item_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</button></div>": "")."
+                                ".($hasEventDelete ? "<div><a href='#' onclick='return delete_record(\"{$type->item_id}\", \"event_type\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a></div>" : "")."
+                            </div>" : ""
+                        )."
                     </div>
                 </div>
             </div>";
@@ -167,8 +169,8 @@ if(!empty($session->clientId)) {
                 '.($hasEventAdd ? '
                 <div class="col-sm-12 col-lg-3">
                     <h5>EVENT TYPES <span class="float-right"><button onclick="return add_Event_Type()" class="btn btn-sm btn-outline-primary"><i class="fa fa-plus"></i> Add New</button></span></h5>
-                    <div class="mt-3 slim-scroll p-2" style="max-height:700px;overflow-y:auto;" id="events_types_list">
-                        <div class="row p-3">
+                    <div class="mt-3 slim-scroll p-1" style="max-height:700px;overflow-y:auto;overflow-x:hidden;" id="events_types_list">
+                        <div class="row p-0">
                             '.$event_types_list.'
                         </div>
                     </div>

@@ -127,10 +127,17 @@ if($session->clientId) {
                                                             '.$record->student_info->name.'
                                                         </td>' : '').'
                                                         <td>'.$record->category_name.'</td>
-                                                        <td>'.$record->payment_method.'</td>
+                                                        <td>
+                                                            <strong>'.$record->payment_method.'</strong>
+                                                            '.(
+                                                                $record->payment_method === "Cheque" ? 
+                                                                "<br><strong>".explode("::", $record->cheque_bank)[0]."</strong><br>
+                                                                <strong>#{$record->cheque_number}</strong>" : ""    
+                                                            ).'
+                                                        </td>
                                                         <td>'.(!$record->description ? $record->description : null).'</td>
                                                         <td>'.$record->recorded_date.'</td>
-                                                        <td class="text-right">'.$record->amount.'</td>
+                                                        <td class="text-right"><strong>'.$record->amount.'</strong></td>
                                                     </tr>';
                                                 }
                                             } else {
@@ -146,7 +153,7 @@ if($session->clientId) {
                                             <hr class="mb-2">
                                             <div class="invoice-detail-item">
                                                 <div class="invoice-detail-name">Total</div>
-                                                <div class="invoice-detail-value invoice-detail-value-lg">'.(number_format($amount, 2)).'</div>
+                                                <div class="invoice-detail-value invoice-detail-value-lg"><strong>'.(number_format($amount, 2)).'</strong></div>
                                             </div>
                                         </div>
                                     </div>
@@ -165,8 +172,8 @@ if($session->clientId) {
             </div>
         </div>
         <script>
-            // window.onload = (evt) => { window.print(); }
-            // window.onafterprint = (evt) => { window.close(); }
+            window.onload = (evt) => { window.print(); }
+            window.onafterprint = (evt) => { window.close(); }
         </script>';
     }
     print $receipt;

@@ -794,7 +794,10 @@ class Auth extends Myschoolgh {
         
         try {
 
+            // check if an account aready exists with the same email address
             $a_check = $this->pushQuery("client_status", "clients_accounts", "client_email='{$params->email}' LIMIT 1");
+
+            // perform the checks
             if(!empty($a_check)) {
                 if($a_check[0]->client_status == 0) {
                     return ["code" => 201, "data" => "Sorry! You already have an account pending verification. Please wait while we verify."];
@@ -855,14 +858,18 @@ class Auth extends Myschoolgh {
             
             // create a client id
             $client_id = "MSGH".$this->append_zeros($last_id, 6);
+
+            // create and insert a new event with the slug public holiday
+            $evt_stmt = $this->db->prepare("INSERT INTO events_types SET client_id = ?, item_id = ?");
+            $evt_stmt->execute([$client_id, random_string("alnum", 32)]);
             
             // insert the client details
-            $stmt = $this->db->prepare("INSERT INTO clients_accounts SET 
+            $client_stmt = $this->db->prepare("INSERT INTO clients_accounts SET 
                 client_id = ?, client_name = ?, client_contact = ?, client_email = ?, client_preferences = ?, ip_address = ?
                 ".(isset($params->school_address) ? ",client_address='{$params->school_address}'" : null)."
                 ".(isset($contact_2) ? ",client_secondary_contact='{$contact_2}'" : null)."
             ");
-            $stmt->execute([$client_id, $params->school_name, $contact, $params->email, json_encode($preference), ip_address()]);
+            $client_stmt->execute([$client_id, $params->school_name, $contact, $params->email, json_encode($preference), ip_address()]);
 
             // get the user permissions
 		    $accessPermissions = $accessObject->getPermissions("admin");

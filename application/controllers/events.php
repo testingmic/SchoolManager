@@ -322,8 +322,13 @@ class Events extends Myschoolgh {
         $item_id = random_string("alnum", 32);
 
         /** Insert */
-        $stmt = $this->db->prepare("INSERT INTO events_types SET client_id = ?, item_id = ?, name = ?, description = ?, icon = ?, color_code = ?");
-        $stmt->execute([$params->clientId, $item_id, $params->name, $params->description ?? "", $params->icon ?? null, $params->color_code ?? null]);
+        $stmt = $this->db->prepare("INSERT INTO events_types SET 
+            client_id = ?, item_id = ?, name = ?, slug = ?,
+            description = ?, icon = ?, color_code = ?
+        ");
+        $stmt->execute([$params->clientId, $item_id, $params->name, create_slug($params->name), 
+            $params->description ?? "", $params->icon ?? null, $params->color_code ?? null
+        ]);
 
         /** Log the user activity */
         $this->userLogs("events_type", $item_id, null, "{$params->userData->name} created a new Event Type: {$params->name}", $params->userId);
@@ -367,13 +372,13 @@ class Events extends Myschoolgh {
         $params->hasEventUpdate = $accessObject->hasAccess("update", "events");
 
         /** Insert */
-        $stmt = $this->db->prepare("UPDATE events_types SET name = ?
+        $stmt = $this->db->prepare("UPDATE events_types SET name = ?, slug = ?
             ".(isset($params->description) ? ",description = '{$params->description}'" : "")."
             ".(isset($params->color_code) ? ",color_code = '{$params->color_code}'" : "")."
             ".(isset($params->icon) ? ",icon = '{$params->icon}'" : "")."
             WHERE client_id = ? AND item_id = ?
         ");
-        $stmt->execute([$params->name, $params->clientId, $item_id]);
+        $stmt->execute([$params->name, create_slug($params->name), $params->clientId, $item_id]);
 
         /** Refresh the JavaScript file */
         if($this->preload($params)) {
@@ -424,7 +429,7 @@ class Events extends Myschoolgh {
                         INTERVAL YEAR(CURDATE()) - YEAR(date_of_birth)
                             + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(date_of_birth), 1, 0)
                         YEAR)
-                    BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 70 DAY)
+                    BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
                 ) AND client_id = '{$data->client_id}' AND user_status='Active' AND status='1' AND deleted='0' ORDER BY date_of_birth ASC LIMIT 200"
             );
             
@@ -483,7 +488,7 @@ class Events extends Myschoolgh {
         ];  
 
         // init the parameters for the events (holidays and other events)
-        $params = (object) ["userData" => $data, "date_range" => $data->date_range ?? null, "clientId" => $data->client_id, "the_user_type" => $data->the_user_type];
+        $params = (object) ["userData" => $data, "date_range" => $data->events_date_range ?? null, "clientId" => $data->client_id, "the_user_type" => $data->the_user_type];
 
         // loop through the query to use
         foreach($array_list as $key => $each) {

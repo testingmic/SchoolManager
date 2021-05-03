@@ -36,6 +36,7 @@ $userData->client_id = $clientId;
 $userData->mini_description = true;
 $userData->the_user_type = $defaultUser->user_type;
 $userData->date_range = date("Y-m-d", strtotime("-20 days")).':'.date("Y-m-t", strtotime("+20 days"));
+$userData->events_date_range = date("Y-m-d", strtotime("-120 days")).':'.date("Y-m-t", strtotime("+120 days"));
 
 // load the events list
 $events_list = $eventClass->events_list($userData);

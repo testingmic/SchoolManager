@@ -56,7 +56,7 @@ if(!empty($item_id)) {
             <div class="section-header">
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'">Dashboard</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'fees-history">Payment History List</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
@@ -199,7 +199,12 @@ if(!empty($item_id)) {
                                                 <div class="col-md-6">
                                                     <address>
                                                     <strong>Payment Method:</strong><br>
-                                                    '.$data->payment_method.'<br>
+                                                    <strong>'.$data->payment_method.'</strong><br>
+                                                    '.(
+                                                        $data->payment_method === "Cheque" ? 
+                                                        "<strong>".explode("::", $data->cheque_bank)[0]."</strong><br>
+                                                        <strong>#{$data->cheque_number}</strong>" : ""    
+                                                    ).'
                                                     </address>
                                                 </div>
                                                 <div class="col-md-6 text-md-right">

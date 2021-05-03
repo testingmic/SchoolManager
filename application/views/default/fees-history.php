@@ -91,7 +91,7 @@ $response->html = '
     <div class="section-header">
         <h1>Fees Payments List</h1>
         <div class="section-header-breadcrumb">
-            <div class="breadcrumb-item active"><a href="'.$baseUrl.'">Dashboard</a></div>
+            <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
             <div class="breadcrumb-item">Fees Payments List</div>
         </div>
     </div>
