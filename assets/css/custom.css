@@ -452,3 +452,7 @@ textarea.form-control {
 .border-red {
     border: solid 1px #ff4000;
 }
+
+label {
+    font-weight: bold;
+}

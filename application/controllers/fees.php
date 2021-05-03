@@ -122,10 +122,10 @@ class Fees extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
-        $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
-        $params->query .= (isset($params->code)) ? " AND a.code='{$params->code}'" : null;
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->category_id)) ? " AND a.id='{$params->category_id}'" : null;
+        $params->query .= (isset($params->q) && !empty($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
+        $params->query .= (isset($params->code) && !empty($params->code)) ? " AND a.code='{$params->code}'" : null;
+        $params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->category_id) && !empty($params->category_id)) ? " AND a.id='{$params->category_id}'" : null;
 
         try {
 

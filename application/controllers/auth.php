@@ -148,6 +148,7 @@ class Auth extends Myschoolgh {
 
                                 // commit the transactions
                                 $this->db->commit();
+                                
                                 // return the response
                                 return $access;
                             }
@@ -168,7 +169,7 @@ class Auth extends Myschoolgh {
 
                             // update the last login for this user
                             $stmt = $this->db->prepare("UPDATE users SET last_login=now(), last_visited_page='{{APPURL}}dashboard', last_seen = now() WHERE item_id=? LIMIT 1");
-                            $stmt->execute([$results->user_id]);
+                            // $stmt->execute([$results->user_id]);
 
                             // commit all transactions
                             $this->db->commit();

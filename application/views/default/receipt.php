@@ -15,6 +15,10 @@ if($session->clientId) {
     // client id
     $clientId = $session->clientId;
 
+    $date_range = "";
+    $date_range .= isset($getObject->start_date) && !empty($getObject->start_date) ? $getObject->start_date : null;
+    $date_range .= isset($getObject->end_date) && !empty($getObject->end_date) ? ":" . $getObject->end_date : null;
+
     // set the parameters
     $item_param = (object) [
         "clientId" => $clientId,
@@ -23,16 +27,27 @@ if($session->clientId) {
         "client_data" => $defaultUser->client,
         "student_id" => $getObject->student_id ?? null,
         "category_id" => $getObject->category_id ?? null,
+        "date_range" => $date_range,
     ];
     $data = load_class("fees", "controllers", $item_param)->list($item_param)["data"];
 
     // if the record was found
-    if(!empty($data)) {
+    if(is_array($data)) {
+
+        // init variable
+        $student_data = [];
+        $studentIsset = (bool) isset($getObject->student_id) && !empty($getObject->student_id);
 
         // if the receipt id was parsed
         if(!empty($receipt_id)) {
             $student_data = $data[0];
         }
+
+        if($studentIsset) {
+            $student_data = $data[0];
+        }
+        
+        // print_r($student_data);
 
         // get the client data
         $amount = 0;
@@ -61,10 +76,10 @@ if($session->clientId) {
                                 <div class="col-lg-12">
                                     <div class="invoice-title">
                                         <h2>Official Receipt</h2>
-                                        '.(!empty($receipt_id) ? '<div style="font-size:20px" class="text-right">Order #'.($student_data->id ?? null).'</div>' : null).'
+                                        '.(!empty($receipt_id) ? '<div style="font-size:20px" class="text-right">Receipt ID #: '.($student_data->id ?? null).'</div>' : null).'
                                     </div>
                                     <hr class="pb-0 mb-2 mt-0">
-                                    '.(!empty($receipt_id) ?
+                                    '.(!empty($student_data) ?
                                     '<div class="row">
                                         <div class="col-md-6">
                                             <address>
@@ -103,19 +118,23 @@ if($session->clientId) {
                                                 <th>Record Date</th>
                                                 <th class="text-right">Amount</th>
                                             </tr>';
-                                            foreach($data as $key => $record) {
-                                                $amount += $record->amount;
-                                                $receipt .='<tr>
-                                                    <td>'.($key+1).'</td>
-                                                    '.(empty($receipt_id) ? '<td>
-                                                        '.$record->student_info->name.'
-                                                    </td>' : '').'
-                                                    <td>'.$record->category_name.'</td>
-                                                    <td>'.$record->payment_method.'</td>
-                                                    <td>'.(!$record->description ? $record->description : null).'</td>
-                                                    <td>'.$record->recorded_date.'</td>
-                                                    <td class="text-right">'.$record->amount.'</td>
-                                                </tr>';
+                                            if(!empty($data)) {
+                                                foreach($data as $key => $record) {
+                                                    $amount += $record->amount;
+                                                    $receipt .='<tr>
+                                                        <td>'.($key+1).'</td>
+                                                        '.(empty($receipt_id) ? '<td>
+                                                            '.$record->student_info->name.'
+                                                        </td>' : '').'
+                                                        <td>'.$record->category_name.'</td>
+                                                        <td>'.$record->payment_method.'</td>
+                                                        <td>'.(!$record->description ? $record->description : null).'</td>
+                                                        <td>'.$record->recorded_date.'</td>
+                                                        <td class="text-right">'.$record->amount.'</td>
+                                                    </tr>';
+                                                }
+                                            } else {
+                                                $receipt .= '<tr><td align="center" colspan="'.(empty($receipt_id) ? 7 : 6).'">No Record Found</td></tr>';
                                             }
                                         $receipt .= '
                                             </tbody>
@@ -146,8 +165,8 @@ if($session->clientId) {
             </div>
         </div>
         <script>
-            window.onload = (evt) => { window.print(); }
-            window.onafterprint = (evt) => { window.close(); }
+            // window.onload = (evt) => { window.print(); }
+            // window.onafterprint = (evt) => { window.close(); }
         </script>';
     }
     print $receipt;

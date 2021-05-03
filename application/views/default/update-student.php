@@ -76,12 +76,20 @@ if(!empty($user_id)) {
 
         // if the user has permissions to view fees allocation
         if($viewAllocation) {
+
             // create a new object
             $feesObject = load_class("fees", "controllers", $allocation_param);
                         
             // load fees allocation list for the students
+            $fees_category_list = "";
             $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
             $student_fees_list = $feesObject->list($allocation_param)["data"];
+            $fees_category_array = $feesObject->category_list($allocation_param)["data"];
+
+            // fees category
+            foreach($fees_category_array as $category) {
+                $fees_category_list .= "<option value=\"{$category->id}\">{$category->name}</option>";
+            }
 
             // loop through the list of all fees payment
             foreach($student_fees_list as $key => $record) {
@@ -93,7 +101,8 @@ if(!empty($user_id)) {
                     <td>'.$record->payment_method.'</td>
                     <td>'.(!$record->description ? $record->description : null).'</td>
                     <td>'.$record->recorded_date.'</td>
-                    <td class="text-right">'.$record->amount.'</td>
+                    <td align="right">'.$record->amount.'</td>
+                    <td><a href="'.$myClass->baseUrl.'receipt/'.$record->item_id.'" target="_blank" title="Click to print Receipt" class="btn btn-sm btn-outline-warning"><i class="fa fa-print"></i></a></td>
                 </tr>';
             }
         }
@@ -233,8 +242,8 @@ if(!empty($user_id)) {
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
                         <div class="clearfix"></div>
                         <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
-                        <div class="author-box-job">'.$data->class_name.'</div>
-                        <div class="author-box-job">('.$data->department_name.')</div>
+                        '.($data->class_name ? '<div class="author-box-job">'.$data->class_name.'</div>' : null).'
+                        '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : null).'
                     </div>
                     <div class="text-center">
                         <div class="author-box-description">'.$data->description.'</div>
@@ -384,20 +393,46 @@ if(!empty($user_id)) {
                             </div>
                         </div>
                         <div class="tab-pane fade" id="fees_payments" role="tabpanel" aria-labelledby="fees_payments-tab2">
-                            <div class="table-responsive">
-                                <table width="100%" class="table table-striped datatable">
-                                    <thead>
-                                        <tr>
-                                            <th data-width="40" style="width: 40px;">#</th>
-                                            <th>Item</th>
-                                            <th>Payment Method</th>
-                                            <th>Description</th>
-                                            <th>Record Date</th>
-                                            <th class="text-right">Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>'.$student_fees_payments.'</tbody>
-                                </table>
+                            <div class="row mb-3">
+                                <div class="col-lg-4">
+                                    <label>Filter by Category</label>
+                                    <select data-width="100%" id="category_id" class="selectpicker form-control">
+                                        <option value="">Select Category</option>
+                                        '.$fees_category_list.'
+                                    </select>
+                                </div>
+                                <div class="col-lg-3">
+                                    <label>Start Date</label>                                
+                                    <input value="'.date("Y-m-d", strtotime("first day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
+                                </div>
+                                <div class="col-lg-3">
+                                    <label>End Date</label>
+                                    <input value="'.date("Y-m-d", strtotime("last day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
+                                </div>
+                                <div class="col-lg-2">
+                                    <label>&nbsp;</label>
+                                    <button type="button" onclick="return generate_payment_report(\''.$user_id.'\');" class="btn btn-primary"><i class="fa fa-adjust"></i> Generate</button>
+                                </div>
+
+                                <div class="border-top pt-3 col-lg-12 mt-3">
+                                    <div class="table-responsive">
+                                        <table width="100%" class="table table-striped datatable">
+                                            <thead>
+                                                <tr>
+                                                    <th data-width="40" style="width: 40px;">#</th>
+                                                    <th>Item</th>
+                                                    <th>Payment Method</th>
+                                                    <th>Description</th>
+                                                    <th>Record Date</th>
+                                                    <th align="right">Amount</th>
+                                                    <th align="center"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>'.$student_fees_payments.'</tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>':'').'
                         <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">

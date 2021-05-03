@@ -15,6 +15,13 @@ async function randomInt(length = 12) {
     return result;
 }
 
+var generate_payment_report = (student_id) => {
+    let category_id = $(`select[id="category_id"]`).val(),
+        start_date = $(`input[name="group_start_date"]`).val(),
+        end_date = $(`input[name="group_end_date"]`).val();
+    window.open(`${baseUrl}receipt?category_id=${category_id}&start_date=${start_date}&end_date=${end_date}&student_id=${student_id}`);
+}
+
 $(`div[id="student_guardian_list"] button[class~="append-row"]`).on('click', async function(e) {
 
     let htmlData = $('div[id="student_guardian_list"] div[data-row]:last select').html(),
