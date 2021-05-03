@@ -15,11 +15,14 @@ if( !defined( 'SITE_URL' ) && !defined( 'SITE_DATE_FORMAT' ) ) die( 'Restricted 
  */
 class Fees extends Myschoolgh {
 
+    private $iclient = [];
+
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
 
         // get the client data
         $client_data = $params->client_data;
+        $this->iclient = $client_data;
 
         // run this query
         $this->academic_term = $client_data->client_preferences->academics->academic_term;
@@ -874,21 +877,23 @@ class Fees extends Myschoolgh {
 
             // generate a unique id for the payment record
             $uniqueId = random_string('alnum', 32);
+            $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+            $receiptId = $this->iclient->client_preferences->labels->receipt.$counter;
 
+            // get the currency
             $currency = $defaultUser->client->client_preferences->labels->currency ?? null;
 
             /* Record the payment made by the user */
-            $stmt = $this->db->prepare("
-                INSERT INTO fees_collection 
+            $stmt = $this->db->prepare("INSERT INTO fees_collection
                 SET client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
                 category_id = ?, amount = ?, created_by = ?, academic_year = ?, 
-                academic_term = ?, description = ?, currency = ?
+                academic_term = ?, description = ?, currency = ?, receipt_id = ?
             ");
             $stmt->execute([
                 $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id, 
                 $paymentRecord->class_id, $paymentRecord->category_id, $params->amount, $params->userId, 
                 $paymentRecord->academic_year, $paymentRecord->academic_term, 
-                $params->description ?? "null", $currency
+                $params->description ?? "null", $currency, $receiptId
             ]);
 
             /* Update the user payment record */

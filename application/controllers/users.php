@@ -5,9 +5,10 @@ if( !defined( 'BASEPATH' ) ) die( 'Restricted access' );
 class Users extends Myschoolgh {
 
 	private $password_ErrorMessage;
+	private $iclient = [];
 	
 	# start the construct
-	public function __construct() {
+	public function __construct(stdClass $params = null) {
 		parent::__construct();
 
 		$this->permission_denied = "Sorry! You do not have the required permission to perform this action.";
@@ -17,6 +18,9 @@ class Users extends Myschoolgh {
 			<li style='padding-left:15px;'>At least 1 Lowercase</li>
 			<li style='padding-left:15px;'>At least 1 Numeric</li>
 			<li style='padding-left:15px;'>At least 1 Special Character</li></ul></div>";
+
+		
+		$this->iclient = $params->client_data ?? [];
 	}
 
 	/**
@@ -322,7 +326,7 @@ class Users extends Myschoolgh {
 
 				// append the client details in the request
 				if($appendClient) {
-					$result->client = $this->client_data($result->client_id);
+					$result->client = !empty($this->iclient) ? $this->iclient : $this->client_data($result->client_id);
 				}
 
 				// append to the results set to return
@@ -896,7 +900,7 @@ class Users extends Myschoolgh {
 		}
 
 		// generate a new unique user id
-		$theClientData = $this->client_data($params->clientId);
+		$theClientData = !empty($this->iclient) ? $this->iclient : $this->client_data($params->clientId);
 
 		// set the label and generate a new unique id
 		$label = $params->user_type === "student" ? "student_label" : ($params->user_type === "parent" ? "parent_label" : "staff_label");
@@ -1279,7 +1283,7 @@ class Users extends Myschoolgh {
 			$stmt->execute([json_encode($course_ids), $params->user_id]);
 
 			$guardian_ids = [];
-			$theClientData = $this->client_data($params->clientId);
+			$theClientData = !empty($this->iclient) ? $this->iclient : $this->client_data($params->clientId);
 
 			// update the user guardian information
 			if(!empty($guardian)) {

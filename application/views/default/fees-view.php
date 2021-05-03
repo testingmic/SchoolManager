@@ -74,22 +74,26 @@ if(!empty($item_id)) {
                                 <span class="float-left">Fullname:</span>
                                 <span class="float-right text-muted">'.($data->student_info->name ?? null).'</span>
                             </p>
-                            <p class="clearfix">
+                            '.(!empty($data->department_name) ? 
+                            '<p class="clearfix">
                                 <span class="float-left">Department:</span>
                                 <span class="float-right text-muted">'.($data->department_name ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
+                            </p>' : '').'
+                            '.(!empty($data->class_name) ? 
+                            '<p class="clearfix">
                                 <span class="float-left">Class:</span>
                                 <span class="float-right text-muted">'.($data->class_name ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
+                            </p>' : '').'
+                            '.(!empty($data->student_info->email) ? 
+                            '<p class="clearfix">
                                 <span class="float-left">Email:</span>
                                 <span class="float-right text-muted">'.($data->student_info->email ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
+                            </p>' : '').'
+                            '.(!empty($data->student_info->phone_number) ? 
+                            '<p class="clearfix">
                                 <span class="float-left">Contact:</span>
                                 <span class="float-right text-muted">'.($data->student_info->phone_number ?? null).'</span>
-                            </p>
+                            </p>' : '').'
                         </div>
                     </div>
                 </div>
@@ -167,8 +171,8 @@ if(!empty($item_id)) {
                                     <div class="row">
                                         <div class="col-lg-12">
                                             <div class="invoice-title">
-                                                <h2>Invoice</h2>
-                                                <div class="invoice-number">Order #'.$data->id.'</div>
+                                                <h2>Receipt</h2>
+                                                <div class="invoice-number">#'.$data->id.'</div>
                                             </div>
                                             <hr class="pb-0 mb-2 mt-0">
                                             <div class="row">
@@ -216,15 +220,11 @@ if(!empty($item_id)) {
                                                     <tr>
                                                         <th data-width="40" style="width: 40px;">#</th>
                                                         <th>Item</th>
-                                                        <th class="text-center">Price</th>
-                                                        <th class="text-center">Quantity</th>
-                                                        <th class="text-right">Totals</th>
+                                                        <th class="text-right">Amount</th>
                                                     </tr>
                                                     <tr>
                                                         <td>1</td>
                                                         <td>'.$data->category_name.'</td>
-                                                        <td class="text-center">'.$data->amount.'</td>
-                                                        <td class="text-center">1</td>
                                                         <td class="text-right">'.$data->amount.'</td>
                                                     </tr>
                                                 </tbody>
@@ -233,7 +233,7 @@ if(!empty($item_id)) {
                                             <div class="row mt-4">
                                                 <div class="col-lg-8">
                                                     <div class="section-title">Description</div>
-                                                    <p class="section-lead">'.$data->description.'</p>
+                                                    <p class="section-lead">'.($data->description ? $data->description : null).'</p>
                                                 </div>
                                                 <div class="col-lg-4 text-right">
                                                     <div class="invoice-detail-item">

@@ -824,9 +824,10 @@ class Auth extends Myschoolgh {
             // the preferences
             $preference = (object) [
                 "labels" => [
-                    "staff" => $prefix,
-                    "student" => $prefix,
-                    "parent" => $prefix
+                    "staff" => "{$prefix}U",
+                    "student" => "$prefix",
+                    "parent" => "{$prefix}P",
+                    "receipt" => "R{$prefix}"
                 ],
                 "academics" => [
                     "academic_year" => date("Y") . "/" . (date("Y") - 1),
