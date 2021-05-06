@@ -21,7 +21,7 @@ if($usersClass->loggedIn()) {
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/components.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
   <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
-  <link id="current_url" name="current_url" value="<?= $user_current_url ?>">
+  <link id="current_url" name="current_url" value="<?= $baseUrl ?>main">
   <style>
   .bg {
     background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');

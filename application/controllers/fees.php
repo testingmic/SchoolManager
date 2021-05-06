@@ -850,7 +850,7 @@ class Fees extends Myschoolgh {
             if(!empty($result) && isset($params->clean_payment_info)) {
                 // convert the last payment information into an array
                 $result->last_payment_info = $this->stringToArray($result->last_payment_info, "|",
-                    ["pay_id", "amount", "created_by", "created_date", "currency", "description"]
+                    ["pay_id", "amount", "created_by", "created_date", "currency", "description", "payment_method", "cheque_bank", "cheque_number"]
                 );
             }
 
@@ -891,7 +891,8 @@ class Fees extends Myschoolgh {
             $outstandingBalance = $paymentRecord->balance - $params->amount;
             $totalPayment = $paymentRecord->amount_paid + $params->amount;
 
-            $paid_status = ((round($totalPayment) === round($paymentRecord->amount_due)) || ($totalPayment > $paymentRecord->amount_due)) ? 1 : 2;
+            // set the paid status
+            $paid_status = ((round($totalPayment) === round($paymentRecord->amount_due)) || (round($totalPayment) > round($paymentRecord->amount_due))) ? 1 : 2;
 
             /* Confirm if the user has any credits */
             if($outstandingBalance < 0) {
@@ -903,18 +904,19 @@ class Fees extends Myschoolgh {
             $uniqueId = random_string('alnum', 32);
             $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
             $receiptId = $this->iclient->client_preferences->labels->receipt_label.$counter;
+            $receiptId = strtoupper($receiptId);
 
             // get the currency
             $params->payment_method = isset($params->payment_method) ? ucfirst($params->payment_method) : "Cash";
             $currency = $defaultUser->client->client_preferences->labels->currency ?? null;
 
-            // ensure that the bank_id and the cheque number are not empty
-            if(empty($params->bank_id) || empty($params->cheque_number)) {
-                return ["code" => 203, "data" => "Sorry! The bank name and cheque number cannot be empty."];
-            }
-
             // append additional sql
             $append_sql = ($params->payment_method === "Cheque") ? ", cheque_bank='{$params->bank_id}', cheque_number='{$params->cheque_number}'" : null;
+
+            // ensure that the bank_id and the cheque number are not empty
+            if(!empty($append_sql) && (empty($params->bank_id) || empty($params->cheque_number))) {
+                return ["code" => 203, "data" => "Sorry! The bank name and cheque number cannot be empty."];
+            }
 
             /* Record the payment made by the user */
             $stmt = $this->db->prepare("INSERT INTO fees_collection
@@ -932,7 +934,7 @@ class Fees extends Myschoolgh {
 
             /* Update the user payment record */
             $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
-                last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", paid_status='1'" : "")."
+                last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", paid_status='{$paid_status}'" : "")."
                 WHERE checkout_url = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([$totalPayment, $outstandingBalance, $params->checkout_url, $params->clientId]);

@@ -212,9 +212,9 @@ class Users extends Myschoolgh {
 				LEFT JOIN country c ON c.id = a.country
 				LEFT JOIN classes cl ON cl.id = a.class_id
 				{$leftJoin}
-				WHERE {$params->query} AND a.deleted='0' AND a.status='1' {$order_by} LIMIT {$params->limit}
+				WHERE {$params->query} AND a.deleted = ? AND a.status = ? {$order_by} LIMIT {$params->limit}
 			");
-			$sql->execute();
+			$sql->execute([0, 1]);
 			
 			// init
 			$row = 0;

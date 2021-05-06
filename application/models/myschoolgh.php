@@ -396,9 +396,9 @@ class Myschoolgh extends Models {
 		foreach($expl as $key => $each) {
 			if(!empty($each) || $allowEmpty) {
 				if(!empty($key_name)) {
-					$array[$key_name[$key]] = trim($each);
+					$array[$key_name[$key]] = (trim($each) === "NULL" ? null : trim($each));
 				} else{
-					$array[] = trim($each, "\"");
+					$array[] = (trim($each) === "NULL") ? null : trim($each, "\"");
 				}
 			}
 		}

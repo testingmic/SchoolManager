@@ -74,7 +74,8 @@ var save_Receive_Payment = () => {
                 data["cheque_number"] = $(`input[name="cheque_number"]`).val();
             }
             $.post(`${baseUrl}api/fees/make_payment`, data).then((response) => {
-                let s_icon = "error";
+                let s_icon = "error",
+                    payment_method = "";
                 if (response.code === 200) {
                     s_icon = "success";
                     $(`div[id="fees_payment_form"] input[name="amount"]`).val("");
@@ -82,26 +83,34 @@ var save_Receive_Payment = () => {
                     let payment_info = response.data.additional.payment;
                     $(`span[class="amount_paid"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.amount_paid}`);
                     $(`span[class="outstanding"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.balance}`);
-                    if (payment_info.paid_status === "1") {
+                    if (payment_info.paid_status === "1" || payment_info.paid_status === 1) {
                         $(`span[data-payment_label='status']`)
                             .removeClass('badge-danger badge-primary')
                             .addClass('badge-success')
                             .html("Paid");
-                    } else if (payment_info.paid_status === "2") {
+                    } else if (payment_info.paid_status === "2" || payment_info.paid_status === 2) {
                         $(`span[data-payment_label='status']`)
                             .removeClass('badge-danger badge-success')
                             .addClass('badge-primary')
                             .html("Partly Paid");
                     }
+
+                    if (payment_info.last_payment_info.payment_method === "Cheque") {
+                        payment_method += `<span class="last_payment_date"><i class="fa fa-home"></i> ${payment_info.last_payment_info.cheque_bank}</span><br>`;
+                        payment_method += `<span class="last_payment_date"><i class="fa fa-neuter"></i> ${payment_info.last_payment_info.cheque_number}</span><br>`;
+                    }
                     $(`div[class='last_payment_container']`).html(`
                     <table width="100%" class="t_table table-hover table-bordered">
                         <tbody>
                             <tr>
-                                <td width="55%">Last Payment Info:</td>
+                                <td width="43%">Last Payment Info:</td>
                                 <td>
                                     <span class="last_payment_id"><strong>Payment ID:</strong> ${payment_info.last_payment_info.pay_id}</span><br>
                                     <span class="amount_paid"><i class="fa fa-money-bill"></i> ${payment_info.last_payment_info.currency} ${payment_info.last_payment_info.amount}</span><br>
                                     <span class="last_payment_date"><i class="fa fa-calendar-check"></i> ${payment_info.last_payment_info.created_date}</span><br>
+                                    <hr class=\"mt-1 mb-1\">
+                                    <span class="last_payment_date"><i class="fa fa-air-freshener"></i> ${payment_info.last_payment_info.payment_method}</span><br>
+                                    ${payment_method}
                                     <p class="mt-3 mb-0 pb-0" id="print_receipt"><a class="btn btn-sm btn-outline-primary" target="_blank" href="${baseUrl}receipt/${payment_info.last_payment_id}"><i class="fa fa-print"></i> Print Receipt</a></p>
                                 </td>
                             </tr>

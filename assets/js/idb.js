@@ -66,7 +66,7 @@ $(async() => {
         $(`button[id="idb_init"]`).on("click", async function() {
             $(`div[id="populating-data"]`).removeClass("hidden");
             console_log("Forcing a cold boot to load information")
-            await $.post(`${baseUrl}api/users/preference`, { label: "init_idb" }).then((response) => {
+            await $.get(`${baseUrl}api/pwa/idb`, { label: "init_idb" }).then((response) => {
                 if (response.code == 200) {
                     console_log("Information loaded successfully. Awaiting to populate local storage with the information")
                     init(response.data.result).then((resp) => {
