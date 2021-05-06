@@ -31,6 +31,7 @@ $staff_param = (object) [
     "clientId" => $clientId,
     "user_id" => $loggedUserId,
     "limit" => 1,
+    "user_status" => ["Pending", "Active"],
     "full_details" => true,
     "no_limit" => 1,
     "user_type" => $defaultUser->user_type
@@ -52,6 +53,13 @@ $session->remove(["course_csv_file", "staff_csv_file", "student_csv_file"]);
 load_helpers(['setup_helper']);
 ?>
 <div class="main-content" id="pagecontent">
+    <?php if(in_array($clientData->client_state, ["Pending"])) { ?>
+        <div class="alert alert-danger text-center">
+            Sorry! Your Account has not yet been activated. Please check your
+            email for the verification link. You may not be able to perform certain functions if
+            not done.
+        </div>
+    <?php } ?>
     <section class="section">
         <div class="d-flex mt-3 justify-content-between">
             <div class="section-header">
@@ -65,7 +73,7 @@ load_helpers(['setup_helper']);
                 </p>
             </div>
             <div class="col-lg-12">
-                <?php  if($clientData->client_state === "Activated") { ?>
+                <?php  if(in_array($clientData->client_state, ["Activated", "Pending"])) { ?>
                     <?= activated_form($the_form) ?>
                 <?php } ?>
             </div>
@@ -73,6 +81,7 @@ load_helpers(['setup_helper']);
     </section>
 </div>
 <?php } else { ?>
+
 <div class="main-content" id="pagecontent"></div>
 <?php } ?>
 <?php require "foottags.php"; ?>

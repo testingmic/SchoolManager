@@ -76,7 +76,11 @@ class Users extends Myschoolgh {
 		$params->query .= (isset($params->user_id) && !empty($params->user_id)) ? " AND a.item_id IN {$this->inList($params->user_id)}" : "";
 		$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
 		$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
-		$params->query .= (isset($params->user_status) && !empty($params->user_status)) ? " AND a.user_status ='{$params->user_status}'" : " AND a.user_status ='Active'";
+
+		// if the activated parameter was not and not equal to pending then append this section
+		if((isset($this->session->activated) && ($this->session->activated !== "Pending")) || (!isset($this->session->activated))) {
+			$params->query .= (isset($params->user_status) && !empty($params->user_status)) ? " AND a.user_status IN {$this->inList($params->user_status)}" : " AND a.user_status ='Active'";
+		}
 		
 		// bypass the academic year checker
 		if(empty($params->no_academic_year)) {
@@ -195,7 +199,7 @@ class Users extends Myschoolgh {
 			$leftJoinQuery = !empty($leftJoin) ? ", 
 				up.gross_salary, up.net_allowance, up.allowances, up.deductions, up.net_salary, up.basic_salary,
 				up.account_name, up.account_number, up.bank_name, up.bank_branch, up.ssnit_number, up.tin_number" : null;
-
+			
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT 
 				".((isset($params->columns) ? $params->columns : "

@@ -15,7 +15,7 @@ $cur_user_id = (confirm_url_id(1)) ? xss_clean($SITEURL[1]) : $loggedUserId;
 $userData = $defaultUser;
 
 // if no user credentials was found
-if(!$userData) { $session->remove(["userId", "clientId"]); }
+// if(!$userData) { $session->remove(["userId", "clientId"]); }
 
 // if the user is not loggedin then show the login form
 if(!$usersClass->loggedIn()) { require "login.php"; exit(-1); }

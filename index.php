@@ -93,7 +93,16 @@ GLOBAL $SITEURL, $session;
 if(!empty($session->userId)) {
 	
 	// the query parameter to load the user information
-	$i_params = (object) ["limit" => 1, "user_id" => $session->userId, "minified" => "simplified", "append_wards" => true, "filter_preferences" => true, "userId" => $session->userId, "append_client" => true];
+	$i_params = (object) [
+		"limit" => 1, 
+		"user_id" => $session->userId, 
+		"minified" => "simplified", 
+		"append_wards" => true, 
+		"filter_preferences" => true, 
+		"userId" => $session->userId, 
+		"append_client" => true, 
+		"user_status" => ["Pending", "Active"]
+	];
 	$defaultUser = $usersClass->list($i_params)["data"];
 
 	// if the result is not empty

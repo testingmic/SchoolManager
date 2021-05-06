@@ -1,11 +1,12 @@
 <?php
+// set some global variables
 $appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$baseUrl = config_item("base_url");
 $user_current_url = current_url();
 
 // if the user is not loggedin then show the login form
 if($usersClass->loggedIn()) { 
-    header("location: {$config->base_url("main")}");
+    header("location: {$baseUrl}main");
     exit;
 }
 ?>

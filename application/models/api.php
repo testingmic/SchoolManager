@@ -210,52 +210,56 @@ class Api {
         $params->clientId = $this->clientId;
         $params->userData = (object) $this->userData;
 
-        // set the default limit to 1000
-        $params->limit = isset($params->limit) ? (int) $params->limit : $this->myClass->global_limit;
-
-        // developer access permission check
-        $params->devAccess = $this->accessCheck->hasAccess('developer', 'control') ? true : false;
-        
-        // if the client id is empty and yet the user is not selecting which account to manage
-        if(empty($this->userId) && (($this->outer_url !== "select" && $this->inner_url !== "account"))) {
-            return $this->output($code, $result);
-        }
-
-        // set the default object to parse when instantiating a class
-        $default = (object) ["clientId" => $this->clientId, "default_User_Id" => $this->userId, "client_data" => $client_data];
-        
-        // create a new class for handling the resource
-        $classObject = load_class("{$this->inner_url}", "controllers", $default);
-        
-        // confirm that there is a method to process the resource endpoint
-        if(!empty($this->clientId) && method_exists($classObject, $this->outer_url)) {
-
-            // set the method to load
-            $method = $this->outer_url;
-            
-            // convert the response into an arry if not already in there
-            $request = $classObject->$method($params);
-            
-            // set the response code to return
-            $code = is_array($request) && isset($request['code']) ? $request['code'] : 200;
-            
-            // set the result
-            $result['result'] =  is_array($request) && isset($request["data"]) ? $request["data"] : $request;
-            
-            // if additional parameter was parsed
-            if(is_array($request) && isset($request['additional'])) {
-                // set the additional parameter
-                $result['additional'] = $request["additional"];
-            }
-            
-        }
-
         // parse the code to return
         $code = !empty($code) ? $code : 201;
 
-        // log the user request
-        $this->update_onlineStatus($this->userId);
-        // $this->logRequest($this->default_params, $code);
+        // end the query here if nothing was found
+        if(isset($this->accessCheck)) {
+
+            // set the default limit to 1000
+            $params->limit = isset($params->limit) ? (int) $params->limit : $this->myClass->global_limit;
+
+            // developer access permission check
+            $params->devAccess = $this->accessCheck->hasAccess('developer', 'control') ? true : false;
+            
+            // if the client id is empty and yet the user is not selecting which account to manage
+            if(empty($this->userId) && (($this->outer_url !== "select" && $this->inner_url !== "account"))) {
+                return $this->output($code, $result);
+            }
+
+            // set the default object to parse when instantiating a class
+            $default = (object) ["clientId" => $this->clientId, "default_User_Id" => $this->userId, "client_data" => $client_data];
+            
+            // create a new class for handling the resource
+            $classObject = load_class("{$this->inner_url}", "controllers", $default);
+            
+            // confirm that there is a method to process the resource endpoint
+            if(!empty($this->clientId) && method_exists($classObject, $this->outer_url)) {
+
+                // set the method to load
+                $method = $this->outer_url;
+                
+                // convert the response into an arry if not already in there
+                $request = $classObject->$method($params);
+                
+                // set the response code to return
+                $code = is_array($request) && isset($request['code']) ? $request['code'] : 200;
+                
+                // set the result
+                $result['result'] =  is_array($request) && isset($request["data"]) ? $request["data"] : $request;
+                
+                // if additional parameter was parsed
+                if(is_array($request) && isset($request['additional'])) {
+                    // set the additional parameter
+                    $result['additional'] = $request["additional"];
+                }
+                
+            }
+
+            // log the user request
+            $this->update_onlineStatus($this->userId);
+            // $this->logRequest($this->default_params, $code);
+        }
 
         // output the results
         return $this->output($code, $result);

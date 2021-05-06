@@ -47,7 +47,7 @@ class Auth extends Myschoolgh {
                     u.id, u.password, u.item_id AS user_id, 
                     u.access_level, u.username, u.client_id, 
                     u.status AS activated, u.email, u.user_type,
-                    u.last_timetable_id, c.client_state
+                    u.last_timetable_id, c.client_state, u.user_status
                 FROM users u
                 LEFT JOIN clients_accounts c ON c.client_id = u.client_id
                 WHERE (u.username = ? OR u.email = ?) AND u.deleted =  ? LIMIT 1
@@ -68,7 +68,7 @@ class Auth extends Myschoolgh {
 
                         // check the client state
                         if($results->client_state === "Pending") {
-                            return ["code" => 201, "data" => "Sorry! You must first activate your account to continue."];
+                            // return ["code" => 201, "data" => "Sorry! You must first activate your account to continue."];
                         }
 
                         // verify the password
@@ -121,7 +121,7 @@ class Auth extends Myschoolgh {
                                 $session->set("userId", $results->user_id);
                                 $session->set("userName", $params->username);
                                 $session->set("clientId", $results->client_id);
-                                $session->set("activated", $results->activated);
+                                $session->set("activated", $results->user_status);
                                 $session->set("userRole", $results->access_level);
 
                                 // set the last timetable id in session
@@ -406,7 +406,7 @@ class Auth extends Myschoolgh {
             // prepare a new query
             $sql = $this->db->prepare("UPDATE users_access_attempt SET attempts = '0', lastattempt = now() WHERE username=? AND `ipaddress` = ? AND attempt_type = ? LIMIT 1");
             // execute the statement
-            $sql->execute([$username, ip_address(), $attempt_type]);
+            return $sql->execute([$username, ip_address(), $attempt_type]);
         } catch(PDOException $e) {
             return false;
         }
@@ -769,7 +769,7 @@ class Auth extends Myschoolgh {
      */
     public function create(stdClass $params) {
 
-        global $accessObject;
+        global $accessObject, $session;
 
         // check if the user has registered an account with the past 5 minutes
         if(!$this->check_time("clients_accounts", 0.1)) {
@@ -838,13 +838,13 @@ class Auth extends Myschoolgh {
                     "next_academic_year" => "",
                     "next_academic_term" => ""
                 ],
-                "account" => [
+                "account" => (object) [
                     "type" => $params->plan ?? "basic",
                     "activation_code" => $token,
                     "date_created" => date("Y-m-d h:iA"),
                     "expiry" => date("Y-m-d h:iA", strtotime("+1 months"))
                 ],
-                "opening_days" => $this->default_opening_days
+                "opening_days" => $this->default_opening_days,
             ];
 
             // check the user password to see if it meets the requirements
@@ -881,11 +881,11 @@ class Auth extends Myschoolgh {
             // insert the user account details
             $ac_stmt = $this->db->prepare("INSERT INTO users SET 
                 item_id = ?, unique_id = ?, client_id = ?, access_level = ?, password = ?, user_type = ?, 
-                address = ?, username = ?, verify_token = ?, status = ?, email = ?, phone_number = ?
+                address = ?, username = ?, verify_token = ?, user_status = ?, email = ?, phone_number = ?, status = ?
             ");
             $ac_stmt->execute([
                 $item_id, $user_id, $client_id, $access_level, $password, "admin", 
-                $params->school_address, $username, $token, "Pending", $params->email, $contact
+                $params->school_address, $username, $token, "Pending", $params->email, $contact, 1
             ]);
 
             // log the user access level
@@ -915,6 +915,18 @@ class Auth extends Myschoolgh {
 
             // insert the user activity
             $this->userLogs("verify_account", $item_id, null, "{$params->school_name} created a new Account pending Verification.", $item_id, $client_id);
+
+            // auto log the user in and show notification message at the top of the page
+            $session->set([   
+                "userLoggedIn" => random_string('alnum', 50),
+                "userName" => $username,
+                "clientId" => $client_id,
+                "userId" => $user_id,
+                "userRole" => $access_level,
+                "last_TimetableId" => true,
+                "activated" => 0,
+                "ready_App" => true
+            ]);
 
             // create the account
             return [

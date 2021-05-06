@@ -7,7 +7,7 @@ $session->remove("redirect");
 
 // if the user is not loggedin then show the login form
 if($usersClass->loggedIn()) { 
-    header("location: {$config->base_url("main")}");
+    header("location: {$baseUrl}main");
     exit;
 }
 ?>

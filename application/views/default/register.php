@@ -7,7 +7,7 @@ $session->remove("redirect");
 
 // if the user is not loggedin then show the login form
 if($usersClass->loggedIn()) { 
-    header("location: {$config->base_url("main")}");
+    header("location: {$baseUrl}main");
     exit;
 }
 ?>
@@ -23,6 +23,7 @@ if($usersClass->loggedIn()) {
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/components.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
   <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
+  <link id="current_url" name="current_url" value="<?= $baseUrl ?>main">
   <style>
   .bg {
     background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');

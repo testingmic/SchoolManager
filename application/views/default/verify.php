@@ -7,12 +7,6 @@ if(!empty($session->redirect)) {
     exit;
 }
 
-// if the user is not loggedin then show the login form
-if($usersClass->loggedIn()) { 
-    header("location: {$config->base_url("main")}");
-    exit;
-}
-
 // verify header
 $page_title = "Account Verification";
 $key = "";
@@ -38,8 +32,13 @@ elseif(isset($_GET["dw"]) && ($_GET["dw"] == "user")) {
 $session->refresh_page = empty($session->refresh_page) ? 1 : ($session->refresh_page + 1);
 
 // end the page query if the user tries to refresh more than 10 times
-if($session->refresh_page >= 10) {
-  print '
+if($session->refresh_page >= 15) {
+  header("Location: {$baseUrl}main");
+  exit;
+}
+// print an error page
+if($session->refresh_page >= 7) {
+print '
 <!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
 <html><head>
 <title>403 Forbidden</title>
@@ -49,7 +48,7 @@ if($session->refresh_page >= 10) {
 <hr>
 <address>Apache/2.4.46 (Win64) OpenSSL/1.1.1h PHP/7.3.26 Server at localhost Port 80</address>
 </body></html>';
-  exit;
+exit;
 }
 
 // set the token variable
