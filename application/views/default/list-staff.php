@@ -84,7 +84,7 @@ $response->html = '
         <div class="row">
             <div class="col-xl-4 col-md-4 col-12 form-group">
                 <label>Select Department</label>
-                <select class="form-control selectpicker" id="department_id" name="department_id">
+                <select data-width="100%" class="form-control selectpicker" id="department_id" name="department_id">
                     <option value="">Please Select Department</option>';
                     foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
                         $response->html .= "<option ".(isset($filter->department_id) && ($filter->department_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
@@ -94,7 +94,7 @@ $response->html = '
             </div>
             <div class="col-xl-3 col-md-3 col-12 form-group">
                 <label>Select Role</label>
-                <select class="form-control selectpicker" name="user_type">
+                <select data-width="100%" class="form-control selectpicker" name="user_type">
                     <option value="">Please Select Role</option>';
                     foreach($myClass->user_roles_list as $key => $value) {
                         $response->html .= "<option ".(isset($filter->user_type) && ($filter->user_type == $key) ? "selected" : "")." value=\"{$key}\">{$value}</option>";                            
@@ -104,7 +104,7 @@ $response->html = '
             </div>
             <div class="col-xl-3 col-md-3 col-12 form-group">
                 <label>Select Gender</label>
-                <select class="form-control selectpicker" name="gender">
+                <select data-width="100%" class="form-control selectpicker" name="gender">
                     <option value="">Please Select Gender</option>';
                     foreach($myClass->pushQuery("*", "users_gender") as $each) {
                         $response->html .= "<option ".(isset($filter->gender) && ($filter->gender == $each->name) ? "selected" : "")." value=\"{$each->name}\">{$each->name}</option>";                            

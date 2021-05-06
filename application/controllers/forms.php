@@ -2044,7 +2044,7 @@ class Forms extends Myschoolgh {
                         <input type="text" value="'.($userData->address ?? null).'" name="address" id="address" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-4">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="relationship">Relationship</label>
                         <select data-width="100%" name="relationship" id="relationship" class="form-control selectpicker">
@@ -2973,7 +2973,7 @@ class Forms extends Myschoolgh {
             $html_content .= '
                 <div class="form-group">
                     <label>User Role</label>
-                    <select name="user_role" id="user_role" class="form-control selectpicker">
+                    <select data-width="100%" name="user_role" id="user_role" class="form-control selectpicker">
                         <option value="">Please Select</option>';
                         foreach($this->all_user_roles_list as $key => $value) {
                             $html_content .= "<option ".(isset($data->user_role) && ($key == $data->user_role) ? "selected" : null)." value=\"{$key}\">{$value}</option>";                            
@@ -2983,7 +2983,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="form-group">
                     <label>Fullname <span class="required">*</span></label>
-                    <select name="user_id" id="user_id" class="form-control selectpicker">
+                    <select data-width="100%" name="user_id" id="user_id" class="form-control selectpicker">
                         <option value="">Please Select</option>
                     </select>
                 </div>
@@ -2999,7 +2999,7 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class="col-lg-6">
                             <label>Apply Overdue</label>
-                            <select name="overdue_apply" id="overdue_apply" class="form-control selectpicker">
+                            <select data-width="100%" name="overdue_apply" id="overdue_apply" class="form-control selectpicker">
                                 <option value="entire">Entire Order</option>
                                 <option value="single">Each Book</option>
                             </select>
@@ -3624,7 +3624,7 @@ class Forms extends Myschoolgh {
         } else {
             $the_form["general"] = "
                 <div class='row' id='terminal_reports'>
-                    <div class='col-lg-3'>
+                    <div class='col-lg-3 mb-2'>
                         <select data-width='100%' class='form-control selectpicker' name='class_id' id='class_id'>
                             <option value='null'>Select the Class</option>";
                             foreach($classes_list as $class) {
@@ -3632,12 +3632,12 @@ class Forms extends Myschoolgh {
                             }
             $the_form["general"] .= "</select>
                     </div>
-                    <div class='col-lg-4'>
+                    <div class='col-lg-4 mb-2'>
                         <select data-width='100%' class='form-control selectpicker' name='course_id' id='course_id'>
                             <option value='null'>Select the Course</option>
                         </select>
                     </div>
-                    <div class='col-lg-3'>
+                    <div class='col-lg-3 mb-2'>
                         <select data-width='100%' class='form-control selectpicker' name='upload_type' id='upload_type'>
                             <option value='download'>Download CSV File</option>
                             <!--<option value='online'>Input the Data Online</option>-->
@@ -3753,7 +3753,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12">
                     <h5>BANK DETAILS</h5>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-6 col-md-6">
                     <label for="account_name">Account Holder Name</label>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -3762,7 +3762,7 @@ class Forms extends Myschoolgh {
                         <input type="text" value="'.($data->account_name ?? null).'" maxlength="255" name="account_name" id="account_name" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-6 col-md-6">
                     <label for="account_number">Account Number</label>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -3771,7 +3771,7 @@ class Forms extends Myschoolgh {
                         <input type="text" maxlength="24" value="'.($data->account_number ?? null).'" name="account_number" id="account_number" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-6 col-md-6">
                     <label for="bank_name">Bank Name</label>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -3780,7 +3780,7 @@ class Forms extends Myschoolgh {
                         <input type="text" value="'.($data->bank_name ?? null).'" maxlength="40" name="bank_name" id="bank_name" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-6 col-md-6">
                     <label for="bank_branch">Bank Branch</label>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -3789,7 +3789,7 @@ class Forms extends Myschoolgh {
                         <input type="text" value="'.($data->bank_branch ?? null).'" maxlength="40" name="bank_branch" id="bank_branch" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-6 col-md-6">
                     <label for="ssnit_number">SSNIT Number</label>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -3798,7 +3798,7 @@ class Forms extends Myschoolgh {
                         <input type="text" value="'.($data->ssnit_number ?? null).'" maxlength="40" name="ssnit_number" id="ssnit_number" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-6 col-md-6">
                     <label for="tin_number">Tax Identification Number</label>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">

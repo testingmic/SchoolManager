@@ -366,7 +366,7 @@ $response->html = '
         </div>
         '.($isAdminAccountant ?
             '<div class="row">
-                <div class="col-xl-3 col-lg-6">
+                <div class="col-xl-3 col-lg-6 col-md-6">
                     <div class="card">
                         <div class="card-body card-type-3">
                             <div class="row">
@@ -383,7 +383,7 @@ $response->html = '
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6">
+                <div class="col-xl-3 col-lg-6 col-md-6">
                     <div class="card">
                         <div class="card-body card-type-3">
                             <div class="row">
@@ -400,7 +400,7 @@ $response->html = '
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6">
+                <div class="col-xl-3 col-lg-6 col-md-6">
                     <div class="card">
                         <div class="card-body card-type-3">
                             <div class="row">
@@ -417,7 +417,7 @@ $response->html = '
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6">
+                <div class="col-xl-3 col-lg-6 col-md-6">
                     <div class="card">
                         <div class="card-body card-type-3">
                             <div class="row">
@@ -610,7 +610,7 @@ $response->html = '
         </div>
         '.($isAdminAccountant ?
             '<div class="row">
-                <div class="col-xl-3 col-lg-6">
+                <div class="col-xl-3 col-lg-6 col-md-6">
                     <div class="card">
                         <div class="card-body card-type-3">
                             <div class="row">
@@ -627,7 +627,7 @@ $response->html = '
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6">
+                <div class="col-xl-3 col-lg-6 col-md-6">
                     <div class="card">
                         <div class="card-body card-type-3">
                             <div class="row">
@@ -644,7 +644,7 @@ $response->html = '
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6">
+                <div class="col-xl-3 col-lg-6 col-md-6">
                     <div class="card">
                         <div class="card-body card-type-3">
                             <div class="row">
@@ -661,7 +661,7 @@ $response->html = '
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-3 col-lg-6">
+                <div class="col-xl-3 col-lg-6 col-md-6">
                     <div class="card">
                         <div class="card-body card-type-3">
                             <div class="row">

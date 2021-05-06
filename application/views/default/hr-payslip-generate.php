@@ -45,9 +45,9 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                     <div class="card">
                         <div class="card-body">
                             <div class="row" id="payslip_container">
-                                <div class="col-lg-4">
+                                <div class="col-lg-4 col-md-6 mb-2">
                                     <label>Select Employee</label>
-                                    <select class="form-control selectpicker" name="employee_id">
+                                    <select data-width="100%" class="form-control selectpicker" name="employee_id">
                                         <option value="">Please Select </option>';
                                         foreach($myClass->pushQuery("name, unique_id, item_id", "users", "user_type NOT IN('parent','student') AND user_status='Active' AND client_id='{$clientId}' ORDER BY name") as $each) {
                                             $response->html .= "<option ".(($userId == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";                            
@@ -55,9 +55,9 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                         $response->html .= '
                                     </select>
                                 </div>
-                                <div class="col-lg-3">
+                                <div class="col-lg-3 col-md-6 mb-2">
                                     <label>Select Year</label>
-                                    <select class="form-control selectpicker" name="year_id">
+                                    <select data-width="100%" class="form-control selectpicker" name="year_id">
                                         <option value="">Please Select </option>';
                                         for($i = date("Y")-2; $i < date("Y")+3; $i++) {
                                             $response->html .= "<option ".(($i == date("Y")) ? "selected" : "")." value=\"{$i}\">{$i}</option>";                            
@@ -65,9 +65,9 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                         $response->html .= '
                                     </select>
                                 </div>
-                                <div class="col-lg-3">
+                                <div class="col-lg-3 col-md-6 mb-2">
                                     <label>Select Month</label>
-                                    <select class="form-control selectpicker" name="month_id">
+                                    <select data-width="100%" class="form-control selectpicker" name="month_id">
                                         <option value="">Please Select </option>';
                                         for($i = 0; $i < 12; $i++) {
                                             $month = date("F", strtotime("January +{$i} month"));
@@ -76,7 +76,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                         $response->html .= '
                                     </select>
                                 </div>
-                                <div class="col-lg-2">
+                                <div class="col-lg-2 col-md-6 mb-2">
                                     <div class="form-group">
                                         <label for="submit">&nbsp;</label>
                                         <button onclick="return load_employee_payslip()" class="btn-block btn btn-outline-success">Load Record</button>

@@ -79,7 +79,7 @@ if(!$receivePayment) {
                             
                                 <div class="form-group">
                                     <label>Allocate To <span class="required">*</span></label>
-                                    <select class="form-control selectpicker" id="allocate_to" name="allocate_to">
+                                    <select data-width="100%" class="form-control selectpicker" id="allocate_to" name="allocate_to">
                                         <option value="class">Entire Class</option>
                                         <option value="student">Specific Student</option>
                                     </select>
@@ -87,7 +87,7 @@ if(!$receivePayment) {
 
                                 <div class="form-group">
                                     <label>Select Class <span class="required">*</span></label>
-                                    <select class="form-control selectpicker" name="class_id">
+                                    <select data-width="100%" class="form-control selectpicker" name="class_id">
                                         <option value="">Please Select Class</option>';
                                         foreach($class_list as $each) {
                                             $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
@@ -105,7 +105,7 @@ if(!$receivePayment) {
 
                                 <div class="form-group">
                                     <label>Select Category <span class="required">*</span></label>
-                                    <select class="form-control selectpicker" name="category_id">
+                                    <select data-width="100%" class="form-control selectpicker" name="category_id">
                                         <option value="">Please Select Category</option>';
                                         foreach($myClass->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$clientId}'") as $each) {
                                             $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";                            

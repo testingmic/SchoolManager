@@ -44,7 +44,7 @@ $response->html = '
             
             <div class="col-xl-4 col-md-4 col-12 form-group">
                 <label>Select Department</label>
-                <select class="form-control selectpicker" id="department_id" name="department_id">
+                <select data-width="100%" class="form-control selectpicker" id="department_id" name="department_id">
                     <option value="">Please Select Department</option>';
                     foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
                         $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
@@ -54,7 +54,7 @@ $response->html = '
             </div>
             <div class="col-xl-3 col-md-3 col-12 form-group">
                 <label>Select Class</label>
-                <select class="form-control selectpicker" name="class_id">
+                <select data-width="100%" class="form-control selectpicker" name="class_id">
                     <option value="null">Please Select Class</option>';
                     foreach($class_list as $each) {
                         $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
@@ -64,7 +64,7 @@ $response->html = '
             </div>
             <div class="col-xl-3 col-md-3 col-12 form-group">
                 <label>Period Filter</label>
-                <select class="form-control selectpicker" id="filter-dashboard" name="period">
+                <select data-width="100%" class="form-control selectpicker" id="filter-dashboard" name="period">
                     <option value="">Please Select Period</option>';
                     foreach($myClass->accepted_period as $key => $value) {
                         $response->html .= "<option ".($session->reportPeriod === $key ? "selected" : "")." value=\"{$key}\">{$value["title"]}</option>";                            

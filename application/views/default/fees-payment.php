@@ -124,7 +124,7 @@ if(!$receivePayment) {
 
                                 <div class="form-group">
                                     <label>Select Department</label>
-                                    <select '.$search_disabled.' class="form-control selectpicker" id="department_id" name="department_id">
+                                    <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" id="department_id" name="department_id">
                                         <option value="">Please Select Department</option>';
                                         foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
                                             $response->html .= "<option ".(($department_id === $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
@@ -135,7 +135,7 @@ if(!$receivePayment) {
 
                                 <div class="form-group">
                                     <label>Select Class</label>
-                                    <select '.$search_disabled.' class="form-control selectpicker" name="class_id">
+                                    <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" name="class_id">
                                         <option value="">Please Select Class</option>';
                                         foreach($class_list as $each) {
                                             $response->html .= "<option ".(($class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
@@ -146,7 +146,7 @@ if(!$receivePayment) {
 
                                 <div class="form-group">
                                     <label>Select Student</label>
-                                    <select '.$search_disabled.' class="form-control selectpicker" name="student_id">
+                                    <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" name="student_id">
                                         <option value="">Please Select Student</option>';
                                         foreach($students_list as $each) {
                                             $response->html .= "<option ".(($student_id == $each->user_id) ? "selected" : "")." value=\"{$each->user_id}\">{$each->name}</option>";
@@ -157,7 +157,7 @@ if(!$receivePayment) {
 
                                 <div class="form-group">
                                     <label>Select Category</label>
-                                    <select '.$search_disabled.' class="form-control selectpicker" name="category_id">
+                                    <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" name="category_id">
                                         <option value="">Please Select Category</option>';
                                         foreach($myClass->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$clientId}'") as $each) {
                                             $response->html .= "<option ".(($category_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";                            
@@ -180,7 +180,7 @@ if(!$receivePayment) {
                             <div class="col-12 col-md-5" id="fees_payment_form">
                                 <div class="form-group">
                                     <label>Payment Medium</label>
-                                    <select '.$disabled.' class="form-control selectpicker" name="payment_method" id="payment_method">
+                                    <select '.$disabled.' data-width="100%" class="form-control selectpicker" name="payment_method" id="payment_method">
                                         <option value="cash">Cash</option>
                                         <option value="cheque">Cheque</option>
                                     </select>

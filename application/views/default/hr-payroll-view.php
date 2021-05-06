@@ -241,8 +241,8 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                             <div><h5>EMPLOYEE PAYSLIPS</h5></div>
                                             <div><a class="btn btn-outline-primary" href="'.$baseUrl.'hr-payslip-generate/'.$userId.'"><i class="fa fa-plus"></i> Create Payslip</a></div>
                                         </div>
-                                        <div class="mt-3 border-top pt-3">
-                                            <table class="table table-responsive table-striped datatable">
+                                        <div class="mt-3 border-top table-responsive pt-3">
+                                            <table width="100%" class="table table-striped datatable">
                                                 <thead>
                                                     <tr>
                                                         <th width="5%" class="text-center">#</th>

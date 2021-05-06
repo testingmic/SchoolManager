@@ -98,7 +98,7 @@ $response->html = '
     <div class="row" id="filter_Department_Class">
         <div class="col-xl-4 col-md-4 col-12 form-group">
             <label>Select Department</label>
-            <select class="form-control selectpicker" id="department_id" name="department_id">
+            <select data-width="100%" class="form-control selectpicker" id="department_id" name="department_id">
                 <option value="">Please Select Department</option>';
                 foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
                     $response->html .= "<option ".(isset($filter->department_id) && ($filter->department_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
@@ -108,7 +108,7 @@ $response->html = '
         </div>
         <div class="col-xl-3 col-md-3 col-12 form-group">
             <label>Select Class</label>
-            <select class="form-control selectpicker" name="class_id">
+            <select data-width="100%" class="form-control selectpicker" name="class_id">
                 <option value="">Please Select Class</option>';
                 foreach($class_list as $each) {
                     $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
@@ -118,7 +118,7 @@ $response->html = '
         </div>
         <div class="col-xl-3 col-md-3 col-12 form-group">
             <label>Select Category</label>
-            <select class="form-control selectpicker" name="category_id">
+            <select data-width="100%" class="form-control selectpicker" name="category_id">
                 <option value="">Please Select Category</option>';
                 foreach($myClass->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$clientId}'") as $each) {
                     $response->html .= "<option ".(isset($filter->category_id) && ($filter->category_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";                            
