@@ -947,20 +947,24 @@ class Fees extends Myschoolgh {
             $params->payment_method = isset($params->payment_method) ? ucfirst($params->payment_method) : "Cash";
             $currency = $defaultUser->client->client_preferences->labels->currency ?? null;
 
-            // append additional sql
-            $append_sql = ($params->payment_method === "Cheque") ? ", cheque_bank='{$params->bank_id}', cheque_number='{$params->cheque_number}'" : null;
+            // set this to boolean
+            $append_sql = (bool) ($params->payment_method === "Cheque");
 
             // ensure that the bank_id and the cheque number are not empty
             if(!empty($append_sql) && (empty($params->bank_id) || empty($params->cheque_number))) {
                 return ["code" => 203, "data" => "Sorry! The bank name and cheque number cannot be empty."];
             }
 
+            // append additional sql
+            $append_sql = !empty($append_sql) ? 
+                ",  cheque_security='".($params->cheque_security ?? null)."',
+                    cheque_bank='{$params->bank_id}', cheque_number='{$params->cheque_number}'" : null;
+
             /* Record the payment made by the user */
             $stmt = $this->db->prepare("INSERT INTO fees_collection
                 SET client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
-                category_id = ?, amount = ?, created_by = ?, academic_year = ?, 
-                academic_term = ?, description = ?, currency = ?, receipt_id = ?, payment_method = ?
-                {$append_sql}
+                category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
+                description = ?, currency = ?, receipt_id = ?, payment_method = ? {$append_sql}
             ");
             $stmt->execute([
                 $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id, 

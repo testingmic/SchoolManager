@@ -71,8 +71,8 @@ if(!$receivePayment) {
         $student_id = $data->student_id;
         $category_id = $data->category_id;
         $department_id = $data->department_id;
-        $disabled = $data->paid_status === 1 ? "disabled='disabled'" : null;
-        $search_disabled = $data->paid_status === 1 ? null : "disabled='disabled'";
+        $disabled = (($data->paid_status === 1) || ($data->paid_status === "1")) ? "disabled='disabled'" : null;
+        $search_disabled = ($data->paid_status === 1) ? null : "disabled='disabled'";
 
         // append the allocation information to the parameters before fetching the payment form
         $params->allocation_info = $data;
@@ -177,46 +177,52 @@ if(!$receivePayment) {
                 <div class="col-12 col-md-8">
                     <div class="card">
                         <div class="row padding-20" style="min-height:470px">
-                            <div class="col-12 col-md-5" id="fees_payment_form">
-                                <div class="form-group">
-                                    <label>Payment Medium</label>
-                                    <select '.$disabled.' data-width="100%" class="form-control selectpicker" name="payment_method" id="payment_method">';
-                                        foreach($myClass->payment_methods as $key => $value) {
-                                            $response->html .= "<option value=\"{$key}\">{$value}</option>";
+                            <div class="col-12 col-md-12" id="fees_payment_form">
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label>Payment Medium</label>
+                                        <select '.$disabled.' data-width="100%" class="form-control selectpicker" name="payment_method" id="payment_method">';
+                                            foreach($myClass->payment_methods as $key => $value) {
+                                                $response->html .= "<option value=\"{$key}\">{$value}</option>";
+                                            }
+                                            $response->html .='
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 form-group hidden" id="cheque_payment_filter">
+                                        <label>Bank Name <span class="required">*</span></label>
+                                        <select '.$disabled.' data-width="100%" class="form-control selectpicker" id="bank_id" name="bank_id">
+                                            <option value="">Select Bank Name</option>';
+                                        foreach($banks_list as $bank) {
+                                            $response->html .= "<option value=\"{$bank->bank_name}::{$bank->id}\">{$bank->bank_name}</option>";
                                         }
-                                        $response->html .='
-                                    </select>
-                                </div>
-                                <div class="form-group hidden" id="cheque_payment_filter">
-                                    <label>Bank Name</label>
-                                    <select '.$disabled.' data-width="100%" class="form-control selectpicker" id="bank_id" name="bank_id">
-                                        <option value="">Select Bank Name</option>';
-                                    foreach($banks_list as $bank) {
-                                        $response->html .= "<option value=\"{$bank->bank_name}::{$bank->id}\">{$bank->bank_name}</option>";
-                                    }
-                                    $response->html .=
-                                    '</select>
-                                </div>
-                                <div class="form-group hidden" id="cheque_payment_filter">
-                                    <label>Cheque Number</label>
-                                    <input '.$disabled.' class="form-control text-uppercase" name="cheque_number" id="cheque_number" type="number" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label>Amount</label>
-                                    <input '.$disabled.' value="'.($amount ?? null).'" class="form-control" name="amount" id="amount" type="number" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label>Remarks</label>
-                                    <textarea '.$disabled.' class="form-control" name="description" id="description"></textarea>
-                                </div>
-                                <div class="form-group text-right">
-                                    <div class="d-flex justify-content-between">
-                                        <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form();" class="btn '.($category_id ? null : 'hidden').' btn-outline-danger">Cancel</button></div>
-                                        <div><button '.$disabled.' onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-save"></i> Save</button></div>
+                                        $response->html .=
+                                        '</select>
+                                    </div>
+                                    <div class="col-md-6 form-group hidden" id="cheque_payment_filter">
+                                        <label>Cheque Number <span class="required">*</span></label>
+                                        <input '.$disabled.' class="form-control text-uppercase" name="cheque_number" id="cheque_number" type="number" min="0">
+                                    </div>
+                                    <div class="col-md-6 form-group hidden" id="cheque_payment_filter">
+                                        <label>Cheque Security Code <span class="required">*</span></label>
+                                        <input '.$disabled.' class="form-control text-uppercase" name="cheque_security" id="cheque_security" type="text" min="0">
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Amount <span class="required">*</span></label>
+                                        <input '.$disabled.' value="'.($amount ?? null).'" class="form-control" name="amount" id="amount" type="number" min="0">
+                                    </div>
+                                    <div class="col-md-12 form-group">
+                                        <label>Remarks</label>
+                                        <textarea '.$disabled.' class="form-control" name="description" id="description"></textarea>
+                                    </div>
+                                    <div class="col-md-12 form-group text-right">
+                                        <div class="d-flex justify-content-between">
+                                            <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form();" class="btn '.($category_id ? null : 'hidden').' btn-outline-danger">Cancel</button></div>
+                                            <div><button '.$disabled.' onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-save"></i> Save</button></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-md-7" id="fees_payment_history">'.$payment_form.'</div>
+                            <div class="col-12 mt-3 border-top pt-4 col-md-12" id="fees_payment_history">'.$payment_form.'</div>
                         </div>
                     </div>
                 </div>
