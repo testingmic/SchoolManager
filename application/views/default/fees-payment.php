@@ -40,6 +40,7 @@ if(!$receivePayment) {
 
     /** Confirm if some items has already been selected */
     if(isset($_GET["checkout_url"])) {
+
         /** Clean the checkout url parsed */
         $checkout_url = xss_clean($_GET["checkout_url"]);
 
@@ -66,14 +67,15 @@ if(!$receivePayment) {
         }
 
         // set the information
+        $data = is_array($data) ? $data[0] : $data;
         $amount = $data->balance;
         $class_id = $data->class_id;
         $student_id = $data->student_id;
         $category_id = $data->category_id;
         $department_id = $data->department_id;
-        $disabled = (($data->paid_status === 1) || ($data->paid_status === "1")) ? "disabled='disabled'" : null;
-        $search_disabled = ($data->paid_status === 1) ? null : "disabled='disabled'";
-
+        $disabled = (($data->paid_status == 1) || ($data->paid_status == '1')) ? "disabled='disabled'" : null;
+        $search_disabled = ($data->paid_status == 1) ? null : "disabled='disabled'";
+        
         // append the allocation information to the parameters before fetching the payment form
         $params->allocation_info = $data;
         $params->client = $defaultUser->client;

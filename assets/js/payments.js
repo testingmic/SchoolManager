@@ -13,14 +13,23 @@ var load_Pay_Fees_Form = () => {
     $(`div[id="make_payment_button"] button`).prop("disabled", true).html(`Loading record <i class="fa fa-spin fa-spinner"></i>`);
 
     $.get(`${baseUrl}api/fees/payment_form`, data).then((response) => {
-        $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Make Payment`);
+        $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Load Form`);
         if (response.code === 200) {
             $(`div[id="fees_payment_history"]`).html(response.data.result.form);
             $(`button[id="payment_cancel"]`).removeClass("hidden");
             $(`div[id="fees_payment_form"] input[id="amount"]`).focus();
 
-            if (response.data.result.query.paid_status !== undefined) {
-                if (response.data.result.query.paid_status == 1) {
+            if (response.data.result.query !== undefined) {
+                if (response.data.result.query.paid_status !== undefined) {
+                    if (response.data.result.query.paid_status == 1) {
+                        $(`div[id="fees_payment_form"] *`).prop("disabled", true);
+                    } else {
+                        $(`div[id="fees_payment_preload"] *`).prop("disabled", true);
+                        $(`div[id="fees_payment_form"] *`).prop("disabled", false);
+                    }
+                }
+            } else if (response.data.result.uncategorized !== undefined) {
+                if (response.data.result.paid_status == 1) {
                     $(`div[id="fees_payment_form"] *`).prop("disabled", true);
                 } else {
                     $(`div[id="fees_payment_preload"] *`).prop("disabled", true);
@@ -35,7 +44,7 @@ var load_Pay_Fees_Form = () => {
             });
         }
     }).catch(() => {
-        $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Make Payment`);
+        $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Load Form`);
     });
 }
 

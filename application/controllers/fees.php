@@ -450,109 +450,203 @@ class Fees extends Myschoolgh {
 
         /** Load the payment information that has been allocated to the student */
         $allocation = isset($params->allocation_info) ? $params->allocation_info : $this->confirm_student_payment_record($params);
-
+        
         /** If no allocation record was found */
         if(empty($allocation)) {
             return ["code" => 203, "data" => "Sorry! No allocation has been made for the selected category.
                 Please ensure an allocation has been made before payment can be received."];
         }
 
+        // set the first item
+        $html_form = "<style>.t_table td {padding:10px;}</style>";
+        $html_form .= "<div class='table-responsive'>";
+        
+        // response to return
+        $response = [];
+        
+        /** Quick CSS */
+        $currency = $params->client->client_preferences->labels->currency ?? null;
+
+        // if the item is not an array
+        if(!is_array($allocation)) {
+
+            // append the data allocation
+            $data_content = $allocation;
+
+            /** Set the label for the amount */
+            if(($allocation->amount_paid > 1) && (round($allocation->amount_due) > round($allocation->amount_paid))) {
+                $label = "<span data-payment_label='status' class='badge badge-primary'>Part Payment</span>";
+            } elseif(round($allocation->amount_paid) === 0) {
+                $label = "<span data-payment_label='status' class='badge badge-danger'>Not Paid</span>";
+            } else if(($allocation->amount_due < $allocation->amount_paid) || ($allocation->amount_due === $allocation->amount_paid)) {
+                $label = "<span data-payment_label='status' class='badge badge-success'>Paid</span>";
+            } else {
+                $label = "<span data-payment_label='status' class='badge badge-danger'>Not Paid</span>";    
+            }
+
+            /** Set the HMTL form to display */
+            $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
+            $html_form .= "<tr>";
+            $html_form .= "<td class='font-weight-bold' width='43%'>Amount Due:</td>";
+            $html_form .= "<td>{$currency} {$allocation->amount_due}</td>";
+            $html_form .= "</tr>";
+            $html_form .= "<tr>";
+            $html_form .= "<td class='font-weight-bold'>Amount Paid:</td>";
+            $html_form .= "<td><span data-checkout_url='{$allocation->checkout_url}' class='amount_paid'>{$currency} {$allocation->amount_paid}</span></td>";
+            $html_form .= "</tr>";
+            $html_form .= "<tr>";
+            $html_form .= "<td class='font-weight-bold'>Outstanding Balance:</td>";
+            $html_form .= "<td><span data-checkout_url='{$allocation->checkout_url}' data-amount_payable='{$allocation->balance}' class='outstanding'>{$currency} {$allocation->balance}</span></td>";
+            $html_form .= "</tr>";
+
+            $html_form .= "<tr>";
+            $html_form .= "<td>Status:</td>";
+            $html_form .= "<td>{$label}</td>";
+            $html_form .= "</tr>";
+            $html_form .= "</table>";
+
+            // the query attached
+            $response["query"] = $allocation;
+
+        } elseif(is_array($allocation)) {
+
+            // initials
+            $amount_due = 0;
+            $amount_paid = 0;
+            $balance = 0;
+            $owings_list = "<table width='100%' class='t_table mt-4 table-hover table-bordered'>";
+            $owings_list .= "
+                <tr class='font-weight-bold'>
+                    <td>CATEGORY NAME</td>
+                    <td>AMOUNT DUE</td>
+                    <td>AMOUNT PAID</td>
+                    <td>BALANCE</td>
+                </tr>";
+            $data_content = $allocation[count($allocation)-1];
+
+            // loop through the allocations list
+            foreach($allocation as $fees) {
+
+                // add up to the values
+                $balance += $fees->balance;
+                $amount_due += $fees->amount_due;
+                $amount_paid += $fees->amount_paid;
+
+                // append to the owings list
+                $owings_list .= "
+                    <tr>
+                        <td class='font-weight-bold'>{$fees->category_name}</td>
+                        <td>{$fees->amount_due}</td>
+                        <td>{$fees->amount_paid}</td>
+                        <td class='font-weight-bold'>{$fees->balance}</td>
+                    </tr>";
+            }
+            $owings_list .= "</table>";
+
+            /** Set the label for the amount */
+            if(($amount_paid > 1) && (round($amount_due) > round($amount_paid))) {
+                $status = 2;
+                $label = "<span data-payment_label='status' class='badge badge-primary'>Part Payment</span>";
+            } elseif(round($amount_paid) === 0) {
+                $status = 0;
+                $label = "<span data-payment_label='status' class='badge badge-danger'>Not Paid</span>";
+            } else if(($amount_due < $amount_paid) || ($amount_due === $amount_paid)) {
+                $status = 1;
+                $label = "<span data-payment_label='status' class='badge badge-success'>Paid</span>";
+            } else {
+                $status = 0;
+                $label = "<span data-payment_label='status' class='badge badge-danger'>Not Paid</span>";    
+            }
+
+            /**  */
+            $balance = number_format($balance, 2);
+            $amount_due = number_format($amount_due, 2);
+            $amount_paid = number_format($amount_paid, 2);
+            
+            /** Set the HMTL form to display */
+            $html_form .= "<div class='table-responsive'>";
+            $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
+            $html_form .= "<tr>";
+            $html_form .= "<td class='font-weight-bold' width='43%'>Amount Due:</td>";
+            $html_form .= "<td>{$currency} {$amount_due}</td>";
+            $html_form .= "</tr>";
+            $html_form .= "<tr>";
+            $html_form .= "<td class='font-weight-bold'>Amount Paid:</td>";
+            $html_form .= "<td><span data-checkout_url='general' class='amount_paid'>{$currency} {$amount_paid}</span></td>";
+            $html_form .= "</tr>";
+            $html_form .= "<tr>";
+            $html_form .= "<td class='font-weight-bold'>Outstanding Balance:</td>";
+            $html_form .= "<td><span data-checkout_url='general' data-amount_payable='{$balance}' class='outstanding'>{$currency} {$balance}</span></td>";
+            $html_form .= "</tr>";
+
+            $html_form .= "<tr>";
+            $html_form .= "<td class='font-weight-bold'>Status:</td>";
+            $html_form .= "<td>{$label}</td>";
+            $html_form .= "</tr>";
+            $html_form .= "</table>";
+            $html_form .= $owings_list;
+
+            // append the multiple schedule
+            $response["uncategorized"] = 1;
+            $response["paid_status"] = $status;
+
+        }
+
         /** Format the last_payment_info value */
-        if(!empty($allocation->last_payment_info)) {
+        if(!empty($data_content->last_payment_info)) {
             // assign a key to the concat value
-            $allocation->last_payment_info = $this->stringToArray(
-                $allocation->last_payment_info, "|", [
+            $data_content->last_payment_info = $this->stringToArray(
+                $data_content->last_payment_info, "|", [
                     "pay_id", "amount", "created_by", "created_date", "currency",
                     "description", "payment_method","cheque_bank", "cheque_number"
                 ]
             );
         }
 
-        // print_r($allocation->last_payment_info);
-
-        /** Set the label for the amount */
-        if(($allocation->amount_paid > 1) && (round($allocation->amount_due) > round($allocation->amount_paid))) {
-            $label = "<span data-payment_label='status' class='badge badge-primary'>Part Payment</span>";
-        } elseif(round($allocation->amount_paid) === 0) {
-            $label = "<span data-payment_label='status' class='badge badge-danger'>Not Paid</span>";
-        } else if(($allocation->amount_due < $allocation->amount_paid) || ($allocation->amount_due === $allocation->amount_paid)) {
-            $label = "<span data-payment_label='status' class='badge badge-success'>Paid</span>";
-        } else {
-            $label = "<span data-payment_label='status' class='badge badge-danger'>Not Paid</span>";    
-        }
-
-        /** Quick CSS */
-        $html_form = "<style>.t_table td {padding:10px;}</style>";
-        $currency = $params->client->client_preferences->labels->currency ?? null;
-
-        /** Set the HMTL form to display */
-        $html_form .= "<div class='table-responsive'>";
-        $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
-        $html_form .= "<tr>";
-        $html_form .= "<td width='43%'>Amount Due:</td>";
-        $html_form .= "<td>{$currency} {$allocation->amount_due}</td>";
-        $html_form .= "</tr>";
-        $html_form .= "<tr>";
-        $html_form .= "<td>Amount Paid:</td>";
-        $html_form .= "<td><span data-checkout_url='{$allocation->checkout_url}' class='amount_paid'>{$currency} {$allocation->amount_paid}</span></td>";
-        $html_form .= "</tr>";
-        $html_form .= "<tr>";
-        $html_form .= "<td>Outstanding Balance:</td>";
-        $html_form .= "<td><span data-checkout_url='{$allocation->checkout_url}' data-amount_payable='{$allocation->balance}' class='outstanding'>{$currency} {$allocation->balance}</span></td>";
-        $html_form .= "</tr>";
-
-        $html_form .= "<tr>";
-        $html_form .= "<td>Status:</td>";
-        $html_form .= "<td>{$label}</td>";
-        $html_form .= "</tr>";
-        $html_form .= "</table>";
-
         /** Last payment container */
         $html_form .= "<div class='last_payment_container'>";
 
         /** If last payment information is not empty */
-        if(!empty($allocation->last_payment_info)) {
+        if(!empty($data_content->last_payment_info)) {
 
             // append value
-            $allocation->last_payment_uid = $allocation->last_payment_info["pay_id"];
+            $data_content->last_payment_uid = $data_content->last_payment_info["pay_id"];
             $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
+
             // set the rows for the last payment id
             $html_form .= "<tr>";
             $html_form .= "<td width='43%'>Last Payment Info:</td><td>";
             
             // payment information
-            $html_form .= "<span class='last_payment_id'><strong>Payment ID:</strong> {$allocation->last_payment_uid}</span><br>
-                <span class='amount_paid'><i class='fa fa-money-bill'></i> {$allocation->last_payment_info["currency"]} {$allocation->last_payment_info["amount"]}</span><br>
-                <span class='last_payment_date'><i class='fa fa-calendar-check'></i> {$allocation->last_payment_date}</span><br>";
+            $html_form .= "<span class='last_payment_id'><strong>Payment ID:</strong> {$data_content->last_payment_uid}</span><br>
+                <span class='amount_paid'><i class='fa fa-money-bill'></i> {$data_content->last_payment_info["currency"]} {$data_content->last_payment_info["amount"]}</span><br>
+                <span class='last_payment_date'><i class='fa fa-calendar-check'></i> {$data_content->last_payment_date}</span><br>";
 
             // payment method
             $html_form .= "<hr class=\"mt-1 mb-1\">
-                <span><strong>Payment Method:</strong> {$allocation->last_payment_info["payment_method"]}</span><br>";
+                <span><strong>Payment Method:</strong> {$data_content->last_payment_info["payment_method"]}</span><br>";
 
             // if the payment method is a cheque
-            if($allocation->last_payment_info["payment_method"] === "Cheque") {
+            if($data_content->last_payment_info["payment_method"] === "Cheque") {
                 // check bank
-                $cheque_bank = explode("::", $allocation->last_payment_info["cheque_bank"])[0];
+                $cheque_bank = explode("::", $data_content->last_payment_info["cheque_bank"])[0];
 
                 // show the check number and bank name
                 $html_form .= "<span><strong>Bank:</strong> {$cheque_bank}</span><br>";
-                $html_form .= "<span><strong>Cheque Number:</strong> {$allocation->last_payment_info["cheque_number"]}</span><br>";
+                $html_form .= "<span><strong>Cheque Number:</strong> {$data_content->last_payment_info["cheque_number"]}</span><br>";
             }
+            
             // show the paid button
-            $html_form .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a onclick='return paid_status(\"{$allocation->last_payment_id}\")' class='btn btn-sm btn-outline-primary' target='_blank' href='#'><i class='fa fa-print'></i> Print Receipt</a></p>";
+            $html_form .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a onclick='return paid_status(\"{$data_content->last_payment_id}\")' class='btn btn-sm btn-outline-primary' target='_blank' href='#'><i class='fa fa-print'></i> Print Receipt</a></p>";
             $html_form .= "</td></tr>";
             $html_form .= "</table>";
         }
-
         $html_form .= "</div>";
         $html_form .= "</div>";
 
-        return [
-            "data" => [
-                "form" => $html_form,
-                "query" => $allocation
-            ]
-        ];
+        $response["form"] = $html_form;
+
+        return ["data" => $response];
 
     }
 
@@ -849,9 +943,12 @@ class Fees extends Myschoolgh {
         try {
 
             // return false if any parameter is missing
-            if((!isset($params->student_id) || !isset($params->category_id)) && !isset($params->checkout_url)) {
+            if(!isset($params->student_id) && !isset($params->checkout_url)) {
                 return null;
             }
+
+            // if the category id is not empty
+            $category_id = isset($params->category_id) && !empty($params->category_id) ? $params->category_id : null ;
 
             // run the query
 			$stmt = $this->db->prepare("
@@ -874,27 +971,37 @@ class Fees extends Myschoolgh {
 				FROM fees_payments a
                 LEFT JOIN users u ON u.item_id = a.student_id
 				WHERE ".(isset($params->checkout_url) ? "checkout_url='{$params->checkout_url}'" : 
-                    " a.student_id = '{$params->student_id}' AND 
-                        a.category_id = '{$params->category_id}' AND a.academic_year = '{$params->academic_year}'
+                    " a.student_id = '{$params->student_id}'
+                    ".(!empty($category_id) ? " AND a.category_id = '{$params->category_id}'" : null)."
+                        AND a.academic_year = '{$params->academic_year}'
                         AND a.academic_term = '{$params->academic_term}'
-                ")." AND a.client_id = '{$params->clientId}' AND a.status = '1' LIMIT 1
+                ")." AND a.client_id = '{$params->clientId}' AND a.status = '1' LIMIT ".(!empty($category_id) ? 1 : 100)."
 			");
 			$stmt->execute();
-			
-            $result = ($stmt->rowCount() > 0) ? $stmt->fetch(PDO::FETCH_OBJ) : false;
+
+            // count the number of rows found
+            $showInfo = (bool) isset($params->clean_payment_info);
 
             // if clean_payment_info was parsed then query below
-            if(!empty($result) && isset($params->clean_payment_info)) {
-                // convert the last payment information into an array
-                $result->last_payment_info = $this->stringToArray($result->last_payment_info, "|",
-                    ["pay_id", "amount", "created_by", "created_date", "currency", "description", "payment_method", "cheque_bank", "cheque_number"]
-                );
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                
+                // if show payment info was also parsed in the request
+                if($showInfo) {
+                    // convert the last payment information into an array
+                    $result->last_payment_info = $this->stringToArray($result->last_payment_info, "|",
+                        ["pay_id", "amount", "created_by", "created_date", "currency", "description", "payment_method", "cheque_bank", "cheque_number"]
+                    );
+                }
+
+                // append to the data array
+                $data[] = $result;
             }
 
-            return $result;
+            return !empty($data) && $category_id ? $data[0] : $data;
 
 		} catch(PDOException $e) {
-            return false;
+            return "false";
 		}
 	}
 
