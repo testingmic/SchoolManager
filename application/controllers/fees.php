@@ -61,7 +61,8 @@ class Fees extends Myschoolgh {
 		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id IN {$this->inList($params->class_id)}" : "";
         $filters .= isset($params->department_id) && !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : "";
         $filters .= !empty($student_id) ? " AND a.student_id IN {$this->inList($student_id)}" : "";
-        $filters .= isset($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";
+        $filters .= isset($params->item_id) && !empty($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";
+        $filters .= isset($params->query) && !empty($params->query) ? " AND {$params->query}" : "";
         $filters .= isset($params->programme_id) && !empty($params->programme_id) ? " AND a.programme_id='{$params->programme_id}'" : "";
         $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id IN {$this->inList($params->category_id)}" : ""; 
         $filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
@@ -111,6 +112,42 @@ class Fees extends Myschoolgh {
 			return [];
 		}
 	}
+
+    /**
+     * Search for a Payment Log
+     * 
+     * @param String $stdClass->term
+     * 
+     * @return Array
+     */
+    public function search(stdClass $params) {
+        
+        // if the search term is empty
+        if(empty($params->term)) {
+            return [
+                "code" => 201,
+                "data" => "Sorry! The search term is required."
+            ];
+        }
+
+        try {
+            
+            $query = null;
+            $query .= preg_match("/^[0-9]+$/", $params->term) ? "(a.id = '{$params->term}'" : null;
+            $query .= !empty($query) && preg_match("/^[0-9a-z]+$/", $params->term) ? " OR u.name LIKE '%{$params->term}%'" : "(u.name LIKE '%{$params->term}%'";
+            $params->term = strtoupper($params->term);
+            $query .= preg_match("/^[0-9A-Z]+$/", $params->term) ? " OR a.receipt_id='{$params->term}'" : null;
+            $query .= ")";
+
+            $params->query = $query;
+
+            return $this->list($params);
+
+        } catch(PDOException $e) {
+            return [];
+        }
+
+    }
     
     /**
      * List Category List

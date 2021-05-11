@@ -207,15 +207,6 @@ var email_Receipt = (receipt_id) => {
 
 }
 
-$(`div[id="fees_allocation_form"] select[name="allocate_to"]`).on("change", function() {
-    let value = $(this).val();
-    if (value === "class") {
-        $(`div[id="students_list"]`).addClass("hidden");
-    } else {
-        $(`div[id="students_list"]`).removeClass("hidden");
-    }
-});
-
 var load_Fees_Allocation_Amount = () => {
     let $allot_to = $(`div[id="fees_allocation_form"] select[name="allocate_to"]`).val(),
         $class_id = $(`div[id="fees_allocation_form"] select[name="class_id"]`).val(),
@@ -241,6 +232,97 @@ var load_Fees_Allocation_Amount = () => {
     }
 }
 
+var search_Payment_Log = () => {
+    let term = $(`div[id="finance_search_field"] input[id="log_search_term"]`).val();
+
+    if (!term.length) {
+        $(`div[id="finance_search_field"] div[id="log_search_term_list"]`).html(``);
+        swal({
+            text: "Sorry! The search term cannot be empty.",
+            icon: "error",
+        });
+    } else {
+        $(`div[id="finance_search_field"] div[id="log_search_term_list"]`).html(`<div align="center">Processing request <i class="fa fa-spin fa-spinner"></i></div>`);
+        $.get(`${baseUrl}api/fees/search`, { term }).then((response) => {
+            if (response.code === 200) {
+                let results_list = ``,
+                    location = `${baseUrl}fees-search?term=${term}`;
+                $.each(response.data.result, function(i, data) {
+                    results_list += `
+                    <div class="row mb-2 border-bottom pb-2">
+                        <div class="col-md-12">
+                            <table width="90%" border="0" cellpadding="3px">
+                                <tr>
+                                    <td><strong>Student Name:</strong></td>
+                                    <td>
+                                        <span class="underline" title="Click to view payment history">
+                                            <a href="${baseUrl}receipt?student_id=${data.student_id}" target="_blank">${data.student_info.name}</a>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Class: </strong></td>
+                                    <td>${data.class_name}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Fee Payment Category: </strong></td>
+                                    <td>${data.category_name}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Amount Paid: </strong></td>
+                                    <td>${data.currency} ${data.amount}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Receipt ID: </strong></td>
+                                    <td>${data.receipt_id}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Date Paid: </strong></td>
+                                    <td>${data.recorded_date}</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        <a href="${baseUrl}fees-view/${data.item_id}?redir=${term}" class="btn btn-sm btn-outline-success" title="Click to view full details"><i class="fa fa-eye"></i> View</a>
+                                        <a href="${baseUrl}receipt/${data.item_id}" target="_blank" class="btn btn-sm btn-outline-warning" title="Click to print receipt"><i class="fa fa-print"></i> Print</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>`;
+                });
+                $(`div[id="finance_search_field"] div[id="log_search_term_list"]`).html(results_list);
+                window.history.pushState({ current: location }, "", location);
+                linkClickStopper($(`div[id="finance_search_field"] div[id="log_search_term_list"]`));
+            } else {
+                $(`div[id="finance_search_field"] div[id="log_search_term_list"]`).html(`<div align="center" class="text-danger">${response.result.data}</div>`);
+            }
+        }).catch(() => {
+            $(`div[id="finance_search_field"] div[id="log_search_term_list"]`).html(``);
+            swal({
+                text: "Sorry! There was an error while processing the request.",
+                icon: "error",
+            });
+        });
+    }
+}
+
+$(`div[id="finance_search_field"] input[id="log_search_term"]`).on("keyup", function(evt) {
+    let search_term = $(this).val();
+    if (evt.keyCode == 13 && !evt.shiftKey) {
+        search_Payment_Log();
+    }
+});
+
+$(`div[id="fees_allocation_form"] select[name="allocate_to"]`).on("change", function() {
+    let value = $(this).val();
+    if (value === "class") {
+        $(`div[id="students_list"]`).addClass("hidden");
+    } else {
+        $(`div[id="students_list"]`).removeClass("hidden");
+    }
+});
+
 $(`div[id="fees_allocation_form"] select[name="category_id"]`).on("change", function() {
     load_Fees_Allocation_Amount();
 });
@@ -253,6 +335,7 @@ $(`div[id="fees_allocation_form"] select[name="student_id"]`).on("change", funct
         load_Fees_Allocation_Amount();
     }
 });
+
 $(`div[class~="toggle-calculator"]`).removeClass("hidden");
 
 $(`select[name="payment_method"]`).on("change", function() {

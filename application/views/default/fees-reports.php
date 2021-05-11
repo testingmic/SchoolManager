@@ -114,7 +114,7 @@ $response->html = '
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-md-12">
+                    <div class="col-lg-4 col-md-6">
                         <div class="card">
                             <div class="card-header">
                                 <h4>Revenue Category</h4>
@@ -124,8 +124,7 @@ $response->html = '
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-md-12">
+                    <div class="col-lg-12">
                         <div class="card">
                             <div class="card-header">
                                 <h4>Revenue Flow Chart</h4>
@@ -142,12 +141,26 @@ $response->html = '
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-lg-12" id="revenue_category_counts"></div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Fees Payment Method</h4>
+                            </div>
+                            <div class="card-body" data-chart="revenue_payment_category">
+                                <canvas style="max-height:420px;height:420px;" id="revenue_payment_category"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-8 col-md-12">
+                        <div class="row">
+                            <div class="col-lg-12" id="revenue_category_counts"></div>
+                        </div>
+                    </div>
 
                 </div>
 
             </div>
+            
         </div>
     </section>';
 // print out the response

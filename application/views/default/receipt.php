@@ -76,7 +76,7 @@ if($session->clientId) {
                                 <div class="col-lg-12">
                                     <div class="invoice-title">
                                         <h2>Official Receipt</h2>
-                                        '.(!empty($receipt_id) ? '<div style="font-size:20px" class="text-right">Receipt ID #: '.($student_data->id ?? null).'</div>' : null).'
+                                        '.(!empty($receipt_id) ? '<div style="font-size:20px" class="text-right">Receipt ID #: '.($student_data->receipt_id ?? null).'</div>' : null).'
                                     </div>
                                     <hr class="pb-0 mb-2 mt-0">
                                     '.(!empty($student_data) ?

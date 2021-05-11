@@ -1,4 +1,4 @@
-<?php function general_menu($isAdmin = false) { global $baseUrl; ?>
+<?php function general_menu($isAdmin = false) { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
         <ul class="dropdown-menu">
@@ -98,17 +98,29 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>issued-books">Issued Books</a></li>
         </ul>
     </li>
+    <?php if($accessObject->hasAccess("view", "fees")) { ?>
     <li class="menu-header">HR / Finance</li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Fees</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>fees-search">Search Log</a></li>
+            <?php if($accessObject->hasAccess("receive", "fees")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Receive Payment</a></li>
+            <?php } ?>
+            <?php if($accessObject->hasAccess("view", "fees_category")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-category">Fees Category</a></li>
+            <?php } ?>
+            <?php if($accessObject->hasAccess("allocation", "fees")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
+            <?php } ?>
+            <?php if($accessObject->hasAccess("reports", "fees")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Reports</a></li>
+            <?php } ?>
         </ul>
     </li>
+    <?php } ?>
+    <?php if($accessObject->hasAccess("view", "payslip")) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
         <ul class="dropdown-menu">
@@ -118,6 +130,7 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
         </ul>
     </li>
+    <?php } ?>
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
     <li class="dropdown">

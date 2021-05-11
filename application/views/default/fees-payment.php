@@ -180,9 +180,11 @@ if(!$receivePayment) {
                             <div class="col-12 col-md-5" id="fees_payment_form">
                                 <div class="form-group">
                                     <label>Payment Medium</label>
-                                    <select '.$disabled.' data-width="100%" class="form-control selectpicker" name="payment_method" id="payment_method">
-                                        <option value="cash">Cash</option>
-                                        <option value="cheque">Cheque</option>
+                                    <select '.$disabled.' data-width="100%" class="form-control selectpicker" name="payment_method" id="payment_method">';
+                                        foreach($myClass->payment_methods as $key => $value) {
+                                            $response->html .= "<option value=\"{$key}\">{$value}</option>";
+                                        }
+                                        $response->html .='
                                     </select>
                                 </div>
                                 <div class="form-group hidden" id="cheque_payment_filter">

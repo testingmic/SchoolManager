@@ -81,7 +81,11 @@ load_helpers(['setup_helper']);
     </section>
 </div>
 <?php } else { ?>
-
 <div class="main-content" id="pagecontent"></div>
 <?php } ?>
 <?php require "foottags.php"; ?>
+
+
+<div class="form-group">
+
+</div>

@@ -27,6 +27,11 @@ class Models {
     // instantiate the class
     public function __construct() {
 
+        $this->payment_methods = [
+            "cash" => "Cash",
+            "cheque" => "Cheque"
+        ];
+
         $this->form_modules = [
             "course_unit_form" => "Lesson Planner: Course Unit",
             "course_lesson_form" => "Lesson Planner: Unit Lesson",

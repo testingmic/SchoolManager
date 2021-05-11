@@ -186,7 +186,6 @@ var save_Request_Fine = (borrowed_id) => {
             $(`button[id="save_fine_"]`).addClass("hidden");
             $(`input[name='request_fine']`).attr("data-original", fine);
             $(`span[data-each_fine='request']`).html(response.data.result);
-            // loadPage(`${baseUrl}update-book-request/${borrowed_id}`)
         }
     });
 }

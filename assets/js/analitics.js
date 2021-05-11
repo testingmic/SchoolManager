@@ -137,6 +137,38 @@ var revenueReporting = (revenue) => {
         });
 
     }
+    if ($(`canvas[id="revenue_payment_category"]`).length) {
+        console.log(revenue);
+        if (revenue.revenue_received_payment_method_count !== undefined) {
+            let the_value = new Array(),
+                the_label = new Array();
+            $.each(revenue.revenue_received_payment_method_count.current.data, function(i, e) {
+                the_value.push(parseInt(e.amount_value));
+                the_label.push(e.payment_method);
+            });
+            var ctx = document.getElementById("revenue_payment_category");
+            var myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: the_label,
+                    datasets: [{
+                        label: 'Amount Paid',
+                        data: the_value,
+                        backgroundColor: ['#304ffe', '#ffa601'],
+                        borderColor: ['#fff', '#fff', '#fff']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    cutoutPercentage: 70,
+                    maintainAspectRatio: false,
+                    legend: {
+                        display: true
+                    }
+                }
+            });
+        }
+    }
 }
 
 var summaryReporting = (t_summary, date_range) => {
@@ -237,12 +269,12 @@ var summaryReporting = (t_summary, date_range) => {
             let amount = fees.amount[i];
             let percentage = (amount > 0) ? ((amount / total_revenue) * 100).toFixed(2) : 0;
             revenue_category_counts += `
-            <div class="col-lg-3 col-md-4">
+            <div class="col-lg-4 col-md-6">
                 <div class="card">
                     <div class="card-header pb-0"><strong>${i}</strong></div>
                     <div class="card-body pt-2 pb-1">
                         <p class="mb-0 pb-0">Processed Count: <strong>${e}</strong></p>
-                        <p class="mb-0 pb-0">Processed Amount: <strong>${myPrefs.labels.currency}${format_currency(amount)}</strong></p>
+                        <p class="mb-0 pb-0">Amount: <strong>${myPrefs.labels.currency}${format_currency(amount)}</strong></p>
                         <p class="mb-0 pb-0">Percentage: <strong>${percentage}%</strong></p>
                     </div>
                 </div>

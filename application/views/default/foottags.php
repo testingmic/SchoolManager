@@ -5,7 +5,7 @@
         $idb_init = (bool) (isset($userPrefs->idb_init->init) && (strtotime($userPrefs->idb_init->idb_next_init) < time()));
         // if the force_cold_boot=1 query parameter has been parsed then set the init to true
         if(isset($_GET["force_cold_boot"]) && ($_GET["force_cold_boot"] == 1)) {
-            $idb_init = true;
+            // $idb_init = true;
         }
         // create a new account object
         $accountObj = load_class("account", "controllers");
@@ -113,7 +113,6 @@
     <script src="<?= $baseUrl; ?>assets/bundles/bootstrap-datepicker/datepicker.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/fullcalendar/fullcalendar.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
-    <script src="<?= $baseUrl; ?>assets/js/idb.js"></script>
     <?php if($isActiveAccount) { ?>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/ui.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/ui-touch-punch.min.js"></script>

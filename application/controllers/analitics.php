@@ -579,33 +579,6 @@ class Analitics extends Myschoolgh {
                     $counter = $stmt->fetchAll(PDO::FETCH_OBJ);
                     $result["revenue_received_count"][$range_key]["data"] = $counter;
 
-                    /** The policies created for the period */
-                    $class_stmt = $this->db->prepare("
-                        SELECT 
-                            COUNT(*) AS value, {$this->group_by}(a.class_id) AS value_date, SUM(a.amount) AS amount_value
-                        FROM fees_collection a 
-                        WHERE 
-                            a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
-                            AND (
-                                DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
-                            ) {$this->class_idm_query}
-                        GROUP BY {$this->group_by}(a.recorded_date)
-                    ");
-                    $class_stmt->execute();
-                    $class_counter = $class_stmt->fetchAll(PDO::FETCH_OBJ);
-                    $result["revenue_received_byclass_count"][$range_key]["data"] = $class_counter;
-
-                    // create new array
-                    $class_count_converted = [];
-                    // convert to int
-                    foreach($class_counter as $count) {
-                        $count->value = (float) $count->value;
-                        $count->amount_value = (float) $count->amount_value;
-                        $class_count_converted[] = $count;
-                    }
-                    // assign the int cast value back to the array
-                    $result["revenue_received_byclass_count"][$range_key]["data"] = $class_count_converted;
-
                     // create new array
                     $count_converted = [];
                     // convert to int
@@ -694,6 +667,63 @@ class Analitics extends Myschoolgh {
                         $ranger[$range_key][$the_key]["period"] = $range_value;
 
                     }
+
+                    /** The payments made for the period grouped by class */
+                    $class_stmt = $this->db->prepare("
+                        SELECT 
+                            COUNT(*) AS value, a.class_id, SUM(a.amount) AS amount_value
+                        FROM fees_collection a 
+                        WHERE 
+                            a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
+                            AND (
+                                DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
+                            ) {$this->class_idm_query}
+                        GROUP BY a.class_id
+                    ");
+                    $class_stmt->execute();
+                    $class_counter = $class_stmt->fetchAll(PDO::FETCH_OBJ);
+                    $result["revenue_received_byclass_count"][$range_key]["data"] = $class_counter;
+
+                    // create new array
+                    $class_count_converted = [];
+                    // convert to int
+                    foreach($class_counter as $count) {
+                        $count->value = (float) $count->value;
+                        $count->class_id = (float) $count->class_id;
+                        $count->amount_value = (float) $count->amount_value;
+                        $class_count_converted[] = $count;
+                    }
+                    // assign the int cast value back to the array
+                    $result["revenue_received_byclass_count"][$range_key]["data"] = $class_count_converted;
+
+
+                    /** The payments received for the period grouped by payment_method */
+                    $payment_method_stmt = $this->db->prepare("
+                        SELECT 
+                            COUNT(*) AS value, a.payment_method, SUM(a.amount) AS amount_value
+                        FROM fees_collection a 
+                        WHERE 
+                            a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
+                            AND (
+                                DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
+                            ) {$this->class_idm_query}
+                        GROUP BY a.payment_method
+                    ");
+                    $payment_method_stmt->execute();
+                    $payment_method_counter = $payment_method_stmt->fetchAll(PDO::FETCH_OBJ);
+                    $result["revenue_received_payment_method_count"][$range_key]["data"] = $payment_method_counter;
+
+                    // create new array
+                    $payment_method_count_converted = [];
+                    // convert to int
+                    foreach($payment_method_counter as $count) {
+                        $count->value = (float) $count->value;
+                        $count->payment_method = $count->payment_method;
+                        $count->amount_value = (float) $count->amount_value;
+                        $payment_method_count_converted[] = $count;
+                    }
+                    // assign the int cast value back to the array
+                    $result["revenue_received_payment_method_count"][$range_key]["data"] = $payment_method_counter;
 
                     // append the period to to the array values
                     $result["revenue_received_count"][$range_key]["period"] = $range_value;

@@ -172,7 +172,7 @@ if(!empty($item_id)) {
                                         <div class="col-lg-12">
                                             <div class="invoice-title">
                                                 <h2>Receipt</h2>
-                                                <div class="invoice-number">#'.$data->id.'</div>
+                                                <div class="invoice-number">#'.$data->receipt_id.'</div>
                                             </div>
                                             <hr class="pb-0 mb-2 mt-0">
                                             <div class="row">

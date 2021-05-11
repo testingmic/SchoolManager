@@ -314,7 +314,6 @@ $(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() 
         if (class_id.length) {
             $.get(`${baseUrl}api/${link}/list?class_id=${class_id}&minified=true`).then((response) => {
                 if (response.code == 200) {
-                    // ${e.unique_id !== undefined ? `(${e.unique_id})` : ""}
                     $.each(response.data.result, function(i, e) {
                         $(`select[name='${option_link}']`).append(`<option value='${e.item_id !== undefined ? e.item_id : e.user_id}'>${e.name}</option>'`);
                     });
