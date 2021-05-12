@@ -1148,6 +1148,9 @@ class Fees extends Myschoolgh {
                 $additional["payment"] = $this->confirm_student_payment_record($params);
 
             } else {
+                // generate a new payment_id
+                $payment_id = random_string('alnum', 15);
+
                 // loop through the payment record
                 foreach($paymentRecord as $record) {
 
@@ -1166,12 +1169,12 @@ class Fees extends Myschoolgh {
 
                         // insert the new record into the database
                         $stmt = $this->db->prepare("INSERT INTO fees_collection
-                            SET client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
+                            SET client_id = ?, item_id = ?, student_id = ?, payment_id = ?, department_id = ?, class_id = ?, 
                             category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
                             description = ?, currency = ?, receipt_id = ?, payment_method = ? {$append_sql}
                         ");
                         $stmt->execute([
-                            $params->clientId, $uniqueId, $record->student_id, 
+                            $params->clientId, $uniqueId, $record->student_id, $payment_id,
                             $record->department_id, $record->class_id, $record->category_id, 
                             $total_paid, $params->userId, $record->academic_year, $record->academic_term, 
                             $params->description ?? null, $currency, $receiptId, $params->payment_method

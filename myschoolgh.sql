@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 05, 2021 at 04:41 PM
+-- Generation Time: May 12, 2021 at 05:35 AM
 -- Server version: 10.4.17-MariaDB
 -- PHP Version: 7.3.26
 
@@ -27,6 +27,7 @@ SET time_zone = "+00:00";
 -- Table structure for table `academic_terms`
 --
 
+DROP TABLE IF EXISTS `academic_terms`;
 CREATE TABLE `academic_terms` (
   `id` int(11) NOT NULL,
   `client_id` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -49,6 +50,7 @@ INSERT INTO `academic_terms` (`id`, `client_id`, `name`, `description`) VALUES
 -- Table structure for table `academic_years`
 --
 
+DROP TABLE IF EXISTS `academic_years`;
 CREATE TABLE `academic_years` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -64,6 +66,7 @@ CREATE TABLE `academic_years` (
 -- Table structure for table `announcements`
 --
 
+DROP TABLE IF EXISTS `announcements`;
 CREATE TABLE `announcements` (
   `id` int(11) UNSIGNED NOT NULL,
   `item_id` varchar(32) NOT NULL DEFAULT 'NULL',
@@ -94,6 +97,7 @@ CREATE TABLE `announcements` (
 -- Table structure for table `assignments`
 --
 
+DROP TABLE IF EXISTS `assignments`;
 CREATE TABLE `assignments` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) CHARACTER SET latin1 DEFAULT '1',
@@ -132,6 +136,7 @@ CREATE TABLE `assignments` (
 -- Table structure for table `assignments_answers`
 --
 
+DROP TABLE IF EXISTS `assignments_answers`;
 CREATE TABLE `assignments_answers` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -147,6 +152,7 @@ CREATE TABLE `assignments_answers` (
 -- Table structure for table `assignments_questions`
 --
 
+DROP TABLE IF EXISTS `assignments_questions`;
 CREATE TABLE `assignments_questions` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -177,6 +183,7 @@ CREATE TABLE `assignments_questions` (
 -- Table structure for table `assignments_submitted`
 --
 
+DROP TABLE IF EXISTS `assignments_submitted`;
 CREATE TABLE `assignments_submitted` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -195,6 +202,7 @@ CREATE TABLE `assignments_submitted` (
 -- Table structure for table `blood_groups`
 --
 
+DROP TABLE IF EXISTS `blood_groups`;
 CREATE TABLE `blood_groups` (
   `id` int(11) NOT NULL,
   `name` varchar(25) DEFAULT NULL
@@ -218,6 +226,7 @@ INSERT INTO `blood_groups` (`id`, `name`) VALUES
 -- Table structure for table `books`
 --
 
+DROP TABLE IF EXISTS `books`;
 CREATE TABLE `books` (
   `id` int(10) UNSIGNED NOT NULL,
   `item_id` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -248,6 +257,7 @@ CREATE TABLE `books` (
 -- Table structure for table `books_borrowed`
 --
 
+DROP TABLE IF EXISTS `books_borrowed`;
 CREATE TABLE `books_borrowed` (
   `id` int(12) UNSIGNED NOT NULL,
   `client_id` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -275,6 +285,7 @@ CREATE TABLE `books_borrowed` (
 -- Table structure for table `books_borrowed_details`
 --
 
+DROP TABLE IF EXISTS `books_borrowed_details`;
 CREATE TABLE `books_borrowed_details` (
   `id` int(11) NOT NULL,
   `borrowed_id` varchar(32) DEFAULT NULL,
@@ -298,6 +309,7 @@ CREATE TABLE `books_borrowed_details` (
 -- Table structure for table `books_stock`
 --
 
+DROP TABLE IF EXISTS `books_stock`;
 CREATE TABLE `books_stock` (
   `id` int(11) NOT NULL,
   `books_id` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -310,6 +322,7 @@ CREATE TABLE `books_stock` (
 -- Table structure for table `books_type`
 --
 
+DROP TABLE IF EXISTS `books_type`;
 CREATE TABLE `books_type` (
   `id` int(11) NOT NULL,
   `item_id` varchar(32) DEFAULT NULL,
@@ -328,6 +341,7 @@ CREATE TABLE `books_type` (
 -- Table structure for table `classes`
 --
 
+DROP TABLE IF EXISTS `classes`;
 CREATE TABLE `classes` (
   `id` int(11) NOT NULL,
   `upload_id` varchar(12) DEFAULT NULL,
@@ -366,6 +380,7 @@ INSERT INTO `classes` (`id`, `upload_id`, `item_id`, `client_id`, `name`, `slug`
 -- Table structure for table `classes_rooms`
 --
 
+DROP TABLE IF EXISTS `classes_rooms`;
 CREATE TABLE `classes_rooms` (
   `item_id` varchar(255) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -383,6 +398,7 @@ CREATE TABLE `classes_rooms` (
 -- Table structure for table `clients_accounts`
 --
 
+DROP TABLE IF EXISTS `clients_accounts`;
 CREATE TABLE `clients_accounts` (
   `id` int(11) NOT NULL,
   `client_id` varchar(255) DEFAULT NULL,
@@ -409,7 +425,8 @@ CREATE TABLE `clients_accounts` (
 INSERT INTO `clients_accounts` (`id`, `client_id`, `client_name`, `client_contact`, `client_secondary_contact`, `client_address`, `client_email`, `client_website`, `client_logo`, `client_location`, `client_category`, `client_preferences`, `client_status`, `client_state`, `ip_address`, `date_created`) VALUES
 (1, 'TLIS0000001', 'True Love International School', '0550107770', '0240553604', 'P. O. Box AF 2582, Adentan Accra', 'emmallob14@gmail.com', 'https://www.trueloveinternational.com', 'assets/img/accounts/oEbGi1JVC0BqZp3gwtHKmFQYRAUWjcvl.png', 'Dodowa', NULL, '{\"academics\":{\"academic_year\":\"2020\\/2021\",\"academic_term\":\"1st\",\"term_starts\":\"2021-01-18\",\"term_ends\":\"2021-05-07\",\"next_academic_year\":\"2020\\/2021\",\"next_academic_term\":\"2nd\",\"next_term_starts\":\"2021-05-24\",\"next_term_ends\":\"2021-07-30\"},\"labels\":{\"student_label\":\"sl\",\"parent_label\":\"gl\",\"teacher_label\":\"tl\",\"staff_label\":\"stl\",\"course_label\":\"cl\",\"book_label\":\"bkl\",\"class_label\":\"cl\",\"department_label\":\"dp\",\"section_label\":\"sl\",\"receipt_label\":\"rel\",\"currency\":\"GHS\"},\"opening_days\":[\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\"]}', '1', 'Active', NULL, '2021-02-24 04:46:36'),
 (2, 'MSIS0000002', 'Morning Star International School', '0550107770', NULL, 'Accra, Cantanments', 'morningstar@gmail.com', 'https://www.morningstar.com', NULL, '', NULL, '{\"academics\":{\"academic_year\":\"2020/2021\",\"academic_term\":\"1st\",\"term_starts\":\"2021-01-18\",\"term_ends\":\"2021-03-31\",\"next_academic_year\":\"\",\"next_academic_term\":\"\"},\"labels\":{\"student_label\":\"sl\",\"parent_label\":\"gl\",\"teacher_label\":\"tl\",\"staff_label\":\"stl\",\"course_label\":\"crl\",\"book_label\":\"bkl\",\"class_label\":\"cl\",\"department_label\":\"dl\",\"section_label\":\"sl\",\"receipt_label\":\"rl\",\"currency\":\"GHS\"},\"opening_days\":[\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\"],\"setup_upload\":{\"staff\":true}}', '1', 'Active', NULL, '2021-02-24 04:46:36'),
-(3, 'GIS00003', 'Galaxy International School', '233550107770', '233240553604', 'P. O. Box DT 2582, Accra', 'info@gallaxyinternationalschool.com', 'https://www.gallaxyinternationalschool.com', 'assets/img/accounts/wsxCG7avKgQRZ8OH5MBhN9z61mefjYcL.png', 'Accra', NULL, '{\"academics\":{\"academic_year\":\"2021\\/2022\",\"academic_term\":\"1st\",\"term_starts\":\"2021-01-12\",\"term_ends\":\"2021-04-01\",\"next_academic_year\":\"2021\\/2022\",\"next_academic_term\":\"2nd\",\"next_term_starts\":\"2021-04-30\",\"next_term_ends\":\"2021-06-30\"},\"labels\":{\"student_label\":\"st\",\"parent_label\":\"gu\",\"teacher_label\":\"tl\",\"staff_label\":\"sl\",\"course_label\":\"cl\",\"book_label\":\"bk\",\"class_label\":\"ctl\",\"department_label\":\"dp\",\"section_label\":\"st\",\"receipt_label\":\"rl\",\"currency\":\"GHS\"},\"opening_days\":[\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\"]}', '1', 'Activated', '::1', '2021-03-17 10:20:28');
+(3, 'GIS00003', 'Galaxy International School', '233550107770', '233240553604', 'P. O. Box DT 2582, Accra', 'info@gallaxyinternationalschool.com', 'https://www.gallaxyinternationalschool.com', 'assets/img/accounts/wsxCG7avKgQRZ8OH5MBhN9z61mefjYcL.png', 'Accra', NULL, '{\"academics\":{\"academic_year\":\"2021\\/2022\",\"academic_term\":\"1st\",\"term_starts\":\"2021-01-12\",\"term_ends\":\"2021-04-01\",\"next_academic_year\":\"2021\\/2022\",\"next_academic_term\":\"2nd\",\"next_term_starts\":\"2021-04-30\",\"next_term_ends\":\"2021-06-30\"},\"labels\":{\"student_label\":\"st\",\"parent_label\":\"gu\",\"teacher_label\":\"tl\",\"staff_label\":\"sl\",\"course_label\":\"cl\",\"book_label\":\"bk\",\"class_label\":\"ctl\",\"department_label\":\"dp\",\"section_label\":\"st\",\"receipt_label\":\"rl\",\"currency\":\"GHS\"},\"opening_days\":[\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\"]}', '1', 'Activated', '::1', '2021-03-17 10:20:28'),
+(4, 'MSGH000004', 'Test Sample School', '233550107770', '233500021983', 'Test School Address', 'testsampleschool@mail.com', 'https://sampleschoolgh.com', NULL, 'Accra', NULL, '{\"academics\":{\"academic_year\":\"2019\\/2020\",\"academic_term\":\"1st\",\"term_starts\":\"2021-03-01\",\"term_ends\":\"2021-05-29\",\"next_academic_year\":\"2019\\/2020\",\"next_academic_term\":\"2nd\",\"next_term_starts\":\"2021-06-15\",\"next_term_ends\":\"2021-08-31\"},\"labels\":{\"student_label\":\"ST\",\"parent_label\":\"GL\",\"teacher_label\":\"TL\",\"staff_label\":\"SL\",\"course_label\":\"CL\",\"book_label\":\"BK\",\"class_label\":\"\",\"department_label\":\"\",\"section_label\":\"\",\"receipt_label\":\"\",\"currency\":\"GHS\"},\"opening_days\":[\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\"],\"account\":{\"verified_date\":\"2021-05-06 11:49PM\",\"expiry\":\"2021-06-06 11:49PM\",\"activation_code\":\"K1lwMeg7hxHL4DWI89jNZQRSOtXp0bCAdJoT3FPrn5G6cEifkqaYyU\"}}', '1', 'Activated', '::1', '2021-05-06 22:59:24');
 
 -- --------------------------------------------------------
 
@@ -417,6 +434,7 @@ INSERT INTO `clients_accounts` (`id`, `client_id`, `client_name`, `client_contac
 -- Table structure for table `contact`
 --
 
+DROP TABLE IF EXISTS `contact`;
 CREATE TABLE `contact` (
   `id` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
@@ -444,6 +462,7 @@ INSERT INTO `contact` (`id`, `name`, `email`, `subject`, `message`, `date_create
 -- Table structure for table `country`
 --
 
+DROP TABLE IF EXISTS `country`;
 CREATE TABLE `country` (
   `id` int(11) NOT NULL,
   `country_name` varchar(255) NOT NULL,
@@ -711,6 +730,7 @@ INSERT INTO `country` (`id`, `country_name`, `country_code`) VALUES
 -- Table structure for table `courses`
 --
 
+DROP TABLE IF EXISTS `courses`;
 CREATE TABLE `courses` (
   `id` int(11) NOT NULL,
   `upload_id` varchar(12) DEFAULT NULL,
@@ -752,6 +772,7 @@ INSERT INTO `courses` (`id`, `upload_id`, `item_id`, `client_id`, `course_code`,
 -- Table structure for table `courses_plan`
 --
 
+DROP TABLE IF EXISTS `courses_plan`;
 CREATE TABLE `courses_plan` (
   `id` int(11) NOT NULL,
   `item_id` varchar(32) DEFAULT NULL,
@@ -777,6 +798,7 @@ CREATE TABLE `courses_plan` (
 -- Table structure for table `courses_resource_links`
 --
 
+DROP TABLE IF EXISTS `courses_resource_links`;
 CREATE TABLE `courses_resource_links` (
   `id` int(11) NOT NULL,
   `item_id` varchar(32) DEFAULT NULL,
@@ -798,6 +820,7 @@ CREATE TABLE `courses_resource_links` (
 -- Table structure for table `cron_scheduler`
 --
 
+DROP TABLE IF EXISTS `cron_scheduler`;
 CREATE TABLE `cron_scheduler` (
   `id` int(11) NOT NULL,
   `query` text DEFAULT NULL,
@@ -830,6 +853,7 @@ INSERT INTO `cron_scheduler` (`id`, `query`, `item_id`, `user_id`, `notice_code`
 -- Table structure for table `currency`
 --
 
+DROP TABLE IF EXISTS `currency`;
 CREATE TABLE `currency` (
   `id` int(11) NOT NULL,
   `currency` varchar(12) DEFAULT NULL
@@ -850,6 +874,7 @@ INSERT INTO `currency` (`id`, `currency`) VALUES
 -- Table structure for table `departments`
 --
 
+DROP TABLE IF EXISTS `departments`;
 CREATE TABLE `departments` (
   `id` int(11) NOT NULL,
   `item_id` varchar(32) DEFAULT NULL,
@@ -873,6 +898,7 @@ CREATE TABLE `departments` (
 -- Table structure for table `events`
 --
 
+DROP TABLE IF EXISTS `events`;
 CREATE TABLE `events` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -914,6 +940,7 @@ INSERT INTO `events` (`id`, `client_id`, `item_id`, `title`, `description`, `sta
 -- Table structure for table `events_types`
 --
 
+DROP TABLE IF EXISTS `events_types`;
 CREATE TABLE `events_types` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -931,7 +958,8 @@ CREATE TABLE `events_types` (
 --
 
 INSERT INTO `events_types` (`id`, `client_id`, `item_id`, `name`, `slug`, `description`, `color_code`, `icon`, `status`) VALUES
-(1, 'TLIS0000001', 'SYed3LuwXgKkh60P7Uzc2W41qNQHGyDr', 'Public Holiday', 'public-holiday', 'This is the general category for all public holidays', '#9c27b0', NULL, '1');
+(1, 'TLIS0000001', 'SYed3LuwXgKkh60P7Uzc2W41qNQHGyDr', 'Public Holiday', 'public-holiday', 'This is the general category for all public holidays', '#9c27b0', NULL, '1'),
+(2, 'MSGH000004', 'nwAShbU71vWTmpu0t453EQxaGYH6RlZO', 'Public Holiday', 'public-holiday', 'This is the general category for all public holidays', '#6777ef', NULL, '1');
 
 -- --------------------------------------------------------
 
@@ -939,6 +967,7 @@ INSERT INTO `events_types` (`id`, `client_id`, `item_id`, `name`, `slug`, `descr
 -- Table structure for table `e_learning`
 --
 
+DROP TABLE IF EXISTS `e_learning`;
 CREATE TABLE `e_learning` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -971,6 +1000,7 @@ CREATE TABLE `e_learning` (
 -- Table structure for table `e_learning_comments`
 --
 
+DROP TABLE IF EXISTS `e_learning_comments`;
 CREATE TABLE `e_learning_comments` (
   `id` int(11) NOT NULL,
   `type` enum('comment','reply') DEFAULT 'comment',
@@ -992,6 +1022,7 @@ CREATE TABLE `e_learning_comments` (
 -- Table structure for table `e_learning_timer`
 --
 
+DROP TABLE IF EXISTS `e_learning_timer`;
 CREATE TABLE `e_learning_timer` (
   `id` int(10) UNSIGNED NOT NULL,
   `user_id` varchar(32) DEFAULT NULL,
@@ -1005,6 +1036,7 @@ CREATE TABLE `e_learning_timer` (
 -- Table structure for table `e_learning_views`
 --
 
+DROP TABLE IF EXISTS `e_learning_views`;
 CREATE TABLE `e_learning_views` (
   `id` int(11) UNSIGNED NOT NULL,
   `video_id` varchar(255) DEFAULT NULL,
@@ -1019,6 +1051,7 @@ CREATE TABLE `e_learning_views` (
 -- Table structure for table `fees_allocations`
 --
 
+DROP TABLE IF EXISTS `fees_allocations`;
 CREATE TABLE `fees_allocations` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) NOT NULL DEFAULT '1',
@@ -1056,6 +1089,7 @@ INSERT INTO `fees_allocations` (`id`, `client_id`, `programme_id`, `class_id`, `
 -- Table structure for table `fees_category`
 --
 
+DROP TABLE IF EXISTS `fees_category`;
 CREATE TABLE `fees_category` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) NOT NULL DEFAULT '1',
@@ -1083,11 +1117,13 @@ INSERT INTO `fees_category` (`id`, `client_id`, `name`, `amount`, `code`, `descr
 -- Table structure for table `fees_collection`
 --
 
+DROP TABLE IF EXISTS `fees_collection`;
 CREATE TABLE `fees_collection` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) NOT NULL DEFAULT '1',
   `item_id` varchar(32) DEFAULT NULL,
   `receipt_id` varchar(32) DEFAULT NULL,
+  `payment_id` varchar(32) DEFAULT NULL,
   `student_id` varchar(32) DEFAULT NULL,
   `department_id` int(10) UNSIGNED DEFAULT NULL,
   `programme_id` int(11) UNSIGNED DEFAULT NULL,
@@ -1095,6 +1131,7 @@ CREATE TABLE `fees_collection` (
   `payment_method` enum('Cash','Cheque') NOT NULL DEFAULT 'Cash',
   `cheque_bank` varchar(255) DEFAULT NULL,
   `cheque_number` varchar(64) DEFAULT NULL,
+  `cheque_security` varchar(64) DEFAULT NULL,
   `paidin_by` varchar(64) DEFAULT NULL,
   `paidin_contact` varchar(32) DEFAULT NULL,
   `currency` varchar(20) DEFAULT NULL,
@@ -1113,34 +1150,39 @@ CREATE TABLE `fees_collection` (
 -- Dumping data for table `fees_collection`
 --
 
-INSERT INTO `fees_collection` (`id`, `client_id`, `item_id`, `receipt_id`, `student_id`, `department_id`, `programme_id`, `class_id`, `payment_method`, `cheque_bank`, `cheque_number`, `paidin_by`, `paidin_contact`, `currency`, `category_id`, `amount`, `created_by`, `recorded_date`, `description`, `academic_year`, `academic_term`, `reversed`, `status`) VALUES
-(1, 'TLIS0000001', 'UAweEh3mnDVLp70icYt4oOxXkSF6qPzJ', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 2, '25.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:37:49', NULL, '2020/2021', '1st', '0', '1'),
-(2, 'TLIS0000001', 'qjCsSpkN8mxKTDw4aYG52Zzb30OFLrhM', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 1, '600.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:38:17', NULL, '2020/2021', '1st', '0', '1'),
-(3, 'TLIS0000001', '1wz9deBc2ponRXaNAQ7Fy5KDW8rm3Yhg', NULL, 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 1, '650.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:40:54', NULL, '2020/2021', '1st', '0', '1'),
-(4, 'TLIS0000001', 'DcexTLqhI0ObSyfAPM3wWBFo6dk1p5ji', NULL, 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 2, '25.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:46:04', NULL, '2020/2021', '1st', '0', '1'),
-(5, 'TLIS0000001', '3ZaUqz9JfIBNCtWDHvnYVAsgGwyKku6x', NULL, 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 3, '30.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:46:46', NULL, '2020/2021', '1st', '0', '1'),
-(6, 'TLIS0000001', 'YrCgtPJTBUM0GsoXS9Qyxfju5daO7ZD2', NULL, 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 4, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:47:42', NULL, '2020/2021', '1st', '0', '1'),
-(7, 'TLIS0000001', 'kHSNId0tBL3poP6vA17OuFJTyli5Qgaq', NULL, 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 5, '250.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:48:10', NULL, '2020/2021', '1st', '0', '1'),
-(8, 'TLIS0000001', 'FzTLvXAqHxRuJo7ZwP0nQdr1pDK4OU5f', NULL, '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 5, '250.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:48:31', NULL, '2020/2021', '1st', '0', '1'),
-(9, 'TLIS0000001', 'TVnHDzhoSgIrcdQx7Fjv0Z1MKAEbq3UP', NULL, '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 3, '20.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:48:45', NULL, '2020/2021', '1st', '0', '1'),
-(10, 'TLIS0000001', 'Fgo8jPQIRiWNVmcha974C15d32E6TGUL', NULL, '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 1, '650.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:53:22', NULL, '2020/2021', '1st', '0', '1'),
-(11, 'TLIS0000001', '2L0aJrZNRXDI6P1yQ7qKbCWvce4dMYwS', NULL, '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 4, '20.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:53:42', NULL, '2020/2021', '1st', '0', '1'),
-(12, 'TLIS0000001', 'xHXUYzLREdQlAhDGkuZ1JFBO68NM9r0S', NULL, '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 2, '25.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:53:57', NULL, '2020/2021', '1st', '0', '1'),
-(13, 'TLIS0000001', 'uZEqtcS1ijDOeJdk54Ys7F9l0H82vhNz', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 1, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 18:53:49', NULL, '2020/2021', '1st', '0', '1'),
-(14, 'TLIS0000001', 'tR315zfY80DeuFWElwAqrnbHmdIk9Vys', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 3, '30.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 18:54:03', NULL, '2020/2021', '1st', '0', '1'),
-(15, 'TLIS0000001', 'Uc1IeT6HvqrO4Dytx2XLkWaENZVGuC7w', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 4, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 18:54:12', NULL, '2020/2021', '1st', '0', '1'),
-(16, 'TLIS0000001', 'PlCAM4q5Fj3G6utVKy7Qve0Hrg2mUnBh', '00016', 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 1, '350.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 12:31:29', NULL, '2020/2021', '1st', '0', '1'),
-(17, 'TLIS0000001', '7peCHbf4v21jSqsMWgdrnT86OZLPhKNV', 'REL00017', 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 1, '300.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 12:43:36', NULL, '2020/2021', '1st', '0', '1'),
-(18, 'TLIS0000001', 'T1j8wmEvSPfBV2ueZQrFNC0GXMAYO6Iy', 'REL00018', 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 2, '25.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 12:44:05', 'This is the full payment for the student ict dues', '2020/2021', '1st', '0', '1'),
-(19, 'TLIS0000001', 'WervgpBHOqPkRFwUd1VJ6NhisTl43EYy', 'REL00019', 'T18sVwiSd4HumlNkXUfh3ngjCEP0M7LK', 0, NULL, 1, 'Cheque', 'Fidelity Bank Ghana Limited::10', '0092021', NULL, NULL, 'GHS', 1, '300.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 17:03:02', NULL, '2020/2021', '1st', '0', '1'),
-(20, 'TLIS0000001', 'lU1qMQ5JVva2yhPHngKtDTLmxbCo8IEF', 'REL00020', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 1, '500.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 22:13:47', NULL, '2020/2021', '1st', '0', '1'),
-(21, 'TLIS0000001', 'cMKzHlQWirkLVb9OahRsSPTw6DyetJdG', 'REL00021', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 1, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 22:20:01', NULL, '2020/2021', '1st', '0', '1'),
-(22, 'TLIS0000001', 'mrqNO8AbfnYSkZJVDwQ1oicj9WXCh4TF', 'REL00022', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 1, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 22:24:34', 'This is another payment check', '2020/2021', '1st', '0', '1'),
-(23, 'TLIS0000001', 'cxQmr0Z1eJY2D8vBubtsS4HaL9V6pzif', 'REL00023', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 2, '25.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 23:15:34', NULL, '2020/2021', '1st', '0', '1'),
-(24, 'TLIS0000001', '2pfchrozeNGQ4jwVBR7xkYEubOP3Im8U', 'REL00024', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cheque', 'Absa Bank Ghana Limited::2', '0092839', NULL, NULL, 'GHS', 3, '30.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 23:18:30', NULL, '2020/2021', '1st', '0', '1'),
-(25, 'TLIS0000001', '5FmSoD1rT9ZGc3OV8NR02wKtYipj6gbE', 'REL00025', 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cheque', 'Agricultural Development Bank Limited::4', '000293', NULL, NULL, 'GHS', 3, '30.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 23:21:38', NULL, '2020/2021', '1st', '0', '1'),
-(26, 'TLIS0000001', 'pXgH0eWLxAZvGmNRMrPSCyJc6as8QVnD', 'REL00026', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 4, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 23:23:31', NULL, '2020/2021', '1st', '0', '1'),
-(27, 'TLIS0000001', 'XJpPenYTzOQiaHy5bVrALqSjwC9kZgd1', 'REL00027', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, 'GHS', 1, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 23:24:46', NULL, '2020/2021', '1st', '0', '1');
+INSERT INTO `fees_collection` (`id`, `client_id`, `item_id`, `receipt_id`, `payment_id`, `student_id`, `department_id`, `programme_id`, `class_id`, `payment_method`, `cheque_bank`, `cheque_number`, `cheque_security`, `paidin_by`, `paidin_contact`, `currency`, `category_id`, `amount`, `created_by`, `recorded_date`, `description`, `academic_year`, `academic_term`, `reversed`, `status`) VALUES
+(1, 'TLIS0000001', 'UAweEh3mnDVLp70icYt4oOxXkSF6qPzJ', NULL, NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 2, '25.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:37:49', NULL, '2020/2021', '1st', '0', '1'),
+(2, 'TLIS0000001', 'qjCsSpkN8mxKTDw4aYG52Zzb30OFLrhM', NULL, NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 1, '600.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:38:17', NULL, '2020/2021', '1st', '0', '1'),
+(3, 'TLIS0000001', '1wz9deBc2ponRXaNAQ7Fy5KDW8rm3Yhg', NULL, NULL, 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 1, '650.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:40:54', NULL, '2020/2021', '1st', '0', '1'),
+(4, 'TLIS0000001', 'DcexTLqhI0ObSyfAPM3wWBFo6dk1p5ji', NULL, NULL, 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 2, '25.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:46:04', NULL, '2020/2021', '1st', '0', '1'),
+(5, 'TLIS0000001', '3ZaUqz9JfIBNCtWDHvnYVAsgGwyKku6x', NULL, NULL, 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 3, '30.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:46:46', NULL, '2020/2021', '1st', '0', '1'),
+(6, 'TLIS0000001', 'YrCgtPJTBUM0GsoXS9Qyxfju5daO7ZD2', NULL, NULL, 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 4, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:47:42', NULL, '2020/2021', '1st', '0', '1'),
+(7, 'TLIS0000001', 'kHSNId0tBL3poP6vA17OuFJTyli5Qgaq', NULL, NULL, 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 5, '250.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:48:10', NULL, '2020/2021', '1st', '0', '1'),
+(8, 'TLIS0000001', 'FzTLvXAqHxRuJo7ZwP0nQdr1pDK4OU5f', NULL, NULL, '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 5, '250.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:48:31', NULL, '2020/2021', '1st', '0', '1'),
+(9, 'TLIS0000001', 'TVnHDzhoSgIrcdQx7Fjv0Z1MKAEbq3UP', NULL, NULL, '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 3, '20.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:48:45', NULL, '2020/2021', '1st', '0', '1'),
+(10, 'TLIS0000001', 'Fgo8jPQIRiWNVmcha974C15d32E6TGUL', NULL, NULL, '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 1, '650.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:53:22', NULL, '2020/2021', '1st', '0', '1'),
+(11, 'TLIS0000001', '2L0aJrZNRXDI6P1yQ7qKbCWvce4dMYwS', NULL, NULL, '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 4, '20.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:53:42', NULL, '2020/2021', '1st', '0', '1'),
+(12, 'TLIS0000001', 'xHXUYzLREdQlAhDGkuZ1JFBO68NM9r0S', NULL, NULL, '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 2, '25.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 17:53:57', NULL, '2020/2021', '1st', '0', '1'),
+(13, 'TLIS0000001', 'uZEqtcS1ijDOeJdk54Ys7F9l0H82vhNz', NULL, NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 1, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 18:53:49', NULL, '2020/2021', '1st', '0', '1'),
+(14, 'TLIS0000001', 'tR315zfY80DeuFWElwAqrnbHmdIk9Vys', NULL, NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 3, '30.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 18:54:03', NULL, '2020/2021', '1st', '0', '1'),
+(15, 'TLIS0000001', 'Uc1IeT6HvqrO4Dytx2XLkWaENZVGuC7w', NULL, NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 0, NULL, 1, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 4, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-01 18:54:12', NULL, '2020/2021', '1st', '0', '1'),
+(16, 'TLIS0000001', 'PlCAM4q5Fj3G6utVKy7Qve0Hrg2mUnBh', '00016', NULL, 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 1, '350.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 12:31:29', NULL, '2020/2021', '1st', '0', '1'),
+(17, 'TLIS0000001', '7peCHbf4v21jSqsMWgdrnT86OZLPhKNV', 'REL00017', NULL, 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 1, '300.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 12:43:36', NULL, '2020/2021', '1st', '0', '1'),
+(18, 'TLIS0000001', 'T1j8wmEvSPfBV2ueZQrFNC0GXMAYO6Iy', 'REL00018', NULL, 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 2, '25.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 12:44:05', 'This is the full payment for the student ict dues', '2020/2021', '1st', '0', '1'),
+(19, 'TLIS0000001', 'WervgpBHOqPkRFwUd1VJ6NhisTl43EYy', 'REL00019', NULL, 'T18sVwiSd4HumlNkXUfh3ngjCEP0M7LK', 0, NULL, 1, 'Cheque', 'Fidelity Bank Ghana Limited::10', '0092021', NULL, NULL, NULL, 'GHS', 1, '300.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 17:03:02', NULL, '2020/2021', '1st', '0', '1'),
+(20, 'TLIS0000001', 'lU1qMQ5JVva2yhPHngKtDTLmxbCo8IEF', 'REL00020', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 1, '500.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 22:13:47', NULL, '2020/2021', '1st', '0', '1'),
+(21, 'TLIS0000001', 'cMKzHlQWirkLVb9OahRsSPTw6DyetJdG', 'REL00021', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 1, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 22:20:01', NULL, '2020/2021', '1st', '0', '1'),
+(22, 'TLIS0000001', 'mrqNO8AbfnYSkZJVDwQ1oicj9WXCh4TF', 'REL00022', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 1, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 22:24:34', 'This is another payment check', '2020/2021', '1st', '0', '1'),
+(23, 'TLIS0000001', 'cxQmr0Z1eJY2D8vBubtsS4HaL9V6pzif', 'REL00023', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 2, '25.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 23:15:34', NULL, '2020/2021', '1st', '0', '1'),
+(24, 'TLIS0000001', '2pfchrozeNGQ4jwVBR7xkYEubOP3Im8U', 'REL00024', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cheque', 'Absa Bank Ghana Limited::2', '0092839', NULL, NULL, NULL, 'GHS', 3, '30.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 23:18:30', NULL, '2020/2021', '1st', '0', '1'),
+(25, 'TLIS0000001', '5FmSoD1rT9ZGc3OV8NR02wKtYipj6gbE', 'REL00025', NULL, 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cheque', 'Agricultural Development Bank Limited::4', '000293', NULL, NULL, NULL, 'GHS', 3, '30.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 23:21:38', NULL, '2020/2021', '1st', '0', '1'),
+(26, 'TLIS0000001', 'pXgH0eWLxAZvGmNRMrPSCyJc6as8QVnD', 'REL00026', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 4, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 23:23:31', NULL, '2020/2021', '1st', '0', '1'),
+(27, 'TLIS0000001', 'XJpPenYTzOQiaHy5bVrALqSjwC9kZgd1', 'REL00027', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 1, '50.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-03 23:24:46', NULL, '2020/2021', '1st', '0', '1'),
+(28, 'TLIS0000001', 'Mpil76KgEkxPYBJdLrTSaQfce4DbHn3h', 'REL00028', NULL, 'T18sVwiSd4HumlNkXUfh3ngjCEP0M7LK', 0, NULL, 1, 'Cheque', 'Standard Chartered Bank (Ghana) Limited::21', '655142', '', NULL, NULL, 'GHS', 2, '25.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-11 11:38:06', 'This is the full paid for the ICT Dues Owed by the User', '2020/2021', '1st', '0', '1'),
+(29, 'TLIS0000001', 'EXZwAaJcM7r5iqO', 'REL00029', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 5, '10.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-12 05:07:40', 'This is the test payment', '2020/2021', '1st', '0', '1'),
+(30, 'TLIS0000001', 'dGD9NlZcBf4syWt', 'REL00030', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 5, '70.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-12 05:19:26', 'This is the next payment test that i am parsing into the database.', '2020/2021', '1st', '0', '1'),
+(31, 'TLIS0000001', 'kiQM4X9EVmPA0e8', 'REL00031', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cash', NULL, NULL, NULL, NULL, NULL, 'GHS', 5, '80.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-12 05:21:27', 'Final Test to ensure i have the best result as expected', '2020/2021', '1st', '0', '1'),
+(32, 'TLIS0000001', 'ilQ3x0yrdYh6tTH', 'REL00032', NULL, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 0, NULL, 2, 'Cheque', 'Agricultural Development Bank Limited::4', '009029', '', NULL, NULL, 'GHS', 5, '90.00', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '2021-05-12 05:28:20', 'This is the final payment for the student fees', '2020/2021', '1st', '0', '1');
 
 -- --------------------------------------------------------
 
@@ -1148,6 +1190,7 @@ INSERT INTO `fees_collection` (`id`, `client_id`, `item_id`, `receipt_id`, `stud
 -- Table structure for table `fees_collection_banks`
 --
 
+DROP TABLE IF EXISTS `fees_collection_banks`;
 CREATE TABLE `fees_collection_banks` (
   `id` int(11) NOT NULL,
   `bank_name` varchar(255) DEFAULT NULL,
@@ -1194,6 +1237,7 @@ INSERT INTO `fees_collection_banks` (`id`, `bank_name`, `address`, `phone_number
 -- Table structure for table `fees_payments`
 --
 
+DROP TABLE IF EXISTS `fees_payments`;
 CREATE TABLE `fees_payments` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) NOT NULL DEFAULT '1',
@@ -1222,13 +1266,13 @@ CREATE TABLE `fees_payments` (
 INSERT INTO `fees_payments` (`id`, `client_id`, `checkout_url`, `student_id`, `class_id`, `category_id`, `currency`, `amount_due`, `amount_paid`, `balance`, `academic_year`, `academic_term`, `paid_status`, `date_created`, `last_payment_date`, `last_payment_id`, `created_by`, `status`) VALUES
 (1, 'TLIS0000001', 'JNMB5b8OaUdEAT0W9Hiy7hre4z2gSPcl', '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', '1', 1, 'GHS', '650.00', '650.00', '0.00', '2020/2021', '1st', '1', '2021-05-01 17:05:13', '2021-05-01 17:53:22', 'Fgo8jPQIRiWNVmcha974C15d32E6TGUL', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
 (2, 'TLIS0000001', '1NKO2F4b7iakzMJVsGmThQvxS0B6PRjl', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', '1', 1, 'GHS', '650.00', '650.00', '0.00', '2020/2021', '1st', '1', '2021-05-01 17:05:13', '2021-05-01 18:53:49', 'uZEqtcS1ijDOeJdk54Ys7F9l0H82vhNz', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
-(3, 'TLIS0000001', 'ANVs0r7WtK8k5IqUGhifL312bwTMSa4z', 'T18sVwiSd4HumlNkXUfh3ngjCEP0M7LK', '1', 1, 'GHS', '650.00', '300.00', '350.00', '2020/2021', '1st', '1', '2021-05-01 17:05:13', '2021-05-03 17:03:02', 'WervgpBHOqPkRFwUd1VJ6NhisTl43EYy', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
+(3, 'TLIS0000001', 'ANVs0r7WtK8k5IqUGhifL312bwTMSa4z', 'T18sVwiSd4HumlNkXUfh3ngjCEP0M7LK', '1', 1, 'GHS', '650.00', '300.00', '350.00', '2020/2021', '1st', '2', '2021-05-01 17:05:13', '2021-05-03 17:03:02', 'WervgpBHOqPkRFwUd1VJ6NhisTl43EYy', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
 (4, 'TLIS0000001', 'poFK7ZXTM9xyS4V2riWUE1BLtHe8df0h', 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', '1', 1, 'GHS', '650.00', '650.00', '0.00', '2020/2021', '1st', '1', '2021-05-01 17:05:13', '2021-05-01 17:40:54', '1wz9deBc2ponRXaNAQ7Fy5KDW8rm3Yhg', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
 (5, 'TLIS0000001', '8KPG0gBRAa2fjuLk1S5UZNrhHqbxez3v', '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', '1', 2, 'GHS', '25.00', '25.00', '0.00', '2020/2021', '1st', '1', '2021-05-01 17:35:42', '2021-05-01 17:53:57', 'xHXUYzLREdQlAhDGkuZ1JFBO68NM9r0S', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
 (6, 'TLIS0000001', '4xmnf8kpQvz5jSNF6IyCWilh1r2udbH7', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', '1', 2, 'GHS', '25.00', '25.00', '0.00', '2020/2021', '1st', '1', '2021-05-01 17:35:42', '2021-05-01 17:37:49', 'UAweEh3mnDVLp70icYt4oOxXkSF6qPzJ', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
-(7, 'TLIS0000001', '3aj8WoYlCXApyfJLRs1UiPDZ6kIMuHvz', 'T18sVwiSd4HumlNkXUfh3ngjCEP0M7LK', '1', 2, 'GHS', '25.00', '0.00', '25.00', '2020/2021', '1st', '0', '2021-05-01 17:35:42', NULL, NULL, 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
+(7, 'TLIS0000001', '3aj8WoYlCXApyfJLRs1UiPDZ6kIMuHvz', 'T18sVwiSd4HumlNkXUfh3ngjCEP0M7LK', '1', 2, 'GHS', '25.00', '25.00', '0.00', '2020/2021', '1st', '1', '2021-05-01 17:35:42', '2021-05-11 11:38:07', 'Mpil76KgEkxPYBJdLrTSaQfce4DbHn3h', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
 (8, 'TLIS0000001', 'KMNkXjTSYZbG584wAD0CQxqhvUuJrstn', 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', '1', 2, 'GHS', '25.00', '25.00', '0.00', '2020/2021', '1st', '1', '2021-05-01 17:35:42', '2021-05-01 17:46:04', 'DcexTLqhI0ObSyfAPM3wWBFo6dk1p5ji', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
-(9, 'TLIS0000001', 'xOgoTPUGqM1WiXYk8hcfs7dN2aFv9Dyt', '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', '1', 3, 'GHS', '30.00', '20.00', '10.00', '2020/2021', '1st', '0', '2021-05-01 17:35:48', '2021-05-01 17:48:45', 'TVnHDzhoSgIrcdQx7Fjv0Z1MKAEbq3UP', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
+(9, 'TLIS0000001', 'xOgoTPUGqM1WiXYk8hcfs7dN2aFv9Dyt', '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', '1', 3, 'GHS', '30.00', '20.00', '10.00', '2020/2021', '1st', '2', '2021-05-01 17:35:48', '2021-05-01 17:48:45', 'TVnHDzhoSgIrcdQx7Fjv0Z1MKAEbq3UP', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
 (10, 'TLIS0000001', 'fhxabjoyIKD1C3LgX2wUdnJV0BT9RmWt', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', '1', 3, 'GHS', '30.00', '30.00', '0.00', '2020/2021', '1st', '1', '2021-05-01 17:35:48', '2021-05-01 18:54:03', 'tR315zfY80DeuFWElwAqrnbHmdIk9Vys', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
 (11, 'TLIS0000001', '0fTKcBM2d8notm7L6zekp4iFCjHuUaRq', 'T18sVwiSd4HumlNkXUfh3ngjCEP0M7LK', '1', 3, 'GHS', '30.00', '0.00', '30.00', '2020/2021', '1st', '0', '2021-05-01 17:35:48', NULL, NULL, 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
 (12, 'TLIS0000001', 'r7SPIRThcMXi6L0wVK93QNGxYCq8vkyH', 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', '1', 3, 'GHS', '30.00', '30.00', '0.00', '2020/2021', '1st', '1', '2021-05-01 17:35:48', '2021-05-01 17:46:46', '3ZaUqz9JfIBNCtWDHvnYVAsgGwyKku6x', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
@@ -1248,7 +1292,7 @@ INSERT INTO `fees_payments` (`id`, `client_id`, `checkout_url`, `student_id`, `c
 (26, 'TLIS0000001', 'tEfWagUKR2x4ownVHjQ5dFIcsBG6XA71', 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', '2', 3, 'GHS', '30.00', '30.00', '0.00', '2020/2021', '1st', '1', '2021-05-03 12:30:52', '2021-05-03 23:21:38', '5FmSoD1rT9ZGc3OV8NR02wKtYipj6gbE', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
 (27, 'TLIS0000001', '6kOWRdgPJsA9Yepb81cNhMFt3C5QwiaH', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', '2', 4, 'GHS', '50.00', '50.00', '0.00', '2020/2021', '1st', '1', '2021-05-03 12:30:56', '2021-05-03 23:23:31', 'pXgH0eWLxAZvGmNRMrPSCyJc6as8QVnD', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
 (28, 'TLIS0000001', 'r9TYkC5zxwUVIbFPSg7dGc8pN1JyKOqH', 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', '2', 4, 'GHS', '50.00', '0.00', '50.00', '2020/2021', '1st', '0', '2021-05-03 12:30:56', NULL, NULL, 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
-(29, 'TLIS0000001', 'bfoHtlVKavzrXAnp3G1INZ6sFDOPgkj2', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', '2', 5, 'GHS', '250.00', '0.00', '250.00', '2020/2021', '1st', '0', '2021-05-03 12:31:00', NULL, NULL, 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
+(29, 'TLIS0000001', 'bfoHtlVKavzrXAnp3G1INZ6sFDOPgkj2', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', '2', 5, 'GHS', '250.00', '250.00', '0.00', '2020/2021', '1st', '1', '2021-05-03 12:31:00', '2021-05-12 05:28:20', 'ilQ3x0yrdYh6tTH', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1'),
 (30, 'TLIS0000001', 'aY6485iXZQWsEOtdPqn3ypRkrIfgJBCV', 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', '2', 5, 'GHS', '250.00', '0.00', '250.00', '2020/2021', '1st', '0', '2021-05-03 12:31:00', NULL, NULL, 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '1');
 
 -- --------------------------------------------------------
@@ -1257,6 +1301,7 @@ INSERT INTO `fees_payments` (`id`, `client_id`, `checkout_url`, `student_id`, `c
 -- Table structure for table `files_attachment`
 --
 
+DROP TABLE IF EXISTS `files_attachment`;
 CREATE TABLE `files_attachment` (
   `id` int(12) UNSIGNED NOT NULL,
   `resource` varchar(32) DEFAULT NULL,
@@ -1274,6 +1319,7 @@ CREATE TABLE `files_attachment` (
 -- Table structure for table `grading_system`
 --
 
+DROP TABLE IF EXISTS `grading_system`;
 CREATE TABLE `grading_system` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -1298,6 +1344,7 @@ INSERT INTO `grading_system` (`id`, `client_id`, `grading`, `structure`, `show_p
 -- Table structure for table `grading_terminal_logs`
 --
 
+DROP TABLE IF EXISTS `grading_terminal_logs`;
 CREATE TABLE `grading_terminal_logs` (
   `id` int(11) NOT NULL,
   `report_id` varchar(32) DEFAULT NULL,
@@ -1332,6 +1379,7 @@ INSERT INTO `grading_terminal_logs` (`id`, `report_id`, `client_id`, `class_id`,
 -- Table structure for table `grading_terminal_scores`
 --
 
+DROP TABLE IF EXISTS `grading_terminal_scores`;
 CREATE TABLE `grading_terminal_scores` (
   `id` int(11) NOT NULL,
   `report_id` varchar(20) DEFAULT NULL,
@@ -1385,6 +1433,7 @@ INSERT INTO `grading_terminal_scores` (`id`, `report_id`, `client_id`, `student_
 -- Table structure for table `guardian_relation`
 --
 
+DROP TABLE IF EXISTS `guardian_relation`;
 CREATE TABLE `guardian_relation` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -1406,6 +1455,7 @@ INSERT INTO `guardian_relation` (`id`, `client_id`, `name`, `status`) VALUES
 -- Table structure for table `incidents`
 --
 
+DROP TABLE IF EXISTS `incidents`;
 CREATE TABLE `incidents` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -1432,6 +1482,7 @@ CREATE TABLE `incidents` (
 -- Table structure for table `payslips`
 --
 
+DROP TABLE IF EXISTS `payslips`;
 CREATE TABLE `payslips` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -1461,6 +1512,7 @@ CREATE TABLE `payslips` (
 -- Table structure for table `payslips_allowance_types`
 --
 
+DROP TABLE IF EXISTS `payslips_allowance_types`;
 CREATE TABLE `payslips_allowance_types` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -1477,6 +1529,7 @@ CREATE TABLE `payslips_allowance_types` (
 -- Table structure for table `payslips_details`
 --
 
+DROP TABLE IF EXISTS `payslips_details`;
 CREATE TABLE `payslips_details` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -1496,6 +1549,7 @@ CREATE TABLE `payslips_details` (
 -- Table structure for table `payslips_employees_allowances`
 --
 
+DROP TABLE IF EXISTS `payslips_employees_allowances`;
 CREATE TABLE `payslips_employees_allowances` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -1512,6 +1566,7 @@ CREATE TABLE `payslips_employees_allowances` (
 -- Table structure for table `payslips_employees_payroll`
 --
 
+DROP TABLE IF EXISTS `payslips_employees_payroll`;
 CREATE TABLE `payslips_employees_payroll` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -1536,6 +1591,7 @@ CREATE TABLE `payslips_employees_payroll` (
 -- Table structure for table `periods`
 --
 
+DROP TABLE IF EXISTS `periods`;
 CREATE TABLE `periods` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -1551,6 +1607,7 @@ CREATE TABLE `periods` (
 -- Table structure for table `sections`
 --
 
+DROP TABLE IF EXISTS `sections`;
 CREATE TABLE `sections` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -1572,6 +1629,7 @@ CREATE TABLE `sections` (
 -- Table structure for table `timetables`
 --
 
+DROP TABLE IF EXISTS `timetables`;
 CREATE TABLE `timetables` (
   `item_id` varchar(32) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -1601,6 +1659,7 @@ CREATE TABLE `timetables` (
 -- Table structure for table `timetables_slots_allocation`
 --
 
+DROP TABLE IF EXISTS `timetables_slots_allocation`;
 CREATE TABLE `timetables_slots_allocation` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -1623,6 +1682,7 @@ CREATE TABLE `timetables_slots_allocation` (
 -- Table structure for table `users`
 --
 
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
   `id` int(11) UNSIGNED NOT NULL,
   `conflicting` varchar(32) NOT NULL,
@@ -1699,7 +1759,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `conflicting`, `upload_id`, `item_id`, `unique_id`, `client_id`, `firstname`, `lastname`, `othername`, `name`, `academic_year`, `academic_term`, `enrollment_date`, `gender`, `email`, `username`, `password`, `access_level`, `preferences`, `status`, `deleted`, `verified_email`, `last_login`, `phone_number`, `phone_number_2`, `description`, `position`, `address`, `online`, `chat_status`, `last_seen`, `nation_ids`, `date_of_birth`, `class_id`, `course_ids`, `class_ids`, `blood_group`, `religion`, `section`, `programme`, `department`, `nationality`, `occupation`, `postal_code`, `disabled`, `residence`, `employer`, `guardian_id`, `last_timetable_id`, `country`, `verify_token`, `verified_date`, `token_expiry`, `changed_password`, `account_balance`, `city`, `relationship`, `date_created`, `last_updated`, `created_by`, `image`, `previous_school`, `previous_school_qualification`, `previous_school_remarks`, `user_status`, `perma_image`, `user_type`, `last_visited_page`) VALUES
-(1, '', NULL, 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'TLISU0000001', 'TLIS0000001', 'Emmanuel', 'Obeng', 'Hyde', 'Emmanuel Obeng Hyde', NULL, NULL, NULL, 'Male', 'emmallob14@gmail.com', 'emmallob14', '$2y$10$h1s4UbIhqcDH0ZHqFr.fIeNMAhGONrpCEBX7IidpU8dah90apf98K', 6, '{\"payments\":{},\"default_payment\":\"mobile_money\",\"theme_color\":\"sidebar-light\",\"sidebar\":\"sidebar-opened\",\"font-size\":\"12px\",\"previous_policies\":{},\"list_count\":\"200\",\"idb_init\":{\"init\":0,\"idb_last_init\":\"2021-05-05 16:03:06\",\"idb_next_init\":\"2021-05-07 16:03:06\"},\"sidebar_nav\":\"sidebar-opened\",\"new_policy_notification\":\"notify\",\"quick_links\":{\"chat\":\"on\",\"calendar\":\"on\",\"policies\":\"on\",\"proposals\":\"on\"}}', '1', '0', 'Y', '2021-05-02 22:22:50', '0550107770', NULL, '&lt;div&gt;&lt;!--block--&gt;This is my simple profile to add to the database.&lt;/div&gt;', 'Software Developer', 'P. O. Box AF 2582, Adentan Accra', '1', NULL, '2021-05-05 16:20:34', NULL, '1995-03-20', NULL, '[]', NULL, 'B+', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', 'Dodowa', NULL, NULL, NULL, 84, NULL, '2021-02-19 21:48:26', NULL, '1', '0', NULL, NULL, '2021-02-19 20:43:24', '2021-02-19 23:50:26', NULL, 'assets/img/user.png', NULL, NULL, NULL, 'Active', 'assets/img/user.png', 'admin', '{{APPURL}}update-course/2/view'),
+(1, '', NULL, 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'TLISU0000001', 'TLIS0000001', 'Emmanuel', 'Obeng', 'Hyde', 'Emmanuel Obeng Hyde', NULL, NULL, NULL, 'Male', 'emmallob14@gmail.com', 'emmallob14', '$2y$10$h1s4UbIhqcDH0ZHqFr.fIeNMAhGONrpCEBX7IidpU8dah90apf98K', 6, '{\"payments\":{},\"default_payment\":\"mobile_money\",\"theme_color\":\"sidebar-light\",\"sidebar\":\"sidebar-opened\",\"font-size\":\"12px\",\"previous_policies\":{},\"list_count\":\"200\",\"idb_init\":{\"init\":0,\"idb_last_init\":\"2021-05-05 16:03:06\",\"idb_next_init\":\"2021-05-07 16:03:06\"},\"sidebar_nav\":\"sidebar-opened\",\"new_policy_notification\":\"notify\",\"quick_links\":{\"chat\":\"on\",\"calendar\":\"on\",\"policies\":\"on\",\"proposals\":\"on\"}}', '1', '0', 'Y', '2021-05-02 22:22:50', '0550107770', NULL, '&lt;div&gt;&lt;!--block--&gt;This is my simple profile to add to the database.&lt;/div&gt;', 'Software Developer', 'P. O. Box AF 2582, Adentan Accra', '1', NULL, '2021-05-12 05:28:34', NULL, '1995-03-20', NULL, '[]', NULL, 'B+', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', 'Dodowa', NULL, NULL, NULL, 84, NULL, '2021-02-19 21:48:26', NULL, '1', '0', NULL, NULL, '2021-02-19 20:43:24', '2021-02-19 23:50:26', NULL, 'assets/img/user.png', NULL, NULL, NULL, 'Active', 'assets/img/user.png', 'admin', '{{APPURL}}fees-payment'),
 (2, '', 'dOC2tAcXh4Jf', '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 'LJKDFLAA3', 'TLIS0000001', 'Ebenezer', 'Franklin', 'Hyde', 'Ebenezer Franklin Hyde', '2020/2021', '1st', '1970-01-01', 'Male', 'emmallob@mail.com', 'emmallob', '$2y$10$h1s4UbIhqcDH0ZHqFr.fIeNMAhGONrpCEBX7IidpU8dah90apf98K', 6, '{\"payments\":{},\"default_payment\":\"mobile_money\",\"theme_color\":\"sidebar-light\",\"sidebar\":\"sidebar-opened\",\"font-size\":\"12px\",\"previous_policies\":{},\"list_count\":\"200\",\"idb_init\":{\"init\":0,\"idb_last_init\":\"2021-05-01 07:21:46\",\"idb_next_init\":\"2021-05-03 07:21:46\"},\"sidebar_nav\":\"sidebar-opened\",\"new_policy_notification\":\"notify\",\"quick_links\":{\"chat\":\"on\",\"calendar\":\"on\",\"policies\":\"on\",\"proposals\":\"on\"}}', '1', '0', 'N', '2021-05-01 07:21:42', '983983983', NULL, 'Emmanuel is a good student', NULL, NULL, '0', NULL, '2021-05-01 07:21:49', NULL, '1992-03-20', '1', '[]', NULL, 'A+', 'christian', 'null', NULL, '', NULL, NULL, NULL, '0', 'accra', NULL, 'ZYibOC4wzLWBXUAa5skuhNS2KxQ7nr1f', NULL, 0, NULL, NULL, NULL, '1', '0', 'accra', NULL, '2021-02-20 08:37:02', '2021-02-23 09:32:38', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'assets/img/user.png', 'knust', 'bsc. Real estate', 'he was a good student', 'Active', 'assets/img/user.png', 'student', '{{APPURL}}dashboard'),
 (3, '', 'dOC2tAcXh4Jf', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 'IURIEKJFD', 'TLIS0000001', 'julian', 'asamoah', 'dadzie', 'julian asamoah dadzie', '2020/2021', '1st', '2020-01-15', 'Male', 'julian@mail.com', 'julian', '$2y$10$h1s4UbIhqcDH0ZHqFr.fIeNMAhGONrpCEBX7IidpU8dah90apf98K', 6, '{\"payments\":{},\"default_payment\":\"mobile_money\",\"theme_color\":\"sidebar-light\",\"sidebar\":\"sidebar-opened\",\"font-size\":\"12px\",\"previous_policies\":{},\"list_count\":\"200\",\"idb_init\":{\"init\":0,\"idb_last_init\":\"2021-05-03 08:13:20\",\"idb_next_init\":\"2021-05-05 08:13:20\"},\"sidebar_nav\":\"sidebar-opened\",\"new_policy_notification\":\"notify\",\"quick_links\":{\"chat\":\"on\",\"calendar\":\"on\",\"policies\":\"on\",\"proposals\":\"on\"}}', '1', '0', 'N', '2021-05-02 23:05:40', '9090993093', NULL, 'Julian is a great student', NULL, NULL, '1', NULL, '2021-05-03 20:32:53', NULL, '1993-05-12', '1', '[]', NULL, 'B+', 'christian', 'null', NULL, '', NULL, NULL, NULL, '0', 'santa maria', NULL, NULL, NULL, 0, NULL, NULL, NULL, '1', '0', 'accra', NULL, '2021-02-20 08:37:02', '2021-02-23 09:32:59', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'assets/img/user.png', 'pentecost university', 'bsc. Human resource management', 'was a great student', 'Active', 'assets/img/user.png', 'student', '{{APPURL}}dashboard'),
 (4, '', 'QBxIsCoZmuhv', 'tnThYo5wKHG2XxgPdSVkErb7zLlqum1A', 'P00001', 'TLIS0000001', 'fredrick', 'amponsah', 'badu', 'fredrick amponsah badu', '2020/2021', '1st', '2020-03-11', 'Male', 'fredamponsah@gmail.com', 'fredamponsah', '$2y$10$h1s4UbIhqcDH0ZHqFr.fIeNMAhGONrpCEBX7IidpU8dah90apf98K', 6, '{\"payments\":{},\"default_payment\":\"mobile_money\",\"theme_color\":\"sidebar-light\",\"sidebar\":\"sidebar-opened\",\"font-size\":\"12px\",\"previous_policies\":{},\"list_count\":\"200\",\"idb_init\":{\"init\":0,\"idb_last_init\":\"2021-02-20 22:30:19\",\"idb_next_init\":\"2021-02-22 22:30:19\"},\"sidebar_nav\":\"sidebar-opened\",\"new_policy_notification\":\"notify\",\"quick_links\":{\"chat\":\"on\",\"calendar\":\"on\",\"policies\":\"on\",\"proposals\":\"on\"}}', '1', '0', 'N', '2021-02-20 22:30:16', '490993093', NULL, 'He is a good teacher', 'manager', NULL, '1', NULL, '2021-02-20 22:35:53', NULL, '1990-02-03', NULL, '[\"1\",\"2\",\"3\"]', NULL, 'A+', 'christian', 'null', NULL, '', NULL, 'teacher', NULL, '0', 'accra', 'the school', NULL, NULL, 3, NULL, NULL, NULL, '1', '0', 'accra', NULL, '2021-02-20 09:07:18', '2021-02-20 09:55:35', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'assets/img/user.png', NULL, NULL, NULL, 'Active', 'assets/img/user.png', 'teacher', '{{APPURL}}dashboard'),
@@ -1711,7 +1771,8 @@ INSERT INTO `users` (`id`, `conflicting`, `upload_id`, `item_id`, `unique_id`, `
 (10, '', 'MlOgsDr9hwYT', 'ZYibOC4wzLWBXUAa5skuhNS2KxQ7nr1f', 'P00002', 'TLIS0000001', 'henry', 'asmah', '', 'henry asmah', '2020/2021', '1st', '2020-03-11', 'Male', 'asmahhenry@gmail.com', NULL, NULL, 6, '{\"payments\":{},\"default_payment\":\"mobile_money\",\"theme_color\":\"sidebar-light\",\"sidebar\":\"sidebar-opened\",\"font-size\":\"12px\",\"previous_policies\":{},\"list_count\":\"200\",\"idb_init\":{\"init\":0,\"idb_last_init\":\"2020-09-18\",\"idb_next_init\":\"2020-09-21\"},\"sidebar_nav\":\"sidebar-opened\",\"new_policy_notification\":\"notify\",\"quick_links\":{\"chat\":\"on\",\"calendar\":\"on\",\"policies\":\"on\",\"proposals\":\"on\"}}', '1', '0', 'N', NULL, '9093009192', NULL, 'he is a great teache', 'administrative assistant', NULL, '0', NULL, '2021-02-23 09:27:36', NULL, '1990-10-19', NULL, '', NULL, 'B', 'christian', '', NULL, '', NULL, 'teacher', NULL, '0', 'accra', 'the school', NULL, NULL, NULL, NULL, NULL, NULL, '1', '0', 'accra', NULL, '2021-02-23 09:27:36', NULL, 'vmVn9KIyMRx4ASTDCY0qLF83lWgXZpPa', 'assets/img/user.png', NULL, NULL, NULL, 'Active', 'assets/img/user.png', 'parent', '{{APPURL}}dashboard'),
 (11, '', NULL, '9HOBYRpyMxJr60foS5FdQXGDUCsviNeh', 'GISU000001', 'GIS00003', 'Philip', 'Adusei Bampoh', NULL, 'Philip Adusei Bampoh ', NULL, NULL, NULL, 'Male', 'info@gallaxyinternationalschool.com', 'info', '$2y$10$JbOOG34xvPmOQYA5De7QlubFC12SJZrDe6Ct0q7WL9WwGyxJi07/2', 6, '{\"payments\":{},\"default_payment\":\"mobile_money\",\"theme_color\":\"sidebar-light\",\"sidebar\":\"sidebar-opened\",\"font-size\":\"12px\",\"previous_policies\":{},\"list_count\":\"200\",\"idb_init\":{\"init\":0,\"idb_last_init\":\"2021-03-17 10:31:37\",\"idb_next_init\":\"2021-03-19 10:31:37\"},\"sidebar_nav\":\"sidebar-opened\",\"new_policy_notification\":\"notify\",\"quick_links\":{\"chat\":\"on\",\"calendar\":\"on\",\"policies\":\"on\",\"proposals\":\"on\"}}', '1', '0', 'Y', '2021-03-17 10:33:13', '233550107770', NULL, NULL, 'Administrator', 'P. O. Box DT 2582, Accra', '0', NULL, '2021-03-17 10:42:05', NULL, '1995-07-20', NULL, '[]', NULL, 'A-', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', 'Accra', NULL, NULL, NULL, 0, NULL, '2021-03-17 10:31:22', NULL, '1', '0', NULL, NULL, '2021-03-17 10:20:28', '2021-03-17 10:42:05', NULL, 'assets/img/user.png', NULL, NULL, NULL, 'Active', 'assets/img/user.png', 'admin', '{{APPURL}}dashboard'),
 (12, '', 'dOC2tAcXh4Jf', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 'IURIEKJFD', 'TLIS0000001', 'Test', 'Class', 'Student', 'Test Class Student', '2020/2021', '1st', '2020-01-15', 'Male', 'julian@mail.com', 'julian', '$2y$10$h1s4UbIhqcDH0ZHqFr.fIeNMAhGONrpCEBX7IidpU8dah90apf98K', 6, '{\"payments\":{},\"default_payment\":\"mobile_money\",\"theme_color\":\"sidebar-light\",\"sidebar\":\"sidebar-opened\",\"font-size\":\"12px\",\"previous_policies\":{},\"list_count\":\"200\",\"idb_init\":{\"init\":0,\"idb_last_init\":\"2021-05-03 08:13:20\",\"idb_next_init\":\"2021-05-05 08:13:20\"},\"sidebar_nav\":\"sidebar-opened\",\"new_policy_notification\":\"notify\",\"quick_links\":{\"chat\":\"on\",\"calendar\":\"on\",\"policies\":\"on\",\"proposals\":\"on\"}}', '1', '0', 'N', '2021-05-02 23:05:40', '9090993093', NULL, 'Julian is a great student', NULL, NULL, '1', NULL, '2021-05-03 12:13:54', NULL, '1993-05-12', '2', '[]', NULL, 'B+', 'christian', 'null', NULL, '', NULL, NULL, NULL, '0', 'santa maria', NULL, NULL, NULL, 0, NULL, NULL, NULL, '1', '0', 'accra', NULL, '2021-02-20 08:37:02', '2021-02-23 09:32:59', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'assets/img/user.png', 'pentecost university', 'bsc. Human resource management', 'was a great student', 'Active', 'assets/img/user.png', 'student', '{{APPURL}}dashboard'),
-(13, '', 'dOC2tAcXh4Jf', 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 'IURIEKJFD', 'TLIS0000001', 'Another Test', 'Class', 'Student', 'Another Test Class Student', '2020/2021', '1st', '2020-01-15', 'Male', 'julian@mail.com', 'julian', '$2y$10$h1s4UbIhqcDH0ZHqFr.fIeNMAhGONrpCEBX7IidpU8dah90apf98K', 6, '{\"payments\":{},\"default_payment\":\"mobile_money\",\"theme_color\":\"sidebar-light\",\"sidebar\":\"sidebar-opened\",\"font-size\":\"12px\",\"previous_policies\":{},\"list_count\":\"200\",\"idb_init\":{\"init\":0,\"idb_last_init\":\"2021-05-03 08:13:20\",\"idb_next_init\":\"2021-05-05 08:13:20\"},\"sidebar_nav\":\"sidebar-opened\",\"new_policy_notification\":\"notify\",\"quick_links\":{\"chat\":\"on\",\"calendar\":\"on\",\"policies\":\"on\",\"proposals\":\"on\"}}', '1', '0', 'N', '2021-05-02 23:05:40', '9090993093', NULL, 'Julian is a great student', NULL, NULL, '1', NULL, '2021-05-03 12:13:54', NULL, '1993-05-12', '2', '[]', NULL, 'B+', 'christian', 'null', NULL, '', NULL, NULL, NULL, '0', 'santa maria', NULL, NULL, NULL, 0, NULL, NULL, NULL, '1', '0', 'accra', NULL, '2021-02-20 08:37:02', '2021-02-23 09:32:59', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'assets/img/user.png', 'pentecost university', 'bsc. Human resource management', 'was a great student', 'Active', 'assets/img/user.png', 'student', '{{APPURL}}dashboard');
+(13, '', 'dOC2tAcXh4Jf', 'aSzAlD7uPObpda2jKtE0qhWUV8igTo9a', 'IURIEKJFD', 'TLIS0000001', 'Another Test', 'Class', 'Student', 'Another Test Class Student', '2020/2021', '1st', '2020-01-15', 'Male', 'julian@mail.com', 'julian', '$2y$10$h1s4UbIhqcDH0ZHqFr.fIeNMAhGONrpCEBX7IidpU8dah90apf98K', 6, '{\"payments\":{},\"default_payment\":\"mobile_money\",\"theme_color\":\"sidebar-light\",\"sidebar\":\"sidebar-opened\",\"font-size\":\"12px\",\"previous_policies\":{},\"list_count\":\"200\",\"idb_init\":{\"init\":0,\"idb_last_init\":\"2021-05-03 08:13:20\",\"idb_next_init\":\"2021-05-05 08:13:20\"},\"sidebar_nav\":\"sidebar-opened\",\"new_policy_notification\":\"notify\",\"quick_links\":{\"chat\":\"on\",\"calendar\":\"on\",\"policies\":\"on\",\"proposals\":\"on\"}}', '1', '0', 'N', '2021-05-02 23:05:40', '9090993093', NULL, 'Julian is a great student', NULL, NULL, '1', NULL, '2021-05-03 12:13:54', NULL, '1993-05-12', '2', '[]', NULL, 'B+', 'christian', 'null', NULL, '', NULL, NULL, NULL, '0', 'santa maria', NULL, NULL, NULL, 0, NULL, NULL, NULL, '1', '0', 'accra', NULL, '2021-02-20 08:37:02', '2021-02-23 09:32:59', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'assets/img/user.png', 'pentecost university', 'bsc. Human resource management', 'was a great student', 'Active', 'assets/img/user.png', 'student', '{{APPURL}}dashboard'),
+(14, '', NULL, 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'TSSU000001', 'MSGH000004', 'Frank', 'Asamoah', 'Mensah', 'Frank Asamoah Mensah', NULL, NULL, NULL, 'Male', 'testsampleschool@mail.com', 'testsampleschool', '$2y$10$T/JZzqXxRCXe3fRQuR9QpeQNj5Rh1PSRVz9IcC08G6pnwfWfGCemW', 6, '{\"payments\":{},\"default_payment\":\"mobile_money\",\"theme_color\":\"sidebar-light\",\"sidebar\":\"sidebar-opened\",\"font-size\":\"12px\",\"previous_policies\":{},\"list_count\":\"200\",\"idb_init\":{\"init\":0,\"idb_last_init\":\"2021-05-06 23:33:27\",\"idb_next_init\":\"2021-05-08 23:33:27\"},\"sidebar_nav\":\"sidebar-opened\",\"new_policy_notification\":\"notify\",\"quick_links\":{\"chat\":\"on\",\"calendar\":\"on\",\"policies\":\"on\",\"proposals\":\"on\"}}', '1', '0', 'Y', NULL, '233550107770', NULL, NULL, 'Administrator', 'Test School Address', '0', NULL, '2021-05-06 23:44:50', NULL, '1995-07-20', NULL, '[]', NULL, 'A-', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', 'Island', NULL, 'NULL', NULL, 2, NULL, '2021-05-06 23:49:35', NULL, '1', '0', NULL, NULL, '2021-05-06 22:59:24', '2021-05-06 23:33:51', NULL, 'assets/img/user.png', NULL, NULL, NULL, 'Active', 'assets/img/user.png', 'admin', '{{APPURL}}dashboard');
 
 -- --------------------------------------------------------
 
@@ -1719,6 +1780,7 @@ INSERT INTO `users` (`id`, `conflicting`, `upload_id`, `item_id`, `unique_id`, `
 -- Table structure for table `users_access_attempt`
 --
 
+DROP TABLE IF EXISTS `users_access_attempt`;
 CREATE TABLE `users_access_attempt` (
   `id` int(11) NOT NULL,
   `ipaddress` varchar(50) DEFAULT NULL,
@@ -1747,6 +1809,7 @@ INSERT INTO `users_access_attempt` (`id`, `ipaddress`, `username`, `username_fou
 -- Table structure for table `users_activity_logs`
 --
 
+DROP TABLE IF EXISTS `users_activity_logs`;
 CREATE TABLE `users_activity_logs` (
   `id` int(11) UNSIGNED NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -2042,7 +2105,26 @@ INSERT INTO `users_activity_logs` (`id`, `client_id`, `item_id`, `user_id`, `sub
 (271, 'TLIS0000001', 'tEfWagUKR2x4ownVHjQ5dFIcsBG6XA71', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'fees_payment', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-03 23:21:38', 'Windows 10 | Chrome | ::1', 'Emmanuel Obeng Hyde received an amount of \r\n                <strong>30</strong> as Payment for <strong>Library Fees</strong> from <strong>Another Test Class Student</strong>. \r\n                Outstanding Balance is <strong>0</strong>', '1'),
 (272, 'TLIS0000001', '6kOWRdgPJsA9Yepb81cNhMFt3C5QwiaH', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'fees_payment', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-03 23:23:31', 'Windows 10 | Chrome | ::1', 'Emmanuel Obeng Hyde received an amount of \r\n                <strong>50</strong> as Payment for <strong>Project Fees</strong> from <strong>Test Class Student</strong>. \r\n                Outstanding Balance is <strong>0</strong>', '1'),
 (273, 'TLIS0000001', 'xXiZUrDslmP0vF7fkny9hbVICLJqtKjd', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'fees_payment', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-03 23:24:46', 'Windows 10 | Chrome | ::1', 'Emmanuel Obeng Hyde received an amount of \r\n                <strong>50</strong> as Payment for <strong>Tuition Fees</strong> from <strong>Test Class Student</strong>. \r\n                Outstanding Balance is <strong>0</strong>', '1'),
-(274, 'TLIS0000001', '', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'endpoints', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-05 16:05:27', 'Windows 10 | Chrome | ::1', '<strong>Emmanuel Obeng Hyde</strong> added a new endpoint: <strong>pwa/idb</strong> to the resource: <strong>pwa</strong>.', '1');
+(274, 'TLIS0000001', '', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'endpoints', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-05 16:05:27', 'Windows 10 | Chrome | ::1', '<strong>Emmanuel Obeng Hyde</strong> added a new endpoint: <strong>pwa/idb</strong> to the resource: <strong>pwa</strong>.', '1'),
+(275, 'TLIS0000001', 'blgc8rfdehuqmcq6iiohygn0trv7uevt', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'endpoints', 'MySchoolGH Calculation<br>Property changed by an update from another property.', '{\"id\":\"134\",\"item_id\":\"blgc8rfdehuqmcq6iiohygn0trv7uevt\",\"version\":\"v1\",\"resource\":\"fees\",\"endpoint\":\"fees\\/make_payment\",\"method\":\"POST\",\"description\":\"\",\"parameter\":\"{\\\"checkout_url\\\":\\\"required - This is the checkout url for making payments\\\",\\\"payment_method\\\":\\\"required - The mode for making the payment\\\",\\\"amount\\\":\\\"required - This is the amount to be made.\\\",\\\"description\\\":\\\"The description for the payment (optional)\\\",\\\"bank_id\\\":\\\"The unique id of the bank if a cheque is used to make payment\\\",\\\"cheque_number\\\":\\\"The unique number of the cheque if payment is being made using a cheque.\\\"}\",\"status\":\"active\",\"counter\":\"0\",\"date_created\":\"2021-01-09 19:22:02\",\"last_updated\":\"2021-05-03 17:00:15\",\"deleted\":\"0\",\"deprecated\":\"0\",\"added_by\":\"uIkajsw123456789064hxk1fc3efmnva\",\"updated_by\":\"JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM\"}', '2021-05-06 14:50:43', 'Windows 10 | Chrome | ::1', '<strong>Emmanuel Obeng Hyde</strong> updated the endpoint.', '1'),
+(276, 'MSGH000004', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'verify_account', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-06 22:59:25', 'Windows 10 | Chrome | ::1', 'Test Sample School created a new Account pending Verification.', '1'),
+(277, 'MSGH000004', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'admin_account', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-06 23:33:21', 'Windows 10 | Chrome | ::1', 'Name was changed from ', '1'),
+(278, 'MSGH000004', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'admin_account', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-06 23:33:21', 'Windows 10 | Chrome | ::1', 'Position has been altered.  => Administrator', '1'),
+(279, 'MSGH000004', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'admin_account', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-06 23:33:21', 'Windows 10 | Chrome | ::1', 'You updated your account information', '1'),
+(280, 'MSGH000004', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'admin_account', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-06 23:33:51', 'Windows 10 | Chrome | ::1', 'Date of Birth has been changed to 1995-07-20', '1'),
+(281, 'MSGH000004', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'admin_account', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-06 23:33:51', 'Windows 10 | Chrome | ::1', 'You updated your account information', '1'),
+(282, 'MSGH000004', 'MSGH000004', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'account', 'MySchoolGH Calculation<br>Property changed by an update from another property.', '{\"id\":\"4\",\"client_id\":\"MSGH000004\",\"client_name\":\"Test Sample School\",\"client_contact\":\"233550107770\",\"client_secondary_contact\":\"233500021983\",\"client_address\":\"Test School Address\",\"client_email\":\"testsampleschool@mail.com\",\"client_website\":null,\"client_logo\":null,\"client_location\":null,\"client_category\":null,\"client_preferences\":{\"labels\":{\"staff\":\"TSSU\",\"student\":\"TSS\",\"parent\":\"TSSP\",\"receipt\":\"RTSS\"},\"academics\":{\"academic_year\":\"2021\\/2020\",\"academic_term\":\"\",\"next_academic_year\":\"\",\"next_academic_term\":\"\"},\"account\":{\"type\":\"basic\",\"activation_code\":\"K1lwMeg7hxHL4DWI89jNZQRSOtXp0bCAdJoT3FPrn5G6cEifkqaYyU\",\"date_created\":\"2021-05-06 10:59PM\",\"expiry\":\"2021-06-06 10:59PM\"},\"opening_days\":[\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\"]},\"client_status\":\"1\",\"client_state\":\"Pending\",\"ip_address\":\"::1\",\"date_created\":\"2021-05-06 22:59:24\",\"grading_system\":null,\"grading_structure\":null,\"show_position\":null,\"show_teacher_name\":null,\"allow_submission\":null,\"academic_year_logs\":[]}', '2021-05-06 23:35:07', 'Windows 10 | Chrome | ::1', 'Frank Asamoah Mensah updated the Account Information', '1'),
+(283, 'MSGH000004', 'MSGH000004', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'account', 'MySchoolGH Calculation<br>Property changed by an update from another property.', '{\"id\":\"4\",\"client_id\":\"MSGH000004\",\"client_name\":\"Test Sample School\",\"client_contact\":\"233550107770\",\"client_secondary_contact\":\"233500021983\",\"client_address\":\"Test School Address\",\"client_email\":\"testsampleschool@mail.com\",\"client_website\":\"https:\\/\\/sampleschoolgh.com\",\"client_logo\":null,\"client_location\":\"Accra\",\"client_category\":null,\"client_preferences\":{\"academics\":{\"academic_year\":\"2019\\/2020\",\"academic_term\":\"1st\",\"term_starts\":\"2021-03-01\",\"term_ends\":\"2021-05-29\",\"next_academic_year\":\"2019\\/2020\",\"next_academic_term\":\"2nd\",\"next_term_starts\":\"2021-06-15\",\"next_term_ends\":\"2021-08-31\"},\"labels\":{\"student_label\":\"\",\"parent_label\":\"\",\"teacher_label\":\"\",\"staff_label\":\"\",\"course_label\":\"\",\"book_label\":\"\",\"class_label\":\"\",\"department_label\":\"\",\"section_label\":\"\",\"receipt_label\":\"\",\"currency\":\"GHS\"},\"opening_days\":[\"Monday\",\"Tuesday\",\"Wednesday\",\"Thursday\",\"Friday\"],\"account\":{}},\"client_status\":\"1\",\"client_state\":\"Pending\",\"ip_address\":\"::1\",\"date_created\":\"2021-05-06 22:59:24\",\"grading_system\":null,\"grading_structure\":null,\"show_position\":null,\"show_teacher_name\":null,\"allow_submission\":null,\"academic_year_logs\":[]}', '2021-05-06 23:44:50', 'Windows 10 | Chrome | ::1', 'Frank Asamoah Mensah updated the Account Information', '1'),
+(284, 'MSGH000004', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'verify_account', 'Account was manually activated using the Activation link.', NULL, '2021-05-06 23:48:31', 'Windows 10 | Chrome | ::1', 'testsampleschool\'s - account was successfully activated.', '1'),
+(285, 'MSGH000004', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'verify_account', 'Account was manually activated using the Activation link.', NULL, '2021-05-06 23:49:35', 'Windows 10 | Chrome | ::1', 'testsampleschool\'s - account was successfully activated.', '1'),
+(286, 'TLIS0000001', '', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'endpoints', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-08 19:03:28', 'Windows 10 | Chrome | ::1', '<strong>Emmanuel Obeng Hyde</strong> added a new endpoint: <strong>fees/search</strong> to the resource: <strong>fees</strong>.', '1'),
+(287, 'TLIS0000001', 'k6fr3exchm5rniq24fcysvyzidazolkb', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'endpoints', 'MySchoolGH Calculation<br>Property changed by an update from another property.', '{\"id\":\"179\",\"item_id\":\"k6fr3exchm5rniq24fcysvyzidazolkb\",\"version\":\"v1\",\"resource\":\"fees\",\"endpoint\":\"fees\\/search\",\"method\":\"GET\",\"description\":\"\",\"parameter\":\"\",\"status\":\"active\",\"counter\":\"0\",\"date_created\":\"2021-05-08 19:03:28\",\"last_updated\":\"2021-05-08 19:03:28\",\"deleted\":\"0\",\"deprecated\":\"0\",\"added_by\":\"JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM\",\"updated_by\":null}', '2021-05-08 19:09:56', 'Windows 10 | Chrome | ::1', '<strong>Emmanuel Obeng Hyde</strong> updated the endpoint.', '1'),
+(288, 'TLIS0000001', '3aj8WoYlCXApyfJLRs1UiPDZ6kIMuHvz', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'fees_payment', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-11 11:38:07', 'Windows 10 | Chrome | ::1', 'Emmanuel Obeng Hyde received an amount of \r\n                <strong>25</strong> as Payment for <strong>ICT Dues</strong> from <strong>George Anderson Hyde</strong>. \r\n                Outstanding Balance is <strong>0</strong>', '1'),
+(289, 'TLIS0000001', 'blgc8rfdehuqmcq6iiohygn0trv7uevt', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'endpoints', 'MySchoolGH Calculation<br>Property changed by an update from another property.', '{\"id\":\"134\",\"item_id\":\"blgc8rfdehuqmcq6iiohygn0trv7uevt\",\"version\":\"v1\",\"resource\":\"fees\",\"endpoint\":\"fees\\/make_payment\",\"method\":\"POST\",\"description\":\"\",\"parameter\":\"{\\\"checkout_url\\\":\\\"required - This is the checkout url for making payments\\\",\\\"payment_method\\\":\\\"required - The mode for making the payment\\\",\\\"amount\\\":\\\"required - This is the amount to be made.\\\",\\\"description\\\":\\\"The description for the payment (optional)\\\",\\\"bank_id\\\":\\\"The unique id of the bank if a cheque is used to make payment\\\",\\\"cheque_number\\\":\\\"The unique number of the cheque if payment is being made using a cheque.\\\",\\\"cheque_security\\\":\\\"The security code on the cheque.\\\"}\",\"status\":\"active\",\"counter\":\"0\",\"date_created\":\"2021-01-09 19:22:02\",\"last_updated\":\"2021-05-06 14:50:43\",\"deleted\":\"0\",\"deprecated\":\"0\",\"added_by\":\"uIkajsw123456789064hxk1fc3efmnva\",\"updated_by\":\"JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM\"}', '2021-05-11 22:17:05', 'Windows 10 | Chrome | ::1', '<strong>Emmanuel Obeng Hyde</strong> updated the endpoint.', '1'),
+(290, 'TLIS0000001', 'bfoHtlVKavzrXAnp3G1INZ6sFDOPgkj2', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'fees_payment', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-12 05:07:40', 'Windows 10 | Chrome | ::1', 'Emmanuel Obeng Hyde received an amount of \r\n                            <strong>10</strong> as Payment for <strong>Feeding Fees</strong> from \r\n                            <strong>Test Class Student</strong>. Outstanding Balance is <strong>240</strong>', '1'),
+(291, 'TLIS0000001', 'bfoHtlVKavzrXAnp3G1INZ6sFDOPgkj2', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'fees_payment', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-12 05:19:26', 'Windows 10 | Chrome | ::1', 'Emmanuel Obeng Hyde received an amount of \r\n                            <strong>70</strong> as Payment for <strong>Feeding Fees</strong> from \r\n                            <strong>Test Class Student</strong>. Outstanding Balance is <strong>170</strong>', '1'),
+(292, 'TLIS0000001', 'bfoHtlVKavzrXAnp3G1INZ6sFDOPgkj2', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'fees_payment', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-12 05:21:27', 'Windows 10 | Chrome | ::1', 'Emmanuel Obeng Hyde received an amount of \r\n                            <strong>80</strong> as Payment for <strong>Feeding Fees</strong> from \r\n                            <strong>Test Class Student</strong>. Outstanding Balance is <strong>90</strong>', '1'),
+(293, 'TLIS0000001', 'bfoHtlVKavzrXAnp3G1INZ6sFDOPgkj2', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'fees_payment', 'MySchoolGH Calculation<br>Property changed by an update from another property.', NULL, '2021-05-12 05:28:20', 'Windows 10 | Chrome | ::1', 'Emmanuel Obeng Hyde received an amount of \r\n                            <strong>90</strong> as Payment for <strong>Feeding Fees</strong> from \r\n                            <strong>Test Class Student</strong>. Outstanding Balance is <strong>0</strong>', '1');
 
 -- --------------------------------------------------------
 
@@ -2050,6 +2132,7 @@ INSERT INTO `users_activity_logs` (`id`, `client_id`, `item_id`, `user_id`, `sub
 -- Table structure for table `users_api_endpoints`
 --
 
+DROP TABLE IF EXISTS `users_api_endpoints`;
 CREATE TABLE `users_api_endpoints` (
   `id` int(11) NOT NULL,
   `item_id` varchar(32) DEFAULT NULL,
@@ -2171,7 +2254,7 @@ INSERT INTO `users_api_endpoints` (`id`, `item_id`, `version`, `resource`, `endp
 (131, 'fcgwydlvdkss1tivtx2uro9pbma5zqyk', 'v1', 'fees', 'fees/payment_form', 'GET', '', '{\"department_id\":\"This is the unique id of the department\",\"class_id\":\"This is the unique id of the class of the student\",\"student_id\":\"The unique id of the student\",\"category_id\":\"The fees category type to load\",\"show_history\":\"When submitted in the query, the result will contain the payment history of the student (if supplied)\"}', 'active', 0, '2021-01-08 11:43:35', '2021-01-08 11:43:35', '0', '0', 'uIkajsw123456789064hxk1fc3efmnva', NULL),
 (132, 'd6kwitjdx81rnocfabuefoqywtrvsb59', 'v1', 'fees', 'fees/allocate_fees', 'POST', '', '{\"allocate_to\":\"required - This specifies whether to allot the fees to the class or student\",\"amount\":\"required - This is the amount.\",\"category_id\":\"required - This is the category id of the fees type\",\"student_id\":\"This is only needed if the allocate_to is equal to student.\",\"class_id\":\"This is required for insertion. If not specified, the said fees will be allotted to all active classes in the database.\"}', 'active', 0, '2021-01-08 16:19:16', '2021-01-08 16:20:11', '0', '0', 'uIkajsw123456789064hxk1fc3efmnva', 'uIkajsw123456789064hxk1fc3efmnva'),
 (133, '5gnulblaojzrmyke1chz3yivchsxp6gu', 'v1', 'fees', 'fees/allocate_fees_amount', 'GET', 'Get the fees allotted a class or student', '{\"allocate_to\":\"required - This specifies whether to allot the fees to the class or student\",\"category_id\":\"required - This is the category id of the fees type\",\"student_id\":\"This is only needed if the allocate_to is equal to student.\",\"class_id\":\"This is required for insertion. If not specified, the said fees will be allotted to all active classes in the database.\"}', 'active', 0, '2021-01-08 21:12:22', '2021-01-08 21:25:46', '0', '0', 'uIkajsw123456789064hxk1fc3efmnva', 'uIkajsw123456789064hxk1fc3efmnva'),
-(134, 'blgc8rfdehuqmcq6iiohygn0trv7uevt', 'v1', 'fees', 'fees/make_payment', 'POST', '', '{\"checkout_url\":\"required - This is the checkout url for making payments\",\"payment_method\":\"required - The mode for making the payment\",\"amount\":\"required - This is the amount to be made.\",\"description\":\"The description for the payment (optional)\",\"bank_id\":\"The unique id of the bank if a cheque is used to make payment\",\"cheque_number\":\"The unique number of the cheque if payment is being made using a cheque.\"}', 'active', 0, '2021-01-09 19:22:02', '2021-05-03 17:00:15', '0', '0', 'uIkajsw123456789064hxk1fc3efmnva', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM'),
+(134, 'blgc8rfdehuqmcq6iiohygn0trv7uevt', 'v1', 'fees', 'fees/make_payment', 'POST', '', '{\"checkout_url\":\"required - This is the checkout url for making payments\",\"payment_method\":\"required - The mode for making the payment\",\"amount\":\"required - This is the amount to be made.\",\"description\":\"The description for the payment (optional)\",\"bank_id\":\"The unique id of the bank if a cheque is used to make payment\",\"cheque_number\":\"The unique number of the cheque if payment is being made using a cheque.\",\"cheque_security\":\"The security code on the cheque.\",\"student_id\":\"The student id to receive payment.\"}', 'active', 0, '2021-01-09 19:22:02', '2021-05-11 22:17:05', '0', '0', 'uIkajsw123456789064hxk1fc3efmnva', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM'),
 (135, '01gwzvszytiwhn3fkfulasxciee6yv72', 'v1', 'analitics', 'analitics/generate', 'GET', '', '{\"period\":\"The period for the data collection (Default: this_week)\",\"label\":\"This will be an array of information to generate the report\"}', 'active', 0, '2021-01-15 22:26:22', '2021-01-15 22:26:22', '0', '0', 'uIkajsw123456789064hxk1fc3efmnva', NULL),
 (136, 'cv1z6jdijok4lbireaxv25hyzsonfrc3', 'v1', 'users', 'users/set_default_student', 'POST', '', '{\"student_id\":\"required - The student id to set as the default id.\"}', 'active', 0, '2021-01-21 13:11:48', '2021-01-21 13:11:48', '0', '0', '5Jz7Lv8aZ1Gi43MxDXBlfqRn9uYQjIEc', NULL),
 (137, 'o1y0arsbxfjclzahgzx2wswitjuy4m9l', 'v1', 'rooms', 'rooms/list', 'GET', '', '{\"limit\":\"The number of rows to list\",\"code\":\"The room unique code\"}', 'active', 0, '2021-01-22 14:57:22', '2021-01-22 14:57:22', '0', '0', 'uIkajsw123456789064hxk1fc3efmnva', NULL),
@@ -2215,7 +2298,8 @@ INSERT INTO `users_api_endpoints` (`id`, `item_id`, `version`, `resource`, `endp
 (175, 'exghes10atnr7qdmkyphiwibq4o92tuc', 'v1', 'terminal_reports', 'terminal_reports/modify', 'POST', 'This endpoint is used to modify the status of a terminal report that has been uploaded', '{\"label\":\"required - This is an array of actions to perform\"}', 'active', 0, '2021-02-24 11:52:17', '2021-02-24 11:52:17', '0', '0', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', NULL),
 (176, 'exghes10atnr7qdmkyphiwibq4o92tuc', 'v1', 'terminal_reports', 'terminal_reports/update_report', 'POST', 'This endpoint is used to modify the status of a terminal report that has been uploaded', '{\"label\":\"required - This is an array of actions to perform\"}', 'active', 0, '2021-02-24 11:52:17', '2021-02-24 11:52:17', '0', '0', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', NULL),
 (177, 'hcbopnbvlef9rf8yw61rsmdj4gujpzhx', 'v1', 'terminal_reports', 'terminal_reports/generate', 'GET', '', '{\"academic_year\":\"The academic year to generate the report. Default will be the current academic year\",\"academic_term\":\"The academic term to generate the report. Default will be the current academic term.\",\"class_id\":\"required - This is the class to generate the terminal report cards\",\"student_id\":\"This is optional. When set then the report card only this student is generated.\"}', 'active', 0, '2021-04-17 20:41:55', '2021-04-17 22:33:22', '0', '0', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM'),
-(178, 'cjs47zlobduqn1rbikyngap5uzt0m2mj', 'v1', 'pwa', 'pwa/idb', 'GET', '', '', 'active', 0, '2021-05-05 16:05:27', '2021-05-05 16:05:27', '0', '0', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', NULL);
+(178, 'cjs47zlobduqn1rbikyngap5uzt0m2mj', 'v1', 'pwa', 'pwa/idb', 'GET', '', '', 'active', 0, '2021-05-05 16:05:27', '2021-05-05 16:05:27', '0', '0', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', NULL),
+(179, 'k6fr3exchm5rniq24fcysvyzidazolkb', 'v1', 'fees', 'fees/search', 'GET', '', '{\"term\":\"required - This is the search term to lookup for.\"}', 'active', 0, '2021-05-08 19:03:28', '2021-05-08 19:09:56', '0', '0', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM');
 
 -- --------------------------------------------------------
 
@@ -2223,6 +2307,7 @@ INSERT INTO `users_api_endpoints` (`id`, `item_id`, `version`, `resource`, `endp
 -- Table structure for table `users_api_keys`
 --
 
+DROP TABLE IF EXISTS `users_api_keys`;
 CREATE TABLE `users_api_keys` (
   `id` int(11) UNSIGNED NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -2254,6 +2339,7 @@ INSERT INTO `users_api_keys` (`id`, `client_id`, `user_id`, `username`, `access_
 -- Table structure for table `users_api_queries`
 --
 
+DROP TABLE IF EXISTS `users_api_queries`;
 CREATE TABLE `users_api_queries` (
   `id` int(11) UNSIGNED NOT NULL,
   `requests_count` int(11) UNSIGNED DEFAULT NULL,
@@ -2266,6 +2352,7 @@ CREATE TABLE `users_api_queries` (
 -- Table structure for table `users_api_requests`
 --
 
+DROP TABLE IF EXISTS `users_api_requests`;
 CREATE TABLE `users_api_requests` (
   `id` int(11) UNSIGNED NOT NULL,
   `user_id` varchar(64) DEFAULT NULL,
@@ -2284,6 +2371,7 @@ CREATE TABLE `users_api_requests` (
 -- Table structure for table `users_attendance_log`
 --
 
+DROP TABLE IF EXISTS `users_attendance_log`;
 CREATE TABLE `users_attendance_log` (
   `id` int(11) NOT NULL,
   `client_id` varchar(32) DEFAULT NULL,
@@ -2346,6 +2434,7 @@ INSERT INTO `users_attendance_log` (`id`, `client_id`, `user_type`, `class_id`, 
 -- Table structure for table `users_chat`
 --
 
+DROP TABLE IF EXISTS `users_chat`;
 CREATE TABLE `users_chat` (
   `id` int(11) UNSIGNED NOT NULL,
   `item_id` varchar(32) DEFAULT NULL,
@@ -2445,6 +2534,7 @@ INSERT INTO `users_chat` (`id`, `item_id`, `message_unique_id`, `sender_id`, `re
 -- Table structure for table `users_emails`
 --
 
+DROP TABLE IF EXISTS `users_emails`;
 CREATE TABLE `users_emails` (
   `id` int(10) UNSIGNED NOT NULL,
   `thread_id` varchar(32) DEFAULT NULL,
@@ -2480,6 +2570,7 @@ CREATE TABLE `users_emails` (
 -- Table structure for table `users_feedback`
 --
 
+DROP TABLE IF EXISTS `users_feedback`;
 CREATE TABLE `users_feedback` (
   `id` int(11) UNSIGNED NOT NULL,
   `item_id` varchar(32) DEFAULT NULL,
@@ -2504,6 +2595,7 @@ CREATE TABLE `users_feedback` (
 -- Table structure for table `users_gender`
 --
 
+DROP TABLE IF EXISTS `users_gender`;
 CREATE TABLE `users_gender` (
   `id` int(11) NOT NULL,
   `name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL
@@ -2524,6 +2616,7 @@ INSERT INTO `users_gender` (`id`, `name`) VALUES
 -- Table structure for table `users_login_history`
 --
 
+DROP TABLE IF EXISTS `users_login_history`;
 CREATE TABLE `users_login_history` (
   `id` int(11) UNSIGNED NOT NULL,
   `client_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -2624,7 +2717,23 @@ INSERT INTO `users_login_history` (`id`, `client_id`, `username`, `lastlogin`, `
 (82, 'TLIS0000001', 'emmallob14', '2021-05-03 19:26:42', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
 (83, 'TLIS0000001', 'julian', '2021-05-03 20:32:24', '::1', 'Chrome|Windows 10', 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
 (84, 'TLIS0000001', 'emmallob14', '2021-05-03 22:10:52', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
-(85, 'TLIS0000001', 'emmallob14', '2021-05-05 16:03:04', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85');
+(85, 'TLIS0000001', 'emmallob14', '2021-05-05 16:03:04', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
+(86, 'TLIS0000001', 'emmallob14', '2021-05-06 08:46:30', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
+(87, 'TLIS0000001', 'emmallob14', '2021-05-06 09:14:42', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
+(88, 'TLIS0000001', 'emmallob14', '2021-05-06 09:14:58', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
+(89, 'TLIS0000001', 'emmallob14', '2021-05-06 14:49:20', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
+(90, 'TLIS0000001', 'emmallob14', '2021-05-06 23:11:12', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
+(91, 'MSGH000004', 'testsampleschool', '2021-05-06 23:13:40', '::1', 'Chrome|Windows 10', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
+(92, 'MSGH000004', 'testsampleschool', '2021-05-06 23:13:48', '::1', 'Chrome|Windows 10', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
+(93, 'TLIS0000001', 'emmallob14', '2021-05-06 23:51:33', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85'),
+(94, 'TLIS0000001', 'emmallob14', '2021-05-07 20:05:54', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93'),
+(95, 'TLIS0000001', 'emmallob14', '2021-05-08 17:47:58', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93'),
+(96, 'TLIS0000001', 'emmallob14', '2021-05-09 11:12:01', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93'),
+(97, 'TLIS0000001', 'emmallob14', '2021-05-11 11:24:31', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93'),
+(98, 'TLIS0000001', 'emmallob14', '2021-05-11 15:37:32', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93'),
+(99, 'TLIS0000001', 'emmallob14', '2021-05-11 17:07:31', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93'),
+(100, 'TLIS0000001', 'emmallob14', '2021-05-11 20:57:09', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93'),
+(101, 'TLIS0000001', 'emmallob14', '2021-05-12 04:05:00', '::1', 'Chrome|Windows 10', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93');
 
 -- --------------------------------------------------------
 
@@ -2632,6 +2741,7 @@ INSERT INTO `users_login_history` (`id`, `client_id`, `username`, `lastlogin`, `
 -- Table structure for table `users_messaging_list`
 --
 
+DROP TABLE IF EXISTS `users_messaging_list`;
 CREATE TABLE `users_messaging_list` (
   `id` int(11) UNSIGNED NOT NULL,
   `item_id` varchar(32) DEFAULT NULL,
@@ -2658,7 +2768,8 @@ CREATE TABLE `users_messaging_list` (
 INSERT INTO `users_messaging_list` (`id`, `item_id`, `client_id`, `template_type`, `users_id`, `recipients_list`, `date_requested`, `schedule_type`, `schedule_date`, `message_medium`, `sent_status`, `subject`, `message`, `created_by`, `deleted`, `date_sent`) VALUES
 (1, 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'TLIS0000001', 'verify_account', 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', '{\"recipients_list\":[{\"fullname\":\"True Love International School\",\"email\":\"emmallob14@gmail.com\",\"customer_id\":\"JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM\"}]}', '2021-02-19 20:43:24', 'send_now', '2021-02-19 20:43:24', 'email', '0', '[MySchoolGH] Account Verification', 'Thank you for registering your School: <strong>True Love International School</strong> with MySchoolGH.\r\n                        We are pleased to have you join and benefit from our platform.\r\n\r\nOne of our personnel will get in touch shortly to assist you with additional setup processes that is required to aid you quick start the usage of the application.\r\n\r\n<a href=\'http://localhost/myschool_gh/verify?account=true&token=Cp5UM0edDfJT6ocFbkrXRsw3HzN9Px8LSh1my7qujntO4KIWYZQlBG\'><strong>Click Here</strong></a> to verify your Email Address and also to activate the account.\r\n\r\n', 'TLISU0000001', '0', NULL),
 (2, 'vmVn9KIyMRx4ASTDCY0qLF83lWgXZpPa', 'MSIS0000002', 'verify_account', 'vmVn9KIyMRx4ASTDCY0qLF83lWgXZpPa', '{\"recipients_list\":[{\"fullname\":\"Morning Star International School\",\"email\":\"morningstar@gmail.com\",\"customer_id\":\"vmVn9KIyMRx4ASTDCY0qLF83lWgXZpPa\"}]}', '2021-02-22 14:13:22', 'send_now', '2021-02-22 14:13:22', 'email', '0', '[MySchoolGH] Account Verification', 'Thank you for registering your School: <strong>Morning Star International School</strong> with MySchoolGH.\r\n                        We are pleased to have you join and benefit from our platform.<br><br>\r\n                        Your can login with your <strong>Email Address:</strong> morningstar@gmail.com or <strong>Username:</strong> morningstar\r\n                        and the password that was provided during signup.<br><br>One of our personnel will get in touch shortly to assist you with additional setup processes that is required to aid you quick start the usage of the application.<br></br><a href=\'http://localhost/myschool_gh/verify?dw=account&token=syCEZr2Iakd8K67xtB5HupRNwnm9J0FcbUg3QeLhX1TvVSG4DAMPYo\'><strong>Click Here</strong></a> to verify your Email Address and also to activate the account.<br><br>', 'MSISU0000001', '0', NULL),
-(3, '9HOBYRpyMxJr60foS5FdQXGDUCsviNeh', 'GIS00003', 'verify_account', '9HOBYRpyMxJr60foS5FdQXGDUCsviNeh', '{\"recipients_list\":[{\"fullname\":\"Galaxy International School\",\"email\":\"info@gallaxyinternationalschool.com\",\"customer_id\":\"9HOBYRpyMxJr60foS5FdQXGDUCsviNeh\"}]}', '2021-03-17 10:20:28', 'send_now', '2021-03-17 10:20:28', 'email', '0', '[MySchoolGH] Account Verification', 'Thank you for registering your School: <strong>Galaxy International School</strong> with MySchoolGH.\r\n                        We are pleased to have you join and benefit from our platform.<br><br>\r\n                        Your can login with your <strong>Email Address:</strong> info@gallaxyinternationalschool.com or <strong>Username:</strong> info\r\n                        and the password that was provided during signup.<br><br>One of our personnel will get in touch shortly to assist you with additional setup processes that is required to aid you quick start the usage of the application.<br></br><a href=\'http://localhost/myschool_gh/verify?dw=account&token=r0GnHJ3smfZQziSRNC8Ie65VPBOYuMLvEpjwyAtq2klWXxKTodhDcg\'><strong>Click Here</strong></a> to verify your Email Address and also to activate the account.<br><br>', 'GISU000001', '0', NULL);
+(3, '9HOBYRpyMxJr60foS5FdQXGDUCsviNeh', 'GIS00003', 'verify_account', '9HOBYRpyMxJr60foS5FdQXGDUCsviNeh', '{\"recipients_list\":[{\"fullname\":\"Galaxy International School\",\"email\":\"info@gallaxyinternationalschool.com\",\"customer_id\":\"9HOBYRpyMxJr60foS5FdQXGDUCsviNeh\"}]}', '2021-03-17 10:20:28', 'send_now', '2021-03-17 10:20:28', 'email', '0', '[MySchoolGH] Account Verification', 'Thank you for registering your School: <strong>Galaxy International School</strong> with MySchoolGH.\r\n                        We are pleased to have you join and benefit from our platform.<br><br>\r\n                        Your can login with your <strong>Email Address:</strong> info@gallaxyinternationalschool.com or <strong>Username:</strong> info\r\n                        and the password that was provided during signup.<br><br>One of our personnel will get in touch shortly to assist you with additional setup processes that is required to aid you quick start the usage of the application.<br></br><a href=\'http://localhost/myschool_gh/verify?dw=account&token=r0GnHJ3smfZQziSRNC8Ie65VPBOYuMLvEpjwyAtq2klWXxKTodhDcg\'><strong>Click Here</strong></a> to verify your Email Address and also to activate the account.<br><br>', 'GISU000001', '0', NULL),
+(4, 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'MSGH000004', 'verify_account', 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', '{\"recipients_list\":[{\"fullname\":\"Test Sample School\",\"email\":\"testsampleschool@mail.com\",\"customer_id\":\"Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk\"}]}', '2021-05-06 22:59:25', 'send_now', '2021-05-06 22:59:25', 'email', '0', '[MySchoolGH] Account Verification', 'Thank you for registering your School: <strong>Test Sample School</strong> with MySchoolGH.\r\n                        We are pleased to have you join and benefit from our platform.<br><br>\r\n                        Your can login with your <strong>Email Address:</strong> testsampleschool@mail.com or <strong>Username:</strong> testsampleschool\r\n                        and the password that was provided during signup.<br><br>One of our personnel will get in touch shortly to assist you with additional setup processes that is required to aid you quick start the usage of the application.<br></br><a href=\'http://localhost/myschool_gh/verify?dw=account&token=K1lwMeg7hxHL4DWI89jNZQRSOtXp0bCAdJoT3FPrn5G6cEifkqaYyU\'><strong>Click Here</strong></a> to verify your Email Address and also to activate the account.<br><br>', 'TSSU000001', '0', NULL);
 
 -- --------------------------------------------------------
 
@@ -2666,6 +2777,7 @@ INSERT INTO `users_messaging_list` (`id`, `item_id`, `client_id`, `template_type
 -- Table structure for table `users_notification`
 --
 
+DROP TABLE IF EXISTS `users_notification`;
 CREATE TABLE `users_notification` (
   `id` int(11) UNSIGNED NOT NULL,
   `item_id` varchar(32) DEFAULT NULL,
@@ -2700,6 +2812,7 @@ INSERT INTO `users_notification` (`id`, `item_id`, `user_id`, `subject`, `messag
 -- Table structure for table `users_notification_types`
 --
 
+DROP TABLE IF EXISTS `users_notification_types`;
 CREATE TABLE `users_notification_types` (
   `id` int(11) NOT NULL,
   `name` varchar(62) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -2730,6 +2843,7 @@ INSERT INTO `users_notification_types` (`id`, `name`, `alias`, `priority`, `favi
 -- Table structure for table `users_payments`
 --
 
+DROP TABLE IF EXISTS `users_payments`;
 CREATE TABLE `users_payments` (
   `id` int(10) UNSIGNED NOT NULL,
   `record_type` enum('licenses','policy','adverts') DEFAULT NULL,
@@ -2758,6 +2872,7 @@ CREATE TABLE `users_payments` (
 -- Table structure for table `users_posts`
 --
 
+DROP TABLE IF EXISTS `users_posts`;
 CREATE TABLE `users_posts` (
   `id` int(11) UNSIGNED NOT NULL,
   `resource_id` varchar(32) DEFAULT NULL,
@@ -2785,6 +2900,7 @@ CREATE TABLE `users_posts` (
 -- Table structure for table `users_reset_request`
 --
 
+DROP TABLE IF EXISTS `users_reset_request`;
 CREATE TABLE `users_reset_request` (
   `id` int(11) NOT NULL,
   `item_id` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -2804,6 +2920,7 @@ CREATE TABLE `users_reset_request` (
 -- Table structure for table `users_roles`
 --
 
+DROP TABLE IF EXISTS `users_roles`;
 CREATE TABLE `users_roles` (
   `id` int(11) UNSIGNED NOT NULL,
   `user_id` varchar(50) CHARACTER SET utf8mb4 DEFAULT NULL,
@@ -2818,7 +2935,7 @@ CREATE TABLE `users_roles` (
 --
 
 INSERT INTO `users_roles` (`id`, `user_id`, `client_id`, `permissions`, `date_logged`, `last_updated`) VALUES
-(1, 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'TLIS0000001', '{\"permissions\":{\"student\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"teacher\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"employee\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"guardian\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"incident\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"department\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"section\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"events\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"class\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"attendance\":{\"log\":1,\"finalize\":1},\"library\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"issue\":1,\"return\":1},\"fees\":{\"view\":1,\"update\":1,\"receive\":1,\"allocation\":1,\"view_allocation\":1},\"fees_category\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"results\":{\"upload\":1,\"modify\":1,\"approve\":1,\"generate\":1},\"course\":{\"view\":1,\"add\":1,\"update\":1,\"lesson\":1,\"delete\":1},\"permissions\":{\"view\":1,\"update\":1},\"assignments\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"mark\":1},\"timetable\":{\"manage\":1,\"allocate\":1},\"settings\":{\"filters\":1,\"manage\":1,\"activities\":1,\"login_history\":1},\"payslip\":{\"view\":1,\"modify_payroll\":1,\"generate\":1,\"validate\":1,\"manage_expense\":1}}}', '2021-02-19 20:43:24', NULL),
+(1, 'JB7iLyOZnzVRHF1X6UmWdtxkD8gpNTbM', 'TLIS0000001', '{\"permissions\":{\"student\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"teacher\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"employee\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"guardian\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"incident\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"department\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"section\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"events\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"class\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"attendance\":{\"log\":1,\"finalize\":1},\"library\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"issue\":1,\"return\":1},\"fees\":{\"view\":1,\"update\":1,\"receive\":1,\"allocation\":1,\"view_allocation\":1,\"reports\":1},\"fees_category\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"results\":{\"upload\":1,\"modify\":1,\"approve\":1,\"generate\":1},\"course\":{\"view\":1,\"add\":1,\"update\":1,\"lesson\":1,\"delete\":1},\"permissions\":{\"view\":1,\"update\":1},\"assignments\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"mark\":1},\"timetable\":{\"manage\":1,\"allocate\":1},\"settings\":{\"filters\":1,\"manage\":1,\"activities\":1,\"login_history\":1},\"payslip\":{\"view\":1,\"modify_payroll\":1,\"generate\":1,\"validate\":1,\"manage_expense\":1}}}', '2021-02-19 20:43:24', NULL),
 (2, '1v9Gqy2ATRlCzMjESgiY4U05O3mpWLNB', 'TLIS0000001', '{\"permissions\":{\"student\":{\"view\":1},\"teacher\":{\"view\":1},\"parent\":{\"view\":1},\"employee\":{\"view\":1},\"assignments\":{\"view\":1,\"handin\":1}}}', '2021-02-20 08:37:02', '2021-02-20 08:37:02'),
 (3, 'GSzAlD7uPObpda2jKtE0qhWUV8igTo9f', 'TLIS0000001', '{\"permissions\":{\"student\":{\"view\":1},\"teacher\":{\"view\":1},\"parent\":{\"view\":1},\"employee\":{\"view\":1},\"assignments\":{\"view\":1,\"handin\":1}}}', '2021-02-20 08:37:02', '2021-02-20 08:37:02'),
 (4, 'tnThYo5wKHG2XxgPdSVkErb7zLlqum1A', 'TLIS0000001', '{\"permissions\":{\"student\":{\"view\":1},\"teacher\":{\"view\":1},\"parent\":{\"view\":1},\"employee\":{\"view\":1},\"attendance\":{\"log\":1},\"library\":{\"request\":1},\"course\":{\"update\":1,\"lesson\":1},\"assignments\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"mark\":1}}}', '2021-02-20 09:07:18', '2021-02-20 09:07:18'),
@@ -2828,7 +2945,8 @@ INSERT INTO `users_roles` (`id`, `user_id`, `client_id`, `permissions`, `date_lo
 (8, 'qkrNWbzA3EoZLaSleY5T4291ICQsmvdD', 'MSIS0000002', '{\"permissions\":{\"student\":{\"view\":1},\"teacher\":{\"view\":1},\"parent\":{\"view\":1},\"employee\":{\"view\":1},\"assignments\":{\"view\":1,\"handin\":1}}}', '2021-02-23 09:27:24', '2021-02-23 09:27:24'),
 (9, '8hMv9C2qmL1ZH04WwyKfnrRAPusbVGx6', 'MSIS0000002', '{\"permissions\":{\"student\":{\"view\":1},\"teacher\":{\"view\":1},\"parent\":{\"view\":1},\"employee\":{\"view\":1},\"attendance\":{\"log\":1},\"library\":{\"request\":1},\"course\":{\"update\":1,\"lesson\":1},\"assignments\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"mark\":1}}}', '2021-02-23 09:27:36', '2021-02-23 09:27:36'),
 (10, 'ZYibOC4wzLWBXUAa5skuhNS2KxQ7nr1f', 'MSIS0000002', '{\"permissions\":{\"student\":{\"view\":1},\"teacher\":{\"view\":1},\"parent\":{\"view\":1},\"employee\":{\"view\":1},\"attendance\":{\"log\":1},\"library\":{\"request\":1},\"course\":{\"update\":1,\"lesson\":1},\"assignments\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"mark\":1}}}', '2021-02-23 09:27:36', '2021-02-23 09:27:36'),
-(11, '9HOBYRpyMxJr60foS5FdQXGDUCsviNeh', 'GIS00003', '{\"permissions\":{\"student\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"teacher\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"employee\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"guardian\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"incident\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"department\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"section\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"events\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"class\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"attendance\":{\"log\":1,\"finalize\":1},\"library\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"issue\":1,\"return\":1},\"fees\":{\"view\":1,\"update\":1,\"receive\":1,\"allocation\":1,\"view_allocation\":1},\"fees_category\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"course\":{\"view\":1,\"add\":1,\"update\":1,\"lesson\":1,\"delete\":1},\"permissions\":{\"view\":1,\"update\":1},\"assignments\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"mark\":1},\"timetable\":{\"manage\":1,\"allocate\":1},\"settings\":{\"filters\":1,\"manage\":1,\"activities\":1,\"login_history\":1},\"payslip\":{\"view\":1,\"modify_payroll\":1,\"generate\":1,\"validate\":1,\"manage_expense\":1}}}', '2021-03-17 10:20:28', NULL);
+(11, '9HOBYRpyMxJr60foS5FdQXGDUCsviNeh', 'GIS00003', '{\"permissions\":{\"student\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"teacher\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"employee\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"guardian\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"incident\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"department\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"section\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"events\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"class\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"attendance\":{\"log\":1,\"finalize\":1},\"library\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"issue\":1,\"return\":1},\"fees\":{\"view\":1,\"update\":1,\"receive\":1,\"allocation\":1,\"view_allocation\":1},\"fees_category\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"course\":{\"view\":1,\"add\":1,\"update\":1,\"lesson\":1,\"delete\":1},\"permissions\":{\"view\":1,\"update\":1},\"assignments\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"mark\":1},\"timetable\":{\"manage\":1,\"allocate\":1},\"settings\":{\"filters\":1,\"manage\":1,\"activities\":1,\"login_history\":1},\"payslip\":{\"view\":1,\"modify_payroll\":1,\"generate\":1,\"validate\":1,\"manage_expense\":1}}}', '2021-03-17 10:20:28', NULL),
+(12, 'Z3qWQN8stLBUSg2FArpOIKEDMJvdafYk', 'MSGH000004', '{\"permissions\":{\"student\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"teacher\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"employee\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"guardian\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"incident\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"department\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"section\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"events\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"class\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"attendance\":{\"log\":1,\"finalize\":1},\"library\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"issue\":1,\"return\":1},\"fees\":{\"view\":1,\"update\":1,\"receive\":1,\"allocation\":1,\"view_allocation\":1},\"fees_category\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"results\":{\"upload\":1,\"modify\":1,\"approve\":1,\"generate\":1},\"course\":{\"view\":1,\"add\":1,\"update\":1,\"lesson\":1,\"delete\":1},\"permissions\":{\"view\":1,\"update\":1},\"assignments\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"mark\":1},\"timetable\":{\"manage\":1,\"allocate\":1},\"settings\":{\"filters\":1,\"manage\":1,\"activities\":1,\"login_history\":1},\"payslip\":{\"view\":1,\"modify_payroll\":1,\"generate\":1,\"validate\":1,\"manage_expense\":1}}}', '2021-05-06 22:59:24', NULL);
 
 -- --------------------------------------------------------
 
@@ -2836,6 +2954,7 @@ INSERT INTO `users_roles` (`id`, `user_id`, `client_id`, `permissions`, `date_lo
 -- Table structure for table `users_temp_forms`
 --
 
+DROP TABLE IF EXISTS `users_temp_forms`;
 CREATE TABLE `users_temp_forms` (
   `id` int(11) NOT NULL,
   `user_id` varchar(32) DEFAULT NULL,
@@ -2851,6 +2970,7 @@ CREATE TABLE `users_temp_forms` (
 -- Table structure for table `users_types`
 --
 
+DROP TABLE IF EXISTS `users_types`;
 CREATE TABLE `users_types` (
   `id` int(11) UNSIGNED NOT NULL,
   `name` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'GUEST',
@@ -2867,8 +2987,8 @@ INSERT INTO `users_types` (`id`, `name`, `description`, `user_permissions`) VALU
 (2, 'TEACHER', 'teacher', '{\"permissions\":{\"student\":{\"view\":1},\"teacher\":{\"view\":1},\"parent\":{\"view\":1},\"employee\":{\"view\":1},\"attendance\":{\"log\":1},\"library\":{\"request\":1},\"course\":{\"update\":1,\"lesson\":1},\"assignments\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"mark\":1},\"results\":{\"upload\":1,\"modify\":1}}}'),
 (3, 'PARENT', 'parent', '{\"permissions\":{\"student\":{\"view\":1},\"teacher\":{\"view\":1},\"parent\":{\"view\":1},\"employee\":{\"view\":1},\"library\":{\"request\":1},\"fees\":{\"view\":1,\"view_allocation\":1},\"assignments\":{\"view\":1,\"handin\":1}}}'),
 (4, 'EMPLOYEE', 'employee', '{\"permissions\":{\"student\":{\"view\":1},\"teacher\":{\"view\":1},\"parent\":{\"view\":1},\"employee\":{\"view\":1},\"library\":{\"request\":1}}}'),
-(5, 'ACCOUNTANT', 'accountant', '{\"permissions\":{\"student\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"teacher\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"employee\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"guardian\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"incident\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"department\":{\"view\":1},\"section\":{\"view\":1},\"events\":{\"view\":1},\"class\":{\"view\":1},\"attendance\":{\"log\":1},\"library\":{\"view\":1,\"return\":1},\"fees\":{\"view\":1,\"update\":1,\"receive\":1,\"allocation\":1,\"view_allocation\":1},\"fees_category\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"course\":{\"view\":1,\"lesson\":1},\"settings\":{\"filters\":1},\"payslip\":{\"view\":1,\"modify_payroll\":1,\"generate\":1,\"validate\":1,\"manage_expense\":1}}}'),
-(6, 'ADMIN', 'admin', '{\"permissions\":{\"student\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"teacher\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"employee\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"guardian\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"incident\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"department\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"section\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"events\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"class\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"attendance\":{\"log\":1,\"finalize\":1},\"library\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"issue\":1,\"return\":1},\"fees\":{\"view\":1,\"update\":1,\"receive\":1,\"allocation\":1,\"view_allocation\":1},\"fees_category\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"results\":{\"upload\":1,\"modify\":1,\"approve\":1,\"generate\":1},\"course\":{\"view\":1,\"add\":1,\"update\":1,\"lesson\":1,\"delete\":1},\"permissions\":{\"view\":1,\"update\":1},\"assignments\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"mark\":1},\"timetable\":{\"manage\":1,\"allocate\":1},\"settings\":{\"filters\":1,\"manage\":1,\"activities\":1,\"login_history\":1},\"payslip\":{\"view\":1,\"modify_payroll\":1,\"generate\":1,\"validate\":1,\"manage_expense\":1}}}');
+(5, 'ACCOUNTANT', 'accountant', '{\"permissions\":{\"student\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"teacher\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"employee\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"guardian\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"incident\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"department\":{\"view\":1},\"section\":{\"view\":1},\"events\":{\"view\":1},\"class\":{\"view\":1},\"attendance\":{\"log\":1},\"library\":{\"view\":1,\"return\":1},\"fees\":{\"view\":1,\"update\":1,\"receive\":1,\"allocation\":1,\"view_allocation\":1,\"reports\":1},\"fees_category\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"course\":{\"view\":1,\"lesson\":1},\"settings\":{\"filters\":1},\"payslip\":{\"view\":1,\"modify_payroll\":1,\"generate\":1,\"validate\":1,\"manage_expense\":1}}}'),
+(6, 'ADMIN', 'admin', '{\"permissions\":{\"student\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"teacher\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"employee\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"guardian\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"incident\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"department\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"section\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"events\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"class\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"attendance\":{\"log\":1,\"finalize\":1},\"library\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"issue\":1,\"return\":1},\"fees\":{\"view\":1,\"update\":1,\"receive\":1,\"allocation\":1,\"view_allocation\":1,\"reports\":1},\"fees_category\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1},\"results\":{\"upload\":1,\"modify\":1,\"approve\":1,\"generate\":1},\"course\":{\"view\":1,\"add\":1,\"update\":1,\"lesson\":1,\"delete\":1},\"permissions\":{\"view\":1,\"update\":1},\"assignments\":{\"view\":1,\"add\":1,\"update\":1,\"delete\":1,\"mark\":1},\"timetable\":{\"manage\":1,\"allocate\":1},\"settings\":{\"filters\":1,\"manage\":1,\"activities\":1,\"login_history\":1},\"payslip\":{\"view\":1,\"modify_payroll\":1,\"generate\":1,\"validate\":1,\"manage_expense\":1}}}');
 
 -- --------------------------------------------------------
 
@@ -2876,6 +2996,7 @@ INSERT INTO `users_types` (`id`, `name`, `description`, `user_permissions`) VALU
 -- Table structure for table `wn_antonym`
 --
 
+DROP TABLE IF EXISTS `wn_antonym`;
 CREATE TABLE `wn_antonym` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `wnum_1` decimal(10,0) DEFAULT NULL,
@@ -2889,6 +3010,7 @@ CREATE TABLE `wn_antonym` (
 -- Table structure for table `wn_attr_adj_noun`
 --
 
+DROP TABLE IF EXISTS `wn_attr_adj_noun`;
 CREATE TABLE `wn_attr_adj_noun` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `synset_id_2` decimal(10,0) DEFAULT NULL
@@ -2900,6 +3022,7 @@ CREATE TABLE `wn_attr_adj_noun` (
 -- Table structure for table `wn_cause`
 --
 
+DROP TABLE IF EXISTS `wn_cause`;
 CREATE TABLE `wn_cause` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `synset_id_2` decimal(10,0) DEFAULT NULL
@@ -2911,6 +3034,7 @@ CREATE TABLE `wn_cause` (
 -- Table structure for table `wn_class_member`
 --
 
+DROP TABLE IF EXISTS `wn_class_member`;
 CREATE TABLE `wn_class_member` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `synset_id_2` decimal(10,0) DEFAULT NULL,
@@ -2923,6 +3047,7 @@ CREATE TABLE `wn_class_member` (
 -- Table structure for table `wn_derived`
 --
 
+DROP TABLE IF EXISTS `wn_derived`;
 CREATE TABLE `wn_derived` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `wnum_1` decimal(10,0) DEFAULT NULL,
@@ -2936,6 +3061,7 @@ CREATE TABLE `wn_derived` (
 -- Table structure for table `wn_entails`
 --
 
+DROP TABLE IF EXISTS `wn_entails`;
 CREATE TABLE `wn_entails` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `synset_id_2` decimal(10,0) DEFAULT NULL
@@ -2947,6 +3073,7 @@ CREATE TABLE `wn_entails` (
 -- Table structure for table `wn_gloss`
 --
 
+DROP TABLE IF EXISTS `wn_gloss`;
 CREATE TABLE `wn_gloss` (
   `synset_id` decimal(10,0) NOT NULL DEFAULT 0,
   `gloss` varchar(255) DEFAULT NULL
@@ -2958,6 +3085,7 @@ CREATE TABLE `wn_gloss` (
 -- Table structure for table `wn_hypernym`
 --
 
+DROP TABLE IF EXISTS `wn_hypernym`;
 CREATE TABLE `wn_hypernym` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `synset_id_2` decimal(10,0) DEFAULT NULL
@@ -2969,6 +3097,7 @@ CREATE TABLE `wn_hypernym` (
 -- Table structure for table `wn_hyponym`
 --
 
+DROP TABLE IF EXISTS `wn_hyponym`;
 CREATE TABLE `wn_hyponym` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `synset_id_2` decimal(10,0) DEFAULT NULL
@@ -2980,6 +3109,7 @@ CREATE TABLE `wn_hyponym` (
 -- Table structure for table `wn_mbr_meronym`
 --
 
+DROP TABLE IF EXISTS `wn_mbr_meronym`;
 CREATE TABLE `wn_mbr_meronym` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `synset_id_2` decimal(10,0) DEFAULT NULL
@@ -2991,6 +3121,7 @@ CREATE TABLE `wn_mbr_meronym` (
 -- Table structure for table `wn_participle`
 --
 
+DROP TABLE IF EXISTS `wn_participle`;
 CREATE TABLE `wn_participle` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `wnum_1` decimal(10,0) DEFAULT NULL,
@@ -3004,6 +3135,7 @@ CREATE TABLE `wn_participle` (
 -- Table structure for table `wn_part_meronym`
 --
 
+DROP TABLE IF EXISTS `wn_part_meronym`;
 CREATE TABLE `wn_part_meronym` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `synset_id_2` decimal(10,0) DEFAULT NULL
@@ -3015,6 +3147,7 @@ CREATE TABLE `wn_part_meronym` (
 -- Table structure for table `wn_pertainym`
 --
 
+DROP TABLE IF EXISTS `wn_pertainym`;
 CREATE TABLE `wn_pertainym` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `wnum_1` decimal(10,0) DEFAULT NULL,
@@ -3028,6 +3161,7 @@ CREATE TABLE `wn_pertainym` (
 -- Table structure for table `wn_see_also`
 --
 
+DROP TABLE IF EXISTS `wn_see_also`;
 CREATE TABLE `wn_see_also` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `wnum_1` decimal(10,0) DEFAULT NULL,
@@ -3041,6 +3175,7 @@ CREATE TABLE `wn_see_also` (
 -- Table structure for table `wn_similar`
 --
 
+DROP TABLE IF EXISTS `wn_similar`;
 CREATE TABLE `wn_similar` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `synset_id_2` decimal(10,0) DEFAULT NULL
@@ -3052,6 +3187,7 @@ CREATE TABLE `wn_similar` (
 -- Table structure for table `wn_subst_meronym`
 --
 
+DROP TABLE IF EXISTS `wn_subst_meronym`;
 CREATE TABLE `wn_subst_meronym` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `synset_id_2` decimal(10,0) DEFAULT NULL
@@ -3063,6 +3199,7 @@ CREATE TABLE `wn_subst_meronym` (
 -- Table structure for table `wn_synset`
 --
 
+DROP TABLE IF EXISTS `wn_synset`;
 CREATE TABLE `wn_synset` (
   `synset_id` decimal(10,0) NOT NULL DEFAULT 0,
   `w_num` decimal(10,0) NOT NULL DEFAULT 0,
@@ -3078,6 +3215,7 @@ CREATE TABLE `wn_synset` (
 -- Table structure for table `wn_verb_frame`
 --
 
+DROP TABLE IF EXISTS `wn_verb_frame`;
 CREATE TABLE `wn_verb_frame` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `f_num` decimal(10,0) DEFAULT NULL,
@@ -3090,6 +3228,7 @@ CREATE TABLE `wn_verb_frame` (
 -- Table structure for table `wn_verb_group`
 --
 
+DROP TABLE IF EXISTS `wn_verb_group`;
 CREATE TABLE `wn_verb_group` (
   `synset_id_1` decimal(10,0) DEFAULT NULL,
   `synset_id_2` decimal(10,0) DEFAULT NULL
@@ -3772,7 +3911,7 @@ ALTER TABLE `classes`
 -- AUTO_INCREMENT for table `clients_accounts`
 --
 ALTER TABLE `clients_accounts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `contact`
@@ -3832,7 +3971,7 @@ ALTER TABLE `events`
 -- AUTO_INCREMENT for table `events_types`
 --
 ALTER TABLE `events_types`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `e_learning`
@@ -3874,7 +4013,7 @@ ALTER TABLE `fees_category`
 -- AUTO_INCREMENT for table `fees_collection`
 --
 ALTER TABLE `fees_collection`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `fees_collection_banks`
@@ -3976,7 +4115,7 @@ ALTER TABLE `timetables_slots_allocation`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `users_access_attempt`
@@ -3988,13 +4127,13 @@ ALTER TABLE `users_access_attempt`
 -- AUTO_INCREMENT for table `users_activity_logs`
 --
 ALTER TABLE `users_activity_logs`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=275;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=294;
 
 --
 -- AUTO_INCREMENT for table `users_api_endpoints`
 --
 ALTER TABLE `users_api_endpoints`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=179;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=180;
 
 --
 -- AUTO_INCREMENT for table `users_api_keys`
@@ -4048,13 +4187,13 @@ ALTER TABLE `users_gender`
 -- AUTO_INCREMENT for table `users_login_history`
 --
 ALTER TABLE `users_login_history`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=86;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
 
 --
 -- AUTO_INCREMENT for table `users_messaging_list`
 --
 ALTER TABLE `users_messaging_list`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users_notification`
@@ -4090,7 +4229,7 @@ ALTER TABLE `users_reset_request`
 -- AUTO_INCREMENT for table `users_roles`
 --
 ALTER TABLE `users_roles`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `users_temp_forms`

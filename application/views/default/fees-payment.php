@@ -136,7 +136,7 @@ if(!$receivePayment) {
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Select Class</label>
+                                    <label>Select Class <span class="required">*</span></label>
                                     <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" name="class_id">
                                         <option value="">Please Select Class</option>';
                                         foreach($class_list as $each) {
@@ -147,7 +147,7 @@ if(!$receivePayment) {
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Select Student</label>
+                                    <label>Select Student <span class="required">*</span></label>
                                     <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" name="student_id">
                                         <option value="">Please Select Student</option>';
                                         foreach($students_list as $each) {
@@ -158,7 +158,7 @@ if(!$receivePayment) {
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Select Category</label>
+                                    <label>Select Category <small>(Optional)</small></label>
                                     <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" name="category_id">
                                         <option value="">Please Select Category</option>';
                                         foreach($myClass->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$clientId}'") as $each) {
