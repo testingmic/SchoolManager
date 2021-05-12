@@ -605,17 +605,18 @@ class Fees extends Myschoolgh {
 
         /** Last payment container */
         $html_form .= "<div class='last_payment_container'>";
+        $html_form .= "<input name='fees_payment_student_id' hidden type='hidden' value='{$params->student_id}' readonly>";
 
         /** If last payment information is not empty */
         if(!empty($data_content->last_payment_info)) {
-
+            
             // append value
             $data_content->last_payment_uid = $data_content->last_payment_info["pay_id"];
             $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
 
             // set the rows for the last payment id
             $html_form .= "<tr>";
-            $html_form .= "<td width='43%'>Last Payment Info:</td><td>";
+            $html_form .= "<td width='43%' class='font-weight-bold'>Last Payment Info:</td><td>";
             
             // payment information
             $html_form .= "<span class='last_payment_id'><strong>Payment ID:</strong> {$data_content->last_payment_uid}</span><br>
@@ -637,7 +638,7 @@ class Fees extends Myschoolgh {
             }
             
             // show the paid button
-            $html_form .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a onclick='return paid_status(\"{$data_content->last_payment_id}\")' class='btn btn-sm btn-outline-primary' target='_blank' href='#'><i class='fa fa-print'></i> Print Receipt</a></p>";
+            $html_form .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a href='{$this->baseUrl}receipt/{$data_content->last_payment_id}' class='btn btn-sm btn-outline-primary' target='_blank'><i class='fa fa-print'></i> Print Receipt</a></p>";
             $html_form .= "</td></tr>";
             $html_form .= "</table>";
         }
@@ -970,7 +971,7 @@ class Fees extends Myschoolgh {
                     ) AS last_payment_info
 				FROM fees_payments a
                 LEFT JOIN users u ON u.item_id = a.student_id
-				WHERE ".(isset($params->checkout_url) ? "checkout_url='{$params->checkout_url}'" : 
+				WHERE ".(isset($params->checkout_url) && ($params->checkout_url !== "general") ? "checkout_url='{$params->checkout_url}'" : 
                     " a.student_id = '{$params->student_id}'
                     ".(!empty($category_id) ? " AND a.category_id = '{$params->category_id}'" : null)."
                         AND a.academic_year = '{$params->academic_year}'
@@ -1031,24 +1032,66 @@ class Fees extends Myschoolgh {
                 return ["code" => 203, "data" => "Sorry! An invalid checkout url was parsed for processing."];
             }
 
-            /* Outstanding balance calculator */
-            $outstandingBalance = $paymentRecord->balance - $params->amount;
-            $totalPayment = $paymentRecord->amount_paid + $params->amount;
+            // confirm if the data parsed is an array
+            if(is_array($paymentRecord)) {
 
-            // set the paid status
-            $paid_status = ((round($totalPayment) === round($paymentRecord->amount_due)) || (round($totalPayment) > round($paymentRecord->amount_due))) ? 1 : 2;
+                // initials    
+                $amount_due = 0;
+                $total_amount_paid = 0;
+                $balance = 0;
+
+                $fees_list = [];
+                $amount_paid = [];
+                $paying = $params->amount;
+                $init_paying = $paying;
+
+                // loop through the allocations list
+                foreach($paymentRecord as $fee) {
+                    // add up to the values
+                    $balance += $fee->balance;
+                    $amount_due += $fee->amount_due;
+                    $total_amount_paid += $fee->amount_paid;
+
+                    // algorithm to get the items being paid for
+                    if($paying > 0) {
+                        if(($fee->balance < $paying) || ($fee->balance === $paying)) {
+                            $paying = $paying - $fee->balance;
+                            $fees_list[$fee->category_id] = 0;
+                        } elseif($fee->balance > $paying) {
+                            $n_value = $fee->balance - $paying;
+                            $amount_paid[$fee->category_id] = $paying;
+                            $fees_list[$fee->category_id] = $n_value;
+                            $paying = 0;
+                        } else {
+                            $n_value = $fee->balance - $paying;
+                            $amount_paid[$fee->category_id] = $paying;
+                            $fees_list[$fee->category_id] = $n_value;
+                            $paying -= $fee->balance; 
+                        }
+                    }
+                }
+
+                /* Outstanding balance calculator */
+                $outstandingBalance = $balance - $params->amount;
+                $totalPayment = $total_amount_paid + $params->amount;
+
+                // set the paid status
+                $paid_status = ((round($totalPayment) === round($amount_due)) || (round($totalPayment) > round($amount_due))) ? 1 : 2;
+                
+            } else {
+                /* Outstanding balance calculator */
+                $outstandingBalance = $paymentRecord->balance - $params->amount;
+                $totalPayment = $paymentRecord->amount_paid + $params->amount;
+
+                // set the paid status
+                $paid_status = ((round($totalPayment) === round($paymentRecord->amount_due)) || (round($totalPayment) > round($paymentRecord->amount_due))) ? 1 : 2;
+            }
 
             /* Confirm if the user has any credits */
             if($outstandingBalance < 0) {
                 $creditBalance = $outstandingBalance * -1;
                 $outstandingBalance = 0;
             }
-
-            // generate a unique id for the payment record
-            $uniqueId = random_string('alnum', 32);
-            $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
-            $receiptId = $this->iclient->client_preferences->labels->receipt_label.$counter;
-            $receiptId = strtoupper($receiptId);
 
             // get the currency
             $params->payment_method = isset($params->payment_method) ? ucfirst($params->payment_method) : "Cash";
@@ -1067,36 +1110,93 @@ class Fees extends Myschoolgh {
                 ",  cheque_security='".($params->cheque_security ?? null)."',
                     cheque_bank='{$params->bank_id}', cheque_number='{$params->cheque_number}'" : null;
 
+            
             /* Record the payment made by the user */
-            $stmt = $this->db->prepare("INSERT INTO fees_collection
-                SET client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
-                category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
-                description = ?, currency = ?, receipt_id = ?, payment_method = ? {$append_sql}
-            ");
-            $stmt->execute([
-                $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id, 
-                $paymentRecord->class_id, $paymentRecord->category_id, $params->amount, $params->userId, 
-                $paymentRecord->academic_year, $paymentRecord->academic_term, 
-                $params->description ?? null, $currency, $receiptId, $params->payment_method
-            ]);
+            if(!is_array($paymentRecord)) {
 
-            /* Update the user payment record */
-            $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
-                last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", paid_status='{$paid_status}'" : "")."
-                WHERE checkout_url = ? AND client_id = ? LIMIT 1
-            ");
-            $stmt->execute([$totalPayment, $outstandingBalance, $params->checkout_url, $params->clientId]);
+                // generate a unique id for the payment record
+                $uniqueId = random_string('alnum', 15);
+                $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+                $receiptId = $this->iclient->client_preferences->labels->receipt_label.$counter;
+                $receiptId = strtoupper($receiptId);
+
+                // log the payment record
+                $stmt = $this->db->prepare("INSERT INTO fees_collection
+                    SET client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
+                    category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
+                    description = ?, currency = ?, receipt_id = ?, payment_method = ? {$append_sql}
+                ");
+                $stmt->execute([
+                    $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id, 
+                    $paymentRecord->class_id, $paymentRecord->category_id, $params->amount, $params->userId, 
+                    $paymentRecord->academic_year, $paymentRecord->academic_term, 
+                    $params->description ?? null, $currency, $receiptId, $params->payment_method
+                ]);
+                /* Update the user payment record */
+                $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
+                    last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", paid_status='{$paid_status}'" : "")."
+                    WHERE checkout_url = ? AND client_id = ? LIMIT 1
+                ");
+                $stmt->execute([$totalPayment, $outstandingBalance, $params->checkout_url, $params->clientId]);
+
+                /* Record the user activity log */
+                $this->userLogs("fees_payment", $params->checkout_url, null, "{$params->userData->name} received an amount of 
+                    <strong>{$params->amount}</strong> as Payment for <strong>{$paymentRecord->category_name}</strong> from <strong>{$paymentRecord->student_name}</strong>. 
+                    Outstanding Balance is <strong>{$outstandingBalance}</strong>", $params->userId);
+                
+                // additional data
+                $additional["payment"] = $this->confirm_student_payment_record($params);
+
+            } else {
+                // loop through the payment record
+                foreach($paymentRecord as $record) {
+
+                    // loop through the items which were paid for
+                    if(isset($amount_paid[$record->category_id])) {
+
+                        // generate a unique id for the payment record
+                        $uniqueId = random_string('alnum', 15);
+                        $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+                        $receiptId = $this->iclient->client_preferences->labels->receipt_label.$counter;
+                        $receiptId = strtoupper($receiptId);
+
+                        // get the total amount paid
+                        $total_paid = $amount_paid[$record->category_id];
+                        $total_balance = ($record->balance - $total_paid);
+
+                        // insert the new record into the database
+                        $stmt = $this->db->prepare("INSERT INTO fees_collection
+                            SET client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
+                            category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
+                            description = ?, currency = ?, receipt_id = ?, payment_method = ? {$append_sql}
+                        ");
+                        $stmt->execute([
+                            $params->clientId, $uniqueId, $record->student_id, 
+                            $record->department_id, $record->class_id, $record->category_id, 
+                            $total_paid, $params->userId, $record->academic_year, $record->academic_term, 
+                            $params->description ?? null, $currency, $receiptId, $params->payment_method
+                        ]);
+                        /* Update the user payment record */
+                        $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
+                            last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", 
+                            paid_status='{$paid_status}'" : "")."
+                            WHERE checkout_url = ? AND client_id = ? LIMIT 1
+                        ");
+                        $stmt->execute([($record->amount_paid + $total_paid), $total_balance, $record->checkout_url, $params->clientId]);
+
+                        /* Record the user activity log */
+                        $this->userLogs("fees_payment", $record->checkout_url, null, "{$params->userData->name} received an amount of 
+                            <strong>{$total_paid}</strong> as Payment for <strong>{$record->category_name}</strong> from 
+                            <strong>{$record->student_name}</strong>. Outstanding Balance is <strong>{$total_balance}</strong>", $params->userId);
+                    }
+                }
+            }
 
             /* Update the student credit balance */
             if(isset($creditBalance)) {
                 // update the user data
                 $this->db->query("UPDATE users SET account_balance = (account_balance + $creditBalance) WHERE item_id = ? AND client_id = '{$params->clientId}' LIMIT 1");
             }
-
-            /* Record the user activity log */
-            $this->userLogs("fees_payment", $params->checkout_url, null, "{$params->userData->name} received an amount of 
-                <strong>{$params->amount}</strong> as Payment for <strong>{$paymentRecord->category_name}</strong> from <strong>{$paymentRecord->student_name}</strong>. 
-                Outstanding Balance is <strong>{$outstandingBalance}</strong>", $params->userId);
 
             // commit the statements
             $this->db->commit();
@@ -1107,9 +1207,7 @@ class Fees extends Myschoolgh {
             // return the success message
             return [
                 "data" => "Fee payment was successfully recorded.",
-                "additional" => [
-                    "payment" => $this->confirm_student_payment_record($params)
-                ]
+                "additional" => $additional ?? true
             ];
 
         } catch(PDOException $e) {
