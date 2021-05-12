@@ -144,10 +144,10 @@
 <?php function admin_menu() { global $baseUrl; ?>
     <?php general_menu(true); ?>
 <?php } ?>
-<?php function accountant_menu() { global $baseUrl; ?>
+<?php function accountant_menu() { global $baseUrl, $accessObject; ?>
     <?php general_menu(); ?>
 <?php } ?>
-<?php function teacher_menu() { global $baseUrl; ?>
+<?php function teacher_menu() { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>My Students</span></a>
         <ul class="dropdown-menu">
@@ -216,7 +216,7 @@
         </ul>
     </li>
 <?php } ?>
-<?php function parent_menu() { global $baseUrl, $session; ?>
+<?php function parent_menu() { global $baseUrl, $accessObject, $session; ?>
     <?php if(!empty($session->student_id)) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
@@ -259,7 +259,7 @@
         </ul>
     </li>
 <?php } ?>
-<?php function student_menu() { global $baseUrl; ?>
+<?php function student_menu() { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
         <ul class="dropdown-menu">
@@ -279,6 +279,14 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>e-learning">E-Books / Videos</a></li>
         </ul>
     </li>
+    <?php if($accessObject->hasAccess("generate", "results")) { ?>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Reports / Promotion</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
+        </ul>
+    </li>
+    <?php } ?>
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Assignments</span></a>
@@ -307,7 +315,7 @@
         </ul>
     </li>
 <?php } ?>
-<?php function employee_menu() { global $baseUrl; ?>
+<?php function employee_menu() { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
         <ul class="dropdown-menu">

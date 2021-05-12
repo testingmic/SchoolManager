@@ -67,7 +67,7 @@ if(!empty($user_id)) {
         $receivePayment = !empty($canReceive) ? $canReceive : $isParent;
 
         // load fees allocation list for class
-        $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "student_id" => $user_id, "receivePayment" => $receivePayment, "client_data" => $defaultUser->client];
+        $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "student_id" => $user_id, "receivePayment" => $receivePayment, "client_data" => $defaultUser->client, "parse_owning" => true];
         
         // load the class timetable
         $timetable = load_class("timetable", "controllers")->class_timetable($data->class_guid, $clientId);
@@ -378,6 +378,18 @@ if(!empty($user_id)) {
                         </div>
                         '.($viewAllocation ? 
                         '<div class="tab-pane fade" id="fees" role="tabpanel" aria-labelledby="fees-tab2">
+                            <div class="d-flex mb-3 pb-2 border-bottom justify-content-between">
+                                <div><h5>FEES ALLOCATION</h5></div>
+                                <div>
+                                '.(
+                                    $student_allocation_list["owning"] ? 
+                                        '<div class="text-right">
+                                            <a href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'" class="btn btn-outline-primary"><i class="fa fa-adjust"></i> Make Fees Payment</a>
+                                        </div>'
+                                    : null
+                                ).'
+                                </div>
+                            </div>
                             <div class="table-responsive">
                                 <table data-empty="" class="table table-striped datatable">
                                     <thead>
@@ -390,7 +402,7 @@ if(!empty($user_id)) {
                                             '.($receivePayment ? '<th width="10%" align="center"></th>' : '').'
                                         </tr>
                                     </thead>
-                                    <tbody>'.$student_allocation_list.'</tbody>
+                                    <tbody>'.$student_allocation_list["list"].'</tbody>
                                 </table>
                             </div>
                         </div>

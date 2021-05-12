@@ -170,6 +170,7 @@ $timetable = "<div class='text-center'>No timetable record for today was found i
 if($isWardTutorParent) {
 
     // load the use information
+    $expenses_list = null;
     $data = $defaultUser;
     $timetableClass = load_class("timetable", "controllers");
 
@@ -251,12 +252,21 @@ if($isWardTutorParent) {
                 "client_data" => $defaultUser->client,
                 "student_array_ids" => $defaultUser->wards_list_ids
             ];
-            $item_list = load_class("fees", "controllers", $params)->list($params)["data"];
 
+            // if the student id is not empty
+            if(!empty($session->student_id)) {
+                $params->student_id = $session->student_id;
+            }
+            
+            // load the student fees payment
+            $item_list = load_class("fees", "controllers", $params)->list($params)["data"];
+            
+            // initials
             $fees_history = "";
 
             // loop through the list
             foreach($item_list as $key => $each) {
+
                 // add up to the expenses
                 $total_expenditure += $each->amount;
 

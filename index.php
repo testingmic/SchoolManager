@@ -118,9 +118,10 @@ if(!empty($session->userId)) {
 
 		// set additional parameters
 		$isAdmin = (bool) ($defaultUser->user_type == "admin");
-		$isTutor = (bool) ($defaultUser->user_type == "teacher");
+		$isTeacher = $isTutor = (bool) ($defaultUser->user_type == "teacher");
 		$isParent = (bool) ($defaultUser->user_type == "parent");
 		$isStudent = (bool) ($defaultUser->user_type == "student");
+		$isEmployee = (bool) ($defaultUser->user_type == "employee");
 		$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
 		$isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
 		$isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);

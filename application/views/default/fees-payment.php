@@ -17,6 +17,7 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) [];
+$getObject = (object) $_GET;
 $pageTitle = "Fees Payment";
 $response->title = "{$pageTitle} : {$appName}";
 
@@ -31,8 +32,15 @@ if(!$receivePayment) {
     $category_id = null;
     $students_list = [];
     $payment_form = "";
-    $student_id = null;
-    $class_id = null;
+    $student_id = $getObject->student_id ?? null;
+    $class_id = $getObject->class_id ?? null;
+
+    /** Create a parameter */
+    $params = (object) [
+        "clientId" => $clientId,
+        "client_data" => $defaultUser->client
+    ];
+    $params->class_id = $class_id;
 
     // disable form inputs
     $search_disabled = null;
@@ -43,13 +51,8 @@ if(!$receivePayment) {
 
         /** Clean the checkout url parsed */
         $checkout_url = xss_clean($_GET["checkout_url"]);
+        $params->checkout_url = $checkout_url;
 
-        /** Create a parameter */
-        $params = (object) [
-            "clientId" => $clientId,
-            "client_data" => $defaultUser->client,
-            "checkout_url" => $checkout_url
-        ];
         /** Create a new object */
         $feesClass = load_class("fees", "controllers", $params);
 
@@ -86,12 +89,14 @@ if(!$receivePayment) {
 
         // append to the params
         $params->class_id = $class_id;
-        $params->user_type = "student";
-        $params->minified = "simplified";
-
-        // load the students list
-        $students_list = load_class("users", "controllers")->list($params)["data"];
     }
+    
+    // load only students
+    $params->user_type = "student";
+    $params->minified = "simplified";
+
+    // load the students list
+    $students_list = load_class("users", "controllers")->list($params)["data"];
 
     // scripts for the page
     $response->scripts = ["assets/js/filters.js", "assets/js/payments.js"];
@@ -168,7 +173,7 @@ if(!$receivePayment) {
                                     </select>
                                 </div>
 
-                                <div class="form-group text-right mb-0 '.($category_id ? null : 'hidden').'" id="make_payment_button">
+                                <div class="form-group text-right mb-0 '.($category_id || $class_id ? null : 'hidden').'" id="make_payment_button">
                                     <button '.$search_disabled.' onclick="return load_Pay_Fees_Form()" class="btn btn-outline-success">Load Form</button>
                                 </div>
 

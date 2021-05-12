@@ -1004,7 +1004,7 @@ class Forms extends Myschoolgh {
             "guardian" => [
                 "title" => "Student Name",
                 "type" => "student",
-                "key" => "unique_id",
+                "key" => "user_id",
                 "attr" => "guardian_id"
             ],
             "student" => [
@@ -3277,7 +3277,7 @@ class Forms extends Myschoolgh {
                     <label for="academic_term">Academic Term</label>
                     <select data-width="100%" name="general[academics][academic_term]" class="form-control selectpicker">
                         <option value="">Select Academic Term</option>';
-                            foreach($this->pushQuery("id, name, description", "academic_terms","1") as $each) {
+                            foreach($this->pushQuery("id, name, description", "academic_terms","1 AND client_id='{$clientId}'") as $each) {
                                 $general .= "<option ".(($client_data && $each->name === $prefs->academics->academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
                             }
                         $general .= '</select>
@@ -3313,7 +3313,7 @@ class Forms extends Myschoolgh {
                     <label for="next_academic_term">Next Academic Term</label>
                     <select data-width="100%" name="general[academics][next_academic_term]" class="form-control selectpicker">
                         <option value="">Select Academic Term</option>';
-                            foreach($this->pushQuery("id, name, description", "academic_terms","1") as $each) {
+                            foreach($this->pushQuery("id, name, description", "academic_terms","1 AND client_id='{$clientId}'") as $each) {
                                 $general .= "<option ".(($client_data && $each->name === $prefs->academics->next_academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
                             }
                         $general .= '</select>
@@ -3672,14 +3672,22 @@ class Forms extends Myschoolgh {
      * 
      * @return Array
      */
-    public function generate_terminal_reports($clientId) {
+    public function generate_terminal_reports($clientId, stdClass $additional = null) {
         $the_form = [];
 
         // get the client data
-        $client_data = !empty($clientId) ? $this->client_data($clientId) : (object)[];
+        $client_data = $additional->client_data;
 
         // run this query
+        $disabled = in_array($additional->user_type, ["student"]) ? "disabled='disabled'" : null;
         $prefs = !empty($client_data) ? $client_data->client_preferences : (object)[];
+
+        $this_user = "<option value=''>Select Student</option>";
+        
+        // if the item is not disabled
+        if(!empty($disabled)) {
+            $this_user = "<option value='{$additional->user->user_id}'>{$additional->user->name}</option>";
+        }
 
         // get the list of all classes
         $classes_param = (object) [
@@ -3704,7 +3712,7 @@ class Forms extends Myschoolgh {
                 <div class='col-md-4 mb-2'>
                     <select data-width='100%' class='form-control selectpicker' name='academic_term' id='academic_term'>
                         <option value=''>Select Academic Term</option>";
-                            foreach($this->pushQuery("id, name, description", "academic_terms","1") as $each) {
+                            foreach($this->pushQuery("id, name, description", "academic_terms","1 AND client_id='{$clientId}'") as $each) {
                                 $the_form["general"] .= "<option ".(($client_data && $each->name === $prefs->academics->academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
                             }
                         $the_form["general"] .= "</select>
@@ -3712,16 +3720,16 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class='col-md-4 mb-2'></div>
                 <div class='col-lg-4 col-md-4 mb-2'>
-                    <select data-width='100%' class='form-control selectpicker' name='class_id' id='class_id'>
+                    <select data-width='100%' {$disabled} class='form-control selectpicker' name='class_id' id='class_id'>
                         <option value=''>Select the Class</option>";
                         foreach($classes_list as $class) {
-                            $the_form["general"] .= "<option value='{$class->item_id}'>{$class->name}</option>";
+                            $the_form["general"] .= "<option ".($additional->class_guid ==  $class->item_id ? "selected" : null)." value='{$class->item_id}'>{$class->name}</option>";
                         }
         $the_form["general"] .= "</select>
                     </div>
                     <div class='col-lg-6 col-md-6 mb-2'>
                         <select data-width='100%' class='form-control selectpicker' name='student_id' id='student_id'>
-                            <option value=''>Select Student</option>
+                            {$this_user}
                         </select>
                     </div>
                     <div class='col-md-2' id='generate_report_button'>

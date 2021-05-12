@@ -16,11 +16,17 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];
+$additional = (object) [
+    "user" => $defaultUser,
+    "client_data" => $defaultUser->client,
+    "user_type" => $defaultUser->user_type,
+    "class_guid" => $defaultUser->class_guid,
+];
 $pageTitle = "Generate Report Cards";
 $response->title = "{$pageTitle} : {$appName}";
 
 // confirm that the user has the required permissions
-$the_form = load_class("forms", "controllers")->generate_terminal_reports($clientId);
+$the_form = load_class("forms", "controllers")->generate_terminal_reports($clientId, $additional);
 
 // add the scripts to load
 $response->scripts = ["assets/js/grading.js"];

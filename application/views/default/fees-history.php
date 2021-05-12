@@ -42,10 +42,18 @@ $params = (object) [
     "clientId" => $clientId,
     "userData" => $defaultUser,
     "client_data" => $defaultUser->client,
+    "student_array_ids" => $defaultUser->wards_list_ids ?? null,
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
     "category_id" => $filter->category_id ?? null
 ];
+
+// if the student id is not empty
+if(!empty($session->student_id)) {
+    $params->student_id = $session->student_id;
+}
+
+// load the student fees payment
 $item_list = load_class("fees", "controllers", $params)->list($params);
 
 $hasAdd = $accessObject->hasAccess("add", "fees");

@@ -371,6 +371,7 @@ class Fees extends Myschoolgh {
     public function student_allocation_array(stdClass $params) {
         
         // load fees allocation list for class
+        $owning = false;
         $student_allocation_list = "";
         $student_allocation_array = $this->students_fees_allocation($params)["data"];
 
@@ -424,6 +425,7 @@ class Fees extends Myschoolgh {
                     if($isPaid) {
                         $student_allocation_list .= "<span class='badge badge-success'>Paid</span>";
                     } else {
+                        $owning = true;
                         $student_allocation_list .= "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?checkout_url={$student->checkout_url}\");' class='btn btn-sm btn-outline-success'>Pay</button>";
                     }
                     // delete the record if possible => that is allowed only if the student has not already made an payment
@@ -436,7 +438,15 @@ class Fees extends Myschoolgh {
                 $student_allocation_list .= "</tr>";
             }
         }
-        return $student_allocation_list;
+        if(isset($params->parse_owning)) {
+            return [
+                "list" => $student_allocation_list,
+                "owning" => $owning
+            ];
+        } else {
+            return $student_allocation_list;
+        }
+
     }
 
     /**
@@ -522,7 +532,8 @@ class Fees extends Myschoolgh {
                     <td>AMOUNT PAID</td>
                     <td>BALANCE</td>
                 </tr>";
-            $data_content = $allocation[count($allocation)-1];
+            // $data_content = $allocation[count($allocation)-1];
+            $data_content = null;
 
             // loop through the allocations list
             foreach($allocation as $fees) {
@@ -574,6 +585,7 @@ class Fees extends Myschoolgh {
             $html_form .= "<td class='font-weight-bold'>Amount Paid:</td>";
             $html_form .= "<td><span data-checkout_url='general' class='amount_paid'>{$currency} {$amount_paid}</span></td>";
             $html_form .= "</tr>";
+
             $html_form .= "<tr>";
             $html_form .= "<td class='font-weight-bold'>Outstanding Balance:</td>";
             $html_form .= "<td><span data-checkout_url='general' data-amount_payable='{$balance}' class='outstanding'>{$currency} {$balance}</span></td>";
@@ -583,6 +595,7 @@ class Fees extends Myschoolgh {
             $html_form .= "<td class='font-weight-bold'>Status:</td>";
             $html_form .= "<td>{$label}</td>";
             $html_form .= "</tr>";
+
             $html_form .= "</table>";
             $html_form .= $owings_list;
 
@@ -605,7 +618,7 @@ class Fees extends Myschoolgh {
 
         /** Last payment container */
         $html_form .= "<div class='last_payment_container'>";
-        $html_form .= "<input name='fees_payment_student_id' hidden type='hidden' value='{$params->student_id}' readonly>";
+        $html_form .= "<input name='fees_payment_student_id' hidden type='hidden' value='".($params->student_id ?? $allocation->student_id)."' readonly>";
 
         /** If last payment information is not empty */
         if(!empty($data_content->last_payment_info)) {
@@ -954,9 +967,10 @@ class Fees extends Myschoolgh {
             // run the query
 			$stmt = $this->db->prepare("
 				SELECT 
-                    a.checkout_url, a.student_id, a.class_id, a.category_id, a.amount_due, a.amount_paid, a.balance, 
-                    a.paid_status, a.last_payment_id, a.academic_year, a.academic_term, a.date_created, a.last_payment_date,
-                    u.name AS student_name, u.department AS department_id, a.currency,
+                    a.checkout_url, a.student_id, a.class_id, a.category_id, a.amount_due, a.amount_paid, 
+                    a.balance, a.paid_status, a.last_payment_id, a.academic_year, a.academic_term, a.date_created, 
+                    a.last_payment_date, u.name AS student_name, u.department AS department_id, a.currency,
+                    u.account_balance,
                     (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
                     (
                         SELECT 
@@ -971,7 +985,7 @@ class Fees extends Myschoolgh {
                     ) AS last_payment_info
 				FROM fees_payments a
                 LEFT JOIN users u ON u.item_id = a.student_id
-				WHERE ".(isset($params->checkout_url) && ($params->checkout_url !== "general") ? "checkout_url='{$params->checkout_url}'" : 
+				WHERE ".(isset($params->checkout_url) && ($params->checkout_url != "general") ? "checkout_url='{$params->checkout_url}'" : 
                     " a.student_id = '{$params->student_id}'
                     ".(!empty($category_id) ? " AND a.category_id = '{$params->category_id}'" : null)."
                         AND a.academic_year = '{$params->academic_year}'
@@ -986,7 +1000,9 @@ class Fees extends Myschoolgh {
             // if clean_payment_info was parsed then query below
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                
+                // set the account balance
+                $result->account_balance = (float) $result->account_balance;
+
                 // if show payment info was also parsed in the request
                 if($showInfo) {
                     // convert the last payment information into an array
@@ -1054,9 +1070,13 @@ class Fees extends Myschoolgh {
 
                     // algorithm to get the items being paid for
                     if($paying > 0) {
-                        if(($fee->balance < $paying) || ($fee->balance === $paying)) {
+                        if(($fee->balance < $paying) || ($fee->balance == $paying)) {
                             $paying = $paying - $fee->balance;
                             $fees_list[$fee->category_id] = 0;
+                            // if the paid status is not equal to one
+                            if($fee->balance != 0.00) {
+                                $amount_paid[$fee->category_id] = $fee->balance;
+                            }
                         } elseif($fee->balance > $paying) {
                             $n_value = $fee->balance - $paying;
                             $amount_paid[$fee->category_id] = $paying;
@@ -1103,8 +1123,7 @@ class Fees extends Myschoolgh {
             }
 
             // append additional sql
-            $append_sql = !empty($append_sql) ? 
-                ",  cheque_security='".($params->cheque_security ?? null)."',
+            $append_sql = !empty($append_sql) ? ", cheque_security='".($params->cheque_security ?? null)."',
                     cheque_bank='{$params->bank_id}', cheque_number='{$params->cheque_number}'" : null;
 
             

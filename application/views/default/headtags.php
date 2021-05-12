@@ -54,12 +54,6 @@ $userNotifications = [];
 // set the current url in session
 $user_current_url = $session->user_current_url;
 
-// is this the current user?
-$isAdmin = $userData->user_type == "admin" ? true : false;
-$isTeacher = $userData->user_type == "teacher" ? true : false;
-$isStudent = $userData->user_type == "student" ? true : false;
-$isEmployee = $userData->user_type == "employee" ? true : false;
-
 // user payment preference
 $userPrefs->payments = isset($userPrefs->payments) ? $userPrefs->payments : (object) [];
 $userPrefs->payments->default_payment = isset($userPrefs->payments->default_payment) ? $userPrefs->payments->default_payment : null;
