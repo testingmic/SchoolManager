@@ -138,7 +138,8 @@ if(!empty($session->clientId)) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item">Events List</div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-events">Events List</a></div>
+                    <div class="breadcrumb-item">Events Category Manager</div>
                 </div>
             </div>
             <div class="row">
