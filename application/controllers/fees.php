@@ -1074,9 +1074,6 @@ class Fees extends Myschoolgh {
                 /* Outstanding balance calculator */
                 $outstandingBalance = $balance - $params->amount;
                 $totalPayment = $total_amount_paid + $params->amount;
-
-                // set the paid status
-                $paid_status = ((round($totalPayment) === round($amount_due)) || (round($totalPayment) > round($amount_due))) ? 1 : 2;
                 
             } else {
                 /* Outstanding balance calculator */
@@ -1157,15 +1154,19 @@ class Fees extends Myschoolgh {
                     // loop through the items which were paid for
                     if(isset($amount_paid[$record->category_id])) {
 
+                        // get the total amount paid
+                        $total_paid = $amount_paid[$record->category_id];
+                        $total_balance = ($record->balance - $total_paid);
+                        $totalPayment = ($record->amount_paid + $total_paid);
+
+                        // set the paid status
+                        $paid_status = ((round($totalPayment) === round($record->amount_due)) || (round($totalPayment) > round($record->amount_due))) ? 1 : 2;
+
                         // generate a unique id for the payment record
                         $uniqueId = random_string('alnum', 15);
                         $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
                         $receiptId = $this->iclient->client_preferences->labels->receipt_label.$counter;
                         $receiptId = strtoupper($receiptId);
-
-                        // get the total amount paid
-                        $total_paid = $amount_paid[$record->category_id];
-                        $total_balance = ($record->balance - $total_paid);
 
                         // insert the new record into the database
                         $stmt = $this->db->prepare("INSERT INTO fees_collection
