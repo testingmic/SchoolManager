@@ -1199,7 +1199,7 @@ class Fees extends Myschoolgh {
             /* Update the student credit balance */
             if(isset($creditBalance)) {
                 // update the user data
-                $this->db->query("UPDATE users SET account_balance = (account_balance + $creditBalance) WHERE item_id = ? AND client_id = '{$params->clientId}' LIMIT 1");
+                $this->db->query("UPDATE users SET account_balance = (account_balance + $creditBalance) WHERE item_id = '{$params->student_id}' AND client_id = '{$params->clientId}' LIMIT 1");
             }
 
             // commit the statements
