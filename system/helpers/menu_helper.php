@@ -132,7 +132,17 @@
     </li>
     <?php } ?>
     <li class="menu-header">Communication</li>
+    <?php if($accessObject->hasAccess("update", "events")) { ?>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-calendar-check"></i><span> Events Management</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>list-events">List Events</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>list-events-category">Events Category</a></li>
+        </ul>
+    </li>
+    <?php } else { ?>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
+    <?php } ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails</span></a>
         <ul class="dropdown-menu">

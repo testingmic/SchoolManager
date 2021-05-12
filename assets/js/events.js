@@ -49,24 +49,29 @@ var save_Event_Type = () => {
                     $(`div[id='createEventModal'] select[name='type']`).find('option').remove().end();
                     $(`div[id='createEventModal'] select[name='type']`).append(`<option value="null">Select</option>`);
 
+                    let type_buttons = "";
+
                     $.each(response.data.additional.event_types, function(i, type) {
 
                         $(`div[id='createEventModal'] select[name='type']`).append(`<option data-row_id='${type.item_id}' value='${type.item_id}'>${type.name}</option>'`);
 
+                        type_buttons = (type.slug == "public-holiday") ? "" : `<div class="d-flex justify-content-between">
+                                        <div><button onclick="return update_Event_Type('${type.item_id}')" class="btn btn-sm btn-outline-success"><i class="fa fa-edit"></i> Edit</button></div>
+                                        <div><button href="" onclick="return delete_record('${type.item_id}', 'event_type');" class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button></div>
+                                    </div>`;
+
                         event_type_list += `
+                        <div data-row_id='${type.item_id}' class='col-lg-4 col-md-6'>
                             <div class="card mb-2">
                                 <div class="card-header p-2 text-uppercase">${type.name}</div>
                                 <div class="card-body p-2">${type.description}</div>
                                 <div class="card-footer p-2">
-                                    <div class="d-flex justify-content-between">
-                                        <div><button onclick="return update_Event_Type('${type.item_id}')" class="btn btn-sm btn-outline-success"><i class="fa fa-edit"></i> Edit</button></div>
-                                        <div><a href="#" onclick="return delete_record('${type.description}', 'event_type');" class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i> Delete</a></div>
-                                    </div>
+                                    ${type_buttons}
                                 </div>
                             </div>
-                        `;
+                        </div>`;
                     });
-                    $(`div[id="events_types_list"]`).html(event_type_list);
+                    $(`div[id="events_types_list"]`).html(`<div class="row p-0">${event_type_list}</div>`);
                     $.array_stream["event_types_array"] = response.data.additional.event_types;
                     setTimeout(() => {
                         initiateCalendar();
