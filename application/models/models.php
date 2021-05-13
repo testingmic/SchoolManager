@@ -231,8 +231,17 @@ class Models {
         ];
 
 		$this->permission_denied = "Sorry! You do not have the required permission to perform this action.";
+        
     }
-    
+
+    /**
+     * Required Field
+     * 
+     * @return String
+     */
+    public function is_required($item = null) {
+        return "Sorry! {$item} is required and cannot be empty.";
+    }    
 
 
 }

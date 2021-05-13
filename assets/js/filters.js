@@ -11,12 +11,13 @@ if ($(`div[id="filter_Department_Class"]`).length) {
 
         $(`div[id="fees_payment_form"] *`).prop("disabled", true);
         $(`div[id="fees_payment_preload"] select[name='category_id']`).prop("disabled", true);
-
-        if (value.length && value !== "null") {
-            $.get(`${baseUrl}api/classes/list?columns=id,name`, { department_id: value }).then((response) => {
+        $(`div[id="promote_Student_Display"]`).addClass(`hidden`);
+        if ((value.length && value !== "null") || $(`div[class~="byPass_Null_Value"]`).length) {
+            $.get(`${baseUrl}api/classes/list?columns=id,name,slug,item_id`, { department_id: value }).then((response) => {
                 if (response.code == 200) {
                     $.each(response.data.result, function(i, e) {
-                        $(`select[name='class_id']`).append(`<option value='${e.id}'>${e.name}</option>'`);
+                        let value = $(`div[id="promote_Student_Display"]`).length ? e.item_id : e.id;
+                        $(`select[name='class_id']`).append(`<option value='${value}'>${e.name}</option>'`);
                     });
                 }
             });

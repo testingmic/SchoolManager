@@ -25,17 +25,13 @@ $filter = (object) $_POST;
 $userId = $session->userId;
 
 // default class_list
-$class_list = [];
-
+$classes_param = (object) [
+    "clientId" => $clientId,
+    "columns" => "id, name"
+];
 // if the class_id is not empty
-if(!empty($filter->department_id)) {
-    $classes_param = (object) [
-        "clientId" => $clientId,
-        "columns" => "id, name",
-        "department_id" => $filter->department_id
-    ];
-    $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
-}
+$classes_param->department_id = !empty($filter->department_id) ? $filter->department_id : null;
+$class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
 // begin the request parameter
 $params = (object) [

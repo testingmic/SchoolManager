@@ -84,18 +84,16 @@ foreach($item_list["data"] as $key => $each) {
 }
 
 // default class_list and courses_list
-$class_list = [];
 $courses_list = [];
 
+// default class_list
+$classes_param = (object) [
+    "clientId" => $clientId,
+    "columns" => "id, name"
+];
 // if the class_id is not empty
-if(!empty($filter->department_id)) {
-    $classes_param = (object) [
-        "clientId" => $clientId,
-        "columns" => "id, name",
-        "department_id" => $filter->department_id
-    ];
-    $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
-}
+$classes_param->department_id = !empty($filter->department_id) ? $filter->department_id : null;
+$class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
 // if the class_id is not empty
 if(!empty($filter->class_id)) {

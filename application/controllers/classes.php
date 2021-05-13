@@ -27,12 +27,12 @@ class Classes extends Myschoolgh {
             }
         }
 
-        $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
-        $params->query .= (isset($params->class_teacher)) ? " AND a.class_teacher LIKE '%{$params->class_teacher}%'" : null;
-        $params->query .= (isset($params->class_assistant)) ? " AND a.class_assistant='{$params->class_assistant}'" : null;
+        $params->query .= (isset($params->q) && !empty($params->q)) ? " AND a.name='{$params->q}'" : null;
+        $params->query .= (isset($params->class_teacher) && !empty($params->class_teacher)) ? " AND a.class_teacher LIKE '%{$params->class_teacher}%'" : null;
+        $params->query .= (isset($params->class_assistant) && !empty($params->class_assistant)) ? " AND a.class_assistant='{$params->class_assistant}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
-        $params->query .= (isset($params->class_id)) ? " AND a.id='{$params->class_id}'" : null;
+        $params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
+        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.id='{$params->class_id}'" : null;
 
         try {
 

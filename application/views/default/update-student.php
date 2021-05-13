@@ -314,32 +314,26 @@ if(!empty($user_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab"
-                        aria-selected="true">Other Information</a>
+                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Other Information</a>
                     </li>
                     '.($viewAllocation ? 
                     '<li class="nav-item">
-                        <a class="nav-link" id="fees-tab2" data-toggle="tab" href="#fees" role="tab"
-                        aria-selected="true">Fees Allocation</a>
+                        <a class="nav-link" id="fees-tab2" data-toggle="tab" href="#fees" role="tab" aria-selected="true">Fees Allocation</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab"
-                        aria-selected="true">Fees Payment</a>
+                        <a class="nav-link" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab" aria-selected="true">Fees Payment</a>
                     </li>' : '').'
                     <li class="nav-item">
-                        <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab"
-                        aria-selected="true">Timetable</a>
+                        <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab" aria-selected="true">Timetable</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="incident-tab2" data-toggle="tab" href="#incident" role="tab"
-                        aria-selected="true">Incidents</a>
+                        <a class="nav-link" id="incident-tab2" data-toggle="tab" href="#incident" role="tab" aria-selected="true">Incidents</a>
                     </li>';
 
                     if($hasUpdate) {
                         $response->html .= '
                         <li class="nav-item">
-                            <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
-                            aria-selected="false">Update Record</a>
+                            <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab" aria-selected="false">Update Record</a>
                         </li>';
                     }
                     

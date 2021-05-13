@@ -59,7 +59,7 @@
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>results-upload">Upload / Manage Results</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>student-promotion">Promote Students</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>promote-students">Promote Students</a></li>
         </ul>
     </li>
     <li class="dropdown">
