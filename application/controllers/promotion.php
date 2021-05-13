@@ -35,7 +35,8 @@ class Promotion extends Myschoolgh {
             // prepare and execute the request for the history log
             $stmt = $this->db->prepare("SELECT a.*,
                     (SELECT name FROM classes WHERE classes.item_id = a.promote_from LIMIT 1) AS from_class_name,
-                    (SELECT name FROM classes WHERE classes.item_id = a.promote_to LIMIT 1) AS to_class_name
+                    (SELECT name FROM classes WHERE classes.item_id = a.promote_to LIMIT 1) AS to_class_name,
+                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.logged_by LIMIT 1) AS logged_by_data
                 FROM promotions_history a
                 WHERE 1 {$params->query} LIMIT {$params->limit}
             ");
@@ -49,7 +50,9 @@ class Promotion extends Myschoolgh {
 
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                
+                // convert the created by string into an object
+                $result->logged_by_data = (object) $this->stringToArray($result->logged_by_data, "|", ["unique_id", "user_id", "name", "image", "user_type"]);
+
                 // if append log was parsed
                 if($appendLog) {
                     $params->history_id = $result->history_log_id;
@@ -100,7 +103,8 @@ class Promotion extends Myschoolgh {
                     u.unique_id, u.firstname, u.lastname, u.name, 
                     u.image, u.gender, u.enrollment_date, u.email, u.date_of_birth,
                     (SELECT name FROM classes WHERE classes.item_id = a.promote_from LIMIT 1) AS from_class_name,
-                    (SELECT name FROM classes WHERE classes.item_id = a.promote_to LIMIT 1) AS to_class_name
+                    (SELECT name FROM classes WHERE classes.item_id = a.promote_to LIMIT 1) AS to_class_name,
+                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.promoted_by LIMIT 1) AS promoted_by_data
                 FROM promotions_log a
                 LEFT JOIN users u ON u.item_id = a.student_id
                 WHERE 1 {$params->query} LIMIT {$params->limit}
@@ -109,7 +113,13 @@ class Promotion extends Myschoolgh {
 
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                // confirm if the student was promoted
                 $result->is_promoted = (int) $result->is_promoted;
+
+                // convert the created by string into an object
+                $result->promoted_by_data = (object) $this->stringToArray($result->promoted_by_data, "|", ["unique_id", "user_id", "name", "image", "user_type"]);
+                
+                // append the array
                 $data[] = $result;
             }
 

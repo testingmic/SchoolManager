@@ -102,7 +102,24 @@ $response->html = '
                         </div>
 
                         <div class="tab-pane fade" id="promotion_history" role="tabpanel" aria-labelledby="promotion_history-tab2">
-                            Promotion History
+                            <div class="table-responsive table-student_staff_list">
+                                <table data-empty="" class="table table-striped datatable">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%" class="text-center">#</th>
+                                            <th>Academic Year</th>
+                                            <th>Promoted From</th>
+                                            <th>Promoted To</th>
+                                            <th>Date of Promotion</th>
+                                            <th>Performed By</th>
+                                            <th>Students Promoted</th>
+                                            <th>Students Repeated</th>
+                                            <th align="center" width="13%"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
 
                     </div>
