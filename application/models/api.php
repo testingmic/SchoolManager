@@ -228,7 +228,7 @@ class Api {
             }
 
             // set the default object to parse when instantiating a class
-            $default = (object) ["clientId" => $this->clientId, "default_User_Id" => $this->userId, "client_data" => $client_data];
+            $default = (object) ["clientId" => $this->clientId, "default_User_Id" => $this->userId, "client_data" => $client_data, "accessCheck" => $this->accessCheck];
             
             // create a new class for handling the resource
             $classObject = load_class("{$this->inner_url}", "controllers", $default);

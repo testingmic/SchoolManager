@@ -53,9 +53,18 @@ var promote_Students = () => {
     }).then((proceed) => {
         if (proceed) {
             let students_list = students_array.join(",");
+            $(`button[id="promote_students_button"]`).prop({ "disabled": true }).html(`Processing Request <i class="fa fa-spin fa-spinner"></i>`);
             $.post(`${baseUrl}api/promotion/promote`, { promote_from, promote_to, students_list }).then((response) => {
-
+                if (response.code === 200) {
+                    promote_display.html(``);
+                }
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
+                $(`button[id="promote_students_button"]`).prop({ "disabled": false }).html(`<i class="fa fa-assistive-listening-systems"></i> Promote Students`);
             }).catch(() => {
+                $(`button[id="promote_students_button"]`).prop({ "disabled": false }).html(`<i class="fa fa-assistive-listening-systems"></i> Promote Students`);
                 swal({
                     text: `Sorry! There is an error while processing the request.`,
                     icon: "error",
@@ -104,11 +113,13 @@ $(`button[id="filter_Promotion_Students_List"]`).on("click", function() {
                     </div>
                 </th>`;
             students_list += `</tr>`;
-            let the_list = response.data.result.students_list;
-            the_list.forEach((value, data) => {
+            let the_list = response.data.result.students_list,
+                count = 0;
+            $.each(the_list, function(i, value) {
+                count++;
                 students_list += `
                     <tr>
-                        <td>${(data+1)}</td>
+                        <td>${(count)}</td>
                         <td>
                             <div class="d-flex justify-content-start">
                                 <div class="mr-2">
@@ -123,23 +134,22 @@ $(`button[id="filter_Promotion_Students_List"]`).on("click", function() {
                         <td align="right">
                             <input style="height:25px" type='checkbox' name='student_to_promote[]' class='student_to_promote form-control cursor' value='${value.item_id}'>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             });
-            if (the_list.length && response.data.result.promotion_log == false) {
+            if (count && response.data.result.promotion_log == false) {
                 students_list += `
                 <tr>
                     <td colspan="3" align="center">
-                        <button onclick="return promote_Students()" class="btn btn-outline-success"><i class="fa fa-assistive-listening-systems"></i> Promote Students</button>
+                        <button onclick="return promote_Students()" id="promote_students_button" class="btn btn-outline-success"><i class="fa fa-assistive-listening-systems"></i> Promote Students</button>
                     </td>
                 </tr>`;
                 $(`select[name="promote_to"]`).prop("disabled", false);
-            } else if (the_list.length && response.data.result.promotion_log == true) {
+            } else if (count && response.data.result.promotion_log == true) {
                 students_list = `
                 <table class="table table-bordered" width="100%">
                     <tr>
                         <td align="center" colspan="3">
-                            <div class="text-danger">Sorry! This class has already been promoted.</div>
+                            <div class="alert alert-danger text-center">Sorry! This class has already been promoted.</div>
                         </td>
                     </tr>`;
             } else {

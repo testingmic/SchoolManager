@@ -21,13 +21,14 @@ $filter = (object) $_POST;
 $response->title = "Promote Students : {$appName}";
 $response->scripts = ["assets/js/filters.js", "assets/js/promotion.js"];
 
-$filter = (object) $_POST;
 $clientId = $session->clientId;
 $hasFiltering = $accessObject->hasAccess("filters", "settings");
 
 // default class_list
 $classes_param = (object) [
     "clientId" => $clientId,
+    "userId" => $defaultUser->user_id,
+    "user_type" => $defaultUser->user_type,
     "columns" => "id, name, slug, item_id"
 ];
 // if the class_id is not empty

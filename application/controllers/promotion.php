@@ -1,8 +1,7 @@
 <?php
 class Promotion extends Myschoolgh {
 
-     public function __construct(stdClass $params = null)
-    {
+    public function __construct(stdClass $params = null) {
         parent::__construct();
 
         // get the client data
@@ -14,34 +13,103 @@ class Promotion extends Myschoolgh {
     }
 
     /**
-     * List all the promotions log
+     * List all the promotions history
+     * 
      * 
      * @return Array
      */
-    public function list(stdClass $params) {
+    public function history(stdClass $params) {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
         $params->query = "";
         $params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->student_id) && !empty($params->student_id)) ? " AND a.student_id LIKE '%{$params->student_id}%'" : null;
-        $params->query .= (isset($params->promote_to) && !empty($params->promote_to)) ? " AND a.promote_to LIKE '%{$params->promote_to}%'" : null;
-        $params->query .= (isset($params->promote_from) && !empty($params->promote_from)) ? " AND a.promote_from LIKE '%{$params->promote_from}%'" : null;
+        $params->query .= (isset($params->history_id) && !empty($params->history_id)) ? " AND a.history_log_id = '{$params->history_id}'" : null;
+        $params->query .= (isset($params->promote_to) && !empty($params->promote_to)) ? " AND a.promote_to = '{$params->promote_to}'" : null;
+        $params->query .= (isset($params->promote_from) && !empty($params->promote_from)) ? " AND a.promote_from = '{$params->promote_from}'" : null;
         $params->query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
         $params->query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
 
         try {
 
+            // prepare and execute the request for the history log
             $stmt = $this->db->prepare("SELECT a.*,
                     (SELECT name FROM classes WHERE classes.item_id = a.promote_from LIMIT 1) AS from_class_name,
                     (SELECT name FROM classes WHERE classes.item_id = a.promote_to LIMIT 1) AS to_class_name
+                FROM promotions_history a
+                WHERE 1 {$params->query} LIMIT {$params->limit}
+            ");
+            $stmt->execute();
+
+            // append log
+            $appendLog = (bool) isset($params->append_log);
+
+            // perform a query query
+            $params->quick_query = true;
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                
+                // if append log was parsed
+                if($appendLog) {
+                    $params->history_id = $result->history_log_id;
+                    $result->promotion_log = $this->log($params)["data"];
+                }
+                $data[] = $result;
+            }
+
+            return [
+                "code" => 200,
+                "data" => $data
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+    }
+
+    /**
+     * List all the promotions log
+     * 
+     * This relates to all students that have been promoted for the entire academic year as parsed
+     * 
+     * @return Array
+     */
+    public function log(stdClass $params) {
+
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+        $params->query = "";
+        $params->query .= (isset($params->history_id) && !empty($params->history_id)) ? " AND a.history_log_id = '{$params->history_id}'" : null;
+
+        // run this section if the quick_query parameter was not parsed
+        if(!isset($params->quick_query)) {
+            $params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+            $params->query .= (isset($params->student_id) && !empty($params->student_id)) ? " AND a.student_id LIKE '%{$params->student_id}%'" : null;
+            $params->query .= (isset($params->promote_to) && !empty($params->promote_to)) ? " AND a.promote_to = '{$params->promote_to}'" : null;
+            $params->query .= (isset($params->promote_from) && !empty($params->promote_from)) ? " AND a.promote_from = '{$params->promote_from}'" : null;
+            $params->query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
+            $params->query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
+        }
+
+        try {
+            
+            // prepare and execute the request for the students promotion log
+            $stmt = $this->db->prepare("SELECT a.*,
+                    u.unique_id, u.firstname, u.lastname, u.name, 
+                    u.image, u.gender, u.enrollment_date, u.email, u.date_of_birth,
+                    (SELECT name FROM classes WHERE classes.item_id = a.promote_from LIMIT 1) AS from_class_name,
+                    (SELECT name FROM classes WHERE classes.item_id = a.promote_to LIMIT 1) AS to_class_name
                 FROM promotions_log a
+                LEFT JOIN users u ON u.item_id = a.student_id
                 WHERE 1 {$params->query} LIMIT {$params->limit}
             ");
             $stmt->execute();
 
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                $result->is_promoted = (int) $result->is_promoted;
                 $data[] = $result;
             }
 
@@ -78,7 +146,8 @@ class Promotion extends Myschoolgh {
         $params->query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
 
         try {
-
+            
+            // prepare and execute the request for the students list
             $stmt = $this->db->prepare("SELECT a.item_id, a.unique_id, a.firstname, a.lastname, a.name, 
                     a.image, a.gender, a.enrollment_date, a.email, a.date_of_birth, a.class_id, c.name AS class_name,
                     (
@@ -98,24 +167,123 @@ class Promotion extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 $result->is_promoted = empty($result->is_promoted) ? 0 : $result->is_promoted;
-                $data[] = $result;
+                $data[$result->item_id] = $result;
             }
 
             // confirm if the promotions list was parsed
             $params->limit = 1;
-            $params->promote_from = $params->class_id;
+
+            // set the students list in an array
+            $response["students_list"] = $data;
+
+            // run this section if the no_promotion_log was parsed
+            if(!isset($params->no_promotion_log)) {
+                $params->promote_from = $params->class_id;
+                $response["promotion_log"] = (bool) !empty($this->log($params)["data"]);
+            }
 
             return [
                 "code" => 200,
-                "data" => [
-                    "students_list" => $data,
-                    "promotion_log" => (bool) !empty($this->list($params)["data"])
-                ]
+                "data" => $response
             ];
 
         } catch(PDOException $e) {
             return $this->unexpected_error;
         }
+    }
+
+    /**
+     * Promote Students
+     * 
+     * @return Array
+     */
+    public function promote(stdClass $params) {
+
+        try {
+
+            // if the class id is empty
+            if(empty($params->promote_from) || empty($params->promote_to)) {
+                return ["code" => 203, "data" => $this->is_required("Class to Promote From and To")];
+            }
+            // convert the students list into an array list
+            $students_list = $this->stringToArray($params->students_list);
+
+            // confirm that the class selected exists
+            $from_class = $this->pushQuery("name", "classes", "item_id='{$params->promote_from}' AND client_id='{$params->clientId}' LIMIT 1");
+            $to_class = $this->pushQuery("name", "classes", "item_id='{$params->promote_to}' AND client_id='{$params->clientId}' LIMIT 1");
+
+            // if the class id is invalid
+            if(empty($from_class) || empty($to_class)) {
+                return ["code" => 203,"data" => "Please ensure a valid class id was supplied"];
+            }
+
+            // append some additional parameters
+            $params->class_id = $params->promote_from;
+
+            // get the students list from the database for the selected class id
+            $students_data = $this->students($params)["data"];
+            $class_students_array = $students_data["students_list"];
+
+            // if the class has already been promoted
+            if($students_data["promotion_log"]) {
+                return ["code" => 203,"data" => "Sorry! This class has already been promoted. Hence cannot repeat the action."];
+            }
+            
+            // new students array list
+            $query_list = "INSERT INTO `promotions_log` (`client_id`, `student_id`, `history_log_id`, `academic_year`, `academic_term`, `promote_from`, `promote_to`, `is_promoted`, `date_log`, `promoted_by`) VALUES";
+            $not_found = false;
+            $students_array = [];
+            $history_log_id = random_string("alnum", 13);
+
+            // compare the students list
+            foreach($class_students_array as $student) {
+
+                // push the user unique id in the array list
+                array_push($students_array, $student->item_id);
+                
+                // set the is promoted data
+                $is_promoted = in_array($student->item_id, $students_list) ? 1 : 0;
+
+                // append to the query list
+                $query_list .= "('{$params->clientId}', '{$student->item_id}', '{$history_log_id}', '{$params->academic_year}', '{$params->academic_term}', '{$params->promote_from}', '{$params->promote_to}', '{$is_promoted}', now(), '{$params->userId}'),";
+            }
+            
+            // loop through the students list to be promoted
+            foreach($students_list as $student) {
+                // if the student id was not in the array list
+                if(!in_array($student, $students_array)) {
+                    $not_found = true;
+                    break;
+                }
+            }
+            
+            // return false if an invalid student id was parsed
+            if($not_found) {
+                return ["code" => 203, "data" => "Sorry! Ensure all students id parsed is valid."];
+            }
+
+            // trim the end
+            $query_list = trim($query_list, ",");
+
+            // execute the query
+            if($this->db->query($query_list)) {
+                // log the history item
+                $this->db->query("INSERT INTO promotions_history SET
+                    `client_id`='{$params->clientId}', `history_log_id`='{$history_log_id}', 
+                    `academic_year`='{$params->academic_year}', `academic_term`='{$params->academic_term}', 
+                    `promote_from`='{$params->promote_from}', `promote_to`='{$params->promote_to}', `date_log` = now(), 
+                    `logged_by`='{$params->userId}'
+                ");
+                // return the success response
+                return "Students were successfully promoted.";
+            } else {
+                return ["code" => 203, "data" => "Sorry! There was an error while processing the request."];
+            }
+            
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
     }
 
 }
