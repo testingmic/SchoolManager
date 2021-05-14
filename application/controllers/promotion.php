@@ -231,6 +231,13 @@ class Promotion extends Myschoolgh {
                 return ["code" => 203,"data" => "Please ensure a valid class id was supplied"];
             }
 
+            // check if there is an existing record already
+            $existing_record = $this->pushQuery("history_log_id, status", "promotions_history", 
+                "academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' AND 
+                promote_from='{$params->promote_from}' AND promote_to='{$params->promote_to}' AND 
+                client_id='{$params->clientId}' LIMIT 1
+            ");
+
             // append some additional parameters
             $params->class_id = $params->promote_from;
 
@@ -239,15 +246,19 @@ class Promotion extends Myschoolgh {
             $class_students_array = $students_data["students_list"];
 
             // if the class has already been promoted
-            if($students_data["promotion_log"]) {
+            if(!empty($existing_record) && ($existing_record[0]->status === "Processed")) {
                 return ["code" => 203,"data" => "Sorry! This class has already been promoted. Hence cannot repeat the action."];
             }
+
+            // get the existing promotion_log_id
+            $promotion_log_id = !empty($existing_record) ? $existing_record[0]->history_log_id : null;
             
             // new students array list
             $query_list = "INSERT INTO `promotions_log` (`client_id`, `student_id`, `history_log_id`, `academic_year`, `academic_term`, `promote_from`, `promote_to`, `is_promoted`, `date_log`, `promoted_by`) VALUES";
             $not_found = false;
+            $update_query = null;
             $students_array = [];
-            $history_log_id = random_string("alnum", 13);
+            $history_log_id = !empty($promotion_log_id) ? $promotion_log_id : random_string("alnum", 13);
 
             // compare the students list
             foreach($class_students_array as $student) {
@@ -258,10 +269,13 @@ class Promotion extends Myschoolgh {
                 // set the is promoted data
                 $is_promoted = in_array($student->item_id, $students_list) ? 1 : 0;
 
+                // if there is an existing record then update the set
+                $update_query .= "UPDATE `promotions_log` SET `promote_from`='{$params->promote_from}', `is_promoted`='{$is_promoted}', `promote_to`='".($is_promoted ? $params->promote_to : $params->promote_from)."' WHERE `history_log_id`='{$history_log_id}' AND `student_id`='{$student->item_id}' LIMIT 1;";
+
                 // append to the query list
                 $query_list .= "('{$params->clientId}', '{$student->item_id}', '{$history_log_id}', '{$params->academic_year}', '{$params->academic_term}', '{$params->promote_from}', '".($is_promoted ? $params->promote_to : $params->promote_from)."', '{$is_promoted}', now(), '{$params->userId}'),";
             }
-            
+
             // loop through the students list to be promoted
             foreach($students_list as $student) {
                 // if the student id was not in the array list
@@ -277,21 +291,28 @@ class Promotion extends Myschoolgh {
             }
 
             // trim the end
-            $query_list = trim($query_list, ",");
+            $query_list = !empty($update_query) ? $update_query : trim($query_list, ",");
 
             // execute the query
             if($this->db->query($query_list)) {
 
                 // log the user activity
-                $this->userLogs("promotion", $history_log_id, null, "{$params->userData->name} Promoted a list of students.", $params->userId);
+                $this->userLogs("promotion", $history_log_id, null, "{$params->userData->name} ".(!empty($update_query) ? "Updated the promotion of students list." : "Promoted a list of students.")."", $params->userId);
 
                 // log the history item
-                $this->db->query("INSERT INTO promotions_history SET
-                    `client_id`='{$params->clientId}', `history_log_id`='{$history_log_id}', 
-                    `academic_year`='{$params->academic_year}', `academic_term`='{$params->academic_term}', 
-                    `promote_from`='{$params->promote_from}', `promote_to`='{$params->promote_to}', `date_log` = now(), 
-                    `logged_by`='{$params->userId}'
-                ");
+                if(!empty($update_query)) {
+                    $this->db->query("UPDATE promotions_history SET 
+                        `promote_from`='{$params->promote_from}', `promote_to`='{$params->promote_to}', `date_log` = now() 
+                        WHERE `client_id`='{$params->clientId}' AND `history_log_id`='{$history_log_id}' LIMIT 1
+                    ");
+                } else {
+                    $this->db->query("INSERT INTO promotions_history SET
+                        `client_id`='{$params->clientId}', `history_log_id`='{$history_log_id}', 
+                        `academic_year`='{$params->academic_year}', `academic_term`='{$params->academic_term}', 
+                        `promote_from`='{$params->promote_from}', `promote_to`='{$params->promote_to}', `date_log` = now(), 
+                        `logged_by`='{$params->userId}'
+                    ");
+                }
 
                 // return the success response
                 return "Students were successfully promoted.";
