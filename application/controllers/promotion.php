@@ -23,6 +23,7 @@ class Promotion extends Myschoolgh {
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
         $params->query = "";
+        $params->query .= (isset($params->status) && !empty($params->status)) ? " AND a.status = '{$params->status}'" : null;
         $params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= (isset($params->history_id) && !empty($params->history_id)) ? " AND a.history_log_id = '{$params->history_id}'" : null;
         $params->query .= (isset($params->promote_to) && !empty($params->promote_to)) ? " AND a.promote_to = '{$params->promote_to}'" : null;
@@ -36,8 +37,10 @@ class Promotion extends Myschoolgh {
             $stmt = $this->db->prepare("SELECT a.*,
                     (SELECT name FROM classes WHERE classes.item_id = a.promote_from LIMIT 1) AS from_class_name,
                     (SELECT name FROM classes WHERE classes.item_id = a.promote_to LIMIT 1) AS to_class_name,
+                    (SELECT COUNT(*) FROM users WHERE users.class_id = c.id) AS students_count,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.logged_by LIMIT 1) AS logged_by_data
                 FROM promotions_history a
+                LEFT JOIN classes c ON c.item_id = a.promote_from
                 WHERE 1 {$params->query} LIMIT {$params->limit}
             ");
             $stmt->execute();
@@ -104,7 +107,7 @@ class Promotion extends Myschoolgh {
                     u.image, u.gender, u.enrollment_date, u.email, u.date_of_birth,
                     (SELECT name FROM classes WHERE classes.item_id = a.promote_from LIMIT 1) AS from_class_name,
                     (SELECT name FROM classes WHERE classes.item_id = a.promote_to LIMIT 1) AS to_class_name,
-                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.promoted_by LIMIT 1) AS promoted_by_data
+                (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.promoted_by LIMIT 1) AS logged_by_data
                 FROM promotions_log a
                 LEFT JOIN users u ON u.item_id = a.student_id
                 WHERE 1 {$params->query} LIMIT {$params->limit}
@@ -117,7 +120,7 @@ class Promotion extends Myschoolgh {
                 $result->is_promoted = (int) $result->is_promoted;
 
                 // convert the created by string into an object
-                $result->promoted_by_data = (object) $this->stringToArray($result->promoted_by_data, "|", ["unique_id", "user_id", "name", "image", "user_type"]);
+                $result->logged_by_data = (object) $this->stringToArray($result->logged_by_data, "|", ["unique_id", "user_id", "name", "image", "user_type"]);
                 
                 // append the array
                 $data[] = $result;
@@ -176,7 +179,7 @@ class Promotion extends Myschoolgh {
 
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                $result->is_promoted = empty($result->is_promoted) ? 0 : $result->is_promoted;
+                $result->is_promoted = empty($result->is_promoted) ? 0 : (int) $result->is_promoted;
                 $data[$result->item_id] = $result;
             }
 
@@ -189,7 +192,8 @@ class Promotion extends Myschoolgh {
             // run this section if the no_promotion_log was parsed
             if(!isset($params->no_promotion_log)) {
                 $params->promote_from = $params->class_id;
-                $response["promotion_log"] = (bool) !empty($this->log($params)["data"]);
+                $params->status = "Processed";
+                $response["promotion_log"] = (bool) !empty($this->history($params)["data"]);
             }
 
             return [
@@ -255,7 +259,7 @@ class Promotion extends Myschoolgh {
                 $is_promoted = in_array($student->item_id, $students_list) ? 1 : 0;
 
                 // append to the query list
-                $query_list .= "('{$params->clientId}', '{$student->item_id}', '{$history_log_id}', '{$params->academic_year}', '{$params->academic_term}', '{$params->promote_from}', '{$params->promote_to}', '{$is_promoted}', now(), '{$params->userId}'),";
+                $query_list .= "('{$params->clientId}', '{$student->item_id}', '{$history_log_id}', '{$params->academic_year}', '{$params->academic_term}', '{$params->promote_from}', '".($is_promoted ? $params->promote_to : $params->promote_from)."', '{$is_promoted}', now(), '{$params->userId}'),";
             }
             
             // loop through the students list to be promoted
@@ -277,6 +281,10 @@ class Promotion extends Myschoolgh {
 
             // execute the query
             if($this->db->query($query_list)) {
+
+                // log the user activity
+                $this->userLogs("promotion", $history_log_id, null, "{$params->userData->name} Promoted a list of students.", $params->userId);
+
                 // log the history item
                 $this->db->query("INSERT INTO promotions_history SET
                     `client_id`='{$params->clientId}', `history_log_id`='{$history_log_id}', 
@@ -284,6 +292,7 @@ class Promotion extends Myschoolgh {
                     `promote_from`='{$params->promote_from}', `promote_to`='{$params->promote_to}', `date_log` = now(), 
                     `logged_by`='{$params->userId}'
                 ");
+
                 // return the success response
                 return "Students were successfully promoted.";
             } else {
@@ -294,6 +303,76 @@ class Promotion extends Myschoolgh {
             return $this->unexpected_error;
         }
 
+    }
+
+    /**
+     * Cancel Promotion
+     * 
+     * @return Array
+     */
+    public function validate(stdClass $params) {
+
+        try {
+
+            // confirm that the record actually exists
+            $history_log = $this->pushQuery("id", "promotions_history", "history_log_id='{$params->history_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+            // if the class id is invalid
+            if(empty($history_log)) {
+                return ["code" => 203,"data" => "Sorry! An invalid promotion history log id was supplied"];
+            }
+
+            // update the log history record
+            $stmt = $this->db->prepare("UPDATE promotions_history SET status = ? WHERE history_log_id = ? AND client_id = ? LIMIT 1");
+            $stmt->execute(["Processed", $params->history_id, $params->clientId]);
+
+            // log the user activity
+            $this->userLogs("promotion", $params->history_id, null, "{$params->userData->name} validated the Student's Promotion Record", $params->userId);
+
+            return [
+                "data" => "The promotion log was successfully validated."
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+    }
+
+    /**
+     * Cancel Promotion
+     * 
+     * @return Array
+     */
+    public function cancel(stdClass $params) {
+
+        try {
+
+            // confirm that the record actually exists
+            $history_log = $this->pushQuery("id", "promotions_history", "history_log_id='{$params->history_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+            // if the class id is invalid
+            if(empty($history_log)) {
+                return ["code" => 203,"data" => "Sorry! An invalid promotion history log id was supplied"];
+            }
+            
+            // update the students promotion list record
+            $stmt = $this->db->prepare("UPDATE promotions_log SET is_promoted = ? WHERE history_log_id = ? AND client_id = ?");
+            $stmt->execute([3, $params->history_id, $params->clientId]);
+
+            // update the log history record
+            $stmt = $this->db->prepare("UPDATE promotions_history SET status = ? WHERE history_log_id = ? AND client_id = ? LIMIT 1");
+            $stmt->execute(["Cancelled", $params->history_id, $params->clientId]);
+
+            // log the user activity
+            $this->userLogs("promotion", $params->history_id, null, "{$params->userData->name} cancelled the Student's Promotion Record", $params->userId);
+
+            return [
+                "data" => "The promotion log was successfully cancelled."
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
     }
 
 }

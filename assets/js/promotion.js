@@ -53,18 +53,24 @@ var promote_Students = () => {
     }).then((proceed) => {
         if (proceed) {
             let students_list = students_array.join(",");
+            $(`input[class~="student_to_promote"], input[id="promote_all_student"]`).prop("disabled", true);
             $(`button[id="promote_students_button"]`).prop({ "disabled": true }).html(`Processing Request <i class="fa fa-spin fa-spinner"></i>`);
             $.post(`${baseUrl}api/promotion/promote`, { promote_from, promote_to, students_list }).then((response) => {
-                if (response.code === 200) {
-                    promote_display.html(``);
-                }
                 swal({
                     text: response.data.result,
                     icon: responseCode(response.code),
                 });
-                $(`button[id="promote_students_button"]`).prop({ "disabled": false }).html(`<i class="fa fa-assistive-listening-systems"></i> Promote Students`);
+                if (response.code !== 200) {
+                    $(`input[class~="student_to_promote"], input[id="promote_all_student"]`).prop("disabled", false);
+                    $(`button[id="promote_students_button"]`).prop({ "disabled": true }).html(`<i class="fa fa-assistive-listening-systems"></i> Promote Students`);
+                } else {
+                    setTimeout(() => {
+                        loadPage($.current_page);
+                    }, 2000);
+                }
             }).catch(() => {
                 $(`button[id="promote_students_button"]`).prop({ "disabled": false }).html(`<i class="fa fa-assistive-listening-systems"></i> Promote Students`);
+                $(`input[class~="student_to_promote"], input[id="promote_all_student"]`).prop("disabled", false);
                 swal({
                     text: `Sorry! There is an error while processing the request.`,
                     icon: "error",
@@ -74,7 +80,92 @@ var promote_Students = () => {
     });
 }
 
+var view_Promotion_Log = (history_log_id) => {
+    if ($.array_stream["promotion_list"][history_log_id] !== undefined) {
+        let promotion = $.array_stream["promotion_list"][history_log_id],
+            log_history = "";
+        if (promotion.promotion_log === undefined) {
+            log_history = `<div class="text-center text-danger">Sorry no record was found</div>`;
+        } else {
+            log_history = `
+            <table data-empty="" class="table table-striped datatable">
+                <tr>
+                    <th width="5%" class="text-center">#</th>
+                    <th>Student Name</th>
+                    <th>Promoted From</th>
+                    <th>Promoted To</th>
+                    <th>Status</th>
+                </tr>`;
+
+            $.each(promotion.promotion_log, function(i, student) {
+                let status = (student.is_promoted == 1) ? "<span class='badge badge-success'>Promoted</span>" : ((student.is_promoted == 2) ? "<span class='badge badge-primary'>On Hold</span>" : ((student.is_promoted == 3) ? "<span class='badge badge-warning'>Cancelled</span>" : "<span class='badge badge-danger'>Repeated</span>"));
+                log_history += `<tr>`;
+                log_history += `<td>${(i+1)}</td>`;
+                log_history += `<td>${student.name}</td>`;
+                log_history += `<td>${student.from_class_name}</td>`;
+                log_history += `<td>${student.to_class_name}</td>`;
+                log_history += `<td>${status}</td>`;
+                log_history += `</tr>`;
+            });
+
+            log_history += `</table>`;
+        }
+        $(`div[id="viewOnlyModal"] h5[class~="modal-title"]`).html("Promotion Log");
+        $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html(log_history);
+        $(`div[id="viewOnlyModal"]`).modal("show");
+    }
+}
+
+var cancel_Promotion_Log = (history_log_id) => {
+    swal({
+        title: "Cancel Promotion Log",
+        text: "Are you sure you want to cancel this promotion log. You can perform the operation again once cancelled.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/promotion/cancel`, { history_id: history_log_id }).then((response) => {
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
+                if (response.code == 200) {
+                    setTimeout(() => {
+                        loadPage($.current_page);
+                    }, 2000);
+                }
+            });
+        }
+    });
+}
+
+var validate_Promotion_Log = (history_log_id) => {
+    swal({
+        title: "Validate Promotion Log",
+        text: "Are you sure you want to validate this promotion. Once approved you cannot effect any changes.",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/promotion/validate`, { history_id: history_log_id }).then((response) => {
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
+                if (response.code == 200) {
+                    setTimeout(() => {
+                        loadPage($.current_page);
+                    }, 2000);
+                }
+            });
+        }
+    });
+}
+
 $(`select[name="class_id"]`).on("change", function(evt) {
+    $(`select[name="promote_to"]`).val("");
     if ($(this).val() === default_class_guid) {
         $(`select[name="promote_to"]`).prop("disabled", false);
         $(`div[id="promote_Student_Display"]`).removeClass(`hidden`);
@@ -100,7 +191,11 @@ $(`button[id="filter_Promotion_Students_List"]`).on("click", function() {
         default_class_guid = class_id;
         $(`div[id="promote_Student_Display"]`).removeClass(`hidden`);
         if (response.code === 200) {
-            let students_list = `<table class="table table-bordered" width="100%">`;
+
+            let students_list = `<table class="table table-bordered" width="100%">`,
+                the_list = response.data.result.students_list,
+                count = 0;
+
             students_list += `<tr>`;
             students_list += `<th width="10%">#</th>`;
             students_list += `<th width="65%">STUDENT NAME</th>`;
@@ -113,8 +208,6 @@ $(`button[id="filter_Promotion_Students_List"]`).on("click", function() {
                     </div>
                 </th>`;
             students_list += `</tr>`;
-            let the_list = response.data.result.students_list,
-                count = 0;
             $.each(the_list, function(i, value) {
                 count++;
                 students_list += `
@@ -132,7 +225,7 @@ $(`button[id="filter_Promotion_Students_List"]`).on("click", function() {
                             </div>
                         </td>
                         <td align="right">
-                            <input style="height:25px" type='checkbox' name='student_to_promote[]' class='student_to_promote form-control cursor' value='${value.item_id}'>
+                            <input ${value.is_promoted == 1 ? "checked='checked'" : ""} style="height:25px" type='checkbox' name='student_to_promote[]' class='student_to_promote form-control cursor' value='${value.item_id}'>
                         </td>
                     </tr>`;
             });
@@ -144,16 +237,25 @@ $(`button[id="filter_Promotion_Students_List"]`).on("click", function() {
                     </td>
                 </tr>`;
                 $(`select[name="promote_to"]`).prop("disabled", false);
+                $(`input[id="promote_all_student"]`).removeClass("hidden");
             } else if (count && response.data.result.promotion_log == true) {
                 students_list = `
                 <table class="table table-bordered" width="100%">
                     <tr>
                         <td align="center" colspan="3">
-                            <div class="alert alert-danger text-center">Sorry! This class has already been promoted.</div>
+                            <div class="alert alert-warning text-center">Sorry! This class has already been promoted.</div>
                         </td>
                     </tr>`;
             } else {
                 $(`select[name="promote_to"]`).prop("disabled", true);
+                $(`input[id="promote_all_student"]`).addClass("hidden");
+                students_list = `
+                <table class="table table-bordered" width="100%">
+                <tr>
+                    <td align="center" colspan="3">
+                        <div class="alert alert-warning text-center">Sorry! No students found under this class.</div>
+                    </td>
+                </tr>`;
             }
             students_list += `</table>`;
             promote_display.html(students_list);

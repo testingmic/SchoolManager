@@ -107,7 +107,6 @@ $("#history-reload").on("click", function() {
 })
 
 $("#history-back").on("click", function() {
-    // console.log("before", window.history.state)
     if (window.history.state === null) return false;
     window.history.back();
 })

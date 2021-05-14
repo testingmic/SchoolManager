@@ -59,7 +59,9 @@
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>results-upload">Upload / Manage Results</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
+            <?php if($accessObject->hasAccess("promote", "promotion")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>promote-students">Promote Students</a></li>
+            <?php } ?>
         </ul>
     </li>
     <li class="dropdown">
