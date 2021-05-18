@@ -115,7 +115,10 @@ if(!empty($session->userId)) {
 		$accessObject->userId = $defaultUser->user_id;
 		$accessObject->clientId = $defaultUser->client_id;
 		$accessObject->userPermits = json_decode($defaultUser->user_permissions);
-
+		$accessObject->appPrefs = $defaultUser->client->client_preferences;
+		$defaultUser->appPrefs = $defaultUser->client->client_preferences;
+		$defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
+		
 		// set additional parameters
 		$isAdmin = (bool) ($defaultUser->user_type == "admin");
 		$isTeacher = $isTutor = (bool) ($defaultUser->user_type == "teacher");

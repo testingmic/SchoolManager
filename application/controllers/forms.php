@@ -3537,11 +3537,11 @@ class Forms extends Myschoolgh {
                 </div>
             </div>";
         $default_columns_list[2] = "
-            <div class='row mb-2 mt-1'>
-                <div class='col-lg-12'>
-                    <input type='text' readonly name='report_columns[teacher_comments]' value='Teacher Remarks' class='form-control'>
-                </div>
-            </div>";
+        <div class='row mb-2 mt-1'>
+            <div class='col-lg-12'>
+                <input type='text' readonly name='report_columns[teacher_comments]' value='Teacher Remarks' class='form-control'>
+            </div>
+        </div>";
 
         // examination forms
         $examination = '
@@ -3592,6 +3592,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
         </div>';
+
         $forms["examination"] = $examination;
 
         return $forms;

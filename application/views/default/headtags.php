@@ -67,6 +67,9 @@ if(!isset($userPrefs->messages)) {
     ];
 }
 
+// if the user has the permission to end the academic term
+$endPermission = $accessObject->hasAccess("close", "settings");
+
 // load the helper
 load_helpers(['menu_helper']);
 ?>
@@ -158,6 +161,7 @@ load_helpers(['menu_helper']);
                                 <span>|</span>
                                 <span><?= $clientPrefs->academics->academic_term ?> Term</span>
                             </strong>
+                            <?= ($endPermission && $defaultUser->appPrefs->termEnded ? "<span class='badge badge-danger'>Already Ended</span>" : "<span class='badge badge-success'>Active</span>"); ?>
                         </a>
                     </li>
                     <?php } ?>
@@ -260,19 +264,24 @@ load_helpers(['menu_helper']);
                         <a href="<?= $baseUrl ?>profile" class="dropdown-item has-icon">
                             <i class="far fa-user"></i> Profile
                         </a>
-                        <?php if($accessObject->hasAccess("manage", "settings")) { ?>
-                        <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon">
-                            <i class="fas fa-cog"></i> Settings
-                        </a>
-                        <?php } ?>
                         <?php if($accessObject->hasAccess("activities", "settings")) { ?>
                         <a href="<?= $baseUrl ?>timeline" class="dropdown-item has-icon">
-                            <i class="fas fa-bolt"></i> Activities
+                            <i class="fas fa-align-left"></i> Activities
                         </a>
                         <?php } ?>
                         <?php if($accessObject->hasAccess("login_history", "settings")) { ?>
                         <a href="<?= $baseUrl ?>login-history" class="dropdown-item has-icon">
                             <i class="fas fa-lock"></i> Login History
+                        </a>
+                        <?php } ?>
+                        <?php if($accessObject->hasAccess("manage", "settings")) { ?>
+                        <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon">
+                            <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <?php } ?>
+                        <?php if($accessObject->hasAccess("close", "settings")) { ?>
+                        <a href="<?= $baseUrl ?>manager" class="dropdown-item has-icon">
+                            <i class="fas fa-bolt"></i> Manage
                         </a>
                         <?php } ?>
                     <?php } ?>

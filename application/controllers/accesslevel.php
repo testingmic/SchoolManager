@@ -6,8 +6,8 @@ class Accesslevel {
 
     public $userId;
     public $clientId;
+    public $appPrefs;
     public $userPermits = null;
-
     private $_message = '';
 
     public function __construct(){
@@ -50,8 +50,7 @@ class Accesslevel {
      *
      * @return Object $this->_message
      */
-    public function getUserPermissions()
-    {
+    public function getUserPermissions() {
         $this->_message = false;
         $clientId = !empty($this->clientId) ? $this->clientId : $this->session->clientId;
 
