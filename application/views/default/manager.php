@@ -22,11 +22,11 @@ $response->title = "{$pageTitle} : {$appName}";
 
 // staff id
 $user_id = $session->userId;
-
+$response->scripts = ["assets/js/academics.js"];
 
 // confirm the user permissions
 if(empty($accessObject->hasAccess("close", "settings"))) {
-    $response->html = page_not_found();
+    $response->html = page_not_found("permission_denied");
 } else {
     // append the html content
     $response->html = '
@@ -39,40 +39,53 @@ if(empty($accessObject->hasAccess("close", "settings"))) {
             </div>
         </div>
         <div class="section-body">
+        
             <div class="row">
                 <div class="col-12 col-md-6">
                     <div class="card">
                         <div class="card-body font-16">
-                            <div class="mb-2">
-                                <span class="font-weight-bold text-uppercase">Academic Year</span>
-                                <span class="pull-right">'.$defaultUser->appPrefs->academics->academic_year.'</span>
+                            <div class="mb-2 row">
+                                <div class="col-lg-6"><span class="font-weight-bold text-uppercase">Academic Year</span></div>
+                                <div class="col-lg-6"><span>'.$defaultUser->appPrefs->academics->academic_year.'</span></div>
                             </div>
-                            <div class="mb-2">
-                                <span class="font-weight-bold text-uppercase">Academic Term</span>
-                                <span class="pull-right">'.$defaultUser->appPrefs->academics->academic_term.'</span>
+                            <div class="mb-2 row">
+                                <div class="col-lg-6"><span class="font-weight-bold text-uppercase">Academic Term</span></div>
+                                <div class="col-lg-6"><span>'.$defaultUser->appPrefs->academics->academic_term.'</span></div>
                             </div>
-                            <div class="mb-2">
-                                <span class="font-weight-bold text-uppercase">This Term Began On</span>
-                                <span class="pull-right">'.date("jS F Y", strtotime($defaultUser->appPrefs->academics->term_starts)).'</span>
+                            <div class="mb-2 row">
+                                <div class="col-lg-6"><span class="font-weight-bold text-uppercase">This Term Began On</span></div>
+                                <div class="col-lg-6"><span>'.date("jS F Y", strtotime($defaultUser->appPrefs->academics->term_starts)).'</span></div>
                             </div>
-                            <div class="mb-2">
-                                <span class="font-weight-bold text-uppercase">This Term '.($defaultUser->appPrefs->termEnded ? "Ended On" : "Ends On").'</span>
-                                <span class="pull-right">
+                            <div class="mb-2 row">
+                                <div class="col-lg-6"><span class="font-weight-bold text-uppercase">This Term '.($defaultUser->appPrefs->termEnded ? "Ended On" : "Ends On").'</span></div>
+                                <div class="col-lg-6">
+                                <span>
                                     '.date("jS F Y", strtotime($defaultUser->appPrefs->academics->term_ends)).'
                                     '.($defaultUser->appPrefs->termEnded ? "<span class='badge badge-danger'>Already Ended</span>" : "<span class='badge badge-success'>Active</span>").'
                                 </span>
+                                </div>
                             </div>
-                            <div class="mb-2">
-                                <span class="font-weight-bold text-uppercase">Next Term Begins</span>
-                                <span class="pull-right">'.date("jS F Y", strtotime($defaultUser->appPrefs->academics->next_term_starts)).'</span>
+                            <div class="mb-2 row">
+                                <div class="col-lg-6"><span class="font-weight-bold text-uppercase">Next Term Begins</span></div>
+                                <div class="col-lg-6"><span>'.date("jS F Y", strtotime($defaultUser->appPrefs->academics->next_term_starts)).'</span></div>
                             </div>
-                            <div class="mb-2">
-                                <span class="font-weight-bold text-uppercase">Next Term Ends On</span>
-                                <span class="pull-right">'.date("jS F Y", strtotime($defaultUser->appPrefs->academics->next_term_ends)).'</span>
+                            <div class="mb-2 row">
+                                <div class="col-lg-6"><span class="font-weight-bold text-uppercase">Next Term Ends On</span></div>
+                                <div class="col-lg-6"><span>'.date("jS F Y", strtotime($defaultUser->appPrefs->academics->next_term_ends)).'</span></div>
+                            </div>
+                            <div class="mb-2 mt-3 border-top pt-3"></div>
+                            <div class="d-flex  justify-content-between mb-2">
+                                <div>
+                                    <a href="'.$baseUrl.'settings" class="btn btn-outline-primary"><i class="fa fa-edit"></i> Update</a>
+                                </div>
+                                <div>
+                                    <button onclick="return end_Academic_Term(\'begin\');" class="btn btn-outline-danger"><i class="fa fa-american-sign-language-interpreting"></i> End Academic Term</button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="col-12 col-md-6" id="academic_Term_Processing"></div>
             </div>
 
         </div>

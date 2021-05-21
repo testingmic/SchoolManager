@@ -22,7 +22,7 @@ $response->title = "{$pageTitle} : {$appName}";
 
 // access permissions check
 if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
-    $response->html = page_not_found();
+    $response->html = page_not_found("permission_denied");
 } else {
     // staff id
     $userId = confirm_url_id(1) ? xss_clean($SITEURL[1]) : $session->userId;

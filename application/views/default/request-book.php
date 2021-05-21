@@ -24,7 +24,7 @@ $pageTitle = "Request Book";
 $response->title = "{$pageTitle} : {$appName}";
 
 if(!$hasRequest) {
-    $response->html = page_not_found("denied");
+    $response->html = page_not_found("permission_denied");
 } else {
 
     $userId = !empty($session->student_id) ? $session->student_id : $session->userId;

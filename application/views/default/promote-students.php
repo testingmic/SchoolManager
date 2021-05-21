@@ -37,7 +37,7 @@ $class_list = load_class("classes", "controllers")->list($classes_param)["data"]
 
 // if the user has the requisite permotions
 if(!$accessObject->hasAccess("promote", "promotion")) {
-    $response->html = page_not_found();
+    $response->html = page_not_found("permission_denied");
 } else {
 
     // promotion params

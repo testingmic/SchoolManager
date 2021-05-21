@@ -3183,7 +3183,9 @@ class Forms extends Myschoolgh {
      * @return Array
      */
     public function settings_form($clientId, $form_id = "ajax-data-form-content") {
-
+        // global
+        global $defaultUser;
+        
         // get the client data
         $client_data = !empty($clientId) ? $this->client_data($clientId) : (object)[];
 
@@ -3382,7 +3384,7 @@ class Forms extends Myschoolgh {
         $forms["general"] = $general;
 
         // create a new account object
-        $accountObj = load_class("account", "controllers");
+        $accountObj = load_class("account", "controllers", (object) ["client_data" => $defaultUser->client]);
         $array_columns = $accountObj->accepted_column;
 
         // forms

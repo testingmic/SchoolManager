@@ -22,7 +22,7 @@ $response->title = "{$pageTitle} : {$appName}";
 // confirm that the user has the required permissions
 if(!$accessObject->hasAccess("manage", "timetable")) {
     // show the error page
-    $response->html = page_not_found();
+    $response->html = page_not_found("permission_denied");
 } else {
 
     // set some scripts to load

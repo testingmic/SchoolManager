@@ -24,7 +24,7 @@ $receivePayment = $accessObject->hasAccess("receive", "fees");
 
 /** confirm that the user has the permission to receive payment */
 if(!$receivePayment) {
-    $response->html = page_not_found();
+    $response->html = page_not_found("permission_denied");
 } else {
 
     // the allocation fees

@@ -24,7 +24,7 @@ $pageTitle = "Issue Book";
 $response->title = "{$pageTitle} : {$appName}";
 
 if(!$hasIssue) {
-    $response->html = page_not_found("denied");
+    $response->html = page_not_found("permission_denied");
 } else {
 
     $response->scripts = ["assets/js/library.js"];

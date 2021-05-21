@@ -72,7 +72,7 @@ var promote_Students = () => {
                 $(`button[id="promote_students_button"]`).prop({ "disabled": false }).html(`<i class="fa fa-assistive-listening-systems"></i> Promote Students`);
                 $(`input[class~="student_to_promote"], input[id="promote_all_student"]`).prop("disabled", false);
                 swal({
-                    text: `Sorry! There is an error while processing the request.`,
+                    text: swalnotice["ajax_error"],
                     icon: "error",
                 });
             });
@@ -119,7 +119,7 @@ var view_Promotion_Log = (history_log_id) => {
 var cancel_Promotion_Log = (history_log_id) => {
     swal({
         title: "Cancel Promotion Log",
-        text: "Are you sure you want to cancel this promotion log. You can perform the operation again once cancelled.",
+        text: swalnotice["cancel_promotion_log"],
         icon: 'warning',
         buttons: true,
         dangerMode: true,
@@ -135,6 +135,11 @@ var cancel_Promotion_Log = (history_log_id) => {
                         loadPage($.current_page);
                     }, 2000);
                 }
+            }).catch(() => {
+                swal({
+                    text: swalnotice["ajax_error"],
+                    icon: "error",
+                });
             });
         }
     });
@@ -143,7 +148,7 @@ var cancel_Promotion_Log = (history_log_id) => {
 var validate_Promotion_Log = (history_log_id) => {
     swal({
         title: "Validate Promotion Log",
-        text: "Are you sure you want to validate this promotion. Once approved you cannot effect any changes.",
+        text: swalnotice["validate_promotion_log"],
         icon: 'warning',
         buttons: true,
         dangerMode: true,
@@ -159,6 +164,11 @@ var validate_Promotion_Log = (history_log_id) => {
                         loadPage($.current_page);
                     }, 2000);
                 }
+            }).catch(() => {
+                swal({
+                    text: swalnotice["ajax_error"],
+                    icon: "error",
+                });
             });
         }
     });
@@ -268,7 +278,7 @@ $(`button[id="filter_Promotion_Students_List"]`).on("click", function() {
         }
     }).catch(() => {
         swal({
-            text: `Sorry! There is an error while processing the request.`,
+            text: swalnotice["ajax_error"],
             icon: "error",
         });
     });

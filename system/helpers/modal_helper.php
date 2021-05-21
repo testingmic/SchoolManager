@@ -230,6 +230,31 @@ function page_not_found($request = "not_found", $string = "The page you were loo
 }
 
 /**
+ * Page not found html
+ * 
+ * @param StdClass $clientData
+ * 
+ * @return String
+ */
+function propagating_data($clientData) {
+    return '
+    <section class="section">
+        <div class="container">
+            <div class="mt-3 text-center font-18">
+                <div class="page-inner">
+                    <div class="page-description">
+                        <h3>Propagating Data</h3>
+                    </div>
+                    <div class="text-danger">
+                        Please wait while process completes <i class="fa fa-spin fa-spinner"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>';
+}
+
+/**
  * Session Logged Out
  * 
  * @return String

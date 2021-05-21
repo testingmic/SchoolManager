@@ -8,7 +8,7 @@
             // $idb_init = true;
         }
         // create a new account object
-        $accountObj = load_class("account", "controllers");
+        $accountObj = load_class("account", "controllers", (object) ["client_data" => $defaultUser->client]);
         ?>
         <footer class="main-footer">
             <div class="footer-left">
@@ -90,6 +90,7 @@
         viewedAs = "<?= (bool) isset($_GET["viewas"]) ?>",
         this_user_unique_key = "persist:msgh-client-<?= $session->userId; ?>",
         form_modules = <?= json_encode($myClass->form_modules); ?>,
+        swalnotice = <?= json_encode($myClass->swal_notification); ?>,
         $myPrefs = <?= json_encode($userPrefs); ?>;
         var acceptedArray = new Array();
             <?php foreach($accountObj->accepted_column as $key => $values) { ?>

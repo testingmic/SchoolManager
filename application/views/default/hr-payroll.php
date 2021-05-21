@@ -27,7 +27,7 @@ $clientId = $session->clientId;
 
 // access permissions check
 if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
-    $response->html = page_not_found();
+    $response->html = page_not_found("permission_denied");
 } else {
 
     $staff_list = "";

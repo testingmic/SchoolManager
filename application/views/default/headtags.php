@@ -161,7 +161,7 @@ load_helpers(['menu_helper']);
                                 <span>|</span>
                                 <span><?= $clientPrefs->academics->academic_term ?> Term</span>
                             </strong>
-                            <?= ($endPermission && $defaultUser->appPrefs->termEnded ? "<span class='badge badge-danger'>Already Ended</span>" : "<span class='badge badge-success'>Active</span>"); ?>
+                            <?= ($endPermission && $defaultUser->appPrefs->termEnded ? "<span class='badge badge-danger notification'>Already Ended</span>" : "<span class='badge badge-success'>Active</span>"); ?>
                         </a>
                     </li>
                     <?php } ?>
@@ -199,6 +199,7 @@ load_helpers(['menu_helper']);
                     </div>
                 </li>
                 <?php } ?>
+                <?php if($isActiveAccount) { ?>
                 <li class="dropdown dropdown-list-toggle">
                     <a href="#" data-toggle="dropdown" class="nav-link nav-link-lg message-toggle" data-notification="message"><i class="far fa-envelope"></i></a>
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
@@ -252,6 +253,7 @@ load_helpers(['menu_helper']);
                     </div>
                     </div>
                 </li>
+                <?php } ?>
                 <li class="dropdown">
                     <a href="#" data-toggle="dropdown"
                         class="nav-link dropdown-toggle nav-link-lg nav-link-user">
@@ -281,7 +283,7 @@ load_helpers(['menu_helper']);
                         <?php } ?>
                         <?php if($accessObject->hasAccess("close", "settings")) { ?>
                         <a href="<?= $baseUrl ?>manager" class="dropdown-item has-icon">
-                            <i class="fas fa-bolt"></i> Manage
+                            <i class="fas fa-bolt"></i> <span class="mr-3">Manage</span> <?= $endPermission && $defaultUser->appPrefs->termEnded ? '<span class="notification beep"></span>' : null ?>
                         </a>
                         <?php } ?>
                     <?php } ?>

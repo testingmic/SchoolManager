@@ -25,7 +25,7 @@ $response->title = "{$pageTitle} : {$appName}";
 // if the user has no permissions
 if(!$accessObject->hasAccess("activities", "settings")) {
     // show the error page
-    $response->html = page_not_found();
+    $response->html = page_not_found("permission_denied");
 } else {
 
     $response->scripts = ["assets/js/timeline.js"];

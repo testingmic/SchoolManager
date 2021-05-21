@@ -3,9 +3,14 @@
 class Account extends Myschoolgh {
 
     public $accepted_column;
+    private $iclient;
 
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
+
+        // get the client data
+        $client_data = $params->client_data;
+        $this->iclient = $client_data;
 
         // set the columns for the import of csv files
         $this->accepted_column["student"] = [
@@ -51,9 +56,47 @@ class Account extends Myschoolgh {
 	}
 
     /**
+     * End the Academic Term
+     * 
+     * This method will end the academic term. The fist step will be to lock the system to
+     * disable the user from performing any actions necessary to begin the next academic term
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function endacademicterm(stdClass $params) {
+
+        // global variables
+        global $defaultUser;
+
+        // create a new scheduler id
+        $scheduler_id = random_string("alnum", 12);
+
+        // insert a new cron job scheduler for this activity
+        $stmt = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, subject = ?");
+        $stmt->execute([$scheduler_id."_".$params->clientId, $params->userId, "end_academic_term", "End Academic Term for {$defaultUser->appPrefs->academics->academic_year}"]);
+
+        // update the information in the database table
+        $stmt = $this->db->prepare("UPDATE clients_accounts SET client_state = ? WHERE client_id = ? LIMIT 1");
+        $stmt->execute(["Propagation", $params->clientId]);
+
+        // log the user activity
+        $this->userLogs("end_academic_term", $params->clientId, null, "{$params->userData->name} requested to end this academic term.", $params->userId);
+
+        // return the success reponse
+        return [
+            "code" => 200,
+            "data" => "You have successfully initiated the propagation process.",
+        ];
+    }
+
+    /**
      * Complete the Account setup process
      * 
      * This will set the account state to Active
+     * 
+     * @param stdClass $params
      * 
      * @return Array
      */
@@ -132,6 +175,8 @@ initiateCalendar();";
 
     /**
      * Update Account Information
+     * 
+     * @param stdClass $params
      * 
      * @return Array
      */
@@ -226,6 +271,8 @@ initiateCalendar();";
     /**
      * Save the Academic Grading System
      * 
+     * @param stdClass $params
+     * 
      * @return Array
      */
     public function update_grading(stdClass $params) {
@@ -267,6 +314,8 @@ initiateCalendar();";
      * Upload CSV File Data
      * 
      * Save the information in a session to be used later on
+     * 
+     * @param stdClass $params
      * 
      * @return Array
      */
@@ -332,6 +381,8 @@ initiateCalendar();";
 
     /**
      * Import the Data
+     * 
+     * @param stdClass $params
      * 
      * @return Array
      */
@@ -602,6 +653,10 @@ initiateCalendar();";
      * Get the unique id using the name slug of the name
      * Get just one value from the list
      * 
+     * @param String $column
+     * @param String $value
+     * @param String $clientId
+     * 
      * @return String 
      */
     public function get_equivalent($column, $value, $clientId) {
@@ -633,6 +688,8 @@ initiateCalendar();";
      * 
      * Get the unique id using the name slug of the name
      * 
+     * @param String $value
+     * 
      * @return Int 
      */
     public function country_equivalent($value) {
@@ -647,6 +704,8 @@ initiateCalendar();";
 
     /**
      * Download Temporary CSV Files for Uploads
+     * 
+     * @param stdClass $params
      * 
      * @return Array
      */

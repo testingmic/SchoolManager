@@ -24,7 +24,7 @@ $response->scripts = ["assets/js/payroll.js"];
 
 // access permissions check
 if(!$accessObject->hasAccess("generate", "payslip")) {
-    $response->html = page_not_found();
+    $response->html = page_not_found("permission_denied");
 } else {
 
     // load the form

@@ -25,7 +25,7 @@ $response->timer = 350;
 // confirm that the user has the required permissions
 if(!$accessObject->hasAccess("allocate", "timetable")) {
     // show the error page
-    $response->html = page_not_found();
+    $response->html = page_not_found("permission_denied");
 } else {
 
     // confirm if the user has permission to manage

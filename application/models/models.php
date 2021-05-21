@@ -232,6 +232,13 @@ class Models {
 
 		$this->permission_denied = "Sorry! You do not have the required permission to perform this action.";
         
+        // set the javascript swal notifications
+        $this->swal_notification = [
+            "ajax_error" => "Sorry! There is an error while processing the request.",
+            "cancel_promotion_log" => "Are you sure you want to cancel this promotion log. You can perform the operation again once cancelled.",
+            "validate_promotion_log" => "Are you sure you want to validate this promotion. Once approved you cannot effect any changes.",
+            "end_academic_term" => "Are you sure you want to end this academic term. You will be locked out from the system for not more than 10 minute to allow processing? Once confirmed, you cannot reverse the action."
+        ];
     }
 
     /**
