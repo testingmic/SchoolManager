@@ -2,11 +2,12 @@
  
 class Crons {
 
-	public $db;
-	public $userAccount;
-	public $mailAttachment = array();
-	public $rootUrl;
-	public $siteName = "MySchoolGH - VisamiNetSolutions.Com";
+	private $db;
+	private $userAccount;
+	private $mailAttachment = array();
+	private $rootUrl;
+	private $limit = 100;
+	private $siteName = "MySchoolGH - VisamiNetSolutions.Com";
 
 	public function __construct() {
 		$this->baseUrl = "https://app.myschoolgh.com/";
@@ -384,8 +385,13 @@ class Crons {
 					$this->terminal_report_handler($result->item_id);
 				}
 
+				// if the type is to manage the end of term propagation
+				elseif($result->cron_type == "end_academic_term") {
+					$this->end_academic_term_handler($result->item_id);
+				}
+
 				// update the cron status
-				$this->db->query("UPDATE cron_scheduler SET date_processed=now(), status='1' WHERE id='{$result->id}' LIMIT 1");
+				// $this->db->query("UPDATE cron_scheduler SET date_processed=now(), status='1' WHERE id='{$result->id}' LIMIT 1");
 
 			}
 
@@ -467,6 +473,140 @@ class Crons {
         }
 
     }
+
+	/**
+	 * client_data
+	 * 
+	 * @param String $clientId
+	 * 
+	 * @return Object
+	 */
+	public function client_data($clientId = null) {
+
+		try {
+
+			$stmt = $this->db->prepare("SELECT a.*, 
+				c.grading AS grading_system, c.structure AS grading_structure, 
+				c.show_position, c.show_teacher_name, c.allow_submission
+			FROM clients_accounts a 
+				LEFT JOIN grading_system c ON c.client_id = a.client_id
+			WHERE a.client_id = ? AND a.client_status = ? LIMIT 1");
+			$stmt->execute([$clientId, 1]);
+			
+			$data = [];
+
+			// loop through the list
+			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+				// loop through the items and convert into an object
+				foreach(["client_preferences", "grading_system", "grading_structure"] as $value) {
+					$result->{$value} = json_decode($result->{$value});
+				}
+
+				// append to the data
+				$data[] = $result;
+			}
+
+			return !(empty($data)) ? $data[0] : (object) [];
+			
+		} catch(PDOException $e) {
+			return (object) [];
+		}
+	}
+
+	/**
+	 * Close Academic Term
+	 * 
+	 * Process the Populating of Data for a new Term
+	 * 
+	 * @param String $recordId
+	 * 
+	 * @return Bool
+	 */
+	public function end_academic_term_handler($recordId) {
+
+		// split the record id for the client id and the record id
+		$clientId = explode("_", $recordId)[1];
+
+		// load client data
+		$client_data = $this->client_data($clientId);
+
+		// academics information
+		$academics = $client_data->client_preferences->academics;
+		
+		// set variables for the academic year and term
+		$academic_year = $academics->academic_year;
+		$academic_term = $academics->academic_term;
+		$next_academic_year = $academics->next_academic_year;
+		$next_academic_term = $academics->next_academic_term;
+
+		/**
+		 * STEP ONE:: 
+		 * 
+		 * GET THE LIST OF ALL STUDENTS FOR THE CURRENT ACADEMIC YEAR / TERM
+		 */
+		$list_users = $this->db->prepare("SELECT a.*,
+				(
+					SELECT 
+						CONCAT (
+							b.is_promoted,'_',b.promote_to,'_',
+							(
+								SELECT d.id FROM classes d WHERE d.item_id = b.promote_to LIMIT 1
+							)
+						)
+					FROM 
+						promotions_log b 
+					LEFT JOIN promotions_history c ON c.history_log_id = b.history_log_id
+					WHERE 
+						b.academic_year = a.academic_year AND b.academic_term = a.academic_term AND 
+						a.item_id = b.student_id AND c.status='Processed'
+				) AS is_promoted
+			FROM 
+				users a 
+			WHERE 
+				a.academic_year = ? AND a.academic_term = ? AND a.user_type = ? AND a.user_status = ? 
+			LIMIT {$this->limit}"
+		);
+		$list_users->execute([$academic_year, $academic_term, "student", "Active"]);
+		$students_list = $list_users->fetchAll(PDO::FETCH_ASSOC);
+
+		// variables
+		$students_query_string = "";
+
+		// loop through the students list
+		foreach($students_list as $student) {
+			
+			// get the keys
+			$columns = array_keys($student);
+			$values = array_values($student);
+			$last_key = count($values)-1;
+
+			// format the student promotion information
+			$is_promoted = explode("_", $student["is_promoted"]);
+			
+			// append new variables
+			$student["class_id"] = ($is_promoted[0] == 1) ? $is_promoted[2] : $student["class_id"];
+			$student["academic_year"] = $next_academic_year;
+			$student["academic_term"] = $next_academic_term;
+			$student["last_visited_page"] = "{{APPURL}}dashboard";
+			
+			// begin the student insert string
+			$query_string = "INSERT INTO users SET ";
+			
+			// loop through the columns
+			foreach($columns as $key => $column) {
+				// exempt some data from the query
+				if(!in_array($key, [0, $last_key])) {
+					$query_string .= "{$column}='{$values[$key]}',";
+				}
+			}
+			$students_query_string .= trim($query_string, ",").";\n";
+
+		}
+
+		print $students_query_string;
+
+	}
 
     /**
 	 * Create a "Random" String
