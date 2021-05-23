@@ -6,7 +6,8 @@ class Crons {
 	private $userAccount;
 	private $mailAttachment = array();
 	private $rootUrl;
-	private $limit = 100;
+	private $clientId;
+	private $limit = 2000;
 	private $siteName = "MySchoolGH - VisamiNetSolutions.Com";
 
 	public function __construct() {
@@ -23,7 +24,7 @@ class Crons {
 	 * 
 	 * @return $this
 	 */
-	public function dbConn() {
+	private function dbConn() {
 		
 		// CONNECT TO THE DATABASE
 		$connectionArray = array(
@@ -110,7 +111,7 @@ class Crons {
 	 * General emails list. Get the list of emails to be sent to users and send them out.
 	 * Includes messages for signup, logins, reset password and the likes.
 	 */
-	public function loadEmailRequests() {
+	private function loadEmailRequests() {
 		
 		try {
 
@@ -163,7 +164,7 @@ class Crons {
 	 * This processes the in-app emails that have been scheduled
 	 * Loop through the list and send out the emails
 	 */
-	public function inApp_Emails() {
+	private function inApp_Emails() {
 		
 		try {
 
@@ -445,7 +446,7 @@ class Crons {
      * 
      * @return Array
      */
-    public function notice_add(stdClass $params) {
+    private function notice_add(stdClass $params) {
 
         // predefine some variables
         $params->_item_id = $this->random_string(32);
@@ -481,7 +482,7 @@ class Crons {
 	 * 
 	 * @return Object
 	 */
-	public function client_data($clientId = null) {
+	private function client_data($clientId = null) {
 
 		try {
 
@@ -493,7 +494,7 @@ class Crons {
 			WHERE a.client_id = ? AND a.client_status = ? LIMIT 1");
 			$stmt->execute([$clientId, 1]);
 			
-			$data = [];
+			$data = array();
 
 			// loop through the list
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
@@ -507,11 +508,56 @@ class Crons {
 				$data[] = $result;
 			}
 
-			return !(empty($data)) ? $data[0] : (object) [];
+			return !(empty($data)) ? $data[0] : (object) array();
 			
 		} catch(PDOException $e) {
-			return (object) [];
+			return (object) array();
 		}
+	}
+
+	/**
+	 * Get the Student Fees
+	 * 
+	 * @param String $studentId 
+	 * @param String $academic_year
+	 * @param String $academic_term
+	 * 
+	 * @return Array
+	 */
+	private function student_fees($studentId, $academic_year, $academic_term) {
+
+		try {
+
+			$stmt = $this->db->prepare("SELECT a.*, 
+					b.name AS category_name, b.amount AS category_default_amount
+				FROM fees_payments a 
+				LEFT JOIN fees_category b ON b.id = a.category_id
+				WHERE a.student_id = ? AND a.status = ? AND a.academic_year = ? AND a.academic_term = ?
+			");
+			$stmt->execute([$studentId, 1, $academic_year, $academic_term]);
+			$result = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+			$data = array();
+
+			// loop through the results list
+			foreach($result as $key => $value) {
+				// append the list
+				$data[$studentId][$value->category_id] = [
+					"category_id" => $value->category_id,
+					"amount" => [
+						"due" => $value->amount_due,
+						"paid" => $value->amount_paid,
+						"balance" => $value->balance
+					]
+				];
+			}
+
+			// set the data
+			$response = $data;
+
+			return $response;
+
+		} catch(PDOException $e) {}
 	}
 
 	/**
@@ -523,7 +569,7 @@ class Crons {
 	 * 
 	 * @return Bool
 	 */
-	public function end_academic_term_handler($recordId) {
+	private function end_academic_term_handler($recordId) {
 
 		// split the record id for the client id and the record id
 		$clientId = explode("_", $recordId)[1];
@@ -572,9 +618,10 @@ class Crons {
 
 		// variables
 		$students_query_string = "";
+		$students_query_array = array();
 
 		// loop through the students list
-		foreach($students_list as $student) {
+		foreach($students_list as $ikey => $student) {
 			
 			// get the keys
 			$columns = array_keys($student);
@@ -589,7 +636,10 @@ class Crons {
 			$student["academic_year"] = $next_academic_year;
 			$student["academic_term"] = $next_academic_term;
 			$student["last_visited_page"] = "{{APPURL}}dashboard";
-			
+
+			// get the finances owed by the user
+			$student_fees = $this->student_fees($student["item_id"], $academic_year, $academic_term);
+
 			// begin the student insert string
 			$query_string = "INSERT INTO users SET ";
 			
@@ -602,10 +652,116 @@ class Crons {
 			}
 			$students_query_string .= trim($query_string, ",").";\n";
 
+			$students_query_array[] = $student_fees;
+
 		}
 
-		print $students_query_string;
+		// initial 
+		$school_fees = array();
 
+		// algorithm to calculate how much money the school should have received 
+		foreach($students_query_array as $key => $value) {
+			foreach($value as $ikey => $ivalue) {
+				foreach($ivalue as $ivkey => $ivvalue) {
+					$school_fees[$ivvalue["category_id"]]["due"] = isset($school_fees[$ivvalue["category_id"]]["due"]) ? ($school_fees[$ivvalue["category_id"]]["due"] + $ivvalue["amount"]["due"]) : $ivvalue["amount"]["due"];
+					$school_fees[$ivvalue["category_id"]]["paid"] = isset($school_fees[$ivvalue["category_id"]]["paid"]) ? ($school_fees[$ivvalue["category_id"]]["paid"] + $ivvalue["amount"]["paid"]) : $ivvalue["amount"]["paid"];
+					$school_fees[$ivvalue["category_id"]]["balance"] = isset($school_fees[$ivvalue["category_id"]]["balance"]) ? ($school_fees[$ivvalue["category_id"]]["balance"] + $ivvalue["amount"]["balance"]) : $ivvalue["amount"]["due"];
+				}
+			}
+		}
+
+		// total balance
+		$total_due = array_sum(array_column($school_fees, "due"));
+		$total_paid = array_sum(array_column($school_fees, "paid"));
+		$total_balance = array_sum(array_column($school_fees, "balance"));
+
+		$school_fees_summary = [
+			"total_due" => $total_due,
+			"total_paid" => $total_paid,
+			"total_balance" => $total_balance
+		];
+
+		// school fees log information
+		$school_fees_log = [
+			"fees_log" => $school_fees,
+			"summary" => $school_fees_summary
+		];
+
+		// get only fees that array list that the student has a balance
+		$student_ownings = array();
+
+		// algorithm to calculate how much money the school should have received 
+		foreach($students_query_array as $key => $value) {
+			foreach($value as $ikey => $ivalue) {
+				foreach($ivalue as $ivkey => $ivvalue) {
+					if(round($ivvalue["amount"]["balance"]) > 0) {
+						$student_ownings[$ikey][$ivvalue["category_id"]] = $ivvalue["amount"]["balance"];
+					}
+				}
+			}
+		}
+
+		// EXECUTE THE STUDENTS LIST
+		// $this->db->query($students_query_string);
+
+		// UPDATE THE STUDENTS FEES DATA FOR THE TERM
+		$update_query = $this->db->prepare("UPDATE fees_terminal_log SET fees_log = ?, owings_logs = ? WHERE student_id = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
+		$insert_query = $this->db->prepare("INSERT INTO fees_terminal_log SET client_id = ?, fees_log = ?, owings_logs = ?, student_id = ?, academic_year = ?, academic_term = ?");
+		
+		// Through the Students Fees Log List
+		foreach($students_query_array as $key => $value) {
+			// loop through the students fees payments list
+			foreach($value as $ikey => $ivalue) {
+				// confirm that the owings already exists or not
+				$owing = isset($student_ownings[$ikey]) ? $student_ownings[$ikey] : (object) array();
+				// confirm that the record already exists or not
+				if($this->fees_history_log_exist($ikey, $academic_year, $academic_term)) {
+					$update_query->execute([json_encode($value), json_encode($owing), $ikey, $academic_year, $academic_term]);
+				} else {
+					$insert_query->execute([$clientId, json_encode($value), json_encode($owing), $ikey, $academic_year, $academic_term]);
+				}
+			}
+		}
+
+		// new query string for a school
+		$update_query = $this->db->prepare("UPDATE fees_terminal_log SET fees_log = ? WHERE client_id = ? AND academic_year = ? AND academic_term = ? AND log_type = ? LIMIT 1");
+		$insert_query = $this->db->prepare("INSERT INTO fees_terminal_log SET client_id = ?, fees_log = ?, academic_year = ?, academic_term = ?, log_type = ?");
+
+		// confirm if the school fees log already exists
+		if($this->fees_history_log_exist($clientId, $academic_year, $academic_term, "school")) {
+			$update_query->execute([json_encode($school_fees_log), $clientId, $academic_year, $academic_term, "school"]);
+		} else {
+			$insert_query->execute([$clientId, json_encode($school_fees_log), $academic_year, $academic_term, "school"]);
+		}
+
+	}
+
+	/**
+	 * Fees History Log Check
+	 * 
+	 * @param String $studentId
+	 * @param String $academic_year
+	 * @param String $academic_term
+	 * @param String $type		default(student, school)
+	 * 
+	 * @return Bool
+	 */
+	private function fees_history_log_exist($studentId, $academic_year, $academic_term, $type = "student") {
+
+		try {
+
+			// set the field
+			$field = ($type == "student") ? "student_id" : "client_id";
+
+			// prepare and execute the statement
+			$stmt = $this->db->prepare("SELECT id FROM fees_terminal_log WHERE {$field} = ? AND academic_year = ? AND academic_term = ? AND log_type = ? LIMIT 1");
+			$stmt->execute([$studentId, $academic_year, $academic_term, $type]);
+
+			return $stmt->rowCount();
+
+		} catch(PDOException $e) {
+			return false;
+		}
 	}
 
     /**
@@ -615,7 +771,7 @@ class Crons {
 	 * @param	int	number of characters
 	 * @return	string
 	 */
-	public function random_string($len = 8) {
+	private function random_string($len = 8) {
 		$pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 		return substr(str_shuffle(str_repeat($pool, ceil($len / strlen($pool)))), 0, $len);
 	}

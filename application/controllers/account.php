@@ -71,10 +71,29 @@ class Account extends Myschoolgh {
         global $defaultUser;
 
         // create a new scheduler id
-        $scheduler_id = random_string("alnum", 12);
+        $scheduler_id = strtoupper(random_string("alnum", 15));
+
+        // assign a new variable
+		$academics = $this->iclient->client_preferences->academics;
+		
+		// set variables for the academic year and term
+		$academic_year = $academics->academic_year;
+		$academic_term = $academics->academic_term;
+		$next_academic_year = $academics->next_academic_year;
+		$next_academic_term = $academics->next_academic_term;
+
+        // verify that the next academic year/term isnt the same as the current one
+        if("{$academic_year}_{$academic_term}" == "{$next_academic_year}_{$next_academic_term}") {
+            // return an error message
+            return [
+                "code" => 203,
+                "data" => "Fatal Error! Please ensure that the current academic year and term is not the same as the next academic year and term.
+                    This can be corrected under the SETTINGS panel.",
+            ];
+        }
 
         // insert a new cron job scheduler for this activity
-        $stmt = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, subject = ?");
+        $stmt = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, subject = ?, active_date = now()");
         $stmt->execute([$scheduler_id."_".$params->clientId, $params->userId, "end_academic_term", "End Academic Term for {$defaultUser->appPrefs->academics->academic_year}"]);
 
         // update the information in the database table
