@@ -110,6 +110,7 @@ if(!empty($session->userId)) {
 		
 		// get the current user information
 		$defaultUser = $defaultUser[0];
+		$defaultAcademics = $defaultUser->client->client_preferences->academics;
 		
 		// set the parameters for the access object
 		$accessObject->userId = $defaultUser->user_id;

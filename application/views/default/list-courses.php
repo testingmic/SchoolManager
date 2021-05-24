@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $defaultAcademics;
 
 // initial variables
 $appName = config_item("site_name");
@@ -30,7 +30,9 @@ $courses_param = (object) [
     "limit" => 99999,
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
-    "course_tutor" => $filter->course_tutor ?? null
+    "course_tutor" => $filter->course_tutor ?? null,
+    "academic_year" => $defaultAcademics->academic_year,
+    "academic_term" => $defaultAcademics->academic_term,
 ];
 
 $item_list = load_class("courses", "controllers")->list($courses_param);

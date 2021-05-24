@@ -66,12 +66,13 @@ class Resources extends Myschoolgh {
                     // insert the link record
                     $stmt = $this->db->prepare("
                         INSERT INTO courses_resource_links 
-                        SET item_id = ?, client_id = ?, course_id = ?, lesson_id = ?,
-                        description = ?, link_url = ?, link_name = ?, created_by = ?
+                        SET item_id = ?, client_id = ?, course_id = ?, lesson_id = ?, description = ?, link_url = ?, 
+                        link_name = ?, created_by = ?, academic_year = ?, academic_term = ?
                     ");
                     $stmt->execute([
                         $item_id, $params->clientId, $upload->course_id, $lesson_ids, 
-                        $upload->description, $upload->link_url, $upload->link_name, $params->userId
+                        $upload->description, $upload->link_url, $upload->link_name, 
+                        $params->userId, $params->academic_year, $params->academic_term 
                     ]);    
                     # set the output to return when successful
                     $return = ["code" => 200, "data" => "Resource Link successfully uploaded.", "refresh" => 2000];

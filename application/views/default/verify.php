@@ -160,7 +160,7 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
 
                     // set the expiry date to one month from activation
                     $prefs->account->verified_date = date("Y-m-d h:iA");
-                    $prefs->account->expiry = date("Y-m-d h:iA", strtotime("+1 months"));
+                    $prefs->account->expiry = date("Y-m-d h:iA", strtotime("+3 months"));
                     
                     // confirm that the verification code matches
                     if(($key == "verify_account") && ($prefs->account->activation_code !== $token)) {

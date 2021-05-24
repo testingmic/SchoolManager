@@ -28,6 +28,25 @@ $response->scripts = ["assets/js/academics.js"];
 if(empty($accessObject->hasAccess("close", "settings"))) {
     $response->html = page_not_found("permission_denied");
 } else {
+    // import list
+    $import_list = [
+        "students" => "Students",
+        "courses" => "Courses / Subjects",
+        "fees_allocation" => "Fees Allocation"
+    ];
+    // import div
+    $import_div = "";
+    $count = 0;
+    foreach($import_list as $key => $value) {
+        $count++;
+        $import_div .= "
+            <div class=\"col-lg-4\">
+                <div class=\"form-group\">
+                    <label style=\"font-size:16px\" class=\"cursor\" for=\"{$key}_{$count}\">{$value}</label>
+                    <input ".($key === "students" ? "checked disabled" : null)." id=\"{$key}_{$count}\" style=\"height:20px;width:20px;\" class=\"cursor data_to_import\" name=\"data_to_import[]\" value=\"{$key}\" type=\"checkbox\">
+                </div>
+            </div>";
+    }
     // append the html content
     $response->html = '
     <section class="section">
@@ -41,7 +60,7 @@ if(empty($accessObject->hasAccess("close", "settings"))) {
         <div class="section-body">
         
             <div class="row">
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-md-7">
                     <div class="card">
                         <div class="card-body font-16">
                             <div class="mb-2 row">
@@ -74,6 +93,11 @@ if(empty($accessObject->hasAccess("close", "settings"))) {
                                 <div class="col-lg-6"><span>'.date("jS F Y", strtotime($defaultUser->appPrefs->academics->next_term_ends)).'</span></div>
                             </div>
                             <div class="mb-2 mt-3 border-top pt-3"></div>
+                            <div class="mb-2 row">
+                                <div class="col-lg-12 text-primary mb-3"><strong>SELECT DATA TO IMPORT</strong></div>
+                                '.$import_div.'
+                            </div>
+                            <div class="mb-2 mt-3 border-top pt-3"></div>
                             <div class="d-flex  justify-content-between mb-2">
                                 <div>
                                     <a href="'.$baseUrl.'settings" class="btn btn-outline-primary"><i class="fa fa-edit"></i> Update</a>
@@ -85,7 +109,7 @@ if(empty($accessObject->hasAccess("close", "settings"))) {
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-6" id="academic_Term_Processing"></div>
+                <div class="col-12 col-md-5" id="academic_Term_Processing"></div>
             </div>
 
         </div>

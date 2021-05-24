@@ -82,6 +82,14 @@ class Account extends Myschoolgh {
 		$next_academic_year = $academics->next_academic_year;
 		$next_academic_term = $academics->next_academic_term;
 
+        // confirm that the academic term and year are not empty
+        if(empty($next_academic_year) || empty($next_academic_term)) {
+            return [
+                "code" => 203,
+                "data" => "Sorry! The next academic year and term cannot be empty. Ensure it has been correctly set before proceeding"
+            ];
+        }
+
         // verify that the next academic year/term isnt the same as the current one
         if("{$academic_year}_{$academic_term}" == "{$next_academic_year}_{$next_academic_term}") {
             // return an error message
@@ -92,9 +100,12 @@ class Account extends Myschoolgh {
             ];
         }
 
+        // get the data to import
+        $data_to_import = isset($params->data_to_import) ? $this->stringToArray($params->data_to_import) : [];
+
         // insert a new cron job scheduler for this activity
-        $stmt = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, subject = ?, active_date = now()");
-        $stmt->execute([$scheduler_id."_".$params->clientId, $params->userId, "end_academic_term", "End Academic Term for {$defaultUser->appPrefs->academics->academic_year}"]);
+        $stmt = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, subject = ?, active_date = now(), query = ?");
+        $stmt->execute([$scheduler_id."_".$params->clientId, $params->userId, "end_academic_term", "End Academic Term for {$defaultUser->appPrefs->academics->academic_year}", json_encode($data_to_import)]);
 
         // update the information in the database table
         $stmt = $this->db->prepare("UPDATE clients_accounts SET client_state = ? WHERE client_id = ? LIMIT 1");
@@ -120,16 +131,28 @@ class Account extends Myschoolgh {
      * @return Array
      */
     public function complete_setup(stdClass $params) {
+
+        // get the client state
+        $client_state = $this->iclient->client_state;
+
         // get the client data
         $stmt = $this->db->prepare("UPDATE clients_accounts SET client_state = ? WHERE client_id = ? LIMIT 1");
         $stmt->execute(['Active', $params->clientId]);
 
-        // generate a new script for this client
-        $filename = "assets/js/scripts/{$params->clientId}_{$params->userData->user_type}_events.js";
-        $data = $this->init_calender();
-        $file = fopen($filename, "w");
-        fwrite($file, $data);
-        fclose($file);
+        // confirm that this files already exists
+        if(!in_array($client_state, ["Complete", "Propagation"])) {
+
+            // generate a new script for this client
+            $filename = "assets/js/scripts/{$params->clientId}_{$params->userData->user_type}_events.js";
+            $data = $this->init_calender();
+            $file = fopen($filename, "w");
+            fwrite($file, $data);
+            fclose($file);
+        } else {
+            // set the last visited page
+            $stmt = $this->db->prepare("UPDATE users SET last_visited_page='{{APPURL}}dashboard' WHERE item_id=? LIMIT 1");
+            $stmt->execute([$params->userId]);
+        }
 
         return [
             "data" => "Account setup is successfully completed."
@@ -212,7 +235,7 @@ initiateCalendar();";
         }
 
         // get the client data
-        $client_data = $this->client_data($params->clientId);
+        $client_data = $this->iclient;
 
         $return = ["data" => "Account information successfully updated."];
 
@@ -252,13 +275,12 @@ initiateCalendar();";
         $preference["academics"] = $params->general["academics"];
         $preference["labels"] = $params->general["labels"];
         $preference["opening_days"] = $params->general["opening_days"] ?? [];
-        // $preference["grading_system"] = $params->general["grading_system"] ?? [];
+        $preference["account"] = $client_data->client_preferences->account;
 
         // unset the values
         unset($params->general["opening_days"]);
         unset($params->general["academics"]);
         unset($params->general["labels"]);
-        // unset($params->general["grading_system"]);
 
         // format
         $query = "";

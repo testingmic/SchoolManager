@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $defaultAcademics;
 
 // initial variables
 $appName = config_item("site_name");
@@ -30,7 +30,9 @@ $student_param = (object) [
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
     "gender" => $filter->gender ?? null,
-    "client_data" => $defaultUser->client
+    "client_data" => $defaultUser->client,
+    "academic_year" => $defaultAcademics->academic_year,
+    "academic_term" => $defaultAcademics->academic_term,
 ];
 
 // if the current user is a parent then append this query

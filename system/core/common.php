@@ -22,37 +22,11 @@ $availableQuickLinks = [
 		"label" => "Calendar", "href" => "calendar",
 		"favicon" => 'data-feather="calendar" class="icon-lg"',
 	],
-	"quotes" => [
-		"label" => "Quotes", "href" => "quotes",
-		"favicon" => 'data-feather="bookmark" class="icon-lg"',
-	],
-	"policies" => [
-		"label" => "Policies", "href" => "policies",
-		"favicon" => 'data-feather="message-square" class="icon-lg"',
-	],
-	"proposals" => [
-		"label" => "Proposals", "href" => "proposals",
-		"favicon" => 'class="icon-lg fa fa-vr-cardboard fa-1x"',
-	],
 	"adverts" => [
 		"label" => "Adverts", "href" => "ads-view",
 		"favicon" => 'data-feather="speaker" class="icon-lg"',
 	]
 ];
-
-/**
- * Force https using php
- * 
- * confirm if the current port is not 433 then redirect the page
- * 
- * @return Redirect
- */
-function forceHttps() {
-	if($_SERVER["SERVER_PORT"] !==433 && (empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"]=="off")) {
-		// header("Location: https://dev.".$_SERVER["HTTP_HOST"].'.com'.$_SERVER["REQUEST_URI"]."");
-	}
-}
-forceHttps();
 
 // ------------------------------------------------------------------------
 
@@ -265,7 +239,7 @@ if ( ! function_exists('load_class'))
 		
 		// check if the class really exists
 		if(class_exists($class)) {
-			$_classes[$class] = isset($param) ? new $name($param) : new $name();
+			$_classes[$class] = isset($param) && !empty($param) ? new $name($param) : new $name();
 			return $_classes[$class];
 		} else {
 			echo 'The specified class has not yet been defined: '.$class;

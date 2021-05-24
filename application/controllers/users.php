@@ -8,8 +8,10 @@ class Users extends Myschoolgh {
 	private $iclient = [];
 	
 	# start the construct
-	public function __construct(stdClass $params = null) {
+	public function __construct(stdClass $data = null) {
 		parent::__construct();
+
+		print_r($data);
 
 		$this->permission_denied = "Sorry! You do not have the required permission to perform this action.";
 		$this->password_ErrorMessage = "<div style='width:100%'>Sorry! Please use a stronger password. <br><strong>Password Format</strong><br><ul>
@@ -20,7 +22,11 @@ class Users extends Myschoolgh {
 			<li style='padding-left:15px;'>At least 1 Special Character</li></ul></div>";
 
 		
-		$this->iclient = $params->client_data ?? [];
+		$this->iclient = $data->client_data ?? [];
+
+		// run this query
+        $this->academic_term = $data->client_data->client_preferences->academics->academic_term ?? null;
+        $this->academic_year = $data->client_data->client_preferences->academics->academic_year ?? null;
 	}
 
 	/**
@@ -35,7 +41,7 @@ class Users extends Myschoolgh {
 	/**
 	 * Global function to search for item based on the predefined columns and values parsed
 	 * 
-	 * @param \stdClass $params
+	 * @param StdClass $params
 	 * @param String $params->user_id 		The unique user id to load the results
 	 * @param String $params->user_type		The type of the user to load the result
 	 * @param String $params->gender		The gender of the user
@@ -226,6 +232,11 @@ class Users extends Myschoolgh {
 			$data = [];
 			$users_group = [];
 
+			if(isset($params->client_data)) {
+				$this->academic_year = $params->client_data->client_preferences->academics->academic_year;
+    			$this->academic_term = $params->client_data->client_preferences->academics->academic_term;
+			}
+
 			// loop through the results
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
 
@@ -315,15 +326,16 @@ class Users extends Myschoolgh {
 
 				// if the user wants to load wards as well
 				if($loadWards && ($result->user_type === "parent")) {
-					$qr = $this->db->prepare("
-						SELECT 
+					$qr = $this->db->prepare("SELECT 
 							a.item_id AS student_guid, a.unique_id, a.firstname, a.lastname, a.othername,
 							a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
 							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name, a.enrollment_date,
 							(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
-						FROM users a WHERE a.status='1' AND a.guardian_id LIKE '%{$result->user_id}%' AND a.user_type='student'
+						FROM users a 
+						WHERE a.status='1' AND a.guardian_id LIKE '%{$result->user_id}%' AND 
+							a.user_type='student' AND a.academic_year = ? AND a.academic_term = ?
 					");
-					$qr->execute();
+					$qr->execute([$this->academic_year, $this->academic_term]);
 					$result->wards_list = $qr->fetchAll(PDO::FETCH_ASSOC);
 					$result->wards_list_ids = array_column($result->wards_list, "student_guid");
 				}

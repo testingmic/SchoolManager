@@ -87,8 +87,8 @@ global $isActiveAccount, $clientData, $clientId;
                 
                 <div class="row">
                     <div class="col-lg-12">
-                        <?php  if(in_array($clientData->client_state, ["Activated", "Pending"])) { ?>
-                            <?= activated_form($the_form) ?>
+                        <?php  if(in_array($clientData->client_state, ["Activated", "Pending", "Complete"])) { ?>
+                            <?= activated_form($the_form, $clientData->client_state) ?>
                         <?php } ?>
                     </div>
                 </div>

@@ -210,7 +210,8 @@ class Courses extends Myschoolgh {
             
             $query = "";
             $type = (isset($params->type) && !empty($params->type)) ? $params->type : (!empty($type) ? $type : "unit");
-            
+            $query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
+            $query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
             $query .= (isset($params->unit_id) && !empty($params->unit_id)) ? " AND unit_id = '{$params->unit_id}'" : (!empty($unit_id) ? " AND unit_id = '{$unit_id}'" : null);
             $query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND course_id='{$params->course_id}'" : "";
 

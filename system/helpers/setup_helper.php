@@ -1,4 +1,4 @@
-<?php function activated_form($the_form) { global $notReady, $formsObj, $baseUrl, $userData; ?>
+<?php function activated_form($the_form, $client_state) { global $notReady, $formsObj, $baseUrl, $userData; ?>
 <div class="card">
     <div class="card-body">
         <div class="padding-20">
@@ -12,6 +12,7 @@
                 <li class="nav-item">
                     <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Examination</a>
                 </li>
+                <?php  if(in_array($client_state, ["Activated", "Pending"])) { ?>
                 <li class="nav-item">
                     <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Import Courses</a>
                 </li>
@@ -21,6 +22,7 @@
                 <li class="nav-item">
                     <a class="nav-link" id="staff-tab2" data-toggle="tab" href="#staff" role="tab" aria-selected="true">Import Staff</a>
                 </li>
+                <?php } ?>
                 <li class="nav-item">
                     <a class="nav-link" id="complete-tab2" data-toggle="tab" href="#complete" role="tab" aria-selected="true">Complete Process</a>
                 </li>
@@ -41,33 +43,35 @@
                         <?= $the_form["examination"] ?? null; ?>
                     <?php } ?>
                 </div>
-                <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
-                    <?php if($notReady) { ?>
-                        <div class="alert alert-warning text-center">
-                            You must first set the Academic Year and Term to proceed.
-                        </div>
-                    <?php } else { ?>
-                        <?= $the_form["student"] ?? null; ?>
-                    <?php } ?>
-                </div>
-                <div class="tab-pane fade" id="staff" role="tabpanel" aria-labelledby="staff-tab2">
-                    <?php if($notReady) { ?>
-                        <div class="alert alert-warning text-center">
-                            You must first set the Academic Year and Term to proceed.
-                        </div>
-                    <?php } else { ?>
-                        <?= $the_form["staff"] ?? null; ?>
-                    <?php } ?>
-                </div>
-                <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="courses-tab2">
-                    <?php if($notReady) { ?>
-                        <div class="alert alert-warning text-center">
-                            You must first set the Academic Year and Term to proceed.
-                        </div>
-                    <?php } else { ?>
-                        <?= $the_form["course"] ?? null; ?>
-                    <?php } ?>
-                </div>
+                <?php  if(in_array($client_state, ["Activated", "Pending"])) { ?>
+                    <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
+                        <?php if($notReady) { ?>
+                            <div class="alert alert-warning text-center">
+                                You must first set the Academic Year and Term to proceed.
+                            </div>
+                        <?php } else { ?>
+                            <?= $the_form["student"] ?? null; ?>
+                        <?php } ?>
+                    </div>
+                    <div class="tab-pane fade" id="staff" role="tabpanel" aria-labelledby="staff-tab2">
+                        <?php if($notReady) { ?>
+                            <div class="alert alert-warning text-center">
+                                You must first set the Academic Year and Term to proceed.
+                            </div>
+                        <?php } else { ?>
+                            <?= $the_form["staff"] ?? null; ?>
+                        <?php } ?>
+                    </div>
+                    <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="courses-tab2">
+                        <?php if($notReady) { ?>
+                            <div class="alert alert-warning text-center">
+                                You must first set the Academic Year and Term to proceed.
+                            </div>
+                        <?php } else { ?>
+                            <?= $the_form["course"] ?? null; ?>
+                        <?php } ?>
+                    </div>
+                <?php } ?>
                 <div class="tab-pane fade" id="complete" role="tabpanel" aria-labelledby="complete-tab2">
                     <?php if($notReady) { ?>
                         <div class="alert alert-warning text-center">
@@ -76,15 +80,20 @@
                     <?php } else { ?>
                         <div>
                             <h3 class="text-success text-center">
-                                You have successfully gone through the initial setup process, proceed to 
-                                complete it and begin using the system.
+                                <?= in_array($client_state, ["Activated", "Pending"]) ? 
+                                    "You have successfully gone through the initial setup process, proceed to complete it and begin using the system." : 
+                                    "The setup process for the academic year/term is completed, proceed to complete it and begin using the system." 
+                                ?>
                             </h3>
                             <div class="text-center pt-3 mt-3 border-top">
-                                <button onclick="return complete_setup_process()" class="btn btn-outline-success">Complete Setup Process</button>
+                                <button onclick="return complete_setup_process()" class="btn btn-outline-success">
+                                    <?= in_array($client_state, ["Activated", "Pending"]) ? "Complete Setup Process" : "Begin Academic Year" ?>
+                                </button>
                             </div>
                         </div>
                     <?php } ?>
                 </div>
+            
             </div>
         </div>
     </div>
