@@ -322,6 +322,10 @@ class Crons {
 
 		try {
 
+			// load and execute all email requests
+			// $this->loadEmailRequests();
+			// $this->inApp_Emails();
+
 			// prepare and execute the statement
 			$stmt = $this->db->prepare("SELECT * FROM cron_scheduler WHERE status = ? AND CURRENT_TIME() > TIMESTAMP(active_date) ORDER BY id ASC LIMIT 10");
 			$stmt->execute([0]);
@@ -577,161 +581,190 @@ class Crons {
 		// load client data
 		$client_data = $this->client_data($clientId);
 
-		// academics information
-		$academics = $client_data->client_preferences->academics;
-		
-		// set variables for the academic year and term
-		$academic_year = $academics->academic_year;
-		$academic_term = $academics->academic_term;
-		$next_academic_year = $academics->next_academic_year;
-		$next_academic_term = $academics->next_academic_term;
+		// confirm that the status is propagation of record
+		if($client_data->client_state === "Propagation") {
 
-		/**
-		 * STEP ONE:: 
-		 * 
-		 * GET THE LIST OF ALL STUDENTS FOR THE CURRENT ACADEMIC YEAR / TERM
-		 */
-		$list_users = $this->db->prepare("SELECT a.*,
-				(
-					SELECT 
-						CONCAT (
-							b.is_promoted,'_',b.promote_to,'_',
-							(
-								SELECT d.id FROM classes d WHERE d.item_id = b.promote_to LIMIT 1
+			// academics information
+			$preferences = $client_data->client_preferences;
+			$academics = $preferences->academics;
+			
+			// set variables for the academic year and term
+			$academic_year = $academics->academic_year;
+			$academic_term = $academics->academic_term;
+			$next_academic_year = $academics->next_academic_year;
+			$next_academic_term = $academics->next_academic_term;
+
+			/**
+			 * STEP ONE:: 
+			 * 
+			 * GET THE LIST OF ALL STUDENTS FOR THE CURRENT ACADEMIC YEAR / TERM
+			 */
+			$list_users = $this->db->prepare("SELECT a.*,
+					(
+						SELECT 
+							CONCAT (
+								b.is_promoted,'_',b.promote_to,'_',
+								(
+									SELECT d.id FROM classes d WHERE d.item_id = b.promote_to LIMIT 1
+								)
 							)
-						)
-					FROM 
-						promotions_log b 
-					LEFT JOIN promotions_history c ON c.history_log_id = b.history_log_id
-					WHERE 
-						b.academic_year = a.academic_year AND b.academic_term = a.academic_term AND 
-						a.item_id = b.student_id AND c.status='Processed'
-				) AS is_promoted
-			FROM 
-				users a 
-			WHERE 
-				a.academic_year = ? AND a.academic_term = ? AND a.user_type = ? AND a.user_status = ? 
-			LIMIT {$this->limit}"
-		);
-		$list_users->execute([$academic_year, $academic_term, "student", "Active"]);
-		$students_list = $list_users->fetchAll(PDO::FETCH_ASSOC);
+						FROM 
+							promotions_log b 
+						LEFT JOIN promotions_history c ON c.history_log_id = b.history_log_id
+						WHERE 
+							b.academic_year = a.academic_year AND b.academic_term = a.academic_term AND 
+							a.item_id = b.student_id AND c.status='Processed'
+					) AS is_promoted
+				FROM 
+					users a 
+				WHERE 
+					a.academic_year = ? AND a.academic_term = ? AND a.user_type = ? AND a.user_status = ? 
+				LIMIT {$this->limit}"
+			);
+			$list_users->execute([$academic_year, $academic_term, "student", "Active"]);
+			$students_list = $list_users->fetchAll(PDO::FETCH_ASSOC);
 
-		// variables
-		$students_query_string = "";
-		$students_query_array = array();
+			// variables
+			$students_query_string = "";
+			$students_query_array = array();
 
-		// loop through the students list
-		foreach($students_list as $ikey => $student) {
-			
-			// get the keys
-			$columns = array_keys($student);
-			$values = array_values($student);
-			$last_key = count($values)-1;
+			// loop through the students list
+			foreach($students_list as $ikey => $student) {
+				
+				// get the keys
+				$columns = array_keys($student);
+				$values = array_values($student);
+				$last_key = count($values)-1;
 
-			// format the student promotion information
-			$is_promoted = explode("_", $student["is_promoted"]);
-			
-			// append new variables
-			$student["class_id"] = ($is_promoted[0] == 1) ? $is_promoted[2] : $student["class_id"];
-			$student["academic_year"] = $next_academic_year;
-			$student["academic_term"] = $next_academic_term;
-			$student["last_visited_page"] = "{{APPURL}}dashboard";
+				// format the student promotion information
+				$is_promoted = explode("_", $student["is_promoted"]);
+				
+				// append new variables
+				$student["class_id"] = ($is_promoted[0] == 1) ? $is_promoted[2] : $student["class_id"];
+				$student["academic_year"] = $next_academic_year;
+				$student["academic_term"] = $next_academic_term;
+				$student["date_created"] = date("Y-m-d H:i:s");
+				$student["last_login"] = date("Y-m-d H:i:s");
+				$student["last_visited_page"] = "{{APPURL}}dashboard";
 
-			// get the finances owed by the user
-			$student_fees = $this->student_fees($student["item_id"], $academic_year, $academic_term);
+				// get the finances owed by the user
+				$student_fees = $this->student_fees($student["item_id"], $academic_year, $academic_term);
 
-			// begin the student insert string
-			$query_string = "INSERT INTO users SET ";
-			
-			// loop through the columns
-			foreach($columns as $key => $column) {
-				// exempt some data from the query
-				if(!in_array($key, [0, $last_key])) {
-					$query_string .= "{$column}='{$values[$key]}',";
+				// begin the student insert string
+				$query_string = "INSERT INTO users SET ";
+				
+				// loop through the columns
+				foreach($columns as $key => $column) {
+					// exempt some data from the query
+					if(!in_array($key, [0, $last_key])) {
+						$query_string .= "{$column}='{$values[$key]}',";
+					}
 				}
+				$students_query_string .= trim($query_string, ",").";\n";
+
+				$students_query_array[] = $student_fees;
+
 			}
-			$students_query_string .= trim($query_string, ",").";\n";
 
-			$students_query_array[] = $student_fees;
+			// initial 
+			$school_fees = array();
 
-		}
-
-		// initial 
-		$school_fees = array();
-
-		// algorithm to calculate how much money the school should have received 
-		foreach($students_query_array as $key => $value) {
-			foreach($value as $ikey => $ivalue) {
-				foreach($ivalue as $ivkey => $ivvalue) {
-					$school_fees[$ivvalue["category_id"]]["due"] = isset($school_fees[$ivvalue["category_id"]]["due"]) ? ($school_fees[$ivvalue["category_id"]]["due"] + $ivvalue["amount"]["due"]) : $ivvalue["amount"]["due"];
-					$school_fees[$ivvalue["category_id"]]["paid"] = isset($school_fees[$ivvalue["category_id"]]["paid"]) ? ($school_fees[$ivvalue["category_id"]]["paid"] + $ivvalue["amount"]["paid"]) : $ivvalue["amount"]["paid"];
-					$school_fees[$ivvalue["category_id"]]["balance"] = isset($school_fees[$ivvalue["category_id"]]["balance"]) ? ($school_fees[$ivvalue["category_id"]]["balance"] + $ivvalue["amount"]["balance"]) : $ivvalue["amount"]["due"];
-				}
-			}
-		}
-
-		// total balance
-		$total_due = array_sum(array_column($school_fees, "due"));
-		$total_paid = array_sum(array_column($school_fees, "paid"));
-		$total_balance = array_sum(array_column($school_fees, "balance"));
-
-		$school_fees_summary = [
-			"total_due" => $total_due,
-			"total_paid" => $total_paid,
-			"total_balance" => $total_balance
-		];
-
-		// school fees log information
-		$school_fees_log = [
-			"fees_log" => $school_fees,
-			"summary" => $school_fees_summary
-		];
-
-		// get only fees that array list that the student has a balance
-		$student_ownings = array();
-
-		// algorithm to calculate how much money the school should have received 
-		foreach($students_query_array as $key => $value) {
-			foreach($value as $ikey => $ivalue) {
-				foreach($ivalue as $ivkey => $ivvalue) {
-					if(round($ivvalue["amount"]["balance"]) > 0) {
-						$student_ownings[$ikey][$ivvalue["category_id"]] = $ivvalue["amount"]["balance"];
+			// algorithm to calculate how much money the school should have received 
+			foreach($students_query_array as $key => $value) {
+				foreach($value as $ikey => $ivalue) {
+					foreach($ivalue as $ivkey => $ivvalue) {
+						$school_fees[$ivvalue["category_id"]]["due"] = isset($school_fees[$ivvalue["category_id"]]["due"]) ? ($school_fees[$ivvalue["category_id"]]["due"] + $ivvalue["amount"]["due"]) : $ivvalue["amount"]["due"];
+						$school_fees[$ivvalue["category_id"]]["paid"] = isset($school_fees[$ivvalue["category_id"]]["paid"]) ? ($school_fees[$ivvalue["category_id"]]["paid"] + $ivvalue["amount"]["paid"]) : $ivvalue["amount"]["paid"];
+						$school_fees[$ivvalue["category_id"]]["balance"] = isset($school_fees[$ivvalue["category_id"]]["balance"]) ? ($school_fees[$ivvalue["category_id"]]["balance"] + $ivvalue["amount"]["balance"]) : $ivvalue["amount"]["due"];
 					}
 				}
 			}
-		}
 
-		// EXECUTE THE STUDENTS LIST
-		// $this->db->query($students_query_string);
+			// total balance
+			$total_due = array_sum(array_column($school_fees, "due"));
+			$total_paid = array_sum(array_column($school_fees, "paid"));
+			$total_balance = array_sum(array_column($school_fees, "balance"));
 
-		// UPDATE THE STUDENTS FEES DATA FOR THE TERM
-		$update_query = $this->db->prepare("UPDATE fees_terminal_log SET fees_log = ?, owings_logs = ? WHERE student_id = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
-		$insert_query = $this->db->prepare("INSERT INTO fees_terminal_log SET client_id = ?, fees_log = ?, owings_logs = ?, student_id = ?, academic_year = ?, academic_term = ?");
-		
-		// Through the Students Fees Log List
-		foreach($students_query_array as $key => $value) {
-			// loop through the students fees payments list
-			foreach($value as $ikey => $ivalue) {
-				// confirm that the owings already exists or not
-				$owing = isset($student_ownings[$ikey]) ? $student_ownings[$ikey] : (object) array();
-				// confirm that the record already exists or not
-				if($this->fees_history_log_exist($ikey, $academic_year, $academic_term)) {
-					$update_query->execute([json_encode($value), json_encode($owing), $ikey, $academic_year, $academic_term]);
-				} else {
-					$insert_query->execute([$clientId, json_encode($value), json_encode($owing), $ikey, $academic_year, $academic_term]);
+			$school_fees_summary = [
+				"total_due" => $total_due,
+				"total_paid" => $total_paid,
+				"total_balance" => $total_balance
+			];
+
+			// school fees log information
+			$school_fees_log = [
+				"fees_log" => $school_fees,
+				"summary" => $school_fees_summary
+			];
+
+			// get only fees that array list that the student has a balance
+			$student_ownings = array();
+
+			// algorithm to calculate how much money the school should have received 
+			foreach($students_query_array as $key => $value) {
+				foreach($value as $ikey => $ivalue) {
+					foreach($ivalue as $ivkey => $ivvalue) {
+						if(round($ivvalue["amount"]["balance"]) > 0) {
+							$student_ownings[$ikey][$ivvalue["category_id"]] = $ivvalue["amount"]["balance"];
+						}
+					}
 				}
 			}
-		}
 
-		// new query string for a school
-		$update_query = $this->db->prepare("UPDATE fees_terminal_log SET fees_log = ? WHERE client_id = ? AND academic_year = ? AND academic_term = ? AND log_type = ? LIMIT 1");
-		$insert_query = $this->db->prepare("INSERT INTO fees_terminal_log SET client_id = ?, fees_log = ?, academic_year = ?, academic_term = ?, log_type = ?");
+			// get fees category
+			$fees_category = $this->db->prepare("SELECT * FROM fees_category WHERE client_id = ? AND status = ? LIMIT 20");
+			$fees_category->execute([$clientId, 1]);
+			$fees_category_log = $fees_category->fetchAll(PDO::FETCH_OBJ);
 
-		// confirm if the school fees log already exists
-		if($this->fees_history_log_exist($clientId, $academic_year, $academic_term, "school")) {
-			$update_query->execute([json_encode($school_fees_log), $clientId, $academic_year, $academic_term, "school"]);
-		} else {
-			$insert_query->execute([$clientId, json_encode($school_fees_log), $academic_year, $academic_term, "school"]);
+			// EXECUTE THE STUDENTS LIST
+			$this->db->query($students_query_string);
+
+			// UPDATE THE STUDENTS FEES DATA FOR THE TERM
+			$update_query = $this->db->prepare("UPDATE clients_terminal_log SET fees_log = ?, arrears_log = ?, fees_category_log = ? WHERE student_id = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
+			$insert_query = $this->db->prepare("INSERT INTO clients_terminal_log SET client_id = ?, fees_log = ?, arrears_log = ?, fees_category_log = ?, student_id = ?, academic_year = ?, academic_term = ?");
+			
+			// Through the Students Fees Log List
+			foreach($students_query_array as $key => $value) {
+				// loop through the students fees payments list
+				foreach($value as $ikey => $ivalue) {
+					// confirm that the owings already exists or not
+					$owing = isset($student_ownings[$ikey]) ? $student_ownings[$ikey] : (object) array();
+					// confirm that the record already exists or not
+					if($this->fees_history_log_exist($ikey, $academic_year, $academic_term)) {
+						$update_query->execute([json_encode($value), json_encode($owing), json_encode($fees_category_log), $ikey, $academic_year, $academic_term]);
+					} else {
+						$insert_query->execute([$clientId, json_encode($value), json_encode($owing), json_encode($fees_category_log), $ikey, $academic_year, $academic_term]);
+					}
+				}
+			}
+
+			// new query string for a school
+			$update_query = $this->db->prepare("UPDATE clients_terminal_log SET fees_log = ?, fees_category_log = ? WHERE client_id = ? AND academic_year = ? AND academic_term = ? AND log_type = ? LIMIT 1");
+			$insert_query = $this->db->prepare("INSERT INTO clients_terminal_log SET client_id = ?, fees_log = ?, fees_category_log = ?, academic_year = ?, academic_term = ?, log_type = ?");
+
+			// confirm if the school fees log already exists
+			if($this->fees_history_log_exist($clientId, $academic_year, $academic_term, "school")) {
+				$update_query->execute([json_encode($school_fees_log), json_encode($fees_category_log), $clientId, $academic_year, $academic_term, "school"]);
+			} else {
+				$insert_query->execute([$clientId, json_encode($school_fees_log), json_encode($fees_category_log), $academic_year, $academic_term, "school"]);
+			}
+
+			// set the new term in the clients data table
+			$preferences->academics->academic_year = $next_academic_year;
+			$preferences->academics->academic_term = $next_academic_term;
+			$preferences->academics->term_starts = $preferences->academics->next_term_starts;
+			$preferences->academics->term_ends = $preferences->academics->next_term_ends;
+
+			// unset the next academic term and year
+			$preferences->academics->next_academic_year = null;
+			$preferences->academics->next_academic_term = null;
+			$preferences->academics->next_term_starts = null;
+			$preferences->academics->next_term_ends = null;
+	
+			// update the clients preferences
+			$stmt = $this->db->prepare("UPDATE clients_accounts SET client_preferences = ?, client_state = ? WHERE client_id = ? LIMIT 1");
+			$stmt->execute([json_encode($preferences), "Complete", $clientId]);
+
 		}
 
 	}
@@ -754,7 +787,7 @@ class Crons {
 			$field = ($type == "student") ? "student_id" : "client_id";
 
 			// prepare and execute the statement
-			$stmt = $this->db->prepare("SELECT id FROM fees_terminal_log WHERE {$field} = ? AND academic_year = ? AND academic_term = ? AND log_type = ? LIMIT 1");
+			$stmt = $this->db->prepare("SELECT id FROM clients_terminal_log WHERE {$field} = ? AND academic_year = ? AND academic_term = ? AND log_type = ? LIMIT 1");
 			$stmt->execute([$studentId, $academic_year, $academic_term, $type]);
 
 			return $stmt->rowCount();
@@ -780,7 +813,5 @@ class Crons {
 
 // create new object
 $jobs = new Crons;
-// $jobs->loadEmailRequests();
-// $jobs->inApp_Emails();
 $jobs->scheduler();
 ?>
