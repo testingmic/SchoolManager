@@ -756,10 +756,10 @@ class Crons {
 			$preferences->academics->term_ends = $preferences->academics->next_term_ends;
 
 			// unset the next academic term and year
-			$preferences->academics->next_academic_year = null;
-			$preferences->academics->next_academic_term = null;
-			$preferences->academics->next_term_starts = null;
-			$preferences->academics->next_term_ends = null;
+			$preferences->academics->next_academic_year = "";
+			$preferences->academics->next_academic_term = "";
+			$preferences->academics->next_term_starts = "";
+			$preferences->academics->next_term_ends = "";
 	
 			// update the clients preferences
 			$stmt = $this->db->prepare("UPDATE clients_accounts SET client_preferences = ?, client_state = ? WHERE client_id = ? LIMIT 1");
