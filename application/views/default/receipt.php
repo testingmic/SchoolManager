@@ -46,8 +46,6 @@ if($session->clientId) {
         if($studentIsset) {
             $student_data = $data[0];
         }
-        
-        // print_r($student_data);
 
         // get the client data
         $amount = 0;

@@ -65,8 +65,8 @@ class Fees extends Myschoolgh {
         $filters .= isset($params->query) && !empty($params->query) ? " AND {$params->query}" : "";
         $filters .= isset($params->programme_id) && !empty($params->programme_id) ? " AND a.programme_id='{$params->programme_id}'" : "";
         $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id IN {$this->inList($params->category_id)}" : ""; 
-        $filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
-        $filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
+        $filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}' AND u.academic_year='{$params->academic_year}'" : "";
+        $filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}' AND u.academic_term='{$params->academic_term}'" : "";
         $filters .= isset($params->date) && !empty($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";
         $filters .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "recorded_date") : null;
 
@@ -79,18 +79,18 @@ class Fees extends Myschoolgh {
 		try {
 
 			$stmt = $this->db->prepare("
-				SELECT a.*,
+				SELECT a.*, fc.name AS category_name,
                     (SELECT b.name FROM departments b WHERE b.id = a.department_id LIMIT 1) AS department_name,
                     (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
-                    (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.phone_number,'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.phone_number,'|',COALESCE(b.guardian_id,'NULL')) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info
                 FROM fees_collection a
                 LEFT JOIN users u ON u.item_id = a.student_id
+                LEFT JOIN fees_category fc ON fc.id = a.category_id
 				WHERE {$filters} AND a.client_id = ? ORDER BY DATE(a.recorded_date) DESC LIMIT {$params->limit}
             ");
 			$stmt->execute([$params->clientId]);
-
+            
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 
@@ -102,7 +102,7 @@ class Fees extends Myschoolgh {
                 
                 $data[] = $result;
             }
-
+            
 			return [
                 "code" => 200,
                 "data" => $data

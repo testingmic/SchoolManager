@@ -154,7 +154,7 @@ load_helpers(['menu_helper']);
                     <li><a href="#" class="nav-link nav-link-lg fullscreen-btn" data-rel="tooltip" title="Maximize to Fullscreen Mode"><i class="fas fa-expand"></i></a></li>
                     <li><a href="#" class="nav-link nav-link-lg hidden" data-rel="tooltip" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
                     <?php if($isActiveAccount) { ?>
-                    <li class="border-left text-white d-none d-md-block"><a href="javascript:void(0)" class="nav-link text-white nav-link-lg">
+                    <li class="border-left text-white d-none d-md-block"><a href="#" class="nav-link text-white nav-link-lg">
                             Academic Year/Term:
                             <strong class="font-18px">
                                 <span><?= $clientPrefs->academics->academic_year ?></span> 
@@ -190,7 +190,7 @@ load_helpers(['menu_helper']);
                                     </a>
                                 <?php } ?>
                             <?php } else { ?>
-                            <a href="javascript:void(0)" class="anchor dropdown-item">
+                            <a href="#" class="anchor dropdown-item">
                                 <span class="font-italic">Sorry! You currently do not have any ward in the school.</span>
                             </a>
                             <?php } ?>
@@ -205,7 +205,7 @@ load_helpers(['menu_helper']);
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
                     <div class="dropdown-header">Messages
                         <div class="float-right">
-                        <a href="javascript:void(0)" data-function="mark_as_read" data-item="messages">Mark All As Read</a>
+                        <a href="#" data-function="mark_as_read" data-item="messages">Mark All As Read</a>
                         </div>
                     </div>
                     <div id="messages_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-message">
@@ -232,7 +232,7 @@ load_helpers(['menu_helper']);
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
                     <div class="dropdown-header">Notifications
                         <div class="float-right">
-                        <a href="javascript:void(0)" data-function="mark_as_read" data-item="notifications">Mark All As Read</a>
+                        <a href="#" data-function="mark_as_read" data-item="notifications">Mark All As Read</a>
                         </div>
                     </div>
                     <div id="notifications_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-icons">

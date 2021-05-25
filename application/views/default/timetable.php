@@ -46,7 +46,7 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
 
     // set the parameters to load
     $params = (object)[
-        "clientId" => $clientId
+        "clientId" => $clientId, "client_data" => $defaultUser->client
     ];
 
     // if the $timetable_id is not empty
@@ -55,7 +55,7 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
         $params->limit = 1;
         $params->timetable_id = $timetable_id;
     }
-    $timetable_list = load_class("timetable", "controllers")->list($params);
+    $timetable_list = load_class("timetable", "controllers", $params)->list($params);
 
     // run this section if $timetable_id is not empty
     if(!empty($timetable_id)) {
@@ -169,7 +169,7 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Class</span>
                                                 </div>
-                                                <select class="form-control '.($timetable_found ? "selectpicker" : "").'" name="class_id">
+                                                <select class="form-control" name="class_id">
                                                     <option value="">Please Select Class</option>';
                                                     foreach($class_list as $each) {
                                                         $response->html .= "<option ".($class_id == $each->item_id ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";

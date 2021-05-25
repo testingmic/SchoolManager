@@ -2,12 +2,15 @@
 
 class Courses extends Myschoolgh {
 
+    private $iclient;
+
     public function __construct(stdClass $params = null)
     {
         parent::__construct();
 
         // get the client data
         $client_data = $params->client_data ?? null;
+        $this->iclient = $client_data;
 
         // run this query
         $this->academic_term = $client_data->client_preferences->academics->academic_term ?? null;
@@ -982,14 +985,26 @@ class Courses extends Myschoolgh {
      */
     public function draw($content) {
 
-        $html = "<table cellpadding=\"6px\" cellspacing=\"1px\" width=\"100%\">\n";
+        // set the address and the other information
+        $html = "<table cellpadding=\"5\" width=\"100%\">
+            <tr>
+                <td align=\"center\">
+                    <img src=\"{$this->baseUrl}{$this->iclient->client_logo}\" width=\"100px\"><br>
+                    <span style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</span><br>
+                    <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
+                    <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
+                </td>
+            </tr>
+        </table>";
+
+        $html .= "<table cellpadding=\"6px\" cellspacing=\"1px\" width=\"100%\">\n";
         $html .= "
             <tr>
-                <td style=\"border:dashed 1px #ccc\">
+                <td width=\"40%\" style=\"border:dashed 1px #ccc\">
                     <span style=\"font-size:13px\">Academic Year: ".strtoupper($content->academic_year)."</span><br>
                     <span style=\"font-size:13px\">Academic Term: ".strtoupper($content->academic_term)."</span><br>
                 </td>
-                <td style=\"border:dashed 1px #ccc\">
+                <td width=\"60%\" style=\"border:dashed 1px #ccc\">
                     <span style=\"font-size:24px\">".strtoupper($content->name)."</span><br>
                     <span style=\"font-size:13px;padding-right:40px;\"><strong>CODE:</strong> {$content->course_code}</span><br>
                     <span style=\"font-size:13px\"><strong>WEEKLY MEETINGS:</strong> {$content->weekly_meeting}</span><br>
@@ -1039,28 +1054,34 @@ class Courses extends Myschoolgh {
                 $html .= "</tr>";
             }
         }
-        $html .= "<tr><td style=\"border:dashed 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;COURSE TUTORS</span></td></tr>";
-        $html .= "</table>";
-        $html .= "
-        <table width=\"100%\">
-            <tr>
-                <td>
-                    <span style=\"font-size:13px\"><strong>Fullname:</strong></span><br>
-                    <span style=\"font-size:13px\"><strong>Employee ID:</strong></span><br>
-                    <span style=\"font-size:13px\"><strong>Phone Number:</strong></span><br>
-                    <span style=\"font-size:13px\"><strong>Email Address:</strong></span><br>
-                </td>";
-        foreach($content->course_tutors as $key => $value) {
-            $html .= "
-            <td>
-                <span style=\"font-size:13px\">".$value->name."</span><br>
-                <span style=\"font-size:13px\">".$value->unique_id."</span><br>
-                <span style=\"font-size:13px\">".$value->phone_number."</span><br>
-                <span style=\"font-size:13px\">".$value->email."</span><br>
-            </td>";
+        // load this section if the course tutors are not empty
+        if(!empty($content->course_tutors)) {
+            $html .= "<tr><td style=\"border:dashed 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;COURSE TUTORS</span></td></tr>";
         }
-        $html .= "</tr>";
         $html .= "</table>";
+        // load this section if the course tutors are not empty
+        if(!empty($content->course_tutors)) {
+            $html .= "
+            <table width=\"100%\">
+                <tr>
+                    <td>
+                        <span style=\"font-size:13px\"><strong>Fullname:</strong></span><br>
+                        <span style=\"font-size:13px\"><strong>Employee ID:</strong></span><br>
+                        <span style=\"font-size:13px\"><strong>Phone Number:</strong></span><br>
+                        <span style=\"font-size:13px\"><strong>Email Address:</strong></span><br>
+                    </td>";
+            foreach($content->course_tutors as $key => $value) {
+                $html .= "
+                <td>
+                    <span style=\"font-size:13px\">".$value->name."</span><br>
+                    <span style=\"font-size:13px\">".$value->unique_id."</span><br>
+                    <span style=\"font-size:13px\">".$value->phone_number."</span><br>
+                    <span style=\"font-size:13px\">".$value->email."</span><br>
+                </td>";
+            }
+            $html .= "</tr>";
+            $html .= "</table>";
+        }
 
         return $html;
     }

@@ -665,6 +665,7 @@ class Forms extends Myschoolgh {
 
         // set the form
         $data = str_ireplace("'", "", $data);
+        $name = empty($name) ? "faketext" : $name;
         $form_content = "<input type='hidden' hidden id='trix-editor-input' value='{$data}'>";
         $form_content .= "<trix-editor name=\"{$name}\" input='trix-editor-input' class=\"trix-slim-scroll\" id=\"{$id}\"></trix-editor>";
 
@@ -1062,7 +1063,7 @@ class Forms extends Myschoolgh {
         $title = isset($params->data->name) ? $params->data->name : null;
 
         $html_content = "
-        <form action='{$this->baseUrl}api/courses/".(!$title ? "add_unit" : "update_unit")."' method='POST' id='ajax-data-form-content' class='ajax-data-form'>
+        <form action='{$this->baseUrl}api/courses/".(!$title ? "add_unit" : "update_unit")."' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
             <div class='row'>
                 <div class='col-lg-12'>
                     <div class='form-group'>
@@ -1085,7 +1086,7 @@ class Forms extends Myschoolgh {
                 <div class='col-md-12'>
                     <div class='form-group'>
                         <label>Overview / Objective</label>
-                        {$this->textarea_editor($message)}
+                        {$this->textarea_editor($message, "faketext", "_ajax-form-content")}
                     </div>
                 </div>
                 <div class=\"col-md-6 text-left\">
@@ -1190,7 +1191,7 @@ class Forms extends Myschoolgh {
             }
 
             $html_content = "
-            <form action='{$this->baseUrl}api/courses/".(!$title ? "add_lesson" : "update_lesson")."' method='POST' id='ajax-data-form-content' class='ajax-data-form'>
+            <form action='{$this->baseUrl}api/courses/".(!$title ? "add_lesson" : "update_lesson")."' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
                 <div class='row'>
                     <div class='col-lg-12'>
                         <div class='form-group'>
@@ -1213,7 +1214,7 @@ class Forms extends Myschoolgh {
                     <div class='col-md-12'>
                         <div class='form-group'>
                             <label>Description</label>
-                            {$this->textarea_editor($message)}
+                            {$this->textarea_editor($message, "faketext", "_ajax-form-content")}
                         </div>
                     </div>";
 
@@ -1259,7 +1260,7 @@ class Forms extends Myschoolgh {
         $lessons_list = $this->pushQuery("id, item_id, course_id, unit_id, name", "courses_plan", "course_id = '".($params->data->the_course_id ?? $course_id)."' AND client_id='{$params->clientId}' AND plan_type='lesson'");
         
         $html_content = "
-        <form id='ajax-data-form-content' class='ajax-data-form' enctype=\"multipart/form-data\" action=\"{$this->baseUrl}api/resources/upload_4courses\" method=\"POST\">
+        <form id='_ajax-data-form-content' class='_ajax-data-form' enctype=\"multipart/form-data\" action=\"{$this->baseUrl}api/resources/upload_4courses\" method=\"POST\">
             <div class=\"row\">
                 <div class=\"col-lg-12 pt-0 mt-0\">
                     <div class=\"form-group pb-1 pt-0 mb-2 mt-0\">
@@ -1448,7 +1449,7 @@ class Forms extends Myschoolgh {
             }
 
             $html_content = "
-            <form action='{$this->baseUrl}api/incidents/".(!$title ? "add" : "update")."' method='POST' id='ajax-data-form-content' class='ajax-data-form'>
+            <form action='{$this->baseUrl}api/incidents/".(!$title ? "add" : "update")."' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
                 <div class='row'>
                     <div class='col-lg-12'>
                         <div class='form-group'>
@@ -1506,7 +1507,7 @@ class Forms extends Myschoolgh {
                     $html_content .= "<div class='col-md-12'>
                         <div class='form-group'>
                             <label>Description</label>
-                            {$this->textarea_editor($message)}
+                            {$this->textarea_editor($message, "faketext", "_ajax-form-content")}
                         </div>
                     </div>";
 

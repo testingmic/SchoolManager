@@ -359,7 +359,9 @@ class Analitics extends Myschoolgh {
             $query = $this->db->prepare("SELECT 
                     COUNT(*) AS {$value_count},
                     SUM(amount) AS {$amount_paid}
-                FROM fees_collection a WHERE {$where_clause}
+                FROM fees_collection a
+                LEFT JOIN users u ON u.item_id = a.student_id
+                WHERE {$where_clause}
             ");
             $query->execute([$this->user_status]);
             $q_result = $query->fetch(PDO::FETCH_OBJ);
@@ -381,7 +383,9 @@ class Analitics extends Myschoolgh {
                 $_query = $this->db->prepare("SELECT 
                         COUNT(*) AS {$value_count}, 
                         SUM(amount) AS {$amount_paid}
-                    FROM fees_collection a WHERE {$_where_clause}
+                    FROM fees_collection a 
+                    LEFT JOIN users u ON u.item_id = a.student_id
+                    WHERE {$_where_clause}
                 ");
                 $_query->execute([$this->user_status]);
                 $_q_result = $_query->fetch(PDO::FETCH_OBJ);

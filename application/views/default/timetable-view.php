@@ -29,7 +29,7 @@ $isPermitted = $accessObject->hasAccess("manage", "timetable");
 $timetable_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : $session->last_TimetableId;
 
 // set the parameters to load
-$params = (object)["clientId" => $clientId];
+$params = (object)["clientId" => $clientId, "client_data" => $defaultUser->client];
 
 // if a student is logged in then show timetables for the class
 if(in_array($defaultUser->user_type, ["student", "parent"])) {
@@ -37,7 +37,7 @@ if(in_array($defaultUser->user_type, ["student", "parent"])) {
 }
 
 // create a new object
-$timetableClass = load_class("timetable", "controllers");
+$timetableClass = load_class("timetable", "controllers", $params);
 
 // load the timetables list
 $timetable_list = $timetableClass->list($params);
@@ -99,7 +99,7 @@ $response->html = '
                             <div class="col-lg-12 text-center">
                                 <div class="form-group">
                                     <label>Timetable</label>
-                                    <select style="max-width:400px" class="form-control selectpicker" data-url="timetable-view" id="change_TimetableViewId" name="change_TimetableViewId">';
+                                    <select data-width="100%" class="form-control selectpicker" data-url="timetable-view" id="change_TimetableViewId" name="change_TimetableViewId">';
                                     if(empty($timetable_id)) {
                                         $response->html .= "<option value='auto_select'>Select Timetable</option>";
                                     }

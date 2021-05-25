@@ -35,9 +35,9 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
     $timetable_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : $session->last_TimetableId;
 
     // set the parameters to load
-    $params = (object)["clientId" => $clientId];
+    $params = (object)["clientId" => $clientId, "client_data" => $defaultUser->client];
 
-    $timetableClass = load_class("timetable", "controllers");
+    $timetableClass = load_class("timetable", "controllers", $params);
     $timetable_list = $timetableClass->list($params);
 
     // set the timetable key
@@ -64,10 +64,10 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
             $params->minified = true;
             $params->userData = $defaultUser;
             $params->class_id = $data->class_id;
-            $courses_list = load_class("courses", "controllers")->list($params)["data"];
+            $courses_list = load_class("courses", "controllers", $params)->list($params)["data"];
 
             // load the class rooms available to be used
-            $rooms_list = load_class("rooms", "controllers")->list($params)["data"];
+            $rooms_list = load_class("rooms", "controllers", $params)->list($params)["data"];
             $disabled_inputs = $data->disabled_inputs;
 
             // load the allocations

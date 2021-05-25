@@ -34,6 +34,7 @@ if(!empty($item_id)) {
         "userId" => $userId,
         "course_id" => $item_id,
         "userData" => $defaultUser,
+        "client_data" => $defaultUser->client,
         "full_attachments" => true,
         "full_details" => true,
         "limit" => 1
@@ -49,7 +50,7 @@ if(!empty($item_id)) {
         $item_param->bypass = true;
     }
 
-    $data = load_class("courses", "controllers")->list($item_param);
+    $data = load_class("courses", "controllers", $item_param)->list($item_param);
 
     // if no record was found
     if(empty($data["data"])) {
@@ -119,13 +120,8 @@ if(!empty($item_id)) {
         $updateItem = confirm_url_id(2, "update") ? true : false;
 
         // lesson planner display
-        $unit_lessons = "";
+        $lessons_list = "<div class='mb-2'>&nbsp;</div>";
         $attachments_list = "";
-        $lessons_list = "";
-
-        if(!empty($data->lesson_plan)) {
-            $lessons_list = "<div class='mb-2'>&nbsp;</div>";
-        }
 
         // if the attachment parameter is not empty
         if(!empty($data->attachment)) {
@@ -140,6 +136,7 @@ if(!empty($item_id)) {
         foreach($data->lesson_plan as $key => $plan) {
 
             $key++;
+            $unit_lessons = "";
 
             // if the lesson is not empty
             if(!empty($plan->lessons_list)) {

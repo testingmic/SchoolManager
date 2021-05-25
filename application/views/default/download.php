@@ -1,4 +1,7 @@
 <?php
+// global variable
+global $defaultUser;
+
 // if a first parameter was parsed then end
 if(confirm_url_id(1)) {
     print "Access Denied!";
@@ -108,13 +111,16 @@ if((isset($_GET["file"]) && !empty($_GET["file"])) || (isset($_GET["file_id"], $
 elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) {
 
     // set the timetable id
-    $timetableClass = load_class("timetable", "controllers");
     $timetable_id = xss_clean($_GET["tb_id"]);
     $codeOnly = (bool) isset($_GET["code_only"]);
     $file_name = "timetable_calendar.pdf";
 
     // set some parameters
     $param = (object) ["data" => [], "timetable_id" => $timetable_id, "code_only" => $codeOnly, "download" => true];
+    $param->client_data = $defaultUser->client;
+
+    // create a new object
+    $timetableClass = load_class("timetable", "controllers", $param);
 
     // set a day parameter
     if(isset($_GET["load"]) && (in_array($_GET["load"], ["yesterday", "today", "tomorrow"]))) {
@@ -145,9 +151,10 @@ elseif(isset($_GET["pay_id"]) && !isset($_GET["cs_mat"])) {
 
     $payslip_id = xss_clean($_GET["pay_id"]);
     $param = (object) ["payslip_id" => $payslip_id, "download" => true, "clientId" => $session->clientId];
+    $param->client_data = $defaultUser->client;
 
     // load the table
-    $content = load_class("payroll", "controllers")->draw($param);
+    $content = load_class("payroll", "controllers", $param)->draw($param);
     $file_name = "Employee_Payslip.pdf";
 
     // end query if no result found
@@ -173,15 +180,18 @@ elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"
 
     // continue
     if(isset($course[2])) {
-        // create new object
-        $courseObj = load_class("courses", "controllers");
+
         // get the parameters
         $params = (object) [
             "limit" => 1,
             "full_details" => true,
             "course_id" => $course[1],
-            "clientId" => $course[2]
+            "clientId" => $course[2],
+            "client_data" => $defaultUser->client
         ];
+
+        // create new object
+        $courseObj = load_class("courses", "controllers", $params);
         $course_info = $courseObj->list($params);
 
         // if data was found

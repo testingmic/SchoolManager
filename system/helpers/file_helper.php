@@ -457,13 +457,12 @@ function show_content($title = null, $file_name, $report_content, $orientation =
     // create new PDF document
     $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
-    //print $report_data;
 	// set document information
 	$pdf->SetCreator(PDF_CREATOR);
 	$pdf->SetAuthor($appName);
-	$pdf->SetTitle($appName.$title);
+	$pdf->SetTitle("{$appName} {$title}");
 	$pdf->SetSubject('Calendar');
-	$pdf->SetKeywords('score, ucc, nursing, attendance, timetable, manager');
+	$pdf->SetKeywords('myschoolgh, attendance, timetable, manager');
 
 	$pdf->SetHeaderData(NULL);
 	// set header and footer fonts
@@ -496,30 +495,29 @@ function show_content($title = null, $file_name, $report_content, $orientation =
 	// if the content is not an array
 	if(!is_array($report_content)) {
 		// add the new page
-		$pdf->AddPage("L", "A4");
+		$pdf->AddPage($orientation, "A4");
 		// write the content of the page
-		$pdf->writeHTML($report_content["report"] ?? null, false, false, true, false, '');
+		$pdf->writeHTML($report_content["report"] ?? $report_content, false, false, true, false, '');
 	} else {
-		// reverse the array
-		// $report_content = array_reverse($report_content);
 		// loop through the pages
 		foreach($report_content as $content) {
 			// add the new page
-			$pdf->AddPage("L", "A4");
+			$pdf->AddPage($orientation, "A4");
 			// write the content of the page
-			$pdf->writeHTML($content["report"] ?? null, false, false, true, false, '');
+			$pdf->writeHTML($content["report"] ?? $content, false, false, true, false, '');
 		}
 	}
 
 	// output the HTML content
-    $pdf->Output($file_name, 'I');
+    $pdf->Output($file_name);
 }
 
 // create a function
 function dompdf_show_content($title = null, $file_name, $report_content, $orientation = "landscape", $reportObj) {
 		
 	// instantiate and use the dompdf class
-	$dompdf = new Dompdf();
+	// $dompdf = new Dompdf();
+	$dompdf = (object) [];
 
 	// get the content
 	$pages_content = "<link rel=\"stylesheet\" type=\"text/css\" href=\"assets/css/dompdf.css\">";

@@ -297,7 +297,7 @@ var generate_terminal_report = () => {
         return false;
     }
 
-    window.open(`${baseUrl}reports/report?academic_term=${academic_term}&academic_year=${academic_year}&class_id=${class_id}&student_id=${student_id}`)
+    window.open(`${baseUrl}report?academic_term=${academic_term}&academic_year=${academic_year}&class_id=${class_id}&student_id=${student_id}`)
 }
 
 $(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() {

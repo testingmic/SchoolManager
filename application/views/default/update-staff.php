@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser;
+global $myClass, $SITEURL, $defaultUser, $defaultAcademics;
 
 // initial variables
 $appName = config_item("site_name");
@@ -82,7 +82,9 @@ if(!empty($user_id)) {
                 "userId" => $defaultUser->user_id,
                 "userData" => $defaultUser,
                 "course_tutor" => $data["data"][0]->user_id,
-                "limit" => 99999
+                "limit" => 99999,
+                "academic_year" => $defaultAcademics->academic_year,
+                "academic_term" => $defaultAcademics->academic_term,
             ];
             $courses_list = load_class("courses", "controllers")->list($courses_param);
 

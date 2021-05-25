@@ -4,9 +4,16 @@ class Timetable extends Myschoolgh {
 
     private $color_set;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function __construct(stdClass $params = null) {
+		parent::__construct();
+
+        // get the client data
+        $client_data = $params->client_data;
+        $this->iclient = $client_data;
+
+        // run this query
+        $this->academic_term = $client_data->client_preferences->academics->academic_term;
+        $this->academic_year = $client_data->client_preferences->academics->academic_year;
 
         // set the colors to use for the loading of pages
         $this->color_set = [
@@ -14,7 +21,7 @@ class Timetable extends Myschoolgh {
             "#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
             "#007bff", "#6c757d", "#28a745", "#17a2b8", "#ffc107", "#dc3545"
         ];
-    }
+	}
     
     /**
      * List timetable records
@@ -29,6 +36,9 @@ class Timetable extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
+
         $params->query .= (isset($params->timetable_id) && !empty($params->timetable_id)) ? " AND a.item_id='{$params->timetable_id}'" : null;
         $params->query .= (isset($params->published) && !empty($params->published)) ? " AND a.published='{$params->published}'" : null;
         $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
@@ -41,7 +51,8 @@ class Timetable extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT name FROM classes WHERE classes.item_id = a.class_id LIMIT 1) AS class_name
+                    (SELECT name FROM classes WHERE classes.item_id = a.class_id LIMIT 1) AS class_name,
+                    (SELECT name FROM departments WHERE departments.item_id = a.department_id LIMIT 1) AS department_name                    
                 FROM timetables a
                 WHERE {$params->query} AND a.status = ? ORDER BY a.name LIMIT {$params->limit}
             ");
@@ -649,10 +660,11 @@ class Timetable extends Myschoolgh {
         // column with calculation
         $summary = null;
         $slots = $data->slots;
-        $width = round(100/($slots+1));
+        $width = round((100/($slots+1)), 2);
 
         // preferences
         if(isset($data->client_details)) {
+
             // set the preferences
             $prefs = !is_object($data->client_details->client_preferences) ? json_decode($data->client_details->client_preferences) : $data->client_details->client_preferences;
             
@@ -660,19 +672,19 @@ class Timetable extends Myschoolgh {
             if(!isset($params->no_header)) {
                 
                 // set the header content
-                $summary = '<table width="100%" class="'.$table_class.'" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
+                $summary = '<table width="100%" class="'.$table_class.'" cellpadding="3px" style="margin: auto auto;" cellspacing="3px">'."\n";
                 $summary .= "<tr>\n
-                        <td>
+                        <td width=\"27%\">
                             <strong style=\"font-size:13px;\">Class Name:</strong> {$data->class_name}<br>
-                            <strong style=\"font-size:13px;\">Department:</strong> {$data->class_name}
+                            <strong style=\"font-size:13px;\">Department:</strong> {$data->department_name}
                         </td>
-                        <td align=\"center\">
-                            <strong style=\"padding-top:0px;font-size:17px\">".strtoupper($data->client_details->client_name)."</strong><br>
-                            <strong style=\"padding-top:0px;font-size:12px\">".$data->client_details->client_email."</strong><br>
-                            <strong style=\"padding-top:0px;font-size:12px\">".$data->client_details->client_contact."</strong><br>
-                            <strong>".$data->client_details->client_address."</strong><br>
+                        <td width=\"46%\" align=\"center\">
+                            <img src=\"{$this->baseUrl}{$this->iclient->client_logo}\" width=\"70px\"><br>
+                            <span style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</span><br>
+                            <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
+                            <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
                         </td>
-                        <td>
+                        <td width=\"27%\">
                             <strong style=\"font-size:12px;\">Academic Year:</strong> {$prefs->academics->academic_year}<br>
                             <strong style=\"font-size:12px;\">Academic Term:</strong> {$prefs->academics->academic_term}<br>
                             ".(isset($data->last_updated) ? "
@@ -690,7 +702,7 @@ class Timetable extends Myschoolgh {
         } else {
             $html_table = "<style>#t_table tr td, #t_table tr td {border:1px dashed #ccc;}</style>\n";
         }
-        $html_table .= $summary.'<table class="'.$table_class.'" id="t_table" width="100%" cellpadding="5px" style="margin: auto auto;" cellspacing="5px">'."\n";
+        $html_table .= $summary.'<table class="'.$table_class.'" id="t_table" width="100%" cellpadding="3px" style="margin: auto auto;" cellspacing="3px">'."\n";
         $html_table .= "<tr ".(isset($params->height) && $params->height ? "style='height:{$params->height}px'" : "").">\n\t<td width=\"{$width}%\"></td>\n";
         $start_time = $data->start_time;
         
@@ -743,8 +755,10 @@ class Timetable extends Myschoolgh {
 
         // if the allocations is not empty
         if(!empty($data->allocations)) {
+            
             // loop through each day
             for ($d = 0; $d < $data->days; $d++) {
+
                 // if not today only 
                 if(!$todayOnly || ($todayOnly && $days[$d] == $filters[$todayOnly])) {
 

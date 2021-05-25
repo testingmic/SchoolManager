@@ -278,7 +278,7 @@ var trigger_form_submit = () => {
         let theButton = $(this),
             draftButton = $(`form[class="ajax-data-form"] button[type="button-submit"][data-function="draft"]`),
             formAction = $(`form[class="ajax-data-form"]`).attr("action"),
-            formButton = $(`form[class="app-data-form"] button[type="button-submit"]`);
+            formButton = $(`form[class="ajax-data-form"] button[type="button-submit"]`);
 
         let optional_flow = "We recommend that you save the form as a draft, and review it before submitting. Do you wish to proceed with this action?";
 
@@ -420,6 +420,156 @@ var trigger_form_submit = () => {
     });
 }
 
+var ajax_trigger_form_submit = () => {
+
+    $(`form[class="_ajax-data-form"] button[type="button-submit"]`).on("click", async function(evt) {
+
+        evt.preventDefault();
+        let theButton = $(this),
+            draftButton = $(`form[class="_ajax-data-form"] button[type="button-submit"][data-function="draft"]`),
+            formAction = $(`form[class="_ajax-data-form"]`).attr("action"),
+            formButton = $(`form[class="_ajax-data-form"] button[type="button-submit"]`);
+
+        let optional_flow = "We recommend that you save the form as a draft, and review it before submitting. Do you wish to proceed with this action?";
+
+        formButton.prop("disabled", true);
+
+        let myForm = document.getElementById('_ajax-data-form-content');
+        let theFormData = new FormData(myForm);
+
+        let button = theButton.attr("data-function");
+        theFormData.append("the_button", button);
+
+        if ($(`select[name='assigned_to_list']`).length) {
+            theFormData.delete("assigned_to_list");
+            theFormData.append("assigned_to_list", serializeSelect($(`select[name="assigned_to_list"]`)));
+        }
+
+        if ($(`textarea[name="faketext"]`).length) {
+            theFormData.delete("faketext");
+            let content = CKEDITOR.instances['_ajax-form-content'].getData();
+            theFormData.append("description", htmlEntities(content));
+        }
+
+        if ($(`textarea[name="faketext_2"]`).length) {
+            theFormData.delete("faketext_2");
+            let content = CKEDITOR.instances['_ajax-form-content_2'].getData();
+            theFormData.append("reason", htmlEntities(content));
+        }
+
+        if ($(`trix-editor[name="faketext"][id="_ajax-form-content"]`).length) {
+            theFormData.delete("faketext");
+            let content = $(`trix-editor[id="_ajax-form-content"]`).html();
+            theFormData.append("description", htmlEntities(content));
+        }
+
+        if ($(`trix-editor[name="faketext_2"][id="_ajax-form-content_2"]`).length) {
+            theFormData.delete("faketext_2");
+            let content = $(`trix-editor[id="_ajax-form-content_2"]`).html();
+            theFormData.append("reason", htmlEntities(content));
+        }
+
+        swal({
+            title: "Submit Form",
+            text: `Are you sure you want to Submit this form? ${draftButton.length ? optional_flow : ""}`,
+            icon: 'warning',
+            buttons: true,
+            dangerMode: true,
+        }).then((proceed) => {
+            if (proceed) {
+                $.ajax({
+                    url: `${formAction}`,
+                    data: theFormData,
+                    contentType: false,
+                    cache: false,
+                    type: `POST`,
+                    processData: false,
+                    success: function(response) {
+                        if (response.code == 200) {
+                            swal({
+                                position: 'top',
+                                text: response.data.result,
+                                icon: "success",
+                            });
+                            if (response.data.additional) {
+                                if (response.data.additional.clear !== undefined) {
+                                    if ($(`textarea[name="faketext"]`).length) {
+                                        CKEDITOR.instances['_ajax-form-content'].setData("");
+                                    }
+                                    if ($(`trix-editor[name="faketext"][id="_ajax-form-content"]`).length) {
+                                        $(`trix-editor[name="faketext"][id="_ajax-form-content"]`).html("");
+                                    }
+                                    $replies_loaded.attr("value", "0");
+                                    $replies_loaded.attr("data-form", "none");
+                                    $(".modal").modal("hide");
+                                    $(`form[class="_ajax-data-form"] select`).val("null").change();
+                                    $(`form[class="ajax-data-form"] input, form[class="_ajax-data-form"] textarea`).val("");
+                                }
+                                if (response.data.additional.append !== undefined) {
+                                    $(`div[id="${response.data.additional.append.div_id}"]`).html(response.data.additional.append.data);
+                                }
+                                if (response.data.additional.record !== undefined) {
+                                    $.each(response.data.additional.record, function(ie, iv) {
+                                        $(`form[class="_ajax-data-form"] input[name="${ie}"]`).val(iv);
+                                        $(`[data-record="${ie}"]`).html(iv);
+                                    });
+                                }
+                                if (response.data.additional.href !== undefined) {
+                                    if (theButton.attr("href") !== undefined) {
+                                        setTimeout(() => {
+                                            loadPage(theButton.attr("href"));
+                                        }, 1000);
+                                    } else {
+                                        setTimeout(() => {
+                                            loadPage(response.data.additional.href);
+                                        }, 2000);
+                                    }
+                                }
+                                if (response.data.additional.data !== undefined) {
+                                    preload_AjaxData(response.data.additional.data);
+                                }
+                            }
+
+                            if (typeof initiateCalendar === "function") {
+                                initiateCalendar();
+                            }
+
+                            $form_modal.modal("hide");
+                            $(`form[class="_ajax-data-form"] div[class~="file-preview"]`).html("");
+                        } else {
+                            if (response.data.result !== undefined) {
+                                swal({
+                                    position: 'top',
+                                    text: response.data.result,
+                                    icon: "error",
+                                });
+                            } else {
+                                swal({
+                                    position: 'top',
+                                    text: "Sorry! Error processing request.",
+                                    icon: "error",
+                                });
+                            }
+                        }
+                    },
+                    complete: function() {
+                        $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+                    },
+                    error: function() {
+                        $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+                        swal({
+                            position: 'top',
+                            text: "Sorry! Error processing request.",
+                            icon: "error",
+                        });
+                    }
+                });
+            }
+        });
+
+    });
+}
+
 var loadPage = (loc, pushstate) => {
     devlog("loadPage(", loc, ") I called =>")
 
@@ -483,6 +633,7 @@ var loadPage = (loc, pushstate) => {
             linkClickStopper($.pagecontent);
             formSubmitStopper($.pagecontent);
             trigger_form_submit();
+            ajax_trigger_form_submit();
         },
         complete: () => {
             var prev = window.history.state === null ? null : window.history.state.current
@@ -771,6 +922,7 @@ var form_processing = () => {
     });
 
     trigger_form_submit();
+    ajax_trigger_form_submit();
 }
 
 var form_loader = async(form_module, module_item_id) => {
