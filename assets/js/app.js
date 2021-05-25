@@ -553,10 +553,12 @@ var ajax_trigger_form_submit = () => {
                         }
                     },
                     complete: function() {
+                        formButton.prop("disabled", false);
                         $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
                     },
                     error: function() {
                         $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+                        formButton.prop("disabled", false);
                         swal({
                             position: 'top',
                             text: "Sorry! Error processing request.",

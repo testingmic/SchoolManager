@@ -3759,6 +3759,9 @@ class Forms extends Myschoolgh {
 
         $forms = [];
 
+        // get the list of banks
+        $banks_list = $this->pushQuery("id, bank_name, phone_number", "fees_collection_banks", "1 ORDER BY bank_name");
+        
         $bank = '
         <form class="ajax-data-form" action="'.$this->baseUrl.'api/payroll/paymentdetails" method="POST" id="ajax-data-form-content">
             <div class="row">
@@ -3789,7 +3792,13 @@ class Forms extends Myschoolgh {
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon1"><i class="fa fa-tablet"></i></span>
                         </div>
-                        <input type="text" value="'.($data->bank_name ?? null).'" maxlength="40" name="bank_name" id="bank_name" class="form-control">
+                        <select data-width="100%" class="form-control" id="bank_name" name="bank_name">
+                            <option value="">Select Bank Name</option>';
+                        foreach($banks_list as $this_bank) {
+                            $bank .= "<option value=\"{$this_bank->id}\" ".(isset($data->bank_name) && ($data->bank_name == $this_bank->id) ? "selected" : null).">{$this_bank->bank_name}</option>";
+                        }
+                        $bank .=
+                        '</select>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">

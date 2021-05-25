@@ -184,7 +184,7 @@ class Payroll extends Myschoolgh {
             if(empty($the_user->basic_salary)) {
 
                 /** Insert a new record */
-                $stmt = $this->db->prepare("INSERT INTO payslips_users_payroll SET 
+                $stmt = $this->db->prepare("INSERT INTO payslips_employees_payroll SET 
                 client_id = ?, employee_id = ?, basic_salary = ?, gross_salary = ?,
                 allowances = ?, deductions = ?, net_allowance = ?, net_salary = ?");
                 
@@ -197,7 +197,7 @@ class Payroll extends Myschoolgh {
             } else {
 
                 /** update existing record */
-                $stmt = $this->db->prepare("UPDATE payslips_users_payroll SET 
+                $stmt = $this->db->prepare("UPDATE payslips_employees_payroll SET 
                 basic_salary = ?,  gross_salary = ?, allowances = ?, deductions = ?, net_allowance = ?, net_salary = ?
                 WHERE client_id = ? AND employee_id = ? LIMIT 1");
 
@@ -220,11 +220,14 @@ class Payroll extends Myschoolgh {
         }
 
         else if(isset($params->account_name)) {
+
+            // set the bank name
+            $params->bank_name = $params->bank_name ?? null;
             
             /** Insert/Update the basic salary information */
             if(empty($the_user->basic_salary)) {
                 /** Insert a new record */
-                $stmt = $this->db->prepare("INSERT INTO payslips_users_payroll SET 
+                $stmt = $this->db->prepare("INSERT INTO payslips_employees_payroll SET 
                 client_id = ?, employee_id = ?, account_name = ?, account_number = ?,
                 bank_name = ?, bank_branch = ?, ssnit_number = ?, tin_number = ?");
                 
@@ -236,7 +239,7 @@ class Payroll extends Myschoolgh {
                 
             } else {
                 /** Insert a new record */
-                $stmt = $this->db->prepare("UPDATE  payslips_users_payroll SET 
+                $stmt = $this->db->prepare("UPDATE  payslips_employees_payroll SET 
                 account_name = ?, account_number = ?, bank_name = ?, bank_branch = ?, ssnit_number = ?, tin_number = ?
                 WHERE client_id = ? AND employee_id = ? LIMIT 1");
                 
