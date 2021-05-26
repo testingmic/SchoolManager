@@ -751,19 +751,16 @@ class Payroll extends Myschoolgh {
                     <tbody>";
                     $result .= '<tr style="padding: 5px; border-bottom: solid 1px #ccc;">
                             <td colspan="4" align="center" style="padding: 10px;">
-                                '.(!empty($client->client_logo) ? "<img width='70px' src='{$this->baseUrl}{$client->client_logo}'>" : "").'
-                                <h2 style="margin-bottom: 0px; margin-top:0px; color:#6777ef">'.strtoupper($client->client_name).'</h2>
-                                '.($client->client_contact . " / " .$client->client_secondary_contact).'<br>
-                                '.($client->client_email).'
+                                <img src="'.$this->baseUrl.''.$client->client_logo.'" width="70px"><br>
+                                <span style="padding:0px; font-weight:bold; font-size:20px; margin:0px;">'.strtoupper($client->client_name).'</span><br>
+                                <span style="padding:0px; font-weight:bold; margin:0px;">'.$client->client_address.'</span><br>
+                                <span style="padding:0px; font-weight:bold; margin:0px;">'.$client->client_contact.' '.(!$client->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null).'</span>
                             </td>
                         </tr>
                         <tr>
                             <td colspan="2" align="left" style="padding-bottom: 10px; font-family: Calibri Light;font-size: 12px;">';
                             if($printing) {
-                                $result .= '<strong style="font-size: 15px;">'.$data->employee_info->name.'</strong><br>
-                                '.(!empty($data->employee_info->unique_id) ? "<strong>Employee ID:</strong> {$data->employee_info->unique_id}<br>" : null).'
-                                '.(!empty($data->employee_info->phone_number) ? "<strong>Contact:</strong> {$data->employee_info->phone_number}<br>" : null).'
-                                '.(!empty($data->employee_info->email) ? "<strong>Email:</strong> {$data->employee_info->email}<br>" : null).'';
+                                $result .= '<strong style="font-size: 15px;">'.$data->employee_info->name.'</strong><br>'.(!empty($data->employee_info->unique_id) ? "<strong>Employee ID:</strong> {$data->employee_info->unique_id}<br>" : null).''.(!empty($data->employee_info->phone_number) ? "<strong>Contact:</strong> {$data->employee_info->phone_number}<br>" : null).''.(!empty($data->employee_info->email) ? "<strong>Email:</strong> {$data->employee_info->email}<br>" : null).'';
                             }
                             $result .= '</td>
                             <td colspan="2">

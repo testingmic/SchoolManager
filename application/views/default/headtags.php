@@ -24,6 +24,8 @@ if(!$usersClass->loggedIn()) { require "login.php"; exit(-1); }
 $clientData = $myClass->client_data($clientId);
 $clientPrefs = $clientData->client_preferences;
 
+$clientName = $clientData->client_name;
+
 // confirm that the account is active
 $isActiveAccount = (bool) ($clientData->client_state === "Active");
 
@@ -79,7 +81,7 @@ load_helpers(['menu_helper']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><?= $page_title ?? "Dashboard" ?> : <?= $appName ?></title>
+    <title><?= $page_title ?? "Dashboard" ?> : <?= $clientName ?></title>
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/components.css">

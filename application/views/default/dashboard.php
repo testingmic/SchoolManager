@@ -166,13 +166,16 @@ if($isAdminAccountant) {
 $response->scripts = ["assets/js/analitics.js"];
 $timetable = "<div class='text-center'>No timetable record for today was found in the database.</div>";
 
+// global params
+$global_params = (object) ["client_data" => $defaultUser->client];
+
 // if ward/parent/tutor
 if($isWardTutorParent) {
 
     // load the use information
     $expenses_list = null;
     $data = $defaultUser;
-    $timetableClass = load_class("timetable", "controllers");
+    $timetableClass = load_class("timetable", "controllers", $global_params);
 
     // load the wards list
     if($isParent) {

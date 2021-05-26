@@ -117,7 +117,7 @@ elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) 
 
     // set some parameters
     $param = (object) ["data" => [], "timetable_id" => $timetable_id, "code_only" => $codeOnly, "download" => true];
-    $param->client_data = $defaultUser->client;
+    $param->client_data = $defaultUser->client ?? null;
 
     // create a new object
     $timetableClass = load_class("timetable", "controllers", $param);
@@ -151,7 +151,7 @@ elseif(isset($_GET["pay_id"]) && !isset($_GET["cs_mat"])) {
 
     $payslip_id = xss_clean($_GET["pay_id"]);
     $param = (object) ["payslip_id" => $payslip_id, "download" => true, "clientId" => $session->clientId];
-    $param->client_data = $defaultUser->client;
+    $param->client_data = $defaultUser->client ?? null;
 
     // load the table
     $content = load_class("payroll", "controllers", $param)->draw($param);
@@ -187,7 +187,7 @@ elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"
             "full_details" => true,
             "course_id" => $course[1],
             "clientId" => $course[2],
-            "client_data" => $defaultUser->client
+            "client_data" => $defaultUser->client ?? null
         ];
 
         // create new object

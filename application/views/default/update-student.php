@@ -70,7 +70,7 @@ if(!empty($user_id)) {
         $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "student_id" => $user_id, "receivePayment" => $receivePayment, "client_data" => $defaultUser->client, "parse_owning" => true];
         
         // load the class timetable
-        $timetable = load_class("timetable", "controllers")->class_timetable($data->class_guid, $clientId);
+        $timetable = load_class("timetable", "controllers", $allocation_param)->class_timetable($data->class_guid, $clientId);
 
         $student_fees_payments = "";
         $student_fees_list = [];

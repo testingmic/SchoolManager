@@ -985,11 +985,16 @@ class Courses extends Myschoolgh {
      */
     public function draw($content) {
 
+        // if empty the client data then return false
+        if(empty($this->iclient)) {
+            return;
+        }
+
         // set the address and the other information
         $html = "<table cellpadding=\"5\" width=\"100%\">
             <tr>
                 <td align=\"center\">
-                    <img src=\"{$this->baseUrl}{$this->iclient->client_logo}\" width=\"100px\"><br>
+                    <img src=\"{$this->baseUrl}{$this->iclient->client_logo}\" width=\"80px\"><br>
                     <span style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</span><br>
                     <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
                     <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
