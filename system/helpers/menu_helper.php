@@ -1,3 +1,12 @@
+<?php function communication_menu() { global $baseUrl; ?>
+<li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails & SMS</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>sms_manager">SMS Management</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>emails_manager">E-Mail Management</a></li>
+        </ul>
+    </li>
+<?php } ?>
 <?php function general_menu($isAdmin = false) { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
@@ -145,13 +154,7 @@
     <?php } else { ?>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
     <?php } ?>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-emails">List Mails</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>compose-email">Compose</a></li>
-        </ul>
-    </li>
+    <?= communication_menu() ?>
 <?php } ?>
 <?php function admin_menu() { global $baseUrl; ?>
     <?php general_menu(true); ?>
@@ -220,13 +223,7 @@
     </li>
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-emails">List Mails</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>compose-email">Compose</a></li>
-        </ul>
-    </li>
+    <?= communication_menu() ?>
 <?php } ?>
 <?php function parent_menu() { global $baseUrl, $accessObject, $session; ?>
     <?php if(!empty($session->student_id)) { ?>
@@ -263,13 +260,7 @@
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-emails">List Mails</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>compose-email">Compose</a></li>
-        </ul>
-    </li>
+    <?= communication_menu() ?>
 <?php } ?>
 <?php function student_menu() { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
@@ -319,13 +310,7 @@
     
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-emails">List Mails</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>compose-email">Compose</a></li>
-        </ul>
-    </li>
+    <?= communication_menu() ?>
 <?php } ?>
 <?php function employee_menu() { global $baseUrl, $accessObject; ?>
     <li class="dropdown">

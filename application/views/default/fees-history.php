@@ -58,9 +58,9 @@ $hasUpdate = $accessObject->hasAccess("update", "fees");
 $fees_history = "";
 foreach($item_list["data"] as $key => $each) {
     $action = "";
-    $action = "<a href='#' onclick='loadPage(\"{$baseUrl}fees-view/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
-
-    $action .= "&nbsp;<a href='#' onclick=\"return print_receipt('{$each->item_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
+    $action = "<a href='#' title='View receipt details' onclick='loadPage(\"{$baseUrl}fees-view/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action .= "&nbsp;<a title='Click to print this reciept' href='#' onclick=\"return print_receipt('{$each->item_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
+    $action .= "&nbsp;<a title='Download this Receipt as PDF' href='{$baseUrl}download?rpt_id={$each->item_id}' target='_blank' class='btn btn-sm btn-outline-success'><i class='fa fa-download'></i></a>";
 
     $fees_history .= "<tr data-row_id=\"{$each->item_id}\">";
     $fees_history .= "<td>".($key+1)."</td>";

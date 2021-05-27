@@ -172,6 +172,32 @@ elseif(isset($_GET["pay_id"]) && !isset($_GET["cs_mat"])) {
     exit;
 }
 
+/** Download Receipt ID */
+elseif(isset($_GET["rpt_id"]) && !isset($_GET["pay_id"])) {
+
+    $receipt_id = xss_clean($_GET["rpt_id"]);
+    $param = (object) ["receipt_id" => $receipt_id, "download" => true, "clientId" => $session->clientId];
+    $param->client_data = $defaultUser->client ?? null;
+
+    // load the table
+    $content = load_class("payroll", "controllers", $param)->draw($param);
+    $file_name = "Receipt_Download.pdf";
+
+    // end query if no result found
+    if(!isset($_GET["dw"])) {
+        print $content["data"];
+        print '<script>
+                //window.onload = (evt) => { window.print(); }
+                //window.onafterprint = (evt) => { window.close(); }
+            </script>';
+        return;
+    }
+
+    show_content("Fees Payment Receipt", $file_name, $content["data"], "P");
+
+    exit;
+}
+
 /** Download Course Material (Units / Lessons) */
 elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"])) {
     // assign the course variable
