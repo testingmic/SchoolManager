@@ -43,11 +43,12 @@ if($session->clientId) {
         $param = (object) [
             "getObject" => $getObject,
             "data" => $data,
+            "receipt_id" => $receipt_id,
             "clientId" => $clientId
         ];
-
+        
         // load the receipt 
-        $receipt = $feesObject->receipt();
+        $receipt = $feesObject->receipt($param);
     }
     print $receipt;
 } else {

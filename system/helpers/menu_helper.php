@@ -133,10 +133,7 @@
             <?php } ?>
             <?php if($accessObject->hasAccess("allocation", "fees")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
-            <?php } ?>
-            <?php if($accessObject->hasAccess("reports", "fees")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Reports</a></li>
-            <?php } ?>
+            <?php } ?>            
         </ul>
     </li>
     <?php } ?>
@@ -147,10 +144,30 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>payroll">Payroll</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>payroll-category">Allowance Category</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">Reports</a></li>
         </ul>
     </li>
     <?php } ?>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-archway"></i><span>Simple Accounting</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>accounting">Account</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>deposit_voucher">New Deposit</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>expense_voucher">New Expense</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>all_transactions">All Transactions</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>account_type">Account Type Head</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-line"></i><span>Reports</span></a>
+        <ul class="dropdown-menu">
+            <?php if($accessObject->hasAccess("reports", "fees")) { ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Fees Reports</a></li>
+            <?php } ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>accounting">Financial Reports</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">HR & Payroll</a></li>
+        </ul>
+    </li>
+
     <li class="menu-header">Communication</li>
     <?php if($accessObject->hasAccess("update", "events")) { ?>
     <li class="dropdown">

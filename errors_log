@@ -1,0 +1,41 @@
+[29-May-2021 11:27:52 Africa/Accra] PHP Warning:  Cannot modify header information - headers already sent by (output started at C:\xampp\htdocs\myschool_gh\application\views\default\download.php:203) in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 7625
+[29-May-2021 11:30:04 Africa/Accra] PHP Notice:  Undefined index: rows in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 16923
+[29-May-2021 11:30:04 Africa/Accra] PHP Warning:  array_push() expects parameter 1 to be array, null given in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 16925
+[29-May-2021 11:30:04 Africa/Accra] PHP Notice:  Undefined variable: cellspacingx in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18121
+[29-May-2021 11:30:04 Africa/Accra] PHP Notice:  Undefined variable: cellspacing in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18188
+[29-May-2021 11:30:04 Africa/Accra] PHP Notice:  Undefined variable: cellspacing in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18214
+[29-May-2021 11:30:04 Africa/Accra] PHP Notice:  Undefined variable: cellspacingx in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18269
+[29-May-2021 11:30:04 Africa/Accra] PHP Notice:  Undefined index: trids in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19508
+[29-May-2021 11:30:04 Africa/Accra] PHP Warning:  Invalid argument supplied for foreach() in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19508
+[29-May-2021 11:30:04 Africa/Accra] PHP Notice:  Undefined index: trids in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19537
+[29-May-2021 11:30:04 Africa/Accra] PHP Warning:  count(): Parameter must be an array or an object that implements Countable in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19537
+[29-May-2021 11:30:04 Africa/Accra] PHP Notice:  Undefined index: trids in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19540
+[29-May-2021 11:30:04 Africa/Accra] PHP Warning:  Invalid argument supplied for foreach() in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19540
+[29-May-2021 11:30:04 Africa/Accra] PHP Notice:  Undefined index: old_cell_padding in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19750
+[29-May-2021 11:38:12 Africa/Accra] PHP Notice:  Undefined index: cols in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 16477
+[29-May-2021 11:38:12 Africa/Accra] PHP Notice:  Undefined index: rows in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 16923
+[29-May-2021 11:38:12 Africa/Accra] PHP Warning:  array_push() expects parameter 1 to be array, null given in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 16925
+[29-May-2021 11:38:12 Africa/Accra] PHP Warning:  array_push() expects parameter 1 to be array, null given in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 16925
+[29-May-2021 11:38:12 Africa/Accra] PHP Notice:  Undefined index: rows in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 16923
+[29-May-2021 11:38:12 Africa/Accra] PHP Warning:  array_push() expects parameter 1 to be array, null given in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 16925
+[29-May-2021 11:38:12 Africa/Accra] PHP Notice:  Undefined variable: cellspacingx in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18121
+[29-May-2021 11:38:12 Africa/Accra] PHP Notice:  Undefined variable: cellspacing in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18188
+[29-May-2021 11:38:12 Africa/Accra] PHP Notice:  Undefined variable: cellspacing in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18214
+[29-May-2021 11:38:12 Africa/Accra] PHP Notice:  Undefined variable: cellspacingx in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18269
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined variable: cellspacingx in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18121
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined variable: table_columns_width in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18176
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined variable: cellspacing in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18188
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined variable: cellspacing in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18214
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined variable: cellspacingx in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18269
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined variable: cellspacingx in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18123
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined variable: cellspacing in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18188
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined variable: cellspacing in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18214
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined variable: cellspacingx in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 18269
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined index: old_cell_padding in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19750
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined index: trids in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19508
+[29-May-2021 11:39:39 Africa/Accra] PHP Warning:  Invalid argument supplied for foreach() in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19508
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined index: trids in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19537
+[29-May-2021 11:39:39 Africa/Accra] PHP Warning:  count(): Parameter must be an array or an object that implements Countable in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19537
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined index: trids in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19540
+[29-May-2021 11:39:39 Africa/Accra] PHP Warning:  Invalid argument supplied for foreach() in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19540
+[29-May-2021 11:39:39 Africa/Accra] PHP Notice:  Undefined index: old_cell_padding in C:\xampp\htdocs\myschool_gh\system\libraries\pdf\tcpdf.php on line 19750

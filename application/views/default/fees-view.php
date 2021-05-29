@@ -242,11 +242,6 @@ if(!empty($item_id)) {
                                                 </div>
                                                 <div class="col-lg-4 text-right">
                                                     <div class="invoice-detail-item">
-                                                        <div class="invoice-detail-name">Subtotal</div>
-                                                        <div class="invoice-detail-value">'.$data->amount.'</div>
-                                                    </div>
-                                                    <hr class="mt-2 mb-2">
-                                                    <div class="invoice-detail-item">
                                                         <div class="invoice-detail-name">Total</div>
                                                         <div class="invoice-detail-value invoice-detail-value-lg">'.$data->amount.'</div>
                                                     </div>

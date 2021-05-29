@@ -1313,16 +1313,17 @@ class Fees extends Myschoolgh {
         $studentIsset = (bool) isset($params->getObject->student_id) && !empty($params->getObject->student_id);
 
         // if the receipt id was parsed
-        if(!empty($receipt_id)) {
-            $student_data = $params->data[0];
+        if(!empty($params->receipt_id)) {
+            $student_data = $params->data[0] ?? [];
         }
 
         if($studentIsset) {
-            $student_data = $params->data[0];
+            $student_data = $params->data[0] ?? [];
         }
 
         // get the client data
         $amount = 0;
+        $data = $params->data;
         $client = $this->client_data($params->clientId);
         $clientPrefs = $client->client_preferences;
 
@@ -1330,32 +1331,40 @@ class Fees extends Myschoolgh {
         $receipt = '
         <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/app.min.css">
         <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/style.css">
-        <div style="margin:auto auto; max-width:1040px;">
+        <div style="margin:auto auto; max-width:700px;">
             <div class="row mb-3">
                 <div class="text-dark bg-white col-md-12 p-3">
                     <div class="text-center">
-                        '.(!empty($client->client_logo) ? "<img width='70px' src='{$this->baseUrl}{$client->client_logo}'>" : "").'
+                        '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$this->baseUrl}{$client->client_logo}\">" : "").'
                         <h3 class="mb-0 pb-0" style="color:#6777ef">'.$client->client_name.'</h3>
                         <div>'.$client->client_address.'</div>
-                        <div>'.$client->client_contact.'
-                            '.(!empty($client->client_secondary_contact) ? " | {$client->client_secondary_contact}" : "").'
-                        </div>
+                        '.(!empty($client->client_email) ? "<div>{$client->client_email}</div>" : "").'
                     </div>
                     <div class="border-bottom pb-1 mb-3 bg-blue"></div>
                     <div class="invoice">
                         <div class="invoice-print">
                             <div class="row">
                                 <div class="col-lg-12">
-                                    <div class="invoice-title">
-                                        <h2>Official Receipt</h2>
-                                        '.(!empty($receipt_id) ? '<div style="font-size:20px" class="text-right">Receipt ID #: '.($student_data->receipt_id ?? null).'</div>' : null).'
-                                    </div>
+                                    <table width="100%">
+                                    <tr>
+                                    <td width="50%">
+                                        <div class="invoice-title">
+                                            <h3>Official Receipt</h3>
+                                            <span style="font-size:12px;"><strong>Date & Time:</strong> '.date("d-m-Y h:iA").'</span>
+                                        </div>
+                                    </td>
+                                    <td align="right">
+                                        '.(!empty($student_data) ? "<strong>Academic Year & Term:</strong><br>{$student_data->academic_year} :: {$student_data->academic_term}<br>" : null).'
+                                        '.(count($data) == 1 ? "Receipt ID: <strong>{$student_data->receipt_id}</strong><br>" : null).'
+                                    </td>
+                                    </tr>
+                                    </table>
                                     <hr class="pb-0 mb-2 mt-0">
                                     '.(!empty($student_data) ?
                                     '<div class="row">
                                         <div class="col-md-6">
                                             <address>
-                                                <strong>Student Details:</strong><br>
+                                                <strong>To:</strong><br>
                                                 '.($student_data->student_info->name ?? null).'<br>
                                                 '.($student_data->student_info->unique_id ?? null).'<br>
                                                 '.($student_data->class_name ?? null).'<br>
@@ -1375,15 +1384,14 @@ class Fees extends Myschoolgh {
                                     </div>': '').'
                                 </div>
                             </div>
-                            <div class="row mt-4">
+                            <div class="row">
                                 <div class="col-md-12">
-                                    <div class="section-title">Payment Details</div>
                                     <div class="table-responsive">
-                                        <table class="table table-striped table-hover table-md">
+                                        <table class="table table-striped table-hover table-md" style="font-size:13px;">
                                             <tbody>
                                             <tr>
                                                 <th data-width="40" style="width: 40px;">#</th>
-                                                '.(empty($receipt_id) ? '<th>Item</th>' : '').'
+                                                '.(empty($student_data) ? '<th>Name</th>' : '').'
                                                 <th>Item</th>
                                                 <th>Payment Method</th>
                                                 <th>Description</th>
@@ -1395,7 +1403,7 @@ class Fees extends Myschoolgh {
                                                     $amount += $record->amount;
                                                     $receipt .='<tr>
                                                         <td>'.($key+1).'</td>
-                                                        '.(empty($receipt_id) ? '<td>
+                                                        '.(empty($student_data) ? '<td>
                                                             '.$record->student_info->name.'
                                                         </td>' : '').'
                                                         <td>'.$record->category_name.'</td>
@@ -1419,7 +1427,7 @@ class Fees extends Myschoolgh {
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div class="row mt-4">
+                                    <div class="row">
                                         <div class="col-lg-8"></div>
                                         <div class="col-lg-4 text-right">
                                             <hr class="mb-2">
@@ -1434,7 +1442,7 @@ class Fees extends Myschoolgh {
                         </div>
                     </div>
                     <div class="border-bottom pb-1 mt-3 bg-blue"></div>
-                    <div class="text-center pb-1 mt-1">
+                    <div class="text-center pb-1 mt-1" style="font-size:12px;">
                         <strong>Location: </strong>'.$client->client_location.' | 
                         <strong>Contact:</strong> '.$client->client_contact.'
                         '.(!empty($client->client_secondary_contact) ? " | {$client->client_secondary_contact}" : "").'
@@ -1442,11 +1450,17 @@ class Fees extends Myschoolgh {
                     </div>
                 </div>
             </div>
-        </div>
-        <script>
-            window.onload = (evt) => { window.print(); }
-            window.onafterprint = (evt) => { window.close(); }
-        </script>';
+        </div>';
+
+        // append this section if download element was not parsed
+        if(!isset($params->download)) {
+            $receipt .= "<script>
+                window.onload = (evt) => { window.print(); }
+                window.onafterprint = (evt) => { window.close(); }
+            </script>";
+        }
+
+        return $receipt;
     }
 
 }

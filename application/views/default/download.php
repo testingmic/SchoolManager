@@ -176,24 +176,33 @@ elseif(isset($_GET["pay_id"]) && !isset($_GET["cs_mat"])) {
 elseif(isset($_GET["rpt_id"]) && !isset($_GET["pay_id"])) {
 
     $receipt_id = xss_clean($_GET["rpt_id"]);
-    $param = (object) ["receipt_id" => $receipt_id, "download" => true, "clientId" => $session->clientId];
+    $param = (object) ["userData" => $defaultUser, "item_id" => $receipt_id, "download" => true, "clientId" => $session->clientId];
     $param->client_data = $defaultUser->client ?? null;
 
+    // create new object
+    $feesObject = load_class("fees", "controllers", $param);
+
     // load the table
-    $content = load_class("payroll", "controllers", $param)->draw($param);
+    $content = $feesObject->list($param);
     $file_name = "Receipt_Download.pdf";
+    $receipt = "";
 
     // end query if no result found
-    if(!isset($_GET["dw"])) {
-        print $content["data"];
-        print '<script>
-                //window.onload = (evt) => { window.print(); }
-                //window.onafterprint = (evt) => { window.close(); }
-            </script>';
-        return;
+    if(is_array($content)) {
+
+        // create a new object
+        $param = (object) [
+            "getObject" => [],
+            "download" => true,
+            "data" => $content["data"],
+            "receipt_id" => $receipt_id,
+            "clientId" => $session->clientId
+        ];
+        // load the receipt 
+        $receipt = $feesObject->receipt($param);
     }
 
-    show_content("Fees Payment Receipt", $file_name, $content["data"], "P");
+    show_content("Fees Payment Receipt", $file_name, $receipt, "P");
 
     exit;
 }
