@@ -1805,7 +1805,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="religion">Religion <span class="required">*</span></label>
+                        <label for="religion">Religion</label>
                         <input type="text" value="'.($userData->religion ?? null).'" name="religion" id="religion" class="form-control">
                     </div>
                 </div>
@@ -3789,10 +3789,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-6 col-md-6">
                     <label for="bank_name">Bank Name</label>
                     <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="basic-addon1"><i class="fa fa-tablet"></i></span>
-                        </div>
-                        <select data-width="100%" class="form-control" id="bank_name" name="bank_name">
+                        <select data-width="100%" class="form-control selectpicker" id="bank_name" name="bank_name">
                             <option value="">Select Bank Name</option>';
                         foreach($banks_list as $this_bank) {
                             $bank .= "<option value=\"{$this_bank->id}\" ".(isset($data->bank_name) && ($data->bank_name == $this_bank->id) ? "selected" : null).">{$this_bank->bank_name}</option>";
@@ -3816,7 +3813,7 @@ class Forms extends Myschoolgh {
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="basic-addon1"><i class="fa fa-tablet"></i></span>
                         </div>
-                        <input type="text" value="'.($data->ssnit_number ?? null).'" maxlength="40" name="ssnit_number" id="ssnit_number" class="form-control">
+                        <input type="text" value="'.($data->ssnit_number ?? null).'" maxlength="40" name="ssnit_number" id="ssnit_number" class="form-control text-uppercase">
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">

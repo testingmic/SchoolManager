@@ -532,7 +532,6 @@ class Fees extends Myschoolgh {
                     <td>AMOUNT PAID</td>
                     <td>BALANCE</td>
                 </tr>";
-            // $data_content = $allocation[count($allocation)-1];
             $data_content = null;
 
             // loop through the allocations list
@@ -552,6 +551,7 @@ class Fees extends Myschoolgh {
                         <td class='font-weight-bold'>{$fees->balance}</td>
                     </tr>";
             }
+
             $owings_list .= "</table>";
 
             /** Set the label for the amount */
@@ -964,33 +964,42 @@ class Fees extends Myschoolgh {
             // if the category id is not empty
             $category_id = isset($params->category_id) && !empty($params->category_id) ? $params->category_id : null ;
 
+            // set the academic year and term
+            $academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year; 
+            $academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
+            
             // run the query
 			$stmt = $this->db->prepare("
 				SELECT 
                     a.checkout_url, a.student_id, a.class_id, a.category_id, a.amount_due, a.amount_paid, 
                     a.balance, a.paid_status, a.last_payment_id, a.academic_year, a.academic_term, a.date_created, 
-                    a.last_payment_date, u.name AS student_name, u.department AS department_id, a.currency,
-                    u.account_balance,
-                    (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
+                    a.last_payment_date, a.currency,
                     (
                         SELECT 
                             CONCAT(
+                                u.name,'|',COALESCE(u.department, 'NULL'),'|',COALESCE(u.account_balance,'0')
+                            ) 
+                        FROM users u WHERE u.item_id = '{$params->student_id}' AND 
+                        u.academic_year = '{$academic_year}' AND u.academic_term = '{$academic_term}'
+                    ) as student_details,
+                    (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
+                    (
+                        SELECT 
+                            CONCAT (
                                 b.id,'|',b.amount,'|',b.created_by,'|',b.recorded_date,'|',
                                 b.currency,'|',COALESCE(b.description,'NULL'),'|',
                                 COALESCE(b.payment_method,'NULL'),'|',COALESCE(b.cheque_bank,'NULL'),'|',
                                 COALESCE(b.cheque_number,'NULL')                                
-                            ) 
+                            )
                         FROM fees_collection b 
                         WHERE b.item_id = a.last_payment_id LIMIT 1
                     ) AS last_payment_info
 				FROM fees_payments a
-                LEFT JOIN users u ON u.item_id = a.student_id
 				WHERE ".(isset($params->checkout_url) && ($params->checkout_url != "general") ? "checkout_url='{$params->checkout_url}'" : 
                     " a.student_id = '{$params->student_id}'
                     ".(!empty($category_id) ? " AND a.category_id = '{$params->category_id}'" : null)."
-                        AND a.academic_year = '{$params->academic_year}'
-                        AND a.academic_term = '{$params->academic_term}'
-                ")." AND a.client_id = '{$params->clientId}' AND a.status = '1' LIMIT ".(!empty($category_id) ? 1 : 100)."
+                ")." AND a.academic_year = '{$academic_year}' AND a.academic_term = '{$academic_term}' 
+                    AND a.client_id = '{$params->clientId}' AND a.status = '1' LIMIT ".(!empty($category_id) ? 1 : 100)."
 			");
 			$stmt->execute();
 
@@ -1000,8 +1009,14 @@ class Fees extends Myschoolgh {
             // if clean_payment_info was parsed then query below
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                
+                // payment information
+                $result->student_details = $this->stringToArray($result->student_details, "|",
+                    ["student_name", "department_id", "account_balance"], true                
+                );
+
                 // set the account balance
-                $result->account_balance = (float) $result->account_balance;
+                $result->account_balance = isset($result->student_details["account_balance"]) ? (float) $result->student_details["account_balance"] : 0;
 
                 // if show payment info was also parsed in the request
                 if($showInfo) {
@@ -1032,7 +1047,6 @@ class Fees extends Myschoolgh {
      */
 	public function make_payment(stdClass $params) {
 
-        
         try {
 
             global $defaultUser;

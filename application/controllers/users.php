@@ -820,10 +820,10 @@ class Users extends Myschoolgh {
 		/** Run this section if the user is logged in */
 		if($loggedInAccount || (isset($params->remote) && $params->remote)) {
 			/** The user types */
-			$user_type = $params->user_type == "parent" ? "guardian" : $params->user_type;
-
+			$access = ($params->user_type === "student") ? "student" : ($params->user_type === "parent" ? "guardian" : $params->user_type);
+			
 			/** If not permitted */
-			if(!$accessObject->hasAccess("add", $user_type)) {
+			if(!$accessObject->hasAccess("add", $access)) {
 				return ["code" => 201, "data" => $this->permission_denied];
 			}
 
@@ -1084,7 +1084,7 @@ class Users extends Myschoolgh {
 
 				$message .= '<a class="alert alert-success" href="'.$this->baseUrl.'verify?dw=user&token='.$token.'">Verify your account</a>';
 				$message .= '<br><br>If it does not work please copy this link and place it in your browser url.<br><br>';
-				$message .= $this->baseUrl.'verify?dw=account&token='.$token;
+				$message .= $this->baseUrl.'verify?dw=user&token='.$token;
 
 				// recipient list
 				$reciepient = ["recipients_list" => [["fullname" => $params->fullname,"email" => $params->email,"customer_id" => $params->user_id]]];

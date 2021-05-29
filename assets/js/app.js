@@ -282,8 +282,6 @@ var trigger_form_submit = () => {
 
         let optional_flow = "We recommend that you save the form as a draft, and review it before submitting. Do you wish to proceed with this action?";
 
-        formButton.prop("disabled", true);
-
         let myForm = document.getElementById('ajax-data-form-content');
         let theFormData = new FormData(myForm);
 
@@ -327,6 +325,7 @@ var trigger_form_submit = () => {
             dangerMode: true,
         }).then((proceed) => {
             if (proceed) {
+                formButton.prop("disabled", true);
                 $.ajax({
                     url: `${formAction}`,
                     data: theFormData,
@@ -404,9 +403,11 @@ var trigger_form_submit = () => {
                     },
                     complete: function() {
                         $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+                        formButton.prop("disabled", true);
                     },
                     error: function() {
                         $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+                        formButton.prop("disabled", true);
                         swal({
                             position: 'top',
                             text: "Sorry! Error processing request.",
@@ -431,8 +432,6 @@ var ajax_trigger_form_submit = () => {
             formButton = $(`form[class="_ajax-data-form"] button[type="button-submit"]`);
 
         let optional_flow = "We recommend that you save the form as a draft, and review it before submitting. Do you wish to proceed with this action?";
-
-        formButton.prop("disabled", true);
 
         let myForm = document.getElementById('_ajax-data-form-content');
         let theFormData = new FormData(myForm);
@@ -477,6 +476,7 @@ var ajax_trigger_form_submit = () => {
             dangerMode: true,
         }).then((proceed) => {
             if (proceed) {
+                formButton.prop("disabled", true);
                 $.ajax({
                     url: `${formAction}`,
                     data: theFormData,

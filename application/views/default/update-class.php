@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL;
+global $myClass, $SITEURL, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -32,10 +32,11 @@ if(!empty($item_id)) {
         "clientId" => $clientId,
         "class_id" => $item_id,
         "load_courses" => true,
+        "client_data" => $defaultUser->client,
         "limit" => 1
     ];
 
-    $data = load_class("classes", "controllers")->list($item_param);
+    $data = load_class("classes", "controllers", $item_param)->list($item_param);
     
     // if no record was found
     if(empty($data["data"])) {
@@ -51,15 +52,15 @@ if(!empty($item_id)) {
         $hasUpdate = $accessObject->hasAccess("update", "class");
 
         // load the section students list
-        $student_param = (object) ["clientId" => $clientId, "class_id" => $item_id, "user_type" => "student"];
-        $student_list = load_class("users", "controllers")->list($student_param);
+        $student_param = (object) ["clientId" => $clientId, "client_data" => $defaultUser->client, "class_id" => $item_id, "user_type" => "student"];
+        $student_list = load_class("users", "controllers", $student_param)->list($student_param);
 
         // student update permissions
         $students = "";
         $studentUpdate = $accessObject->hasAccess("update", "student");
 
         // load the class timetable
-        $timetable = load_class("timetable", "controllers")->class_timetable($data->item_id, $clientId);
+        $timetable = load_class("timetable", "controllers", $item_param)->class_timetable($data->item_id, $clientId);
 
         // loop through the students list
         foreach($student_list["data"] as $key => $student) {

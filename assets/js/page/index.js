@@ -37,7 +37,7 @@ $(`div[id="student_guardian_list"] button[class~="append-row"]`).on('click', asy
     }
 
     $(`div[id="student_guardian_list"] div[data-row]:last`).after(`
-        <div class="row mb-3 pb-3" data-row="${lastRowId}">
+        <div class="row mb-3 mt-3 pb-3" data-row="${lastRowId}">
             <div class="col-lg-4 col-md-4">
                 <label for="guardian_info[guardian_fullname][${lastRowId}]">Fullname</label>
                 <input type="hidden" name="guardian_info[guardian_id][${lastRowId}]" id="guardian_info[guardian_id][${lastRowId}]" value="${random_int}">

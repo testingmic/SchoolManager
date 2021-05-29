@@ -712,7 +712,7 @@ class Payroll extends Myschoolgh {
         $return = ["code" => 200, "data" => "Request was successfully executed.", "refresh" => 800];
         
         # append to the response
-        $return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}hr-category"];
+        $return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}payroll-category"];
 
         // return the output
         return $return;

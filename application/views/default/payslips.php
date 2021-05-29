@@ -59,7 +59,7 @@ foreach($payslips_list["data"] as $key => $each) {
         // if the user has the permission to validate a payslip
         if($validatePayslip) {
             $validated = false;
-            $action .= "&nbsp;<a onclick='return validate_item(\"{$each->item_id}\",\"payslip\",\"{$baseUrl}hr-payslip\")' class=\"btn btn-sm btn-outline-success mb-1\" title=\"Validate Payslip\" href=\"#\"><i class='fa fa-check'></i></a>";
+            $action .= "&nbsp;<a onclick='return validate_item(\"{$each->item_id}\",\"payslip\",\"{$baseUrl}payslips\")' class=\"btn btn-sm btn-outline-success mb-1\" title=\"Validate Payslip\" href=\"#\"><i class='fa fa-check'></i></a>";
         }
     }
     
@@ -116,7 +116,7 @@ $response->html = '
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="text-right mb-2">
-                    <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'hr-payslip-generate"><i class="fa fa-plus"></i> Generate Payslip</a>
+                    <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'payslip-generate"><i class="fa fa-plus"></i> Generate Payslip</a>
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">

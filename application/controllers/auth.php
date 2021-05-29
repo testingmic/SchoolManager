@@ -50,7 +50,7 @@ class Auth extends Myschoolgh {
                     u.last_timetable_id, c.client_state, u.user_status
                 FROM users u
                 LEFT JOIN clients_accounts c ON c.client_id = u.client_id
-                WHERE (u.username = ? OR u.email = ?) AND u.deleted =  ? LIMIT 1
+                WHERE (u.username = ? OR u.email = ?) AND u.deleted =  ? ORDER BY u.id DESC LIMIT 1
             ");
             $stmt->execute([$params->username, $params->username, 0]);
 

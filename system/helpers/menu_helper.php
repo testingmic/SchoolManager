@@ -12,9 +12,12 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-student">Students List</a></li>
+            <?php if($accessObject->hasAccess("add", "student")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>add-student">Add Student</a></li>
+            <?php } ?>
         </ul>
     </li>
+    <?php if($accessObject->hasAccess("view", "guardian")) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-clock"></i><span>Guardians</span></a>
         <ul class="dropdown-menu">
@@ -22,20 +25,27 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>add-guardian">Add Guardian</a></li>
         </ul>
     </li>
+    <?php } ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Staff</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-staff">Staff List</a></li>
+            <?php if($accessObject->hasAccess("add", "staff")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>add-staff">Add Staff</a></li>
+            <?php } ?>
         </ul>
     </li>
+    <?php if($isAdmin) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>attendance">List Attendance</a></li>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
+            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
         </ul>
-    </li>                        
+    </li>
+    <?php } ?>
+    <?php if($accessObject->hasAccess("view", "class")) { ?>
     <li class="menu-header">Academics</li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Academics</span></a>
@@ -54,6 +64,7 @@
             <?php } ?>
         </ul>
     </li>
+    <?php } ?>
     <?php if($isAdmin) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
@@ -98,8 +109,6 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>add-assignment">Create Assignment</a></li>
         </ul>
     </li>
-    <?php } else { ?>
-    <li><a href="<?= $baseUrl ?>timetable" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
     <?php } ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Library</span></a>
@@ -112,7 +121,7 @@
     <?php if($accessObject->hasAccess("view", "fees")) { ?>
     <li class="menu-header">HR / Finance</li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Fees</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>School Fees</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-search">Search Log</a></li>
@@ -135,10 +144,10 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-payroll">Payroll</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-payslip">Payslip List</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-category">Allowance Category</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-reports">Reports</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>payroll">Payroll</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>payroll-category">Allowance Category</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">Reports</a></li>
         </ul>
     </li>
     <?php } ?>
@@ -152,7 +161,7 @@
         </ul>
     </li>
     <?php } else { ?>
-    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
+    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
@@ -172,8 +181,9 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>attendance">List Attendance</a></li>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
+            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
         </ul>
     </li>                        
     <li class="menu-header">Academics</li>
@@ -222,7 +232,7 @@
         </ul>
     </li>
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
+    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?= communication_menu() ?>
 <?php } ?>
 <?php function parent_menu() { global $baseUrl, $accessObject, $session; ?>
@@ -259,7 +269,7 @@
     <li class="menu-header">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
+    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?= communication_menu() ?>
 <?php } ?>
 <?php function student_menu() { global $baseUrl, $accessObject; ?>
@@ -309,15 +319,16 @@
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
+    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?= communication_menu() ?>
 <?php } ?>
 <?php function employee_menu() { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>attendance">List Attendance</a></li>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
+            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
         </ul>
     </li>                        
     <li class="menu-header">Academics</li>
@@ -345,5 +356,5 @@
         </ul>
     </li>
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Event Management</span></a></li>
+    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
 <?php } ?>

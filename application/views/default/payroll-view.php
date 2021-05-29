@@ -111,7 +111,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                     <h1>'.$pageTitle.'</h1>
                     <div class="section-header-breadcrumb">
                         <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                        <div class="breadcrumb-item active"><a href="'.$baseUrl.'hr-payroll">Staff Payroll List</a></div>
+                        <div class="breadcrumb-item active"><a href="'.$baseUrl.'payroll">Staff Payroll List</a></div>
                         <div class="breadcrumb-item">'.$pageTitle.'</div>
                     </div>
                 </div>
@@ -239,7 +239,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                     <div class="tab-pane fade" id="payslips" role="tabpanel" aria-labelledby="payslips-tab2">
                                         <div class="d-flex justify-content-between">
                                             <div><h5>EMPLOYEE PAYSLIPS</h5></div>
-                                            <div><a class="btn btn-outline-primary" href="'.$baseUrl.'hr-payslip-generate/'.$userId.'"><i class="fa fa-plus"></i> Create Payslip</a></div>
+                                            <div><a class="btn btn-outline-primary" href="'.$baseUrl.'payslip-generate/'.$userId.'"><i class="fa fa-plus"></i> Create Payslip</a></div>
                                         </div>
                                         <div class="mt-3 border-top table-responsive pt-3">
                                             <table width="100%" class="table table-striped datatable">

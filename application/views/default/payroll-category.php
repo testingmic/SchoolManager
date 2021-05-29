@@ -19,7 +19,6 @@ $response = (object) [];
 $filter = (object) $_POST;
 
 $response->title = "Payroll Allowance Types : {$appName}";
-$response->scripts = ["assets/js/filters.js"];
 
 $clientId = $session->clientId;
 
@@ -46,7 +45,6 @@ foreach($allowance_types as $key => $each) {
     $staff_list .= "<td>".($key+1)."</td>";
     $staff_list .= "<td>{$each->name}</td>";
     $staff_list .= "<td><span class='badge badge-{$color[$each->type]}'>{$each->type}</span></td>";
-    $staff_list .= "<td>{$each->default_amount}</td>";
     $staff_list .= "<td>{$each->description}</td>";
     $staff_list .= "<td class='text-center'>{$action}</td>";
     $staff_list .= "</tr>";
@@ -64,7 +62,7 @@ $response->html = '
             <h1>Allowance Types</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'hr-payroll">Payroll List</a></div>
+                <div class="breadcrumb-item active"><a href="'.$baseUrl.'payroll">Payroll List</a></div>
                 <div class="breadcrumb-item">Allowance Types</div>
             </div>
         </div>
@@ -94,12 +92,6 @@ $response->html = '
                                             <option value="Allowance">Allowance</option>
                                             <option value="Deduction">Deduction</option>
                                         </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="default_amount">Default Amount</label>
-                                        <input type="text" maxlength="20" placeholder="Type default amount" name="default_amount" id="default_amount" class="form-control">
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -136,7 +128,6 @@ $response->html = '
                                         <th width="5%" class="text-center">#</th>
                                         <th>Name</th>
                                         <th>Type</th>
-                                        <th width="15%">Default Amount</th>
                                         <th>Description</th>
                                         <th width="8%" align="center"></th>
                                     </tr>

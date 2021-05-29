@@ -166,7 +166,7 @@ var save_staff_allowances = () => {
                 if (response.code === 200) {
                     s_icon = "success";
                     setTimeout(() => {
-                        loadPage(`${baseUrl}hr-payroll-view/${employee_id}`);
+                        loadPage(`${baseUrl}payroll-view/${employee_id}`);
                     }, 1000);
                 }
                 swal({
@@ -275,7 +275,7 @@ var generate_payslip = () => {
                         $(`div[class~="allowance-div"] div[class~="allowances-list"]`).html(``);
                         $(`div[class~="deductions-div"] div[class~="deductions-list"]`).html(``);
                         setTimeout(function() {
-                            loadPage(`${baseUrl}hr-payslip`);
+                            loadPage(`${baseUrl}payslips`);
                         }, 1000);
                     }
                 }).catch(() => {

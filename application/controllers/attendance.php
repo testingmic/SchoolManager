@@ -264,15 +264,15 @@ class Attendance extends Myschoolgh {
         if(!isset($list_days[0])) {
             return [
                 "data" => [
-                    "table_content" => "<div class='mt-3 text-danger text-center font-italic'>Sorry! The date must not be a Sunday.</div>"
+                    "table_content" => "<div class='mt-3 text-danger text-center font-italic'>Sorry! The date must not be a Weekend.</div>"
                 ]
             ];
         }
 
         // confirm that the days range is a maximum of 14 days
-        if(count($list_days) > 22) {
+        if(count($list_days) > 25) {
             return [
-                "data" => "Sorry! The maximum days range but be at most 22."
+                "data" => "Sorry! The maximum days range must be at most 25."
             ];
         }
 
@@ -506,7 +506,7 @@ class Attendance extends Myschoolgh {
             $table_content .= "
             <tr>
                 <td align='center' colspan='4'>
-                    <div class='font-italic'>Sorry! No students found under the selected class.</div>
+                    <div class='font-italic'>Sorry! No user was found under the selected category.</div>
                 </td>
             </tr>";
         }

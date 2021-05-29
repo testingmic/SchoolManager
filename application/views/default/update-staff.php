@@ -272,6 +272,7 @@ if(!empty($user_id)) {
                         <div class="clearfix"></div>
                         <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
                         '.($data->class_name ? '<div class="author-box-job">'.$data->class_name.'</div>' : '').'
+                        <div class="author-box-job"><strong>'.strtoupper($data->user_type).'</strong></div>
                         '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : '').'
                     </div>
                 </div>
