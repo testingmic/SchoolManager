@@ -403,11 +403,11 @@ var trigger_form_submit = () => {
                     },
                     complete: function() {
                         $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
-                        formButton.prop("disabled", true);
+                        formButton.prop("disabled", false);
                     },
                     error: function() {
                         $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
-                        formButton.prop("disabled", true);
+                        formButton.prop("disabled", false);
                         swal({
                             position: 'top',
                             text: "Sorry! Error processing request.",

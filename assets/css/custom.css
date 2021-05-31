@@ -461,3 +461,9 @@ label {
     max-height: 600px;
     overflow-y: auto;
 }
+
+.card-header {
+    font-weight: bold;
+    border-bottom: solid 3px #6777ef!important;
+    border-bottom-color: #6777ef!important;
+}

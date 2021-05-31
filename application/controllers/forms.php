@@ -4310,4 +4310,42 @@ class Forms extends Myschoolgh {
 
     }
 
+    /**
+     * Account Head
+     * 
+     * @return String
+     */
+    public function account_type_head(stdClass $params) {
+
+        $data = isset($params->data) ? $params->data : null;
+
+        $html = "";
+        $html .= "<div class=\"col-12 col-md-5 col-lg-4\">";
+        $html .= "<div class=\"card\">";
+        $html .= "<div class=\"card-header\">".(!empty($data) ? "Add Account Type Head" : "Update Account Type Head")."</div>";
+        $html .= "<div class=\"card-body\">";
+        $html .= "<form method=\"post\" action=\"{$this->baseUrl}api/accounting/".(!empty($data) ? "update_accounttype" : "add_accounttype")."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">";
+        $html .= "<div class=\"form-group\">";
+        $html .= "<label>Name <span class=\"required\">*</span></label>";
+        $html .= "<input type=\"text\" name=\"name\" class=\"form-control\">";
+        $html .= "</div>";
+        $html .= "<div class=\"form-group\">";
+        $html .= "<label>Type <span class=\"required\">*</span></label>";
+        $html .= "<select class=\"form-control selectpicker\" name=\"account_type\">";
+        $html .= "<option value=\"\">Select Type</option>";
+        $html .= "<option value=\"Income\">Income</option>";
+        $html .= "<option value=\"Expense\">Expense</option>";
+        $html .= "</select>";
+        $html .= "</div>";
+        $html .= "<div align=\"right\">";
+        $html .= "<button class=\"btn btn-success\" data-function=\"save\" type=\"button-submit\">Save</button>";
+        $html .= "</div>";
+        $html .= "<form>";
+        $html .= "</div>";
+        $html .= "</div>";
+        $html .= "</div>";
+
+        return $html;
+    }
+
 }
