@@ -306,4 +306,105 @@ class Accounting extends Myschoolgh {
 
     }
 
+    /**
+     * Add Deposit Record
+     * 
+     * @param String $params->account_id
+     * @param String $params->reference
+     * @param String $params->description
+     * @param Float  $params->amount
+     * @param String $params->deposit_date
+     *
+     * @return Array
+     */
+    public function add_deposit(stdClass $params) {
+
+        try {
+
+            // create an item_id
+            $item_id = random_string("alnum", 15);
+
+            // insert the record
+            $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                item_id = ?, client_id = ?, account_id = ?, account_type = ?, 
+                item_type = ?, reference = ?, amount = ?, created_by = ?, date = ?,
+                payment_medium = ?, description = ?, academic_year = ?, academic_term = ?
+            ");
+            $stmt->execute([
+                $item_id, $params->clientId, $params->account_id, $params->account_type, 
+                'Deposit', $params->reference ?? null, $params->amount, $params->userId, 
+                $params->deposit_date, $params->payment_medium, $params->description ?? null,
+                $params->academic_year, $params->academic_term
+            ]);
+
+            // log the user activity
+            $this->userLogs("accounts_deposit", $item_id, null, "{$params->userData->name} added a new deposit", $params->userId);
+
+            // return the success response
+            return [
+                "code" => 200, 
+                "data" => "Account deposit was successfully recorded.", 
+                "additional" => [
+                    "clear" => true, 
+                    "href" => "{$this->baseUrl}deposit_voucher"
+                ]
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+    }
+
+    /**
+     * Update Deposit Record
+     * 
+     * @param String $params->account_id
+     * @param String $params->reference
+     * @param String $params->description
+     * @param Float  $params->amount
+     * @param String $params->deposit_date
+     * @param String $params->deposit_id
+     *
+     * @return Array
+     */
+    public function update_deposit(stdClass $params) {
+
+        try {
+
+            // old record
+            $prevData = $this->pushQuery("*", "accounts_transaction", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND item_type='Deposit' AND status='1' LIMIT 1");
+            
+            // if empty then return
+            if(empty($prevData)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            // insert the record
+            $stmt = $this->db->prepare("UPDATE accounts_transaction SET 
+                account_id = ?, account_type = ?, item_type = ?, reference = ?, amount = ?, 
+                created_by = ?, date = ?, payment_medium = ?, description = ? WHERE item_id = ? AND client_id = ?
+            ");
+            $stmt->execute([
+                $params->account_id, $params->account_type, 
+                'Deposit', $params->reference ?? null, $params->amount, $params->userId, 
+                $params->deposit_date, $params->payment_medium, $params->description ?? null,
+                $params->deposit_id, $params->clientId
+            ]);
+
+            // log the user activity
+            $this->userLogs("accounts_deposit", $params->deposit_id, null, "{$params->userData->name} updated the existing deposit record", $params->userId);
+
+            // return the success response
+            return [
+                "code" => 200, 
+                "data" => "Deposit record was successfully updated.", 
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+    }
+
 }
