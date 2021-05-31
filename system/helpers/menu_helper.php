@@ -150,7 +150,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-archway"></i><span>Simple Accounting</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>accounting">Account</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>accounts">Account</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>deposit_voucher">New Deposit</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>expense_voucher">New Expense</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>all_transactions">All Transactions</a></li>
@@ -164,7 +164,9 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Fees Reports</a></li>
             <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>accounting">Financial Reports</a></li>
+            <?php if($accessObject->hasAccess("view", "payslip")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">HR & Payroll</a></li>
+            <?php } ?>
         </ul>
     </li>
 

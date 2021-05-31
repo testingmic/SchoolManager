@@ -28,10 +28,10 @@ class Accounting extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
-        $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
+        $params->query .= (isset($params->q) && !empty($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
         $params->query .= (isset($params->type) && !empty($params->type)) ? " AND a.type='{$params->type}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->item_id) && !empty($params->item_id)) ? " AND a.id='{$params->item_id}'" : null;
+        $params->query .= (isset($params->type_id) && !empty($params->type_id)) ? " AND a.item_id='{$params->type_id}'" : null;
 
         try {
 
@@ -93,7 +93,7 @@ class Accounting extends Myschoolgh {
             $stmt->execute([$params->clientId, $params->name, $params->account_type, $params->description ?? null, $params->userId, $item_id]);
 
             // log the user activity
-            $this->userLogs("account_typehead", $item_id, null, "{$params->userData->name} added a new account type head", $params->userId);
+            $this->userLogs("accounts_typehead", $item_id, null, "{$params->userData->name} added a new account type head", $params->userId);
 
             // return the success response
             return [
@@ -143,7 +143,7 @@ class Accounting extends Myschoolgh {
             $stmt->execute([$params->name, $params->account_type, $params->description ?? null, $params->type_id, $params->clientId]);
 
             // log the user activity
-            $this->userLogs("account_typehead", $params->type_id, $prevData[0], "{$params->userData->name} updated the existing account type head", $params->userId);
+            $this->userLogs("accounts_typehead", $params->type_id, $prevData[0], "{$params->userData->name} updated the existing account type head", $params->userId);
 
             // return the success response
             return [
@@ -152,6 +152,151 @@ class Accounting extends Myschoolgh {
                 "additional" => [
                     "clear" => true, 
                     "href" => "{$this->baseUrl}account_type/{$params->type_id}"
+                ]
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+    }
+    
+    /**
+     * List Account Type Head
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function list_accounts(stdClass $params) {
+
+
+        $params->query = "1";
+
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+        $params->query .= (isset($params->q) && !empty($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
+        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->account_id) && !empty($params->account_id)) ? " AND a.item_id='{$params->account_id}'" : null;
+
+        try {
+
+            $stmt = $this->db->prepare("
+                SELECT a.*,
+                    (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info
+                FROM accounts a
+                WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
+            ");
+            $stmt->execute([1]);
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // loop through the information
+                foreach(["createdby_info"] as $each) {
+                    // convert the created by string into an object
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["name", "phone_number", "email", "image","user_type"]);
+                }
+
+                $data[] = $result;
+            }
+
+            return [
+                "code" => 200,
+                "data" => $data
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
+
+    }
+
+    /**
+     * Add Account
+     * 
+     * @param String $params->account_number
+     * @param String $params->account_name
+     * @param String $params->description
+     * @param Float  $params->opening_balance
+     *
+     * @return Array
+     */
+    public function add_account(stdClass $params) {
+
+        try {
+
+            // create an item_id
+            $item_id = random_string("alnum", 15);
+
+            // insert the record
+            $stmt = $this->db->prepare("INSERT INTO accounts SET client_id = ?, account_name = ?, account_number = ?,
+            description = ?, opening_balance = ?, created_by = ?, item_id = ?");
+            $stmt->execute([
+                $params->clientId, $params->account_name, $params->account_number, 
+                $params->description ?? null, $params->opening_balance, $params->userId, $item_id
+            ]);
+
+            // log the user activity
+            $this->userLogs("accounts", $item_id, null, "{$params->userData->name} added a new account type head", $params->userId);
+
+            // return the success response
+            return [
+                "code" => 200, 
+                "data" => "Account was successfully created.", 
+                "additional" => [
+                    "clear" => true, 
+                    "href" => "{$this->baseUrl}account_type"
+                ]
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+    }
+
+    /**
+     * Update Account
+     * 
+     * @param String $params->account_number
+     * @param String $params->account_name
+     * @param String $params->description
+     * @param Float  $params->opening_balance
+     * @param String $params->account_id
+     *
+     * @return Array
+     */
+    public function update_account(stdClass $params) {
+
+        try {
+
+            // old record
+            $prevData = $this->pushQuery("*", "accounts", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+            
+            // if empty then return
+            if(empty($prevData)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            // insert the record
+            $stmt = $this->db->prepare("UPDATE accounts SET account_name = ?, account_number = ?,
+            description = ?, opening_balance = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
+            $stmt->execute([
+                $params->account_name, $params->account_number, $params->description ?? null, 
+                $params->opening_balance, $params->account_id, $params->clientId
+            ]);
+
+            // log the user activity
+            $this->userLogs("accounts", $params->account_id, $prevData[0], "{$params->userData->name} updated the existing account details", $params->userId);
+
+            // return the success response
+            return [
+                "code" => 200, 
+                "data" => "Account was successfully updated.", 
+                "additional" => [
+                    "clear" => true, 
+                    "href" => "{$this->baseUrl}accounts/{$params->account_id}"
                 ]
             ];
 
