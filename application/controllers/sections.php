@@ -31,7 +31,7 @@ class Sections extends Myschoolgh {
             $stmt = $this->db->prepare("
                 SELECT a.*,
                     (SELECT COUNT(*) FROM users b WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' AND b.department = a.id AND b.client_id = a.client_id) AS students_count,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.section_leader LIMIT 1) AS section_leader_info
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.section_leader LIMIT 1) AS section_leader_info
                 FROM sections a
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
             ");
@@ -43,7 +43,7 @@ class Sections extends Myschoolgh {
                 // loop through the information
                 foreach(["section_leader_info"] as $each) {
                     // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","user_type"]);
                 }
 
                 $data[] = $result;
