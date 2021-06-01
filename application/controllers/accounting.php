@@ -155,7 +155,7 @@ class Accounting extends Myschoolgh {
                 "data" => "Account Type Head was successfully updated.", 
                 "additional" => [
                     "clear" => true, 
-                    "href" => "{$this->baseUrl}account_type/{$params->type_id}"
+                    "href" => "{$this->baseUrl}account_type"
                 ]
             ];
 

@@ -124,6 +124,12 @@ class Records extends Myschoolgh {
                 "update" => "status='0', deleted='1'",
                 "where" => "item_id='{$record_id}' AND user_type='parent'",
                 "query" => "SELECT id FROM users WHERE item_id='{$record_id}' AND client_id='{$userData->client_id}' AND user_type='parent' AND status ='1' LIMIT 1"
+            ],
+            "accounts_type" => [
+                "table" => "accounts_type_head",
+                "update" => "status='0'",
+                "where" => "item_id='{$record_id}' AND status='1'",
+                "query" => "SELECT name FROM accounts_type_head WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
             ]
         ];
 
@@ -170,21 +176,15 @@ class Records extends Myschoolgh {
                 return ["code" => 203, "data" => "Sorry! There was no record found for the specified id."];
             }
 
-            // if the result is in this list
-            if(in_array($params->resource, [
-                "event_type", "event", "class", "department", "course", "incident", "user", "guardian", "course_unit",
-                "course_lesson", "book", "book_category", "fees_category", "class_room", "timetable", "allowance", "payslip"
-            ])) {
-                // update the database record
-                $this->db->query("UPDATE {$featured["table"]} SET {$featured["update"]} WHERE {$featured["where"]} LIMIT 1");
-                
-                /** Log the user activity */
-                $this->userLogs("{$params->resource}", $params->record_id, null, "<strong>{$params->userData->name}</strong> deleted this record from the system.", $params->userData->user_id);
+            // update the database record
+            $this->db->query("UPDATE {$featured["table"]} SET {$featured["update"]} WHERE {$featured["where"]} LIMIT 1");
+            
+            /** Log the user activity */
+            $this->userLogs("{$params->resource}", $params->record_id, null, "<strong>{$params->userData->name}</strong> deleted this record from the system.", $params->userData->user_id);
 
-                // return the success response
-                $code = 200;
-                $data = "Record set successfully deleted";
-            }
+            // return the success response
+            $code = 200;
+            $data = "Record set successfully deleted";
 
             // if a full result was found
             return [

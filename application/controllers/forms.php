@@ -4317,28 +4317,34 @@ class Forms extends Myschoolgh {
      */
     public function account_type_head(stdClass $params) {
 
-        $data = isset($params->data) ? $params->data : null;
+        $data = isset($params->data) && !empty($params->data) ? $params->data : null;
 
         $html = "";
-        $html .= "<div class=\"col-12 col-md-5 col-lg-4\">";
+        $html .= "<div id=\"accounts_form\" class=\"col-12 col-md-5 col-lg-4\">";
         $html .= "<div class=\"card\">";
-        $html .= "<div class=\"card-header\">".(!empty($data) ? "Add Account Type Head" : "Update Account Type Head")."</div>";
+        $html .= "<div class=\"card-header\">".(empty($data) ? "Add Account Type Head" : "Update Account Type Head")."</div>";
         $html .= "<div class=\"card-body\">";
         $html .= "<form method=\"post\" action=\"{$this->baseUrl}api/accounting/".(!empty($data) ? "update_accounttype" : "add_accounttype")."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">";
         $html .= "<div class=\"form-group\">";
         $html .= "<label>Name <span class=\"required\">*</span></label>";
-        $html .= "<input type=\"text\" name=\"name\" class=\"form-control\">";
+        $html .= "<input type=\"text\" name=\"name\" value=\"".($data->name ?? null)."\" class=\"form-control\">";
+        $html .= "<input type=\"hidden\" readonly value=\"".($data->item_id ?? null)."\" name=\"type_id\" class=\"form-control\">";
         $html .= "</div>";
         $html .= "<div class=\"form-group\">";
         $html .= "<label>Type <span class=\"required\">*</span></label>";
         $html .= "<select class=\"form-control selectpicker\" name=\"account_type\">";
         $html .= "<option value=\"\">Select Type</option>";
-        $html .= "<option value=\"Income\">Income</option>";
-        $html .= "<option value=\"Expense\">Expense</option>";
+        $html .= "<option ".(!empty($data) && $data->account_type == "Income" ? "selected" : null)." value=\"Income\">Income</option>";
+        $html .= "<option ".(!empty($data) && $data->account_type == "Expense" ? "selected" : null)." value=\"Expense\">Expense</option>";
         $html .= "</select>";
         $html .= "</div>";
-        $html .= "<div align=\"right\">";
-        $html .= "<button class=\"btn btn-success\" data-function=\"save\" type=\"button-submit\">Save</button>";
+        $html .= "<div class=\"row\">";
+        $html .= "<div class=\"col-md-6\" align=\"left\">";
+        $html .= "<button class=\"btn btn-outline-danger\" onclick=\"return reset_account_form('api/accounting/add_accounttype')\" type=\"button\">Cancel</button>";
+        $html .= "</div>";
+        $html .= "<div class=\"col-md-6\" align=\"right\">";
+        $html .= "<button class=\"btn btn-outline-success\" data-function=\"save\" type=\"button-submit\"><i class=\"fa fa-save\"></i> Save</button>";
+        $html .= "</div>";
         $html .= "</div>";
         $html .= "<form>";
         $html .= "</div>";

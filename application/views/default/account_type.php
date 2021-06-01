@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass;
+global $myClass, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -16,18 +16,59 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];
+$filter = (object) $_GET;
 $pageTitle = "Account Type Head";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [
     "assets/js/accounting.js"
 ];
 
+// set the parameters
 $params = (object)[
-    "clientId" => $clientId
+    "clientId" => $clientId,
+    "client_data" => $defaultUser->client,
+    "type_id" => $filter->type_id ?? null
 ];
-$the_form = load_class("forms", "controllers")->account_type_head($params);
+// get the list of all the account types
+$accountsObject = load_class("accounting", "controllers", $params);
+$list_data = $accountsObject->list_accounttype($params)["data"];
 
-$data = null;
+// append the data to the params
+if(!empty($list_data) && !empty($params->type_id)) {
+    $params->data = $list_data[0];
+}
+
+// init value
+$type_list = "";
+$account_headtype_array = [];
+
+// if the user has the required permissions
+$hasUpdate = $accessObject->hasAccess("account_type_head", "accounting");
+
+// loop through the list of account type heads
+foreach($list_data as $key => $each) {
+    // append to the array list
+    $account_headtype_array[$each->item_id] = $each;
+
+    // set the action button
+    $action = "";
+    if($hasUpdate) {
+        $action .= "&nbsp;<a title='Click to delete record' href='#' onclick='return update_account_type(\"{$each->item_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a href='#' title='Click to delete this Account Type Head' onclick='return delete_record(\"{$each->item_id}\", \"accounts_type\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
+    }
+
+    // append to the rows
+    $type_list .= "<tr data-row_id=\"{$each->item_id}\">";
+    $type_list .= "<td>".($key+1)."</td>";
+    $type_list .= "<td>{$each->name}</td>";
+    $type_list .= "<td>{$each->type}</td>";
+    $type_list .= $hasUpdate ? "<td>{$action}</td>" : null;
+    $type_list .= "</tr>";
+}
+
+// load the form
+$the_form = $hasUpdate ? load_class("forms", "controllers")->account_type_head($params) : null;
+$response->array_stream["account_headtype_array"] = $account_headtype_array;
 
 $response->html = '
     <section class="section">
@@ -40,7 +81,7 @@ $response->html = '
         </div>
         <div class="row">
             '.$the_form.'
-            <div class="col-12 col-md-7 col-lg-8">
+            <div class="col-12 '.($hasUpdate ? "col-md-7 col-lg-8" : "col-md-12").'">
                 <div class="card">
                     <div class="card-header">Account Type Head List</div>
                     <div class="card-body">
@@ -50,13 +91,12 @@ $response->html = '
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
-                                        <th>Branch</th>
                                         <th>Name</th>
                                         <th>Type</th>
-                                        <th width="13%" align="center"></th>
+                                        '.($hasUpdate ? '<th width="13%" align="center"></th>' : null).'
                                     </tr>
                                 </thead>
-                                <tbody></tbody>
+                                <tbody>'.$type_list.'</tbody>
                             </table>
                         </div>
 
