@@ -142,9 +142,10 @@ class Accounting extends Myschoolgh {
             }
 
             // insert the record
-            $stmt = $this->db->prepare("UPDATE accounts_type_head SET name = ?, type = ?,
-            description = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
-            $stmt->execute([$params->name, $params->account_type, $params->description ?? null, $params->type_id, $params->clientId]);
+            $stmt = $this->db->prepare("UPDATE accounts_type_head SET name = ?, type = ?
+                ".(isset($params->description) ? ", description='{$params->description}'" : null)."
+            WHERE item_id = ? AND client_id = ? LIMIT 1");
+            $stmt->execute([$params->name, $params->account_type, $params->type_id, $params->clientId]);
 
             // log the user activity
             $this->userLogs("accounts_typehead", $params->type_id, $prevData[0], "{$params->userData->name} updated the existing account type head", $params->userId);
@@ -238,7 +239,7 @@ class Accounting extends Myschoolgh {
             description = ?, opening_balance = ?, created_by = ?, item_id = ?");
             $stmt->execute([
                 $params->clientId, $params->account_name, $params->account_number, 
-                $params->description ?? null, $params->opening_balance, $params->userId, $item_id
+                $params->description ?? null, $params->opening_balance ?? 0, $params->userId, $item_id
             ]);
 
             // log the user activity
@@ -276,7 +277,7 @@ class Accounting extends Myschoolgh {
         try {
 
             // old record
-            $prevData = $this->pushQuery("*", "accounts", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+            $prevData = $this->pushQuery("*", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
             
             // if empty then return
             if(empty($prevData)) {
@@ -284,12 +285,12 @@ class Accounting extends Myschoolgh {
             }
 
             // insert the record
-            $stmt = $this->db->prepare("UPDATE accounts SET account_name = ?, account_number = ?,
-            description = ?, opening_balance = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
-            $stmt->execute([
-                $params->account_name, $params->account_number, $params->description ?? null, 
-                $params->opening_balance, $params->account_id, $params->clientId
-            ]);
+            $stmt = $this->db->prepare("UPDATE accounts SET account_name = ?, account_number = ? 
+                ".(isset($params->description) ? ", description='{$params->description}'" : null)."
+                ".(isset($params->opening_balance) ? ", opening_balance='{$params->opening_balance}'" : null)."
+                WHERE item_id = ? AND client_id = ? LIMIT 1
+            ");
+            $stmt->execute([$params->account_name, $params->account_number, $params->account_id, $params->clientId]);
 
             // log the user activity
             $this->userLogs("accounts", $params->account_id, $prevData[0], "{$params->userData->name} updated the existing account details", $params->userId);

@@ -27,48 +27,49 @@ $response->scripts = [
 $params = (object)[
     "clientId" => $clientId,
     "client_data" => $defaultUser->client,
-    "type_id" => $filter->type_id ?? null
+    "account_id" => $filter->account_id ?? null
 ];
 // get the list of all the account types
 $accountsObject = load_class("accounting", "controllers", $params);
-$list_data = $accountsObject->list_accounttype($params)["data"];
+$list_data = $accountsObject->list_accounts($params)["data"];
 
 // append the data to the params
-if(!empty($list_data) && !empty($params->type_id)) {
+if(!empty($list_data) && !empty($params->account_id)) {
     $params->data = $list_data[0];
 }
 
 // init value
 $type_list = "";
-$account_headtype_array = [];
+$bank_accounts_array = [];
 
 // if the user has the required permissions
-$hasUpdate = $accessObject->hasAccess("account_type_head", "accounting");
+$hasUpdate = $accessObject->hasAccess("accounts", "accounting");
 
 // loop through the list of account type heads
 foreach($list_data as $key => $each) {
     // append to the array list
-    $account_headtype_array[$each->item_id] = $each;
+    $bank_accounts_array[$each->item_id] = $each;
 
     // set the action button
     $action = "";
     if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to delete record' href='#' onclick='return update_account_type(\"{$each->item_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-        $action .= "&nbsp;<a href='#' title='Click to delete this Account Type Head' onclick='return delete_record(\"{$each->item_id}\", \"accounts_type\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a title='Click to delete record' href='#' onclick='return update_bank_account(\"{$each->item_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a href='#' title='Click to delete this Account' onclick='return delete_record(\"{$each->item_id}\", \"accounts\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     // append to the rows
     $type_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $type_list .= "<td>".($key+1)."</td>";
-    $type_list .= "<td>{$each->name}</td>";
-    $type_list .= "<td>{$each->type}</td>";
+    $type_list .= "<td>{$each->account_name}</td>";
+    $type_list .= "<td>{$each->account_number}</td>";
+    $type_list .= "<td>{$each->description}</td>";
     $type_list .= $hasUpdate ? "<td>{$action}</td>" : null;
     $type_list .= "</tr>";
 }
 
 // load the form
-$the_form = $hasUpdate ? load_class("forms", "controllers")->account_type_head($params) : null;
-$response->array_stream["account_headtype_array"] = $account_headtype_array;
+$the_form = $hasUpdate ? load_class("forms", "controllers")->bank_accounts_form($params) : null;
+$response->array_stream["bank_accounts_array"] = $bank_accounts_array;
 
 $response->html = '
     <section class="section">
@@ -83,7 +84,7 @@ $response->html = '
             '.$the_form.'
             <div class="col-12 '.($hasUpdate ? "col-md-7 col-lg-8" : "col-md-12").'">
                 <div class="card">
-                    <div class="card-header">Account Type Head List</div>
+                    <div class="card-header">Accounts List</div>
                     <div class="card-body">
 
                         <div class="table-responsive table-student_staff_list">
@@ -92,7 +93,8 @@ $response->html = '
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
                                         <th>Name</th>
-                                        <th>Type</th>
+                                        <th>Number</th>
+                                        <th>Description</th>
                                         '.($hasUpdate ? '<th width="13%" align="center"></th>' : null).'
                                     </tr>
                                 </thead>

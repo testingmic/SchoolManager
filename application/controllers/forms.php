@@ -4354,4 +4354,52 @@ class Forms extends Myschoolgh {
         return $html;
     }
 
+    /**
+     * Account Head
+     * 
+     * @return String
+     */
+    public function bank_accounts_form(stdClass $params) {
+
+        $data = isset($params->data) && !empty($params->data) ? $params->data : null;
+
+        $html = "";
+        $html .= "<div id=\"accounts_form\" class=\"col-12 col-md-5 col-lg-4\">";
+        $html .= "<div class=\"card\">";
+        $html .= "<div class=\"card-header\">".(empty($data) ? "Add Account" : "Update Account")."</div>";
+        $html .= "<div class=\"card-body\">";
+        $html .= "<form method=\"post\" action=\"{$this->baseUrl}api/accounting/".(!empty($data) ? "update_account" : "add_account")."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">";
+        $html .= "<div class=\"form-group\">";
+        $html .= "<label>Account Name <span class=\"required\">*</span></label>";
+        $html .= "<input type=\"text\" name=\"account_name\" value=\"".($data->account_name ?? null)."\" class=\"form-control\">";
+        $html .= "<input type=\"hidden\" readonly value=\"".($data->item_id ?? null)."\" name=\"account_id\" class=\"form-control\">";
+        $html .= "</div>";
+        $html .= "<div class=\"form-group\">";
+        $html .= "<label>Account Number <span class=\"required\">*</span></label>";
+        $html .= "<input type=\"text\" name=\"account_number\" value=\"".($data->account_number ?? null)."\" class=\"form-control\">";
+        $html .= "</div>";
+        $html .= "<div class=\"form-group\">";
+        $html .= "<label>Description</label>";
+        $html .= "<textarea name=\"description\" class=\"form-control\">".($data->description ?? null)."</textarea>";
+        $html .= "</div>";
+        $html .= "<div class=\"form-group\">";
+        $html .= "<label>Opening Balance <span class=\"required\">*</span></label>";
+        $html .= "<input type=\"number\" name=\"opening_balance\" value=\"".($data->opening_balance ?? 0)."\" class=\"form-control\">";
+        $html .= "</div>";
+        $html .= "<div class=\"row\">";
+        $html .= "<div class=\"col-md-6\" align=\"left\">";
+        $html .= "<button class=\"btn btn-outline-danger\" onclick=\"return reset_account_form('api/accounting/add_account', 'Add Account')\" type=\"button\">Cancel</button>";
+        $html .= "</div>";
+        $html .= "<div class=\"col-md-6\" align=\"right\">";
+        $html .= "<button class=\"btn btn-outline-success\" data-function=\"save\" type=\"button-submit\"><i class=\"fa fa-save\"></i> Save</button>";
+        $html .= "</div>";
+        $html .= "</div>";
+        $html .= "<form>";
+        $html .= "</div>";
+        $html .= "</div>";
+        $html .= "</div>";
+
+        return $html;
+    }
+
 }

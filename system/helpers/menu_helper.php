@@ -150,11 +150,15 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-archway"></i><span>Simple Accounting</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>accounts">Account</a></li>
+            <?php if($accessObject->hasAccess("accounts", "accounting")) { ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>accounts">Accounts</a></li>
+            <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>deposit_voucher">New Deposit</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>expense_voucher">New Expense</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>all_transactions">All Transactions</a></li>
+            <?php if($accessObject->hasAccess("account_type_head", "accounting")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>account_type">Account Type Head</a></li>
+            <?php } ?>
         </ul>
     </li>
     <li class="dropdown">

@@ -177,7 +177,6 @@ require "headtags.php";
                                 <div class="endpoint-list">
                                     <table class="table pb-0 mb-0 table-hover " width="100%">
                                         <th width="6%">#</th>
-                                        <th width="20%">Resource</th>
                                         <th align="left">Endpoint</th>
                                         <th width="15%">Method</th>
                                         <th width="20%"></th>
@@ -188,23 +187,22 @@ require "headtags.php";
                                             <?php $key = 0; foreach($list["data"] as $value) { $key++; ?>
                                                 <tr data-item="<?= $value->item_id ?>">
                                                     <td width="6%"><?= $key ?></td>
-                                                    <td width="20%"><span class="resource-<?= $value->item_id ?>"><?= ucwords($value->resource) ?></span>
+                                                    <td><?= ucfirst($value->endpoint) ?>
                                                         <?php if($value->deprecated && !$value->deleted) { ?>
-                                                        <br><span class="badge badge-danger">Deprecated</span>
+                                                        <br><span class="badge badge-warning">Deprecated</span>
                                                         <?php } ?>
                                                         <?php if($value->deleted) { ?>
                                                         <br><span class="badge badge-danger">Deleted</span>
                                                         <?php } ?>
                                                     </td>
-                                                    <td><?= $value->endpoint ?></td>
                                                     <td width="15%"><?= strtoupper($value->method) ?></td>
                                                     <td width="20%" align="center">
                                                         <?php if(!$value->deprecated) { ?>
-                                                        <button data-function="update" title="Update this Endpoint" data-item="<?= $value->item_id ?>" class="btn btn-sm btn-outline-success"><i class="fa fa-edit"></i></button>
-                                                        <button data-function="delete" data-label="deprecate" data-msg="Are you want you want to deprecate this endpoint?" title="Deprecate this Endpoint" data-item="<?= $value->item_id ?>" class="btn btn-sm btn-outline-danger"><i class="fa fa-stop"></i></button>
+                                                        <button data-function="update" title="Update this Endpoint" data-item="<?= $value->item_id ?>" class="btn btn-sm mb-1 btn-outline-success"><i class="fa fa-edit"></i></button>
+                                                        <button data-function="delete" data-label="deprecate" data-msg="Are you want you want to deprecate this endpoint?" title="Deprecate this Endpoint" data-item="<?= $value->item_id ?>" class="btn mb-1 btn-sm btn-outline-danger"><i class="fa fa-stop"></i></button>
                                                         <?php } elseif($value->deprecated && !$value->deleted) { ?>
-                                                        <button data-function="delete" data-label="restore" data-msg="Are you sure you want to restore this endpoint to active state?" title="Set this endpoint as active" data-item="<?= $value->item_id ?>" class="btn btn-sm btn-outline-warning"><i class="fa fa-play"></i></button>
-                                                        <button data-function="delete" data-label="delete" data-msg="Are you want you want to permanently delete this endpoint?" title="Delete endpoint" data-item="<?= $value->item_id ?>" class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button>
+                                                        <button data-function="delete" data-label="restore" data-msg="Are you sure you want to restore this endpoint to active state?" title="Set this endpoint as active" data-item="<?= $value->item_id ?>" class="btn mb-1 btn-sm btn-outline-warning"><i class="fa fa-play"></i></button>
+                                                        <button data-function="delete" data-label="delete" data-msg="Are you want you want to permanently delete this endpoint?" title="Delete endpoint" data-item="<?= $value->item_id ?>" class="btn mb-1 btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button>
                                                         <?php } ?>
                                                     </td>
                                                 </tr>
@@ -220,7 +218,7 @@ require "headtags.php";
                         <div class="card">
                             <div class="card-header">
                                 <div class="card-title">
-                                    Endpoint Content
+                                    Endpoint Content &nbsp;
                                     <span class="float-right">
                                         <a href="<?= $baseUrl ?>endpoints" class="btn btn-sm hidden refresh-button btn-outline-success"><i class="fa fa-random"></i> Refresh</a>
                                         <button class="btn btn-outline-primary btn-sm cursor" type="add"><i class="fa fa-plus"></i> Add New</button>
@@ -231,30 +229,18 @@ require "headtags.php";
                                 <div class="endpoint-content">
                                     <form action="<?= $baseUrl ?>endpoints/save" autocomplete="Off" class="endpoint-form" method="POST">
                                         <div class="row">
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="resource">Resource Name</label>
                                                     <input type="text" name="resource" id="resource" class="form-control">
                                                 </div>
                                             </div>
-                                            <div class="col-md-4">
+                                            <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="endpoint">Endpoint URL</label>
                                                     <input type="text" name="endpoint" id="endpoint" class="form-control">
                                                     <input type="text" name="request" readonly hidden id="request" value="add" class="form-control">
                                                     <input type="hidden" readonly hidden value="<?= $end_id ?>" name="endpoint_id" id="endpoint_id" class="form-control">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-group">
-                                                    <label for="method">Method</label>
-                                                    <select name="method" id="method" class="form-control selectpicker">
-                                                        <option value="">Select Method</option>
-                                                        <option value="get">GET</option>
-                                                        <option value="post">POST</option>
-                                                        <option value="put">PUT</option>
-                                                        <option value="delete">DELETE</option>
-                                                    </select>
                                                 </div>
                                             </div>
                                             <div class="col-md-12">
@@ -277,6 +263,18 @@ require "headtags.php";
                                                         <option value="inactive">Inactive</option>
                                                         <option value="dormant">Dormant</option>
                                                         <option value="overloaded">Overloaded</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="method">Method</label>
+                                                    <select name="method" id="method" class="form-control selectpicker">
+                                                        <option value="">Select Method</option>
+                                                        <option value="get">GET</option>
+                                                        <option value="post">POST</option>
+                                                        <option value="put">PUT</option>
+                                                        <option value="delete">DELETE</option>
                                                     </select>
                                                 </div>
                                             </div>
