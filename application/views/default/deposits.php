@@ -38,6 +38,10 @@ $transactions_list = load_class("accounting", "controllers", $params)->list_tran
 // confirm that the user has the required permissions
 $the_form = load_class("forms", "controllers")->transaction_form($params);
 
+// permission to modify and validate
+$hasValidate = $accessObject->hasAccess("validate", "accounting");
+$hasModify = $accessObject->hasAccess("modify", "accounting");
+
 $count = 0;
 $list_transactions = "";
 $transactions_array_list = [];
@@ -45,18 +49,29 @@ foreach($transactions_list as $key => $transaction) {
     $transactions_array_list[$transaction->item_id] = $transaction;
     $count++;
 
-    $action = "";
+    // view button
+    $action = "<button onclick='return view_transaction(\"{$transaction->item_id}\");' title='Click to view full details of transaction' class='btn btn-outline-success mb-1 btn-sm'><i class='fa fa-eye'></i></button>";
 
-    $list_transactions .= "<tr>";
+    // if the record is still pending
+    if($transaction->state === "Pending") {
+        // validate the transaction
+        $action .= "&nbsp;<button onclick='return validate_transaction(\"{$transaction->item_id}\",\"{$baseUrl}deposits\")' class=\"btn btn-sm btn-outline-primary mb-1\" title=\"Validate Transaction\"><i class='fa fa-check'></i></button>";
+
+        // if the user has permission to modify record
+        if($hasModify) {
+            $action .= "&nbsp;<button onclick='return delete_record(\"{$transaction->item_id}\", \"transaction\");' title='Click to reverse this transaction' class='btn btn-outline-danger mb-1 btn-sm'><i class='fa fa-recycle'></i></button>";
+        }
+    }
+
+    $list_transactions .= "<tr data-row_id=\"{$transaction->item_id}\">";
     $list_transactions .= "<td>{$count}</td>";
     $list_transactions .= "<td>{$transaction->account_name}</td>";
     $list_transactions .= "<td>{$transaction->account_type_name}</td>";
     $list_transactions .= "<td>{$transaction->reference}</td>";
-    $list_transactions .= "<td>{$transaction->description}</td>";
-    $list_transactions .= "<td>{$transaction->payment_medium}</td>";
-    $list_transactions .= "<td>{$transaction->amount}</td>";
-    $list_transactions .= "<td>{$transaction->record_date}</td>";
-    $list_transactions .= "<td>{$action}</td>";
+    $list_transactions .= "<td>".ucfirst($transaction->payment_medium)."</td>";
+    $list_transactions .= "<td>".number_format($transaction->amount, 2)."</td>";
+    $list_transactions .= "<td>".date("jS M Y", strtotime($transaction->record_date))."</td>";
+    $list_transactions .= "<td align='center'>{$action}</td>";
     $list_transactions .= "</tr>";
 }
 $response->array_stream["transactions_array_list"] = $transactions_array_list;
@@ -86,13 +101,12 @@ $response->html = '
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
                                     <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered datatable">
+                                        <table class="table table-bordered table-striped datatable">
                                             <thead>
                                                 <th></th>
                                                 <th>Account Name</th>
                                                 <th>Account Type Head</th>
                                                 <th>Ref No.</th>
-                                                <th>Description</th>
                                                 <th>Pay Via</th>
                                                 <th>Amount</th>
                                                 <th>Date</th>

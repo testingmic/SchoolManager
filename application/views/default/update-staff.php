@@ -398,7 +398,7 @@ if(!empty($user_id)) {
                                     : null ).'
                                 </div>
                                 <div class="table-responsive">
-                                    <table data-empty="" class="table table-striped datatable">
+                                    <table data-empty="" class="table table-bordered table-striped datatable">
                                         <thead>
                                             <tr>
                                                 <th>Course Title</th>

@@ -151,7 +151,7 @@ if(!$accessObject->hasAccess("promote", "promotion")) {
 
                             <div class="tab-pane fade" id="promotion_history" role="tabpanel" aria-labelledby="promotion_history-tab2">
                                 <div class="table-responsive table-student_staff_list">
-                                    <table data-empty="" class="table table-striped datatable">
+                                    <table data-empty="" class="table table-bordered table-striped datatable">
                                         <thead>
                                             <tr>
                                                 <th width="5%" class="text-center">#</th>

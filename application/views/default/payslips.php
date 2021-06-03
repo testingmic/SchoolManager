@@ -59,7 +59,7 @@ foreach($payslips_list["data"] as $key => $each) {
         // if the user has the permission to validate a payslip
         if($validatePayslip) {
             $validated = false;
-            $action .= "&nbsp;<a onclick='return validate_payslip(\"{$each->item_id}\",\"payslip\",\"{$baseUrl}payslips\")' class=\"btn btn-sm btn-outline-success mb-1\" title=\"Validate Payslip\" href=\"#\"><i class='fa fa-check'></i></a>";
+            $action .= "&nbsp;<a onclick='return validate_payslip(\"{$each->item_id}\",\"{$baseUrl}payslips\")' class=\"btn btn-sm btn-outline-success mb-1\" title=\"Validate Payslip\" href=\"#\"><i class='fa fa-check'></i></a>";
         }
     }
     

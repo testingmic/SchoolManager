@@ -332,10 +332,8 @@ var set_default_Student = (student_id) => {
     });
 }
 
-var validate_payslip = (record_id, record, redirect) => {
-    let label = {
-        record_id,record
-    };
+var validate_payslip = (record_id, redirect) => {
+    let label = {record_id, record: "payslip"};
     swal({
         title: "Validate Payslip",
         text: "Are you sure you want to validate the payslip(s)",
@@ -344,7 +342,7 @@ var validate_payslip = (record_id, record, redirect) => {
         dangerMode: true,
     }).then((proceed) => {
         if(proceed) {
-            $.post(`${baseUrl}api/records/validate_payslip`, {label}).then((response) => {
+            $.post(`${baseUrl}api/records/validate`, {label}).then((response) => {
                 swal({
                     text: response.data.result,
                     icon: responseCode(response.code)
@@ -359,10 +357,8 @@ var validate_payslip = (record_id, record, redirect) => {
     });
 }
 
-var validate_transaction = (record_id, record, redirect) => {
-    let label = {
-        record_id,record
-    };
+var validate_transaction = (record_id, redirect) => {
+    let label = { record_id, record: "transaction" };
     swal({
         title: "Validate Transaction",
         text: "Are you sure you want to validate the transaction(s)",
@@ -371,7 +367,7 @@ var validate_transaction = (record_id, record, redirect) => {
         dangerMode: true,
     }).then((proceed) => {
         if(proceed) {
-            $.post(`${baseUrl}api/records/validate_transaction`, {label}).then((response) => {
+            $.post(`${baseUrl}api/records/validate`, {label}).then((response) => {
                 swal({
                     text: response.data.result,
                     icon: responseCode(response.code)

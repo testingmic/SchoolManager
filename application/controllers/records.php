@@ -206,68 +206,58 @@ class Records extends Myschoolgh {
      * 
      * @return Array
      */
-    public function validate_payslip(stdClass $params) {
+    public function validate(stdClass $params) {
         
         // confirm that all required parameters has been parsed
         if(!isset($params->label["record_id"]) || !isset($params->label["record"])) {
             return ["code" => 203, "data" => "Sorry! Please ensure all required parameters has been parsed."];
         }
 
-        $record = $params->label["record"];
-        $record_id = $params->label["record_id"];
-
         // set the record
         $record = $params->label["record"];
         $records_id = $this->stringToArray($params->label["record_id"]);
 
-        // loop through the array list
-        foreach($records_id as $record_id) {
-            $payslip = $this->pushQuery("a.payslip_month, a.id, a.payslip_year, (SELECT b.name FROM users b WHERE b.item_id = a.employee_id ORDER BY b.id DESC LIMIT 1) AS employee_name", 
-            "payslips a", "a.client_id='{$params->clientId}' AND a.deleted='0' AND a.item_id='{$record_id}' AND a.validated='0' LIMIT 1");
-            if(empty($payslip)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied or the payslip has already been validated."];
-            }
-            $this->db->query("UPDATE payslips SET validated='1', validated_date = now(), status='1' WHERE item_id='{$record_id}' LIMIT 1");
+        // if the record is to validate a payslip
+        if($record == "payslip") {
 
-            // log the user activity
-            $this->userLogs("payslip", $record_id, null, "<strong>{$params->userData->name}</strong> validated the payslip: <strong>{$payslip[0]->employee_name}</strong> for the month: <strong>{$payslip[0]->payslip_month} {$payslip[0]->payslip_year}</strong>", $params->userId);
+            // loop through the array list
+            foreach($records_id as $record_id) {
+                $payslip = $this->pushQuery("a.payslip_month, a.id, a.payslip_year, (SELECT b.name FROM users b WHERE b.item_id = a.employee_id ORDER BY b.id DESC LIMIT 1) AS employee_name", 
+                "payslips a", "a.client_id='{$params->clientId}' AND a.deleted='0' AND a.item_id='{$record_id}' AND a.validated='0' LIMIT 1");
+                if(empty($payslip)) {
+                    return ["code" => 203, "data" => "Sorry! An invalid id was supplied or the payslip has already been validated."];
+                }
+                $this->db->query("UPDATE payslips SET validated='1', validated_date = now(), status='1' WHERE item_id='{$record_id}' LIMIT 1");
+
+                // log the user activity
+                $this->userLogs("payslip", $record_id, null, "<strong>{$params->userData->name}</strong> validated the payslip: <strong>{$payslip[0]->employee_name}</strong> for the month: <strong>{$payslip[0]->payslip_month} {$payslip[0]->payslip_year}</strong>", $params->userId);
+
+            }
 
             return ["code" => 200, "data" => "Payslip successfully validated."];
+
         }
 
-    }
+        // if the record is transaction
+        elseif($record == "transaction") {
 
-    /**
-     * Validate Transaction
-     * 
-     * @return Array
-     */
-    public function validate_transaction(stdClass $params) {
-        
-        // confirm that all required parameters has been parsed
-        if(!isset($params->label["record_id"]) || !isset($params->label["record"])) {
-            return ["code" => 203, "data" => "Sorry! Please ensure all required parameters has been parsed."];
-        }
+            // loop through the array list
+            foreach($records_id as $record_id) {
 
-        // set the record
-        $record = $params->label["record"];
-        $records_id = $this->stringToArray($params->label["record_id"]);
+                // validate the transaction record
+                $transaction = $this->pushQuery("item_id", "accounts_transaction", "client_id='{$params->clientId}' AND state='Pending' AND item_id='{$record_id}' LIMIT 1");
+                if(empty($transaction)) {
+                    return ["code" => 203, "data" => "Sorry! An invalid id was supplied or the transaction has already been validated."];
+                }
+                $this->db->query("UPDATE accounts_transaction SET state='Approved', validated_date = now(), validated_by = '{$params->userId}' WHERE item_id='{$record_id}' LIMIT 1");
 
-        // loop through the array list
-        foreach($records_id as $record_id) {
-
-            // validate the transaction record
-            $transaction = $this->pushQuery("item_id", "accounts_transaction", "client_id='{$params->clientId}' AND state='Pending' AND item_id='{$record_id}' LIMIT 1");
-            if(empty($transaction)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied or the transaction has already been validated."];
+                // log the user activity
+                $this->userLogs("accounts_transaction", $record_id, null, "<strong>{$params->userData->name}</strong> validated the transaction.", $params->userId);
             }
-            $this->db->query("UPDATE accounts_transaction SET state='Approved', validated_date = now() WHERE item_id='{$record_id}' LIMIT 1");
 
-            // log the user activity
-            $this->userLogs("accounts_transaction", $record_id, null, "<strong>{$params->userData->name}</strong> validated the transaction.", $params->userId);
+            return ["code" => 200, "data" => "Transaction record successfully validated."];
+
         }
-
-        return ["code" => 200, "data" => "Transaction record successfully validated."];
 
     }
 

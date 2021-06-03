@@ -4414,11 +4414,13 @@ class Forms extends Myschoolgh {
         // the route for the form
         $form_route = [
             "deposit" => [
+                "type" => "Income",
                 "title" => "Add Deposit",
                 "add" => "{$this->baseUrl}api/accounting/add_deposit",
                 "update" => "{$this->baseUrl}api/accounting/update_deposit"
             ],
             "expense" => [
+                "type" => "Expense",
                 "title" => "Add Expense",
                 "add" => "{$this->baseUrl}api/accounting/add_expenditure",
                 "update" => "{$this->baseUrl}api/accounting/update_expenditure"
@@ -4462,7 +4464,7 @@ class Forms extends Myschoolgh {
 
         // load the accounts
         $accounts_list = $this->pushQuery("account_name, item_id, account_number", "accounts", "client_id = '{$params->clientId}' AND status='1'");
-        $accounts_head_list = $this->pushQuery("name, item_id", "accounts_type_head", "client_id = '{$params->clientId}' AND status='1' AND type='{$params->route}'");
+        $accounts_head_list = $this->pushQuery("name, item_id", "accounts_type_head", "client_id = '{$params->clientId}' AND status='1' AND type='{$form_route[$params->route]["type"]}'");
 
         $html = "
         <div class='row'>

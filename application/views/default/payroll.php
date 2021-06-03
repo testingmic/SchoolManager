@@ -130,7 +130,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                     <div class="card">
                         <div class="card-body">
                             <div class="table-responsive table-student_staff_list">
-                                <table data-empty="" class="table table-striped datatable">
+                                <table data-empty="" class="table table-bordered table-striped datatable">
                                     <thead>
                                         <tr>
                                             <th width="5%" class="text-center">#</th>

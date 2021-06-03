@@ -155,7 +155,7 @@
             <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>deposits">Deposits</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>expenses">Expenses</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>all_transactions">All Transactions</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>transactions">All Transactions</a></li>
             <?php if($accessObject->hasAccess("account_type_head", "accounting")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>account_type">Account Type Head</a></li>
             <?php } ?>

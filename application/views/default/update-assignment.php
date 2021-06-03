@@ -197,7 +197,7 @@ if(!empty($item_id)) {
                         </thead>
                     </table>
                     <div class="slim-scroll" style="max-height: 500px; overflow-y:auto;">
-                        <table width="100%" class="table-bordered table mt-0">
+                        <table width="100%" class="table-bordered table-stripped table mt-0">
                         <tbody>';
                         // loop through the list of students
                         foreach($result as $student) {

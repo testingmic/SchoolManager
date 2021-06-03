@@ -141,7 +141,7 @@ if(!$receivePayment) {
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="classes" role="tabpanel" aria-labelledby="classes-tab2">
                                     <div class="table-responsive">
-                                        <table data-empty="" class="table table-striped datatable">
+                                        <table data-empty="" class="table table-bordered table-striped datatable">
                                             <thead>
                                                 <tr>
                                                     <th width="5%" class="text-center">#</th>
@@ -157,7 +157,7 @@ if(!$receivePayment) {
                                 </div>
                                 <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
                                     <div class="table-responsive">
-                                        <table data-empty="" class="table table-striped datatable">
+                                        <table data-empty="" class="table table-bordered table-striped datatable">
                                             <thead>
                                                 <tr>
                                                     <th width="5%" class="text-center">#</th>

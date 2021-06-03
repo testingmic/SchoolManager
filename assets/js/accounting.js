@@ -6,6 +6,16 @@ var reset_account_form = (form_url, title = "Add Account Type Head") => {
     $(`div[id="accounts_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}${form_url}`);
 }
 
+var view_transaction = (transaction_id) => {
+    if ($.array_stream["transactions_array_list"] !== undefined) {
+        let transaction = $.array_stream["transactions_array_list"];
+        if (transaction[transaction_id] !== undefined) {
+            let data = transaction[transaction_id];
+            console.log(data);
+        }
+    }
+}
+
 var update_account_type = (type_id) => {
     if ($.array_stream["account_headtype_array"] !== undefined) {
         let account_head = $.array_stream["account_headtype_array"];

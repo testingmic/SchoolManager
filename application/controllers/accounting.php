@@ -236,10 +236,10 @@ class Accounting extends Myschoolgh {
 
             // insert the record
             $stmt = $this->db->prepare("INSERT INTO accounts SET client_id = ?, account_name = ?, account_number = ?,
-            description = ?, opening_balance = ?, created_by = ?, item_id = ?");
+            description = ?, opening_balance = ?, created_by = ?, item_id = ?, balance = ?, total_credit = ?");
             $stmt->execute([
-                $params->clientId, $params->account_name, $params->account_number, 
-                $params->description ?? null, $params->opening_balance ?? 0, $params->userId, $item_id
+                $params->clientId, $params->account_name, $params->account_number, $params->description ?? null, 
+                $params->opening_balance ?? 0, $params->userId, $item_id, $params->opening_balance ?? 0, $params->opening_balance ?? 0
             ]);
 
             // log the user activity
@@ -397,18 +397,28 @@ class Accounting extends Myschoolgh {
             // create an item_id
             $item_id = random_string("alnum", 15);
 
+            // validate the account id
+            $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            if(empty($accountData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+
+            // set the payment medium if not set
+            $params->payment_medium = isset($params->payment_medium) ? $params->payment_medium : "cash";
+
             // insert the record
             $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
                 item_id = ?, client_id = ?, account_id = ?, account_type = ?, 
                 item_type = ?, reference = ?, amount = ?, created_by = ?, record_date = ?,
-                payment_medium = ?, description = ?, academic_year = ?, academic_term = ?
+                payment_medium = ?, description = ?, academic_year = ?, academic_term = ?, balance = ?
             ");
             $stmt->execute([
                 $item_id, $params->clientId, $params->account_id, $params->account_type, 
                 'Deposit', $params->reference ?? null, $params->amount, $params->userId, 
                 $params->date, $params->payment_medium, $params->description ?? null,
-                $params->academic_year, $params->academic_term
+                $params->academic_year, $params->academic_term, ($accountData[0]->balance + $params->amount)
             ]);
+
+            // add up to the credit line
+            $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$params->amount}), balance = (balance + {$params->amount}) WHERE item_id = '{$params->account_id}' LIMIT 1");
 
             // create a new object of the files class
             $filesObj = load_class("files", "controllers");
@@ -447,7 +457,7 @@ class Accounting extends Myschoolgh {
      * @param String $params->description
      * @param Float  $params->amount
      * @param String $params->deposit_date
-     * @param String $params->deposit_id
+     * @param String $params->transaction_id
      *
      * @return Array
      */
@@ -457,26 +467,33 @@ class Accounting extends Myschoolgh {
 
             // old record
             $prevData = $this->pushQuery("*", "accounts_transaction", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND item_type='Deposit' AND status='1' LIMIT 1");
-            
-            // if empty then return
-            if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
-            }
+            if(empty($prevData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+
+            // validate the account id
+            $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            if(empty($accountData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+
+            // set the payment medium if not set
+            $params->payment_medium = isset($params->payment_medium) ? $params->payment_medium : "cash";
 
             // insert the record
             $stmt = $this->db->prepare("UPDATE accounts_transaction SET 
-                account_id = ?, account_type = ?, item_type = ?, reference = ?, amount = ?, 
-                created_by = ?, record_date = ?, payment_medium = ?, description = ? WHERE item_id = ? AND client_id = ?
+                account_id = ?, account_type = ?, reference = ?, amount = ?, created_by = ?, record_date = ?, 
+                payment_medium = ?, description = ?, balance = ? WHERE item_id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([
                 $params->account_id, $params->account_type, 
-                'Deposit', $params->reference ?? null, $params->amount, $params->userId, 
+                $params->reference ?? null, $params->amount, $params->userId, 
                 $params->date, $params->payment_medium, $params->description ?? null,
-                $params->deposit_id, $params->clientId
+                ($accountData[0]->balance - $prevData[0]->amount + $params->amount),
+                $params->transaction_id, $params->clientId
             ]);
 
+            // update the deposits
+            $this->db->query("UPDATE accounts SET total_credit = (total_credit - {$prevData[0]->amount} + {$params->amount}) WHERE item_id = '{$params->account_id}' LIMIT 1");
+
             // log the user activity
-            $this->userLogs("accounts_transaction", $params->deposit_id, null, "{$params->userData->name} updated the existing deposit record", $params->userId);
+            $this->userLogs("accounts_transaction", $params->transaction_id, $prevData[0], "{$params->userData->name} updated the existing deposit record", $params->userId);
 
             // return the success response
             return [
@@ -508,18 +525,28 @@ class Accounting extends Myschoolgh {
             // create an item_id
             $item_id = random_string("alnum", 15);
 
+            // validate the account id
+            $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            if(empty($accountData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+
+            // set the payment medium if not set
+            $params->payment_medium = isset($params->payment_medium) ? $params->payment_medium : "cash";
+
             // insert the record
             $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
-                item_id = ?, client_id = ?, account_id = ?, account_type = ?, 
-                item_type = ?, reference = ?, amount = ?, created_by = ?, record_date = ?,
-                payment_medium = ?, description = ?, academic_year = ?, academic_term = ?
+                item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                description = ?, academic_year = ?, academic_term = ?, balance = ?
             ");
             $stmt->execute([
                 $item_id, $params->clientId, $params->account_id, $params->account_type, 
                 'Expense', $params->reference ?? null, $params->amount, $params->userId, 
                 $params->date, $params->payment_medium, $params->description ?? null,
-                $params->academic_year, $params->academic_term
+                $params->academic_year, $params->academic_term, ($accountData[0]->balance - $params->amount)
             ]);
+
+            // add up to the expense
+            $this->db->query("UPDATE accounts SET total_debit = (total_debit + {$params->amount}), balance = (balance - {$params->amount}) WHERE item_id = '{$params->account_id}' LIMIT 1");
 
             // create a new object of the files class
             $filesObj = load_class("files", "controllers");
@@ -558,7 +585,7 @@ class Accounting extends Myschoolgh {
      * @param String $params->description
      * @param Float  $params->amount
      * @param String $params->deposit_date
-     * @param String $params->deposit_id
+     * @param String $params->transaction_id
      *
      * @return Array
      */
@@ -568,26 +595,33 @@ class Accounting extends Myschoolgh {
 
             // old record
             $prevData = $this->pushQuery("*", "accounts_transaction", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND item_type='Expense' AND status='1' LIMIT 1");
-            
-            // if empty then return
-            if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
-            }
+            if(empty($prevData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
 
+            // validate the account id
+            $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            if(empty($accountData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+
+            // set the payment medium if not set
+            $params->payment_medium = isset($params->payment_medium) ? $params->payment_medium : "cash";
+            
             // insert the record
             $stmt = $this->db->prepare("UPDATE accounts_transaction SET 
-                account_id = ?, account_type = ?, item_type = ?, reference = ?, amount = ?, 
-                created_by = ?, record_date = ?, payment_medium = ?, description = ? WHERE item_id = ? AND client_id = ?
+                account_id = ?, account_type = ?, reference = ?, amount = ?, created_by = ?, record_date = ?, 
+                payment_medium = ?, description = ?, balance = ? WHERE item_id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([
                 $params->account_id, $params->account_type, 
-                'Expense', $params->reference ?? null, $params->amount, $params->userId, 
+                $params->reference ?? null, $params->amount, $params->userId, 
                 $params->date, $params->payment_medium, $params->description ?? null,
-                $params->deposit_id, $params->clientId
+                ($accountData[0]->balance + $prevData[0]->amount - $params->amount),
+                $params->transaction_id, $params->clientId
             ]);
 
+            // update the expense
+            $this->db->query("UPDATE accounts SET total_debit = (total_debit - {$prevData[0]->amount} + {$params->amount}) WHERE item_id = '{$params->account_id}' LIMIT 1");
+
             // log the user activity
-            $this->userLogs("accounts_transaction", $params->deposit_id, null, "{$params->userData->name} updated the existing expense record", $params->userId);
+            $this->userLogs("accounts_transaction", $params->transaction_id, $prevData[0], "{$params->userData->name} updated the existing expense record", $params->userId);
 
             // return the success response
             return [

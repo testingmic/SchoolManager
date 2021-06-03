@@ -424,7 +424,7 @@ if(!empty($user_id)) {
 
                                 <div class="border-top pt-3 col-lg-12 mt-3">
                                     <div class="table-responsive">
-                                        <table width="100%" class="table table-striped datatable">
+                                        <table width="100%" class="table table-striped table-bordered datatable">
                                             <thead>
                                                 <tr>
                                                     <th data-width="40" style="width: 40px;">#</th>
