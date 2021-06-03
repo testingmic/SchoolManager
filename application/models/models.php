@@ -29,7 +29,9 @@ class Models {
 
         $this->payment_methods = [
             "cash" => "Cash",
-            "cheque" => "Cheque"
+            "cheque" => "Cheque",
+            "mobile_money" => "Mobile Money",
+            "bank_transfer" => "Bank Transfer"
         ];
 
         $this->form_modules = [
@@ -239,6 +241,7 @@ class Models {
             "validate_promotion_log" => "Are you sure you want to validate this promotion. Once approved you cannot effect any changes.",
             "end_academic_term" => "Are you sure you want to end this academic term. You will be locked out from the system for not more than 10 minute to allow processing? Once confirmed, you cannot reverse the action."
         ];
+
     }
 
     /**

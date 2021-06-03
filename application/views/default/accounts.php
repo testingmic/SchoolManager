@@ -84,10 +84,10 @@ $response->html = '
             '.$the_form.'
             <div class="col-12 '.($hasUpdate ? "col-md-7 col-lg-8" : "col-md-12").'">
                 <div class="card">
-                    <div class="card-header">Accounts List</div>
+                    <div class="card-header"><i class="fa fa-list"></i> &nbsp; Accounts List</div>
                     <div class="card-body">
 
-                        <div class="table-responsive table-student_staff_list">
+                        <div class="table-responsive">
                             <table data-empty="" class="table table-striped datatable">
                                 <thead>
                                     <tr>

@@ -1,7 +1,8 @@
 var reset_account_form = (form_url, title = "Add Account Type Head") => {
-    $(`form[class="ajax-data-form"] input`).val("");
+    $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
     $(`div[id="accounts_form"] select[name="account_type"]`).val("").change();
     $(`div[id="accounts_form"] [class="card-header"]`).html(title);
+    $(`div[id="accounts_form"] input[name="opening_balance"]`).attr("disabled", false);
     $(`div[id="accounts_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}${form_url}`);
 }
 
@@ -26,7 +27,7 @@ var update_bank_account = (account_id) => {
         if (account[account_id] !== undefined) {
             let type = account[account_id];
             $(`div[id="accounts_form"] [class="card-header"]`).html("Update Account");
-            $(`div[id="accounts_form"] input[name="opening_balance"]`).val(type.opening_balance);
+            $(`div[id="accounts_form"] input[name="opening_balance"]`).val(type.opening_balance).attr("disabled", true);
             $(`div[id="accounts_form"] input[name="account_number"]`).val(type.account_number);
             $(`div[id="accounts_form"] textarea[name="description"]`).val(type.description);
             $(`div[id="accounts_form"] input[name="account_name"]`).val(type.account_name);
@@ -35,3 +36,11 @@ var update_bank_account = (account_id) => {
         }
     }
 }
+
+$(`input[id="all_delete"]`).on("click", function() {
+    if ($(this).is(':checked')) {
+        $(`input[class~="cb_delete"]`).prop("checked", true);
+    } else {
+        $(`input[class~="cb_delete"]`).prop("checked", false);
+    }
+});

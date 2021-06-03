@@ -339,7 +339,10 @@ class Accounting extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info
+                    (SELECT c.name FROM accounts_type_head c WHERE c.item_id = a.account_type LIMIT 1) AS account_type_name,
+                    (SELECT b.account_name FROM accounts b WHERE b.item_id = a.account_id LIMIT 1) AS account_name,
+                    (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info,
+                    (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment
                 FROM accounts_transaction a
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
             ");
@@ -352,6 +355,14 @@ class Accounting extends Myschoolgh {
                 foreach(["createdby_info"] as $each) {
                     // convert the created by string into an object
                     $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["name", "phone_number", "email", "image","user_type"]);
+                }
+
+                // if attachment variable was parsed
+                $result->attachment = json_decode($result->attachment);
+
+                // if the files is set
+                if(!isset($result->attachment->files)) {
+                   $result->attachment = $this->fake_files;
                 }
 
                 $data[] = $result;
@@ -395,9 +406,19 @@ class Accounting extends Myschoolgh {
             $stmt->execute([
                 $item_id, $params->clientId, $params->account_id, $params->account_type, 
                 'Deposit', $params->reference ?? null, $params->amount, $params->userId, 
-                $params->deposit_date, $params->payment_medium, $params->description ?? null,
+                $params->date, $params->payment_medium, $params->description ?? null,
                 $params->academic_year, $params->academic_term
             ]);
+
+            // create a new object of the files class
+            $filesObj = load_class("files", "controllers");
+
+            // attachments
+            $attachments = $filesObj->prep_attachments("accounts_transaction", $params->userId, $item_id);
+
+            // insert the record if not already existing
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
+            $files->execute(["accounts_transaction", $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
 
             // log the user activity
             $this->userLogs("accounts_transaction", $item_id, null, "{$params->userData->name} added a new deposit", $params->userId);
@@ -408,7 +429,7 @@ class Accounting extends Myschoolgh {
                 "data" => "Account deposit was successfully recorded.", 
                 "additional" => [
                     "clear" => true, 
-                    "href" => "{$this->baseUrl}deposit_voucher"
+                    "href" => "{$this->baseUrl}deposits"
                 ]
             ];
 
@@ -450,7 +471,7 @@ class Accounting extends Myschoolgh {
             $stmt->execute([
                 $params->account_id, $params->account_type, 
                 'Deposit', $params->reference ?? null, $params->amount, $params->userId, 
-                $params->deposit_date, $params->payment_medium, $params->description ?? null,
+                $params->date, $params->payment_medium, $params->description ?? null,
                 $params->deposit_id, $params->clientId
             ]);
 
@@ -496,9 +517,19 @@ class Accounting extends Myschoolgh {
             $stmt->execute([
                 $item_id, $params->clientId, $params->account_id, $params->account_type, 
                 'Expense', $params->reference ?? null, $params->amount, $params->userId, 
-                $params->expenditure_date, $params->payment_medium, $params->description ?? null,
+                $params->date, $params->payment_medium, $params->description ?? null,
                 $params->academic_year, $params->academic_term
             ]);
+
+            // create a new object of the files class
+            $filesObj = load_class("files", "controllers");
+
+            // attachments
+            $attachments = $filesObj->prep_attachments("accounts_transaction", $params->userId, $item_id);
+
+            // insert the record if not already existing
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
+            $files->execute(["accounts_transaction", $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
 
             // log the user activity
             $this->userLogs("accounts_transaction", $item_id, null, "{$params->userData->name} added a new expense", $params->userId);
@@ -509,7 +540,7 @@ class Accounting extends Myschoolgh {
                 "data" => "Account Expense was successfully recorded.", 
                 "additional" => [
                     "clear" => true, 
-                    "href" => "{$this->baseUrl}expense_voucher"
+                    "href" => "{$this->baseUrl}expenses"
                 ]
             ];
 
@@ -551,7 +582,7 @@ class Accounting extends Myschoolgh {
             $stmt->execute([
                 $params->account_id, $params->account_type, 
                 'Expense', $params->reference ?? null, $params->amount, $params->userId, 
-                $params->expenditure_date, $params->payment_medium, $params->description ?? null,
+                $params->date, $params->payment_medium, $params->description ?? null,
                 $params->deposit_id, $params->clientId
             ]);
 

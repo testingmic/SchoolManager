@@ -62,12 +62,7 @@ class Incidents extends Myschoolgh {
 
                 // if the files is set
                 if(!isset($result->attachment->files)) {
-                   $result->attachment = (object) [
-                        "files" => [],
-                        "files_count" => 0,
-                        "files_size" => 0,
-                        "raw_size_mb" => 0
-                    ];
+                   $result->attachment = $this->fake_files;
                 }
 
                 // if the full_details parameter was parsed

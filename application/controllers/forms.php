@@ -4366,7 +4366,7 @@ class Forms extends Myschoolgh {
         $html = "";
         $html .= "<div id=\"accounts_form\" class=\"col-12 col-md-5 col-lg-4\">";
         $html .= "<div class=\"card\">";
-        $html .= "<div class=\"card-header\">".(empty($data) ? "Add Account" : "Update Account")."</div>";
+        $html .= "<div class=\"card-header\">".(empty($data) ? "Create Account" : "Update Account")."</div>";
         $html .= "<div class=\"card-body\">";
         $html .= "<form method=\"post\" action=\"{$this->baseUrl}api/accounting/".(!empty($data) ? "update_account" : "add_account")."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">";
         $html .= "<div class=\"form-group\">";
@@ -4388,7 +4388,7 @@ class Forms extends Myschoolgh {
         $html .= "</div>";
         $html .= "<div class=\"row\">";
         $html .= "<div class=\"col-md-6\" align=\"left\">";
-        $html .= "<button class=\"btn btn-outline-danger\" onclick=\"return reset_account_form('api/accounting/add_account', 'Add Account')\" type=\"button\">Cancel</button>";
+        $html .= "<button class=\"btn btn-outline-danger\" onclick=\"return reset_account_form('api/accounting/add_account', 'Create Account')\" type=\"button\">Cancel</button>";
         $html .= "</div>";
         $html .= "<div class=\"col-md-6\" align=\"right\">";
         $html .= "<button class=\"btn btn-outline-success\" data-function=\"save\" type=\"button-submit\"><i class=\"fa fa-save\"></i> Save</button>";
@@ -4400,6 +4400,143 @@ class Forms extends Myschoolgh {
         $html .= "</div>";
 
         return $html;
+    }
+
+    /**
+     * Transactions Form
+     * 
+     * @return String
+     */
+    public function transaction_form(stdClass $params) {
+        
+        $data = isset($params->data) && !empty($params->data) ? $params->data : null;
+
+        // the route for the form
+        $form_route = [
+            "deposit" => [
+                "title" => "Add Deposit",
+                "add" => "{$this->baseUrl}api/accounting/add_deposit",
+                "update" => "{$this->baseUrl}api/accounting/update_deposit"
+            ],
+            "expense" => [
+                "title" => "Add Expense",
+                "add" => "{$this->baseUrl}api/accounting/add_expenditure",
+                "update" => "{$this->baseUrl}api/accounting/update_expenditure"
+            ]
+        ];
+
+        /** init content */
+        $preloaded_attachments = "";
+
+        /** Set parameters for the data to attach */
+        $form_params = (object) [
+            "module" => "accounts_transaction",
+            "userData" => $params->userData,
+            "item_id" => $data->item_id ?? null
+        ];
+        
+        // get the attachment list
+        if(isset($params->data->attachment)) {
+
+            // convert to object
+            $params->data->attachment = json_decode($params->data->attachment);
+
+            // set a new parameter for the items
+            $files_param = (object) [
+                "userData" => $params->userData,
+                "label" => "list",
+                "is_deletable" => (bool) ($data->state === "Pending"),
+                "module" => "accounts_transaction",
+                "item_id" => $data->item_id,
+                "attachments_list" => $data->attachment
+            ];
+
+            // create a new object
+            $attachments = load_class("files", "controllers")->attachments($files_param);
+        
+            // get the attachments list
+            $preloaded_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
+
+        }
+
+
+        // load the accounts
+        $accounts_list = $this->pushQuery("account_name, item_id, account_number", "accounts", "client_id = '{$params->clientId}' AND status='1'");
+        $accounts_head_list = $this->pushQuery("name, item_id", "accounts_type_head", "client_id = '{$params->clientId}' AND status='1' AND type='{$params->route}'");
+
+        $html = "
+        <div class='row'>
+            <div id=\"accounts_form\" class=\"col-md-2\"></div>
+            <div id=\"accounts_form\" class=\"col-12 col-md-7 col-lg-7\">
+                <div class=\"card\">
+                    <div class=\"card-header\">".(empty($data) ? $form_route[$params->route]["title"] : $form_route[$params->route]["title"])."</div>
+                    <div class=\"card-body\">
+                    <form method=\"post\" action=\"".(!empty($data) ? $form_route[$params->route]["update"] : $form_route[$params->route]["add"])."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">
+                        <div class=\"form-group\">
+                            <label>Account <span class=\"required\">*</span></label>
+                            <select data-width=\"100%\" name=\"account_id\" class=\"form-control selectpicker\">
+                                <option value=\"\">Select Account</option>";
+                                foreach($accounts_list as $account) {
+                                   $html .= "<option ".(!empty($data) && $account->item_id === $data->account_id ? "selected" : null)." value=\"{$account->item_id}\">{$account->account_name}</option>"; 
+                                }
+                            $html .= "</select>
+                            <input type=\"hidden\" readonly value=\"".($data->item_id ?? null)."\" name=\"transaction_id\" class=\"form-control\">
+                        </div>
+                        <div class=\"form-group\">
+                            <label>Account Type Head <span class=\"required\">*</span></label>
+                            <select data-width=\"100%\" name=\"account_type\" class=\"form-control selectpicker\">
+                                <option value=\"\">Select Account Type Head</option>";
+                                foreach($accounts_head_list as $type) {
+                                   $html .= "<option ".(!empty($data) && $type->item_id === $data->account_type ? "selected" : null)." value=\"{$type->item_id}\">{$type->name}</option>"; 
+                                }
+                            $html .= "</select>
+                        </div>
+                        <div class=\"form-group\">
+                            <label>Reference</label>
+                            <input type=\"text\" name=\"reference\" value=\"".($data->reference ?? null)."\" class=\"form-control\">
+                        </div>
+                        <div class=\"form-group\">
+                            <label>Amount <span class=\"required\">*</span></label>
+                            <input type=\"number\" name=\"amount\" value=\"".($data->amount ?? null)."\" class=\"form-control\">
+                        </div>
+                        <div class=\"form-group\">
+                            <label>Date <span class=\"required\">*</span></label>
+                            <input type=\"text\" name=\"date\" value=\"".($data->record_date ?? null)."\" class=\"form-control datepicker\">
+                        </div>
+                        <div class=\"form-group\">
+                            <label>Pay Via</label>
+                            <select data-width=\"100%\" name=\"payment_medium\" class=\"form-control selectpicker\">
+                                <option value=\"\">Select Payment Medium</option>";
+                                foreach($this->payment_methods as $key => $value) {
+                                   $html .= "<option ".(!empty($data) && $key === $data->payment_medium ? "selected" : null)." value=\"{$key}\">{$value}</option>"; 
+                                }
+                            $html .= "
+                            </select>
+                        </div>
+                        <div class=\"form-group\">
+                            <label>Description</label>
+                            <textarea name=\"description\" class=\"form-control\">".($data->description ?? null)."</textarea>
+                        </div>";
+                        $html .= "
+                        <div class='col-lg-12'>
+                            <div class='form-group text-center mb-1'><div class='row'>{$this->form_attachment_placeholder($form_params)}</div></div>
+                        </div>
+                        <div class=\"row\">
+                            <div class=\"col-md-6\" align=\"left\">
+                                <button class=\"btn btn-outline-danger\" onclick=\"return reset_account_form('{$form_route[$params->route]["add"]}', '{$form_route[$params->route]["title"]}')\" type=\"button\">Cancel</button>
+                            </div>
+                            <div class=\"col-md-6\" align=\"right\">
+                                <button class=\"btn btn-outline-success\" data-function=\"save\" type=\"button-submit\"><i class=\"fa fa-save\"></i> Save</button>
+                            </div>
+                        </div>
+                    <form>
+                    </div>
+                </div>
+            </div>
+        </div>";
+
+        return $html;
+
     }
 
 }
