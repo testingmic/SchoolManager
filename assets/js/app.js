@@ -32,6 +32,7 @@ $.panelIconClosed = 'icon-arrow-down';
 $.minTimetableTime = '7:00 AM';
 $.maxTimetableTime = '6:00 PM';
 $.array_stream = {};
+$.today = new Date().toISOString().slice(0, 10);
 
 'use strict';
 var devlog = $.env == "development" ? console.log : () => {}
@@ -763,17 +764,25 @@ var initMainMenu = () => {
 }
 
 var initPlugins = () => {
-
     if ($('._datepicker').length > 0) {
         $('._datepicker').datepicker();
     }
 
-    if ($('.datepicker').length > 0) {
-        $('.datepicker').daterangepicker({
-            locale: { format: 'YYYY-MM-DD' },
+    if ($('.monthyear').length > 0) {
+        $('.monthyear').daterangepicker({
+            locale: { format: 'MM-DD' },
             singleDatePicker: true,
-            drops: 'down',
-            opens: 'right'
+            drops: 'down'
+        });
+    }
+
+    if ($('.datepicker').length > 0) {
+        let date_format = $('.datepicker').attr("date-format") == undefined ? "YYYY-MM-DD" : $('.datepicker').attr("date-format");
+        $('.datepicker').daterangepicker({
+            locale: { format: date_format },
+            singleDatePicker: true,
+            showDropdowns: true,
+            maxDate: $.today
         });
     }
 
@@ -781,16 +790,15 @@ var initPlugins = () => {
         $('.att_datepicker').daterangepicker({
             locale: { format: 'YYYY-MM-DD' },
             singleDatePicker: true,
-            drops: 'down',
-            opens: 'right'
+            showDropdowns: true,
+            maxDate: $.today
         });
     }
 
     if (('.daterange').length > 0) {
         $('.daterange').daterangepicker({
             locale: { format: 'YYYY-MM-DD', separator: ':' },
-            drops: 'down',
-            opens: 'right'
+            drops: 'down'
         });
     }
 
@@ -849,7 +857,6 @@ var setActiveNavLink = () => {
         cUrl = cUrl.slice(0, -1);
     } else {
         if (splitter[6] !== undefined && splitter[5] == 'bulk') splitter[5] = 'bulk/' + splitter[6];
-
         if (splitter[5] !== undefined && splitter[5] == 'classinfo') splitter[5] = 'classes';
         if (splitter[5] !== undefined && splitter[4] == 'students' && splitter[5] == 'info' || splitter[5] == 'edit') splitter[5] = '';
         if (splitter[5] !== undefined && splitter[4] == 'staff' && splitter[5] == 'info') splitter[5] = '';
@@ -864,8 +871,8 @@ var setActiveNavLink = () => {
         if ($(el)[0].href == cUrl) {
             let parentDropdown = $(el).parent("li").parent("ul");
             parentDropdown.css("display", "block");
-            $("ul.dropdown-menu").not(parentDropdown).css("display", "none");
             $(el).parent("li").parent("ul").parent("li").addClass('active');
+            $("ul.dropdown-menu").not(parentDropdown).css("display", "none");
         } else {}
     });
 }

@@ -52,6 +52,8 @@ var save_AttendanceLog = (date, user_type = "", class_id = "") => {
                     text: response.data.result,
                     icon: m_icon,
                 });
+            }).catch(() => {
+                swal({ text: swalnotice.ajax_error, icon: "error", });
             });
         }
     });
@@ -84,6 +86,8 @@ var finalize_AttendanceLog = (date, user_type = "", class_id = "", finalize) => 
                     text: response.data.result,
                     icon: m_icon,
                 });
+            }).catch(() => {
+                swal({ text: swalnotice.ajax_error, icon: "error", });
             });
         }
     });
@@ -132,4 +136,27 @@ var refresh_AttendanceLog = () => {
     $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "flex" });
     $(`button[class~="refresh"]`).html(`Refreshing record <i class='fa fa-spin fa-spinner'></i>`).prop("disabled", true);
     list_userAttendance(`class_id=${class_id}&user_type=${category}&`);
+}
+
+var load_attendance_log = () => {
+    let class_id = $(`select[name="class_id"]`).val(),
+        month_year = $(`input[name="month_year"]`).val();
+
+    if (class_id === "") {
+        swal({
+            text: "Sorry! Please select the class id to continue.",
+            icon: "error",
+        });
+    } else if (month_year === "") {
+        swal({
+            text: "Sorry! Please select the month and year to continue.",
+            icon: "error",
+        });
+    } else {
+        $.get(`${baseUrl}api/attendance/attendance_report`, { class_id, month_year }).then((response) => {
+
+        }).catch(() => {
+            swal({ text: swalnotice.ajax_error, icon: "error", });
+        });
+    }
 }
