@@ -225,7 +225,7 @@ class Users extends Myschoolgh {
 				WHERE {$params->query} AND a.deleted = ? AND a.status = ? {$order_by} LIMIT {$params->limit}
 			");
 			$sql->execute([0, 1]);
-			
+
 			// init
 			$row = 0;
 			$key = 0;

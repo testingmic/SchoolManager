@@ -138,11 +138,31 @@ var refresh_AttendanceLog = () => {
     list_userAttendance(`class_id=${class_id}&user_type=${category}&`);
 }
 
+$(`div[id="attendance_report"] select[id="user_type"]`).on("change", function() {
+    let value = $(this).val();
+    $(`div[class="attendance_log_record"]`).html(`<div class="text-center font-italic">Attendance record will be displayed here</div>`);
+    if (value == "null") {
+        $(`div[id="attendance_report"] select[name="class_id"]`).val("").change();
+        $(`div[id="classes_list"]`).addClass("hidden");
+    } else if (value == "student") {
+        $(`div[id="classes_list"]`).removeClass("hidden");
+    } else {
+        $(`div[id="attendance_report"] select[name="class_id"]`).val("").change();
+        $(`div[id="classes_list"]`).addClass("hidden");
+    }
+});
+
 var load_attendance_log = () => {
     let class_id = $(`select[name="class_id"]`).val(),
-        month_year = $(`input[name="month_year"]`).val();
+        month_year = $(`input[name="month_year"]`).val(),
+        user_type = $(`select[name="user_type"]`).val();
 
-    if (class_id === "") {
+    if (user_type === "") {
+        swal({
+            text: "Sorry! Please select the user category to continue.",
+            icon: "error",
+        });
+    } else if ((user_type == "student") && (class_id === "")) {
         swal({
             text: "Sorry! Please select the class id to continue.",
             icon: "error",
@@ -153,8 +173,26 @@ var load_attendance_log = () => {
             icon: "error",
         });
     } else {
-        $.get(`${baseUrl}api/attendance/attendance_report`, { class_id, month_year }).then((response) => {
-
+        $.get(`${baseUrl}api/attendance/attendance_report`, { class_id, month_year, user_type }).then((response) => {
+            if (response.code == 200) {
+                let attendance_list = response.data.result;
+                $(`div[class="attendance_log_record"]`).html(attendance_list.table_content);
+                if ($('.datatable').length > 0) {
+                    $('.datatable').dataTable({
+                        search: null,
+                        lengthMenu: [
+                            [10, 30, 50, 75, 100, 200, -1],
+                            [10, 30, 50, 75, 100, 200, "All"]
+                        ],
+                        language: {
+                            sEmptyTable: "Nothing Found",
+                            lengthMenu: "Display _MENU_ rows"
+                        }
+                    });
+                }
+            } else {
+                swal({ text: response.data.result, icon: "error", });
+            }
         }).catch(() => {
             swal({ text: swalnotice.ajax_error, icon: "error", });
         });

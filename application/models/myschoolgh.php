@@ -181,6 +181,8 @@ class Myschoolgh extends Models {
 			$stmt = $this->db->prepare("SELECT {$columns} FROM {$tableName} WHERE $whereClause");
 			$stmt->execute();
 
+			// print "SELECT {$columns} FROM {$tableName} WHERE $whereClause ________________";
+
 			return $stmt->fetchAll(PDO::FETCH_OBJ);
 
 		} catch(PDOException $e) {
@@ -436,6 +438,9 @@ class Myschoolgh extends Models {
 	final function validDate($date, $format = 'Y-m-d') {
 		
 		$date = date($format, strtotime($date));
+
+		// if the date equates this, then return false
+		if($date === "1970-01-01") { return false; }
 
 	    $d = DateTime::createFromFormat($format, $date);
 	    return $d && $d->format($format) === $date;
