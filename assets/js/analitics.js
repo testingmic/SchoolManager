@@ -452,7 +452,7 @@ var attendanceReport = (_attendance) => {
             $(`div[data-chart_container="attendance_log_chart"]`).html(`<div id="attendance_log_chart" style="min-height:350px;"></div>`);
 
             $.each(attendance.chart_grouping, function(i, e) {
-                if ($.inArray(e.name, ["Students", "Teachers"]) > -1) {
+                if ($.inArray(e.name, ["Student", "Staff"]) > -1) {
                     _array_data.push(e);
                 }
             });

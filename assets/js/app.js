@@ -294,22 +294,11 @@ var trigger_form_submit = () => {
             theFormData.append("assigned_to_list", serializeSelect($(`select[name="assigned_to_list"]`)));
         }
 
-        if ($(`textarea[name="faketext"]`).length) {
-            theFormData.delete("faketext");
-            let content = CKEDITOR.instances['ajax-form-content'].getData();
-            theFormData.append("description", htmlEntities(content));
-        }
-
-        if ($(`textarea[name="faketext_2"]`).length) {
-            theFormData.delete("faketext_2");
-            let content = CKEDITOR.instances['ajax-form-content_2'].getData();
-            theFormData.append("reason", htmlEntities(content));
-        }
-
         if ($(`trix-editor[name="faketext"][id="ajax-form-content"]`).length) {
             theFormData.delete("faketext");
-            let content = $(`trix-editor[id="ajax-form-content"]`).html();
-            theFormData.append("description", htmlEntities(content));
+            let content = $(`trix-editor[id="ajax-form-content"]`).html(),
+                form_variable = $(`trix-editor[id="ajax-form-content"]`).attr("data-predefined_name");
+            theFormData.append(form_variable, htmlEntities(content));
         }
 
         if ($(`trix-editor[name="faketext_2"][id="ajax-form-content_2"]`).length) {
@@ -445,22 +434,11 @@ var ajax_trigger_form_submit = () => {
             theFormData.append("assigned_to_list", serializeSelect($(`select[name="assigned_to_list"]`)));
         }
 
-        if ($(`textarea[name="faketext"]`).length) {
-            theFormData.delete("faketext");
-            let content = CKEDITOR.instances['_ajax-form-content'].getData();
-            theFormData.append("description", htmlEntities(content));
-        }
-
-        if ($(`textarea[name="faketext_2"]`).length) {
-            theFormData.delete("faketext_2");
-            let content = CKEDITOR.instances['_ajax-form-content_2'].getData();
-            theFormData.append("reason", htmlEntities(content));
-        }
-
         if ($(`trix-editor[name="faketext"][id="_ajax-form-content"]`).length) {
             theFormData.delete("faketext");
-            let content = $(`trix-editor[id="_ajax-form-content"]`).html();
-            theFormData.append("description", htmlEntities(content));
+            let content = $(`trix-editor[id="_ajax-form-content"]`).html(),
+                form_variable = $(`trix-editor[id="ajax-form-content"]`).attr("data-predefined_name");
+            theFormData.append(form_variable, htmlEntities(content));
         }
 
         if ($(`trix-editor[name="faketext_2"][id="_ajax-form-content_2"]`).length) {

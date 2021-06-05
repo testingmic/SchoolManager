@@ -446,7 +446,7 @@ class Timetable extends Myschoolgh {
                     return $table;
                 }
             } else {
-                $result = "<div class='alert alert-warning text-center'>No timetable has been generated for this class yet. Please check back later to verify.</div>";
+                $result = "<div class='text-danger text-center'>No timetable has been generated for this class yet. Please check back later to verify.</div>";
             }
 
             return $result;

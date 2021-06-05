@@ -50,6 +50,7 @@ foreach($transactions_list as $key => $transaction) {
     $count++;
 
     // view button
+    $checkbox = "";
     $action = "<button onclick='return view_transaction(\"{$transaction->item_id}\");' title='Click to view full details of transaction' class='btn btn-outline-success mb-1 btn-sm'><i class='fa fa-eye'></i></button>";
 
     // if the record is still pending
@@ -59,13 +60,14 @@ foreach($transactions_list as $key => $transaction) {
 
         // if the user has permission to modify record
         if($hasModify) {
+            // $checkbox = "<input class='cursor' style='height:15px' id='check_{$transaction->item_id}' type='checkbox'> &nbsp;";
             $action .= "&nbsp;<button onclick='return delete_record(\"{$transaction->item_id}\", \"transaction\");' title='Click to reverse this transaction' class='btn btn-outline-danger mb-1 btn-sm'><i class='fa fa-recycle'></i></button>";
         }
     }
 
     $list_transactions .= "<tr data-row_id=\"{$transaction->item_id}\">";
     $list_transactions .= "<td>{$count}</td>";
-    $list_transactions .= "<td>{$transaction->account_name}</td>";
+    $list_transactions .= "<td>{$checkbox} <label class='cursor' for='check_{$transaction->item_id}'>{$transaction->account_name}</label></td>";
     $list_transactions .= "<td>{$transaction->account_type_name}</td>";
     $list_transactions .= "<td>{$transaction->reference}</td>";
     $list_transactions .= "<td>".ucfirst($transaction->payment_medium)."</td>";
@@ -100,6 +102,9 @@ $response->html = '
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
+                                    <div>
+
+                                    </div>
                                     <div class="table-responsive trix-slim-scroll">
                                         <table class="table table-bordered table-striped datatable">
                                             <thead>

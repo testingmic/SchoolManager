@@ -511,10 +511,10 @@ class Analitics extends Myschoolgh {
                 
                 // set the user types that each person can view
                 if(in_array($user_type, ["admin", "accountant"])) {
-                    $params->user_types_list = ["student", "teacher", "admin", "employee", "accountant"];
+                    $params->user_types_list = ["staff", "student"];
                 } else {
                     $params->is_present_check = true;
-                    $params->user_types_list = ($user_type === "parent") ? ["student"] : [$user_type];
+                    $params->user_types_list = ($user_type === "parent") ? ["student"] : ($user_type === "student" ? ["student"] : ["staff"]);
                     $params->the_current_user_id = ($user_type === "parent") ? $this->session->student_id : $params->userId;
                 }
                 

@@ -661,13 +661,13 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function textarea_editor($data = null, $name = "faketext", $id = "ajax-form-content") {
+    public function textarea_editor($data = null, $name = "faketext", $id = "ajax-form-content", $predefined = "description") {
 
         // set the form
         $data = str_ireplace("'", "", $data);
         $name = empty($name) ? "faketext" : $name;
         $form_content = "<input type='hidden' hidden id='trix-editor-input' value='{$data}'>";
-        $form_content .= "<trix-editor name=\"{$name}\" input='trix-editor-input' class=\"trix-slim-scroll\" id=\"{$id}\"></trix-editor>";
+        $form_content .= "<trix-editor name=\"{$name}\" data-predefined_name=\"{$predefined}\" input='trix-editor-input' class=\"trix-slim-scroll\" id=\"{$id}\"></trix-editor>";
 
         // return the results
         return $form_content;
@@ -4461,7 +4461,6 @@ class Forms extends Myschoolgh {
 
         }
 
-
         // load the accounts
         $accounts_list = $this->pushQuery("account_name, item_id, account_number", "accounts", "client_id = '{$params->clientId}' AND status='1'");
         $accounts_head_list = $this->pushQuery("name, item_id", "accounts_type_head", "client_id = '{$params->clientId}' AND status='1' AND type='{$form_route[$params->route]["type"]}'");
@@ -4532,6 +4531,85 @@ class Forms extends Myschoolgh {
                             </div>
                         </div>
                     <form>
+                    </div>
+                </div>
+            </div>
+        </div>";
+
+        return $html;
+
+    }
+
+    /**
+     * SMS Template Form
+     * 
+     * @return String
+     */
+public function smsemail_template_form(stdClass $params) {
+
+        // the route for the form
+        $form_route = [
+            "sms" => [
+                "type" => "SMS",
+                "title" => "Create SMS Template",
+                "add" => "{$this->baseUrl}api/communication/add_template",
+                "update" => "{$this->baseUrl}api/communication/update_template"
+            ],
+            "email" => [
+                "type" => "Email",
+                "title" => "Create Email Template",
+                "add" => "{$this->baseUrl}api/communication/add_template",
+                "update" => "{$this->baseUrl}api/communication/update_template"
+            ]
+        ];
+        
+        $data = isset($params->data) && !empty($params->data) ? $params->data : null;
+        
+        $html = "
+        <div class='row'>
+            <div class=\"col-md-2\"></div>
+            <div id=\"communication_form\" class=\"col-12 col-md-7 col-lg-7\">
+                <div class=\"card\">
+                    <div class=\"card-body\">
+                        <form method=\"post\" action=\"".(!empty($data) ? $form_route[$params->route]["update"] : $form_route[$params->route]["add"])."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">
+                            <div class=\"form-group\">
+                                <label>Name <span class=\"required\">*</span></label>
+                                <input type=\"text\" name=\"name\" value=\"".($data->name ?? null)."\" class=\"form-control\">
+                            </div>
+                            ".($params->route == "email" ? 
+                            "<div class=\"form-group hidden\">
+                                <label>Subject</label>
+                                <input disabled type=\"text\" name=\"subject\" value=\"".($data->subject ?? null)."\" class=\"form-control\">
+                            </div>"
+                            : null)."
+                            <div class=\"form-group\">
+                                <label>Message <span class=\"required\">*</span></label>
+                                ".(
+                                    ($params->route === "email") ? $this->textarea_editor($data->body ?? null, "faketext", "ajax-form-content", "message") : 
+                                    (
+                                        ($params->route === "sms") ? "
+                                        <textarea maxlength=\"480\" name=\"message\" style=\"height:200px\" class=\"form-control\">".($data->body ?? null)."</textarea>
+                                        <div class=\"text-right alert-danger\"> 
+                                            <span class=\"remaining_count p-1\">0 characters remaining</span>
+                                            <span id=\"messages\">0 message</span>
+                                        </div>
+                                        " : null
+                                    )
+                                )."
+                            </div>
+                            <div class=\"form-group\">
+                                <div class=\"row\">
+                                    <div class=\"col-md-6\" align=\"left\">
+                                        <button class=\"btn btn-outline-danger\" onclick=\"return reset_communication_form('{$form_route[$params->route]["add"]}', '{$form_route[$params->route]["title"]}')\" type=\"button\">Cancel</button>
+                                    </div>
+                                    <input type=\"hidden\" readonly name=\"type\" value=\"{$params->route}\">
+                                    <input type=\"hidden\" readonly name=\"template_id\" value=\"".($data->item_id ?? null)."\">
+                                    <div class=\"col-md-6\" align=\"right\">
+                                        <button class=\"btn btn-outline-success\" data-function=\"save\" type=\"button-submit\"><i class=\"fa fa-save\"></i> Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

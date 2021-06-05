@@ -130,6 +130,12 @@ class Records extends Myschoolgh {
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}' AND status='1'",
                 "query" => "SELECT name FROM accounts_type_head WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
+            ],
+            "template" => [
+                "table" => "smsemail_templates",
+                "update" => "status='0'",
+                "where" => "item_id='{$record_id}' AND status='1'",
+                "query" => "SELECT name FROM smsemail_templates WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
             ]
         ];
 
@@ -167,8 +173,8 @@ class Records extends Myschoolgh {
                 $result = $stmt->fetch(PDO::FETCH_OBJ);
             } catch(PDOException $e) {
                 // quit the execution of the file
-                // return ["code" => 203, "data" => "Sorry! There was an error while processing the request."];
-                return ["code" => 203, "data" => $e->getMessage()];
+                return ["code" => 203, "data" => "Sorry! There was an error while processing the request."];
+                // return ["code" => 203, "data" => $e->getMessage()];
             }
 
             // return if no result was found

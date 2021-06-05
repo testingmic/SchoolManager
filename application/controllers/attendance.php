@@ -68,6 +68,9 @@ class Attendance extends Myschoolgh {
 
         // if the attendance parameter was parsed
         if(isset($params->attendance)) {
+            
+            // set a new user type
+            $the_user_type = $params->user_type == "staff" ? ["teacher","employee","admin","accountant"] : [$params->user_type];
 
             // loop through the array list
             foreach($params->attendance as $key => $value) {
@@ -77,7 +80,7 @@ class Attendance extends Myschoolgh {
                     $present_list[] = $key;
                 }
                 // load the user data using the key
-                $data = $this->pushQuery("item_id, unique_id, name, image, phone_number", "users", "item_id = '{$key}' AND user_type ='{$params->user_type}' LIMIT 1");
+                $data = $this->pushQuery("item_id, unique_id, name, image, phone_number, user_type", "users", "item_id = '{$key}' AND user_type IN {$this->inList($the_user_type)} AND status='1' LIMIT 1");
                 
                 // end the query if the result is empty
                 if(empty($data)) {
@@ -169,7 +172,7 @@ class Attendance extends Myschoolgh {
                 $this->userLogs("attendance_log", $params->finalize ?? null, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}. {$info}", $params->userId);
             } else {
                 // update the for user type
-                $this->userLogs("attendance_log", $params->finalize, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$params->user_type}</strong> on {$params->date}. {$info}", $params->userId);
+                $this->userLogs("attendance_log", $params->finalize ?? 1, $check[0], "{$params->userData->name} updated logged attendance for <strong>{$params->user_type}</strong> on {$params->date}. {$info}", $params->userId);
             }
         }
 
@@ -244,6 +247,7 @@ class Attendance extends Myschoolgh {
         // set additional parameters
         // $params->weekends = true;
         $params->no_list = true;
+        $params->is_finalized = true;
         $the_user_type = $params->user_type;
 
         // modify the date supplied
@@ -421,10 +425,11 @@ class Attendance extends Myschoolgh {
         }
         
         $class_id = isset($params->class_id) && ($params->class_id !== "null") ? $params->class_id : null;
-        $the_user_type = $params->user_type == "staff" ? ["teacher","employee","admin","accountant"] : [$params->user_type];
+        $the_user_type = $params->user_type == "staff" ? ["teacher","employee","admin","accountant", "staff"] : [$params->user_type];
 
-        $query = !empty($params->user_type) ? " AND a.user_type IN {$this->inList($the_user_type)}" : null;
+        $query = !empty($params->user_type) ? " AND a.user_type = '{$params->user_type}'" : null;
         $query .= !empty($class_id) ? " AND a.class_id='{$params->class_id}'" : null;
+        $query .= isset($params->is_finalized) ? " AND a.finalize='1'" : null;
         
         // counter loop
         $counter = 0;
@@ -439,7 +444,7 @@ class Attendance extends Myschoolgh {
             if(!empty($check)) {
                 // append the parameters
                 $params->class_id = $check[0]->class_id;
-                $params->user_type = $check[0]->user_type;
+                $params->user_type = $check[0]->user_type == "staff" ? ["teacher","employee","admin","accountant"] : $check[0]->user_type;
             } else {
                 // set the user type to load
                 $params->user_type = $the_user_type;
@@ -732,7 +737,7 @@ class Attendance extends Myschoolgh {
             "today" => $this->get_date("today"),
             "yesterday" => $this->get_date("yesterday")
         ];
-        $users = ["student", "teacher", "admin", "employee", "accountant"];
+        $users = ["student", "teacher", "admin", "employee", "accountant", "staff"];
         
         // users counter
         $users_count = [];
@@ -806,13 +811,8 @@ class Attendance extends Myschoolgh {
                 // set a new variable for the day
                 $the_day = date("Y-m-d", strtotime($day));
 
-                // if the current date is greater than the date range
-                // if((strtotime($the_day) > time())){
-                //     break;
-                // }
-
                 // label to use
-                $the_label = ucfirst($user)."s";
+                $the_label = ucfirst($user);
 
                 // if the query is not empty
                 if(!empty($theQuery)) {
@@ -825,6 +825,9 @@ class Attendance extends Myschoolgh {
                         
                         // convert the users list into an array
                         $present = json_decode($today->users_list, true);
+
+                        // print_r($present);
+                        // print_r($today);
 
                         // if the user is not an admin/accountant then verify if the user was present or absent
                         if($checkPresent) {
@@ -839,10 +842,10 @@ class Attendance extends Myschoolgh {
                         } else {
                            
                             // set a new label to be used
-                            if(in_array($params->the_user_type, ["admin", "accountant", "teacher", "employee"])) { 
-                                $n_label = "Others";
-                                $users_count["summary"][$n_label] = isset($users_count["summary"][$n_label]) ? ($users_count["summary"][$n_label] + count($present)) : count($present);
-                                $users_count["days_list"][$the_day][$n_label] = isset($users_count["days_list"][$the_day][$n_label]) ? ($users_count["days_list"][$the_day][$n_label] + count($present)) : count($present);
+                            if(in_array($params->the_user_type, ["admin", "accountant", "teacher", "employee", "staff"])) { 
+                                // $n_label = ucfirst($params->the_user_type);
+                                // $users_count["summary"][$n_label] = isset($users_count["summary"][$n_label]) ? ($users_count["summary"][$n_label] + count($present)) : count($present);
+                                // $users_count["days_list"][$the_day][$n_label] = isset($users_count["days_list"][$the_day][$n_label]) ? ($users_count["days_list"][$the_day][$n_label] + count($present)) : count($present);
                             }
 
                             // append to the summary
@@ -856,7 +859,7 @@ class Attendance extends Myschoolgh {
                     // if the is_present_check is empty
                     if(empty($params->is_present_check)) {
                         // append the absent log to it.
-                        // $users_count["days_list"][$the_day][$the_label] = 0;
+                        $users_count["days_list"][$the_day][$the_label] = 0;
                     } else {
                         $users_count["days_list"][$the_day] = "Not Logged";
                     }
@@ -930,10 +933,10 @@ class Attendance extends Myschoolgh {
      * 
      * @return Array
      */
-    public function class_summary(stdClass $params) {
+    public function class_summary(stdClass $data) {
 
         /** If finalized */
-        $query = isset($params->is_finalized) ? " AND finalize='1'" : null;
+        $query = isset($data->is_finalized) ? " AND finalize='1'" : null;
 
         /** Run a query for all classes, append the total logged count as well */
         $classes_list = $this->pushQuery(
@@ -948,7 +951,7 @@ class Attendance extends Myschoolgh {
                 (
                     SELECT b.users_list FROM users_attendance_log b
                     WHERE 
-                        DATE(b.log_date) = '{$params->load_date}' AND 
+                        DATE(b.log_date) = '{$data->load_date}' AND 
                         b.class_id = a.id AND b.user_type = 'student' AND
                         status = '1' {$query}
                     LIMIT 1
@@ -956,14 +959,14 @@ class Attendance extends Myschoolgh {
                 (
                     SELECT b.users_data FROM users_attendance_log b
                     WHERE 
-                        DATE(b.log_date) = '{$params->load_date}' AND 
+                        DATE(b.log_date) = '{$data->load_date}' AND 
                         b.class_id = a.id AND b.user_type = 'student' AND
                         status = '1' {$query}
                     LIMIT 1
                 ) AS users_data
             ", 
             "classes a", 
-            "a.status='1' AND a.client_id='{$params->clientId}'"
+            "a.status='1' AND a.client_id='{$data->clientId}'"
         );
         /** Init variables */
         $data = [];

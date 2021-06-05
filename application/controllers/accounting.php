@@ -2,7 +2,6 @@
 
 class Accounting extends Myschoolgh {
 
-    public $accepted_column;
     private $iclient;
 
 	public function __construct(stdClass $params = null) {
@@ -132,9 +131,7 @@ class Accounting extends Myschoolgh {
             $prevData = $this->pushQuery("*", "accounts_type_head", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
             
             // if empty then return
-            if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
-            }
+            if(empty($prevData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
 
             // ensure the correct account type is parsed
             if(!in_array(strtolower($params->account_type), ["income", "expense"])) {
@@ -280,9 +277,7 @@ class Accounting extends Myschoolgh {
             $prevData = $this->pushQuery("*", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
             
             // if empty then return
-            if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
-            }
+            if(empty($prevData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
 
             // insert the record
             $stmt = $this->db->prepare("UPDATE accounts SET account_name = ?, account_number = ? 

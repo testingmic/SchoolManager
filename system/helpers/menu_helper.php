@@ -2,8 +2,10 @@
 <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails & SMS</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>sms_manager">SMS Management</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>emails_manager">E-Mail Management</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_send">Send SMS / Email</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_report">SMS / Email Report</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>sms_template">SMS Templates</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>email_template">Email Templates</a></li>
         </ul>
     </li>
 <?php } ?>
@@ -41,7 +43,6 @@
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
         </ul>
     </li>
     <?php } ?>
@@ -171,6 +172,7 @@
             <?php if($accessObject->hasAccess("view", "payslip")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">HR & Payroll</a></li>
             <?php } ?>
+            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
         </ul>
     </li>
 
@@ -350,8 +352,6 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
         </ul>
     </li>                        
     <li class="menu-header">Academics</li>

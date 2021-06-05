@@ -1,9 +1,20 @@
 var reset_account_form = (form_url, title = "Add Account Type Head") => {
-    $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
-    $(`div[id="accounts_form"] select[name="account_type"]`).val("").change();
-    $(`div[id="accounts_form"] [class="card-header"]`).html(title);
-    $(`div[id="accounts_form"] input[name="opening_balance"]`).attr("disabled", false);
-    $(`div[id="accounts_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}${form_url}`);
+    swal({
+        title: "Cancel Form",
+        text: "Are you sure you want to cancel this form?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
+            $(`div[id="accounts_form"] select[name="account_type"]`).val("").change();
+            $(`div[id="accounts_form"] [class="card-header"]`).html(title);
+            $(`div[id="accounts_form"] input[name="opening_balance"]`).attr("disabled", false);
+            $(`div[id="accounts_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}${form_url}`);
+        }
+    });
+
 }
 
 var view_transaction = (transaction_id) => {

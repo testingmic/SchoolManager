@@ -49,34 +49,21 @@ if(!empty($clientId)) {
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
-                                    <h3 data-attendance_count="Students" class="font-light mb-0">0</h3>
+                                    <h3 data-attendance_count="Student" class="font-light mb-0">0</h3>
                                     <span class="text-muted">Students</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="col-lg-5 col-md-6 col-sm-6">
                     <div class="card card-statistic-1">
                         <i class="fas fa-user-tie card-icon col-orange"></i>
                         <div class="card-wrap">
                             <div class="padding-20">
                                 <div class="text-right">
-                                    <h3 data-attendance_count="Teachers" class="font-light mb-0">0</h3>
-                                    <span class="text-muted">Teachers</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="card card-statistic-1">
-                        <i class="fas fa-users card-icon col-blue"></i>
-                        <div class="card-wrap">
-                            <div class="padding-20">
-                                <div class="text-right">
-                                    <h3 data-attendance_count="Others" class="font-light mb-0">0</h3>
-                                    <span class="text-muted">Employees / Account / Admin</span>
+                                    <h3 data-attendance_count="Staff" class="font-light mb-0">0</h3>
+                                    <span class="text-muted">Teachers, Employees & Users</span>
                                 </div>
                             </div>
                         </div>
