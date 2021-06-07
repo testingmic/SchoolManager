@@ -570,6 +570,8 @@ var loadPage = (loc, pushstate) => {
             $.pageoverlay.show();
         },
         success: (result) => {
+            $(`div[id="viewOnlyModal"]`).modal("hide");
+            $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html("");
             $(`div[class~="toggle-calculator"]`).addClass("hidden");
             $(`div[class~="calculator"] div[class~="display"], div[class~="calculator"] div[class~="all-buttons"]`).addClass("hidden");
             if (result.redirect !== undefined) {
@@ -755,12 +757,13 @@ var initPlugins = () => {
     }
 
     if ($('.datepicker').length > 0) {
-        let date_format = $('.datepicker').attr("date-format") == undefined ? "YYYY-MM-DD" : $('.datepicker').attr("date-format");
+        let date_format = $('.datepicker').attr("date-format") == undefined ? "YYYY-MM-DD" : $('.datepicker').attr("date-format"),
+            max_date = $('.datepicker').attr("data-maxdate") == undefined ? $.today : $('.datepicker').attr("data-maxdate");
         $('.datepicker').daterangepicker({
             locale: { format: date_format },
             singleDatePicker: true,
             showDropdowns: true,
-            maxDate: $.today
+            maxDate: max_date
         });
     }
 

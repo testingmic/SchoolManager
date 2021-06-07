@@ -123,7 +123,7 @@ class Communication extends Myschoolgh {
             if(empty($prevData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
             
             // prepare and execute the statement
-            $stmt = $this->db->prepare("UPDATE INTO smsemail_templates SET name = ?, message = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
+            $stmt = $this->db->prepare("UPDATE smsemail_templates SET name = ?, message = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
             $stmt->execute([$params->name, $params->message, $params->template_id, $params->clientId]);
 
             // log the user activity
@@ -134,7 +134,6 @@ class Communication extends Myschoolgh {
                 "code" => 200, 
                 "data" => "Template was successfully updated.", 
                 "additional" => [
-                    "clear" => true, 
                     "href" => "{$this->baseUrl}{$params->type}_template"
                 ]
             ];

@@ -4545,19 +4545,19 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-public function smsemail_template_form(stdClass $params) {
+    public function smsemail_template_form(stdClass $params) {
 
         // the route for the form
         $form_route = [
             "sms" => [
                 "type" => "SMS",
-                "title" => "Create SMS Template",
+                "title" => "Create Template",
                 "add" => "{$this->baseUrl}api/communication/add_template",
                 "update" => "{$this->baseUrl}api/communication/update_template"
             ],
             "email" => [
                 "type" => "Email",
-                "title" => "Create Email Template",
+                "title" => "Create Template",
                 "add" => "{$this->baseUrl}api/communication/add_template",
                 "update" => "{$this->baseUrl}api/communication/update_template"
             ]
@@ -4570,6 +4570,7 @@ public function smsemail_template_form(stdClass $params) {
             <div class=\"col-md-2\"></div>
             <div id=\"communication_form\" class=\"col-12 col-md-7 col-lg-7\">
                 <div class=\"card\">
+                    <div class=\"card-header\">".(empty($data) ? $form_route[$params->route]["title"] : $form_route[$params->route]["title"])."</div>
                     <div class=\"card-body\">
                         <form method=\"post\" action=\"".(!empty($data) ? $form_route[$params->route]["update"] : $form_route[$params->route]["add"])."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">
                             <div class=\"form-group\">
@@ -4617,6 +4618,166 @@ public function smsemail_template_form(stdClass $params) {
 
         return $html;
 
+    }
+
+    /**
+     * Send SMS & Email Form
+     * 
+     * @return Array
+     */
+    public function smsemail_form(stdClass $params) {
+        
+        $html = [];
+        $forms = ["email", "sms"];
+
+        // get the list of all templates
+        $templates_array = $this->pushQuery("name, id, item_id, type, message", "smsemail_templates", "client_id='{$params->clientId}' AND status='1'");
+        $class_list = $this->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'");
+        // loop through the forms
+        foreach($forms as $route) {
+
+            // append to the form
+            $html[$route] = "";
+            $html[$route] .= "
+            <div class=\"send_smsemail\">
+                <form method=\"post\" action=\"{$this->baseUrl}api/communication/send_message\" class=\"form_send_message\" id=\"send_form_{$route}\" data-route=\"{$route}\">
+                    <div class=\"row\">
+                        <div class=\"col-md-6\">
+                            <div class=\"form-group mb-1\">
+                                <label>Campaign Name <span class=\"required\">*</span></label>
+                                <input type=\"text\" name=\"name\" class=\"form-control\">
+                            </div>
+                        </div>
+                        <div class=\"col-md-6\">
+                            <div class=\"form-group mb-1\">
+                                <label>Template</label>
+                                <select type=\"text\" data-route=\"{$route}\" data-width=\"100%\" name=\"template_id\" class=\"form-control selectpicker\">
+                                    <option value=''>Select Template</option>";
+                                    foreach($templates_array as $key => $template) {
+                                        $templates_array[$key]->message = htmlspecialchars_decode($template->message);
+                                        if($template->type == $route) {
+                                            $html[$route] .= "<option value='{$template->item_id}'>{$template->name}</option>";
+                                        }
+                                    }
+                        $html[$route] .= "</select>
+                            </div>
+                        </div>
+                        <div class=\"col-md-12\">
+                            <div class=\"form-group mb-1\">
+                                <label>Message <span class=\"required\">*</span></label>
+                                ".(
+                                    ($route === "email") ? $this->textarea_editor(null, "faketext", "ajax-form-content", "message") : 
+                                    "<textarea data-route=\"{$route}\" maxlength=\"480\" name=\"message\" style=\"height:200px\" class=\"form-control\"></textarea>
+                                    <div class=\"text-right alert-danger\"> 
+                                        <span class=\"remaining_count p-1\">0 characters remaining</span>
+                                        <span id=\"messages\">0 message</span>
+                                    </div>"
+                                )."
+                            </div>
+                        </div>
+                        <div class=\"col-md-6\">
+                            <div class=\"form-group mb-1\">
+                                <label>Type <span class=\"required\">*</span></label>
+                                <select data-route=\"{$route}\" type=\"text\" name=\"recipient_type\" data-width=\"100%\" class=\"form-control selectpicker\">
+                                    <option value=''>Select Type</option>
+                                    <option value='group'>Group</option>
+                                    <option value='individual'>Individual</option>
+                                    <option value='class'>Class</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class=\"col-md-12 hidden\" id=\"role_group_select_{$route}\">
+                            <div class=\"form-group mb-1\">
+                                <label>Role <span class=\"required\">*</span></label>
+                                <select data-selectors=\"{$route}\" data-route=\"{$route}\" name=\"role_group[]\" class=\"form-control selectpicker\" multiple=\"true\" data-width=\"100%\">
+                                    <option value=''>Select</option>
+                                    <option value=\"admin\">Admin</option>
+                                    <option value=\"teacher\">Teacher</option>
+                                    <option value=\"accountant\">Accountant</option>
+                                    <option value=\"employee\">Employees</option>
+                                    <option value=\"guardian\">Parent</option>
+                                    <option value=\"student\">Student</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class=\"col-md-12 hidden\" id=\"individual_select_{$route}\">
+                            <div class=\"form-group mb-1\">
+                                <label>Role <span class=\"required\">*</span></label>
+                                <select data-selectors=\"{$route}\" data-route=\"{$route}\" name=\"role_id\" class=\"form-control selectpicker\" data-width=\"100%\">
+                                    <option value=''>Select</option>
+                                    <option value=\"admin\">Admin</option>
+                                    <option value=\"teacher\">Teacher</option>
+                                    <option value=\"accountant\">Accountant</option>
+                                    <option value=\"employee\">Employees</option>
+                                    <option value=\"guardian\">Parent</option>
+                                    <option value=\"student\">Student</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class=\"col-md-12 hidden\" id=\"individual_select_list_{$route}\">
+                            <div class=\"form-group mb-1\">
+                                <label>Name <span class=\"required\">*</span></label>
+                                <select data-selectors=\"{$route}\" data-route=\"{$route}\" name=\"recipients[]\" multiple class=\"form-control selectpicker\" data-width=\"100%\">
+                                    <option value=''>Select</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class=\"col-md-12 hidden\" id=\"class_select_{$route}\">
+                            <div class=\"form-group mb-1\">
+                                <label>Class <span class=\"required\">*</span></label>
+                                <select data-selectors=\"{$route}\" data-route=\"{$route}\" name=\"class_id\" class=\"form-control selectpicker\" data-width=\"100%\">
+                                    <option value=''>Select</option>";
+                                    foreach($class_list as $class) {
+                                        $html[$route] .= "<option value='{$class->item_id}'>{$class->name}</option>";
+                                    }
+                        $html[$route] .= "</select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=\"row mt-3\">
+                        <div class=\"col-md-12 mb-xs\">
+                            <div class=\"form-group\">
+                                <div class=\"checkbox-replace\">
+                                    <label class=\"i-checks cursor\"><input data-route=\"{$route}\" type=\"checkbox\" name=\"send_later\"><i></i> Send Later</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=\"row\">
+                        <div class=\"col-md-8\">
+                            <div class=\"form-group\">
+                                <label class=\"control-label\">Schedule Date <span class=\"required\">*</span></label>
+                                <div class=\"input-group\">
+                                    <input data-route=\"{$route}\" disabled data-maxdate=\"".date("Y-m-d", strtotime("+3 months"))."\" type=\"text\" class=\"form-control datepicker\" name=\"schedule_date\">
+                                </div>
+                                <span class=\"error\"></span>
+                            </div>
+                        </div>
+                        <div class=\"col-md-4\">
+                            <div class=\"form-group\">
+                                <label class=\"control-label\">Schedule Time <span class=\"required\">*</span></label>
+                                <div class=\"input-group\">
+                                    <input data-route=\"{$route}\" type=\"time\" disabled name=\"schedule_time\" class=\"form-control\" value=\"\">
+                                    <span class=\"error\"></span>
+                                </div>
+                                <span class=\"error\"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=\"row mt-3\">
+                        <div class=\"col-md-6\" align=\"left\"></div>
+                        <input type=\"hidden\" data-route=\"{$route}\" readonly name=\"type\" value=\"{$route}\">
+                        <div class=\"col-md-6\" align=\"right\">
+                            <button class=\"btn btn-outline-success\" type=\"submit\"><i class=\"fa fa-mail-bulk\"></i> Send Message</button>
+                        </div>
+                    </div>
+                </form>
+            </div>";
+
+        }
+        $html["templates_array"] = $templates_array;
+
+        return $html;
     }
 
 }

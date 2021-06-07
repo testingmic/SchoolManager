@@ -47,7 +47,7 @@ foreach($templates_array as $key => $template) {
 
     // view button
     $checkbox = "";
-    $action = "<button onclick='return view_template(\"{$template->item_id}\");' title='Click to view full details of template' class='btn btn-outline-success mb-1 btn-sm'><i class='fa fa-eye'></i></button>";
+    $action = "<button onclick='return view_template(\"{$template->item_id}\", \"api/communication/update_template\");' title='Click to view full details of template' class='btn btn-outline-success mb-1 btn-sm'><i class='fa fa-eye'></i></button>";
 
     // if the record is still pending
     $action .= "&nbsp;<button onclick='return delete_record(\"{$template->item_id}\", \"template\");' title='Click to reverse this template' class='btn btn-outline-danger mb-1 btn-sm'><i class='fa fa-trash'></i></button>";

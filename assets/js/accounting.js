@@ -22,7 +22,64 @@ var view_transaction = (transaction_id) => {
         let transaction = $.array_stream["transactions_array_list"];
         if (transaction[transaction_id] !== undefined) {
             let data = transaction[transaction_id];
-            console.log(data);
+
+            $(`div[id="viewOnlyModal"]`).modal("show");
+            $(`div[id="viewOnlyModal"] h5[class~="modal-title"]`).html(`Transaction Details`);
+
+            let content = `
+                <div class="row">
+                    <div class="col-lg-12 table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <td class="font-weight-bold" width="35%">Account Name</td>
+                                <td>${data.account_name}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Account Type</td>
+                                <td>${data.account_type_name}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Reference</td>
+                                <td>${data.reference !== null ? data.reference : ""}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Description</td>
+                                <td>${data.description !== null ? data.description : ""}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Amount</td>
+                                <td>${data.amount}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Payment Medium</td>
+                                <td>${data.payment_medium.toUpperCase()}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Transaction Date</td>
+                                <td>${data.record_date}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Status</td>
+                                <td>${data.state_label}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Recorded By</td>
+                                <td>
+                                    <div><i class="fa fa-user"></i> ${data.createdby_info.name}</div>
+                                    <div><i class="fa fa-phone"></i> ${data.createdby_info.phone_number}</div>
+                                    <div><i class="fa fa-envelope"></i> ${data.createdby_info.email}</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Record Date</td>
+                                <td>${data.date_created}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>`;
+
+            $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html($.parseHTML(content));
+            linkClickStopper($(`div[id="viewOnlyModal"] div[class="modal-body"]`));
         }
     }
 }

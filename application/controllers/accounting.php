@@ -354,6 +354,7 @@ class Accounting extends Myschoolgh {
 
                 // if attachment variable was parsed
                 $result->attachment = json_decode($result->attachment);
+                $result->state_label = $this->the_status_label($result->state);
 
                 // if the files is set
                 if(!isset($result->attachment->files)) {
