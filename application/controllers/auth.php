@@ -862,6 +862,10 @@ class Auth extends Myschoolgh {
             // create and insert a new event with the slug public holiday
             $evt_stmt = $this->db->prepare("INSERT INTO events_types SET client_id = ?, item_id = ?");
             $evt_stmt->execute([$client_id, random_string("alnum", 32)]);
+
+            // gift 20 sms messages to the client
+            $sms_stmt = $this->db->prepare("INSERT INTO smsemail_balance SET client_id = ?, sms_balance = ?");
+            $sms_stmt->execute([$client_id, 20]);
             
             // insert the client details
             $client_stmt = $this->db->prepare("INSERT INTO clients_accounts SET 

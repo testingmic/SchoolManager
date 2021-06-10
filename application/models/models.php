@@ -12,6 +12,7 @@ class Models {
     public $permission_denied;
     public $global_limit = 2000;
     public $formPreloader;
+    public $sms_text_count = 155;
     public $underscores = "____";
 
     /** This is used for generation of user ids */

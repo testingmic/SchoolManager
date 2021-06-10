@@ -26,11 +26,12 @@ $response->scripts = ["assets/js/communication.js"];
 $params = (object) [
     "route" => "email",
     "type" => "email",
-    "clientId" => $clientId
+    "clientId" => $clientId,
+    "client_data" => $defaultUser->client
 ];
 
 // get the list of all the templates
-$templates_array = load_class("communication", "controllers")->list_templates($params)["data"];
+$templates_array = load_class("communication", "controllers", $params)->list_templates($params)["data"];
 
 // confirm that the user has the required permissions
 $the_form = load_class("forms", "controllers")->smsemail_template_form($params);

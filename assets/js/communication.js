@@ -4,8 +4,8 @@ var sms_characters_counter = () => {
 
     $(`textarea[name="message"]`).on("input", function() {
         var chars = this.value.length,
-            messages = Math.ceil(chars / 160),
-            remaining = messages * 160 - (chars % (messages * 160) || messages * 160);
+            messages = Math.ceil(chars / sms_text_count),
+            remaining = messages * sms_text_count - (chars % (messages * sms_text_count) || messages * sms_text_count);
         $remaining.text(`${remaining} characters remaining`);
         $messages.text(`${messages} message`);
     });

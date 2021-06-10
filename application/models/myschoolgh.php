@@ -88,7 +88,7 @@ class Myschoolgh extends Models {
 			return !(empty($data)) ? $data[0] : (object) [];
 			
 		} catch(PDOException $e) {
-			return (object) [];
+			return (object) $e;
 		}
 	}
 
