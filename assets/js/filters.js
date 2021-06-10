@@ -17,7 +17,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                 if (response.code == 200) {
                     $.each(response.data.result, function(i, e) {
                         let value = $(`div[id="promote_Student_Display"]`).length ? e.item_id : e.id;
-                        $(`select[name='class_id']`).append(`<option value='${value}'>${e.name}</option>'`);
+                        $(`select[name='class_id']`).append(`<option value='${value}'>${e.name}</option>`);
                     });
                 }
             });
@@ -55,7 +55,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                 $.get(`${baseUrl}api/users/list?class_id=${value}&minified=simplified&user_type=student`).then((response) => {
                     if (response.code == 200) {
                         $.each(response.data.result, function(i, e) {
-                            $(`select[name='student_id']`).append(`<option value='${e.user_id}'>${e.name}</option>'`);
+                            $(`select[name='student_id']`).append(`<option value='${e.user_id}'>${e.name}</option>`);
                         });
                     }
                 });
@@ -87,7 +87,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                 $.get(`${baseUrl}api/courses/list?class_id=${value}&minified=true`).then((response) => {
                     if (response.code == 200) {
                         $.each(response.data.result, function(i, e) {
-                            $(`select[name='course_id']`).append(`<option value='${e.id}'>${e.name}</option>'`);
+                            $(`select[name='course_id']`).append(`<option value='${e.id}'>${e.name}</option>`);
                         });
                     }
                 });

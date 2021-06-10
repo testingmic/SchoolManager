@@ -79,7 +79,6 @@ var view_transaction = (transaction_id) => {
                 </div>`;
 
             $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html($.parseHTML(content));
-            linkClickStopper($(`div[id="viewOnlyModal"] div[class="modal-body"]`));
         }
     }
 }

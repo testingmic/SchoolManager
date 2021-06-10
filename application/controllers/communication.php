@@ -38,7 +38,8 @@ class Communication extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
                 // clean the text
-                $result->message = custom_clean(htmlspecialchars_decode($result->message));
+                $result->message = htmlspecialchars_decode($result->message);
+                $result->raw_message = htmlspecialchars($result->message);
 
                 // loop through the information
                 foreach(["createdby_info"] as $each) {
@@ -75,6 +76,10 @@ class Communication extends Myschoolgh {
             
             // create a new item id
             $item_id = random_string("alnum", 15);
+
+            // clean the template
+            $params->message = custom_clean(htmlspecialchars_decode($params->message));
+            $params->message = htmlspecialchars($params->message);
 
             // prepare and execute the statement
             $stmt = $this->db->prepare("INSERT INTO smsemail_templates SET 
@@ -121,6 +126,10 @@ class Communication extends Myschoolgh {
             
             // if empty then return
             if(empty($prevData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+
+            // clean the template
+            $params->message = custom_clean(htmlspecialchars_decode($params->message));
+            $params->message = htmlspecialchars($params->message);
             
             // prepare and execute the statement
             $stmt = $this->db->prepare("UPDATE smsemail_templates SET name = ?, message = ? WHERE item_id = ? AND client_id = ? LIMIT 1");

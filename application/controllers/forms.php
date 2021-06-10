@@ -4629,10 +4629,16 @@ class Forms extends Myschoolgh {
         
         $html = [];
         $forms = ["email", "sms"];
+        global $usersClass;
 
         // get the list of all templates
         $templates_array = $this->pushQuery("name, id, item_id, type, message", "smsemail_templates", "client_id='{$params->clientId}' AND status='1'");
-        $class_list = $this->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'");
+        $class_array_list = $this->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'");
+        $users_array_list = $this->pushQuery("name, user_type, unique_id, item_id", "users", 
+            "client_id='{$params->clientId}' AND status='1' AND academic_year='{$params->preferences->academics->academic_year}'
+            AND academic_term='{$params->preferences->academics->academic_term}'"
+        );
+
         // loop through the forms
         foreach($forms as $route) {
 
@@ -4645,7 +4651,7 @@ class Forms extends Myschoolgh {
                         <div class=\"col-md-6\">
                             <div class=\"form-group mb-1\">
                                 <label>Campaign Name <span class=\"required\">*</span></label>
-                                <input type=\"text\" name=\"name\" class=\"form-control\">
+                                <input type=\"text\" name=\"campaign_name\" class=\"form-control\">
                             </div>
                         </div>
                         <div class=\"col-md-6\">
@@ -4727,7 +4733,7 @@ class Forms extends Myschoolgh {
                                 <label>Class <span class=\"required\">*</span></label>
                                 <select data-selectors=\"{$route}\" data-route=\"{$route}\" name=\"class_id\" class=\"form-control selectpicker\" data-width=\"100%\">
                                     <option value=''>Select</option>";
-                                    foreach($class_list as $class) {
+                                    foreach($class_array_list as $class) {
                                         $html[$route] .= "<option value='{$class->item_id}'>{$class->name}</option>";
                                     }
                         $html[$route] .= "</select>
@@ -4776,6 +4782,8 @@ class Forms extends Myschoolgh {
 
         }
         $html["templates_array"] = $templates_array;
+        $html["users_array_list"] = $users_array_list;
+        $html["class_array_list"] = $class_array_list;
 
         return $html;
     }

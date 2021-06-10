@@ -24,13 +24,15 @@ $response->scripts = ["assets/js/communication.js"];
 
 // set the parameters
 $params = (object) [
-    "clientId" => $clientId
+    "clientId" => $clientId,
+    "preferences" => $defaultUser->appPrefs
 ];
-
 // confirm that the user has the required permissions
 $the_form = load_class("forms", "controllers")->smsemail_form($params);
 
 $response->array_stream["templates_array"] = $the_form["templates_array"];
+$response->array_stream["users_array_list"] = $the_form["users_array_list"];
+$response->array_stream["class_array_list"] = $the_form["class_array_list"];
 
 $response->html = '
     <section class="section">
