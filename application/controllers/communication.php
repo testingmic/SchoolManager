@@ -422,6 +422,12 @@ class Communication extends Myschoolgh {
             return ["code" => 203, "data" => "Sorry! Ensure all required parameters have been parsed."];
         }
 
+        // check if the transaction id already exits
+        $transaction = $this->pushQuery("id", "transaction_logs", "transaction_id='{$params->transaction_id}' LIMIT 1");
+        if(!empty($transaction)) {
+            return ["code" => 203, "data" => "Sorry! This transaction has already been processed."];
+        }
+
         // validate the package
         $sms_package = $this->pushQuery("*", "sms_packages", "item_id='{$params->package_id}'");
         if(empty($sms_package)) {
@@ -439,8 +445,39 @@ class Communication extends Myschoolgh {
 
         // confirm the payment
         $payment_check = $payObject->get($data);
+        
+        // if payment status is true
+        if($payment_check["data"]->status === true) {
 
-        return $payment_check;
+            // set the amount 
+            $amount = $payment_check["data"]->data->amount / 100;
+            
+            // update the user sms balance
+            $this->db->query("UPDATE smsemail_balance SET sms_balance=(sms_balance + {$sms_package[0]->units}) WHERE client_id='{$params->clientId}' LIMIT 1");
+            
+            // update the total amount purchased on the package
+            $this->db->query("UPDATE sms_packages SET amount_purchased=(amount_purchased + {$amount}) WHERE item_id='{$params->package_id}' LIMIT 1");
+            
+            // log the transaction information
+            $this->db->query("
+                INSERT INTO transaction_logs SET client_id = '{$params->clientId}',
+                transaction_id = '{$params->transaction_id}', endpoint = 'sms',
+                reference_id = '{$params->reference_id}', amount='{$amount}'
+            ");
+
+            // log the user activity
+            $this->userLogs("sms_topup", $params->package_id, null, 
+                "{$params->userData->name} purchased {$sms_package[0]->units} sms units at the rate of {$payment_check["data"]->data->currency}{$amount}.", $params->userId);
+
+        } else {
+            return ["code" => 203, "data" => "Sorry! An error was encountered while processing the request."];
+        }
+        
+        // validate the package
+        $package = $this->pushQuery("sms_balance", "smsemail_balance", "client_id='{$params->clientId}' LIMIT 1")[0];
+        
+        // return the response message
+        return [ "data" => $package->sms_balance ];
 
     }
 

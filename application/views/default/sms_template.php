@@ -62,6 +62,13 @@ foreach($templates_array as $key => $template) {
     $list_templates .= "</tr>";
 }
 
+// get the smsemail information
+$settings = $myClass->pushQuery("*", "smsemail_balance", "client_id='{$clientId}' LIMIT 1");
+$settings = !empty($settings) ? $settings[0] : [];
+$sms_packages = $myClass->pushQuery("*", "sms_packages", "1");
+
+$response->array_stream["smsemail_settings"] = $settings;
+$response->array_stream["sms_packages"] = $sms_packages;
 $response->array_stream["templates_array_list"] = $templates_array_list;
 
 $response->html = '
@@ -77,6 +84,13 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div></div>
+                            <div>
+                                <span class="btn font-17 btn-danger" id="sms_balance">'.($settings->sms_balance ?? 0).' SMS Units</span>
+                                <button onclick="return topup_sms()" class="btn btn-success"><i class="fa fa-database"></i> Top Up</button>
+                            </div>
+                        </div>
                         <div class="padding-20">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
@@ -87,6 +101,7 @@ $response->html = '
                                 </li>
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
+                                <input type="hidden" name="myemail_address" value="'.$defaultUser->email.'">
                                 <div class="tab-pane fade show active" id="templates_list" role="tabpanel" aria-labelledby="templates_list-tab2">
                                     <div class="table-responsive trix-slim-scroll">
                                         <table class="table table-bordered table-condensed table-striped datatable">

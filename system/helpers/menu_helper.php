@@ -6,7 +6,6 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_report">SMS / Email Report</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>sms_template">SMS Templates</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>email_template">Email Templates</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_settings">SMS / Email Settings</a></li>
         </ul>
     </li>
 <?php } ?>

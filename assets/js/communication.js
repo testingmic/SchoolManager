@@ -144,7 +144,6 @@ var buy_sms_package = (amount, package_id) => {
         callback: function (response) {
             let message = `Payment ${response.message}`,
                 code = "error";
-            console.log(response);
             if(response.message == "Approved") {
                 $(`div[id="buy_sms_package"] div[class="form-content-loader"]`).css("display", "none");
                 $(`div[id="viewOnlyModal"]`).modal("hide");
