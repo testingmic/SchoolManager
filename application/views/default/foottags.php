@@ -122,7 +122,6 @@
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/form.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/grid.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/myschoolgh.js"></script>
-    <script src="<?= $baseUrl; ?>assets/js/calculator.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/app.js"></script>
     <?php } else { ?>
     <script src="<?= $baseUrl; ?>assets/js/setup.js"></script>

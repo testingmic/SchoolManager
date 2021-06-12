@@ -482,6 +482,7 @@ class Fees extends Myschoolgh {
 
             // append the data allocation
             $data_content = $allocation;
+            $outstanding = $allocation->balance;
 
             /** Set the label for the amount */
             if(($allocation->amount_paid > 1) && (round($allocation->amount_due) > round($allocation->amount_paid))) {
@@ -506,7 +507,7 @@ class Fees extends Myschoolgh {
             $html_form .= "</tr>";
             $html_form .= "<tr>";
             $html_form .= "<td class='font-weight-bold'>Outstanding Balance:</td>";
-            $html_form .= "<td><span data-checkout_url='{$allocation->checkout_url}' data-amount_payable='{$allocation->balance}' class='outstanding'>{$currency} {$allocation->balance}</span></td>";
+            $html_form .= "<td><span data-checkout_url='{$allocation->checkout_url}' data-amount_payable='{$outstanding}' class='outstanding'>{$currency} {$allocation->balance}</span></td>";
             $html_form .= "</tr>";
 
             $html_form .= "<tr>";
@@ -570,7 +571,7 @@ class Fees extends Myschoolgh {
             }
 
             /**  */
-            $balance = number_format($balance, 2);
+            $balance = $balance;
             $amount_due = number_format($amount_due, 2);
             $amount_paid = number_format($amount_paid, 2);
             
@@ -588,7 +589,7 @@ class Fees extends Myschoolgh {
 
             $html_form .= "<tr>";
             $html_form .= "<td class='font-weight-bold'>Outstanding Balance:</td>";
-            $html_form .= "<td><span data-checkout_url='general' data-amount_payable='{$balance}' class='outstanding'>{$currency} {$balance}</span></td>";
+            $html_form .= "<td><span data-checkout_url='general' data-amount_payable='{$balance}' class='outstanding'>{$currency} ".number_format($balance, 2)."</span></td>";
             $html_form .= "</tr>";
 
             $html_form .= "<tr>";
@@ -617,9 +618,9 @@ class Fees extends Myschoolgh {
         }
 
         /** Last payment container */
-        $html_form .= "<div class='last_payment_container'>";
         $html_form .= "<input name='fees_payment_student_id' hidden type='hidden' value='".($params->student_id ?? $allocation->student_id)."' readonly>";
-
+        $html_form .= "<div class='last_payment_container'>";
+        
         /** If last payment information is not empty */
         if(!empty($data_content->last_payment_info)) {
             
@@ -655,6 +656,7 @@ class Fees extends Myschoolgh {
             $html_form .= "</td></tr>";
             $html_form .= "</table>";
         }
+
         $html_form .= "</div>";
         $html_form .= "</div>";
 
@@ -741,14 +743,14 @@ class Fees extends Myschoolgh {
                 }
 
                 /** Check if the student id is valid */
-                $student_check = $this->pushQuery("a.id, a.name, (SELECT b.name fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", 
+                $student_check = $this->pushQuery(
+                    "a.id, a.name, (SELECT b.name FROM fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", 
                     "users a", 
-                    "a.item_id='{$params->student_id}' 
-                        AND a.client_id='{$params->clientId}' 
-                        AND a.status='1' AND a.deleted='0'
-                        AND a.academic_year = '{$params->academic_year}' 
-                        AND a.academic_term = '{$params->academic_term}'
-                    LIMIT 1");
+                    "a.item_id='{$params->student_id}' AND a.client_id='{$params->clientId}' 
+                        AND a.status='1' AND a.deleted='0' AND a.academic_year = '{$params->academic_year}' 
+                        AND a.academic_term = '{$params->academic_term}' LIMIT 1");
+                
+                // return error if the student was not found
                 if(empty($student_check)) {
                     return ["code" => 203, "data" => "Sorry! An invalid student id was supplied."];
                 }
@@ -842,7 +844,7 @@ class Fees extends Myschoolgh {
 
             }
         } catch(PDOException $e) {
-            return $e->getMessage();
+            return $this->unexpected_error;
         }
     }
 
@@ -1011,9 +1013,7 @@ class Fees extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 
                 // payment information
-                $result->student_details = $this->stringToArray($result->student_details, "|",
-                    ["student_name", "department_id", "account_balance"], true                
-                );
+                $result->student_details = $this->stringToArray($result->student_details, "|", ["student_name", "department_id", "account_balance"], true);
 
                 // set the account balance
                 $result->account_balance = isset($result->student_details["account_balance"]) ? (float) $result->student_details["account_balance"] : 0;
@@ -1033,7 +1033,7 @@ class Fees extends Myschoolgh {
             return !empty($data) && $category_id ? $data[0] : $data;
 
 		} catch(PDOException $e) {
-            return "false";
+            return false;
 		}
 	}
 
@@ -1060,6 +1060,11 @@ class Fees extends Myschoolgh {
             /** If no allocation record was found */
             if(empty($paymentRecord)) {
                 return ["code" => 203, "data" => "Sorry! An invalid checkout url was parsed for processing."];
+            }
+
+            /** Validate email address */
+            if(!empty($params->email_address) && !filter_var($params->email_address, FILTER_VALIDATE_EMAIL)) {
+                return ["code" => 203, "data" => "Sorry! A valid email address is required."];
             }
 
             // confirm if the data parsed is an array
@@ -1137,10 +1142,11 @@ class Fees extends Myschoolgh {
             }
 
             // append additional sql
-            $append_sql = !empty($append_sql) ? ", cheque_security='".($params->cheque_security ?? null)."',
-                    cheque_bank='{$params->bank_id}', cheque_number='{$params->cheque_number}'" : null;
-
+            $append_sql = !empty($append_sql) ? ", cheque_security='".($params->cheque_security ?? null)."', cheque_bank='{$params->bank_id}', cheque_number='{$params->cheque_number}'" : null;
             
+            // if the payment method is momo or card payment
+            $append_sql .= ", paidin_by='".($params->contact_number ?? null)."', paidin_contact='".($params->email_address ?? null)."'";
+                        
             /* Record the payment made by the user */
             if(!is_array($paymentRecord)) {
 
@@ -1175,11 +1181,19 @@ class Fees extends Myschoolgh {
                     Outstanding Balance is <strong>{$outstandingBalance}</strong>", $params->userId);
                 
                 // additional data
+                $params->clean_payment_info = true;
                 $additional["payment"] = $this->confirm_student_payment_record($params);
 
             } else {
                 // generate a new payment_id
                 $payment_id = random_string('alnum', 15);
+
+                // get the student name
+                $student = $this->pushQuery("name AS student_name", "users", "item_id = '{$params->student_id}' AND academic_year='{$this->academic_year}' AND academic_term='{$this->academic_term}' LIMIT 1");
+                $student_name = !empty($student) ? $student[0]->student_name : "Unknown";
+
+                $last_info = $this->confirm_student_payment_record($params);
+                $additional["payment"] = $last_info[count($last_info)-1];
 
                 // loop through the payment record
                 foreach($paymentRecord as $record) {
@@ -1209,22 +1223,23 @@ class Fees extends Myschoolgh {
                         ");
                         $stmt->execute([
                             $params->clientId, $uniqueId, $record->student_id, $payment_id,
-                            $record->department_id, $record->class_id, $record->category_id, 
+                            $record->department_id ?? null, $record->class_id, $record->category_id, 
                             $total_paid, $params->userId, $record->academic_year, $record->academic_term, 
                             $params->description ?? null, $currency, $receiptId, $params->payment_method
                         ]);
+
                         /* Update the user payment record */
                         $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
-                            last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", 
-                            paid_status='{$paid_status}'" : "")."
-                            WHERE checkout_url = ? AND client_id = ? LIMIT 1
+                            last_payment_date = now(), last_payment_id = '{$payment_id}' ".($paid_status ? ", 
+                            paid_status='{$paid_status}'" : "")." WHERE checkout_url = ? AND client_id = ? LIMIT 1
                         ");
                         $stmt->execute([($record->amount_paid + $total_paid), $total_balance, $record->checkout_url, $params->clientId]);
 
                         /* Record the user activity log */
                         $this->userLogs("fees_payment", $record->checkout_url, null, "{$params->userData->name} received an amount of 
                             <strong>{$total_paid}</strong> as Payment for <strong>{$record->category_name}</strong> from 
-                            <strong>{$record->student_name}</strong>. Outstanding Balance is <strong>{$total_balance}</strong>", $params->userId);
+                            <strong>{$student_name}</strong>. Outstanding Balance is <strong>{$total_balance}</strong>", $params->userId);
+                        
                     }
                 }
             }

@@ -128,7 +128,7 @@ if(!$receivePayment) {
                         </div>
                         <div class="card-body pt-0 pb-0">
                             <div class="py-3 pt-0" id="fees_payment_preload">
-
+                                <input type="hidden" name="client_email_address" value="'.$defaultUser->client->client_email.'">
                                 <div class="form-group">
                                     <label>Select Department</label>
                                     <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" id="department_id" name="department_id">
@@ -217,6 +217,15 @@ if(!$receivePayment) {
                                         <label>Amount <span class="required">*</span></label>
                                         <input '.$disabled.' value="'.($amount ?? null).'" class="form-control" name="amount" id="amount" type="number" min="0">
                                     </div>
+                                    <div class="col-md-12 mt-0 mb-0 form-group"></div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Contact Number</label>
+                                        <input '.$disabled.' class="form-control" name="contact_number" id="contact_number" type="text">
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label class="email_label">Email Address</label>
+                                        <input '.$disabled.' class="form-control" name="email_address" id="email_address" type="email">
+                                    </div>
                                     <div class="col-md-12 form-group">
                                         <label>Remarks</label>
                                         <textarea '.$disabled.' class="form-control" name="description" id="description"></textarea>
@@ -224,7 +233,7 @@ if(!$receivePayment) {
                                     <div class="col-md-12 form-group text-right">
                                         <div class="d-flex justify-content-between">
                                             <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form();" class="btn '.($category_id ? null : 'hidden').' btn-outline-danger">Cancel</button></div>
-                                            <div><button '.$disabled.' onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-save"></i> Save</button></div>
+                                            <div><button '.$disabled.' onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay Fee</button></div>
                                         </div>
                                     </div>
                                 </div>

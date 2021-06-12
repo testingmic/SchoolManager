@@ -26,6 +26,7 @@ var reset_communication_form = (form_url, title = "Create Template") => {
             $(`a[id="templates_list-tab2"]`).trigger("click");
             $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
             $(`div[id="communication_form"] [class="card-header"]`).html(title);
+            $(`trix-editor[id="ajax-form-content"]`).html("");
             $(`div[id="communication_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}${form_url}`);
         }
     });

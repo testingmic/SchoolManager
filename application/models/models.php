@@ -31,8 +31,7 @@ class Models {
         $this->payment_methods = [
             "cash" => "Cash",
             "cheque" => "Cheque",
-            "mobile_money" => "Mobile Money",
-            "bank_transfer" => "Bank Transfer"
+            "momo_card" => "Mobile Money / Card Payment",
         ];
 
         $this->form_modules = [

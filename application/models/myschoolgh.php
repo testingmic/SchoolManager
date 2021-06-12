@@ -174,14 +174,16 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return array
 	 **/
-	final function pushQuery($columns = "*", $tableName, $whereClause = 1) {
+	final function pushQuery($columns = "*", $tableName, $whereClause = 1, $print = false) {
 
 		try {
 
 			$stmt = $this->db->prepare("SELECT {$columns} FROM {$tableName} WHERE $whereClause");
 			$stmt->execute();
 
-			// print "SELECT {$columns} FROM {$tableName} WHERE $whereClause ________________";
+			if($print) {
+				print "SELECT {$columns} FROM {$tableName} WHERE $whereClause";
+			}
 
 			return $stmt->fetchAll(PDO::FETCH_OBJ);
 

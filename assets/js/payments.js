@@ -48,73 +48,42 @@ var load_Pay_Fees_Form = () => {
     });
 }
 
-var save_Receive_Payment = () => {
+var finalize_payment = (response, checkout_url) => {
+    let payment_method = "";
+    $(`div[id="fees_payment_form"] input[name="amount"]`).val("");
+    $(`div[id="fees_payment_form"] textarea[name="description"]`).val("");
 
-    let $balance = parseInt($(`span[class="outstanding"]`).attr("data-amount_payable")),
-        $amount = parseInt($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
-        description = $(`div[id="fees_payment_form"] textarea[name="description"]`).val(),
-        payment_method = $(`div[id="fees_payment_form"] select[name="payment_method"]`).val(),
-        checkout_url = $(`span[class="outstanding"]`).attr("data-checkout_url"),
-        student_id = $(`input[name='fees_payment_student_id']`).val(),
-        t_message = "";
+    let payment_info = response.data.additional.payment;
 
-    if ($amount > $balance) {
-        t_message = `Are you sure you want to save this payment. 
-            An amount of ${$amount} is been paid which is more than the required of ${$balance}`;
-    } else if ($amount < $balance) {
-        t_message = `Are you sure you want to save this payment. 
-            An amount of ${$amount} is been paid which will leave a balance of ${$balance-$amount}.`;
-    }
-    swal({
-        title: "Make Payment",
-        text: `${t_message}\nDo you want to proceed to make the payment?`,
-        icon: 'warning',
-        buttons: true,
-        dangerMode: true,
-    }).then((proceed) => {
-        if (proceed) {
-            let data = {
-                "amount": $amount,
-                "student_id": student_id,
-                "description": description,
-                "checkout_url": checkout_url,
-                "payment_method": payment_method
-            };
-            if ($(`select[name="payment_method"]`).val() === "cheque") {
-                data["bank_id"] = $(`select[name="bank_id"]`).val();
-                data["cheque_number"] = $(`input[name="cheque_number"]`).val();
+    // reset the form
+    $(`button[id="payment_cancel"]`).addClass("hidden");
+    $(`div[id="fees_payment_form"] *`).prop("disabled", true);
+    $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
+    $(`div[id="fees_payment_form"] input, div[id="fees_payment_form"] textarea`).val("");
+
+    if (payment_info !== undefined) {
+        $(`span[class="amount_paid"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.amount_paid}`);
+        $(`span[class="outstanding"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.balance}`);
+        if (payment_info.paid_status === "1" || payment_info.paid_status === 1) {
+            $(`span[data-payment_label='status']`)
+                .removeClass('badge-danger badge-primary')
+                .addClass('badge-success')
+                .html("Paid");
+        } else if (payment_info.paid_status === "2" || payment_info.paid_status === 2) {
+            $(`span[data-payment_label='status']`)
+                .removeClass('badge-danger badge-success')
+                .addClass('badge-primary')
+                .html("Partly Paid");
+        }
+
+        if (payment_info.last_payment_info.payment_method !== undefined) {
+
+            if (payment_info.last_payment_info.payment_method === "Cheque") {
+                payment_method += `<span class="last_payment_date"><i class="fa fa-home"></i> ${payment_info.last_payment_info.cheque_bank}</span><br>`;
+                payment_method += `<span class="last_payment_date"><i class="fa fa-neuter"></i> ${payment_info.last_payment_info.cheque_number}</span><br>`;
             }
-            $.post(`${baseUrl}api/fees/make_payment`, data).then((response) => {
-                let s_icon = "error",
-                    payment_method = "";
-                if (response.code === 200) {
-                    s_icon = "success";
-                    $(`div[id="fees_payment_form"] input[name="amount"]`).val("");
-                    $(`div[id="fees_payment_form"] textarea[name="description"]`).val("");
 
-                    let payment_info = response.data.additional.payment;
-
-                    if (payment_info !== undefined) {
-                        $(`span[class="amount_paid"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.amount_paid}`);
-                        $(`span[class="outstanding"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.balance}`);
-                        if (payment_info.paid_status === "1" || payment_info.paid_status === 1) {
-                            $(`span[data-payment_label='status']`)
-                                .removeClass('badge-danger badge-primary')
-                                .addClass('badge-success')
-                                .html("Paid");
-                        } else if (payment_info.paid_status === "2" || payment_info.paid_status === 2) {
-                            $(`span[data-payment_label='status']`)
-                                .removeClass('badge-danger badge-success')
-                                .addClass('badge-primary')
-                                .html("Partly Paid");
-                        }
-
-                        if (payment_info.last_payment_info.payment_method === "Cheque") {
-                            payment_method += `<span class="last_payment_date"><i class="fa fa-home"></i> ${payment_info.last_payment_info.cheque_bank}</span><br>`;
-                            payment_method += `<span class="last_payment_date"><i class="fa fa-neuter"></i> ${payment_info.last_payment_info.cheque_number}</span><br>`;
-                        }
-
-                        $(`div[class='last_payment_container']`).html(`
+            $(`div[class='last_payment_container']`).html(`
                     <table width="100%" class="t_table table-hover table-bordered">
                         <tbody>
                             <tr>
@@ -131,17 +100,71 @@ var save_Receive_Payment = () => {
                             </tr>
                         </tbody>
                     </table>`);
-                        $(`div[id="cheque_payment_filter"]`).addClass("hidden");
-                    } else {
-                        setTimeout(() => {
-                            load_Pay_Fees_Form();
-                        }, 1000);
-                    }
-                    // reset the form
-                    $(`button[id="payment_cancel"]`).addClass("hidden");
-                    $(`div[id="fees_payment_form"] *`).prop("disabled", true);
-                    $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
-                    $(`div[id="fees_payment_form"] input, div[id="fees_payment_form"] textarea`).val("");
+        }
+        $(`div[id="cheque_payment_filter"]`).addClass("hidden");
+    } else {
+        setTimeout(() => {
+            load_Pay_Fees_Form();
+        }, 1000);
+    }
+}
+
+var save_Receive_Payment = () => {
+
+    let $balance = parseInt($(`span[class="outstanding"]`).attr("data-amount_payable")),
+        $amount = parseInt($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
+        description = $(`div[id="fees_payment_form"] textarea[name="description"]`).val(),
+        payment_method = $(`div[id="fees_payment_form"] select[name="payment_method"]`).val(),
+        checkout_url = $(`span[class="outstanding"]`).attr("data-checkout_url"),
+        student_id = $(`input[name='fees_payment_student_id']`).val(),
+        email_address = $(`input[name="email_address"]`).val(),
+        t_message = "";
+
+    if ($amount > $balance) {
+        t_message = `Are you sure you want to save this payment. 
+            An amount of ${$amount} is been paid which is more than the required of ${$balance}`;
+    } else if ($amount < $balance) {
+        t_message = `Are you sure you want to save this payment. 
+            An amount of ${$amount} is been paid which will leave a balance of ${$balance-$amount}.`;
+    }
+    if ((payment_method === "momo_card")) {
+        if (!email_address.length) {
+            swal({
+                text: "Sorry! The email address section is required.",
+                icon: "error",
+            });
+        } else {
+
+        }
+        return false;
+    }
+    swal({
+        title: "Make Payment",
+        text: `${t_message}\nDo you want to proceed to make the payment?`,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            let data = {
+                "amount": $amount,
+                "student_id": student_id,
+                "description": description,
+                "checkout_url": checkout_url,
+                "payment_method": payment_method,
+                "email_address": email_address,
+                "contact_number": $(`input[name="contact_number"]`).val()
+            };
+            if ($(`select[name="payment_method"]`).val() === "cheque") {
+                data["bank_id"] = $(`select[name="bank_id"]`).val();
+                data["cheque_number"] = $(`input[name="cheque_number"]`).val();
+            }
+
+            $.post(`${baseUrl}api/fees/make_payment`, data).then((response) => {
+                let s_icon = "error";
+                if (response.code === 200) {
+                    finalize_payment(response, checkout_url);
+                    s_icon = "success";
                 }
                 swal({
                     text: response.data.result,
@@ -349,19 +372,20 @@ $(`div[id="fees_allocation_form"] select[name="category_id"]`).on("change", func
 $(`div[id="fees_allocation_form"] select[name="student_id"]`).on("change", function() {
     let value = $(this).val(),
         cat_id = $(`div[id="fees_allocation_form"] select[name="category_id"]`).val();
-
     if (value.length && value !== "null" && cat_id.length) {
         load_Fees_Allocation_Amount();
     }
 });
 
-$(`div[class~="toggle-calculator"]`).removeClass("hidden");
-
 $(`select[name="payment_method"]`).on("change", function() {
     let mode = $(this).val();
+    $(`label[class="email_label"]`).html(`Email Address`);
     if (mode === "cash") {
         $(`div[id="cheque_payment_filter"]`).addClass("hidden");
-    } else {
+    } else if (mode === "cheque") {
         $(`div[id="cheque_payment_filter"]`).removeClass("hidden");
+    } else if (mode === "momo_card") {
+        $(`div[id="cheque_payment_filter"]`).addClass("hidden");
+        $(`label[class="email_label"]`).html(`Email Address <span class="required">*</span>`);
     }
 });
