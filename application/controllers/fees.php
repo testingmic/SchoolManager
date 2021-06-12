@@ -1104,7 +1104,7 @@ class Fees extends Myschoolgh {
             }
 
             /** Validate the amount */
-            if($params->amount) {
+            if(!$params->amount) {
                 return ["code" => 203, "data" => "Sorry! The amount cannot be empty."];
             }
 
@@ -1455,7 +1455,7 @@ class Fees extends Myschoolgh {
         $receipt = '
         <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/app.min.css">
         <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/style.css">
-        <div style="margin:auto auto; max-width:700px;">
+        <div style="margin:auto auto; max-width:850px;">
             <div class="row mb-3">
                 <div class="text-dark bg-white col-md-12 p-3">
                     <div class="text-center">
@@ -1479,7 +1479,7 @@ class Fees extends Myschoolgh {
                                     </td>
                                     <td align="right">
                                         '.(!empty($student_data) ? "<strong>Academic Year & Term:</strong><br>{$student_data->academic_year} :: {$student_data->academic_term}<br>" : null).'
-                                        '.(count($data) == 1 ? "Receipt ID: <strong>{$student_data->receipt_id}</strong><br>" : null).'
+                                        '.(count($data) == 1 && !empty($student_data->receipt_id) ? "Receipt ID: <strong>{$student_data->receipt_id}</strong><br>" : null).'
                                     </td>
                                     </tr>
                                     </table>

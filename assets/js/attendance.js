@@ -121,6 +121,7 @@ $(`select[id="attendance_category"]`).on("change", function() {
 $(`select[id="attendance_class"]`).on("change", function() {
     let value = $(this).val(),
         category = $(`select[name="attendance_category"]`).val();
+    $(`a[id="download_link"]`).addClass("hidden");
     if (value !== "null") {
         $(`button[class~="refresh"]`).html(`Refreshing record <i class='fa fa-spin fa-spinner'></i>`).prop("disabled", true);
         $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "flex" });
@@ -140,6 +141,7 @@ var refresh_AttendanceLog = () => {
 
 $(`div[id="attendance_report"] select[id="user_type"]`).on("change", function() {
     let value = $(this).val();
+    $(`a[id="download_link"]`).addClass("hidden");
     $(`div[class="attendance_log_record"]`).html(`<div class="text-center font-italic">Attendance record will be displayed here</div>`);
     if (value == "null") {
         $(`div[id="attendance_report"] select[name="class_id"]`).val("").change();

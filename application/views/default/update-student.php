@@ -418,8 +418,8 @@ if(!empty($user_id)) {
                                     <input value="'.date("Y-m-d", strtotime("last day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
                                 </div>
                                 <div class="col-lg-2">
-                                    <label>&nbsp;</label>
-                                    <button type="button" onclick="return generate_payment_report(\''.$user_id.'\');" class="btn btn-primary"><i class="fa fa-adjust"></i> Generate</button>
+                                    <label>&nbsp;<br></label>
+                                    <button type="button" onclick="return generate_payment_report(\''.$user_id.'\');" class="btn btn-block btn-primary"><i class="fa fa-adjust"></i> Generate</button>
                                 </div>
 
                                 <div class="border-top pt-3 col-lg-12 mt-3">

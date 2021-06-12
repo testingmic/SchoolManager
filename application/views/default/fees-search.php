@@ -24,6 +24,22 @@ $response->scripts = ["assets/js/payments.js"];
 
 $the_form = "";
 
+// load fees allocation list for the students
+$fees_category_list = "";
+$stmt = $myClass->db->prepare("
+    SELECT a.*, 
+        (SELECT COUNT(*) FROM fees_allocations b WHERE a.id = b.category_id AND b.client_id = a.client_id) AS fees_count
+    FROM fees_category a
+    WHERE client_id = ? AND a.status = ? ORDER BY a.id
+");
+$stmt->execute([$clientId, 1]);
+$fees_category_array = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+// fees category
+foreach($fees_category_array as $category) {
+    $fees_category_list .= "<option value=\"{$category->id}\">{$category->name}</option>";
+}
+
 $response->html = '
     <section class="section">
         <div class="section-header">
@@ -35,7 +51,7 @@ $response->html = '
             </div>
         </div>
         <div class="row" id="finance_search_field">
-            <div class="col-12 col-sm-12 col-md-6">
+            <div class="col-12 col-lg-4 col-md-6">
                 <div class="card">
                     <div class="card-body"">
                         <div class="form-group">
@@ -50,9 +66,31 @@ $response->html = '
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-12 col-md-6">
+            <div class="col-12 col-lg-8 col-md-6">
                 <div class="card">
-                    <div class="card-body">'.$the_form.'</div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-lg-4">
+                                <label>Filter by Category</label>
+                                <select data-width="100%" id="category_id" class="selectpicker form-control">
+                                    <option value="">Select Category</option>
+                                    '.$fees_category_list.'
+                                </select>
+                            </div>
+                            <div class="col-lg-3">
+                                <label>Start Date</label>                                
+                                <input value="'.date("Y-m-d", strtotime("first day this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
+                            </div>
+                            <div class="col-lg-3">
+                                <label>End Date</label>
+                                <input value="'.date("Y-m-t", strtotime("last day this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
+                            </div>
+                            <div class="col-lg-2">
+                                <label>&nbsp;<br></label>
+                                <button type="button" onclick="return generate_payment_report();" class="btn btn-block btn-primary"><i class="fa fa-adjust"></i> Generate</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

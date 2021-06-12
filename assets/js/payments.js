@@ -102,11 +102,10 @@ var finalize_payment = (response, checkout_url) => {
                     </table>`);
         }
         $(`div[id="cheque_payment_filter"]`).addClass("hidden");
-    } else {
-        setTimeout(() => {
-            load_Pay_Fees_Form();
-        }, 1000);
     }
+    setTimeout(() => {
+        load_Pay_Fees_Form();
+    }, 1500);
 }
 
 var save_Receive_Payment = () => {
@@ -121,7 +120,7 @@ var save_Receive_Payment = () => {
         category_id = $(`input[name="fees_payment_category_id"]`).val(),
         t_message = "";
 
-    if (!$amount.length) {
+    if (!$(`div[id="fees_payment_form"] input[name="amount"]`).val().length) {
         swal({
             text: "Sorry! The amount cannot be empty.",
             icon: "error",
@@ -210,14 +209,15 @@ var log_fees_payment = (reference_id, transaction_id) => {
     });
 
 }
+
 var receive_Momo_Card_Payment = () => {
 
     try {
 
-        let amount = $(`div[id="fees_payment_form"] input[name="amount"]`).val(),
+        let amount = parseFloat($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
             email_address = $(`input[name="email_address"]`).val();
 
-        if (!amount.length) {
+        if (!$(`div[id="fees_payment_form"] input[name="amount"]`).val().length) {
             swal({
                 text: "Sorry! The amount cannot be empty.",
                 icon: "error",
@@ -231,7 +231,7 @@ var receive_Momo_Card_Payment = () => {
             });
             return false;
         }
-        amount = parseFloat(amount) * 100;
+        amount = amount * 100;
 
         var popup = PaystackPop.setup({
             key: pk_payment_key,
@@ -432,6 +432,13 @@ var search_Payment_Log = () => {
             });
         });
     }
+}
+
+var generate_payment_report = (student_id) => {
+    let category_id = $(`select[id="category_id"]`).val(),
+        start_date = $(`input[name="group_start_date"]`).val(),
+        end_date = $(`input[name="group_end_date"]`).val();
+    window.open(`${baseUrl}receipt?category_id=${category_id}&start_date=${start_date}&end_date=${end_date}`);
 }
 
 $(`div[id="finance_search_field"] input[id="log_search_term"]`).on("keyup", function(evt) {

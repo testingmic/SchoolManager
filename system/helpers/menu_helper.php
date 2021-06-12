@@ -125,7 +125,7 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>School Fees</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-search">Search Log</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>fees-search">Search Log / Generate</a></li>
             <?php if($accessObject->hasAccess("receive", "fees")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Receive Payment</a></li>
             <?php } ?>
