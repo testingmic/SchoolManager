@@ -16,7 +16,7 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Bulk SMS and Email";
+$pageTitle = "Bulk SMS & Email";
 $response->title = "{$pageTitle} : {$appName}";
 
 // add the scripts to load

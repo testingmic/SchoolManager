@@ -462,8 +462,42 @@ label {
     overflow-y: auto;
 }
 
-.card-header {
+.card-header,
+.modal-header {
     font-weight: bold;
     border-bottom: solid 3px #54a7f4!important;
     border-bottom-color: #54a7f4!important;
+}
+
+.buy_text {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.buy_text span {
+    display: block !important;
+    margin: auto !important;
+}
+
+.buy_container {
+    height: 100px;
+    border: dashed 1px #ccc;
+}
+
+.buy_button {
+    color: #fff;
+    padding: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    z-index: 9999;
+    text-align: center;
+    background-color: #1c0577;
+}
+
+.buy_button:hover {
+    background-color: #4caf50;
 }

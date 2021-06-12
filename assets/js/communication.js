@@ -12,6 +12,8 @@ var sms_characters_counter = () => {
 }
 sms_characters_counter();
 
+var paymentWindow;
+
 var reset_communication_form = (form_url, title = "Create Template") => {
     swal({
         title: "Cancel Form",
@@ -113,6 +115,80 @@ var view_message = (type, message_id) => {
             $('.datatable_start').dataTable();
         }
     }
+}
+
+var update_smsbalance = (package_id, reference_id, transaction_id) => {
+    $.post(`${baseUrl}api/communication/verify_and_update`, {package_id, reference_id, transaction_id}).then((response) => {
+        if(response.code == 200) {
+            $(`span[id="sms_balance"]`).html(`${response.data.result} SMS Units`);
+        }
+    });
+}
+
+var buy_sms_package = (amount, package_id) => {
+    $(`div[id="buy_sms_package"] div[class="form-content-loader"]`).css("display", "flex");
+    let email = $(`input[name="myemail_address"]`).val();
+    amount = parseFloat(amount)* 100;
+    var popup = PaystackPop.setup({
+        key: 'pk_test_0b00163f9532f2e6b27819fa20127b8bd4e2c260',
+        email: email,
+        amount: amount,
+        currency: 'GHS',
+        onClose: function() {
+            $(`div[id="buy_sms_package"] div[class="form-content-loader"]`).css("display", "none");
+            swal({
+                text: "Payment Process Cancelled",
+                icon: "error",
+            });
+        },
+        callback: function (response) {
+            let message = `Payment ${response.message}`,
+                code = "error";
+            console.log(response);
+            if(response.message == "Approved") {
+                $(`div[id="buy_sms_package"] div[class="form-content-loader"]`).css("display", "none");
+                $(`div[id="viewOnlyModal"]`).modal("hide");
+                code = "success";
+                update_smsbalance(package_id, response.reference, response.transaction);
+            } else {
+                swal({text: message, icon: code});
+            }
+        }
+    });
+    popup.openIframe();
+}
+
+var topup_sms = () => {
+    $(`div[id="viewOnlyModal"]`).modal("show");
+    $(`div[id="viewOnlyModal"] h5[class~="modal-title"]`).html(`Buy SMS Credit`);
+    
+    let packages = $.array_stream["sms_packages"],
+    packages_list = `
+    <div class="row" id="buy_sms_package">
+    <div class="form-content-loader" style="display: none; position: absolute">
+        <div class="offline-content text-center">
+            <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+        </div>
+    </div>`;
+
+    $.each(packages, function(i, e) {
+        packages_list += `
+        <div class="col-lg-4 mb-2 col-md-4">
+            <div class="buy_container">
+                <div class="buy_text">
+                    <span class="font-20 text-success">${e.units} 
+                        <font class="font-12 text-dark">Units</font><br>
+                        <font class="font-16 font-weight-bold text-dark">GH&cent;${e.amount}</font>
+                    </span>
+                </div>
+            </div>
+            <div class="buy_button" onclick="return buy_sms_package('${e.amount}','${e.item_id}')"><i class="fa fa-money"></i> Buy</div>
+        </div>`;
+    });
+
+    packages_list += `</div>`;
+
+    $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html($.parseHTML(packages_list));
 }
 
 $(`div[class="send_smsemail"] input[name="send_later"]`).on("click", function() {

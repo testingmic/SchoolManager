@@ -411,4 +411,37 @@ class Communication extends Myschoolgh {
 
     }
 
+    /**
+     * Verify Payment and Update the SMS Balance
+     * 
+     * @return Array
+     */
+    public function verify_and_update(stdClass $params) {
+        // check if any item is empty
+        if(empty($params->package_id) || empty($params->reference_id) || empty($params->transaction_id)) {
+            return ["code" => 203, "data" => "Sorry! Ensure all required parameters have been parsed."];
+        }
+
+        // validate the package
+        $sms_package = $this->pushQuery("*", "sms_packages", "item_id='{$params->package_id}'");
+        if(empty($sms_package)) {
+            return ["code" => 203, "data" => "Sorry! An invalid package id was parsed."];
+        }
+
+        // create a new payment object
+        $payObject = load_class("payment", "controllers");
+
+        // set the parameters
+        $data = (object) [
+            "route" => "verify",
+            "reference" => $params->reference_id
+        ];
+
+        // confirm the payment
+        $payment_check = $payObject->get($data);
+
+        return $payment_check;
+
+    }
+
 }
