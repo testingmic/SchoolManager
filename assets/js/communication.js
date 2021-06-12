@@ -46,6 +46,75 @@ var view_template = (template_id, form_url) => {
     }
 }
 
+var view_message = (type, message_id) => {
+        if ($.array_stream["messages_array_list"][type] !== undefined) {
+            let template = $.array_stream["messages_array_list"][type];
+            if (template[message_id] !== undefined) {
+                let data = template[message_id],
+                    recipient_list = ``;
+
+                $(`div[id="viewOnlyModal"]`).modal("show");
+                $(`div[id="viewOnlyModal"] h5[class~="modal-title"]`).html(`Message Details`);
+
+                $.each(data.recipient_list, function(i, e) {
+                    i++;
+                    let status = e.status == undefined ? "Pending" : e.status;
+                    recipient_list += `
+                    <tr>
+                        <td>${i}</td>
+                        <td>${e.name}</td>
+                        <td>${e.unique_id}</td>
+                        <td>${data.type == "sms" ? e.phone_number : e.email}</td>
+                        <td>${status}</td>
+                    </tr>`;
+                });
+
+                let content = `
+                <div class="row">
+                    <div class="col-lg-12 table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <tr>
+                                <td width="20%" class="font-weight-bold">Campaign Name</td>
+                                <td>${data.campaign_name}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Recipient Group</td>
+                                <td>${data.recipient_group}</td>
+                            </tr>
+                            ${data.type === "email" ? `<tr>
+                                <td class="font-weight-bold">Subject</td>
+                                <td>${data.subject}</td>
+                            </tr>`: ""}
+                            <tr>
+                                <td class="font-weight-bold">Message</td>
+                                <td>${data.message}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Date Created</td>
+                                <td>${data.date_created}</td>
+                            </tr>
+                        </table>
+                        <table class="table datatable_start table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Unique ID</th>
+                                    <th>${data.type === "email" ? "Email" : "Phone Number"}</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>${recipient_list}</tbody>
+                        </table>
+                    </div>
+                </div>`;
+
+            $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html($.parseHTML(content));
+            $('.datatable_start').dataTable();
+        }
+    }
+}
+
 $(`div[class="send_smsemail"] input[name="send_later"]`).on("click", function() {
     let route = $(this).attr("data-route");
     if ($(`input[name="send_later"][data-route="${route}"]`).is(':checked')) {
@@ -138,8 +207,10 @@ $(`div[class="send_smsemail"] select[name="recipient_type"]`).on("change", funct
 $(`form[class="form_send_message"]`).on("submit", function(evt) {
     evt.preventDefault();
     let form = $(this);
-    let route = form.attr("data-route"),
-        data = form.serialize();
+    let route = form.attr("data-route");
+
+    let myForm = document.getElementById(`send_form_${route}`);
+    let theFormData = new FormData(myForm);
 
     swal({
         title: `Send ${route.toUpperCase()}`,
@@ -149,19 +220,40 @@ $(`form[class="form_send_message"]`).on("submit", function(evt) {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-            $.post(`${baseUrl}api/communication/send_smsemail`, data).then((response) => {
-                if (response.code == 200) {
+            if (route === "email") {
+                theFormData.delete("faketext");
+                let content = $(`trix-editor[id="ajax-form-content"]`).html();
+                theFormData.append("message", htmlEntities(content));
+            }
+            $.ajax({
+                url: `${baseUrl}api/communication/send_smsemail`,
+                data: theFormData,
+                contentType: false,
+                cache: false,
+                type: `POST`,
+                processData: false,
+                success: function(response) {
+                    swal({
+                        text: response.data.result,
+                        icon: responseCode(response.code),
+                    });
+                    if (response.code == 200) {
+                        $(`form[class="form_send_message"] select`).val("").change();
+                        $(`form[class="form_send_message"] input, form[class="form_send_message"] textarea`).val("");
+                        setTimeout(() => {
+                            // loadPage(`${baseUrl}smsemail_report/${response.data.additional.item_id}`);
+                        }, 2000);
+                    }
+                },
+                complete: function() {
 
+                },
+                error: function() {
+                    swal({
+                        text: swalnotice["ajax_error"],
+                        icon: "error",
+                    });
                 }
-                swal({
-                    text: response.data.result,
-                    icon: responseCode(response.code),
-                });
-            }).catch(() => {
-                swal({
-                    text: swalnotice["ajax_error"],
-                    icon: "error",
-                });
             });
         }
     });

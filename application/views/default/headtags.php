@@ -72,6 +72,8 @@ if(!isset($userPrefs->messages)) {
 // if the user has the permission to end the academic term
 $endPermission = $accessObject->hasAccess("close", "settings");
 
+$isBooking = false;
+
 // load the helper
 load_helpers(['menu_helper']);
 ?>
@@ -156,7 +158,13 @@ load_helpers(['menu_helper']);
                     <li><a href="#" class="nav-link nav-link-lg fullscreen-btn" data-rel="tooltip" title="Maximize to Fullscreen Mode"><i class="fas fa-expand"></i></a></li>
                     <li><a href="#" class="nav-link nav-link-lg hidden" data-rel="tooltip" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
                     <?php if($isActiveAccount) { ?>
-                    <li class="border-left text-white d-none d-md-block"><a href="#" class="nav-link text-white nav-link-lg">
+                    <li class="border-left text-white d-none d-md-block">
+                        <?php if($isBooking) { ?>
+                        <a href="#" class="nav-link text-white nav-link-lg">
+                            <strong class="font-18px">MEMBERSHIP SERVICE BOOKING</strong>
+                        </a>
+                        <?php } else { ?>
+                        <a href="#" class="nav-link text-white nav-link-lg">
                             Academic Year/Term:
                             <strong class="font-18px">
                                 <span><?= $clientPrefs->academics->academic_year ?></span> 
@@ -165,6 +173,7 @@ load_helpers(['menu_helper']);
                             </strong>
                             <?= ($endPermission && $defaultUser->appPrefs->termEnded ? "<span class='badge badge-danger notification'>Already Ended</span>" : "<span class='badge badge-success'>Active</span>"); ?>
                         </a>
+                        <?php } ?>
                     </li>
                     <?php } ?>
                 </ul>
@@ -311,7 +320,7 @@ load_helpers(['menu_helper']);
                         <li><a href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
                         <?php 
                         // set the menu function 
-                        $menu_function = $userData->user_type."_menu";
+                        $menu_function = $isBooking ? "booking_menu" : $userData->user_type."_menu";
                         
                         // confirm that the function exists
                         if(function_exists($menu_function)) {

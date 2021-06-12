@@ -3209,6 +3209,7 @@ class Forms extends Myschoolgh {
         ];
 
         $logoUploaded = (bool) ($client_data && $client_data->client_logo);
+        $last_date = date("Y-m-d", strtotime("+1 year"));
 
         $general = '
         <form class="ajax-data-form" action="'.$this->baseUrl.'api/account/update" method="POST" id="'.$form_id.'">
@@ -3290,13 +3291,13 @@ class Forms extends Myschoolgh {
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="term_starts">Academic Term Start</label>
-                    <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[academics][term_starts]" id="term_starts" class="form-control _datepicker">
+                    <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[academics][term_starts]" id="term_starts" data-maxdate="'.$last_date.'" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="term_ends">Academic Term Ends</label>
-                    <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" class="form-control _datepicker">
+                    <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" data-maxdate="'.$last_date.'" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
@@ -3326,13 +3327,13 @@ class Forms extends Myschoolgh {
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="next_term_starts">Next Academic Term Start</label>
-                    <input type="text" value="'.($prefs->academics->next_term_starts ?? null).'" name="general[academics][next_term_starts]" id="next_term_starts" class="form-control _datepicker">
+                    <input type="text" value="'.($prefs->academics->next_term_starts ?? null).'" name="general[academics][next_term_starts]" data-maxdate="'.$last_date.'" id="next_term_starts" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="next_term_ends">Next Academic Term Ends</label>
-                    <input type="text" value="'.($prefs->academics->next_term_ends ?? null).'" name="general[academics][next_term_ends]" id="next_term_ends" class="form-control _datepicker">
+                    <input type="text" value="'.($prefs->academics->next_term_ends ?? null).'" name="general[academics][next_term_ends]" data-maxdate="'.$last_date.'" id="next_term_ends" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-lg-12"><h5>LABELS</h5></div>';

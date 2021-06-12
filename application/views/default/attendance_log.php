@@ -58,7 +58,7 @@ $permissions = [
 $academics = $defaultUser->client->client_preferences->academics;
 
 // ensure the school is not on vacation
-if(time() > strtotime($academics->term_ends)) {
+if($defaultUser->appPrefs->termEnded) {
     // found
     $response->html = page_not_found("not_found", "Sorry! The Current Academic Term Ended on <strong>{$academics->term_ends}</strong>.");
 

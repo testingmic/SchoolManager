@@ -21,6 +21,64 @@ class Communication extends Myschoolgh {
      * 
      * @return Array
      */
+    public function list_messages(stdClass $params) {
+
+        $params->query = "1";
+
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->type) && !empty($params->type)) ? " AND a.type='{$params->type}'" : null;
+        $params->query .= (isset($params->q) && !empty($params->q)) ? " AND a.campaign_name LIKE '%{$params->q}%'" : null;
+        $params->query .= (isset($params->status) && !empty($params->status)) ? " AND a.sent_status='{$params->status}'" : null;
+        $params->query .= (isset($params->message_id) && !empty($params->message_id)) ? " AND a.item_id='{$params->message_id}'" : null;
+
+        try {
+
+            $stmt = $this->db->prepare("
+                SELECT a.*,
+                    (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info
+                FROM smsemail_send_list a
+                WHERE {$params->query} ORDER BY a.id LIMIT {$params->limit}
+            ");
+            $stmt->execute([1]);
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // clean the text
+                $result->message = htmlspecialchars_decode($result->message);
+                $result->raw_message = htmlspecialchars($result->message);
+
+                $result->recipient_ids = json_decode($result->recipient_ids, true);
+                $result->recipient_list = json_decode($result->recipient_list);
+                $result->recipient_group = ucwords($result->recipient_group);
+
+                // loop through the information
+                foreach(["createdby_info"] as $each) {
+                    // convert the created by string into an object
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["name", "phone_number", "email", "image","user_type"]);
+                }
+
+                $data[] = $result;
+            }
+
+            return [
+                "code" => 200,
+                "data" => $data
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
+
+    }
+
+    /**
+     * List Templates
+     * 
+     * @return Array
+     */
     public function list_templates(stdClass $params) {
 
         $params->query = "1";
@@ -181,6 +239,9 @@ class Communication extends Myschoolgh {
 
         try {
 
+            // begin the transaction
+            $this->db->beginTransaction();
+
             // get the message to be sent type
             $isSMS = (bool) ($params->type == "sms");
 
@@ -195,6 +256,7 @@ class Communication extends Myschoolgh {
             }
 
             // set the init variables
+            $units = 0;
             $recipients_array = [];
             $column = $isSMS ? "phone_number" : "email";
 
@@ -212,7 +274,7 @@ class Communication extends Myschoolgh {
                     "name, user_type, unique_id, item_id, {$column}", "users", 
                     "client_id='{$params->clientId}' AND status='1' AND 
                     academic_year='{$this->academic_year}' AND user_status = 'Active' AND
-                    academic_term='{$this->academic_term}' AND class_id='{$class_check[0]->id}'"
+                    academic_term='{$this->academic_term}' AND class_id='{$class_check[0]->id}' LIMIT 500"
                 );
             }
 
@@ -226,12 +288,15 @@ class Communication extends Myschoolgh {
                 if(is_array($params->recipients)) {
                     // loop through the array list
                     foreach($params->recipients as $recipient) {
-                        $recipients_array[] = $this->pushQuery(
+                        // get the user info
+                        $user = $this->pushQuery(
                             "name, user_type, unique_id, item_id, {$column}", "users", 
                             "client_id='{$params->clientId}' AND status='1' AND user_status = 'Active' AND
                             academic_year='{$this->academic_year}' AND item_id = '{$recipient}' AND
-                            academic_term='{$this->academic_term}' LIMIT 1"
-                        )[0];
+                            academic_term='{$this->academic_term}' LIMIT 1");
+
+                        // append to the list
+                        if(!empty($user)) { $recipients_array[] = $user[0]; }
                     }
                 }
             }
@@ -241,7 +306,7 @@ class Communication extends Myschoolgh {
 
                 // if the role_group was not parsed
                 if(!isset($params->role_group) || empty($params->role_group)) { 
-                    return ["code" => 203, "data" => $this->is_required("Role Group")]; 
+                    return ["code" => 203, "data" => $this->is_required("Role Group")];
                 }
                 // get the recipients array list
                 $recipients_array = $this->pushQuery(
@@ -254,7 +319,7 @@ class Communication extends Myschoolgh {
                     "name, user_type, unique_id, item_id, {$column}", "users", 
                     "client_id='{$params->clientId}' AND status='1' AND 
                     academic_year='{$this->academic_year}' AND user_status = 'Active' AND
-                    academic_term='{$this->academic_term}' AND user_type = 'student'"
+                    academic_term='{$this->academic_term}' AND user_type = 'student' LIMIT 500"
                 );
 
                 // merge the two results set
@@ -286,6 +351,18 @@ class Communication extends Myschoolgh {
 
             }
 
+            // return false if the recipients list is empty
+            if(empty($recipients_array)) {
+                return ["code" => 203, "data" => "Sorry! No recipient found ."];
+            }
+
+            // convert into json string
+            $json = json_encode($recipients_array);
+            $recipients_array = json_decode($json, true);
+
+            // get the list of all user ids
+            $recipient_ids = array_column($recipients_array, "item_id");
+
             // set the scheduled date and time
             $params->schedule_time = empty($params->schedule_time) ? date("H:i:s") : $params->schedule_time;
             $params->schedule_date = empty($params->schedule_date) ? date("Y-m-d") : $params->schedule_date;
@@ -293,12 +370,42 @@ class Communication extends Myschoolgh {
             // set the time to send the message
             $time_to_send = empty($params->send_later) ? date("Y-m-d H:i:s", strtotime("+2 minutes")) : "{$params->schedule_date} {$params->schedule_time}";
 
-            
-            // return the success response
-            return $recipients_array;
+            // check the time to ensure its not less than current time
+            if(strtotime($time_to_send) < time()) {
+                return ["code" => 203, "data" => "Sorry! The scheduled time and date must be above current time."];
+            }
 
-            
+            // generate the message unique id
+            $item_id = random_string("alnum", 15);
+
+            // insert the record
+            $stmt = $this->db->prepare("
+                INSERT INTO smsemail_send_list SET client_id = ?, item_id = ?, type = ?, campaign_name = ?,
+                subject = ?, message = ?, recipient_group = ?, recipient_list = ?, recipient_ids = ?,
+                units_used = ?, schedule_time = ?, created_by = ?
+            ");
+            $stmt->execute([
+                $params->clientId, $item_id, $params->type, $params->campaign_name, $params->subject ?? null,
+                $params->message, $params->recipient_type, json_encode($recipients_array),
+                json_encode($recipient_ids), $units, $time_to_send, $params->userId
+            ]);
+
+            // reduce the SMS balance
+            $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$units}), sms_sent = (sms_sent + {$units}) WHERE client_id = '{$params->clientId}' LIMIT 1");
+
+            // commit the prepared statements
+            $this->db->commit();
+
+            // return the success response
+            return [
+                "data" => "Message was successfully sent to the selected recipients.",
+                "additional" => [
+                    "item_id" => $item_id
+                ]
+            ];
+
         } catch(PDOException $e) {
+            $this->db->rollBack();
             return $this->unexpected_error;
         }
 

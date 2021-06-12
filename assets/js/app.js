@@ -757,13 +757,16 @@ var initPlugins = () => {
     }
 
     if ($('.datepicker').length > 0) {
-        let date_format = $('.datepicker').attr("date-format") == undefined ? "YYYY-MM-DD" : $('.datepicker').attr("date-format"),
-            max_date = $('.datepicker').attr("data-maxdate") == undefined ? $.today : $('.datepicker').attr("data-maxdate");
-        $('.datepicker').daterangepicker({
-            locale: { format: date_format },
-            singleDatePicker: true,
-            showDropdowns: true,
-            maxDate: max_date
+        $('.datepicker').each((index, el) => {
+            let input = $(el);
+            let date_format = input.attr("date-format") == undefined ? "YYYY-MM-DD" : input.attr("date-format"),
+                max_date = input.attr("data-maxdate") == undefined ? $.today : input.attr("data-maxdate");
+            input.daterangepicker({
+                locale: { format: date_format },
+                singleDatePicker: true,
+                showDropdowns: true,
+                maxDate: max_date
+            });
         });
     }
 
