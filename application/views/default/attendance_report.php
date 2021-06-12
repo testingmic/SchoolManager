@@ -88,7 +88,7 @@ $response->html = '
                             <div class="col-lg-3 col-md-4">
                                 <div class="form-group">
                                     <label>Month <span class="required">*</span></label>
-                                    <input type="month" class="form-control" min="2021-01" max="'.date("Y-m").'" name="month_year">
+                                    <input type="month" class="form-control" min="2021-01" max="'.date("Y-m").'" value="'.date("Y-m").'" name="month_year">
                                 </div>
                             </div>
                             <div class="col-lg-2 col-md-3">
@@ -104,7 +104,11 @@ $response->html = '
                     <div class="card-body">
                         <div class="row">
                             
-                            <div class="col-lg-7 col-md-5"></div>
+                            <div class="col-lg-7 col-md-5">
+                                <a href="" id="download_link" target="_blank" class="btn hidden btn-outline-success">
+                                    <i class="fa fa-download"></i> Download Attendance
+                                </a>
+                            </div>
                             <div class="col-lg-5 col-md-7">
                                 <table class="table table-condensed table-bordered text-center">
                                     <tbody>

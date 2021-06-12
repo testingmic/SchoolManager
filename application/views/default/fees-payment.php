@@ -75,13 +75,14 @@ if(!$receivePayment) {
         $class_id = $data->class_id;
         $student_id = $data->student_id;
         $category_id = $data->category_id;
-        $department_id = $data->department_id;
+        $department_id = $data->department_id ?? null;
         $disabled = (($data->paid_status == 1) || ($data->paid_status == '1')) ? "disabled='disabled'" : null;
         $search_disabled = ($data->paid_status == 1) ? null : "disabled='disabled'";
         
         // append the allocation information to the parameters before fetching the payment form
         $params->allocation_info = $data;
         $params->client = $defaultUser->client;
+        $params->category_id = $data->category_id;
 
         // load the last payment information
         $payment_form = $feesClass->payment_form($params)["data"];
@@ -215,7 +216,7 @@ if(!$receivePayment) {
                                     </div>
                                     <div class="col-md-6 form-group">
                                         <label>Amount <span class="required">*</span></label>
-                                        <input '.$disabled.' value="'.($amount ?? null).'" class="form-control" name="amount" id="amount" type="number" min="0">
+                                        <input '.$disabled.' class="form-control" name="amount" id="amount" type="number" min="0">
                                     </div>
                                     <div class="col-md-12 mt-0 mb-0 form-group"></div>
                                     <div class="col-md-6 form-group">
@@ -228,12 +229,15 @@ if(!$receivePayment) {
                                     </div>
                                     <div class="col-md-12 form-group">
                                         <label>Remarks</label>
-                                        <textarea '.$disabled.' class="form-control" name="description" id="description"></textarea>
+                                        <textarea '.$disabled.' class="form-control" name="description" style="height:100px" id="description"></textarea>
                                     </div>
                                     <div class="col-md-12 form-group text-right">
                                         <div class="d-flex justify-content-between">
                                             <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form();" class="btn '.($category_id ? null : 'hidden').' btn-outline-danger">Cancel</button></div>
-                                            <div><button '.$disabled.' onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay Fee</button></div>
+                                            <div>
+                                                <button '.$disabled.' id="default_payment_button" onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay Fee</button>
+                                                <button '.$disabled.' id="momocard_payment_button" onclick="return receive_Momo_Card_Payment();" class="btn hidden btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay via MoMo/Card</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

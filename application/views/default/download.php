@@ -249,5 +249,42 @@ elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"
         }
     }
 }
+
+/** Download Timetables */
+elseif(isset($_GET["att_d"]) && ($_GET["att_d"] === "true") && isset($_GET["user_type"])) {
+    
+    /** Start processing */
+    $getObject = (array) $_GET;
+    $getObject = (object) array_map("xss_clean", $getObject);
+    
+    // end the query
+    if(empty($defaultUser->client)) {
+        print "Access Denied!";
+        return;
+    }
+
+    // set some parameters
+    $getObject->download = true;
+    $getObject->client_data = $defaultUser->client;
+    $getObject->clientId = $defaultUser->client->client_id;
+    $getObject->academic_year = $defaultUser->client->client_preferences->academics->academic_year;
+    $getObject->academic_term = $defaultUser->client->client_preferences->academics->academic_term;
+
+    // confirm the user type
+    if(($getObject->user_type === "student") && !isset($getObject->class_id)) {
+        print "Access Denied!";
+        return;
+    }
+
+    // create an object
+    $file_name = "Attendance_Log";
+    $attendanceObject = load_class("attendance", "controllers", $getObject);
+    $data = $attendanceObject->attendance_report($getObject)["data"];
+
+    show_content("Attendance Log", $file_name, $data["table_content"], "L");
+
+    exit;
+}
+
 // if nothing was set
 print "Access Denied!";

@@ -87,7 +87,7 @@
     <script>
     var fieldDefault = {}, thisRowId = 1, thisSelectRow = 1, userAgent = "<?= $myClass->agent."||".$myClass->platform."||".$myClass->browser."||".ip_address(); ?>",
         baseUrl = "<?= $baseUrl ?>",current_url="<?= $user_current_url ?>", sms_text_count = <?= $myClass->sms_text_count; ?>,
-        viewedAs = "<?= (bool) isset($_GET["viewas"]) ?>",
+        viewedAs = "<?= (bool) isset($_GET["viewas"]) ?>", pk_payment_key = "pk_test_0b00163f9532f2e6b27819fa20127b8bd4e2c260",
         this_user_unique_key = "persist:msgh-client-<?= $session->userId; ?>",
         form_modules = <?= json_encode($myClass->form_modules); ?>,
         swalnotice = <?= json_encode($myClass->swal_notification); ?>,

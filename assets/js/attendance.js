@@ -173,10 +173,12 @@ var load_attendance_log = () => {
             icon: "error",
         });
     } else {
+        $(`a[id="download_link"]`).addClass("hidden");
         $.get(`${baseUrl}api/attendance/attendance_report`, { class_id, month_year, user_type }).then((response) => {
             if (response.code == 200) {
                 let attendance_list = response.data.result;
                 $(`div[class="attendance_log_record"]`).html(attendance_list.table_content);
+                $(`a[id="download_link"]`).removeClass("hidden").attr("href", `${baseUrl}download?class_id=${class_id}&month_year=${month_year}&user_type=${user_type}&att_d=true`);
                 if ($('.datatable').length > 0) {
                     $('.datatable').dataTable({
                         search: null,

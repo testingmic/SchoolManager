@@ -60,8 +60,7 @@ foreach($item_list["data"] as $key => $each) {
     $action = "";
     $action = "<a href='#' title='View receipt details' onclick='loadPage(\"{$baseUrl}fees-view/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
     $action .= "&nbsp;<a title='Click to print this reciept' href='#' onclick=\"return print_receipt('{$each->item_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
-    // $action .= "&nbsp;<a title='Download this Receipt as PDF' href='{$baseUrl}download?rpt_id={$each->item_id}' target='_blank' class='btn btn-sm btn-outline-success'><i class='fa fa-download'></i></a>";
-
+    
     $fees_history .= "<tr data-row_id=\"{$each->item_id}\">";
     $fees_history .= "<td>".($key+1)."</td>";
     $fees_history .= "
@@ -82,8 +81,8 @@ foreach($item_list["data"] as $key => $each) {
     // if the payment method was a cheque
     if($each->payment_method === "Cheque") {
         $cheque_bank = explode("::", $each->cheque_bank)[0];
-        $fees_history .= "<br><strong>{$cheque_bank}</strong>";
-        $fees_history .= "<br><strong>#{$each->cheque_number}</strong>";
+        $fees_history .= $cheque_bank ? "<br><strong>{$cheque_bank}</strong>" : null;
+        $fees_history .= $each->cheque_number ? "<br><strong>#{$each->cheque_number}</strong>" : null;
     }
     $fees_history .= "</td><td>{$each->created_by_info->name} <br> <i class='fa fa-calendar'></i> {$each->recorded_date}</td>";
     $fees_history .= "<td width='10%' align='center'>{$action}</td>";

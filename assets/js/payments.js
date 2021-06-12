@@ -112,13 +112,22 @@ var finalize_payment = (response, checkout_url) => {
 var save_Receive_Payment = () => {
 
     let $balance = parseInt($(`span[class="outstanding"]`).attr("data-amount_payable")),
-        $amount = parseInt($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
+        $amount = parseFloat($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
         description = $(`div[id="fees_payment_form"] textarea[name="description"]`).val(),
         payment_method = $(`div[id="fees_payment_form"] select[name="payment_method"]`).val(),
         checkout_url = $(`span[class="outstanding"]`).attr("data-checkout_url"),
         student_id = $(`input[name='fees_payment_student_id']`).val(),
         email_address = $(`input[name="email_address"]`).val(),
+        category_id = $(`input[name="fees_payment_category_id"]`).val(),
         t_message = "";
+
+    if (!$amount.length) {
+        swal({
+            text: "Sorry! The amount cannot be empty.",
+            icon: "error",
+        });
+        return false;
+    }
 
     if ($amount > $balance) {
         t_message = `Are you sure you want to save this payment. 
@@ -126,17 +135,6 @@ var save_Receive_Payment = () => {
     } else if ($amount < $balance) {
         t_message = `Are you sure you want to save this payment. 
             An amount of ${$amount} is been paid which will leave a balance of ${$balance-$amount}.`;
-    }
-    if ((payment_method === "momo_card")) {
-        if (!email_address.length) {
-            swal({
-                text: "Sorry! The email address section is required.",
-                icon: "error",
-            });
-        } else {
-
-        }
-        return false;
     }
     swal({
         title: "Make Payment",
@@ -148,6 +146,7 @@ var save_Receive_Payment = () => {
         if (proceed) {
             let data = {
                 "amount": $amount,
+                "category_id": category_id,
                 "student_id": student_id,
                 "description": description,
                 "checkout_url": checkout_url,
@@ -178,6 +177,92 @@ var save_Receive_Payment = () => {
             });
         }
     });
+}
+
+var log_fees_payment = (reference_id, transaction_id) => {
+
+    let amount = parseFloat($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
+        description = $(`div[id="fees_payment_form"] textarea[name="description"]`).val(),
+        checkout_url = $(`span[class="outstanding"]`).attr("data-checkout_url"),
+        student_id = $(`input[name='fees_payment_student_id']`).val(),
+        email_address = $(`input[name="email_address"]`).val(),
+        category_id = $(`input[name="fees_payment_category_id"]`).val();
+
+    let data = {
+        "amount": amount,
+        "category_id": category_id,
+        "student_id": student_id,
+        "description": description,
+        "checkout_url": checkout_url,
+        "email_address": email_address,
+        "reference_id": reference_id,
+        "transaction_id": transaction_id,
+        "contact_number": $(`input[name="contact_number"]`).val()
+    };
+
+    $.post(`${baseUrl}api/fees/momocard_payment`, data).then((response) => {
+        if (response.code == 200) {
+            $(`button[id="payment_cancel"]`).addClass("hidden");
+            $(`div[id="fees_payment_form"] *`).prop("disabled", true);
+            $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
+            $(`div[id="fees_payment_form"] input, div[id="fees_payment_form"] textarea`).val("");
+        }
+    });
+
+}
+var receive_Momo_Card_Payment = () => {
+
+    try {
+
+        let amount = $(`div[id="fees_payment_form"] input[name="amount"]`).val(),
+            email_address = $(`input[name="email_address"]`).val();
+
+        if (!amount.length) {
+            swal({
+                text: "Sorry! The amount cannot be empty.",
+                icon: "error",
+            });
+            return false;
+        }
+        if (!email_address.length) {
+            swal({
+                text: "Sorry! The email address section is required.",
+                icon: "error",
+            });
+            return false;
+        }
+        amount = parseFloat(amount) * 100;
+
+        var popup = PaystackPop.setup({
+            key: pk_payment_key,
+            email: email_address,
+            amount: amount,
+            currency: myPrefs.labels.currency,
+            onClose: function() {
+                swal({
+                    text: "Payment Process Cancelled",
+                    icon: "error",
+                });
+            },
+            callback: function(response) {
+                let message = `Payment ${response.message}`,
+                    code = "error";
+                if (response.message == "Approved") {
+                    code = "success";
+                    log_fees_payment(response.reference, response.transaction);
+                } else {
+                    swal({ text: message, icon: code });
+                }
+            }
+        });
+        popup.openIframe();
+    } catch (e) {
+        swal({
+            text: "Connection Failed! Please check your internet connection to proceed.",
+            icon: "error",
+        });
+    }
+
 }
 
 var cancel_Payment_Form = () => {
@@ -380,12 +465,15 @@ $(`div[id="fees_allocation_form"] select[name="student_id"]`).on("change", funct
 $(`select[name="payment_method"]`).on("change", function() {
     let mode = $(this).val();
     $(`label[class="email_label"]`).html(`Email Address`);
+    $(`button[id="momocard_payment_button"]`).addClass("hidden");
+    $(`button[id="default_payment_button"]`).removeClass("hidden");
     if (mode === "cash") {
         $(`div[id="cheque_payment_filter"]`).addClass("hidden");
     } else if (mode === "cheque") {
         $(`div[id="cheque_payment_filter"]`).removeClass("hidden");
     } else if (mode === "momo_card") {
-        $(`div[id="cheque_payment_filter"]`).addClass("hidden");
+        $(`button[id="momocard_payment_button"]`).removeClass("hidden");
         $(`label[class="email_label"]`).html(`Email Address <span class="required">*</span>`);
+        $(`button[id="default_payment_button"], div[id="cheque_payment_filter"]`).addClass("hidden");
     }
 });

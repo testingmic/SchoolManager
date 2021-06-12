@@ -249,6 +249,10 @@ class Attendance extends Myschoolgh {
         $params->no_list = true;
         $params->is_finalized = true;
         $the_user_type = $params->user_type;
+        $isDownloadable = (bool) isset($params->download);
+
+        // set the month and year
+        $params->month_year = !empty($params->month_year) ? $params->month_year : date("Y-m-01");
 
         // modify the date supplied
         $start_date = "{$params->month_year}-01";
@@ -267,9 +271,73 @@ class Attendance extends Myschoolgh {
         $new_array_list = [];
         $array_list = $this->display_attendance($params);
 
+        // begin the table content
+        $information = "";
+        $table_content = "<div class=\"table-responsive slim-scroll\">\n";
+
+        // width for each column
+        $width = number_format((90/count($array_list["days_range_list"])), 2);
+
+        // if the document is downloadable
+        if($isDownloadable) {
+
+            // get the class info
+            if(!empty($params->class_id)) {
+                // get the class information
+                $class_info = $this->pushQuery("*", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}'");
+
+                // if the class info is empty
+                if(empty($class_info)) {
+                    return ["data" => ["table_content" => "Sorry! An invalid class id was parsed."]];
+                }
+                $class_info = $class_info[0];
+
+                // more information
+                $information = "
+                    <span><strong>User Type:</strong> {$the_user_type}</span><br>
+                    <span><strong>Class Name:</strong> {$class_info->name}</span><br>
+                    <span><strong>Class Code:</strong> {$class_info->class_code}</span><br>
+                    <span><strong>Class Size:</strong> {$class_info->class_size}</span><br>
+                    <span><hr></span>
+                    <span><br><strong>Month/Year:</strong> ".date("F Y", strtotime($start_date))."</span>
+                ";
+            } else {
+                // more information
+                $information = "
+                    <span><strong>User Type:</strong> {$the_user_type}</span><br>
+                    <span><hr></span>
+                    <span><br><strong>Month/Year:</strong> ".date("F Y", strtotime($start_date))."</span>
+                ";
+            }
+
+            // set the client data
+            $this->iclient = $params->client_data;
+
+            // set the preferences
+            $prefs = !is_object($params->client_data->client_preferences) ? json_decode($params->client_data->client_preferences) : $params->client_data->client_preferences;
+            
+            // set the header content
+            $table_content = '<table width="100%" cellpadding="3px" style="margin: auto auto;" cellspacing="3px">'."\n";
+            $table_content .= "<tr>\n
+                    <td width=\"27%\">{$information}</td>
+                    <td width=\"46%\" align=\"center\">
+                        <img src=\"{$this->baseUrl}{$this->iclient->client_logo}\" width=\"70px\"><br>
+                        <span style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</span><br>
+                        <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
+                        <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
+                    </td>
+                    <td width=\"27%\">
+                        <strong style=\"font-size:12px;\">Academic Year:</strong> {$prefs->academics->academic_year}<br>
+                        <strong style=\"font-size:12px;\">Academic Term:</strong> {$prefs->academics->academic_term}<br>
+                        <strong style=\"font-size:12px;\">Generated On:</strong> ".date("Y-m-d h:iA")."<br>
+                    </td>\n
+                </tr>\n
+            </table>\n";
+               
+        }
+
         // populate the information
-        $table_content = "<div class='table-responsive slim-scroll'>";
-        $table_content .= "<table class='table table-striped table-bordered datatable'>";
+        $table_content .= "<table border=\"1\" width=\"100%\" cellpadding=\"2px\" class=\"table table-striped table-bordered datatable\">\n";
 
         // rearrange the users list
         function rearrange_list($users_list) {
@@ -284,25 +352,42 @@ class Attendance extends Myschoolgh {
         }
             
         // get the table head
-        $table_content .= "<thead>";
+        $table_content .= "<thead>\n";
         foreach($array_list as $key => $data) {
-            $table_content .= "<tr>";
-            $table_content .= "<th>Student Name</th>";
-            foreach($data as $key => $value) {
-                $new_array_list[$value["record"]["date"]["raw"]] = rearrange_list($value["record"]["users_data"]);
-                $table_content .= "<th>{$value["record"]["date"]["day"]}</th>";
+            // skip the days list range
+            if($key !== "days_range_list") {
+                $table_content .= "<tr>\n";
+                $table_content .= "<th width=\"10%\" align=\"left\">".($isDownloadable ? "<strong>Name</strong>" : "Student Name")."</th>\n";
+                foreach($data as $key => $value) {
+                    $new_array_list[$value["record"]["date"]["raw"]] = rearrange_list($value["record"]["users_data"]);
+                    $table_content .= "<th width=\"{$width}%\" align=\"center\"><strong>{$value["record"]["date"]["day"]}</strong></th>\n";
+                }
+                $table_content .= "</tr>\n";
             }
-            $table_content .= "</tr>";
         }
-        $table_content .= "</thead>";
+        $table_content .= "</thead>\n";
 
         // status variables
         $statuses = [
-            "nothing" => "",
-            "present" => "<i class='far fa-check-circle text-success'></i>",
-            "absent" => "<i class='far fa-times-circle text-danger'></i>",
-            "holiday" => "<i class='fa fa-hospital-symbol text-info'></i>",
-            "late" => "<i class='fa fa-clock text-warning'></i>",
+            "nothing" => [
+                "icon" => ""
+            ],
+            "present" => [
+                "icon" => "<i class=\"far fa-check-circle text-success\"></i>",
+                "title" => "P"
+            ],
+            "absent" => [
+                "icon" => "<i class=\"far fa-times-circle text-danger\"></i>",
+                "title" => "A"
+            ],
+            "holiday" => [
+                "icon" => "<i class=\"fa fa-hospital-symbol text-info\"></i>",
+                "title" => "H"
+            ],
+            "late" => [
+                "icon" => "<i class=\"fa fa-clock text-warning\"></i>",
+                "title" => "L"
+            ],
         ];
 
         // join the names list
@@ -323,27 +408,31 @@ class Attendance extends Myschoolgh {
 
         // list the users
         foreach($names_array as $user) {
-            $table_content .= "<tr>";
-            $table_content .= "<td>{$user->name}</td>";
+            $table_content .= "<tr>\n";
+            $table_content .= "<td width=\"10%\">{$user->name}</td>\n";
 
             // check the user status
             foreach($new_array_list as $key => $attendance) {
                 if(empty($attendance)) {
-                    $table_content .= "<td></td>";
+                    $table_content .= "<td width=\"{$width}%\" align=\"center\"></td>\n";
                 } else {
                     $status = $attendance[$user->item_id]["state"] ?? "nothing";
-                    $table_content .= "<td>{$statuses[$status]}</td>";
+                    
+                    $the_status = $isDownloadable ? $statuses[$status]["title"] : $statuses[$status]["icon"];
+                    
+                    $table_content .= "<td width=\"{$width}%\" align=\"center\">{$the_status}</td>\n";
                 }
             }
 
-            $table_content .= "</tr>";
+            $table_content .= "</tr>\n";
         }
-        $table_content .= "</tbody>";
+        $table_content .= "</tbody>\n";
 
         
-        $table_content .= "</table>";
+        $table_content .= "</table>\n";
         $table_content .= "</div>";
-
+        
+        // print $table_content;
         // exit;
         return [
             "data" => [
@@ -567,6 +656,8 @@ class Attendance extends Myschoolgh {
             <tbody>";
         
         }
+
+        $attendance["days_range_list"] = $list_days;
         
         // can finalize the attendance log
         $canFinalize = $accessObject->hasAccess("finalize","attendance");

@@ -417,6 +417,7 @@ class Communication extends Myschoolgh {
      * @return Array
      */
     public function verify_and_update(stdClass $params) {
+        
         // check if any item is empty
         if(empty($params->package_id) || empty($params->reference_id) || empty($params->transaction_id)) {
             return ["code" => 203, "data" => "Sorry! Ensure all required parameters have been parsed."];
@@ -466,8 +467,7 @@ class Communication extends Myschoolgh {
             ");
 
             // log the user activity
-            $this->userLogs("sms_topup", $params->package_id, null, 
-                "{$params->userData->name} purchased {$sms_package[0]->units} sms units at the rate of {$payment_check["data"]->data->currency}{$amount}.", $params->userId);
+            $this->userLogs("sms_topup", $params->package_id, null,  "{$params->userData->name} purchased {$sms_package[0]->units} sms units at the rate of {$payment_check["data"]->data->currency}{$amount}.", $params->userId);
 
         } else {
             return ["code" => 203, "data" => "Sorry! An error was encountered while processing the request."];
