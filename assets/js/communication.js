@@ -165,6 +165,9 @@ var buy_sms_package = (amount, package_id) => {
             text: "Connection Failed! Please check your internet connection to proceed.",
             icon: "error",
         });
+        setTimeout(() => {
+            $(`div[id="buy_sms_package"] div[class="form-content-loader"]`).css("display", "none");
+        }, 1000);
     }
     
 }
@@ -184,16 +187,18 @@ var topup_sms = () => {
 
     $.each(packages, function(i, e) {
         packages_list += `
-        <div class="col-lg-4 mb-2 col-md-4">
+        <div class="col-lg-4 mb-4 col-md-4" style="overflow:hidden;">
             <div class="buy_container">
+                <div class="pricing font-17">GH&cent;${e.amount}</div>
                 <div class="buy_text">
-                    <span class="font-20 text-success">${e.units} 
+                    <span class="font-30 text-success">${e.units} 
                         <font class="font-12 text-dark">Units</font><br>
-                        <font class="font-16 font-weight-bold text-dark">GH&cent;${e.amount}</font>
                     </span>
                 </div>
             </div>
-            <div class="buy_button" onclick="return buy_sms_package('${e.amount}','${e.item_id}')"><i class="fa fa-money"></i> Buy</div>
+            <div class="buy_button" onclick="return buy_sms_package('${e.amount}','${e.item_id}')">
+                <i class="fa fa-money-bill"></i> Buy
+            </div>
         </div>`;
     });
 
