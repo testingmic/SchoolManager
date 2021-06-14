@@ -8,7 +8,7 @@ $fees = [
 ];
 
 $fees_list = [];
-$paying = 650;
+$paying = 1050;
 $init_paying = $paying;
 
 foreach($fees as $key => $value) {

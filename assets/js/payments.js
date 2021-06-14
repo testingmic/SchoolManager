@@ -203,8 +203,10 @@ var log_fees_payment = (reference_id, transaction_id) => {
         if (response.code == 200) {
             $(`button[id="payment_cancel"]`).addClass("hidden");
             $(`div[id="fees_payment_form"] *`).prop("disabled", true);
+            $(`button[id="momocard_payment_button"]`).addClass("hidden");
             $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
             $(`div[id="fees_payment_form"] input, div[id="fees_payment_form"] textarea`).val("");
+            load_Pay_Fees_Form();
         }
     });
 

@@ -49,8 +49,6 @@ class Payment extends Myschoolgh {
             array(
                 CURLOPT_URL => $this->url[$params->route],
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => "",
-                CURLOPT_MAXREDIRS => 10,
                 CURLOPT_TIMEOUT => 30,
                 CURLOPT_POST => true,
                 CURLOPT_SSL_VERIFYPEER => false,

@@ -1304,7 +1304,7 @@ class Fees extends Myschoolgh {
                 // Insert the transaction
                 $this->db->query("
                     INSERT INTO transaction_logs SET client_id = '{$params->clientId}',
-                    transaction_id = '{$params->transaction_id}', endpoint = 'sms', reference_id = '{$params->reference_id}', amount='{$params->amount}'
+                    transaction_id = '{$params->transaction_id}', endpoint = 'fees', reference_id = '{$params->reference_id}', amount='{$params->amount}'
                 ");
             }
 
@@ -1349,7 +1349,7 @@ class Fees extends Myschoolgh {
             $payObject = load_class("payment", "controllers");
 
             /** Validate the amount */
-            if($params->amount) {
+            if(!$params->amount) {
                 return ["code" => 203, "data" => "Sorry! The amount cannot be empty."];
             }
 
@@ -1363,7 +1363,7 @@ class Fees extends Myschoolgh {
             $payment_check = $payObject->get($data);
             
             // if payment status is true
-            if(!empty($payment_check["data"]) && ($payment_check["data"]->status === true)) {
+            if(!empty($payment_check["data"]) && isset($payment_check["data"]->status) && ($payment_check["data"]->status === true)) {
                 // 
                 $params->payment_method = "MoMo_Card";
 
