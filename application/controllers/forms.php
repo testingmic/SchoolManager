@@ -3348,7 +3348,7 @@ class Forms extends Myschoolgh {
                 </div>';
             }
         $general .= '
-            <div class="col-lg-12"><h5>&nbsp;</h5></div>
+            <div class="col-lg-12"><h5>FINANCE</h5></div>
             <div class="col-lg-4">
                 <div class="form-group">
                     <label for="opening_days">School Opening Days</label>';
@@ -3377,6 +3377,18 @@ class Forms extends Myschoolgh {
                             }
                         $general .= '</select>
                     </select>
+                </div>
+                <div class="form-group">
+                    <div class="custom-control col-lg-12 custom-switch switch-primary">
+                        <input type="checkbox" id="print_receipt" name="general[labels][print_receipt]" value="1" class="custom-control-input" '.((isset($prefs->labels->print_receipt) && $prefs->labels->print_receipt === "1") ? "checked=\"checked\"" : null).'>
+                        <label class="custom-control-label" for="print_receipt">Print Receipt After Payment</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="custom-control col-lg-12 custom-switch switch-primary">
+                        <input type="checkbox" id="send_receipt" name="general[labels][send_receipt]" value="1" class="custom-control-input" '.((isset($prefs->labels->send_receipt) && $prefs->labels->send_receipt === "1") ? "checked=\"checked\"" : null).'>
+                        <label class="custom-control-label" for="send_receipt">Send Receipt After Payment via SMS</label>
+                    </div>
                 </div>
             </div>
             <div class="col-md-12 text-right">

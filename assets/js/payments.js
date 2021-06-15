@@ -53,7 +53,8 @@ var finalize_payment = (response, checkout_url) => {
     $(`div[id="fees_payment_form"] input[name="amount"]`).val("");
     $(`div[id="fees_payment_form"] textarea[name="description"]`).val("");
 
-    let payment_info = response.data.additional.payment;
+    let payment_info = response.data.additional.payment,
+        payment_id = response.data.additional.uniqueId;
 
     // reset the form
     $(`button[id="payment_cancel"]`).addClass("hidden");
@@ -104,6 +105,16 @@ var finalize_payment = (response, checkout_url) => {
         }
         $(`div[id="cheque_payment_filter"]`).addClass("hidden");
     }
+
+    if(payment_id !== null) {
+        if(myPrefs.labels.print_receipt !== undefined) {
+            window.open(
+                `${baseUrl}receipt/${payment_id}`, `Payment Receipt`,
+                `width=850,height=750,left=200,resizable,scrollbars=yes,status=1,left=${($(window).width())*0.25}`
+            );
+        }
+    }
+
     setTimeout(() => {
         load_Pay_Fees_Form();
     }, 1500);
@@ -145,7 +156,6 @@ var save_Receive_Payment = () => {
     }).then((proceed) => {
         if (proceed) {
             $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "flex");
-            return false;
             let data = {
                 "amount": $amount,
                 "category_id": category_id,

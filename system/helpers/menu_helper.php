@@ -32,7 +32,7 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Staff</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-staff">Staff List</a></li>
-            <?php if($accessObject->hasAccess("add", "staff")) { ?>
+            <?php if($accessObject->hasAccess("add", "teacher") || $accessObject->hasAccess("add", "accountant") || $accessObject->hasAccess("add", "employee")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>add-staff">Add Staff</a></li>
             <?php } ?>
         </ul>

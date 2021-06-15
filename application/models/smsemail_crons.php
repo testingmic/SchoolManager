@@ -3,6 +3,8 @@
 class SMS_CronJOB {
 
 	private $db;
+	private $sms_sender = "MySchoolGH";
+	private $mailAttachment = array();
 	private $siteName = "MySchoolGH - EmmallexTecnologies.Com";
 	private $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
 
@@ -10,8 +12,11 @@ class SMS_CronJOB {
 		$this->baseUrl = "https://app.myschoolgh.com/";
 		$this->rootUrl = "/home/mineconr/app.myschoolgh.com/";
 		$this->dbConn();
-		// require $this->rootUrl."system/libraries/phpmailer.php";
-		// require $this->rootUrl."system/libraries/smtp.php";
+		
+		$this->rootUrl = "/var/www/html/myschool_gh/";
+
+		require $this->rootUrl."system/libraries/phpmailer.php";
+		require $this->rootUrl."system/libraries/smtp.php";
 	}
 	
 	/**
@@ -60,7 +65,7 @@ class SMS_CronJOB {
         $stmt = $this->db->prepare("SELECT a.*, c.client_name, c.sms_sender
 			FROM smsemail_send_list a
 			LEFT JOIN clients_accounts c ON c.client_id = a.client_id
-			WHERE a.sent_status='Pending' LIMIT 5
+			WHERE a.sent_status='Pending' LIMIT 10
 		");
         $stmt->execute();
 
@@ -74,15 +79,34 @@ class SMS_CronJOB {
         foreach($data as $key => $value) {
             
 			// append the list
-            if(($value->type === "sms") && (time() > strtotime($value->schedule_time))) {
+			if(time() > strtotime($value->schedule_time)) {
 
-				// get the response of the request
-				$response = $this->mnotify_send($key, $value->message, $value->recipient_list, $value->sms_sender);
-				
-				// save the  reponse
-				if(!empty($response)) {
-					$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered' WHERE sent_time=now() AND item_id='{$key}' LIMIT 1");
+				// if the message type is sms
+				if(($value->type === "sms")) {
+
+					// get the response of the request
+					$response = $this->mnotify_send($key, $value->message, $value->recipient_list, $value->sms_sender);
+					
+					// save the  reponse
+					if(!empty($response)) {
+						$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered' WHERE sent_time=now() AND item_id='{$key}' LIMIT 1");
+					} else {
+						print "Sorry! The message could not be delivered to the purported users.\n";
+					}
+				} elseif($value->type === "email") {
+
+					// get the response of the request
+					$response = $this->phpmailer_send($key, $value->message, $value->recipient_list, $value->subject);
+					
+					// save the  reponse
+					if(!empty($response)) {
+						$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered' WHERE sent_time=now() AND item_id='{$key}' LIMIT 1");
+					} else {
+						print "Sorry! The message could not be delivered to the purported users.\n";
+					}
+
 				}
+
 			}
         }
 
@@ -96,7 +120,7 @@ class SMS_CronJOB {
 	 * @param Array		$recipients
 	 * @param String	$sender
 	 * 
-	 * @return Bool
+	 * @return Object
 	 */
 	public function mnotify_send($item_id, $message, $recipients, $sender) {
 
@@ -105,8 +129,8 @@ class SMS_CronJOB {
 		}
 		
 		// get the list of all recipients
-		$recipients_ids = array_column($recipients, "phone_number");
-		$recipients_join = implode(",", $recipients_ids);
+		$recipients_contact = array_column($recipients, "phone_number");
+		$recipients_join = implode(",", $recipients_contact);
 
 		//open connection
         $ch = curl_init();
@@ -114,8 +138,8 @@ class SMS_CronJOB {
 		// set the field parameters
         $fields_string = [
             "key" => $this->mnotify_key,
-			"recipient" => $recipients_ids,
-			"sender" => $sender,
+			"recipient" => $recipients_contact,
+			"sender" => empty($sender) ? $this->sms_sender : $sender,
 			"message" => $message
         ];
 
@@ -143,6 +167,90 @@ class SMS_CronJOB {
         $result = json_decode(curl_exec($ch));
         
 		return $result;
+
+	}
+
+	/**
+	 * Send the Email Message to the List of Recipients
+	 *  
+	 * @return Object
+	 */
+	public function phpmailer_send($item_id, $message, $recipient_list, $subject = null, $cc_list = null) {
+
+		$mail = new Phpmailer();
+		$smtp = new Smtp();
+
+		// set the message 
+		$message = htmlspecialchars_decode($message);
+
+		// configuration settings
+		$config = (Object) array(
+			'subject' => $subject,
+			'headers' => "From: {$this->siteName} - MySchoolGH.Com<app@myschoolgh.com> \r\n Content-type: text/html; charset=utf-8",
+			'Smtp' => true,
+			'SmtpHost' => 'mail.supremecluster.com',
+			'SmtpPort' => '465',
+			'SmtpUser' => 'app@myschoolgh.com',
+			'SmtpPass' => 'C30C5aamUl',
+			'SmtpSecure' => 'ssl'
+		);
+
+		// additional settings
+		$mail->isSMTP();
+		$mail->SMTPDebug = 0;
+		$mail->Host = $config->SmtpHost;
+		$mail->SMTPAuth = true;
+		$mail->Username = $config->SmtpUser;
+		$mail->Password = $config->SmtpPass;
+		$mail->SMTPSecure = $config->SmtpSecure;
+		$mail->Port = $config->SmtpPort;
+		$mail->Subject = $subject;
+		
+		// attach documents if any was found
+		if(!empty($this->mailAttachment)) {
+			// loop through the attachments list
+			foreach($this->mailAttachment as $theAttachment) {
+				// file path
+				$filepath = $theAttachment["path"];
+				// append the attachment to the mail
+				$mail->AddAttachment($filepath, $theAttachment["name"]);
+			}
+		}
+
+		// set the user from which the email is been sent
+		$mail->setFrom('app@myschoolgh.com', $this->siteName);
+
+		// loop through the list of recipients for this mail
+        foreach($recipient_list as $emailRecipient) {
+			// user fullname
+			$fullname = isset($emailRecipient['name']) ? $emailRecipient['name'] : $emailRecipient['name'];
+			// append the email address
+			$mail->addAddress($emailRecipient['email'], $fullname);
+		}
+
+		// loop through the list of cc if not empty
+		if(!empty($cc_list)) {
+			// loop through the copied list
+			foreach($cc_list as $copiedRecipient) {
+				// user fullname
+				$fullname = isset($copiedRecipient['name']) ? $copiedRecipient['name'] : $copiedRecipient['name'];
+				// append the email address
+				$mail->addCC($copiedRecipient['email'], $fullname);
+			}
+		}
+
+		// this is an html message
+		$mail->isHTML(true);
+
+		// set the subject and message
+		$mail->Body    = $message;
+		
+		// send the email message to the users
+		if($mail->send()) {
+			return true;
+		} else {
+ 			return false;
+		}
 
 	}
 

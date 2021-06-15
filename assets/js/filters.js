@@ -3,8 +3,6 @@ if ($(`div[id="filter_Department_Class"]`).length) {
 
     $(`select[name="department_id"]`).on("change", function() {
         let value = $(this).val();
-        $(`select[name='class_id']`).find('option').remove().end();
-        $(`select[name='class_id']`).append(`<option value="">Please Select Class</option>`);
 
         $(`select[name='student_id']`).find('option').remove().end();
         $(`select[name='student_id']`).append(`<option value="">Please Select Student</option>`);
@@ -13,6 +11,8 @@ if ($(`div[id="filter_Department_Class"]`).length) {
         $(`div[id="fees_payment_preload"] select[name='category_id']`).prop("disabled", true);
         $(`div[id="promote_Student_Display"]`).addClass(`hidden`);
         if ((value.length && value !== "null") || $(`div[class~="byPass_Null_Value"]`).length) {
+            $(`select[name='class_id']`).find('option').remove().end();
+            $(`select[name='class_id']`).append(`<option value="">Please Select Class</option>`);
             $.get(`${baseUrl}api/classes/list?columns=id,name,slug,item_id`, { department_id: value }).then((response) => {
                 if (response.code == 200) {
                     $.each(response.data.result, function(i, e) {

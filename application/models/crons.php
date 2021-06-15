@@ -15,8 +15,10 @@ class Crons {
 		$this->rootUrl = "/home/mineconr/app.myschoolgh.com/";
 		$this->dbConn();
 
-		// require $this->rootUrl."system/libraries/phpmailer.php";
-		// require $this->rootUrl."system/libraries/smtp.php";
+		$this->rootUrl = "/var/www/html/myschool_gh/";
+
+		require $this->rootUrl."system/libraries/phpmailer.php";
+		require $this->rootUrl."system/libraries/smtp.php";
 	}
 	
 	/**
@@ -247,11 +249,11 @@ class Crons {
 		// configuration settings
 		$config = (Object) array(
 			'subject' => $subject,
-			'headers' => "From: {$this->siteName} - MySchoolGH.Com<app@school.mineconrsl.com> \r\n Content-type: text/html; charset=utf-8",
+			'headers' => "From: {$this->siteName} - MySchoolGH.Com<app@myschoolgh.com> \r\n Content-type: text/html; charset=utf-8",
 			'Smtp' => true,
 			'SmtpHost' => 'mail.supremecluster.com',
 			'SmtpPort' => '465',
-			'SmtpUser' => 'app@school.mineconrsl.com',
+			'SmtpUser' => 'app@myschoolgh.com',
 			'SmtpPass' => 'C30C5aamUl',
 			'SmtpSecure' => 'ssl'
 		);
@@ -279,7 +281,7 @@ class Crons {
 		$mail->Port = $config->SmtpPort;
 
 		// set the user from which the email is been sent
-		$mail->setFrom('app@school.mineconrsl.com', $this->siteName);
+		$mail->setFrom('app@myschoolgh.com', $this->siteName);
 
 		// loop through the list of recipients for this mail
         foreach($recipient_list as $emailRecipient) {

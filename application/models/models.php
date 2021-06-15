@@ -14,6 +14,7 @@ class Models {
     public $formPreloader;
     public $sms_text_count = 155;
     public $underscores = "____";
+    public $sms_sender = "MySchoolGH";
 
     /** This is used for generation of user ids */
 	public $append_zeros = 5;

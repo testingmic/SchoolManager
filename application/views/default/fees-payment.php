@@ -129,6 +129,7 @@ if(!$receivePayment) {
                         </div>
                         <div class="card-body pt-0 pb-0">
                             <div class="py-3 pt-0" id="fees_payment_preload">
+                                <div class="byPass_Null_Value"></div>
                                 <input type="hidden" name="client_email_address" value="'.$defaultUser->client->client_email.'">
                                 <div class="form-group">
                                     <label>Select Department</label>

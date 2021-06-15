@@ -16,6 +16,7 @@ if( !defined( 'SITE_URL' ) && !defined( 'SITE_DATE_FORMAT' ) ) die( 'Restricted 
 class Fees extends Myschoolgh {
 
     private $iclient = [];
+    private $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
 
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
@@ -1090,7 +1091,10 @@ class Fees extends Myschoolgh {
         try {
 
             global $defaultUser;
-
+            
+            // get the preference of the client
+            $preference = $this->iclient->client_preferences->labels;
+            
             // begin transaction
             $this->db->beginTransaction();
 
@@ -1228,6 +1232,7 @@ class Fees extends Myschoolgh {
                 
                 // additional data
                 $additional["payment"] = $this->confirm_student_payment_record($params);
+                $additional["uniqueId"] = $uniqueId;
 
             } else {
 
@@ -1290,6 +1295,7 @@ class Fees extends Myschoolgh {
 
                 $last_info = $this->confirm_student_payment_record($params);
                 $additional["payment"] = $last_info[count($last_info)-1];
+                $additional["uniqueId"] = $uniqueId;
 
             }
 
@@ -1308,11 +1314,69 @@ class Fees extends Myschoolgh {
                 ");
             }
 
+            // send the receipt via sms
+            if(isset($preference->send_receipt) && isset($params->contact_number)){
+                
+                // if the contact number is not empty
+                if(strlen($params->contact_number) > 9 && preg_match("/^[0-9+]+$/", $params->contact_number)) {
+                    
+                    // append the message
+                    $message = "Hello,\nFees Payment was successfully processed.\nAmount: {$params->amount}\nBalance: {$outstandingBalance}\n";
+                    
+                    // calculate the message text count
+                    $chars = strlen($message);
+                    $message_count = ceil($chars / $this->sms_text_count);
+                    
+                    // get the sms balance
+                    $balance = $this->pushQuery("sms_balance", "smsemail_balance", "client_id='{$params->clientId}' LIMIT 1");
+                    $balance = $balance[0]->sms_balance ?? 0;
+
+                    // return error if the balance is less than the message to send
+                    if($balance > $message_count) {
+
+                        // set the field parameters
+                        $fields_string = [
+                            "key" => $this->mnotify_key,
+                            "recipient" => [$params->contact_number],
+                            "sender" => !empty($this->iclient->sms_sender) ? $this->iclient->sms_sender : $this->sms_sender,
+                            "message" => $message
+                        ];
+
+                        // send the message
+                        curl_setopt_array($ch, 
+                            array(
+                                CURLOPT_URL => "https://api.mnotify.com/api/sms/quick",
+                                CURLOPT_RETURNTRANSFER => true,
+                                CURLOPT_ENCODING => "",
+                                CURLOPT_MAXREDIRS => 10,
+                                CURLOPT_TIMEOUT => 30,
+                                CURLOPT_POST => true,
+                                CURLOPT_SSL_VERIFYPEER => false,
+                                CURLOPT_CAINFO => dirname(__FILE__)."\cacert.pem",
+                                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                                CURLOPT_CUSTOMREQUEST => "POST",
+                                CURLOPT_POSTFIELDS => json_encode($fields_string),
+                                CURLOPT_HTTPHEADER => [
+                                    "Content-Type: application/json",
+                                ]
+                            )
+                        );
+
+                        //execute post
+                        $result = json_decode(curl_exec($ch));
+                        
+                        // if the sms was successful
+                        if(!empty($result)) {
+                            // reduce the SMS balance
+                            $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$message_count}), sms_sent = (sms_sent + {$message_count}) WHERE client_id = '{$params->clientId}' LIMIT 1");
+                        }
+                    }
+
+                }
+            }
+
             // commit the statements
             $this->db->commit();
-
-            // append to the query
-            $params->clean_payment_info = true;
 
             // return the success message
             return [
