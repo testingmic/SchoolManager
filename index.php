@@ -3,8 +3,6 @@
 $system_folder = "system";
 $application_folder = "application";
 
-// session_start();
-
 // display errors
 error_reporting(E_ALL);
 

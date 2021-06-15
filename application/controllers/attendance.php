@@ -299,14 +299,14 @@ class Attendance extends Myschoolgh {
                     <span><strong>Class Code:</strong> {$class_info->class_code}</span><br>
                     <span><strong>Class Size:</strong> {$class_info->class_size}</span><br>
                     <span><hr></span>
-                    <span><br><strong>Month/Year:</strong> ".date("F Y", strtotime($start_date))."</span>
+                    <span><strong>Month/Year:</strong> ".date("F Y", strtotime($start_date))."</span>
                 ";
             } else {
                 // more information
                 $information = "
                     <span><strong>User Type:</strong> {$the_user_type}</span><br>
                     <span><hr></span>
-                    <span><br><strong>Month/Year:</strong> ".date("F Y", strtotime($start_date))."</span>
+                    <span><strong>Month/Year:</strong> ".date("F Y", strtotime($start_date))."</span>
                 ";
             }
 
@@ -317,7 +317,7 @@ class Attendance extends Myschoolgh {
             $prefs = !is_object($params->client_data->client_preferences) ? json_decode($params->client_data->client_preferences) : $params->client_data->client_preferences;
             
             // set the header content
-            $table_content = '<table width="100%" cellpadding="3px" style="margin: auto auto;" cellspacing="3px">'."\n";
+            $table_content = '<table width="100%" cellpadding="0px" style="margin: auto auto;" cellspacing="0px">'."\n";
             $table_content .= "<tr>\n
                     <td width=\"27%\">{$information}</td>
                     <td width=\"46%\" align=\"center\">
@@ -332,7 +332,7 @@ class Attendance extends Myschoolgh {
                         <strong style=\"font-size:12px;\">Generated On:</strong> ".date("Y-m-d h:iA")."<br>
                     </td>\n
                 </tr>\n
-            </table>\n";
+            </table><br>\n";
                
         }
 

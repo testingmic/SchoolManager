@@ -1575,10 +1575,10 @@ class Fees extends Myschoolgh {
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="table-responsive">
-                                        <table class="table table-striped table-hover table-md" style="font-size:13px;">
+                                        <table width="100%" class="table table-striped table-hover table-md" style="font-size:13px;">
                                             <tbody>
                                             <tr>
-                                                <th data-width="40" style="width: 40px;">#</th>
+                                                <th style="width: 40px;">#</th>
                                                 '.(empty($student_data) ? '<th>Name</th>' : '').'
                                                 <th>Item</th>
                                                 <th>Payment Method</th>

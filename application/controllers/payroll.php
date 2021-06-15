@@ -747,7 +747,7 @@ class Payroll extends Myschoolgh {
 
         // set the header content
         $result .= "<div style=\"width: 80%; margin: auto auto;\">
-                    <table style=\"background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: open sans; width:100%;margin-bottom:2px\" border=\"0\" cellpadding=\"5px\" cellspacing=\"5px\">
+                    <table width=\"100%\" style=\"background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: open sans; width:100%;margin-bottom:2px\" border=\"0\" cellpadding=\"5px\" cellspacing=\"5px\">
                     <tbody>";
                     $result .= '<tr style="padding: 5px; border-bottom: solid 1px #ccc;">
                             <td colspan="4" align="center" style="padding: 10px;">
@@ -794,43 +794,51 @@ class Payroll extends Myschoolgh {
                 </tr>
             </tbody>
         </table>";
-        $result .= "<table width=\"100%\" class=\"table\">
+        $result .= "<table width=\"100%\" border=\"1\" class=\"table\">
             <tbody>
                 <tr>
                     <td width=\"50%\">
-                        <span style=\"font-size:16px\"><strong>EARNINGS</strong></span>
                         <div class=\"row justify-content-between\">
-                            <table class=\"table\" border=\"0\" cellpadding=\"5px\">
+                            <table width=\"100%\" class=\"table\" border=\"0\" cellpadding=\"5px\">
+                                <tr>
+                                    <td colspan=\"2\" align=\"center\">
+                                    <span style=\"font-size:16px\"><strong>EARNINGS</strong></span>
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td>Basic Salary</td>
-                                    <td>GH&cent;{$data->basic_salary}</td>
+                                    <td align=\"right\">GH&cent;{$data->basic_salary}</td>
                                 </tr>";
                                 foreach($allowancesQuery as $eachAllowance) {
                                     $result .= "<tr>
                                         <td>{$eachAllowance->allowance_type}</td>
-                                        <td>GH&cent;{$eachAllowance->amount}</td>
+                                        <td align=\"right\">GH&cent;{$eachAllowance->amount}</td>
                                     </tr>";
                                 }
                                 $result .= "<tr>
                                     <td><strong>Gross Salary</strong></td>
-                                    <td><strong>GH&cent;".number_format(($data->basic_salary + array_sum(array_column($data->payslip_details["Allowance"], 'amount'))), 2)."</strong></td>
+                                    <td align=\"right\"><strong>GH&cent;".number_format(($data->basic_salary + array_sum(array_column($data->payslip_details["Allowance"], 'amount'))), 2)."</strong></td>
                                 </tr>
                             </table>
                         </div>
                     </td>
                     <td width=\"50%\" align=\"right\">
-                        <span style=\"font-size:16px\"><strong>DEDUCTIONS</strong></span>
                         <div class=\"row justify-content-between\">
-                            <table class=\"table\" {$border} cellpadding=\"5px\">";
+                            <table width=\"100%\" class=\"table\" border=\"0\" cellpadding=\"5px\">
+                                <tr>
+                                    <td colspan=\"2\" align=\"center\">
+                                    <span style=\"font-size:16px\"><strong>DEDUCTIONS</strong></span>
+                                    </td>
+                                </tr>";
                                 foreach($deductionsQuery as $eachAllowance) {
                                     $result .= "<tr>
                                         <td>{$eachAllowance->allowance_type}</td>
-                                        <td>GH&cent;{$eachAllowance->amount}</td>
+                                        <td align=\"right\">GH&cent;{$eachAllowance->amount}</td>
                                     </tr>";
                                 }
                                 $result .= "<tr>
                                     <td><strong>Total Deductions</strong></td>
-                                    <td><strong>GH&cent;".number_format(array_sum(array_column($deductionsQuery, 'amount')), 2)."</strong></td>
+                                    <td align=\"right\"><strong>GH&cent;".number_format(array_sum(array_column($deductionsQuery, 'amount')), 2)."</strong></td>
                                 </tr>
                             </table>
                         </div>
@@ -840,10 +848,11 @@ class Payroll extends Myschoolgh {
                     <td colspan=\"1\"></td>
                     <td align=\"right\">
                         <div class=\"row justify-content-between\">
-                            <table cellpadding=\"10px\" class=\"table\" {$border}>
+                            <table width=\"100%\" cellpadding=\"10px\" class=\"table\" {$border}>
                                 <tr>";
-                                    $result .= "<td width=\"50%\" style=\"background-color:#6777ef; color:#fff; padding:10px;font-weight:bolder;text-transform:uppercase\"><strong>Net Salary</strong></td>
-                                    <td style=\"background-color:#f4f4f4;padding:10px;font-weight:bolder;text-transform:uppercase\">
+                                    $result .= "
+                                    <td width=\"50%\" style=\"background-color:#6777ef; color:#fff; padding:10px;font-weight:bolder;text-transform:uppercase\"><strong>Net Salary</strong></td>
+                                    <td align=\"right\" style=\"background-color:#f4f4f4;padding:10px;font-weight:bolder;text-transform:uppercase\">
                                         <strong>GH&cent;".number_format((($data->basic_salary + array_sum(array_column($allowancesQuery, 'amount')))-array_sum(array_column($deductionsQuery, 'amount'))), 2)."</strong>
                                     </td>
                                 </tr>

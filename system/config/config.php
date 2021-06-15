@@ -21,6 +21,7 @@ $config['site_name'] = 'MySchoolGH';
 $config['site_email'] = 'info@myschoolgh.com';
 $config['developer'] = 'Emmallex Technologies';
 $config['update_folder'] = '/var/www/html/myschool_gh/assets/upgrades/';
+$config['site_root'] = "/var/www/html/myschool_gh/";
 $config['sionoff'] = 'Off';
 $config['index_page'] = 'index.php';
 $config['uri_protocol']	= 'REQUEST_URI';

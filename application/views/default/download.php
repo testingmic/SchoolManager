@@ -8,6 +8,27 @@ if(confirm_url_id(1)) {
     return;
 }
 
+// stylesheet
+$pages_content = "<style>@page { margin: 5px; } body { margin: 5px; } .page_break { page-break-before: always; } div.page_break+div.page_break { page-break-before: always; }</style>";
+
+// set the site root
+$site_root = config_item("site_root");
+
+// require the autoload file
+require "{$site_root}system/libraries/dompdf/vendor/autoload.php";
+
+// reference the Dompdf namespace
+use Dompdf\Dompdf;
+
+// instantiate and use the dompdf class
+$dompdf = new Dompdf();
+
+// set the logo of the client account
+$orientation = "landscape";
+$pages_content .= "";
+
+$file_name = "Test Document";
+
 // check if the file to download has been parsed
 if((isset($_GET["file"]) && !empty($_GET["file"])) || (isset($_GET["file_id"], $_GET["file_uid"]))) {
     
@@ -141,9 +162,7 @@ elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) 
         return;
     }
 
-    show_content("Timetable", $file_name, $content["table"]);
-
-    exit;
+    $pages_content .= $content["table"];
 }
 
 /** Download Payslips */
@@ -156,6 +175,7 @@ elseif(isset($_GET["pay_id"]) && !isset($_GET["cs_mat"])) {
     // load the table
     $content = load_class("payroll", "controllers", $param)->draw($param);
     $file_name = "Employee_Payslip.pdf";
+    $orientation = "portrait";
 
     // end query if no result found
     if(!isset($_GET["dw"])) {
@@ -166,10 +186,7 @@ elseif(isset($_GET["pay_id"]) && !isset($_GET["cs_mat"])) {
             </script>';
         return;
     }
-
-    show_content("Employee Payslip", $file_name, $content["data"], "P");
-
-    exit;
+    $pages_content .= $content["data"];
 }
 
 /** Download Receipt ID */
@@ -186,6 +203,7 @@ elseif(isset($_GET["rpt_id"]) && !isset($_GET["pay_id"])) {
     $content = $feesObject->list($param);
     $file_name = "Receipt_Download.pdf";
     $receipt = "";
+    $orientation = "portrait";
 
     // end query if no result found
     if(is_array($content)) {
@@ -199,12 +217,9 @@ elseif(isset($_GET["rpt_id"]) && !isset($_GET["pay_id"])) {
             "clientId" => $session->clientId
         ];
         // load the receipt 
-        $receipt = $feesObject->receipt($param);
+        $pages_content .= $feesObject->receipt($param);
     }
 
-    show_content("Fees Payment Receipt", $file_name, $receipt, "P");
-
-    exit;
 }
 
 /** Download Course Material (Units / Lessons) */
@@ -233,8 +248,9 @@ elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"
         if(isset($course_info["data"][0])) {
 
             // get the information
+            $orientation = "portrait";
             $course_info = $course_info["data"][0];
-            $content = $courseObj->draw($course_info);
+            $pages_content .= $courseObj->draw($course_info);
             
             // file name
             $file_name = "Course_Material.pdf";
@@ -242,10 +258,6 @@ elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"
             if(!isset($_GET["dw"])) {
                 print $content;
             }
-
-            show_content("Course Material", $file_name, $content, "P");
-            
-            exit;
         }
     }
 }
@@ -277,14 +289,28 @@ elseif(isset($_GET["att_d"]) && ($_GET["att_d"] === "true") && isset($_GET["user
     }
 
     // create an object
+    $orientation = "landscape";
     $file_name = "Attendance_Log";
     $attendanceObject = load_class("attendance", "controllers", $getObject);
-    $data = $attendanceObject->attendance_report($getObject)["data"];
-
-    show_content("Attendance Log", $file_name, $data["table_content"], "L");
-
-    exit;
+    $pages_content .= $attendanceObject->attendance_report($getObject)["data"]["table_content"];
 }
+
+// load the html content
+$dompdf->loadHtml($pages_content);
+
+// (Optional) Setup the paper size and orientation
+$dompdf->setPaper("A4", $orientation);
+
+// Render the HTML as PDF
+$dompdf->render();
+
+// if the user wants to auto download
+$download_file = (bool) isset($_GET["auto_download"]);
+
+// Output the generated PDF to Browser
+$dompdf->stream($file_name ?? null, ["compress" => 1, "Attachment" => $download_file]);
+
+exit;
 
 // if nothing was set
 print "Access Denied!";
