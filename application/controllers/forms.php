@@ -4471,6 +4471,11 @@ class Forms extends Myschoolgh {
             <div id=\"accounts_form\" class=\"col-md-2\"></div>
             <div id=\"accounts_form\" class=\"col-12 col-md-7 col-lg-7\">
                 <div class=\"card\">
+                    <div class=\"form-content-loader\" style=\"display: none; position: absolute\">
+                        <div class=\"offline-content text-center\">
+                            <p><i class=\"fa fa-spin fa-spinner fa-3x\"></i></p>
+                        </div>
+                    </div>
                     <div class=\"card-header\">".(empty($data) ? $form_route[$params->route]["title"] : $form_route[$params->route]["title"])."</div>
                     <div class=\"card-body\">
                     <form method=\"post\" action=\"".(!empty($data) ? $form_route[$params->route]["update"] : $form_route[$params->route]["add"])."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">

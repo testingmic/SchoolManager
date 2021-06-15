@@ -60,6 +60,7 @@ var finalize_payment = (response, checkout_url) => {
     $(`div[id="fees_payment_form"] *`).prop("disabled", true);
     $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
     $(`div[id="fees_payment_form"] input, div[id="fees_payment_form"] textarea`).val("");
+    $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
 
     if (payment_info !== undefined) {
         $(`span[class="amount_paid"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.amount_paid}`);
@@ -143,6 +144,8 @@ var save_Receive_Payment = () => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "flex");
+            return false;
             let data = {
                 "amount": $amount,
                 "category_id": category_id,
@@ -169,6 +172,7 @@ var save_Receive_Payment = () => {
                     icon: s_icon,
                 });
             }).catch(() => {
+                $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
                 swal({
                     text: "Sorry! There was an error while trying to process the request.",
                     icon: "error",
@@ -235,6 +239,8 @@ var receive_Momo_Card_Payment = () => {
         }
         amount = amount * 100;
 
+        $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "flex");
+
         var popup = PaystackPop.setup({
             key: pk_payment_key,
             email: email_address,
@@ -254,11 +260,13 @@ var receive_Momo_Card_Payment = () => {
                     log_fees_payment(response.reference, response.transaction);
                 } else {
                     swal({ text: message, icon: code });
+                    $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
                 }
             }
         });
         popup.openIframe();
     } catch (e) {
+        $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
         swal({
             text: "Connection Failed! Please check your internet connection to proceed.",
             icon: "error",

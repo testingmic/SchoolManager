@@ -183,9 +183,14 @@ if(!$receivePayment) {
                     </div>
                 </div>
                 <div class="col-12 col-md-8">
-                    <div class="card">
+                    <div class="card" id="fees_payment_form">
+                        <div class="form-content-loader" style="display: none; position: absolute">
+                            <div class="offline-content text-center">
+                                <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                            </div>
+                        </div>
                         <div class="row padding-20" style="min-height:470px">
-                            <div class="col-12 col-md-12" id="fees_payment_form">
+                            <div class="col-12 col-md-12">
                                 <div class="row">
                                     <div class="col-md-6 form-group">
                                         <label>Payment Medium</label>

@@ -38,14 +38,20 @@ var view_transaction = (transaction_id) => {
                                 <td class="font-weight-bold">Account Type</td>
                                 <td>${data.account_type_name}</td>
                             </tr>
-                            <tr>
-                                <td class="font-weight-bold">Reference</td>
-                                <td>${data.reference !== null ? data.reference : ""}</td>
-                            </tr>
-                            <tr>
-                                <td class="font-weight-bold">Description</td>
-                                <td>${data.description !== null ? data.description : ""}</td>
-                            </tr>
+                            ${
+                                data.reference !== null ? 
+                                `<tr>
+                                    <td class="font-weight-bold">Reference</td>
+                                    <td>${data.reference}</td>
+                                </tr>` : ""
+                            }
+                            ${
+                                data.description !== null ? 
+                                `<tr>
+                                    <td class="font-weight-bold">Description</td>
+                                    <td>${data.description}</td>
+                                </tr>` : ""
+                            }
                             <tr>
                                 <td class="font-weight-bold">Amount</td>
                                 <td>${data.amount}</td>
