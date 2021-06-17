@@ -1,0 +1,11 @@
+[16-Jun-2021 16:16:56 Africa/Accra] PHP Notice:  Undefined index: data in /var/www/html/myschool_gh/application/views/default/list-books.php on line 34
+[16-Jun-2021 16:16:56 Africa/Accra] PHP Warning:  Invalid argument supplied for foreach() in /var/www/html/myschool_gh/application/views/default/list-books.php on line 34
+[16-Jun-2021 16:17:00 Africa/Accra] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1055 Expression #5 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'myschoolgh.b.payslip_month_id' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by in /var/www/html/myschool_gh/application/controllers/analitics.php:777
+Stack trace:
+#0 /var/www/html/myschool_gh/application/controllers/analitics.php(777): PDOStatement->execute()
+#1 /var/www/html/myschool_gh/application/controllers/analitics.php(145): Analitics->salary_report()
+#2 /var/www/html/myschool_gh/application/models/api.php(243): Analitics->generate()
+#3 /var/www/html/myschool_gh/application/views/default/api.php(192): Api->requestHandler()
+#4 /var/www/html/myschool_gh/index.php(163): include('/var/www/html/m...')
+#5 {main}
+  thrown in /var/www/html/myschool_gh/application/controllers/analitics.php on line 777

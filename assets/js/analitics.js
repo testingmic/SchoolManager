@@ -284,6 +284,9 @@ var summaryReporting = (t_summary, date_range) => {
         $(`div[id="revenue_category_counts"]`).html(revenue_category_counts);
 
         if (summary.fees_record_count.comparison !== undefined) {
+            
+            $(`div[data-chart="revenue_category_chart"]`).html(`<div id="revenue_category_chart"></div>`);
+            
             $.each(summary.fees_record_count.comparison.amount.previous, function(i, e) {
                 chartKeys.push(e.name);
                 previousValues.push(parseFloat(e.value));
@@ -352,7 +355,6 @@ var summaryReporting = (t_summary, date_range) => {
 
 
         if ($(`canvas[id="revenue_category_group"]`).length) {
-            $(`div[data-chart="revenue_category_group"]`).html(``);
             $(`div[data-chart="revenue_category_group"]`).html(`<canvas style="max-height:420px;height:420px;" id="revenue_category_group"></canvas>`);
 
             var ctx = document.getElementById("revenue_category_group").getContext('2d');
