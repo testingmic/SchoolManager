@@ -88,7 +88,7 @@ $response->html = '
                             <div class="col-lg-3 col-md-4">
                                 <div class="form-group">
                                     <label>Month <span class="required">*</span></label>
-                                    <input type="month" class="form-control" min="2021-01" max="'.date("Y-m").'" value="'.date("Y-m").'" name="month_year">
+                                    <input type="text" class="form-control monthyear" min="2021-01" max="'.date("Y-m-d").'"  name="month_year">
                                 </div>
                             </div>
                             <div class="col-lg-2 col-md-3">

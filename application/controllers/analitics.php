@@ -770,9 +770,9 @@ class Analitics extends Myschoolgh {
             LEFT JOIN payslips_allowance_types c ON c.id = a.allowance_id
             WHERE 
                 a.client_id = ? AND b.validated = ? AND b.deleted = ? 
-                AND DATE(b.payslip_month_id) >= '{$this->start_date}' AND DATE(b.payslip_month_id) <= '{$this->end_date}'
+                AND DATE(payslip_month_id) >= '{$this->start_date}' AND DATE(payslip_month_id) <= '{$this->end_date}'
                 {$this->employee_id_query}
-            GROUP BY MONTH(b.payslip_month_id), a.allowance_id
+            GROUP BY MONTH(payslip_month_id), a.allowance_id
         ");
         $stmt->execute([$params->clientId, 1, 0]);
         $category_list = $stmt->fetchAll(PDO::FETCH_OBJ);

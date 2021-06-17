@@ -55,10 +55,12 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                 $.get(`${baseUrl}api/users/list?class_id=${value}&minified=simplified&user_type=student`).then((response) => {
                     if (response.code == 200) {
                         $.each(response.data.result, function(i, e) {
-                            $(`select[name='student_id']`).append(`<option value='${e.user_id}'>${e.name}</option>`);
+                            $(`select[name='student_id']`).append(`<option data-phone_number="${e.phone_number}" data-email="${e.email}" value='${e.user_id}'>${e.name}</option>`);
                         });
                     }
                 });
+            } else {
+                $(`input[id="contact_number"], input[id="email_address"]`).val("");
             }
         });
 
@@ -72,7 +74,12 @@ if ($(`div[id="filter_Department_Class"]`).length) {
 
             if (value.length && value !== "null") {
                 $(`div[id="make_payment_button"]`).removeClass("hidden");
+                let data = $(`div[id="fees_payment_preload"] select[name="student_id"] option:selected`).data();
+                $(`div[id="fees_payment_form"] input[id="email_address"]`).val(data.email);
+                $(`div[id="fees_payment_form"] input[id="contact_number"]`).val(data.phone_number);
                 $(`div[id="fees_payment_preload"] select[name='category_id']`).prop("disabled", false);
+            } else {
+                $(`input[id="contact_number"], input[id="email_address"]`).val("");
             }
         });
 

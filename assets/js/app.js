@@ -750,8 +750,9 @@ var initPlugins = () => {
 
     if ($('.monthyear').length > 0) {
         $('.monthyear').daterangepicker({
-            locale: { format: 'MM-DD' },
+            locale: { format: 'YYYY-MM' },
             singleDatePicker: true,
+            maxDate: $.today,
             drops: 'down'
         });
     }

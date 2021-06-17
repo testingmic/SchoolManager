@@ -98,7 +98,7 @@ class Library extends Myschoolgh {
 			];
 		
 		} catch(PDOException $e) {
-			return [];
+			return $this->unexpected_error;
 		}
 		
     }
@@ -142,7 +142,7 @@ class Library extends Myschoolgh {
 			];
 
 		} catch(PDOException $e) {
-			return $e->getMessage();
+			return $this->unexpected_error;
 		}
 	}
 
@@ -817,7 +817,7 @@ class Library extends Myschoolgh {
 			return true;
 		} catch(PDOException $e) {
 			$this->db->rollback();
-			return [];
+			return $this->unexpected_error;
 		}
 
 	}
