@@ -12,7 +12,8 @@
         ?>
         <footer class="main-footer">
             <div class="footer-left">
-                Copyright &copy; <?= date("Y") ?> <div class="bullet"></div> <a href="<?= $baseUrl; ?>"><?= $appName ?></a>. All rights reserved
+                Copyright &copy; <?= date("Y") ?> <div class="bullet"></div> <a href="<?= config_item("site_url"); ?>" target="_blank"><?= $appName ?></a>. All rights reserved
+                | Powered By <strong><?= config_item("developer") ?></strong>
             </div>
             <div class="footer-right">
                 <div class="network-notifier"></div>

@@ -1334,6 +1334,9 @@ class Fees extends Myschoolgh {
                     // return error if the balance is less than the message to send
                     if($balance > $message_count) {
 
+                        //open connection
+                        $ch = curl_init();
+
                         // set the field parameters
                         $fields_string = [
                             "key" => $this->mnotify_key,
