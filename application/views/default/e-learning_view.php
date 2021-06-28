@@ -21,7 +21,7 @@ $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = ["assets/js/elearning.js"];
 
 // load the resource
-$item_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
+$item_id = $SITEURL[1] ?? null;
 
 // item_id 
 $item = explode("_", $item_id);

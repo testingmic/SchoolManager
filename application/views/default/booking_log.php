@@ -21,7 +21,10 @@ $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = ["assets/js/booking_log.js"];
 
 // set the parameters
-$params = (object) [];
+$params = (object) [
+    "data" => null,
+    "booking_id" => $SITEURL[1]
+];
 
 $the_form = load_class("forms", "controllers")->booking_form($params);
 
@@ -31,7 +34,7 @@ $response->html = '
             <h1>'.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-student">Students List</a></div>
+                <div class="breadcrumb-item active"><a href="'.$baseUrl.'booking_list">Booking Logs</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>

@@ -7,6 +7,55 @@ class Booking extends Myschoolgh {
     }
 
     /**
+     * List The Booking Log
+     * 
+     * @return Array
+     */
+    public function list(stdClass $params) {
+
+        try {
+
+            $query = "1";
+
+            $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+            // append to the list
+            $query .= isset($params->booking_id) && !empty($params->booking_id) ? " AND a.item_id='{$params->booking_id}'" : null;
+            $query .= isset($params->log_date) && !empty($params->log_date) ? " AND a.log_date='{$params->log_date}'" : null;
+            $query .= isset($params->created_by) && !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
+            
+            // get the list of all booking logs
+            $stmt = $this->db->prepare("SELECT 
+                    a.client_id, a.item_id, a.log_date, a.members_list, a.date_created, a.created_by,
+                    (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                FROM 
+                    booking_log a
+                WHERE {$query} AND a.client_id = ? ORDER BY a.id DESC LIMIT {$params->limit}
+            ");
+            $stmt->execute([$params->clientId]);
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                
+                // convert the created by string into an object
+                $result->created_by_info = (object) $this->stringToArray($result->created_by_info, "|", ["name", "phone_number", "email", "image","user_type"]);
+                
+                $result->members_list = json_decode($result->members_list);
+                $data[] = $result;
+            }
+
+            return [
+                "code" => 200,
+                "data" => $data
+            ];
+            
+        } catch(PDOEXception $e) {
+            return $this->unexpected_error;
+        }
+            
+    }
+
+    /**
      * Log the Booking Record
      * 
      * @return Array
@@ -18,6 +67,9 @@ class Booking extends Myschoolgh {
             // initial values
             $errors = null;
             $members_list = [];
+
+            // if the record doesn't exist
+            $newRecord = (bool) empty($params->booking_id) || (strlen($params->booking_id) < 10);
 
             // validate the dates
             if(empty($params->log_date)) {
@@ -33,19 +85,25 @@ class Booking extends Myschoolgh {
             }
 
             // loop through the fields
-            foreach(["fullname", "contact", "residence", "temperature"] as $item) {
+            foreach(["fullname", "contact", "residence", "temperature", "member_id"] as $item) {
                 // if the field was parsed in the request
                 if(isset($params->{$item})) {
                     // loop through the fields for grouping
                     foreach($params->{$item} as $key => $value) {
                         // append to the list
                         $members_list[$key][$item] = $value;
+
+                        // append the member id
+                        if(in_array($item, ["member_id"]) && empty($value)) {
+                            $members_list[$key][$item] = random_string("alnum", 18);
+                        }
+
                         // log the errors
                         if(in_array($item, ["fullname", "temperature"]) && empty($value)) {
-                            $errors .= ucfirst($item)." for Member {$key} cannot be empty.\n";
+                            $errors .= ucfirst($item)." for ".(!empty($members_list[$key]["fullname"]) ? $members_list[$key]["fullname"] : "Member {$key}")." cannot be empty.\n";
                         }
                         if((in_array($item, ["temperature"]) && !empty($value) && !preg_match("/^[0-9.]+$/", $value)) || (in_array($item, ["temperature"]) && (strlen($value) > 4))) {
-                            $errors .= ucfirst($item)." for Member {$key} must be an integer and less than 5 characters long.\n";
+                            $errors .= ucfirst($item)." for ".(!empty($members_list[$key]["fullname"]) ? $members_list[$key]["fullname"] : "Member {$key}")." must be an integer and less than 5 characters long.\n";
                         }
                     }
                 }
@@ -57,7 +115,7 @@ class Booking extends Myschoolgh {
             }
 
             // confirm if the record already exists
-            if(empty($params->booking_id) || strlen($params->booking_id) < 10) {
+            if($newRecord) {
 
                 // attendance log record
                 $item_id = random_string("alnum", 15);
@@ -74,7 +132,8 @@ class Booking extends Myschoolgh {
                     "code" => 200, 
                     "data" => "Attendance was successfully logged.", 
                     "additional" => [
-                        "clear" => true
+                        "clear" => true,
+                        "href" => "{$this->baseUrl}booking_log"
                     ]
                 ];
 

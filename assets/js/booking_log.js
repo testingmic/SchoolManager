@@ -11,7 +11,7 @@ var add_sibling = () => {
             <div class='col-md-11'>
                 <div class='form-group'>
                     <label>Fullname <span class='required'>*</span></label>
-                    <input type='text' name='fullname[${rows_count}]' id='fullname[${rows_count}]' class='form-control'>
+                    <input maxlength='64' type='text' name='fullname[${rows_count}]' id='fullname[${rows_count}]' class='form-control'>
                 </div>
             </div>
             <div class='col-md-1'>
@@ -23,19 +23,20 @@ var add_sibling = () => {
             <div class='col-md-4'>
                 <div class='form-group'>
                     <label>Contact Number</label>
-                    <input type='text' name='contact[${rows_count}]' id='contact[${rows_count}]' class='form-control'>
+                    <input maxlength='15' type='number' name='contact[${rows_count}]' id='contact[${rows_count}]' class='form-control'>
                 </div>
             </div>
             <div class='col-md-4'>
                 <div class='form-group'>
                     <label>Place of Residence</label>
-                    <input type='text' name='residence[${rows_count}]' id='residence[${rows_count}]' class='form-control'>
+                    <input maxlength='32' type='text' name='residence[${rows_count}]' id='residence[${rows_count}]' class='form-control'>
                 </div>
             </div>
             <div class='col-md-4'>
                 <div class='form-group'>
                     <label>Temperature <span class='required'>*</span></label>
-                    <input type='float' name='temperature[${rows_count}]' id='temperature[${rows_count}]' class='form-control'>
+                    <input maxlength='32' type='hidden' hidden name='member_id[${rows_count}]' id='member_id[${rows_count}]' class='form-control'>
+                    <input maxlength='6' type='float' name='temperature[${rows_count}]' id='temperature[${rows_count}]' class='form-control'>
                 </div>
             </div>
         </div>`;

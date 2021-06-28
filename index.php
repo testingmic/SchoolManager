@@ -79,6 +79,7 @@ $SITEURL = (($URL == '') || ($URL == 'index.php') || ($URL == 'index.html')) ? A
 
 // call the user logged in class
 $defaultUser = (object) [];
+$SITEURL = array_map("xss_clean", $SITEURL);
 $myClass = load_class('myschoolgh', 'models');
 $usersClass = load_class('users', 'controllers');
 $accessObject = load_class('accesslevel', 'controllers');

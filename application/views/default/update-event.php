@@ -21,7 +21,7 @@ $pageTitle = "Event Details";
 $response->title = "{$pageTitle} : {$appName}";
 
 // item id
-$item_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
+$item_id = $SITEURL[1] ?? null;
 $pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty

@@ -37,11 +37,11 @@ class Library extends Myschoolgh {
         // set the filters
         $filters = "";
         $filters .= isset($params->q) ? " AND bk.title LIKE '%{$params->q}%'" : "";
-		$filters .= isset($params->class_id) ? " AND bk.class_id='{$params->class_id}'" : "";
-        $filters .= isset($params->book_id) ? " AND bk.item_id='{$params->book_id}'" : "";
-        $filters .= isset($params->category_id) ? " AND bk.category_id='{$params->category_id}'" : "";
-        $filters .= isset($params->department_id) ? " AND bk.department_id='{$params->department_id}'" : "";
-        $filters .= isset($params->isbn) ? " AND bk.isbn='{$params->isbn}'" : "";
+		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND bk.class_id='{$params->class_id}'" : "";
+        $filters .= isset($params->book_id) && !empty($params->book_id) ? " AND bk.item_id='{$params->book_id}'" : "";
+        $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND bk.category_id='{$params->category_id}'" : "";
+        $filters .= isset($params->department_id) && !empty($params->department_id) ? " AND bk.department_id='{$params->department_id}'" : "";
+        $filters .= isset($params->isbn) && !empty($params->isbn) ? " AND bk.isbn='{$params->isbn}'" : "";
 
 		try {
 			

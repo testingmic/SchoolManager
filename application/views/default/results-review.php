@@ -20,7 +20,7 @@ $pageTitle = "Review Result";
 $response->title = "{$pageTitle} : {$appName}";
 
 // get the report id
-$report_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
+$report_id = $SITEURL[1] ?? null;
 
 // return error if the report id was not parsed
 if(empty($report_id)) {

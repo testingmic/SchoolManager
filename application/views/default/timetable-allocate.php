@@ -32,7 +32,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
     $isPermitted = $accessObject->hasAccess("manage", "timetable");
 
     // set the timetable id
-    $timetable_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : $session->last_TimetableId;
+    $timetable_id = $SITEURL[1] ?? $session->last_TimetableId;
 
     // set the parameters to load
     $params = (object)["clientId" => $clientId, "client_data" => $defaultUser->client];

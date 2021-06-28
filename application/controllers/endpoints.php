@@ -42,7 +42,7 @@ class Endpoints extends Myschoolgh {
                     counter, date_created, last_updated, version, item_id, item_id AS endpoint_id,
                     deprecated, deleted
                 FROM users_api_endpoints 
-                WHERE {$params->query} {$params->resource} ORDER BY resource,endpoint LIMIT {$params->limit}
+                WHERE {$params->query} {$params->resource} ORDER BY resource LIMIT {$params->limit}
             ");
             $stmt->execute();
 
@@ -58,7 +58,7 @@ class Endpoints extends Myschoolgh {
 				"code" => !empty($data) ? 200 : 201
 			];
         } catch(PDOException $e) {
-            return $e->getMessage();
+            return $this->unexpected_error;
         }
 
     }

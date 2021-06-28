@@ -24,8 +24,9 @@ $hasIssue = $accessObject->hasAccess("issue", "library");
 $tTitle = $hasIssue ? "Issued Books List" : "My Books List";
 
 $response->title = "{$pageTitle} : {$appName}";
+
 // item id
-$item_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
+$item_id = $SITEURL[1] ?? null;
 
 // if the user id is not empty
 if(!empty($item_id)) {

@@ -25,7 +25,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
     $response->html = page_not_found("permission_denied");
 } else {
     // staff id
-    $userId = confirm_url_id(1) ? xss_clean($SITEURL[1]) : $session->userId;
+    $userId = $SITEURL[1] ?? $session->userId;
     $pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
     // if the user id is not empty

@@ -22,7 +22,7 @@ $response->scripts = [
     "assets/js/page/index.js"
 ];
 
-$item_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
+$item_id = $SITEURL[1] ?? null;
 
 // ensure the the id has been parsed
 if(empty($item_id)) {

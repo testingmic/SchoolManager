@@ -1127,7 +1127,9 @@ var load_form_action = (form) => {
                                 $(`form[class~="_ajaxform"] select`).val("null").change();
                             }
                             if (result.data.additional.href !== undefined) {
-                                loadPage(result.data.additional.href);
+                                setTimeout(() => {
+                                    loadPage(result.data.additional.href);
+                                }, 2000);
                             }
                         }
                     } else {

@@ -21,7 +21,7 @@ $pageTitle = "Upload E-Learning Material";
 $response->title = "{$pageTitle} : {$appName}";
 
 // load the resource
-$item_id = confirm_url_id(1) ? xss_clean($SITEURL[1]) : null;
+$item_id = $SITEURL[1] ?? null;
 
 // if the item id is not empty
 if(empty($item_id)) {
