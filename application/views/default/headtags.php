@@ -1,6 +1,6 @@
 <?php
 // global variables
-global $usersClass, $accessObject, $myClass;
+global $usersClass, $accessObject, $myClass, $isBooking, $isSchool, $isChurch;
 
 // base url
 $baseUrl = config_item("base_url");
@@ -72,8 +72,6 @@ if(!isset($userPrefs->messages)) {
 // if the user has the permission to end the academic term
 $endPermission = $accessObject->hasAccess("close", "settings");
 
-$isBooking = false;
-
 // load the helper
 load_helpers(['menu_helper']);
 ?>
@@ -111,7 +109,7 @@ load_helpers(['menu_helper']);
 <body class="<?= $sidebar_pref ?> <?=  $theme_color ?> bg">
 	<div class="loader"></div>
     <div class="last_visited_page" value="<?= $userData->last_visited_page ?>"></div>
-    <?php if($isAdminAccountant) { ?>
+    <?php if(!empty($isAdminAccountant)) { ?>
     <section class="container-parent">
         <div class="container__child">
             <div class="calculator">
@@ -292,7 +290,7 @@ load_helpers(['menu_helper']);
                             <i class="fas fa-cog"></i> Settings
                         </a>
                         <?php } ?>
-                        <?php if($accessObject->hasAccess("close", "settings")) { ?>
+                        <?php if($accessObject->hasAccess("close", "settings") && $isSchool) { ?>
                         <a href="<?= $baseUrl ?>manager" class="dropdown-item has-icon">
                             <i class="fas fa-bolt"></i> <span class="mr-3">Manage</span> <?= $endPermission && $defaultUser->appPrefs->termEnded ? '<span class="notification beep"></span>' : null ?>
                         </a>

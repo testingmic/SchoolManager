@@ -4806,4 +4806,75 @@ class Forms extends Myschoolgh {
         return $html;
     }
 
+
+    /**
+     * Course Unit Form
+     * 
+     * @param stdClass $params
+     * @param String $course_id
+     * 
+     * @return String
+     */
+    public function booking_form(stdClass $params) {
+
+        // description
+        $html_content = "";
+        $message = isset($params->data->description) ? htmlspecialchars_decode($params->data->description) : null;
+        $item_id = isset($params->data->id) ? $params->data->id : null;
+        $fullname = isset($params->data->name) ? $params->data->name : null;
+
+        $html_content = "
+        <form action='{$this->baseUrl}api/booking/log' autocomplete='On' method='POST' id='_ajax-data-form-content' class='_ajaxform'>
+            <div class='text-right'>
+                <button type='button' class='btn btn-primary' title='Add New Family Member' onclick='return add_sibling()'><i class='fa fa-user'></i> Add Member</button>
+            </div>
+            <div id='log_attendance_container'>
+                <div class='row member_item' data-row_id='1'>
+                    <div class='col-md-3'>
+                        <div class='form-group'>
+                            <label>Date <span class='required'>*</span></label>
+                            <input value='".($params->data->log_date ?? null)."' type='text' name='log_date' id='log_date' class='form-control datepicker'>
+                        </div>
+                    </div>
+                    <div class='col-md-9'>
+                        <div class='form-group'>
+                            <label>Fullname <span class='required'>*</span></label>
+                            <input value='{$fullname}' type='text' name='fullname[1]' id='fullname[1]' class='form-control'>
+                        </div>
+                    </div>
+                    <div class='col-md-4'>
+                        <div class='form-group'>
+                            <label>Contact Number</label>
+                            <input value='".($params->data->contact ?? null)."' type='text' name='contact[1]' id='contact[1]' class='form-control'>
+                        </div>
+                    </div>
+                    <div class='col-md-4'>
+                        <div class='form-group'>
+                            <label>Place of Residence</label>
+                            <input value='".($params->data->residence ?? null)."' type='text' name='residence[1]' id='residence[1]' class='form-control'>
+                        </div>
+                    </div>
+                    <div class='col-md-4'>
+                        <div class='form-group'>
+                            <label>Temperature <span class='required'>*</span></label>
+                            <input autocomplete='Off' value='".($params->data->temperature ?? null)."' type='float' name='temperature[1]' id='temperature[1]' class='form-control'>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class='row'>
+                <div class=\"col-md-6 text-left\">
+                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                </div>
+                <div class=\"col-md-6 text-right\">
+                    <input type=\"hidden\" name=\"booking_id[1]\" id=\"booking_id[1]\" value=\"{$item_id}\" hidden class=\"form-control\">
+                    <button class=\"btn btn-outline-success btn-sm\" type='submit'>Save Record</button>
+                </div>
+            </div>
+        </div>";
+
+        return $html_content;
+
+    }
+
 }

@@ -381,3 +381,12 @@
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
 <?php } ?>
+<?php function booking_menu() { global $baseUrl, $accessObject; ?>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Attedance Booking</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>booking_list">Booking History</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>booking_log">Log Member Attendance</a></li>
+        </ul>
+    </li>
+<?php } ?>

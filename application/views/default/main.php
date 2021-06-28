@@ -6,13 +6,13 @@ $page_title = "Dashboard";
 require "headtags.php";
 
 // global variable
-global $isActiveAccount, $clientData, $clientId;
+global $isActiveAccount, $clientData, $clientId, $isSchool, $isChurch, $isBooking;
 ?>
 <?= pageoverlay(); ?>
 <?php if(!$isActiveAccount) { ?>
     <?php
     // if the current state is propagation
-    if($clientData->client_state === "Propagation") { ?>
+    if(($clientData->client_state === "Propagation") && $isSchool) { ?>
     <div class="main-content" id="pagecontent">
         <div class="card">
             <div class="card-body">
@@ -21,7 +21,7 @@ global $isActiveAccount, $clientData, $clientId;
             </div>
         </div>
     </div>
-    <?php } else {
+    <?php } elseif($isSchool) {
         
         // create a new object of the forms class
         $formsObj = load_class("forms", "controllers");

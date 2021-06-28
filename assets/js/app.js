@@ -1076,3 +1076,77 @@ var post_incident_followup = (user_id, incident_id) => {
     });
 
 }
+
+
+var form_submit_stopper = () => {
+    let forms;
+    let element = $.pagecontent;
+    if (element.is("form")) forms = element;
+    else forms = element.find("form");
+
+    if (forms.length) {
+        forms.each(function() {
+            if ($(this).hasClass("_ajaxform")) {
+                $(this).on("submit", (event) => {
+                    event.preventDefault()
+                    load_form_action($(this))
+                })
+            }
+        })
+    }
+}
+
+var load_form_action = (form) => {
+
+    swal({
+        title: "Log Attendance",
+        text: "Are you sure you want to log attendance?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.ajax({
+                url: form[0].action,
+                method: form[0].method,
+                data: new FormData(form[0]),
+                dataType: 'JSON',
+                contentType: false,
+                cache: false,
+                processData: false,
+                success: (result) => {
+                    if (result.code == 200) {
+                        swal({
+                            position: 'top',
+                            text: result.data.result,
+                            icon: "success",
+                        });
+                        if (result.data.additional !== undefined) {
+                            if (result.data.additional.clear !== undefined) {
+                                $(`form[class~="_ajaxform"] input, form[class~="_ajaxform"] textarea`).val("");
+                                $(`form[class~="_ajaxform"] select`).val("null").change();
+                            }
+                            if (result.data.additional.href !== undefined) {
+                                loadPage(result.data.additional.href);
+                            }
+                        }
+                    } else {
+                        swal({
+                            position: 'top',
+                            text: result.data.result,
+                            icon: "error",
+                        });
+                    }
+                },
+                error: (err) => {
+                    swal({
+                        position: 'top',
+                        text: 'Sorry! An unknown error was encountered',
+                        icon: "error",
+                    });
+                    $(`div[class="pageoverlay"]`).css("display", "none");
+                }
+            });
+        }
+    });
+}

@@ -102,13 +102,13 @@ if(!empty($session->userId)) {
 		"user_status" => ["Pending", "Active"]
 	];
 	$defaultUser = $usersClass->list($i_params)["data"];
+	$defaultAcademics = [];
 
 	// if the result is not empty
 	if(!empty($defaultUser)) {
 		
 		// get the current user information
 		$defaultUser = $defaultUser[0];
-		$defaultAcademics = $defaultUser->client->client_preferences->academics;
 		
 		// set the parameters for the access object
 		$accessObject->userId = $defaultUser->user_id;
@@ -116,19 +116,31 @@ if(!empty($session->userId)) {
 		$accessObject->userPermits = json_decode($defaultUser->user_permissions);
 		$accessObject->appPrefs = $defaultUser->client->client_preferences;
 		$defaultUser->appPrefs = $defaultUser->client->client_preferences;
-		$defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
+		$isSchool = (bool) ($defaultUser->client->setup == "School");
+		$isBooking = (bool) ($defaultUser->client->setup == "Booking");
+		$isChurch = (bool) ($defaultUser->client->setup == "Church");
 		
+		// set this as init
+		$defaultUser->appPrefs->termEnded = false;
+		
+
 		// set additional parameters
-		$isAdmin = (bool) ($defaultUser->user_type == "admin");
-		$isTeacher = $isTutor = (bool) ($defaultUser->user_type == "teacher");
-		$isParent = (bool) ($defaultUser->user_type == "parent");
-		$isStudent = (bool) ($defaultUser->user_type == "student");
 		$isEmployee = (bool) ($defaultUser->user_type == "employee");
 		$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
 		$isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
 		$isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
 		$isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
 		$isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
+		$isAdmin = (bool) ($defaultUser->user_type == "admin");
+		$isTeacher = $isTutor = (bool) ($defaultUser->user_type == "teacher");
+		$isParent = (bool) ($defaultUser->user_type == "parent");
+		$isStudent = (bool) ($defaultUser->user_type == "student");
+		
+		// if academics is set
+		if(isset($defaultUser->client->client_preferences->academics)) {
+			$defaultAcademics = $defaultUser->client->client_preferences->academics;
+			$defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
+		}
 	}
 }
 
@@ -140,7 +152,6 @@ $loadedJS = [];
 $defaultFile = config_item('default_view_path').strtolower(preg_replace('/[^\w_]-/','',$SITEURL[0])).'.php';
 $mainFile = config_item('default_view_path').'main.php';
 $errorFile = config_item('default_view_path').'404.php';
-
 
 // confirm if the first index has been parsed
 // however the api and auth endpoint are exempted from this file traversing loop
