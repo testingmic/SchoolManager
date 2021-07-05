@@ -1,0 +1,56 @@
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:08:42 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3273
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Undefined property: stdClass::$academics in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309
+[05-Jul-2021 14:09:05 Africa/Accra] PHP Notice:  Trying to get property 'next_academic_year' of non-object in /var/www/html/myschool_gh/application/controllers/forms.php on line 3309

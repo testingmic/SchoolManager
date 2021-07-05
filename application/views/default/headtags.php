@@ -208,7 +208,7 @@ load_helpers(['menu_helper']);
                     </div>
                 </li>
                 <?php } ?>
-                <?php if($isActiveAccount) { ?>
+                <?php if($isActiveAccount && $isSchool) { ?>
                 <li class="dropdown dropdown-list-toggle">
                     <a href="#" data-toggle="dropdown" class="nav-link nav-link-lg message-toggle" data-notification="message"><i class="far fa-envelope"></i></a>
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
@@ -285,7 +285,7 @@ load_helpers(['menu_helper']);
                             <i class="fas fa-lock"></i> Login History
                         </a>
                         <?php } ?>
-                        <?php if($accessObject->hasAccess("manage", "settings")) { ?>
+                        <?php if($accessObject->hasAccess("manage", "settings") && $isSchool) { ?>
                         <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon">
                             <i class="fas fa-cog"></i> Settings
                         </a>
@@ -326,7 +326,9 @@ load_helpers(['menu_helper']);
                             $menu_function();
                         }
                         ?>
+                        <?php if($isSchool) { ?>
                         <li class="mb-5"><a href="<?= $baseUrl ?>chat" class="nav-link"><i class="fas fa-envelope-open-text"></i><span>Live Chat</span></a></li>
+                        <?php } ?>
                     </ul>
                 </aside>
             </div>

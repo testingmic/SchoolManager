@@ -199,11 +199,11 @@ class Api {
         $client_data = $this->myClass->client_data($this->clientId);
         
         // reassign the variable data
-        $academics = $client_data->client_preferences->academics;
+        $academics = $client_data->client_preferences->academics ?? null;
         
         // set the academic year and term
-        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $academics->academic_term;
-        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $academics->academic_year;
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : ($academics->academic_term ?? null);
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : ($academics->academic_year ?? null);
 
         // set additional parameters
         $params->userId = $this->userId;

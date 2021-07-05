@@ -37,6 +37,19 @@ $count = 0;
 $booking_list = "";
 $booking_log_array_list = [];
 
+// summary count
+$summary = [
+    "Count" => [
+        "Logs" => 0,
+        "Members" => 0
+    ],
+    "Gender" => [
+        "Male" => 0,
+        "Female" => 0,
+        "Unspecified" => 0
+    ]
+];
+
 // loop through the list
 if(is_array($item_list)) {
 
@@ -46,20 +59,53 @@ if(is_array($item_list)) {
         $booking_log_array_list[$log->item_id] = $log;
         $count++;
 
-        // set the action button
-        $action = "<button title='View the details of this log.' onclick='return view_message(\"{$log->item_id}\")' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></button>";
-        $action .= "&nbsp;<a href='{$baseUrl}booking_log/{$log->item_id}' title='Click to edit this record.' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i> Edit</a>";
+        $summary["Count"]["Logs"]++;
 
+        // set the action button
+        $action = "";
+
+        // if still logged
+        if($log->state == "Logged") {
+            $action .= "&nbsp;<a href='{$baseUrl}booking_log/{$log->item_id}' title='Click to edit this record.' class='btn btn-sm btn-outline-primary mb-1'><i class='fa fa-edit'></i> Edit</a>";
+        }
+
+        // members_list processing
+        $members_list = "<div class='row'>";
+
+        // loop through the users list
+        foreach($log->members_list as $key => $member) {
+            // temperature check
+            $color = $member["temperature"] > 36.7 ? "danger" : ($member["temperature"] < 34.7 ? "warning" : "success");
+
+            // add to the counter
+            $summary["Count"]["Members"]++;
+            !empty($member["gender"]) ? $summary["Gender"][$member["gender"]]++ : $summary["Gender"]["Unspecified"]++;
+
+            // append to the list
+            $members_list .= "<div class='col-lg-6 ".($key !== count($log->members_list) ? "mb-3" : "")."'>";
+            $members_list .= "<div><i ".(!empty($member["gender"]) && $member["gender"] == "Female" ? "class='fa fa-user-nurse'"  : (!empty($member["gender"]) && $member["gender"] == "Male" ? "class='fa fa-user-tie'" : "class='fa fa-user'"))."'></i> {$member["fullname"]}</div>";
+            $members_list .= !empty($member["contact"]) ? "<div><i class='fa fa-phone'></i> {$member["contact"]}</div>" : null;
+            $members_list .= "<div class='text-{$color} font-weight-bold'><i class='fa fa-temperature-high'></i> {$member["temperature"]}</div>";
+            $members_list .= !empty($member["residence"]) ? "<div><i class='fa fa-globe'></i> {$member["residence"]}</div>" : null;
+            $members_list .= "</div>";
+        }
+
+        $members_list .= "</div>";
+
+        // append to the list
         $booking_list .= "<tr data-row_id=\"{$log->item_id}\">";
-        $booking_list .= "<td>{$count}</td>";
-        $booking_list .= "<td>{$log->log_date}</td>";
-        $booking_list .= "<td>{$log->log_date}</td>";
-        $booking_list .= "<td>{$log->created_by_info->name}</td>";
+        $booking_list .= "<td style='vertical-align: top;' align='center'>{$count}</td>";
+        $booking_list .= "<td style='vertical-align: top;'>".date("jS M Y", strtotime($log->log_date))."</td>";
+        $booking_list .= "<td>{$members_list}</td>";
+        $booking_list .= "<td style='vertical-align: top;'>{$log->created_by_info->name}</td>";
         $booking_list .= "<td align='center'>{$action}</td>";
         $booking_list .= "</tr>";
     }
 }
-$response->array_stream["booking_log_array_list"] = $booking_log_array_list;
+$response->array_stream["booking_log_array_list"] = [
+    "array_list" => $booking_log_array_list,
+    "summary" => $summary
+];
 
 $response->html = '
     <section class="section">
@@ -81,8 +127,8 @@ $response->html = '
                                         <th width="7%" class="text-center">#</th>
                                         <th width="13%">Log Date</th>
                                         <th>Member Details</th>
-                                        <th width="18%">Created By</th>
-                                        <th align="center" width="12%"></th>
+                                        <th width="12%">Logged By</th>
+                                        <th align="center" width="10%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$booking_list.'</tbody>

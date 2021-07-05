@@ -22,14 +22,15 @@ class Booking extends Myschoolgh {
             // append to the list
             $query .= isset($params->booking_id) && !empty($params->booking_id) ? " AND a.item_id='{$params->booking_id}'" : null;
             $query .= isset($params->log_date) && !empty($params->log_date) ? " AND a.log_date='{$params->log_date}'" : null;
+            $query .= isset($params->member_id) && !empty($params->member_id) ? " AND a.members_ids LIKE '%{$params->member_id}%'" : null;
             $query .= isset($params->created_by) && !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
             
             // get the list of all booking logs
             $stmt = $this->db->prepare("SELECT 
-                    a.client_id, a.item_id, a.log_date, a.members_list, a.date_created, a.created_by,
+                    a.client_id, a.item_id, a.log_date, a.members_list, a.members_ids, a.state, a.date_created, a.created_by,
                     (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM 
-                    booking_log a
+                    church_booking_log a
                 WHERE {$query} AND a.client_id = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([$params->clientId]);
@@ -40,7 +41,9 @@ class Booking extends Myschoolgh {
                 // convert the created by string into an object
                 $result->created_by_info = (object) $this->stringToArray($result->created_by_info, "|", ["name", "phone_number", "email", "image","user_type"]);
                 
-                $result->members_list = json_decode($result->members_list);
+                $result->members_list = json_decode($result->members_list, true);
+                $result->members_ids = json_decode($result->members_ids, true);
+
                 $data[] = $result;
             }
 
@@ -85,7 +88,7 @@ class Booking extends Myschoolgh {
             }
 
             // loop through the fields
-            foreach(["fullname", "contact", "residence", "temperature", "member_id"] as $item) {
+            foreach(["fullname", "contact", "residence", "gender", "temperature", "item_id"] as $item) {
                 // if the field was parsed in the request
                 if(isset($params->{$item})) {
                     // loop through the fields for grouping
@@ -94,7 +97,7 @@ class Booking extends Myschoolgh {
                         $members_list[$key][$item] = $value;
 
                         // append the member id
-                        if(in_array($item, ["member_id"]) && empty($value)) {
+                        if(in_array($item, ["item_id"]) && empty($value)) {
                             $members_list[$key][$item] = random_string("alnum", 18);
                         }
 
@@ -114,6 +117,22 @@ class Booking extends Myschoolgh {
                 return ["code" => 203, "data" => $errors];
             }
 
+            // set the insert and update query
+            $insert = $this->db->prepare("INSERT INTO church_members SET client_id = ?, item_id = ?, fullname = ?, contact = ?, email = ?, residence = ?, gender = ?");
+            $update = $this->db->prepare("UPDATE church_members SET fullname = ?, contact = ?, email = ?, residence = ?, gender = ? WHERE client_id = ? AND item_id = ? LIMIT 1");
+
+            // save the user information
+            foreach($members_list as $member) {
+                if(empty($this->pushQuery("item_id", "church_members", "item_id='{$member["item_id"]}' LIMIT 1"))) {
+                    $insert->execute([$params->clientId, $member["item_id"], $member["fullname"], $member["contact"] ?? null, $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null]);
+                } else {
+                    $update->execute([$member["fullname"], $member["contact"] ?? null, $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null, $params->clientId, $member["item_id"]]);
+                }
+            }
+
+            // get the unique id of the members list
+            $members_ids = array_column($members_list, "item_id");
+
             // confirm if the record already exists
             if($newRecord) {
 
@@ -121,11 +140,11 @@ class Booking extends Myschoolgh {
                 $item_id = random_string("alnum", 15);
 
                 // insert the record
-                $stmt = $this->db->prepare("INSERT INTO booking_log SET client_id = ?, log_date = ?, members_list = ?, item_id = ?, date_created = now(), created_by = ?");
-                $stmt->execute([$params->clientId, $params->log_date, json_encode($members_list), $item_id, $params->userId]);
+                $stmt = $this->db->prepare("INSERT INTO church_booking_log SET client_id = ?, log_date = ?, members_list = ?, members_ids = ?, item_id = ?, date_created = now(), created_by = ?");
+                $stmt->execute([$params->clientId, $params->log_date, json_encode($members_list), json_encode($members_ids), $item_id, $params->userId]);
 
                 // log the user activity
-                $this->userLogs("booking_log", $item_id, null, "{$params->userData->name} logged an attendance.", $params->userId);
+                $this->userLogs("booking_log", $item_id, null, "{$params->userData->name} logged an attendance for <strong>{$params->log_date}</strong>.", $params->userId);
 
                 // return success message
                 return [
@@ -137,9 +156,24 @@ class Booking extends Myschoolgh {
                     ]
                 ];
 
+            } else {
+
+                // update the record
+                $stmt = $this->db->prepare("UPDATE church_booking_log SET log_date = ?, members_list = ?, members_ids = ? WHERE client_id = ? AND item_id = ? LIMIT 1");
+                $stmt->execute([$params->log_date, json_encode($members_list), json_encode($members_ids), $params->clientId, $params->booking_id]);
+
+                // log the user activity
+                $this->userLogs("booking_log", $params->booking_id, null, "{$params->userData->name} updated the attendance log for <strong>{$params->log_date}</strong>.", $params->userId);
+
+                // return success message
+                return [
+                    "code" => 200, 
+                    "data" => "Attendance was successfully updated.",
+                ];
             }
 
         } catch(PDOEXception $e) {
+            print_r($e);
             return $this->unexpected_error;
         }
 

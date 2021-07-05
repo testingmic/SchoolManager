@@ -20,10 +20,28 @@ $pageTitle = "Attendance Log";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = ["assets/js/booking_log.js"];
 
+// get the data
+$data = null;
+$booking_id = $SITEURL[1] ?? null;
+
+// get the record
+if(!empty($booking_id)) {
+    $params = (object) [
+        "clientId" => $clientId,
+        "booking_id" => $booking_id
+    ];
+    $data = load_class("booking", "controllers", $params)->list($params)["data"];
+
+    // if the data is not empty
+    if(!empty($data)) {
+        $data = $data[0];
+    }
+}
+
 // set the parameters
 $params = (object) [
-    "data" => null,
-    "booking_id" => $SITEURL[1]
+    "data" => $data,
+    "booking_id" => $booking_id
 ];
 
 $the_form = load_class("forms", "controllers")->booking_form($params);

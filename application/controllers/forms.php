@@ -4820,16 +4820,29 @@ class Forms extends Myschoolgh {
         // description
         $html_content = "";
 
-        $item_id = isset($params->data->id) ? $params->data->id : null;
-        $fullname = isset($params->data->name) ? $params->data->name : null;
-
+        $item_id = isset($params->data->item_id) ? $params->data->item_id : null;
+        
         $html_content = "
-        <form action='{$this->baseUrl}api/booking/log' autocomplete='On' method='POST' id='_ajax-data-form-content' class='_ajaxform'>
-            ".(empty($item_id) ? 
-            "<div class='text-right'>
-                <button type='button' class='btn btn-primary' title='Add a New Family Member' onclick='return add_sibling()'><i class='fa fa-user'></i> Add Family Member</button>
-            </div>" : "")."
-            <div id='log_attendance_container'>";
+        <form action='{$this->baseUrl}api/booking/log' autocomplete='Off' method='POST' id='_ajax-data-form-content' class='_ajaxform'>
+            <div class='row border-bottom pb-2'>
+            ".(empty($item_id) ? "
+                <div class='col-md-6 col-sm-12 text-left'>
+                    <h5>Add Record</h5>
+                </div>
+                <div class='col-md-6 col-sm-12 text-right'>
+                    <button type='button' class='btn btn-primary' title='Add a New Family Member' onclick='return add_sibling()'><i class='fa fa-user'></i> Add Family Member</button>
+                </div>" : "
+                <div class='col-md-6 col-sm-12 text-left'>
+                    <h5>Update Record</h5>
+                </div>
+                <div class='col-md-6 col-sm-12 text-right'>
+                    <a href='{$this->baseUrl}booking_log' class='btn btn-primary' title='Log New Attendance' onclick='return add_sibling()'><i class='fa fa-user'></i> Log New Attendance</a>
+                </div>
+            ")."
+            </div>
+            <div class='row'>
+            <div class='col-md-12'>
+                <div id='log_attendance_container'>";
 
                 // if the member list is id
                 if(empty($params->data->members_list)) {
@@ -4850,6 +4863,19 @@ class Forms extends Myschoolgh {
                                 <div class='form-group'>
                                     <label>Fullname <span class='required'>*</span></label>
                                     <input maxlength='64' type='text' name='fullname[1]' id='fullname[1]' class='form-control'>
+                                    <div class='picomplete-items col-12 p-0'>
+                                    <div class='picomplete-item' data-value='javascript' data-index='0'>JavaScript</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class='col-md-3'>
+                                <div class='form-group'>
+                                    <label>Gender</label>
+                                    <select type='text' data-width='100%' name='gender[1]' id='gender[1]' class='selectpicker form-control'>
+                                        <option value=''>Please Select</option>
+                                        <option value='Male'>Male</option>
+                                        <option value='Female'>Female</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class='col-md-4'>
@@ -4858,70 +4884,102 @@ class Forms extends Myschoolgh {
                                     <input maxlength='15' type='number' name='contact[1]' id='contact[1]' class='form-control'>
                                 </div>
                             </div>
-                            <div class='col-md-4'>
+                            <div class='col-md-3'>
                                 <div class='form-group'>
                                     <label>Place of Residence</label>
                                     <input maxlength='32' type='text' name='residence[1]' id='residence[1]' class='form-control'>
                                 </div>
                             </div>
-                            <div class='col-md-4'>
+                            <div class='col-md-2'>
                                 <div class='form-group'>
                                     <label>Temperature <span class='required'>*</span></label>
-                                    <input maxlength='32' type='hidden' hidden name='member_id[1]' id='member_id[1]' class='form-control'>
+                                    <input maxlength='32' type='hidden' hidden name='item_id[1]' id='item_id[1]' class='form-control'>
                                     <input maxlength='6' autocomplete='Off' type='float' name='temperature[1]' id='temperature[1]' class='form-control'>
                                 </div>
                             </div>
                         </div>";
                 } else {
-                    foreach($params->data->members_list as $key => $member) {
+
+                    // convert to object
+                    $members_list = json_encode($params->data->members_list);
+                    $members_list = json_decode($members_list);
+
+                    // loop through the users list
+                    foreach($members_list as $key => $member) {
+                        // top list
+                        $border_top = $key != 1 ? "mt-2 border-top pt-3" : null;
+
+                        // set the html
                         $html_content .= "
-                        <div class='row member_item' data-row_id='{$key}'>
-                            <div class='col-md-3'>
-                                <div class='form-group'>
-                                    <label>Date <span class='required'>*</span></label>
-                                    <input maxlength='12' value='".($member->log_date ?? null)."' type='text' name='log_date' id='log_date' class='form-control datepicker'>
-                                </div>
-                            </div>
-                            <div class='col-md-9'>
+                        <div class='row member_item {$border_top}' data-row_id='{$key}'>
+                            ".($key == 1 ? 
+                                "<div class='col-md-3'>
+                                    <div class='form-group'>
+                                        <label>Date <span class='required'>*</span></label>
+                                        <input maxlength='12' value='".($member->log_date ?? null)."' type='text' name='log_date' id='log_date' class='form-control datepicker'>
+                                    </div>
+                                </div>": ""
+                            )."
+                            <div class='col-md-".($key == 1 ? 9 : 11)."'>
                                 <div class='form-group'>
                                     <label>Fullname <span class='required'>*</span></label>
                                     <input maxlength='64' value='{$member->fullname}' type='text' name='fullname[{$key}]' id='fullname[{$key}]' class='form-control'>
                                 </div>
                             </div>
-                            <div class='col-md-4'>
+                            ".($key == 1 ? "" : "
+                            <div class='col-md-1'>
                                 <div class='form-group'>
-                                    <label>Contact Number</label>
-                                    <input maxlength='15' value='".($member->phone_number ?? null)."' type='number' name='contact[{$key}]' id='contact[{$key}]' class='form-control'>
+                                    <label class='text-center'>.</label>
+                                    <button type='button' onclick='return remove_row({$key})' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
+                                </div>
+                            </div>")."
+                            <div class='col-md-3'>
+                                <div class='form-group'>
+                                    <label>Gender</label>
+                                    <select type='text' name='gender[{$key}]' id='gender[{$key}]' data-width='100%' class='form-control selectpicker'>
+                                        <option value=''>Please Select</option>
+                                        <option ".(isset($member->gender) && $member->gender == "Male" ? "selected" : null)." Male'>Male</option>
+                                        <option ".(isset($member->gender) && $member->gender == "Female" ? "selected" : null)." value='Female'>Female</option>
+                                    </select>
                                 </div>
                             </div>
-                            <div class='col-md-4'>
+                            <div class='col-md-3'>
+                                <div class='form-group'>
+                                    <label>Contact Number</label>
+                                    <input maxlength='15' value='".($member->contact ?? null)."' type='number' name='contact[{$key}]' id='contact[{$key}]' class='form-control'>
+                                </div>
+                            </div>
+                            <div class='col-md-3'>
                                 <div class='form-group'>
                                     <label>Place of Residence</label>
                                     <input maxlength='32' value='".($member->residence ?? null)."' type='text' name='residence[{$key}]' id='residence[{$key}]' class='form-control'>
                                 </div>
                             </div>
-                            <div class='col-md-4'>
+                            <div class='col-md-3'>
                                 <div class='form-group'>
                                     <label>Temperature <span class='required'>*</span></label>
-                                    <input maxlength='32' value='".($member->member_id ?? null)."' type='hidden' hidden name='member_id[{$key}]' id='member_id[{$key}]' class='form-control'>
-                                    <input maxlength='6' autocomplete='Off' value='".($params->data->temperature ?? null)."' type='float' name='temperature[{$key}]' id='temperature[{$key}]' class='form-control'>
+                                    <input maxlength='32' value='".($member->item_id ?? null)."' type='hidden' hidden name='item_id[{$key}]' id='item_id[{$key}]' class='form-control'>
+                                    <input maxlength='6' autocomplete='Off' value='".($member->temperature ?? null)."' type='float' name='temperature[{$key}]' id='temperature[{$key}]' class='form-control'>
                                 </div>
                             </div>
                         </div>";
                     }
                 }
+
             $html_content .= "
                 </div>
+            </div>
+            </div>
             <div class='row'>
                 <div class=\"col-md-6 text-left\">
-                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                    <button ".(empty($item_id) ? "type=\"reset\"" : "type=\"button\" onclick=\"return loadPage('{$this->baseUrl}booking_log/{$item_id}')\"")." class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
                 </div>
                 <div class=\"col-md-6 text-right\">
                     <input type=\"hidden\" name=\"booking_id\" id=\"booking_id\" value=\"{$item_id}\" hidden class=\"form-control\">
-                    <button class=\"btn btn-outline-success btn-sm\" type='submit'>Save Record</button>
+                    <button class=\"btn btn-outline-success btn-sm\" type='submit'><i class='fa fa-save'></i> ".(empty($item_id) ? "Save" : "Update")." Record</button>
                 </div>
             </div>
-        </div>";
+        </form>";
 
         return $html_content;
 
