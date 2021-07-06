@@ -4862,10 +4862,8 @@ class Forms extends Myschoolgh {
                             <div class='col-md-9'>
                                 <div class='form-group'>
                                     <label>Fullname <span class='required'>*</span></label>
-                                    <input maxlength='64' type='text' name='fullname[1]' id='fullname[1]' class='form-control'>
-                                    <div class='picomplete-items col-12 p-0'>
-                                    <div class='picomplete-item' data-value='javascript' data-index='0'>JavaScript</div>
-                                    </div>
+                                    <input oninput='return suggest_member(this.value, 1)' maxlength='64' type='text' name='fullname[1]' id='fullname[1]' class='form-control'>
+                                    <div data-row_id='1' class='picomplete-items col-12 p-0'></div>
                                 </div>
                             </div>
                             <div class='col-md-3'>

@@ -2,6 +2,47 @@ var remove_row = (rows_count) => {
     $(`div[class~="member_item"][data-row_id='${rows_count}']`).remove();
 }
 
+var delayTimer, membersSearchList;
+
+var select_member = (user_id, row_id) => {
+    if(membersSearchList[user_id] !== undefined) {
+        let member = membersSearchList[user_id];
+        $(`input[name="fullname[${row_id}]"]`).val(member.fullname);
+        $(`input[name="residence[${row_id}]"]`).val(member.residence);
+        $(`input[name="contact[${row_id}]"]`).val(member.contact);
+        $(`select[name="gender[${row_id}]"]`).val(member.gender).change();
+    }
+    $(`div[class~="picomplete-items"][data-row_id="${row_id}"]`).html(``);
+}
+
+var suggest_member = (search_term, row_id = 1) => {
+    if(search_term.length > 1) {
+        clearTimeout(delayTimer);
+        $(`div[class~="picomplete-items"]`).html(``);
+        delayTimer = setTimeout(() => {
+            let data = {
+                request : "list",
+                name: search_term
+            };
+            let members_list = "";
+            $.post(`${baseUrl}api/booking/members`, {data}).then((response) => {
+                if(response.code == 200) {
+                    membersSearchList = response.data.result;
+                    if(response.data.result) {
+                        $.each(response.data.result, function(i, e) {
+                            members_list += `
+                            <div onclick='return select_member("${e.item_id}", ${row_id})' class='picomplete-item' data-value='${e.fullname}' data-index='${e.item_id}'>
+                                ${e.fullname}
+                            </div>`;
+                        });
+                        $(`div[class~="picomplete-items"][data-row_id="${row_id}"]`).html(members_list);
+                    }
+                }
+            });
+        }, 700);
+    }
+}
+
 var add_sibling = () => {
 
     let members_list = $(`div[id="log_attendance_container"] div[class~="member_item"]:last`).attr("data-row_id"),
@@ -11,7 +52,8 @@ var add_sibling = () => {
             <div class='col-md-11 col-sm-10'>
                 <div class='form-group'>
                     <label>Fullname <span class='required'>*</span></label>
-                    <input maxlength='64' type='text' name='fullname[${rows_count}]' id='fullname[${rows_count}]' class='form-control'>
+                    <input oninput='return suggest_member(this.value, ${rows_count})' maxlength='64' type='text' name='fullname[${rows_count}]' id='fullname[${rows_count}]' class='form-control'>
+                    <div data-row_id='${rows_count}' class='picomplete-items col-12 p-0'></div>
                 </div>
             </div>
             <div class='col-md-1 col-sm-2'>
@@ -23,7 +65,7 @@ var add_sibling = () => {
             <div class='col-md-3'>
                 <div class='form-group'>
                     <label>Gender</label>
-                    <select type='text' data-width='100%' name='gender[1]' id='gender[1]' class='selectpicker form-control'>
+                    <select type='text' data-width='100%' name='gender[${rows_count}]' id='gender[${rows_count}]' class='selectpicker form-control'>
                         <option value=''>Please Select</option>
                         <option value='Male'>Male</option>
                         <option value='Female'>Female</option>
@@ -52,5 +94,6 @@ var add_sibling = () => {
         </div>`;
 
     $(`div[id="log_attendance_container"]`).append(member_html);
+    $('.selectpicker').select2();
 }
 form_submit_stopper();

@@ -117,18 +117,19 @@ class Booking extends Myschoolgh {
                 return ["code" => 203, "data" => $errors];
             }
 
-            // set the insert and update query
-            $insert = $this->db->prepare("INSERT INTO church_members SET client_id = ?, item_id = ?, fullname = ?, contact = ?, email = ?, residence = ?, gender = ?");
-            $update = $this->db->prepare("UPDATE church_members SET fullname = ?, contact = ?, email = ?, residence = ?, gender = ? WHERE client_id = ? AND item_id = ? LIMIT 1");
+            // set a new members param
+            $members_param = (object) [
+                "clientId" => $params->clientId,
+                "data" => [
+                    "clientId" => $params->clientId,
+                    "userId" => $params->userId,
+                    "request" => "add_update",
+                    "members_list" => $members_list
+                ]
+            ];
 
-            // save the user information
-            foreach($members_list as $member) {
-                if(empty($this->pushQuery("item_id", "church_members", "item_id='{$member["item_id"]}' LIMIT 1"))) {
-                    $insert->execute([$params->clientId, $member["item_id"], $member["fullname"], $member["contact"] ?? null, $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null]);
-                } else {
-                    $update->execute([$member["fullname"], $member["contact"] ?? null, $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null, $params->clientId, $member["item_id"]]);
-                }
-            }
+            // push request to the members method
+            $this->members($members_param);
 
             // get the unique id of the members list
             $members_ids = array_column($members_list, "item_id");
@@ -173,9 +174,98 @@ class Booking extends Myschoolgh {
             }
 
         } catch(PDOEXception $e) {
-            print_r($e);
             return $this->unexpected_error;
         }
+
+    }
+
+    /**
+     * Processing members endpoint
+     * 
+     * @param Array $params->data
+     * 
+     * @return Array
+     */
+    public function members(stdClass $params) {
+
+        try {
+
+            if(!is_array($params->data)) {
+                return ["code" => 203, "result" => "Sorry! The data parameter must be an array."];
+            }
+
+            $params->data["clientId"] = $params->clientId;
+
+            if(!isset($params->data["request"])) {
+                return ["code" => 203, "result" => "Sorry! The request variable is required."];
+            }
+
+            if(!in_array($params->data["request"], ["list", "add_update"])) {
+                return ["code" => 203, "result" => "Sorry! An invalid request was parsed"];
+            }
+            
+            // if the request is either add or update member
+            if($params->data["request"] == "add_update") {
+                $this->add_update_member($params->data);
+            }
+
+            // if the request is to search
+            if($params->data["request"] == "list") {
+                return $this->list_members($params->data);
+            }
+        
+        } catch(PDOException $e) {}
+
+    }
+
+    /**
+     * Add or Update Member
+     * 
+     * @return Bool
+     */
+    public function add_update_member(stdClass $params) {
+        // get the members list
+        $members_list = $params["members_list"];
+
+        // set the insert and update query
+        $insert = $this->db->prepare("INSERT INTO church_members SET client_id = ?, item_id = ?, fullname = ?, contact = ?, email = ?, residence = ?, gender = ?");
+        $update = $this->db->prepare("UPDATE church_members SET fullname = ?, contact = ?, email = ?, residence = ?, gender = ? WHERE client_id = ? AND item_id = ? LIMIT 1");
+
+        // save the user information
+        foreach($members_list as $member) {
+            if(empty($this->pushQuery("item_id", "church_members", "item_id='{$member["item_id"]}' LIMIT 1"))) {
+                $insert->execute([$params->clientId, $member["item_id"], $member["fullname"], $member["contact"] ?? null, $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null]);
+            } else {
+                $update->execute([$member["fullname"], $member["contact"] ?? null, $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null, $params->clientId, $member["item_id"]]);
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * List Members
+     * 
+     * @return Array
+     */
+    public function list_members($params) {
+
+        $params = is_object($params) ? $params : (object) $params;
+
+        $where_clause = 1;
+        $where_clause .= isset($params->name) ? " AND a.fullname LIKE '%{$params->name}%'" : null;
+
+        $stmt = $this->db->prepare("SELECT
+            a.id, a.fullname, a.item_id, a.contact, a.residence, a.gender, a.residence
+        FROM church_members a WHERE {$where_clause} AND client_id = ?");
+        $stmt->execute([$params->clientId]);
+
+        $data = [];
+        while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+            $data[$result->item_id] = $result;
+        }
+
+        return $data;
 
     }
 
