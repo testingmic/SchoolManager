@@ -7,6 +7,7 @@ var delayTimer, membersSearchList;
 var select_member = (user_id, row_id) => {
     if(membersSearchList[user_id] !== undefined) {
         let member = membersSearchList[user_id];
+        $(`input[name="item_id[${row_id}]"]`).val(member.item_id);
         $(`input[name="fullname[${row_id}]"]`).val(member.fullname);
         $(`input[name="residence[${row_id}]"]`).val(member.residence);
         $(`input[name="contact[${row_id}]"]`).val(member.contact);
@@ -16,9 +17,9 @@ var select_member = (user_id, row_id) => {
 }
 
 var suggest_member = (search_term, row_id = 1) => {
+    $(`div[class~="picomplete-items"]`).html(``);
     if(search_term.length > 1) {
         clearTimeout(delayTimer);
-        $(`div[class~="picomplete-items"]`).html(``);
         delayTimer = setTimeout(() => {
             let data = {
                 request : "list",
@@ -75,7 +76,7 @@ var add_sibling = () => {
             <div class='col-md-4'>
                 <div class='form-group'>
                     <label>Contact Number</label>
-                    <input maxlength='15' type='number' name='contact[${rows_count}]' id='contact[${rows_count}]' class='form-control'>
+                    <input maxlength='12' type='number' min='0' name='contact[${rows_count}]' id='contact[${rows_count}]' class='form-control'>
                 </div>
             </div>
             <div class='col-md-3'>

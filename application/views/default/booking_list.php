@@ -28,7 +28,7 @@ $params = (object) [
     "client_data" => $defaultUser->client,
     "log_date" => $filter->log_date ?? null
 ];
-$item_list = load_class("booking", "controllers", $params)->list($params)["data"];
+$item_list = load_class("booking", "controllers", $params)->list($params);
 
 // set the parameters
 $params = (object) [];
@@ -37,29 +37,14 @@ $count = 0;
 $booking_list = "";
 $booking_log_array_list = [];
 
-// summary count
-$summary = [
-    "Count" => [
-        "Logs" => 0,
-        "Members" => 0
-    ],
-    "Gender" => [
-        "Male" => 0,
-        "Female" => 0,
-        "Unspecified" => 0
-    ]
-];
-
 // loop through the list
 if(is_array($item_list)) {
 
     // loopt through the log list
-    foreach($item_list as $log) {
+    foreach($item_list["data"]["list"] as $log) {
 
         $booking_log_array_list[$log->item_id] = $log;
         $count++;
-
-        $summary["Count"]["Logs"]++;
 
         // set the action button
         $action = "";
@@ -76,10 +61,6 @@ if(is_array($item_list)) {
         foreach($log->members_list as $key => $member) {
             // temperature check
             $color = $member["temperature"] > 36.7 ? "danger" : ($member["temperature"] < 34.7 ? "warning" : "success");
-
-            // add to the counter
-            $summary["Count"]["Members"]++;
-            !empty($member["gender"]) ? $summary["Gender"][$member["gender"]]++ : $summary["Gender"]["Unspecified"]++;
 
             // append to the list
             $members_list .= "<div class='col-lg-6 ".($key !== count($log->members_list) ? "mb-3" : "")."'>";
@@ -104,7 +85,7 @@ if(is_array($item_list)) {
 }
 $response->array_stream["booking_log_array_list"] = [
     "array_list" => $booking_log_array_list,
-    "summary" => $summary
+    "summary" => $item_list["data"]["summary"]
 ];
 
 $response->html = '
@@ -119,6 +100,14 @@ $response->html = '
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
+                    <div class="row p-3">
+                        <div class="col-md-6 col-sm-12 text-left">
+                            <h5></h5>
+                        </div>
+                        <div class="col-md-6 col-sm-12 text-right">
+                            <a href="'.$baseUrl.'booking_log" class="btn btn-primary" title="Click to log attendance"><i class="fa fa-user"></i> Log Attendance</a>
+                        </div>
+                    </div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table data-empty="" class="table table-bordered table-striped datatable">

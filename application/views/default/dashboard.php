@@ -39,8 +39,147 @@ $userData->the_user_type = $defaultUser->user_type;
 // if not booking set
 if($isBooking) {
 
+    $count = 0;
+
+    // set the params
+    $params = (object) ["clientId" => $clientId];
+
+    // make a request for the logs analitics
+    $bookingObj = load_class("booking", "controllers");
+    $analitics = $bookingObj->analitics($params)["data"];
+
+    // set the members list
+    $members_list = "";
+
+    foreach($analitics["members_summary"]["list"] as $member) {
+
+        // set the action
+        $action = "";
+        $count++;
+
+        // append to the list
+        $members_list .= "<tr data-row_id=\"{$member->item_id}\">";
+        $members_list .= "<td align='center'>{$count}</td>";
+        $members_list .= "<td>{$member->fullname}</td>";
+        $members_list .= "<td>{$member->contact}</td>";
+        $members_list .= "<td>{$member->gender}</td>";
+        $members_list .= "<td>{$member->residence}</td>";
+        $members_list .= "<td>{$member->bible_class_name}</td>";
+        $members_list .= "</tr>";
+    }
+
     // set the panel for booking information
-    
+    // set the response dataset
+    $response->html = '
+    <section class="section">
+        <div class="d-flex mt-3 justify-content-between">
+            <div class="section-header">
+                <h1>Dashboard</h1>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card">
+                    <div class="card-body card-type-3">
+                        <div class="row">
+                            <div class="col">
+                                <h6 class="text-muted mb-0">Total Logs</h6>
+                                <span class="font-weight-bold mb-0">
+                                    '.$analitics["logs_summary"]["Count"]["Logs"].'
+                                </span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="card-circle l-bg-orange text-white">
+                                    <i class="fas fa-list"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card">
+                    <div class="card-body card-type-3">
+                        <div class="row">
+                            <div class="col">
+                                <h6 class="text-muted mb-0">Total Attendees</h6>
+                                <span class="font-weight-bold mb-0">
+                                    '.$analitics["logs_summary"]["Count"]["Members"].'
+                                </span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="card-circle l-bg-cyan text-white">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card">
+                    <div class="card-body card-type-3">
+                        <div class="row">
+                            <div class="col">
+                                <h6 class="text-muted mb-0">Male Attendees</h6>
+                                <span class="font-weight-bold mb-0">
+                                    '.$analitics["logs_summary"]["Gender"]["Male"].'
+                                </span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="card-circle l-bg-green text-white">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card">
+                    <div class="card-body card-type-3">
+                        <div class="row">
+                            <div class="col">
+                                <h6 class="text-muted mb-0">Female Attendees</h6>
+                                <span class="font-weight-bold mb-0">
+                                    '.$analitics["logs_summary"]["Gender"]["Female"].'
+                                </span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="card-circle l-bg-yellow text-white">
+                                    <i class="fas fa-user-nurse"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-12 col-lg-12">
+                <div class=""><h5>Members List</h5></div>
+                <div class="card">                    
+                    <div class="card-body">
+                        <div class="table-responsive table-student_staff_list">
+                            <table data-empty="" class="table table-bordered table-striped datatable">
+                                <thead>
+                                    <tr>
+                                        <th width="8%" class="text-center">#</th>
+                                        <th>Name</th>
+                                        <th>Contact</th>
+                                        <th>Gender</th>
+                                        <th>Residence</th>
+                                        <th>Bible Class</th>
+                                    </tr>
+                                </thead>
+                                <tbody>'.$members_list.'</tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </section>';
 } else {
 
     // append more values for loading

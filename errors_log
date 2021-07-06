@@ -1,1 +1,0 @@
-[05-Jul-2021 16:04:17 Africa/Accra] PHP Notice:  Trying to get property 'clientId' of non-object in /var/www/html/myschool_gh/application/controllers/booking.php on line 254

@@ -675,44 +675,51 @@ new_message_alert();
 
 var loadFormAction = (form) => {
 
-    $.ajax({
-        url: form[0].action,
-        method: form[0].method,
-        data: new FormData(form[0]),
-        dataType: 'JSON',
-        contentType: false,
-        cache: false,
-        processData: false,
-        beforeSend: () => {
-            $.mainprogress.show()
-            $.pageoverlay.show()
-        },
-        success: (result) => {
-            var urlLink = result.data.additional === undefined ? null : result.data.additional.href || null;
-            var error = result.code === 200 ? null : result.data.result || null;
-            $.pageoverlay.hide();
-
-            if (error !== null) notify(error)
-
-            if (result.code == 200) {
-                swal({
-                    position: 'top',
-                    text: result.data.result,
-                    icon: "success",
-                });
-                if (result.data.additional !== undefined) {
-                    if (result.data.additional.clear !== undefined) {
-                        $(`form[class~="ajaxform"] input, form[class~="ajaxform"] textarea`).val("");
-                        $(`form[class~="ajaxform"] select`).val("null").change();
+    swal({
+        title: "Submit Form",
+        text: "Are you sure you want to submit this form for processing?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if(proceed) {
+            $.ajax({
+                url: form[0].action,
+                method: form[0].method,
+                data: new FormData(form[0]),
+                dataType: 'JSON',
+                contentType: false,
+                cache: false,
+                processData: false,
+                beforeSend: () => {
+                    $.pageoverlay.show();
+                },
+                success: (result) => {
+                    var error = result.code === 200 ? null : result.data.result || null;
+                    $.pageoverlay.hide();
+                    if (error !== null) notify(error)
+        
+                    if (result.code == 200) {
+                        swal({
+                            position: 'top',
+                            text: result.data.result,
+                            icon: "success",
+                        });
+                        if (result.data.additional !== undefined) {
+                            if (result.data.additional.clear !== undefined) {
+                                $(`form[class~="ajaxform"] input, form[class~="ajaxform"] textarea`).val("");
+                                $(`form[class~="ajaxform"] select`).val("null").change();
+                            }
+                            if (result.data.additional.href !== undefined) {
+                                loadPage(result.data.additional.href);
+                            }
+                        }
                     }
-                    if (result.data.additional.href !== undefined) {
-                        loadPage(result.data.additional.href);
-                    }
-                }
-            }
-        },
-        error: (err) => {}
-    })
+                },
+                error: (err) => {}
+            });
+        }
+    });
 }
 
 var initMainMenu = () => {
@@ -1096,6 +1103,13 @@ var form_submit_stopper = () => {
     }
 }
 
+var clear_input = () => {
+    $(`div[class~="member_item"] textarea, div[class~="member_item"] input`).val("");
+    $(`div[class~="member_item"] input[id='log_date']`).val($(`input[id="todays_date"]`).val());
+    $(`div[class~="member_item"] select`).val("").change();
+    $(`div[id="log_attendance_container"] div[class~="member_item"]`).not(`:first`).remove();
+}
+
 var load_form_action = (form) => {
 
     swal({
@@ -1125,6 +1139,7 @@ var load_form_action = (form) => {
                             if (result.data.additional.clear !== undefined) {
                                 $(`form[class~="_ajaxform"] input, form[class~="_ajaxform"] textarea`).val("");
                                 $(`form[class~="_ajaxform"] select`).val("null").change();
+                                clear_input();
                             }
                             if (result.data.additional.href !== undefined) {
                                 setTimeout(() => {

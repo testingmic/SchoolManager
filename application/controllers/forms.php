@@ -4808,7 +4808,7 @@ class Forms extends Myschoolgh {
 
 
     /**
-     * Course Unit Form
+     * Booking Log Form
      * 
      * @param stdClass $params
      * @param String $course_id
@@ -4830,7 +4830,7 @@ class Forms extends Myschoolgh {
                     <h5>Add Record</h5>
                 </div>
                 <div class='col-md-6 col-sm-12 text-right'>
-                    <button type='button' class='btn btn-primary' title='Add a New Family Member' onclick='return add_sibling()'><i class='fa fa-user'></i> Add Family Member</button>
+                    <button type='button' class='btn btn-primary' title='Add a New Member' onclick='return add_sibling()'><i class='fa fa-user'></i> Add New Member</button>
                 </div>" : "
                 <div class='col-md-6 col-sm-12 text-left'>
                     <h5>Update Record</h5>
@@ -4879,7 +4879,7 @@ class Forms extends Myschoolgh {
                             <div class='col-md-4'>
                                 <div class='form-group'>
                                     <label>Contact Number</label>
-                                    <input maxlength='15' type='number' name='contact[1]' id='contact[1]' class='form-control'>
+                                    <input maxlength='12' min='0' type='number' name='contact[1]' id='contact[1]' class='form-control'>
                                 </div>
                             </div>
                             <div class='col-md-3'>
@@ -4891,7 +4891,7 @@ class Forms extends Myschoolgh {
                             <div class='col-md-2'>
                                 <div class='form-group'>
                                     <label>Temperature <span class='required'>*</span></label>
-                                    <input maxlength='32' type='hidden' hidden name='item_id[1]' id='item_id[1]' class='form-control'>
+                                    <input maxlength='32' min='10' type='hidden' data-input='item_id' name='item_id[1]' id='item_id[1]' class='form-control'>
                                     <input maxlength='6' autocomplete='Off' type='float' name='temperature[1]' id='temperature[1]' class='form-control'>
                                 </div>
                             </div>
@@ -4944,7 +4944,7 @@ class Forms extends Myschoolgh {
                             <div class='col-md-3'>
                                 <div class='form-group'>
                                     <label>Contact Number</label>
-                                    <input maxlength='15' value='".($member->contact ?? null)."' type='number' name='contact[{$key}]' id='contact[{$key}]' class='form-control'>
+                                    <input maxlength='12' min='0' value='".($member->contact ?? null)."' type='number' name='contact[{$key}]' id='contact[{$key}]' class='form-control'>
                                 </div>
                             </div>
                             <div class='col-md-3'>
@@ -4956,7 +4956,7 @@ class Forms extends Myschoolgh {
                             <div class='col-md-3'>
                                 <div class='form-group'>
                                     <label>Temperature <span class='required'>*</span></label>
-                                    <input maxlength='32' value='".($member->item_id ?? null)."' type='hidden' hidden name='item_id[{$key}]' id='item_id[{$key}]' class='form-control'>
+                                    <input maxlength='32' min='10' value='".($member->item_id ?? null)."' type='hidden' hidden name='item_id[{$key}]' id='item_id[{$key}]' class='form-control'>
                                     <input maxlength='6' autocomplete='Off' value='".($member->temperature ?? null)."' type='float' name='temperature[{$key}]' id='temperature[{$key}]' class='form-control'>
                                 </div>
                             </div>
@@ -4970,7 +4970,7 @@ class Forms extends Myschoolgh {
             </div>
             <div class='row'>
                 <div class=\"col-md-6 text-left\">
-                    <button ".(empty($item_id) ? "type=\"reset\"" : "type=\"button\" onclick=\"return loadPage('{$this->baseUrl}booking_log/{$item_id}')\"")." class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                    <button ".(empty($item_id) ? "onclick=\"return clear_input()\" type=\"button\"" : "type=\"button\" onclick=\"return loadPage('{$this->baseUrl}booking_log/{$item_id}')\"")." class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
                 </div>
                 <div class=\"col-md-6 text-right\">
                     <input type=\"hidden\" name=\"booking_id\" id=\"booking_id\" value=\"{$item_id}\" hidden class=\"form-control\">
@@ -4980,6 +4980,113 @@ class Forms extends Myschoolgh {
         </form>";
 
         return $html_content;
+
+    }
+
+    /**
+     * Members Form
+     * 
+     * @return String
+     */
+    public function members_form(stdClass $params) {
+        
+        $data = $params->data ?? null;
+        $item_id = isset($data->item_id) ? $data->item_id : null;
+
+        $class_list = $this->pushQuery("id, name", "church_bible_classes", "client_id = '{$params->clientId}' AND status='1' LIMIT 100");
+        $organizations_list = $this->pushQuery("id, name", "church_organizations", "client_id = '{$params->clientId}' AND status='1' LIMIT 100");
+
+        $html_content = "
+        <form action='{$this->baseUrl}api/booking/members' autocomplete='Off' method='POST' id='ajax-data-form-content' class='ajaxform'>
+            <div class='row member_item' data-row_id='1'>
+                <div class='col-md-3'>
+                    <div class='form-group'>
+                        <label>Date of Birth <span class='required'>*</span></label>
+                        <input value='".($data->date_of_birth ?? null)."' maxlength='12' type='text' name='data[date_of_birth]' id='data[date_of_birth]' class='form-control datepicker'>
+                    </div>
+                </div>
+                <div class='col-md-6'>
+                    <div class='form-group'>
+                        <label>Fullname <span class='required'>*</span></label>
+                        <input maxlength='64' value='".($data->fullname ?? null)."' type='text' name='data[fullname]' id='data[fullname]' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-3'>
+                    <div class='form-group'>
+                        <label>Gender</label>
+                        <select type='text' data-width='100%' name='data[gender]' id='data[gender]' class='selectpicker form-control'>
+                            <option value=''>Please Select</option>
+                            <option ".(isset($data->gender) && $data->gender == "Male" ? "selected" : null)." Male'>Male</option>
+                            <option ".(isset($data->gender) && $data->gender == "Female" ? "selected" : null)." value='Female'>Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class='col-lg-4 col-md-4'>
+                    <div class='form-group'>
+                        <label>Contact Number</label>
+                        <input maxlength='12' min='0' value='".($data->contact ?? null)."' type='number' name='data[contact]' id='data[contact]' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-lg-4 col-md-4'>
+                    <div class='form-group'>
+                        <label>Phone Number</label>
+                        <input maxlength='12' min='0' value='".($data->contact_2 ?? null)."' type='number' name='data[contact_2]' id='data[contact_2]' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-lg-4 col-md-4'>
+                    <div class='form-group'>
+                        <label>Email Address</label>
+                        <input type='email' name='data[email]' value='".($data->email ?? null)."' id='data[email]' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-lg-4 col-md-4'>
+                    <div class='form-group'>
+                        <label>Place of Residence</label>
+                        <input maxlength='32' type='text' value='".($data->residence ?? null)."' name='data[residence]' id='data[residence]' class='form-control'>
+                    </div>
+                </div> 
+                <div class='col-lg-8 col-md-8'>
+                    <div class='form-group'>
+                        <label>Profession</label>
+                        <input type='text' name='data[profession]' value='".($data->profession ?? null)."' id='data[profession]' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-4'>
+                    <div class='form-group'>
+                        <label>Bible Class</label>
+                        <select type='text' data-width='100%' name='data[bible_class]' id='data[bible_class]' class='selectpicker form-control'>
+                            <option value=''>Please Select</option>";
+                            foreach($class_list as $item) {
+                                $html_content .= "<option value='{$item->item_id}'>{$item->name}</option>";
+                            }
+            $html_content .= "</select>
+                    </div>
+                </div>
+                <div class='col-md-8'>
+                    <div class='form-group'>
+                        <label>Organization(s)</label>
+                        <select type='text' multiple data-width='100%' name='data[organization]' id='data[organization]' class='selectpicker form-control'>
+                            <option value=''>Please Select</option>";
+                            foreach($organizations_list as $item) {
+                                $html_content .= "<option value='{$item->item_id}'>{$item->name}</option>";
+                            }
+            $html_content .= "</select>
+                    </div>
+                </div>
+            </div>
+            <div class='row'>
+                <div class=\"col-md-6 text-left\">
+                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                </div>
+                <div class=\"col-md-6 text-right\">
+                    <input type=\"hidden\" name=\"data[request]\" id=\"data[request]\" value=\"add_update\" hidden>
+                    <input type=\"hidden\" name=\"data[item_id]\" id=\"data[item_id]\" value=\"{$item_id}\" hidden class=\"form-control\">
+                    <button class=\"btn btn-outline-success btn-sm\" type='submit'><i class='fa fa-save'></i> ".(empty($item_id) ? "Save" : "Update")." Record</button>
+                </div>
+            </div>
+        </form>";
+
+        return $html_content;  
 
     }
 

@@ -25,6 +25,19 @@ class Booking extends Myschoolgh {
             $query .= isset($params->member_id) && !empty($params->member_id) ? " AND a.members_ids LIKE '%{$params->member_id}%'" : null;
             $query .= isset($params->created_by) && !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
             
+            // summary count
+            $summary = [
+                "Count" => [
+                    "Logs" => 0,
+                    "Members" => 0
+                ],
+                "Gender" => [
+                    "Male" => 0,
+                    "Female" => 0,
+                    "Unspecified" => 0
+                ]
+            ];
+
             // get the list of all booking logs
             $stmt = $this->db->prepare("SELECT 
                     a.client_id, a.item_id, a.log_date, a.members_list, a.members_ids, a.state, a.date_created, a.created_by,
@@ -44,12 +57,24 @@ class Booking extends Myschoolgh {
                 $result->members_list = json_decode($result->members_list, true);
                 $result->members_ids = json_decode($result->members_ids, true);
 
+                // summary analitics
+                $summary["Count"]["Logs"]++;
+
+                // add to the counter
+                foreach($result->members_list as $key => $member) {
+                    $summary["Count"]["Members"]++;
+                    !empty($member["gender"]) ? $summary["Gender"][$member["gender"]]++ : $summary["Gender"]["Unspecified"]++;
+                }
+
                 $data[] = $result;
             }
 
             return [
                 "code" => 200,
-                "data" => $data
+                "data" => [
+                    "list" => $data,
+                    "summary" => $summary
+                ]
             ];
             
         } catch(PDOEXception $e) {
@@ -89,16 +114,22 @@ class Booking extends Myschoolgh {
 
             // loop through the fields
             foreach(["fullname", "contact", "residence", "gender", "temperature", "item_id"] as $item) {
+                // generate new group id
+                $group_id = random_string("alnum", 15);
+
                 // if the field was parsed in the request
                 if(isset($params->{$item})) {
+
                     // loop through the fields for grouping
                     foreach($params->{$item} as $key => $value) {
+
                         // append to the list
                         $members_list[$key][$item] = $value;
 
                         // append the member id
                         if(in_array($item, ["item_id"]) && empty($value)) {
                             $members_list[$key][$item] = random_string("alnum", 18);
+                            $members_list[$key]["group_id"] = $group_id;
                         }
 
                         // log the errors
@@ -152,8 +183,7 @@ class Booking extends Myschoolgh {
                     "code" => 200, 
                     "data" => "Attendance was successfully logged.", 
                     "additional" => [
-                        "clear" => true,
-                        "href" => "{$this->baseUrl}booking_log"
+                        "clear" => true
                     ]
                 ];
 
@@ -211,7 +241,7 @@ class Booking extends Myschoolgh {
 
             // if the request is to search
             if($params->data["request"] == "list") {
-                return $this->list_members($params->data);
+                return $this->list_members($params->data)["data"]["list"];
             }
         
         } catch(PDOException $e) {}
@@ -223,20 +253,26 @@ class Booking extends Myschoolgh {
      * 
      * @return Bool
      */
-    public function add_update_member(stdClass $params) {
+    public function add_update_member($params) {
+
         // get the members list
-        $members_list = $params["members_list"];
+        $params = is_object($params) ? $params : (object) $params;
+        $members_list = $params->members_list;
 
         // set the insert and update query
-        $insert = $this->db->prepare("INSERT INTO church_members SET client_id = ?, item_id = ?, fullname = ?, contact = ?, email = ?, residence = ?, gender = ?");
-        $update = $this->db->prepare("UPDATE church_members SET fullname = ?, contact = ?, email = ?, residence = ?, gender = ? WHERE client_id = ? AND item_id = ? LIMIT 1");
+        $insert = $this->db->prepare("INSERT INTO church_members SET client_id = ?, item_id = ?, 
+            fullname = ?, contact = ?, email = ?, residence = ?, gender = ?, group_id = ?");
+        $update = $this->db->prepare("UPDATE church_members SET fullname = ?, contact = ?, email = ?, 
+            residence = ?, gender = ?, group_id = ? WHERE client_id = ? AND item_id = ? LIMIT 1");
 
         // save the user information
         foreach($members_list as $member) {
             if(empty($this->pushQuery("item_id", "church_members", "item_id='{$member["item_id"]}' LIMIT 1"))) {
-                $insert->execute([$params->clientId, $member["item_id"], $member["fullname"], $member["contact"] ?? null, $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null]);
+                $insert->execute([$params->clientId, $member["item_id"], $member["fullname"], $member["contact"] ?? null, 
+                    $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null, $member["group_id"] ?? null]);
             } else {
-                $update->execute([$member["fullname"], $member["contact"] ?? null, $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null, $params->clientId, $member["item_id"]]);
+                $update->execute([$member["fullname"], $member["contact"] ?? null, $member["email"] ?? null, $member["residence"] ?? null, 
+                    $member["gender"] ?? null, $member["group_id"] ?? null, $params->clientId, $member["item_id"]]);
             }
         }
 
@@ -253,19 +289,70 @@ class Booking extends Myschoolgh {
         $params = is_object($params) ? $params : (object) $params;
 
         $where_clause = 1;
-        $where_clause .= isset($params->name) ? " AND a.fullname LIKE '%{$params->name}%'" : null;
+        $where_clause .= isset($params->name) && !empty($params->name) ? " AND a.fullname LIKE '%{$params->name}%'" : null;
+        $where_clause .= isset($params->member_id) && !empty($params->member_id) ? " AND a.item_id = '{$params->member_id}'" : null;
 
-        $stmt = $this->db->prepare("SELECT
-            a.id, a.fullname, a.item_id, a.contact, a.residence, a.gender, a.residence
-        FROM church_members a WHERE {$where_clause} AND client_id = ?");
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+        $columns = isset($params->load) ? "a.*" : "a.id, a.fullname, a.item_id, a.contact, a.residence, a.gender, a.residence,
+        a.date_of_birth, a.profession, a.email, a.organization";
+
+        $stmt = $this->db->prepare("SELECT {$columns}, a.bible_class, b.name AS bible_class_name
+        FROM church_members a 
+        LEFT JOIN church_bible_classes b ON b.item_id = a.bible_class
+        WHERE 
+            {$where_clause} AND a.client_id = ? 
+        LIMIT {$params->limit}");
         $stmt->execute([$params->clientId]);
 
         $data = [];
+        $summary = [
+            "Count" => [
+                "Members" => 0
+            ],
+            "Gender" => [
+                "Male" => 0,
+                "Female" => 0,
+                "Unspecified" => 0
+            ]
+        ];
         while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+            // summary analitics
+            $summary["Count"]["Members"]++;
+            !empty($result->gender) ? $summary["Gender"][$result->gender]++ : $summary["Gender"]["Unspecified"]++;
+            
+            // additional data
+            $result->organizations_list = null;
+
+            // append to the list
             $data[$result->item_id] = $result;
         }
 
-        return $data;
+        return [
+            "code" => 200,
+            "data" => [
+                "list" => $data,
+                "summary" => $summary
+            ]
+        ];
+
+    }
+
+    /**
+     * Analytics
+     * 
+     * @return Array
+     */
+    public function analitics(stdClass $params) {
+        
+        // get the summary of the data in the logs
+        $data["logs_summary"] = $this->list($params)["data"]["summary"];
+
+        // get the summary of all members list
+        $data["members_summary"] = $this->list_members(["clientId" => $params->clientId])["data"];
+
+        return [
+            "data" => $data
+        ];
 
     }
 
