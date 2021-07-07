@@ -98,3 +98,65 @@ var add_sibling = () => {
     $('.selectpicker').select2();
 }
 form_submit_stopper();
+
+if($(`div[id="attendance_log_chart"]`).length) {
+
+    if ($.array_stream["dashboard_analitics"] !== undefined) {
+        let analitics = $.array_stream["dashboard_analitics"];
+        
+        $(`div[data-chart="attendance_log_chart"]`).html(`<div id="attendance_log_chart"></div>`);
+            
+        var options = {
+            chart: {
+                height: 350,
+                type: 'bar',
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    endingShape: 'rounded',
+                    columnWidth: '25%',
+                },
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['transparent']
+            },
+            series: [{
+                name: 'Count',
+                data: analitics.logs_graph.count
+            }, {
+                name: 'Male',
+                data: analitics.logs_graph.gender.Male
+            }, {
+                name: 'Female',
+                data: analitics.logs_graph.gender.Female
+            }],
+            xaxis: {
+                categories: analitics.logs_graph.dates,
+            },
+            yaxis: {
+                title: {
+                    text: '$ (thousands)'
+                }
+            },
+            fill: {
+                opacity: 1
+            }
+        }
+
+        var chart = new ApexCharts(
+            document.querySelector("#attendance_log_chart"),
+            options
+        );
+
+        chart.render();
+        
+        $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
+    }
+
+}

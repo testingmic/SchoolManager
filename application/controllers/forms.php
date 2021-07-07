@@ -4993,8 +4993,9 @@ class Forms extends Myschoolgh {
         $data = $params->data ?? null;
         $item_id = isset($data->item_id) ? $data->item_id : null;
 
-        $class_list = $this->pushQuery("id, name", "church_bible_classes", "client_id = '{$params->clientId}' AND status='1' LIMIT 100");
-        $organizations_list = $this->pushQuery("id, name", "church_organizations", "client_id = '{$params->clientId}' AND status='1' LIMIT 100");
+        $class_list = $this->pushQuery("item_id, name, language", "church_bible_classes", "client_id = '{$params->clientId}' AND status='1' LIMIT 100");
+        $organizations_list = $this->pushQuery("item_id, name", "church_organizations", "client_id = '{$params->clientId}' AND status='1' LIMIT 100");
+        $organizations = !empty($data) ? $data->organizations_list : [];
 
         $html_content = "
         <form action='{$this->baseUrl}api/booking/members' autocomplete='Off' method='POST' id='ajax-data-form-content' class='ajaxform'>
@@ -5057,7 +5058,7 @@ class Forms extends Myschoolgh {
                         <select type='text' data-width='100%' name='data[bible_class]' id='data[bible_class]' class='selectpicker form-control'>
                             <option value=''>Please Select</option>";
                             foreach($class_list as $item) {
-                                $html_content .= "<option value='{$item->item_id}'>{$item->name}</option>";
+                                $html_content .= "<option ".(isset($data->bible_class) && $data->bible_class == $item->item_id ? "selected" : null)." value='{$item->item_id}'>{$item->name} ({$item->language})</option>";
                             }
             $html_content .= "</select>
                     </div>
@@ -5065,10 +5066,10 @@ class Forms extends Myschoolgh {
                 <div class='col-md-8'>
                     <div class='form-group'>
                         <label>Organization(s)</label>
-                        <select type='text' multiple data-width='100%' name='data[organization]' id='data[organization]' class='selectpicker form-control'>
+                        <select type='text' multiple data-width='100%' name='data[organization][]' id='data[organization][]' class='selectpicker form-control'>
                             <option value=''>Please Select</option>";
                             foreach($organizations_list as $item) {
-                                $html_content .= "<option value='{$item->item_id}'>{$item->name}</option>";
+                                $html_content .= "<option ".(in_array($item->item_id, $organizations) ? "selected" : null)." value='{$item->item_id}'>{$item->name}</option>";
                             }
             $html_content .= "</select>
                     </div>

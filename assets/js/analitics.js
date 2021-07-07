@@ -138,7 +138,6 @@ var revenueReporting = (revenue) => {
 
     }
     if ($(`canvas[id="revenue_payment_category"]`).length) {
-        console.log(revenue);
         if (revenue.revenue_received_payment_method_count !== undefined) {
             let the_value = new Array(),
                 the_label = new Array();

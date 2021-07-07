@@ -50,6 +50,8 @@ if($isBooking) {
 
     // set the members list
     $members_list = "";
+    $response->scripts = ["assets/js/booking_log.js"];
+    $response->array_stream["dashboard_analitics"] = $analitics;
 
     foreach($analitics["members_summary"]["list"] as $member) {
 
@@ -155,7 +157,26 @@ if($isBooking) {
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-12 col-lg-12">
+
+            <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Attendance Graph</h4>
+                    </div>
+                    <div class="card-body quick_loader" style="max-height:465px;height:465px;">
+                        <div class="form-content-loader" style="display: flex; position: absolute">
+                            <div class="offline-content text-center">
+                                <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                            </div>
+                        </div>
+                        <div class="card-body" data-chart="attendance_log_chart">
+                            <div id="attendance_log_chart"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-12 col-lg-12 hidden">
                 <div class=""><h5>Members List</h5></div>
                 <div class="card">                    
                     <div class="card-body">
@@ -177,6 +198,7 @@ if($isBooking) {
                     </div>
                 </div>
             </div>
+
         </div>
 
     </section>';

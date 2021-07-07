@@ -44,7 +44,7 @@ class Booking extends Myschoolgh {
                     (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM 
                     church_booking_log a
-                WHERE {$query} AND a.client_id = ? ORDER BY a.id DESC LIMIT {$params->limit}
+                WHERE {$query} AND a.client_id = ? ORDER BY DATE(a.log_date) DESC LIMIT {$params->limit}
             ");
             $stmt->execute([$params->clientId]);
 
@@ -221,22 +221,22 @@ class Booking extends Myschoolgh {
         try {
 
             if(!is_array($params->data)) {
-                return ["code" => 203, "result" => "Sorry! The data parameter must be an array."];
+                return ["code" => 203, "data" => "Sorry! The data parameter must be an array."];
             }
 
             $params->data["clientId"] = $params->clientId;
 
             if(!isset($params->data["request"])) {
-                return ["code" => 203, "result" => "Sorry! The request variable is required."];
+                return ["code" => 203, "data" => "Sorry! The request variable is required."];
             }
 
             if(!in_array($params->data["request"], ["list", "add_update"])) {
-                return ["code" => 203, "result" => "Sorry! An invalid request was parsed"];
+                return ["code" => 203, "data" => "Sorry! An invalid request was parsed"];
             }
             
             // if the request is either add or update member
             if($params->data["request"] == "add_update") {
-                $this->add_update_member($params->data);
+                return $this->add_update_member($params->data);
             }
 
             // if the request is to search
@@ -257,26 +257,53 @@ class Booking extends Myschoolgh {
 
         // get the members list
         $params = is_object($params) ? $params : (object) $params;
-        $members_list = $params->members_list;
+        $members_list = isset($params->members_list) ? $params->members_list : [(array) $params];
+        
+        try {
 
-        // set the insert and update query
-        $insert = $this->db->prepare("INSERT INTO church_members SET client_id = ?, item_id = ?, 
-            fullname = ?, contact = ?, email = ?, residence = ?, gender = ?, group_id = ?");
-        $update = $this->db->prepare("UPDATE church_members SET fullname = ?, contact = ?, email = ?, 
-            residence = ?, gender = ?, group_id = ? WHERE client_id = ? AND item_id = ? LIMIT 1");
+            // set the insert and update query
+            $insert = $this->db->prepare("INSERT INTO church_members SET client_id = ?, item_id = ?, fullname = ?, 
+                contact = ?, contact_2 = ?, bible_class = ?, profession = ?, organization = ?,
+                email = ?, residence = ?, gender = ?, group_id = ?");
+            $update = $this->db->prepare("UPDATE church_members SET fullname = ?, 
+                contact = ?, contact_2 = ?, bible_class = ?, profession = ?, organization = ?,
+                email = ?, residence = ?, gender = ?, group_id = ? WHERE client_id = ? AND item_id = ? LIMIT 1");
 
-        // save the user information
-        foreach($members_list as $member) {
-            if(empty($this->pushQuery("item_id", "church_members", "item_id='{$member["item_id"]}' LIMIT 1"))) {
-                $insert->execute([$params->clientId, $member["item_id"], $member["fullname"], $member["contact"] ?? null, 
-                    $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null, $member["group_id"] ?? null]);
-            } else {
-                $update->execute([$member["fullname"], $member["contact"] ?? null, $member["email"] ?? null, $member["residence"] ?? null, 
-                    $member["gender"] ?? null, $member["group_id"] ?? null, $params->clientId, $member["item_id"]]);
+            // save the user information
+            foreach($members_list as $member) {
+
+                // set the organization value
+                $organization = isset($member["organization"]) && !empty($member["organization"]) ? json_encode($member["organization"]) : json_encode([]);
+                $item_id = isset($member["item_id"]) && !empty($member["item_id"]) ? $member["item_id"] : random_string("alnum", 16);
+
+                // insert the record if not existent
+                if(empty($this->pushQuery("item_id", "church_members", "item_id='{$item_id}' LIMIT 1"))) {
+                    $insert->execute([$params->clientId, $item_id, $member["fullname"], $member["contact"] ?? null,
+                        $member["contact_2"] ?? null, $member["bible_class"] ?? null, $member["profession"] ?? null,
+                        $organization, $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null, 
+                        $member["group_id"] ?? null
+                    ]);
+                } else {
+                    // update the record if already existing
+                    $update->execute([$member["fullname"], $member["contact"] ?? null, 
+                        $member["contact_2"] ?? null, $member["bible_class"] ?? null, $member["profession"] ?? null,
+                        $organization, $member["email"] ?? null, $member["residence"] ?? null, $member["gender"] ?? null, 
+                        $member["group_id"] ?? null, $params->clientId, $item_id
+                    ]);
+                }
             }
+
+            return [
+                "data" => "User processing request was successfully executed.",
+                "additional" => [
+                    "clear" => true
+                ]
+            ];
+
+        } catch(PDOException $e) {
+            return false;
         }
 
-        return true;
     }
 
     /**
@@ -321,7 +348,8 @@ class Booking extends Myschoolgh {
             !empty($result->gender) ? $summary["Gender"][$result->gender]++ : $summary["Gender"]["Unspecified"]++;
             
             // additional data
-            $result->organizations_list = null;
+            $result->organizations_list = !empty($result->organization) ? json_decode($result->organization) : [];
+            $result->organizations = "";
 
             // append to the list
             $data[$result->item_id] = $result;
@@ -345,7 +373,51 @@ class Booking extends Myschoolgh {
     public function analitics(stdClass $params) {
         
         // get the summary of the data in the logs
-        $data["logs_summary"] = $this->list($params)["data"]["summary"];
+        $logs = $this->list($params)["data"];
+        $data["logs_summary"] = $logs["summary"];
+
+        $logs_group = [];
+        $logs_chart = [];
+        $logs_graph = [];
+        $gender_array = ["Male", "Female"];
+        foreach($logs["list"] as $list) {
+            $logs_group[$list->log_date] = $list;
+        }
+
+        // loop through the logs_group
+        foreach($logs_group as $date => $item) {
+            
+            $logs_chart[$date] = [
+                "Total" => count($item->members_ids),
+                "Gender" => []
+            ];
+
+            // add to the counter
+            foreach($item->members_list as $key => $member) {
+                $member["gender"] = !in_array($member["gender"], ["Male", "Female"]) ? "Unspecified" : $member["gender"];
+                foreach($gender_array as $gender) {
+                    if(isset($logs_chart[$date]["Gender"][$member["gender"]]) && ($member["gender"] === $gender)) {
+                        $logs_chart[$date]["Gender"][$member["gender"]]++;
+                    } elseif(!isset($logs_chart[$date]["Gender"][$member["gender"]]) && ($member["gender"] === $gender)) {
+                        $logs_chart[$date]["Gender"][$member["gender"]] = 1;
+                    } else {
+                        $logs_chart[$date]["Gender"][$gender] = 0;
+                    }
+                }
+            }
+        }
+
+        $data["logs_chart"] = $logs_chart;
+        $data["logs_graph"] = [
+            "dates" => array_keys($logs_chart),
+            "count" => array_column(array_values($logs_chart), "Total")
+        ];
+
+        foreach($logs_chart as $key => $chart) {
+            foreach($gender_array as $gender) {
+                $data["logs_graph"]["gender"][$gender][] = $chart["Gender"][$gender];
+            }
+        }
 
         // get the summary of all members list
         $data["members_summary"] = $this->list_members(["clientId" => $params->clientId])["data"];

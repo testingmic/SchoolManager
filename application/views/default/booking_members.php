@@ -58,7 +58,7 @@ if(is_array($item_list)) {
         $members_list .= "<td>{$member->gender}</td>";
         $members_list .= "<td>{$member->residence}</td>";
         $members_list .= "<td>{$member->bible_class_name}</td>";
-        $members_list .= "<td>{$member->organizations_list}</td>";
+        $members_list .= "<td>{$member->organizations}</td>";
         $members_list .= "<td align='center'>{$action}</td>";
         $members_list .= "</tr>";
     }

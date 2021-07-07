@@ -35,7 +35,7 @@ $params = (object) [
 
 // make a request for the logs analitics
 $bookingObj = load_class("booking", "controllers");
-$item_list = $bookingObj->list_members($params)["data"]["list"];
+$item_list = !empty($user_id) ? $bookingObj->list_members($params)["data"]["list"] : null;
 
 $data = "";
 if(!empty($item_list)) {
