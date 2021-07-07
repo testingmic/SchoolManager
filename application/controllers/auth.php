@@ -671,7 +671,7 @@ class Auth extends Myschoolgh {
                     $password = password_hash($params->password, PASSWORD_DEFAULT);
                     
                     #deactivate all reset tokens
-                    $stmt = $this->db->prepare("UPDATE users SET password=? WHERE item_id=? LIMIT 10");
+                    $stmt = $this->db->prepare("UPDATE users SET password=? WHERE item_id=? LIMIT 1");
                     $stmt->execute([$password, $user_id]);
 
                     #process the form
@@ -688,9 +688,9 @@ class Auth extends Myschoolgh {
                    
                     //FORM THE MESSAGE TO BE SENT TO THE USER
                     $message = 'Hi '.$fullname.'<br>You have successfully changed your password at '.config_item('site_name');
-                    $message .= '<br><br>Do ignore this message if your rightfully effected this change.<br>';
-                    $message .= '<br>If not, do ';
-                    $message .= '<a class="alert alert-success" href="'.$baseUrl.'recover">Click Here</a> if you did not perform this act.';
+                    $message .= '<br><br>Ignore this message if your rightfully effected this change.<br>';
+                    $message .= '<br>If not,';
+                    $message .= '<a class="alert alert-success" href="'.$baseUrl.'forgot-password">Click Here</a> if you did not perform this act.';
 
                     #send email to the user
                     $reciepient = ["recipients_list" => [["fullname" => $fullname, "email" => $email, "customer_id" => $user_id]]];
@@ -704,23 +704,6 @@ class Auth extends Myschoolgh {
                         'password-recovery', $user_id, $user_id, json_encode($reciepient),
                         $user_id, "[".config_item('site_name')."] Change Password", $message
                     ]);
-
-                    // send a notification to the user
-                    $params = (object) [
-                        '_item_id' => random_string("alnum", 32),
-                        'user_id' => $user_id,
-                        'subject' => "Password Reset",
-                        'message' => "You have successfully changed your password.",
-                        'notice_type' => 4,
-                        'userId' => $user_id,
-                        'initiated_by' => 'system'
-                    ];
-
-                    // add a new notification
-                    $noticeClass->add($params);
-
-                    // update the initial notification sent to the user for the request to change password
-                    $this->db->query("UPDATE users_notification SET confirmed='1' WHERE item_id='{$request_item_id}' LIMIT 1");
 
                     // commit all transactions
                     $this->db->commit();
@@ -792,9 +775,40 @@ class Auth extends Myschoolgh {
             }
 
             // change the password
-            // $stmt = $this->
+            $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
+            $stmt->execute([password_hash($params->password_1, PASSWORD_DEFAULT), $params->user_id, $params->clientId]);
 
+            // log the user activity
+            $this->userLogs("password_reset", $params->user_id, null, "Password was successfully changed.", $params->userId);
+                   
+            //FORM THE MESSAGE TO BE SENT TO THE USER
+            $message = 'Hi '.$user->name.'<br>Your password was successfully changed.';
+            $message .= '<br><br>Ignore this message if your rightfully effected this change.<br>';
+            $message .= '<br>If not, ';
+            $message .= '<a class="alert alert-success" href="'.$baseUrl.'forgot-password">Click Here</a> if you did not perform this act.';
 
+            #send email to the user
+            $reciepient = ["recipients_list" => [["fullname" => $user->name, "email" => $user->email, "customer_id" => $params->user_id]]];
+
+            // add to the email list to be sent by a cron job
+            $stmt = $this->db->prepare("INSERT INTO users_messaging_list SET template_type = ?, item_id = ?, 
+                users_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?
+            ");
+            $stmt->execute(['password_reset', $params->user_id, $params->user_id, json_encode($reciepient),
+                $params->user_id, "[".config_item('site_name')."] Password Reset", $message
+            ]);
+
+            // reset the counter
+            $this->session->reset_count = 0;
+            
+            // return true
+            return [
+                "code" => 200,
+                "data" => "Your password was successfully changed.",
+                "additional" => [
+                    "clear" => true
+                ]
+            ];
 
         } catch(PDOException $e) {
 
