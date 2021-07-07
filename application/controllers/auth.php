@@ -739,7 +739,11 @@ class Auth extends Myschoolgh {
     public function change_password(stdClass $params) {
 
         try {
-
+            
+            if(in_array($params->clientId, ["TLIS0000001"])) {
+                return ["code" => "203", "data" => "Sorry! Changing of password is currently disabled for this account."];   
+            }
+            
             // reset count more than 4 then no long process the user request
             if(!empty($this->session->reset_count) && ($this->session->reset_count >= 4)) {
                 return ["code" => "203", "data" => "Sorry! You have been blocked from multiple trial to reset password."];
@@ -775,7 +779,7 @@ class Auth extends Myschoolgh {
             }
 
             // change the password
-            $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
+            $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE item_id = ? AND client_id = ? LIMIT 10");
             $stmt->execute([password_hash($params->password_1, PASSWORD_DEFAULT), $params->user_id, $params->clientId]);
 
             // log the user activity

@@ -295,6 +295,31 @@ elseif(isset($_GET["att_d"]) && ($_GET["att_d"] === "true") && isset($_GET["user
     $pages_content .= $attendanceObject->attendance_report($getObject)["data"]["table_content"];
 }
 
+/** Download The Terminal Report */
+elseif(isset($_GET["terminal"], $_GET["academic_term"], $_GET["academic_year"]) && !isset($_GET["tb_id"])) {
+    // set the get parameters as the values
+    $params = (object) $_GET;
+    $params->client_data = $defaultUser->client ?? null;
+
+    // set the class
+    $reportObj = load_class("terminal_reports", "controllers", $params);
+
+    // generate the report
+    $data = $reportObj->generate($params);
+
+    $start = 0;
+    $count = count($data["data"]["sheets"]);
+
+    // loop through the data
+    foreach($data["data"]["sheets"] as $key => $info) {
+
+        $start++;
+
+        $pages_content .= $info["report"];
+        $pages_content .= $count !== $start ? "\n<div class=\"page_break\"></div>" : null;
+    }
+}
+
 // load the html content
 $dompdf->loadHtml($pages_content);
 
@@ -311,6 +336,3 @@ $download_file = (bool) isset($_GET["auto_download"]);
 $dompdf->stream($file_name ?? null, ["compress" => 1, "Attachment" => $download_file]);
 
 exit;
-
-// if nothing was set
-print "Access Denied!";

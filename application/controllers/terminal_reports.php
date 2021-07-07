@@ -922,7 +922,7 @@ class Terminal_reports extends Myschoolgh {
 
             // init loop
             $students = [];
-            $bg_color = "#777882";//"#03a9f4";
+            $bg_color = "#6877ef";
             $academics = $this->iclient->client_preferences->academics;
             $grading = $this->iclient->grading_structure->columns;
             $interpretation = $this->iclient->grading_system;
@@ -939,6 +939,13 @@ class Terminal_reports extends Myschoolgh {
                 $grading_column .= "<td align=\"center\" width=\"11%\">".strtoupper($key)."</td>";
             }
 
+            // get the client logo content
+            if(!empty($this->iclient->client_logo)) {
+                $type = pathinfo($this->iclient->client_logo, PATHINFO_EXTENSION);
+                $logo_data = file_get_contents($this->iclient->client_logo);
+                $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+            }
+
             // loop through the report set
             foreach($report_data as $key => $student) {
                 
@@ -947,42 +954,42 @@ class Terminal_reports extends Myschoolgh {
                 $attendance_log = $attendanceObj->range_summary($attendance_param)->summary;
 
                 // set the information
-                $table = "<table width=\"100%\" cellspacing=\"5px\" cellpadding=\"5px\" style=\"background-color:{$bg_color}; color:#fff\">";
+                $table = "<table width=\"100%\" cellspacing=\"5px\" cellpadding=\"5px\" style=\"background-color:#050f58; color:#fff\">\n";
                 // get the student information
                 $table .= "<tr>";
-                $table .= "<td><strong>".strtoupper($student["data"]["student_name"])."</strong></td>";
-                $table .= "<td><strong style=\"text-transform:uppercase\">YEAR: {$student["data"]["academic_year"]} / {$student["data"]["academic_term"]}</strong></td>";
-                $table .= "<td><strong>GRADE: {$student["data"]["class_name"]}</strong></td>";
-                $table .= "<td><strong>AGE: {$student["data"]["student_age"]}</strong></td>";
+                $table .= "<td><strong>".strtoupper($student["data"]["student_name"])."</strong></td>\n";
+                $table .= "<td><strong style=\"text-transform:uppercase\">YEAR: {$student["data"]["academic_year"]} / {$student["data"]["academic_term"]}</strong></td>\n";
+                $table .= "<td><strong>GRADE: {$student["data"]["class_name"]}</strong></td>\n";
+                $table .= "<td><strong>AGE: {$student["data"]["student_age"]}</strong></td>\n";
                 $table .= "</tr>";
-                $table .= "</table>";
+                $table .= "</table>\n";
 
                 // set the address and the other information
-                $table .= "<br><br><table cellpadding=\"5\" width=\"100%\">";
+                $table .= "<table cellpadding=\"5\" width=\"100%\">";
                 $table .= "<tr>
                     <td width=\"25%\" valign=\"top\">
-                        <div style=\"background-color:{$bg_color}; padding:5px; color:#fff; height:80px\">Hello</div>
+                        <div style=\"background-color:{$bg_color}; padding:5px; color:#fff; height:50px\"></div>
                         <div style=\"padding:5px;\"><strong style=\"color:#6777ef\">CLASS AVERAGE: {$student["data"]["average_score"]}</strong></div>
                         <div style=\"padding:5px; text-transform:uppercase;\"><strong>SCHOOL RESUMES ON:<br><span style=\"color:#6777ef\">".date("jS M Y", strtotime($academics->next_term_starts))."</span></strong></div>
                     </td>";
                 $table .= "
                     <td align=\"center\" width=\"45%\">
-                        <img src=\"{$this->baseUrl}{$this->iclient->client_logo}\" width=\"100px\"><br>
+                        ".(!empty($this->iclient->client_logo) ? "<img width=\"100px\" src=\"{$client_logo}\"><br>" : "")."
                         <span style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</span><br>
                         <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
                         <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
                     </td>";
-                $table .= "<td style=\"background-color:{$bg_color}; padding:5px; color:#fff;\" align=\"center\" valign=\"top\" width=\"30%\">
-                    <div style=\"50px\">
+                $table .= "<td style=\"padding:5px; color:#fff;\" align=\"center\" valign=\"top\" width=\"30%\">
+                    <div style=\"padding:10px; background-color:{$bg_color};\">
                         <strong>MESSAGE</strong><br>
                         Please visit www.myschoolgh.com/report/{$student["data"]["unique_id"]} for a
                         graphical analysis of this report.
                     </div></td>
                     </tr>";
-                $table .= "</table>";
-                $table .= "<br><br><table style=\"font-size:11px\" cellpadding=\"5\" width=\"100%\" border=\"1\">";
-                $table .= "<tr style=\"font-weight:bold;font-size:15px;background-color:{$bg_color};color:#fff;\">";
-                $table .= "<td align=\"center\" colspan=\"".($column_count + 2)."\">END OF TERM REPORT CARD</td>";
+                $table .= "</table>\n";
+                $table .= "<table style=\"font-size:12px\" cellpadding=\"5\" width=\"100%\" border=\"1\">";
+                $table .= "<tr style=\"font-weight:bold;font-size:15px;background-color:#050f58;color:#fff;\">";
+                $table .= "<td align=\"center\" colspan=\"".($column_count + 3)."\">END OF TERM REPORT CARD</td>";
                 $table .= "</tr>";
                 $table .= "<tr style=\"font-weight:bold\">";
                 $table .= "<td width=\"25%\">SUBJECT</td>";
@@ -1007,15 +1014,19 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "</table>";
 
                 // set the grading system
-                $table .= "<br><br><table cellpadding=\"5px\" border=\"0\" width=\"100%\">";
+                $table .= "<table cellpadding=\"5px\" border=\"0\" width=\"100%\">";
                 $table .= "<tr>";
-                $table .= "<td align=\"center\" width=\"35%\">";
-                $table .= "<span style=\"font-weight:bold; font-size:20px\">GRADING SYSTEM</span><br>";
-                $table .= "<table style=\"font-size:11px\" align=\"left\" cellpadding=\"5px\" border=\"0\" width=\"100%\">\n";
+                $table .= "<td align=\"center\" width=\"35%\" valign=\"top\">";
+                $table .= "<table style=\"font-size:12px\" align=\"left\" cellpadding=\"5px\" border=\"0\" width=\"100%\">";
+                $table .= "<tr style=\"font-weight:bold\">";
+                $table .= "<td colspan=\"2\" align=\"center\">";
+                $table .= "<span style=\"font-weight:bold; font-size:20px\">GRADING SYSTEM</span>";
+                $table .= "</td>";
+                $table .= "</tr>";
                 $table .= "<tr style=\"font-weight:bold\">";
                 $table .= "<td>Marks in Percentage (%)</td>";
                 $table .= "<td>Interpretation</td>";
-                $table .= "</tr>";
+                $table .= "</tr>\n";
                 // loop through the grading system
                 foreach($interpretation as $ikey => $ivalue) {
                     $table .= "<tr>";
@@ -1025,34 +1036,34 @@ class Terminal_reports extends Myschoolgh {
                 }
                 $table .= "</table>";
                 $table .= "</td>";
-                $table .= "<td width=\"33%\">";
-                $table .= "<table width=\"100%\" cellpadding=\"5px\" border=\"1\">";
+                $table .= "<td width=\"33%\" valign=\"top\">\n";
+                $table .= "<table width=\"100%\" cellpadding=\"5px\" border=\"1\">\n";
                 $table .= "<tr>";
-                $table .= "<td style=\"font-weight:bold\" align=\"center\" colspan=\"2\">ATTENDANCE</td>";
-                $table .= "</tr>";
-                $table .= "<tr>";
-                $table .= "<td style=\"font-weight:bold\">PRESENT</td>";
-                $table .= "<td style=\"font-weight:bold\">".($attendance_log["Present"] ?? 0)."</td>";
-                $table .= "</tr>";
-                $table .= "<tr>";
-                $table .= "<td style=\"font-weight:bold\">ABSENT</td>";
+                $table .= "<td style=\"font-weight:bold\" align=\"center\" colspan=\"2\">ATTENDANCE</td>\n";
+                $table .= "</tr>\n";
+                $table .= "<tr>\n";
+                $table .= "<td style=\"font-weight:bold\">PRESENT</td>\n";
+                $table .= "<td style=\"font-weight:bold\">".($attendance_log["Present"] ?? 0)."</td>\n";
+                $table .= "</tr>\n";
+                $table .= "<tr>\n";
+                $table .= "<td style=\"font-weight:bold\">ABSENT</td>\n";
                 $table .= "<td style=\"font-weight:bold\">".($attendance_log["Absent"] ?? 0)."</td>";
                 $table .= "</tr>";
                 $table .= "<tr>";
                 $table .= "<td style=\"font-weight:bold\">TERM DAYS</td>";
-                $table .= "<td style=\"font-weight:bold\">".($attendance_log["Term"] ?? 0)."</td>";
+                $table .= "<td style=\"font-weight:bold\">".($attendance_log["Term"] ?? 0)."</td>\n";
                 $table .= "</tr>";
-                $table .= "</table>";
-                $table .= "</td>";
-                $table .= "<td width=\"32%\">";
-                 $table .= "<table width=\"100%\" cellpadding=\"5px\" border=\"1\">";
-                $table .= "<tr>";
-                $table .= "<td style=\"font-weight:bold\" align=\"center\" colspan=\"2\">NEXT TERM FEES</td>";
-                $table .= "</tr>";
-                $table .= "</table>";
-                $table .= "</td>";
-                $table .= "</tr>";
-                $table .= "</table>";
+                $table .= "</table>\n";
+                $table .= "</td>\n";
+                $table .= "<td width=\"32%\" valign=\"top\">\n";
+                 $table .= "<table width=\"100%\" cellpadding=\"5px\" border=\"1\">\n";
+                $table .= "<tr>\n";
+                $table .= "<td style=\"font-weight:bold\" align=\"center\" colspan=\"2\">NEXT TERM FEES</td>\n";
+                $table .= "</tr>\n";
+                $table .= "</table>\n";
+                $table .= "</td>\n";
+                $table .= "</tr>\n";
+                $table .= "</table>\n";
 
                 // append to the students list
                 $students[$key] = [
