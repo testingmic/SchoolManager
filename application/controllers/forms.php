@@ -4234,7 +4234,7 @@ class Forms extends Myschoolgh {
                     <div class="row">
                         <div class="col-xl-4 col-md-4 col-12 form-group">
                             <label>Select Class <span class="required">*</span></label>
-                            <select class="form-control selectpicker" name="class_id">
+                            <select class="form-control selectpicker" data-width="100%" name="class_id">
                                 <option value="null">Please Select Class</option>';
                                 foreach($classes_list as $each) {
                                     $html_content .= "<option ".($class === $each->item_id ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
@@ -4244,7 +4244,7 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class="col-xl-4 col-md-4 col-12 form-group">
                             <label>Select Course <span class="required">*</span></label>
-                            <select class="form-control selectpicker" name="course_id">
+                            <select class="form-control selectpicker" data-width="100%" name="course_id">
                                 <option value="null">Please Select Course</option>';
                                 foreach($courses_list as $each) {
                                     $html_content .= "<option ".($course === $each->item_id ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
@@ -4254,7 +4254,7 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class="col-xl-4 col-md-4 col-12 form-group">
                             <label>Select Course Unit</label>
-                            <select class="form-control selectpicker" name="unit_id">
+                            <select class="form-control selectpicker" data-width="100%" name="unit_id">
                                 <option value="null">Please Select Unit</option>';
                                 foreach($units_list as $each) {
                                     $html_content .= "<option ".($unit === $each->item_id ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";
@@ -4272,7 +4272,7 @@ class Forms extends Myschoolgh {
                             <div class="form-group">
                                 <label for="description">Summary Description of the Material</label>
                                 <input type="hidden" hidden id="trix-editor-input" value="'.($params->data->description ?? null).'">
-                                <trix-editor style="height:150px;" name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
+                                <trix-editor data-predefined_name="description" style="height:150px;" name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
                             </div>
                         </div>
                         <div class="col-lg-12">
@@ -4287,14 +4287,14 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-3">
                     <div class="form-group">
                         <label>Allow / Disallow Comments</label>
-                        <select class="form-control selectpicker" name="allow_comment">
+                        <select class="form-control selectpicker" data-width="100%" name="allow_comment">
                             <option '.($comment === "allow" ? "selected" : null).' value="allow">Allow Comments</option>
                             <option '.($comment === "disallow" ? "selected" : null).' value="disallow">Disallow Comments</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Material State</label>
-                        <select class="form-control selectpicker" name="state">
+                        <select class="form-control selectpicker" data-width="100%" name="state">
                             <option '.($state === "Published" ? "selected" : null).' value="Published">Published</option>
                             <option '.($state === "Draft" ? "selected" : null).' value="Draft">Draft</option>
                         </select>

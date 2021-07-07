@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $isAdminAccountant, $isTutorAdmin;
+global $myClass, $isAdminAccountant, $isTutorAdmin, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -23,7 +23,8 @@ $response->scripts = ["assets/js/resources.js"];
 // load the classes list
 $classes_param = (object) [
     "clientId" => $clientId,
-    "columns" => "id, name"
+    "columns" => "id, name",
+    "client_data" => $defaultUser->client
 ];
 $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 

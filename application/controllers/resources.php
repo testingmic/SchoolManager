@@ -2,10 +2,20 @@
 
 class Resources extends Myschoolgh {
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
+    private $iclient = [];
+
+    public function __construct(stdClass $params = null) {
+		parent::__construct();
+
+        // get the client data
+        $client_data = $params->client_data;
+        $this->iclient = $client_data;
+
+        // run this query
+        $this->academic_term = $client_data->client_preferences->academics->academic_term;
+        $this->academic_year = $client_data->client_preferences->academics->academic_year;
+	}
+
 
     /**
      * Upload a new resource
@@ -393,9 +403,13 @@ class Resources extends Myschoolgh {
             $params->created_by = $params->userData->user_id;
         }
 
+        // set the academic year and terms
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
+
         $params->query .= (isset($params->rq)) ? " AND a.subject LIKE '%{$params->rq}%'" : null;
-        $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
-        $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
+        $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}' AND cs.academic_year='{$params->academic_year}'" : "";
+        $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}' AND cs.academic_term='{$params->academic_term}'" : "";
         $params->query .= isset($params->state) ? " AND a.state='{$params->state}'" : "";
         $params->query .= (isset($params->resource_id) && !empty($params->resource_id)) ? " AND a.item_id='{$params->resource_id}'" : null;
         $params->query .= (isset($params->course_tutor) && !empty($params->course_tutor)) ? " AND a.course_tutors LIKE '%{$params->course_tutor}%'" : null;
@@ -411,19 +425,26 @@ class Resources extends Myschoolgh {
                     u.name AS fullname, u.phone_number, u.email, u.image,
                     cl.name AS class_name, cl.id AS class_row_id, 
                     cs.id AS course_row_id, cs.name AS course_name, cp.name AS unit_name,
-                    (SELECT b.description FROM files_attachment b WHERE b.resource='e_learning' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment
+                    (
+                        SELECT b.description FROM files_attachment b 
+                        WHERE b.resource='e_learning' AND b.record_id = a.item_id 
+                        ORDER BY b.id DESC LIMIT 1
+                    ) AS attachment
                 FROM e_learning a
                     LEFT JOIN users u ON u.item_id = a.created_by
                     LEFT JOIN classes cl ON cl.item_id = a.class_id
                     LEFT JOIN courses cs ON cs.item_id = a.course_id
                     LEFT JOIN courses_plan cp ON cp.item_id = a.unit_id
-                WHERE {$params->query} AND a.client_id = ? AND a.status = ? ORDER BY a.id DESC LIMIT {$params->limit}
+                WHERE
+                    {$params->query} AND a.client_id = ? AND a.status = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([$params->clientId, 1]);
 
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                // clean the description data
                 $result->description = custom_clean(htmlspecialchars_decode($result->description));
+
                 // if attachment variable was parsed
                 if($attachmentsOnly) {
                     $files_only = json_decode($result->attachment, true)["files"];

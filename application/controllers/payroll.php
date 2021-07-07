@@ -745,13 +745,20 @@ class Payroll extends Myschoolgh {
         $allowancesQuery = $data->payslip_details["Allowance"] ?? [];
         $deductionsQuery = $data->payslip_details["Deduction"] ?? [];
 
+        // get the client logo content
+        if(!empty($client->client_logo)) {
+            $type = pathinfo($client->client_logo, PATHINFO_EXTENSION);
+            $logo_data = file_get_contents($client->client_logo);
+            $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+        }
+
         // set the header content
-        $result .= "<div style=\"width: 80%; margin: auto auto;\">
+        $result .= "<div style=\"width: 90%; margin: auto auto;\">
                     <table width=\"100%\" style=\"background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: open sans; width:100%;margin-bottom:2px\" border=\"0\" cellpadding=\"5px\" cellspacing=\"5px\">
                     <tbody>";
                     $result .= '<tr style="padding: 5px; border-bottom: solid 1px #ccc;">
                             <td colspan="4" align="center" style="padding: 10px;">
-                                <img src="'.$this->baseUrl.''.$client->client_logo.'" width="70px"><br>
+                                '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\"><br>" : "").'
                                 <span style="padding:0px; font-weight:bold; font-size:20px; margin:0px;">'.strtoupper($client->client_name).'</span><br>
                                 <span style="padding:0px; font-weight:bold; margin:0px;">'.$client->client_address.'</span><br>
                                 <span style="padding:0px; font-weight:bold; margin:0px;">'.$client->client_contact.' '.(!$client->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null).'</span>

@@ -690,7 +690,7 @@ class Auth extends Myschoolgh {
                     $message = 'Hi '.$fullname.'<br>You have successfully changed your password at '.config_item('site_name');
                     $message .= '<br><br>Ignore this message if your rightfully effected this change.<br>';
                     $message .= '<br>If not,';
-                    $message .= '<a class="alert alert-success" href="'.$baseUrl.'forgot-password">Click Here</a> if you did not perform this act.';
+                    $message .= '<a class="alert alert-success" href="'.$this->baseUrl.'forgot-password">Click Here</a> if you did not perform this act.';
 
                     #send email to the user
                     $reciepient = ["recipients_list" => [["fullname" => $fullname, "email" => $email, "customer_id" => $user_id]]];
@@ -785,7 +785,7 @@ class Auth extends Myschoolgh {
             $message = 'Hi '.$user->name.'<br>Your password was successfully changed.';
             $message .= '<br><br>Ignore this message if your rightfully effected this change.<br>';
             $message .= '<br>If not, ';
-            $message .= '<a class="alert alert-success" href="'.$baseUrl.'forgot-password">Click Here</a> if you did not perform this act.';
+            $message .= '<a class="alert alert-success" href="'.$this->baseUrl.'forgot-password">Click Here</a> if you did not perform this act.';
 
             #send email to the user
             $reciepient = ["recipients_list" => [["fullname" => $user->name, "email" => $user->email, "customer_id" => $params->user_id]]];

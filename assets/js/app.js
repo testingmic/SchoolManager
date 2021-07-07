@@ -316,6 +316,7 @@ var trigger_form_submit = () => {
         }).then((proceed) => {
             if (proceed) {
                 formButton.prop("disabled", true);
+                $.pageoverlay.show();
                 $.ajax({
                     url: `${formAction}`,
                     data: theFormData,
@@ -393,9 +394,11 @@ var trigger_form_submit = () => {
                     },
                     complete: function() {
                         $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
+                        $.pageoverlay.hide();
                         formButton.prop("disabled", false);
                     },
                     error: function() {
+                        $.pageoverlay.hide();
                         $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
                         formButton.prop("disabled", false);
                         swal({
@@ -456,6 +459,7 @@ var ajax_trigger_form_submit = () => {
         }).then((proceed) => {
             if (proceed) {
                 formButton.prop("disabled", true);
+                $.pageoverlay.show();
                 $.ajax({
                     url: `${formAction}`,
                     data: theFormData,
@@ -532,10 +536,12 @@ var ajax_trigger_form_submit = () => {
                         }
                     },
                     complete: function() {
+                        $.pageoverlay.hide();
                         formButton.prop("disabled", false);
                         $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
                     },
                     error: function() {
+                        $.pageoverlay.hide();
                         $(`div[id="ajaxFormSubmitModal"]`).modal("hide");
                         formButton.prop("disabled", false);
                         swal({
@@ -559,7 +565,7 @@ var loadPage = (loc, pushstate) => {
     } else {
         $(`[id="history-refresh"]`).removeClass("hidden");
     }
-
+    $.pageoverlay.show();
     $.ajax({
         url: loc,
         data: $.form_data,
@@ -567,7 +573,6 @@ var loadPage = (loc, pushstate) => {
         dataType: "JSON",
         beforeSend: () => {
             $.mainprogress.show()
-            $.pageoverlay.show();
         },
         success: (result) => {
             $(`div[id="viewOnlyModal"]`).modal("hide");
@@ -608,7 +613,6 @@ var loadPage = (loc, pushstate) => {
             }
 
             document.title = result.title
-            $.pageoverlay.hide();
 
             init();
             initDataTables();
@@ -629,13 +633,12 @@ var loadPage = (loc, pushstate) => {
             } else {
                 $("#history-back").removeClass("disabled");
             }
-
+            $.pageoverlay.hide();
             setActiveNavLink()
             $('body, html').scrollTop(0);
         },
         error: (err) => {
             $.pageoverlay.hide();
-            // notify("Sorry! Error processing request.");
             if ([404, 500].includes(err.status)) {
                 swal({
                     title: err.status === 404 ? "404" : "OOPS!",
@@ -696,7 +699,6 @@ var loadFormAction = (form) => {
                 },
                 success: (result) => {
                     var error = result.code === 200 ? null : result.data.result || null;
-                    $.pageoverlay.hide();
                     if (error !== null) notify(error)
         
                     if (result.code == 200) {
@@ -716,7 +718,12 @@ var loadFormAction = (form) => {
                         }
                     }
                 },
-                error: (err) => {}
+                complete: () => {
+                    $.pageoverlay.hide();
+                },
+                error: (err) => {
+                    $.pageoverlay.hide();
+                }
             });
         }
     });
@@ -1120,6 +1127,7 @@ var load_form_action = (form) => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            $.pageoverlay.show();
             $.ajax({
                 url: form[0].action,
                 method: form[0].method,
@@ -1155,7 +1163,11 @@ var load_form_action = (form) => {
                         });
                     }
                 },
+                complete: () => {
+                    $.pageoverlay.hide();
+                },
                 error: (err) => {
+                    $.pageoverlay.hide();
                     swal({
                         position: 'top',
                         text: 'Sorry! An unknown error was encountered',

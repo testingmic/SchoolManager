@@ -662,6 +662,13 @@ class Timetable extends Myschoolgh {
         $slots = $data->slots;
         $width = round((100/($slots+1)), 2);
 
+        // get the client logo content
+        if(!empty($this->iclient->client_logo)) {
+            $type = pathinfo($this->iclient->client_logo, PATHINFO_EXTENSION);
+            $logo_data = file_get_contents($this->iclient->client_logo);
+            $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+        }
+        
         // preferences
         if(isset($data->client_details)) {
 
@@ -679,7 +686,7 @@ class Timetable extends Myschoolgh {
                             <strong style=\"font-size:13px;\">Department:</strong> {$data->department_name}
                         </td>
                         <td width=\"46%\" align=\"center\">
-                            <img src=\"{$this->baseUrl}{$this->iclient->client_logo}\" width=\"70px\"><br>
+                            ".(!empty($this->iclient->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\"><br>" : "")."
                             <span style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</span><br>
                             <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
                             <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>

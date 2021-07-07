@@ -1518,6 +1518,13 @@ class Fees extends Myschoolgh {
         $client = $this->client_data($params->clientId);
         $clientPrefs = $client->client_preferences;
 
+        // get the client logo content
+        if(!empty($client->client_logo)) {
+            $type = pathinfo($client->client_logo, PATHINFO_EXTENSION);
+            $logo_data = file_get_contents($client->client_logo);
+            $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+        }
+
         // append the data
         $receipt = '
         <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/app.min.css">
@@ -1526,7 +1533,7 @@ class Fees extends Myschoolgh {
             <div class="row mb-3">
                 <div class="text-dark bg-white col-md-12 p-3">
                     <div class="text-center">
-                        '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$this->baseUrl}{$client->client_logo}\">" : "").'
+                        '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
                         <h3 class="mb-0 pb-0" style="color:#6777ef">'.$client->client_name.'</h3>
                         <div>'.$client->client_address.'</div>
                         '.(!empty($client->client_email) ? "<div>{$client->client_email}</div>" : "").'
