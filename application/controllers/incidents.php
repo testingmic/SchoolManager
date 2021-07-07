@@ -1,4 +1,4 @@
-<?php 
+        <?php 
 
 class Incidents extends Myschoolgh {
 
@@ -24,20 +24,21 @@ class Incidents extends Myschoolgh {
 
         $params->query .= (isset($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
         $params->query .= (!empty($params->incident_type)) ? " AND a.incident_type='{$params->incident_type}'" : null;
-        $params->query .= (isset($params->incident_date)) ? " AND a.incident_date='{$params->incident_date}'" : null;
-        $params->query .= (isset($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
-        $params->query .= (isset($params->client_id)) ? " AND a.client_id='{$params->client_id}'" : null;
-        $params->query .= (isset($params->incident_id)) ? " AND (a.item_id='{$params->incident_id}' OR a.id='{$params->incident_id}')" : null;
-        $params->query .= (isset($params->followup_id)) ? " AND a.incident_id='{$params->followup_id}'" : null;
+        $params->query .= (isset($params->incident_date) && !empty($params->incident_date)) ? " AND a.incident_date='{$params->incident_date}'" : null;
+        $params->query .= (isset($params->user_id) && !empty($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
+        $params->query .= (isset($params->client_id) && !empty($params->client_id)) ? " AND a.client_id='{$params->client_id}'" : null;
+        $params->query .= (isset($params->subject) && !empty($params->subject)) ? " AND a.subject LIKE '%{$params->subject}%'" : null;
+        $params->query .= (isset($params->incident_id) && !empty($params->incident_id)) ? " AND (a.item_id='{$params->incident_id}' OR a.id='{$params->incident_id}')" : null;
+        $params->query .= (isset($params->followup_id) && !empty($params->followup_id)) ? " AND a.incident_id='{$params->followup_id}'" : null;
 
         try {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
                     (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
-                    (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online,'|',user_type) FROM users WHERE users.item_id = a.assigned_to LIMIT 1) AS assigned_to_info,
-                    (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online,'|',user_type) FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_information,
-                    (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online,'|',user_type) FROM users WHERE users.item_id = a.user_id LIMIT 1) AS user_information
+                    (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',user_type) FROM users WHERE users.item_id = a.assigned_to LIMIT 1) AS assigned_to_info,
+                    (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',user_type) FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_information,
+                    (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',user_type) FROM users WHERE users.item_id = a.user_id LIMIT 1) AS user_information
                 FROM incidents a
                 WHERE {$params->query} AND a.deleted = ? AND client_id = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
@@ -49,7 +50,7 @@ class Incidents extends Myschoolgh {
                 // loop through the information
                 foreach(["created_by_information", "user_information", "assigned_to_info"] as $each) {
                     // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->$each, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);    
+                    $result->{$each} = (object) $this->stringToArray($result->$each, "|", ["user_id", "name", "phone_number", "email", "image","user_type"]);    
                 }
 
                 // if attachment variable was parsed
@@ -238,7 +239,7 @@ class Incidents extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Incident successfully updated.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}update-student/{$params->user_id}/incidents"];
+			$return["additional"] = ["clear" => true, "href" => $this->session->user_current_url];
 
 			// return the output
             return $return;

@@ -112,6 +112,13 @@ if ($(`div[id="filter_Department_Class"]`).length) {
 
 }
 
+$(`button[id="filter_Incidents_List"]`).on("click", function() {
+    user_role = $(`select[name="user_role"]`).val(),
+        subject = $(`input[name="subject"]`).val();
+    $.form_data = { user_role, subject };
+    loadPage(`${baseUrl}incidents_list`);
+});
+
 $(`button[id="filter_Fees_Collection"]`).on("click", function() {
     department_id = $(`select[name="department_id"]`).val(),
         class_id = $(`select[name="class_id"]`).val(),

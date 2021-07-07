@@ -61,7 +61,7 @@ foreach($list_data as $key => $each) {
     $type_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $type_list .= "<td>".($key+1)."</td>";
     $type_list .= "<td>{$each->name}</td>";
-    $type_list .= "<td>{$each->type}</td>";
+    $type_list .= "<td><span class='badge badge-".($each->type == "Income" ? "success" : "danger")."'>".($each->type)."</span></td>";
     $type_list .= $hasUpdate ? "<td>{$action}</td>" : null;
     $type_list .= "</tr>";
 }

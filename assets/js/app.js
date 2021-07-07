@@ -441,6 +441,7 @@ var ajax_trigger_form_submit = () => {
             theFormData.delete("faketext");
             let content = $(`trix-editor[id="_ajax-form-content"]`).html(),
                 form_variable = $(`trix-editor[id="ajax-form-content"]`).attr("data-predefined_name");
+            form_variable = form_variable === undefined ? "description" : form_variable;
             theFormData.append(form_variable, htmlEntities(content));
         }
 

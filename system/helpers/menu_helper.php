@@ -9,6 +9,16 @@
         </ul>
     </li>
 <?php } ?>
+<?php function incidents_menu() { global $baseUrl, $accessObject; ?>
+    <?php if($accessObject->hasAccess("view", "incident")) { ?>
+        <li class="dropdown">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-list"></i><span>Incidents</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>incidents_list">List Incidents</a></li>
+            </ul>
+        </li>
+    <?php } ?>
+<?php } ?>
 <?php function general_menu($isAdmin = false) { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
@@ -46,10 +56,11 @@
         </ul>
     </li>
     <?php } ?>
+    <?php incidents_menu(); ?>
     <?php if($accessObject->hasAccess("view", "class")) { ?>
     <li class="menu-header">Academics</li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Academics</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Structures</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-classes">List Classes</a></li>
             <?php if($isAdmin) { ?>
@@ -210,7 +221,8 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
             <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
         </ul>
-    </li>                        
+    </li>
+    <?php incidents_menu(); ?>             
     <li class="menu-header">Academics</li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Academics</span></a>
