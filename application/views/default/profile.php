@@ -37,6 +37,9 @@ if(!empty($user_id)) {
     ];
 
     $data = load_class("users", "controllers")->list($staff_param);
+
+    // has the right to update the user permissions
+    $updatePermission = $accessObject->hasAccess("update", "permissions");
     
     // if no record was found
     if(empty($data["data"])) {
@@ -141,12 +144,12 @@ if(!empty($user_id)) {
                                     aria-selected="true">Summary Description</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab"
-                                    aria-selected="true">Attendance</a>
+                                    <a class="nav-link" id="profile-tab2" data-toggle="tab" href="#profile" role="tab"
+                                    aria-selected="false">Update Record</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
-                                    aria-selected="false">Update Record</a>
+                                    <a class="nav-link" id="settings-tab2" data-toggle="tab" href="#settings" role="tab"
+                                    aria-selected="true">Security / Settings</a>
                                 </li>
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
@@ -160,12 +163,42 @@ if(!empty($user_id)) {
                                         </div>
                                     " : "").'
                                 </div>
-                                <div class="tab-pane fade" id="attendance" role="tabpanel" aria-labelledby="attendance-tab2">
-                                    
-                                </div>
-                                
-                                <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="profile-tab2">
+                                <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab2">
                                     '.$user_form.'
+                                </div>
+                                <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab2">
+                                    <form autocomplete="Off" method="POST" class="ajaxform" id="ajaxform" action="'.$baseUrl.'api/auth/change_password">
+                                        <div>
+                                            <h5 class="border-bottom pb-2">Change Password</h5>
+                                        </div>
+                                        <div class="row">
+                                            '.(
+                                                !$updatePermission || $updatePermission ? '
+                                                <div class="col-lg-12">
+                                                    <div class="form-group">
+                                                        <label>Current Password</label>
+                                                        <input type="password" name="password" id="password" class="form-control">
+                                                    </div>
+                                                </div>' : ''
+                                            ).'
+                                            <div class="col-lg-12">
+                                                <div class="form-group">
+                                                    <label>Password</label>
+                                                    <input type="password" name="password_1" id="password_1" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <div class="form-group">
+                                                    <label>Confirm Password</label>
+                                                    <input type="password" name="password_2" id="password_2" class="form-control">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <input type="hidden" name="user_id" id="user_id" value="'.$user_id.'">
+                                                <button class="btn btn-outline-success" type="submit">Change Password</button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>

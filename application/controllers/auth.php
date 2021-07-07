@@ -22,6 +22,15 @@ class Auth extends Myschoolgh {
 			<li style='padding-left:15px;'>At least 1 Lowercase</li>
 			<li style='padding-left:15px;'>At least 1 Numeric</li>
 			<li style='padding-left:15px;'>At least 1 Special Character</li></ul></div>";
+        
+        $this->password_ErrorMessage_2 = "
+            Sorry! Please use a stronger password.
+            Password Format:
+			1. Password should be at least 8 characters long
+			2. At least 1 Uppercase
+			3. At least 1 Lowercase
+			4. At least 1 Numeric
+			5. At least 1 Special Character";
     }
 
     /**
@@ -733,6 +742,64 @@ class Auth extends Myschoolgh {
             $this->db->rollBack();
             return $e->getMessage();
         }
+    }
+
+    /**
+     * InApp Change User Password
+     * 
+     * @param String $params->password      The current password
+     * @param String $params->password_1    The new password to use
+     * @param String $params->password_2    Confirmation of the new passwod
+     * 
+     * @return Array
+     */
+    public function change_password(stdClass $params) {
+
+        try {
+
+            // reset count more than 4 then no long process the user request
+            if(!empty($this->session->reset_count) && ($this->session->reset_count >= 4)) {
+                return ["code" => "203", "data" => "Sorry! You have been blocked from multiple trial to reset password."];
+            }
+
+            // password test
+            if(!passwordTest($params->password_1)) {
+                return ["code" => 201, "data" => $this->password_ErrorMessage_2 ];
+            }
+
+            // confirm if the passwords match
+            if($params->password_1 !== $params->password_2) {
+                return ["code" => "203", "data" => "Sorry! The passwords supplied does not match."];
+            }
+
+            // get the user information
+            $user = $this->pushQuery("password, email, name", "users", "item_id='{$params->user_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            if(empty($user)) {
+                return ["code" => "203", "data" => "Sorry! An invalid user id was submitted."];
+            }
+
+            // get the first item
+            $user = $user[0];
+
+            // compare the password
+            if(!password_verify($params->password, $user->password)){
+
+                // count the error number
+                $this->session->reset_count = !empty($this->session->reset_count) ? ($this->session->reset_count + 1) : 1;
+
+                // return the error message
+                return ["code" => "203", "data" => "Sorry! We could not validate the password provided."];
+            }
+
+            // change the password
+            // $stmt = $this->
+
+
+
+        } catch(PDOException $e) {
+
+        }
+        
     }
 
     /**
