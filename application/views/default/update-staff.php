@@ -349,10 +349,6 @@ if(!empty($user_id)) {
                         </li>' : null
                     ).'
                     <li class="nav-item">
-                        <a class="nav-link" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab"
-                        aria-selected="true">Attendance</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" id="incident-tab2" data-toggle="tab" href="#incident" role="tab"
                         aria-selected="true">Incidents</a>
                     </li>';
@@ -428,10 +424,6 @@ if(!empty($user_id)) {
                                 </form>
                             </div>' : null
                         ).'
-                        <div class="tab-pane fade" id="attendance" role="tabpanel" aria-labelledby="attendance-tab2">
-                            
-                            
-                        </div>
                         <div class="tab-pane fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
                             <div class="d-flex justify-content-between">
                                 <div class="mb-2"><h5>INCIDENTS LOG</h5></div>
