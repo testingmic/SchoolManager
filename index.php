@@ -156,7 +156,7 @@ $errorFile = config_item('default_view_path').'404.php';
 
 // confirm if the first index has been parsed
 // however the api and auth endpoint are exempted from this file traversing loop
-if(isset($SITEURL[1]) && (!in_array($SITEURL[0], ["api", "auth", "history", "payment_checkout"]))) {
+if(isset($SITEURL[1]) && (!in_array($SITEURL[0], ["api", "auth", "history", "payment_checkout", "download"]))) {
 
 	// default file to include
 	$otherFile = config_item('default_view_path').strtolower(preg_replace('/[^\w_]-/','',$SITEURL[1])).'.php';

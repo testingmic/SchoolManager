@@ -180,7 +180,7 @@ var load_attendance_log = () => {
             if (response.code == 200) {
                 let attendance_list = response.data.result;
                 $(`div[class="attendance_log_record"]`).html(attendance_list.table_content);
-                $(`a[id="download_link"]`).removeClass("hidden").attr("href", `${baseUrl}download?class_id=${class_id}&month_year=${month_year}&user_type=${user_type}&att_d=true`);
+                $(`a[id="download_link"]`).removeClass("hidden").attr("href", `${baseUrl}download/attendance?class_id=${class_id}&month_year=${month_year}&user_type=${user_type}&att_d=true`);
                 if ($('.datatable').length > 0) {
                     $('.datatable').dataTable({
                         search: null,

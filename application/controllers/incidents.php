@@ -30,6 +30,7 @@ class Incidents extends Myschoolgh {
         $params->query .= (!empty($params->incident_type)) ? " AND a.incident_type='{$params->incident_type}'" : null;
         $params->query .= (isset($params->incident_date) && !empty($params->incident_date)) ? " AND a.incident_date='{$params->incident_date}'" : null;
         $params->query .= (isset($params->user_id) && !empty($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
+        $params->query .= (isset($params->user_role) && !empty($params->user_role)) ? " AND a.user_role='{$params->user_role}'" : null;
         $params->query .= (isset($params->client_id) && !empty($params->client_id)) ? " AND a.client_id='{$params->client_id}'" : null;
         $params->query .= (isset($params->subject) && !empty($params->subject)) ? " AND a.subject LIKE '%{$params->subject}%'" : null;
         $params->query .= (isset($params->incident_id) && !empty($params->incident_id)) ? " AND a.{$column}='{$params->incident_id}'" : null;
@@ -115,6 +116,15 @@ class Incidents extends Myschoolgh {
             // generate a unique id
             $item_id = random_string("alnum", 32);
 
+            // get the user information
+            if(isset($params->user_id)) {
+                $user = $this->pushQuery("user_type", "users", "item_id='{$params->user_id}' AND client_id='{$params->clientId}' LIMIT 1");
+                if(empty($user)) {
+                    return ["code" => 203, "data" => "Sorry! An invalid user id was supplied"];
+                }
+                $user_role = $user[0]->user_type;
+            }
+
             // execute the statement
             $stmt = $this->db->prepare("
                 INSERT INTO incidents SET client_id = ?, created_by = ?, item_id = '{$item_id}'
@@ -124,6 +134,7 @@ class Incidents extends Myschoolgh {
                 ".(isset($params->reported_by) ? ", reported_by = '{$params->reported_by}'" : null)."
                 ".(isset($params->location) ? ", location = '{$params->location}'" : null)."
                 ".(isset($params->user_id) ? ", user_id = '{$params->user_id}'" : null)."
+                ".(isset($user_role) ? ", user_role = '{$params->user_role}'" : null)."
                 ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);

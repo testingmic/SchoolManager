@@ -121,7 +121,7 @@ $response->html = '
                                         <div class="table-responsive" id="timetable_content">
                                             '.($table["table"] ?? "<div class='text-center alert alert-warning'>{$table}</div>").'
                                         </div>
-                                        '.(isset($table["table"]) ? "<div class='text-center mt-2'><a class='btn btn-outline-success' target='_blank' href='{$baseUrl}download?tb=true&tb_id={$timetable_id}&dw=true'>
+                                        '.(isset($table["table"]) ? "<div class='text-center mt-2'><a class='btn btn-outline-success' target='_blank' href='{$baseUrl}download/timetable?tb_id={$timetable_id}&dw=true'>
                                             <i class='fa fa-download'></i> Download Timetable</a></div>" : "").'
                                     </div>
                                 </div>

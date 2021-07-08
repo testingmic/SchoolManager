@@ -199,6 +199,14 @@ class Models {
             "employee" => "Employee",
             "accountant" => "Accountant",
             "admin" => "Admin"
+        ];      
+
+        $this->incident_user_role = [
+            "student" => "Student",
+            "teacher" => "Teacher",
+            "employee" => "Employee",
+            "accountant" => "Accountant",
+            "admin" => "Admin"
         ];
 
         $this->the_user_roles = [

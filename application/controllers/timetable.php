@@ -435,7 +435,7 @@ class Timetable extends Myschoolgh {
                         // append the results set
                         $table = "
                             <div class='text-center mb-3'>
-                                <a class='btn btn-outline-success' target='_blank' href='{$this->baseUrl}download?tb=true&tb_id={$timetable_id}&dw=true'>
+                                <a class='btn btn-outline-success' target='_blank' href='{$this->baseUrl}download/timetable?tb_id={$timetable_id}&dw=true'>
                                     <i class='fa fa-download'></i> Download Timetable
                                 </a>
                             </div>";

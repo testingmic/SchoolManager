@@ -137,7 +137,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                                     </div>
                                                     <div class="col-lg-12 '.(!$timetable_id ? "hidden" : "").' text-center mt-2">
                                                         <button id="save_TimetableAllocation" onclick="return save_TimetableAllocation()" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Timetable</button>
-                                                        <a class="btn btn-outline-primary" target="_blank" href="'.$baseUrl.'download?tb=true&tb_id='.$timetable_id.'&dw=true">
+                                                        <a class="btn btn-outline-primary" target="_blank" href="'.$baseUrl.'download/timetable?tb_id='.$timetable_id.'&dw=true">
                                                         <i class="fa fa-download"></i> Download Timetable</a>
                                                     </div>
                                                     <div class="col-lg-12 mt-3 text-left">

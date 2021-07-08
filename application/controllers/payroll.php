@@ -474,8 +474,8 @@ class Payroll extends Myschoolgh {
 				$note = "<div class=\"text-success mb-3 text-center\">
 						This Payslip has already been redeemed.</div>
 						<div class=\"text-center\">
-						<a href=\"{$this->baseUrl}download?pay_id={$employeePayslip->item_id}&dw=true\" target=\"_blank\" class=\"btn btn-outline-danger\"><i class='fa fa-file-pdf-o'></i> Download</a> &nbsp; 
-						<a href=\"{$this->baseUrl}download?pay_id={$employeePayslip->item_id}&dw=false\" target=\"_blank\" class=\"btn btn-outline-primary\"><i class='fa fa-print'></i>  Print</a></div>
+						<a href=\"{$this->baseUrl}download/payslip?pay_id={$employeePayslip->item_id}&dw=true\" target=\"_blank\" class=\"btn btn-outline-danger\"><i class='fa fa-file-pdf-o'></i> Download</a> &nbsp; 
+						<a href=\"{$this->baseUrl}download/payslip?pay_id={$employeePayslip->item_id}&dw=false\" target=\"_blank\" class=\"btn btn-outline-primary\"><i class='fa fa-print'></i>  Print</a></div>
 				";
 			} else {
 				$note = "<div class=\"text-danger mb-3 text-center\">

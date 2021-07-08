@@ -53,6 +53,7 @@
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
+            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
         </ul>
     </li>
     <?php } ?>
@@ -183,7 +184,6 @@
             <?php if($accessObject->hasAccess("view", "payslip")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">HR & Payroll</a></li>
             <?php } ?>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
         </ul>
     </li>
 

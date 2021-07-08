@@ -134,6 +134,7 @@ if(!empty($user_id)) {
                 if($deleteIncident && $isActive) {
                     $buttons .= "&nbsp;<a href='#' title='Click to delete this record' onclick='return delete_record(\"{$each->item_id}\", \"incident\");' class='btn mb-1 btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a>";
                 }
+                $buttons .= "&nbsp;<a href='{$baseUrl}download/incident?incident_id={$each->item_id}' target='_blank' title='Click to download this record' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-download'></i> Download</a>";
 
                 //append to the list
                 $incidents_list .= "

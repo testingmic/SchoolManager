@@ -59,14 +59,21 @@ foreach($item_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='#' title='Click to delete this record' onclick='return delete_record(\"{$each->item_id}\", \"incident\");' class='btn mb-1 btn-sm btn-outline-danger'><i class='fa fa-trash'></i> </a>";
     }
 
-    $action .= "&nbsp;<a target='_blank' href='{$baseUrl}download?incident=true&incident_id={$each->item_id}' title='Click to download this incident' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-download'></i> </a>";
+    $action .= "&nbsp;<a target='_blank' href='{$baseUrl}download/incident?incident_id={$each->item_id}' title='Click to download this incident' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-download'></i> </a>";
     
     $incidents .= "<tr data-row_id=\"{$each->id}\">";
     $incidents .= "<td>".($key+1)."</td>";
     $incidents .= "<td>
-        <img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->user_information->image}\"> 
-        &nbsp; {$each->user_information->name}
-        <span class='text-uppercase badge badge-{$color[$each->user_information->user_type]} p-1'>{$each->user_information->user_type}</span>
+        <div class='d-flex justify-content-start'>
+            <div class='mr-2'>
+                <img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->user_information->image}\">
+            </div>
+            <div>
+                <a href='{$baseUrl}update-student/{$each->user_information->user_id}'>{$each->user_information->name}</a><br>
+                <span class='text-uppercase badge badge-{$color[$each->user_information->user_type]} p-1'>
+                    {$each->user_information->user_type}
+                </span>
+            </div>
     </td>";
     $incidents .= "<td>{$each->subject}</td>";
     $incidents .= "<td>{$each->reported_by}</td>";
@@ -87,21 +94,21 @@ $response->html = '
         </div>
         <div class="row">
             
-            <div class="col-xl-3 col-md-3 col-12 form-group">
+            <div class="col-md-3 col-12 form-group">
                 <label>Select Role</label>
                 <select data-width="100%" class="form-control selectpicker" name="user_role" id="user_role">
                     <option value="">Please Select Role</option>';
-                    foreach($myClass->all_user_roles_list as $key => $value) {
-                        $response->html .= "<option ".(isset($filter->user_type) && ($filter->user_type == $key) ? "selected" : "")." value=\"{$key}\">{$value}</option>";                            
+                    foreach($myClass->incident_user_role as $key => $value) {
+                        $response->html .= "<option ".(isset($filter->user_role) && ($filter->user_role == $key) ? "selected" : "")." value=\"{$key}\">{$value}</option>";                            
                     }
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-xl-7 col-md-7 col-12 form-group">
+            <div class="col-md-7 col-12 form-group">
                 <label>Search with Subject</label>
                 <input type="text" class="form-control" name="subject" id="subject" value="'.($filter->subject ?? null).'">
             </div>
-            <div class="col-xl-2 col-md-2 col-12 form-group">
+            <div class="col-md-2 col-12 form-group">
                 <label for="">&nbsp;</label>
                 <button id="filter_Incidents_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>

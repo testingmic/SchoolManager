@@ -2,12 +2,6 @@
 // global variable
 global $defaultUser;
 
-// if a first parameter was parsed then end
-if(confirm_url_id(1)) {
-    print "Access Denied!";
-    return;
-}
-
 // stylesheet
 $pages_content = "<style>@page { margin: 5px; } body { margin: 5px; } .page_break { page-break-before: always; } div.page_break+div.page_break { page-break-before: always; }</style>";
 
@@ -129,13 +123,13 @@ if((isset($_GET["file"]) && !empty($_GET["file"])) || (isset($_GET["file_id"], $
 }
 
 /** Download Timetables */
-elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) {
+elseif(confirm_url_id(1, "timetable") && isset($_GET["tb_id"])) {
 
     // set the timetable id
     $timetable_id = xss_clean($_GET["tb_id"]);
     $codeOnly = (bool) isset($_GET["code_only"]);
     $file_name = "timetable_calendar.pdf";
-
+        
     // set some parameters
     $param = (object) ["data" => [], "timetable_id" => $timetable_id, "code_only" => $codeOnly, "download" => true];
     $param->client_data = $defaultUser->client ?? null;
@@ -166,7 +160,7 @@ elseif(isset($_GET["tb"]) && ($_GET["tb"] === "true") && isset($_GET["tb_id"])) 
 }
 
 /** Download Payslips */
-elseif(isset($_GET["pay_id"]) && !isset($_GET["cs_mat"])) {
+elseif(confirm_url_id(1, "payslip") && isset($_GET["pay_id"])) {
 
     $payslip_id = xss_clean($_GET["pay_id"]);
     $param = (object) ["payslip_id" => $payslip_id, "download" => true, "clientId" => $session->clientId];
@@ -190,7 +184,7 @@ elseif(isset($_GET["pay_id"]) && !isset($_GET["cs_mat"])) {
 }
 
 /** Download Receipt ID */
-elseif(isset($_GET["rpt_id"]) && !isset($_GET["pay_id"])) {
+elseif(confirm_url_id(1, "receipt") && isset($_GET["rpt_id"])) {
 
     $receipt_id = xss_clean($_GET["rpt_id"]);
     $param = (object) ["userData" => $defaultUser, "item_id" => $receipt_id, "download" => true, "clientId" => $session->clientId];
@@ -223,7 +217,8 @@ elseif(isset($_GET["rpt_id"]) && !isset($_GET["pay_id"])) {
 }
 
 /** Download Course Material (Units / Lessons) */
-elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"])) {
+elseif(confirm_url_id(1, "coursematerial")) {
+    
     // assign the course variable
     $course = base64_decode(xss_clean($_GET["cs_mat"]));
     $course = explode("_", $course);
@@ -263,7 +258,7 @@ elseif(isset($_GET["cs_mat"]) && !isset($_GET["pay_id"]) && !isset($_GET["tb_id"
 }
 
 /** Download Timetables */
-elseif(isset($_GET["att_d"]) && ($_GET["att_d"] === "true") && isset($_GET["user_type"])) {
+elseif(confirm_url_id(1, "attendance")) {
     
     /** Start processing */
     $getObject = (array) $_GET;
@@ -296,7 +291,7 @@ elseif(isset($_GET["att_d"]) && ($_GET["att_d"] === "true") && isset($_GET["user
 }
 
 /** Download The Terminal Report */
-elseif(isset($_GET["terminal"], $_GET["academic_term"], $_GET["academic_year"]) && !isset($_GET["tb_id"])) {
+elseif(confirm_url_id(1, "terminal") && isset($_GET["academic_term"], $_GET["academic_year"])) {
     // set the get parameters as the values
     $params = (object) $_GET;
     $params->client_data = $defaultUser->client ?? null;
@@ -321,7 +316,7 @@ elseif(isset($_GET["terminal"], $_GET["academic_term"], $_GET["academic_year"]) 
 }
 
 /** Download An Incident Report */
-elseif(isset($_GET["incident"]) && !isset($_GET["terminal"]) && !isset($_GET["tb_id"])) {
+elseif(confirm_url_id(1, "incident")) {
     // set the get parameters as the values
     $params = (object) $_GET;
     $params->limit = 1;

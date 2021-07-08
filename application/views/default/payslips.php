@@ -63,8 +63,8 @@ foreach($payslips_list["data"] as $key => $each) {
         }
     }
     
-    $action .= "&nbsp; <a href=\"{$baseUrl}download?pay_id={$each->item_id}&dw=true\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-warning\"><i class='fa fa-download'></i></a>&nbsp; 
-            <a href=\"{$baseUrl}download?pay_id={$each->item_id}\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-primary\"><i class='fa fa-print'></i> </a>";
+    $action .= "&nbsp; <a href=\"{$baseUrl}download/payslip?pay_id={$each->item_id}&dw=true\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-warning\"><i class='fa fa-download'></i></a>&nbsp; 
+            <a href=\"{$baseUrl}download/payslip?pay_id={$each->item_id}\" target=\"_blank\" class=\"btn mb-1 btn-sm btn-outline-primary\"><i class='fa fa-print'></i> </a>";
     
     if($generatePermission && !$each->status) {
         $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->item_id}\", \"payslip\");' class='btn mb-1 btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
