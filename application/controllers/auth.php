@@ -671,7 +671,7 @@ class Auth extends Myschoolgh {
                     $password = password_hash($params->password, PASSWORD_DEFAULT);
                     
                     #deactivate all reset tokens
-                    $stmt = $this->db->prepare("UPDATE users SET password=? WHERE item_id=? LIMIT 1");
+                    $stmt = $this->db->prepare("UPDATE users SET password=? WHERE item_id=? LIMIT 10");
                     $stmt->execute([$password, $user_id]);
 
                     #process the form

@@ -46,7 +46,7 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>add-staff">Add Staff</a></li>
             <?php } ?>
         </ul>
-    </li>
+    </li>   
     <?php if($isAdmin) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
@@ -178,7 +178,7 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-line"></i><span>Reports</span></a>
         <ul class="dropdown-menu">
             <?php if($accessObject->hasAccess("reports", "fees")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Fees Reports</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Fees Report</a></li>
             <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>accounting">Financial Reports</a></li>
             <?php if($accessObject->hasAccess("view", "payslip")) { ?>
