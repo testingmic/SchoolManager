@@ -350,6 +350,7 @@ elseif(confirm_url_id(1, "fees")) {
         "category_id" => $getObject->category_id ?? null,
         "student_id" => $getObject->student_id ?? null,
         "item_id" => $getObject->receipt_id ?? null,
+        "class_id" => $getObject->class_id ?? null,
         "client_data" => $defaultUser->client,
         "clientId" => $defaultUser->client_id,
         "date_range" => $date_range,

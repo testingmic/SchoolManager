@@ -79,11 +79,11 @@ $response->html = '
                             </div>
                             <div class="col-lg-3">
                                 <label>Start Date</label>                                
-                                <input value="'.date("Y-m-d", strtotime("first day this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
+                                <input value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
                             </div>
                             <div class="col-lg-3">
                                 <label>End Date</label>
-                                <input value="'.date("Y-m-t", strtotime("last day this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
+                                <input value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
                             </div>
                             <div class="col-lg-2">
                                 <label>&nbsp;<br></label>

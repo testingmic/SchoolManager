@@ -194,6 +194,15 @@ $response->html = '
                                    
                                     <div class="row generate_report" id="filter_Department_Class">
                                         
+                                        <div class="col-md-3 mb-1">
+                                            <label>Start Date</label>                                
+                                            <input value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
+                                        </div>
+                                        <div class="col-md-3 mb-1">
+                                            <label>End Date</label>
+                                            <input value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
+                                        </div>
+                                        <div class="col-md-6 mb-1"></div>
                                         <div class="col-md-3 form-group">
                                             <label>Filter by Category</label>
                                             <select data-width="100%" name="category_id" class="selectpicker form-control">

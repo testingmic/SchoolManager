@@ -130,8 +130,10 @@ $(`button[id="filter_Fees_Collection"]`).on("click", function() {
 $(`button[id="generate_Fees_Report"]`).on("click", function() {
     let category_id = $(`div[class~="generate_report"] select[name="category_id"]`).val(),
         class_id = $(`div[class~="generate_report"] select[name="class_id"]`).val(),
-        student_id = $(`div[class~="generate_report"] select[name="student_id"]`).val();
-    window.open(`${baseUrl}download/fees?category_id=${category_id}&class_id=${class_id}&student_id=${student_id}`);
+        student_id = $(`div[class~="generate_report"] select[name="student_id"]`).val(),
+        start_date = $(`div[class~="generate_report"] input[name="start_date"]`).val(),
+        end_date = $(`div[class~="generate_report"] input[name="end_date"]`).val();
+    window.open(`${baseUrl}download/fees?category_id=${category_id}&class_id=${class_id}&student_id=${student_id}&start_date=${start_date}&end_date=${end_date}`);
 });
 
 $(`button[id="filter_Staff_List"]`).on("click", function() {
