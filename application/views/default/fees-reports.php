@@ -19,7 +19,7 @@ $response = (object) [];
 $filter = (object) $_POST;
 $pageTitle = "Fees Reports";
 $response->title = "{$pageTitle} : {$appName}";
-$response->scripts = ["assets/js/analitics.js"];
+$response->scripts = ["assets/js/analitics.js", "assets/js/filters.js"];
 
 // the default data to stream
 $data_stream = 'id="data-report_stream" data-report_stream="summary_report,revenue_flow"';
@@ -73,19 +73,9 @@ $response->html = '
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
                                     
-                                    <div class="row">
-                                        <div class="col-xl-4 col-md-4 col-12 form-group">
-                                            <label>Select Department</label>
-                                            <select data-width="100%" class="form-control selectpicker" id="department_id" name="department_id">
-                                                <option value="">Please Select Department</option>';
-                                                foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
-                                                    $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
-                                                }
-                                                $response->html .= '
-                                            </select>
-                                        </div>
+                                    <div class="row" id="reports_insight">
 
-                                        <div class="col-xl-3 col-md-3 col-12 form-group">
+                                        <div class="col-md-4 col-12 form-group">
                                             <label>Select Class</label>
                                             <select data-width="100%" class="form-control selectpicker" name="class_id">
                                                 <option value="null">Please Select Class</option>';
@@ -96,7 +86,7 @@ $response->html = '
                                             </select>
                                         </div>
 
-                                        <div class="col-xl-3 col-md-3 col-12 form-group">
+                                        <div class="col-md-4 col-12 form-group">
                                             <label>Period Filter</label>
                                             <select data-width="100%" class="form-control selectpicker" id="filter-dashboard" name="period">
                                                 <option value="">Please Select Period</option>';
@@ -202,11 +192,11 @@ $response->html = '
                                 <div class="tab-pane fade" id="generate" role="tabpanel" aria-labelledby="generate-tab2">
                                     
                                    
-                                    <div class="row" id="filter_Department_Class">
+                                    <div class="row generate_report" id="filter_Department_Class">
                                         
                                         <div class="col-md-3 form-group">
                                             <label>Filter by Category</label>
-                                            <select data-width="100%" id="category_id" class="selectpicker form-control">
+                                            <select data-width="100%" name="category_id" class="selectpicker form-control">
                                                 <option value="">Select Category</option>
                                                 '.$fees_category_list.'
                                             </select>

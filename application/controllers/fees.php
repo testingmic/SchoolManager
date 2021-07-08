@@ -1525,20 +1525,22 @@ class Fees extends Myschoolgh {
             $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
         }
 
+        $isPDF = (bool) isset($params->isPDF);
+
         // append the data
         $receipt = '
         <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/app.min.css">
         <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/style.css">
-        <div style="margin:auto auto; max-width:850px;">
+        <div style="margin:auto auto; '.($isPDF ? '' : "max-width:950px;").'">
             <div class="row mb-3">
-                <div class="text-dark bg-white col-md-12 p-3">
-                    <div class="text-center">
+                <div class="text-dark bg-white col-md-12" style="padding:30px">
+                    <div align="center">
                         '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
-                        <h3 class="mb-0 pb-0" style="color:#6777ef">'.$client->client_name.'</h3>
+                        <h1 style="padding:0px;margin:0px;color:#6777ef">'.$client->client_name.'</h1>
                         <div>'.$client->client_address.'</div>
                         '.(!empty($client->client_email) ? "<div>{$client->client_email}</div>" : "").'
                     </div>
-                    <div class="border-bottom pb-1 mb-3 bg-blue"></div>
+                    <div style="background-color: #2196F3 !important;margin-top:5px;border-bottom: 1px solid #dee2e6 !important;height:3px;" class="pb-1 mb-3"></div>
                     <div class="invoice">
                         <div class="invoice-print">
                             <div class="row">
@@ -1547,20 +1549,50 @@ class Fees extends Myschoolgh {
                                     <tr>
                                     <td width="50%">
                                         <div class="invoice-title">
-                                            <h3>Official Receipt</h3>
+                                            <h2 style="margin-top:5px;margin-bottom:5px;">Official Receipt</h2>
                                             <span style="font-size:12px;"><strong>Date & Time:</strong> '.date("d-m-Y h:iA").'</span>
                                         </div>
                                     </td>
                                     <td align="right">
-                                        '.(!empty($student_data) ? "<strong>Academic Year & Term:</strong><br>{$student_data->academic_year} :: {$student_data->academic_term}<br>" : null).'
+                                        '.(!empty($student_data) ? 
+                                            "<strong>Academic Year & Term:</strong><br>{$student_data->academic_year} :: {$student_data->academic_term}<br>" : 
+                                            "<strong>Academic Year & Term:</strong><br>{$client->client_preferences->academics->academic_year} :: {$client->client_preferences->academics->academic_term}<br>"  
+                                            ).'
                                         '.(count($data) == 1 && !empty($student_data->receipt_id) ? "Receipt ID: <strong>{$student_data->receipt_id}</strong><br>" : null).'
                                     </td>
                                     </tr>
                                     </table>
                                     <hr class="pb-0 mb-2 mt-0">
-                                    '.(!empty($student_data) ?
+                                    '.(!empty($student_data) && $isPDF ?
+                                        '<table border="0" width="100%">
+                                            <tr>
+                                                <td width="50%">
+                                                    <address>
+                                                        <strong>To:</strong><br>
+                                                        '.($student_data->student_info->name ?? null).'<br>
+                                                        '.($student_data->student_info->unique_id ?? null).'<br>
+                                                        '.($student_data->class_name ?? null).'<br>
+                                                        '.($student_data->department_name ?? null).'<br>
+                                                    </address>
+                                                </td>
+                                                <td align="right">
+                                                '.(!empty($student_data->student_info->guardian_id) ? 
+                                                    '<address>
+                                                    <strong>Billed To:</strong><br>
+                                                    '.(!empty($student_data->student_info->guardian_id[0]->fullname) ? $student_data->student_info->guardian_id[0]->fullname : null).'
+                                                    '.(!empty($student_data->student_info->guardian_id[0]->address) ? "<br>" . $student_data->student_info->guardian_id[0]->address : null).'
+                                                    '.(!empty($student_data->student_info->guardian_id[0]->contact) ? "<br>" . $student_data->student_info->guardian_id[0]->contact : null).'
+                                                    '.(!empty($student_data->student_info->guardian_id[0]->email) ? "<br>" . $student_data->student_info->guardian_id[0]->email : null).'
+                                                    </address>' : ''
+                                                ).'
+                                                </td>
+                                            </tr>                                        
+                                        </table>'
+                                        : null
+                                    ).'
+                                    '.(!empty($student_data) && !$isPDF ?
                                     '<div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-6" '.($isPDF ? "style='text-align:left'" : null).'>
                                             <address>
                                                 <strong>To:</strong><br>
                                                 '.($student_data->student_info->name ?? null).'<br>
@@ -1570,7 +1602,7 @@ class Fees extends Myschoolgh {
                                             </address>
                                         </div>
                                         '.(!empty($student_data->student_info->guardian_id) ?
-                                        '<div class="col-md-6 text-md-right">
+                                        '<div class="col-md-6 text-md-right" '.($isPDF ? "style='text-align:right'" : null).'>
                                             <address>
                                             <strong>Billed To:</strong><br>
                                             '.(!empty($student_data->student_info->guardian_id[0]->fullname) ? $student_data->student_info->guardian_id[0]->fullname : null).'
@@ -1585,41 +1617,41 @@ class Fees extends Myschoolgh {
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="table-responsive">
-                                        <table width="100%" class="table table-striped table-hover table-md" style="font-size:13px;">
+                                        <table width="100%" '.($isPDF ? "cellpadding='5px'" : null).' class="table table-striped table-hover table-md" style="border: 1px solid #dee2e6; font-size:13px;">
                                             <tbody>
-                                            <tr>
-                                                <th style="width: 40px;">#</th>
+                                            <tr align="left">
+                                                <th '.(!$isPDF ? 'style="width: 40px;"' : null).'>#</th>
                                                 '.(empty($student_data) ? '<th>Name</th>' : '').'
                                                 <th>Item</th>
                                                 <th>Payment Method</th>
                                                 <th>Description</th>
                                                 <th>Record Date</th>
-                                                <th class="text-right">Amount</th>
+                                                <th align="right">Amount</th>
                                             </tr>';
                                             if(!empty($data)) {
                                                 foreach($data as $key => $record) {
                                                     $amount += $record->amount;
                                                     $receipt .='<tr>
-                                                        <td>'.($key+1).'</td>
-                                                        '.(empty($student_data) ? '<td>
+                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.($key+1).'</td>
+                                                        '.(empty($student_data) ? '<td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
                                                             '.$record->student_info->name.'
                                                         </td>' : '').'
-                                                        <td>'.$record->category_name.'</td>
-                                                        <td>
+                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.$record->category_name.'</td>
+                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
                                                             <strong>'.$record->payment_method.'</strong>
                                                             '.(
                                                                 $record->payment_method === "Cheque" ? 
-                                                                "<br><strong>".explode("::", $record->cheque_bank)[0]."</strong><br>
-                                                                <strong>#{$record->cheque_number}</strong>" : ""    
+                                                                "<br><strong>".explode("::", $record->cheque_bank)[0]."</strong>
+                                                                ".(!empty($record->cheque_number) ? "<br><strong>#{$record->cheque_number}</strong>" : null)."" : ""    
                                                             ).'
                                                         </td>
-                                                        <td>'.(!$record->description ? $record->description : null).'</td>
-                                                        <td>'.$record->recorded_date.'</td>
-                                                        <td class="text-right"><strong>'.$record->amount.'</strong></td>
+                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.(!$record->description ? $record->description : null).'</td>
+                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.$record->recorded_date.'</td>
+                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).' align="right"><strong>'.$record->amount.'</strong></td>
                                                     </tr>';
                                                 }
                                             } else {
-                                                $receipt .= '<tr><td align="center" colspan="'.(empty($receipt_id) ? 7 : 6).'">No Record Found</td></tr>';
+                                                $receipt .= '<tr><td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).' align="center" colspan="'.(empty($receipt_id) ? 7 : 6).'">No Record Found</td></tr>';
                                             }
                                         $receipt .= '
                                             </tbody>
@@ -1627,8 +1659,8 @@ class Fees extends Myschoolgh {
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-8"></div>
-                                        <div class="col-lg-4 text-right">
-                                            <hr class="mb-2">
+                                        <div class="col-lg-4" align="right">
+                                            <hr style="margin-bottom:20px">
                                             <div class="invoice-detail-item">
                                                 <div class="invoice-detail-name">Total</div>
                                                 <div class="invoice-detail-value invoice-detail-value-lg"><strong>'.(number_format($amount, 2)).'</strong></div>
@@ -1639,8 +1671,8 @@ class Fees extends Myschoolgh {
                             </div>
                         </div>
                     </div>
-                    <div class="border-bottom pb-1 mt-3 bg-blue"></div>
-                    <div class="text-center pb-1 mt-1" style="font-size:12px;">
+                    <div class="border-bottom" style="border: 2px solid #2196F3; margin-top:10px"></div>
+                    <div align="center" style="font-size:12px;padding-top:10px;">
                         <strong>Location: </strong>'.$client->client_location.' | 
                         <strong>Contact:</strong> '.$client->client_contact.'
                         '.(!empty($client->client_secondary_contact) ? " | {$client->client_secondary_contact}" : "").'

@@ -127,6 +127,13 @@ $(`button[id="filter_Fees_Collection"]`).on("click", function() {
     loadPage(`${baseUrl}fees-history`);
 });
 
+$(`button[id="generate_Fees_Report"]`).on("click", function() {
+    let category_id = $(`div[class~="generate_report"] select[name="category_id"]`).val(),
+        class_id = $(`div[class~="generate_report"] select[name="class_id"]`).val(),
+        student_id = $(`div[class~="generate_report"] select[name="student_id"]`).val();
+    window.open(`${baseUrl}download/fees?category_id=${category_id}&class_id=${class_id}&student_id=${student_id}`);
+});
+
 $(`button[id="filter_Staff_List"]`).on("click", function() {
     department_id = $(`select[name="department_id"]`).val(),
         user_type = $(`select[name="user_type"]`).val(),

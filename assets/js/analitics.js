@@ -6,20 +6,6 @@ var filter = $(`[id="reports_insight"] button[id="filter_Fees_Report"]`),
     ],
     to_stream = "";
 
-$(`[id="reports_insight"] select[name="department_id"]`).on("change", function() {
-    let value = $(this).val();
-    $(`[id="reports_insight"] select[name='class_id']`).find('option').remove().end();
-    $(`[id="reports_insight"] select[name='class_id']`).append(`<option value="">Please Select Class</option>`);
-
-    $.get(`${baseUrl}api/classes/list?columns=id,name`, { department_id: value }).then((response) => {
-        if (response.code == 200) {
-            $.each(response.data.result, function(i, e) {
-                $(`[id="reports_insight"] select[name='class_id']`).append(`<option value='${e.id}'>${e.name}</option>'`);
-            });
-        }
-    });
-});
-
 function format_currency(total) {
     var neg = false;
     if (total < 0) {

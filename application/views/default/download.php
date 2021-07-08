@@ -332,10 +332,54 @@ elseif(confirm_url_id(1, "incident")) {
     $incidentItem = $incidentObj->list($params)["data"];
 
     $pages_content .= $incidentObj->draw($params, $incidentItem);
+}
 
-    if(isset($params->show)) {
-        print $pages_content; exit;
+/** Fees Report */
+elseif(confirm_url_id(1, "fees")) {
+
+    // get the parameters
+    $getObject = (object) $_GET;
+    
+    // set the date range
+    $date_range = "";
+    $date_range .= isset($getObject->start_date) && !empty($getObject->start_date) ? $getObject->start_date : null;
+    $date_range .= isset($getObject->end_date) && !empty($getObject->end_date) ? ":" . $getObject->end_date : null;
+
+    // set the parameters
+    $item_param = (object) [
+        "category_id" => $getObject->category_id ?? null,
+        "student_id" => $getObject->student_id ?? null,
+        "item_id" => $getObject->receipt_id ?? null,
+        "client_data" => $defaultUser->client,
+        "clientId" => $defaultUser->client_id,
+        "date_range" => $date_range,
+        "userData" => $defaultUser,
+    ];
+
+    // create a new object
+    $feesObject = load_class("fees", "controllers", $item_param);
+
+    // load the receipt data
+    $data = $feesObject->list($item_param)["data"];
+
+    // if the record was found
+    if(is_array($data)) {
+
+        // create a new object
+        $param = (object) [
+            "getObject" => $getObject,
+            "data" => $data,
+            "client" => $defaultUser->client,
+            "download" => true,
+            "isPDF" => true,
+            "receipt_id" => $getObject->receipt_id ?? null,
+            "clientId" => $defaultUser->client_id
+        ];
+        
+        // load the receipt 
+        $pages_content .= $feesObject->receipt($param);
     }
+
 }
 
 // load the html content
