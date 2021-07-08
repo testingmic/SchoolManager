@@ -990,11 +990,18 @@ class Courses extends Myschoolgh {
             return;
         }
 
+        // get the client logo content
+        if(!empty($this->iclient->client_logo)) {
+            $type = pathinfo($this->iclient->client_logo, PATHINFO_EXTENSION);
+            $logo_data = file_get_contents($this->iclient->client_logo);
+            $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+        }
+
         // set the address and the other information
         $html = "<table cellpadding=\"5\" width=\"100%\">
             <tr>
                 <td align=\"center\">
-                    <img src=\"{$this->baseUrl}{$this->iclient->client_logo}\" width=\"80px\"><br>
+                    ".(isset($client_logo) ? "<img src=\"{$client_logo}\" width=\"80px\"><br>" : "")."
                     <span style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</span><br>
                     <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
                     <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
@@ -1005,11 +1012,11 @@ class Courses extends Myschoolgh {
         $html .= "<table cellpadding=\"6px\" cellspacing=\"1px\" width=\"100%\">\n";
         $html .= "
             <tr>
-                <td width=\"40%\" style=\"border:dashed 1px #ccc\">
+                <td width=\"40%\" style=\"border:solid 1px #ccc\">
                     <span style=\"font-size:13px\">Academic Year: ".strtoupper($content->academic_year)."</span><br>
                     <span style=\"font-size:13px\">Academic Term: ".strtoupper($content->academic_term)."</span><br>
                 </td>
-                <td width=\"60%\" style=\"border:dashed 1px #ccc\">
+                <td width=\"60%\" style=\"border:solid 1px #ccc\">
                     <span style=\"font-size:24px\">".strtoupper($content->name)."</span><br>
                     <span style=\"font-size:13px;padding-right:40px;\"><strong>CODE:</strong> {$content->course_code}</span><br>
                     <span style=\"font-size:13px\"><strong>WEEKLY MEETINGS:</strong> {$content->weekly_meeting}</span><br>
@@ -1020,8 +1027,8 @@ class Courses extends Myschoolgh {
             $html .= "<tr><td colspan=\"2\"><span style=\"font-size:24px\">LESSON PLAN</span></td></tr>";
         foreach($content->lesson_plan as $key => $plan) {
             $html .= "<tr>";
-            $html .= "<td width=\"70%\" style=\"border:dashed 1px #ccc; font-size:16px; color:#fff; background-color:#2196f3;\">Unit ".($key+1).". {$plan->name}</td>";
-            $html .= "<td width=\"30%\" style=\"border:dashed 1px #ccc; color:#fff; background-color:#2196f3;\"><strong>{$plan->start_date}</strong> to <strong>{$plan->end_date}</strong></td>";
+            $html .= "<td width=\"70%\" style=\"border:solid 1px #ccc; font-size:16px; color:#fff; background-color:#2196f3;\">Unit ".($key+1).". {$plan->name}</td>";
+            $html .= "<td width=\"30%\" style=\"border:solid 1px #ccc; color:#fff; background-color:#2196f3;\"><strong>{$plan->start_date}</strong> to <strong>{$plan->end_date}</strong></td>";
             $html .= "</tr>";
             $html .= "<tr>";
             $html .= "<td colspan=\"2\">{$plan->description}</td>";
@@ -1032,7 +1039,7 @@ class Courses extends Myschoolgh {
                 $html .= "<table width=\"100%\" style=\"padding:0px;margin:0px;\">";
                 $html .= "<tr>";
                 $html .= "<td width=\"70%\" style=\"background-color:#ff9800;color:#fff;line-height:30px;height:30px;\">&nbsp;&nbsp;Lesson ".($lkey+1).". <strong>{$lesson->name}</strong></td>";
-                $html .= "<td width=\"30%\" style=\"line-height:30px;height:30px;border:dashed 1px #ccc; color:#fff; background-color:#ff9800;\">&nbsp;&nbsp;<strong>{$lesson->start_date}</strong> to <strong>{$lesson->end_date}</strong></td>";
+                $html .= "<td width=\"30%\" style=\"line-height:30px;height:30px;border:solid 1px #ccc; color:#fff; background-color:#ff9800;\">&nbsp;&nbsp;<strong>{$lesson->start_date}</strong> to <strong>{$lesson->end_date}</strong></td>";
                 $html .= "</tr>";
                 $html .= "<tr>";
                 $html .= "<td colspan=\"2\">".(empty($lesson->description) ? "No content under this lesson": strip_tags($lesson->description, "<br><strong>"))."</td>";
@@ -1048,7 +1055,7 @@ class Courses extends Myschoolgh {
         // run this section if there are any resource links
         if(isset($content->resources_list["link"])) {
             // header
-            $html .= "<tr><td style=\"line-height:30px;height:30px;border:dashed 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;ADDITIONAL COURSE RESOURCES</span></td></tr>";
+            $html .= "<tr><td style=\"line-height:30px;height:30px;border:solid 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;ADDITIONAL COURSE RESOURCES</span></td></tr>";
             // loop through the links list
             foreach($content->resources_list["link"] as $key => $resource) {
                 $html .= "<tr>";
@@ -1061,7 +1068,7 @@ class Courses extends Myschoolgh {
         }
         // load this section if the course tutors are not empty
         if(!empty($content->course_tutors)) {
-            $html .= "<tr><td style=\"border:dashed 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;COURSE TUTORS</span></td></tr>";
+            $html .= "<tr><td style=\"border:solid 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;COURSE TUTORS</span></td></tr>";
         }
         $html .= "</table>";
         // load this section if the course tutors are not empty

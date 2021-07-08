@@ -22,25 +22,29 @@ class Incidents extends Myschoolgh {
         $params->limit = isset($params->limit) && isset($params->no_limit) ? 9999 : $this->global_limit;
         $params->incident_type = isset($params->incident_type) ? $params->incident_type : "incident";
 
+        if(isset($params->incident_id)) {
+            $column = preg_match("/^[0-9]+$/", $params->incident_id) ? "id" : "item_id";
+        }
+
         $params->query .= (isset($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
         $params->query .= (!empty($params->incident_type)) ? " AND a.incident_type='{$params->incident_type}'" : null;
         $params->query .= (isset($params->incident_date) && !empty($params->incident_date)) ? " AND a.incident_date='{$params->incident_date}'" : null;
         $params->query .= (isset($params->user_id) && !empty($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
         $params->query .= (isset($params->client_id) && !empty($params->client_id)) ? " AND a.client_id='{$params->client_id}'" : null;
         $params->query .= (isset($params->subject) && !empty($params->subject)) ? " AND a.subject LIKE '%{$params->subject}%'" : null;
-        $params->query .= (isset($params->incident_id) && !empty($params->incident_id)) ? " AND (a.item_id='{$params->incident_id}' OR a.id='{$params->incident_id}')" : null;
+        $params->query .= (isset($params->incident_id) && !empty($params->incident_id)) ? " AND a.{$column}='{$params->incident_id}'" : null;
         $params->query .= (isset($params->followup_id) && !empty($params->followup_id)) ? " AND a.incident_id='{$params->followup_id}'" : null;
 
         try {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
-                    (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',user_type) FROM users WHERE users.item_id = a.assigned_to LIMIT 1) AS assigned_to_info,
-                    (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',user_type) FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_information,
-                    (SELECT CONCAT(item_id,'|',name,'|',phone_number,'|',email,'|',image,'|',user_type) FROM users WHERE users.item_id = a.user_id LIMIT 1) AS user_information
+                    (SELECT c.description FROM files_attachment c WHERE c.record_id = a.item_id ORDER BY c.id DESC LIMIT 1) AS attachment,
+                    (SELECT CONCAT(b.item_id,'|',b.unique_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.assigned_to LIMIT 1) AS assigned_to_info,
+                    (SELECT CONCAT(b.item_id,'|',b.unique_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_information,
+                    (SELECT CONCAT(b.item_id,'|',b.unique_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_information
                 FROM incidents a
-                WHERE {$params->query} AND a.deleted = ? AND client_id = ? ORDER BY a.id DESC LIMIT {$params->limit}
+                WHERE {$params->query} AND a.deleted = ? AND a.client_id = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([0, $params->clientId]);
 
@@ -50,7 +54,7 @@ class Incidents extends Myschoolgh {
                 // loop through the information
                 foreach(["created_by_information", "user_information", "assigned_to_info"] as $each) {
                     // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->$each, "|", ["user_id", "name", "phone_number", "email", "image","user_type"]);    
+                    $result->{$each} = (object) $this->stringToArray($result->$each, "|", ["user_id", "unique_id", "name", "phone_number", "email", "image","user_type"]);    
                 }
 
                 // if attachment variable was parsed
@@ -302,6 +306,198 @@ class Incidents extends Myschoolgh {
         
     }
 
+
+    /**
+     * Draw the Incident Infomation
+     * 
+     * @return Array
+     */
+    public function draw($params, $data) {
+
+        // if the data record is empty
+        if(empty($data)) {
+            return "<div><h2>Sorry! No incidents record was found.</h2></div>";
+        }
+
+        // get the client logo content
+        if(!empty($params->client->client_logo)) {
+            $type = pathinfo($params->client->client_logo, PATHINFO_EXTENSION);
+            $logo_data = file_get_contents($params->client->client_logo);
+            $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+        }
+
+        // initial variable
+        $html_content = "";
+        $html_content .= '
+            <div align="center" style="margin:10px;">
+                '.(isset($client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
+                <h2 style="color:#6777ef;padding:0px;margin:0px;">'.$params->client->client_name.'</h2>
+                <div>'.$params->client->client_address.'</div>
+                '.(!empty($params->client->client_email) ? "<div>{$params->client->client_email}</div>" : "").'
+            </div>';
+        
+        // forms object
+        $formsObj = load_class("forms", "controllers");
+
+        $start = 0;
+        $count = count($data);
+
+        // loop through the incidents record
+        foreach($data as $incident) {
+
+            // increment
+            $start++;
+
+            // wipe the message
+            $message = isset($incident->description) ? htmlspecialchars_decode($incident->description) : null;
+
+            // load the file attachments
+            $attachments = "";
+            
+            // list the incident attachments
+            if(!empty($incident->attachment)) {
+                $attached = $incident->attachment;
+                if(!empty($attached)) {
+                    $attachments = $formsObj->list_attachments($attached->files, $params->userId, "col-lg-6");
+                }
+            }
+
+            // load the followup list
+            $followups = $this->incident_log_followup_form($incident->item_id, $incident->user_id, $incident->followups);
+            
+            // get the user image
+            $type = pathinfo($incident->user_information->image, PATHINFO_EXTENSION);
+            $logo_data = file_get_contents($incident->user_information->image);
+            $image = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+
+            // append to the content
+            $html_content .= "
+            <table style=\"border: 1px solid #dee2e6;\" width=\"100%\" cellpadding=\"5px\">
+            <tr>
+                <td colspan='2'>
+                    <div style='border-bottom:solid #ccc 1px; padding-bottom:10px; margin-bottom:10px;'>
+                        <h3 style=\"padding:0px;margin-top:0px;text-transform:uppercase;margin-bottom:5px;\">{$incident->subject}</h3>
+                    </div>
+                    <div class='col-md-12'><strong>Incident Date:</strong> {$incident->incident_date}</div>
+                    <div class='col-md-12'><strong>Current State:</strong> {$this->the_status_label($incident->status)}</div>
+                    <div class='col-md-12'><strong>Location:</strong> {$incident->location}</div>
+                    <div class='col-md-12'><strong>Reported By:</strong> {$incident->reported_by}</div>
+
+                </td>
+            </tr>
+            <tr>
+                <td style=\"border: 1px solid #dee2e6;\" width=\"60px\">
+                    <img width=\"60px\" style=\"border-radius:50%\" src=\"{$image}\" alt=\"\">
+                </td>
+                <td style=\"border: 1px solid #dee2e6;\" valign=\"top\">
+                    <div style=\"text-transform:uppercase\">{$incident->user_information->name}</div>
+                    <div><strong>{$incident->user_information->unique_id}</strong></div>
+                    <div><em>{$incident->user_information->user_type}</em></div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan='2'>
+                    ".(
+                        !empty($incident->assigned_to_info->name) ? "
+                        <div>
+                            <h4 style=\"padding:0px;margin-top:0px;margin-bottom:5px;\">ASSIGNED TO:</h4>
+                            <div><strong>Name:</strong> ".($incident->assigned_to_info->name ?? null)."</div>
+                            <div><strong>Email:</strong> ".($incident->assigned_to_info->email ?? null)."</div>
+                            ".(!empty($incident->assigned_to_info->contact) ? "<div><strong>Contact:</strong> ".($incident->assigned_to_info->contact ?? null)."</div>" : null)."
+                        </div>" : ""
+                    )."
+                    <div style='border-top:solid #ccc 1px; padding-top:10px; margin-top:10px;'>{$message}</div>
+                    ".(isset($attached) && !empty($attached->files) ? "
+                        <div style='border-top:solid #ccc 1px; padding-top:10px; margin-top:10px;'><h4>ATTACHMENTS</h4></div>
+                        <div class='col-md-12'>{$attachments}</div>" : ""
+                    )."
+                    ".(!empty($followups) ? "
+                        <div style='border-top:solid #ccc 1px; padding-top:10px; margin-top:10px;'><h4 style=\"margin-top:0px;margin-bottom:10px;\">FOLLOW UPS</h4></div>
+                        <div class='col-md-12'>{$followups}</div>" : ""
+                    )."                        
+                </td>
+            </tr>
+            </table>";
+        
+            $html_content .= $count !== $start ? "\n<div class=\"page_break\"></div>" : null;
+
+        }
+
+        return $html_content;
+    }
+
+    /**
+     * Incident Followup Form
+     * 
+     * List the followup details before showing the textarea field to add more information to it
+     * 
+     * @param String $item_id
+     * @param String $clientId
+     * @param String $user_id 
+     * 
+     * @return String
+     */
+    public function incident_log_followup_form($item_id, $user_id = null, $followups = []) {
+        
+        /** Initializing */
+        $prev_date = null;
+        $html_content = "<table style=\"border: 1px solid #dee2e6;\" width=\"100%\" cellpadding=\"5px\">";
+        $followups_list = "";
+
+        /** Loop through the followups */
+        foreach($followups as $followup) {
+
+            /** Clean date */
+            $clean_date = date("l, jS F Y", strtotime($followup->date_created));
+            $raw_date = date("Y-m-d", strtotime($followup->date_created));
+
+            /** If the previous date is not the same as the current date */
+            if (!$prev_date || $prev_date !== $raw_date) {
+                $followups_list .= "<tr><td colspan=\"2\">{$clean_date}</td></tr>";
+            }
+            $followups_list .= $this->followup_thread($followup);
+
+            // prepare the previous date
+            $prev_date = date("Y-m-d", strtotime($followup->date_created));
+            $prev_date = $raw_date;
+
+        }
+
+        $html_content .= !empty($followups_list) ? $followups_list : "<tr><td>No followup message available.</td></tr>";
+        $html_content .= "</table>";
+        
+        return $html_content;
+    }
+
+
+    /**
+     * Followup Thread Messages
+     * 
+     * @param stdClass $data
+     * 
+     * @return String
+     */
+    public function followup_thread($data) {
+
+        // get the user image
+        $type = pathinfo($data->created_by_information->image, PATHINFO_EXTENSION);
+        $logo_data = file_get_contents($data->created_by_information->image);
+        $image = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+
+        return "
+        <tr>
+            <td style=\"border: 1px solid #dee2e6;\" width=\"60px\">
+                <img width=\"60px\" style=\"border-radius:50%\" src=\"{$image}\" alt=\"\">
+            </td>
+            <td style=\"border: 1px solid #dee2e6;\" valign=\"top\">
+                <div class=\"cursor underline m-0\">{$data->created_by_information->name}</div>
+                <div title=\"{$data->date_created}\">{$data->time_ago}</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan=\"2\" style=\"font-size:16px;padding:10px;\">{$data->description}</td>
+        <tr>";
+    }
     
 }
 ?>

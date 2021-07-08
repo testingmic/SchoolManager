@@ -320,6 +320,29 @@ elseif(isset($_GET["terminal"], $_GET["academic_term"], $_GET["academic_year"]) 
     }
 }
 
+/** Download An Incident Report */
+elseif(isset($_GET["incident"]) && !isset($_GET["terminal"]) && !isset($_GET["tb_id"])) {
+    // set the get parameters as the values
+    $params = (object) $_GET;
+    $params->limit = 1;
+    $orientation = "portrait";
+    $params->full_details = true;
+    $params->client = $defaultUser->client;
+    $params->userId = $defaultUser->user_id;
+    $params->clientId = $defaultUser->client_id;
+    $params->client_data = $defaultUser->client ?? null;
+
+    // set the class
+    $incidentObj = load_class("incidents", "controllers", $params);
+    $incidentItem = $incidentObj->list($params)["data"];
+
+    $pages_content .= $incidentObj->draw($params, $incidentItem);
+
+    if(isset($params->show)) {
+        print $pages_content; exit;
+    }
+}
+
 // load the html content
 $dompdf->loadHtml($pages_content);
 

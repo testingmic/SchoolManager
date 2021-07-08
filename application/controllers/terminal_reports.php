@@ -987,7 +987,7 @@ class Terminal_reports extends Myschoolgh {
                     </div></td>
                     </tr>";
                 $table .= "</table>\n";
-                $table .= "<table style=\"font-size:12px\" cellpadding=\"5\" width=\"100%\" border=\"1\">";
+                $table .= "<table style=\"font-size:12px\" cellpadding=\"5\" width=\"100%\" style=\"border: 1px solid #dee2e6;\">";
                 $table .= "<tr style=\"font-weight:bold;font-size:15px;background-color:#050f58;color:#fff;\">";
                 $table .= "<td align=\"center\" colspan=\"".($column_count + 3)."\">END OF TERM REPORT CARD</td>";
                 $table .= "</tr>";
@@ -1001,14 +1001,14 @@ class Terminal_reports extends Myschoolgh {
                 // // get the results submitted by the teachers for each subject
                 foreach($student["sheet"] as $score) {
                     $table .= "<tr>";
-                    $table .= "<td>{$score->course_name}</td>";
+                    $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->course_name}</td>";
                     // get the scores
                     foreach($score->scores as $s_score) {
-                        $table .= "<td align=\"center\">{$s_score}</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">{$s_score}</td>";
                     }
-                    $table .= "<td align=\"center\">{$score->total_score}</td>";
-                    $table .= "<td>".strtoupper($score->teachers_name)."</td>";
-                    $table .= "<td>{$score->class_teacher_remarks}</td>";
+                    $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">{$score->total_score}</td>";
+                    $table .= "<td style=\"border: 1px solid #dee2e6;\">".strtoupper($score->teachers_name)."</td>";
+                    $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->class_teacher_remarks}</td>";
                     $table .= "</tr>";
                 }
                 $table .= "</table>";
@@ -1037,7 +1037,7 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "</table>";
                 $table .= "</td>";
                 $table .= "<td width=\"33%\" valign=\"top\">\n";
-                $table .= "<table width=\"100%\" cellpadding=\"5px\" border=\"1\">\n";
+                $table .= "<table width=\"100%\" cellpadding=\"5px\" style=\"border: 1px solid #dee2e6;\" border=\"0\">\n";
                 $table .= "<tr>";
                 $table .= "<td style=\"font-weight:bold\" align=\"center\" colspan=\"2\">ATTENDANCE</td>\n";
                 $table .= "</tr>\n";
@@ -1056,7 +1056,7 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "</table>\n";
                 $table .= "</td>\n";
                 $table .= "<td width=\"32%\" valign=\"top\">\n";
-                 $table .= "<table width=\"100%\" cellpadding=\"5px\" border=\"1\">\n";
+                 $table .= "<table width=\"100%\" cellpadding=\"5px\" style=\"border: 1px solid #dee2e6;\">\n";
                 $table .= "<tr>\n";
                 $table .= "<td style=\"font-weight:bold\" align=\"center\" colspan=\"2\">NEXT TERM FEES</td>\n";
                 $table .= "</tr>\n";

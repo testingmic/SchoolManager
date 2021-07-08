@@ -1393,18 +1393,18 @@ class Forms extends Myschoolgh {
             // show the details
             $html_content = "
                 <div class='row'>
-                    <div class='col-md-12 mb-2'>Subject: <h5 class=\"text-uppercase\">{$params->data->subject}</h5></div>
-                    <div class='col-md-12 mb-2'><strong>Incident Date:</strong> {$params->data->incident_date}</div>
-                    <div class='col-md-12 mb-2'><strong>Current State:</strong> {$this->the_status_label($params->data->status)}</div>
-                    <div class='col-md-12 mb-2'><strong>Location:</strong> {$params->data->location}</div>
-                    <div class='col-md-12 mb-2'><strong>Reported By:</strong> {$params->data->reported_by}</div>
+                    <div class='col-md-12 mb-2'><h5 class=\"text-uppercase\">{$params->data->subject}</h5></div>
+                    <div class='col-md-12'><strong>Incident Date:</strong> {$params->data->incident_date}</div>
+                    <div class='col-md-12'><strong>Current State:</strong> {$this->the_status_label($params->data->status)}</div>
+                    <div class='col-md-12'><strong>Location:</strong> {$params->data->location}</div>
+                    <div class='col-md-12'><strong>Reported By:</strong> {$params->data->reported_by}</div>
                     ".(
                         !empty($params->data->assigned_to_info->name) ? "
-                        <div class='col-md-6 mb-2'>
+                        <div class='col-md-6 mb-2 mt-3'>
                             <h6>ASSIGNED TO:</h6>
-                            <p><strong>Name:</strong> ".($params->data->assigned_to_info->name ?? null)."</p>
-                            <p><strong>Email:</strong> ".($params->data->assigned_to_info->email ?? null)."</p>
-                            <p><strong>Contact:</strong> ".($params->data->assigned_to_info->contact ?? null)."</p>
+                            <div><strong>Name:</strong> ".($params->data->assigned_to_info->name ?? null)."</div>
+                            <div><strong>Email:</strong> ".($params->data->assigned_to_info->email ?? null)."</div>
+                            ".(!empty($params->data->assigned_to_info->contact) ? "<div><strong>Contact:</strong> ".($params->data->assigned_to_info->contact ?? null)."</div>" : null)."
                         </div>" : ""
                     )."
                     <div class='col-md-12 mb-2 border-top pt-3'>{$message}</div>
@@ -1574,7 +1574,7 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function incident_log_followup_form($item_id, $clientId, $user_id = null, $list_only = false) {
+    public function incident_log_followup_form($item_id, $clientId, $user_id = null, $list_only = false, $followups = []) {
         
         /** Initializing */
         $prev_date = null;
@@ -1586,13 +1586,13 @@ class Forms extends Myschoolgh {
             "user_id" => $user_id, "incident_type" => "followup", 
             "followup_id" => $item_id, "clientId" => $clientId
         ];
-		$followups = load_class("incidents", "controllers")->list($q_param)["data"];
+		$followups = empty($followups) ? load_class("incidents", "controllers")->list($q_param)["data"] : $followups;
 
         /** Loop through the followups */
         foreach($followups as $followup) {
 
             /** Clean date */
-            $clean_date = date("l, F Y", strtotime($followup->date_created));
+            $clean_date = date("l, jS F Y", strtotime($followup->date_created));
             $raw_date = date("Y-m-d", strtotime($followup->date_created));
 
             /** If the previous date is not the same as the current date */

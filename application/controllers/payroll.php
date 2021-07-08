@@ -765,12 +765,12 @@ class Payroll extends Myschoolgh {
                             </td>
                         </tr>
                         <tr>
-                            <td colspan="2" align="left" style="padding-bottom: 10px; font-family: Calibri Light;font-size: 12px;">';
+                            <td valign="top" colspan="2" align="left" style="padding-bottom: 10px; font-family: Calibri Light;font-size: 12px;">';
                             if($printing) {
                                 $result .= '<strong style="font-size: 15px;">'.$data->employee_info->name.'</strong><br>'.(!empty($data->employee_info->unique_id) ? "<strong>Employee ID:</strong> {$data->employee_info->unique_id}<br>" : null).''.(!empty($data->employee_info->phone_number) ? "<strong>Contact:</strong> {$data->employee_info->phone_number}<br>" : null).''.(!empty($data->employee_info->email) ? "<strong>Email:</strong> {$data->employee_info->email}<br>" : null).'';
                             }
                             $result .= '</td>
-                            <td colspan="2">
+                            <td colspan="2" valign="top">
                                 <div align="center" style="font-family: Calibri Light; font-size: 12px">
                                 Payslip ID #: <strong>'.$payslipId.'</strong><br>
                                 <strong>Month / Year</strong>: '.$data->payslip_month.' '.$data->payslip_year.'<br>
@@ -801,10 +801,10 @@ class Payroll extends Myschoolgh {
                 </tr>
             </tbody>
         </table>";
-        $result .= "<table width=\"100%\" border=\"1\" class=\"table\">
+        $result .= "<table width=\"100%\" style=\"border:1px solid #ccc;\" border=\"0\">
             <tbody>
                 <tr>
-                    <td width=\"50%\">
+                    <td width=\"50%\" style=\"border:1px solid #ccc;\">
                         <div class=\"row justify-content-between\">
                             <table width=\"100%\" class=\"table\" border=\"0\" cellpadding=\"5px\">
                                 <tr>
@@ -829,7 +829,7 @@ class Payroll extends Myschoolgh {
                             </table>
                         </div>
                     </td>
-                    <td width=\"50%\" align=\"right\">
+                    <td valign=\"top\" style=\"border:1px solid #ccc;\" width=\"50%\" align=\"right\">
                         <div class=\"row justify-content-between\">
                             <table width=\"100%\" class=\"table\" border=\"0\" cellpadding=\"5px\">
                                 <tr>

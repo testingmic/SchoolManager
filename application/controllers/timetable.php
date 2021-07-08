@@ -679,23 +679,23 @@ class Timetable extends Myschoolgh {
             if(!isset($params->no_header)) {
                 
                 // set the header content
-                $summary = '<table width="100%" class="'.$table_class.'" cellpadding="3px" style="margin: auto auto;" cellspacing="3px">'."\n";
+                $summary = '<table width="100%" class="'.$table_class.'" cellpadding="0px" style="margin: auto auto;" cellspacing="0px">'."\n";
                 $summary .= "<tr>\n
-                        <td width=\"27%\">
-                            <strong style=\"font-size:13px;\">Class Name:</strong> {$data->class_name}<br>
-                            <strong style=\"font-size:13px;\">Department:</strong> {$data->department_name}
+                        <td width=\"27%\" style=\"padding:10px;\">
+                            <strong style=\"font-size:15px;\">Class Name:</strong> {$data->class_name}<br>
+                            <strong style=\"font-size:15px;\">Department:</strong> {$data->department_name}
                         </td>
                         <td width=\"46%\" align=\"center\">
                             ".(!empty($this->iclient->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\"><br>" : "")."
-                            <span style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</span><br>
-                            <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
-                            <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
+                            <div style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</div>
+                            <div style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</div>
+                            <div style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</div>
                         </td>
-                        <td width=\"27%\">
-                            <strong style=\"font-size:12px;\">Academic Year:</strong> {$prefs->academics->academic_year}<br>
-                            <strong style=\"font-size:12px;\">Academic Term:</strong> {$prefs->academics->academic_term}<br>
+                        <td width=\"27%\" style=\"padding:10px;\">
+                            <strong style=\"font-size:15px;\">Academic Year:</strong> {$prefs->academics->academic_year}<br>
+                            <strong style=\"font-size:15px;\">Academic Term:</strong> {$prefs->academics->academic_term}<br>
                             ".(isset($data->last_updated) ? "
-                                <strong style=\"font-size:12px;\">Generated On:</strong> {$data->last_updated}<br>" : ""
+                                <strong style=\"font-size:15px;\">Generated On:</strong> {$data->last_updated}<br>" : ""
                             )."
                         </td>\n
                     </tr>\n
@@ -705,11 +705,11 @@ class Timetable extends Myschoolgh {
 
         // start drawing the table
         if($toDownload) {
-            $html_table = "<style>table tr td, table tr td {border:1px dashed #ccc;}</style>\n";
+            $html_table = "<style>table tr td, table tr td {border:1px solid #ccc;}</style>\n";
         } else {
             $html_table = "<style>#t_table tr td, #t_table tr td {border:1px dashed #ccc;}</style>\n";
         }
-        $html_table .= $summary.'<table class="'.$table_class.'" id="t_table" width="100%" cellpadding="3px" style="margin: auto auto;" cellspacing="3px">'."\n";
+        $html_table .= $summary.'<table class="'.$table_class.'" id="t_table" width="100%" cellpadding="0px" style="margin: auto auto;" cellspacing="0px">'."\n";
         $html_table .= "<tr ".(isset($params->height) && $params->height ? "style='height:{$params->height}px'" : "").">\n\t<td width=\"{$width}%\"></td>\n";
         $start_time = $data->start_time;
         

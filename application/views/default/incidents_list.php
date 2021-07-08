@@ -59,6 +59,8 @@ foreach($item_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='#' title='Click to delete this record' onclick='return delete_record(\"{$each->item_id}\", \"incident\");' class='btn mb-1 btn-sm btn-outline-danger'><i class='fa fa-trash'></i> </a>";
     }
 
+    $action .= "&nbsp;<a target='_blank' href='{$baseUrl}download?incident=true&incident_id={$each->item_id}' title='Click to download this incident' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-download'></i> </a>";
+    
     $incidents .= "<tr data-row_id=\"{$each->id}\">";
     $incidents .= "<td>".($key+1)."</td>";
     $incidents .= "<td>
@@ -88,7 +90,7 @@ $response->html = '
             <div class="col-xl-3 col-md-3 col-12 form-group">
                 <label>Select Role</label>
                 <select data-width="100%" class="form-control selectpicker" name="user_role" id="user_role">
-                    <option value="">Please Sefilterlect Role</option>';
+                    <option value="">Please Select Role</option>';
                     foreach($myClass->all_user_roles_list as $key => $value) {
                         $response->html .= "<option ".(isset($filter->user_type) && ($filter->user_type == $key) ? "selected" : "")." value=\"{$key}\">{$value}</option>";                            
                     }

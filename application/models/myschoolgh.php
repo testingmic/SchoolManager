@@ -832,6 +832,6 @@ class Myschoolgh extends Models {
 
 		return $this;
 	}
-
+	
 }
 ?>
