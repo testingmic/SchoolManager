@@ -384,6 +384,21 @@ elseif(confirm_url_id(1, "fees")) {
 
 }
 
+/** Account Statement Reports */
+elseif(confirm_url_id(1, "accounting")) {
+    // get the parameters
+    $getObject = (object) $_GET;
+
+    // set the parameters
+    $orientation = "portrait";
+    $getObject->client_data = $defaultUser->client;
+    $getObject->clientId = $defaultUser->client_id;
+
+    $accountsObj = load_class("accounting", "controllers", $getObject);
+    $pages_content .= $accountsObj->statement($getObject);
+
+}
+// exit;
 // load the html content
 $dompdf->loadHtml($pages_content);
 

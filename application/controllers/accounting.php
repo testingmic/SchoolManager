@@ -179,7 +179,7 @@ class Accounting extends Myschoolgh {
 
         $params->query .= (isset($params->q) && !empty($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->account_id) && !empty($params->account_id)) ? " AND a.item_id='{$params->account_id}'" : null;
+        $params->query .= (isset($params->account_id) && !empty($params->account_id)) ? " AND (a.item_id='{$params->account_id}' OR a.account_number='{$params->account_id}')" : null;
 
         try {
 
@@ -329,7 +329,7 @@ class Accounting extends Myschoolgh {
         $params->query .= (isset($params->transaction_id) && !empty($params->transaction_id)) ? " AND a.item_id='{$params->transaction_id}'" : null;
         $params->query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
         $params->query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
-        $params->query .= isset($params->date) && !empty($params->date) ? " AND DATE(a.record_date='{$params->date}')" : "";
+        $params->query .= isset($params->date) && !empty($params->date) ? " AND DATE(a.record_date) ='{$params->date}'" : "";
         $params->query .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "record_date") : null;
 
         try {
@@ -631,6 +631,200 @@ class Accounting extends Myschoolgh {
             return $this->unexpected_error;
         }
 
+    }
+
+    /**
+     * Generate Account Statement
+     * 
+     * @return String
+     */
+    public function statement(stdClass $params) {
+
+        // get the accounts list
+        $accounts_list = $this->list_accounts($params)["data"];
+
+        // confirm that the account is not empty
+        if(!empty($accounts_list)) {
+
+            $count = count($accounts_list);
+            $html_content = "";
+
+            // get the client logo content
+            if(!empty($params->client_data->client_logo)) {
+                $type = pathinfo($params->client_data->client_logo, PATHINFO_EXTENSION);
+                $logo_data = file_get_contents($params->client_data->client_logo);
+                $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+            }
+
+            // date range algorithm
+            if(isset($params->start_date)) {
+                // revert date
+                if(strtotime($params->start_date) > strtotime(date("Y-m-d"))) {
+                    $params->start_date = date("Y-m-d");
+                }
+                // algorithm
+                if(!isset($params->end_date)) {
+                    $params->date_range = "{$params->start_date}:".date("Y-m-t");
+                }
+                elseif(isset($params->end_date)) {
+                    $params->date_range = "{$params->start_date}:{$params->end_date}";
+                }
+            } else if(isset($params->end_date) && !isset($params->start_date)) {
+                $params->start_date = date("Y-m-d");
+                $params->date = $params->end_date;
+            }
+
+            $start_date = !isset($params->start_date) ? "01-01-2021" : $params->start_date;
+            $end_date = !isset($params->end_date) ?  date("t-m-Y") : $params->end_date;
+            
+            // set the date range
+            $date_range = "{$start_date} To {$end_date}";
+
+            // loop through the accounts
+            foreach($accounts_list as $key => $account) {
+
+                // set the account id for the transaction list
+                $params->account_id = $account->item_id;
+
+                // load the transactions for each account
+                $transactions = $this->list_transactions($params)["data"];
+
+                // count the transactions 
+                $transactions_count = count($transactions);
+
+                // algorithm for calculations
+                $opening_balance = 0;
+                $closing_balance = 0;
+                $_transactions = [];
+
+                // credits / debits
+                foreach($transactions as $transaction) {
+                    $_transactions[$transaction->item_type][] = $transaction;
+                }
+                
+                // counts
+                $credits_count = isset($_transactions["Deposit"]) ? count($_transactions["Deposit"]) : 0;
+                $debits_count = isset($_transactions["Expense"]) ? count($_transactions["Expense"]) : 0;
+
+                // totals
+                $total_credits = isset($_transactions["Deposit"]) ? array_sum(array_column($_transactions["Deposit"], "amount")) : 0;
+                $total_debits = isset($_transactions["Expense"]) ? array_sum(array_column($_transactions["Expense"], "amount")) : 0;
+
+                // processing
+                if(!empty($transactions)) {
+                    $opening_balance = $transactions[0]->balance - $transactions[0]->amount;
+                    $closing_balance = $transactions[$transactions_count-1]->balance;    
+                } else {
+                    $opening_balance = $account->opening_balance;
+                    $closing_balance = $account->opening_balance;
+                }
+
+                // append to the information details
+                $html_content .= "
+                <div style='padding:10px'>
+                    <table border='0' width='100%' style='border:solid 1px #dee2e6'>
+                        <tr>
+                            <td align='center' width='25%'>
+                                ".(!empty($params->client_data->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "")."
+                                <h4 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($params->client_data->client_name)."</h4>
+                            </td>
+                            <td align='center'>
+                                <div style='padding-bottom:5px;font-size:20px'><strong>STATEMENT OF ACCOUNT</strong></div>
+                                <div style='padding-bottom:5px;font-size:13px;'><strong>FOR ACCOUNT NUMBER: {$account->account_number}</strong></div>
+                                <div style='padding-bottom:5px;'><strong>{$account->account_name}</strong></div>
+                                <div>{$date_range}</div>
+                            </td>
+                            <td align='right' valign='top' width='27%'>
+                                <strong>eStatement</strong>
+                                <div>{$account->account_bank}</div>
+                                <div style='margin-top:5px;font-size:11px'><em>{$account->description}</em></div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div style='margin-top:20px'>
+                        <table border='0' width='100%' cellpadding='5px;' style='border:solid 1px #dee2e6;font-size:11px;'>
+                            <tr>
+                                <td width='50%' valign='top'>
+                                    <strong>{$account->account_name}</strong>
+                                </td>
+                                <td>
+                                    <div style='padding-bottom:4px'>&nbsp;</div>
+                                    <div style='padding-bottom:4px'>OPENING BALANCE</div>
+                                    <div style='padding-bottom:4px'>CLOSING BALANCE</div>
+                                    <div style='padding-bottom:4px'>TOTAL DEBITS</div>
+                                    <div style='padding-bottom:4px'>TOTAL CREDITS</div>
+                                </td>
+                                <td valign='top'>
+                                    <div style='padding-bottom:4px'><strong>BOOK</strong></div>
+                                    <div style='padding-bottom:4px'>".number_format($opening_balance, 2)."</div>
+                                    <div style='padding-bottom:4px'>".number_format($closing_balance, 2)."</div>
+                                    <div style='padding-bottom:4px'>".$debits_count."</div>
+                                    <div style='padding-bottom:4px'>".$credits_count."</div>
+                                </td>
+                                <td valign='top'>
+                                    <div><strong>TOTAL</strong></div>
+                                    <div style='padding-bottom:4px'>&nbsp;</div>
+                                    <div style='padding-bottom:4px'>&nbsp;</div>
+                                    <div style='padding-bottom:4px'>".number_format($total_debits, 2)."</div>
+                                    <div style='padding-bottom:4px'>".number_format($total_credits, 2)."</div>
+                                </td>
+                            </tr>
+                        </table>
+                        <table border='0' width='100%' cellpadding='5px;' style='border:solid 1px #dee2e6;font-size:11px;'>
+                            <thead>
+                                <tr style='text-transform:uppercase;font-size:10px;'>
+                                    <th>Date Created</th>
+                                    <th>Item Date</th>
+                                    <th>Description</th>
+                                    <th>Debits</th>
+                                    <th>Credits</th>
+                                </tr>
+                            </thead>";
+                        
+                        if(!empty($transactions)) {
+                            foreach ($transactions as $item => $value) {
+                                $html_content .= "
+                                <tr>
+                                    <td width='12%' style='padding:7px;border:solid 1px #dee2e6;'>
+                                        ".date("d-m-Y", strtotime($value->date_created))."
+                                    </td>
+                                    <td width='12%' style='padding:7px;border:solid 1px #dee2e6;'>
+                                        ".date("d-m-Y", strtotime($value->record_date))."
+                                    </td>
+                                    <td  width='40%' style='padding:7px;border:solid 1px #dee2e6;'>
+                                        <div>".$value->account_type_name."</div>
+                                        <div>".$value->description."</div>
+                                        <div>".$value->reference."</div>
+                                    </td>
+                                    <td style='padding:7px;border:solid 1px #dee2e6;'>".($value->item_type == "Expense" ? number_format($value->amount, 2) : null)."</td>
+                                    <td style='padding:7px;border:solid 1px #dee2e6;'>".($value->item_type == "Deposit" ? number_format($value->amount, 2) : null)."</td>
+                                </tr>";
+                            }
+                        } else {
+                            $html_content .= "
+                            <tr>
+                                <td colspan='5' style='height:50px' align='center'><strong>***NO TRANSACTION FOUND***</strong></td>
+                            </tr>";
+                        }
+                $html_content .= "
+                            <tr>
+                                <td colspan='3' align='center'><strong>***END OF STATEMENT***</strong></td>
+                                <td style='padding:7px;border:solid 1px #dee2e6;height:50px'>".number_format($total_debits, 2)."</td>
+                                <td style='padding:7px;border:solid 1px #dee2e6;height:50px'>".number_format($total_credits, 2)."</td>
+                            </tr>
+                    </table>
+                    </div>
+                </div>";
+
+
+                $html_content .= $count !== $key + 1 ? "\n<div class=\"page_break\"></div>" : null;
+            }
+        } else {
+            $html_content = "<h3>Sorry! An invalid request was parsed.</h3>";
+        }
+
+
+        return $html_content;
     }
 
 }

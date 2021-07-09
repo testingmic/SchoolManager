@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 $filter = (object) $_GET;
-$pageTitle = "Simple Accounting";
+$pageTitle = "Simple Accounting - Accounts";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [
     "assets/js/accounting.js"
