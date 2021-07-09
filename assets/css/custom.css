@@ -539,3 +539,15 @@ label {
     background-color: #6777ef;
     color: #fff;
 }
+
+.btn-outline-danger {
+    background: #fff;
+    color: #ff0000;
+    border:solid 1px #ff0000;
+}
+
+.btn-outline-success {
+    background: #fff;
+    color: #05a027;
+    border:solid 1px #05a027;
+}

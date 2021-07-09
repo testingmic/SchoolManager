@@ -233,10 +233,11 @@ class Accounting extends Myschoolgh {
 
             // insert the record
             $stmt = $this->db->prepare("INSERT INTO accounts SET client_id = ?, account_name = ?, account_number = ?,
-            description = ?, opening_balance = ?, created_by = ?, item_id = ?, balance = ?, total_credit = ?");
+            description = ?, opening_balance = ?, created_by = ?, item_id = ?, balance = ?, total_credit = ?, account_bank = ?");
             $stmt->execute([
                 $params->clientId, $params->account_name, $params->account_number, $params->description ?? null, 
-                $params->opening_balance ?? 0, $params->userId, $item_id, $params->opening_balance ?? 0, $params->opening_balance ?? 0
+                $params->opening_balance ?? 0, $params->userId, $item_id, $params->opening_balance ?? 0, 
+                $params->opening_balance ?? 0, $params->account_bank ?? null
             ]);
 
             // log the user activity
@@ -248,7 +249,7 @@ class Accounting extends Myschoolgh {
                 "data" => "Account was successfully created.", 
                 "additional" => [
                     "clear" => true, 
-                    "href" => "{$this->baseUrl}account_type"
+                    "href" => "{$this->baseUrl}accounts"
                 ]
             ];
 
@@ -283,6 +284,7 @@ class Accounting extends Myschoolgh {
             $stmt = $this->db->prepare("UPDATE accounts SET account_name = ?, account_number = ? 
                 ".(isset($params->description) ? ", description='{$params->description}'" : null)."
                 ".(isset($params->opening_balance) ? ", opening_balance='{$params->opening_balance}'" : null)."
+                ".(isset($params->account_bank) ? ", account_bank='{$params->account_bank}'" : null)."
                 WHERE item_id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([$params->account_name, $params->account_number, $params->account_id, $params->clientId]);

@@ -105,8 +105,10 @@
     <script src="<?= $baseUrl; ?>assets/bundles/apexcharts/apexcharts.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/select2/select2.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/sweetalert/sweetalert.js"></script>
-    <script src="<?= $baseUrl; ?>assets/bundles/datatables/datatables.js"></script>
+    <script src="<?= $baseUrl; ?>assets/bundles/datatables/datatables.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js"></script>
+    <script src="<?= $baseUrl; ?>assets/bundles/datatables/export-tables/buttons.print.min.js"></script>
+    <script src="<?= $baseUrl; ?>assets/bundles/datatables/export-tables/dataTables.buttons.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/inputmask/jquery.inputmask.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/magnify.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/notify.js"></script>

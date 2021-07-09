@@ -10,6 +10,7 @@ var reset_account_form = (form_url, title = "Add Account Type Head") => {
             $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
             $(`div[id="accounts_form"] select[name="account_type"]`).val("").change();
             $(`div[id="accounts_form"] [class="card-header"]`).html(title);
+            $(`div[id="accounts_form"] select[name="account_bank"]`).val("").change();
             $(`div[id="accounts_form"] input[name="opening_balance"]`).attr("disabled", false);
             $(`div[id="accounts_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}${form_url}`);
         }
@@ -115,6 +116,7 @@ var update_bank_account = (account_id) => {
             $(`div[id="accounts_form"] textarea[name="description"]`).val(type.description);
             $(`div[id="accounts_form"] input[name="account_name"]`).val(type.account_name);
             $(`div[id="accounts_form"] input[name="account_id"]`).val(account_id);
+            $(`div[id="accounts_form"] select[name="account_bank"]`).val(type.account_bank).change();
             $(`div[id="accounts_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}api/accounting/update_account`);
         }
     }

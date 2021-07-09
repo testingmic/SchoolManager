@@ -4376,6 +4376,9 @@ class Forms extends Myschoolgh {
 
         $data = isset($params->data) && !empty($params->data) ? $params->data : null;
 
+        // get the list of banks
+        $banks_list = $this->pushQuery("id, bank_name, phone_number", "fees_collection_banks", "1 ORDER BY bank_name");
+
         $html = "";
         $html .= "<div id=\"accounts_form\" class=\"col-12 col-md-5 col-lg-4\">";
         $html .= "<div class=\"card\">";
@@ -4387,6 +4390,14 @@ class Forms extends Myschoolgh {
         $html .= "<input type=\"text\" name=\"account_name\" value=\"".($data->account_name ?? null)."\" class=\"form-control\">";
         $html .= "<input type=\"hidden\" readonly value=\"".($data->item_id ?? null)."\" name=\"account_id\" class=\"form-control\">";
         $html .= "</div>";
+        $html .= '<div class="form-group">
+            <label>Bank Name <span class="required">*</span></label>
+            <select data-width="100%" class="form-control selectpicker" id="account_bank" name="account_bank">
+            <option value="">Select Bank Name</option>';
+            foreach($banks_list as $bank) {
+                $html .= "<option value=\"{$bank->bank_name}\">{$bank->bank_name}</option>";
+            }
+        $html .= '</select></div>';
         $html .= "<div class=\"form-group\">";
         $html .= "<label>Account Number <span class=\"required\">*</span></label>";
         $html .= "<input type=\"text\" name=\"account_number\" value=\"".($data->account_number ?? null)."\" class=\"form-control\">";
@@ -4493,8 +4504,10 @@ class Forms extends Myschoolgh {
                     <form method=\"post\" action=\"".(!empty($data) ? $form_route[$params->route]["update"] : $form_route[$params->route]["add"])."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">
                         <div class=\"form-group\">
                             <label>Account <span class=\"required\">*</span></label>
-                            <select data-width=\"100%\" name=\"account_id\" class=\"form-control selectpicker\">
-                                <option value=\"\">Select Account</option>";
+                            <select data-width=\"100%\" name=\"account_id\" class=\"form-control selectpicker\">";
+                                if(empty($accounts_list) || count($accounts_list) > 1) {
+                                    $html .= "<option value=\"\">Select Account</option>";
+                                }
                                 foreach($accounts_list as $account) {
                                    $html .= "<option ".(!empty($data) && $account->item_id === $data->account_id ? "selected" : null)." value=\"{$account->item_id}\">{$account->account_name}</option>"; 
                                 }

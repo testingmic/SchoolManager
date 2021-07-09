@@ -53,8 +53,8 @@ foreach($list_data as $key => $each) {
     // set the action button
     $action = "";
     if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to delete record' href='#' onclick='return update_bank_account(\"{$each->item_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-        $action .= "&nbsp;<a href='#' title='Click to delete this Account' onclick='return delete_record(\"{$each->item_id}\", \"accounts\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a title='Click to edit this bank account details' href='#' onclick='return update_bank_account(\"{$each->item_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        // $action .= "&nbsp;<a href='#' title='Click to delete this Account' onclick='return delete_record(\"{$each->item_id}\", \"accounts\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     // append to the rows
@@ -63,7 +63,7 @@ foreach($list_data as $key => $each) {
     $type_list .= "<td>{$each->account_name}</td>";
     $type_list .= "<td>{$each->account_number}</td>";
     $type_list .= "<td>{$each->description}</td>";
-    $type_list .= $hasUpdate ? "<td>{$action}</td>" : null;
+    $type_list .= $hasUpdate ? "<td align='center'>{$action}</td>" : null;
     $type_list .= "</tr>";
 }
 
