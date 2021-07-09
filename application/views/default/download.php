@@ -273,6 +273,7 @@ elseif(confirm_url_id(1, "attendance")) {
     // set some parameters
     $getObject->download = true;
     $getObject->client_data = $defaultUser->client;
+    $getObject->user_type = $getObject->user_type ?? null;
     $getObject->clientId = $defaultUser->client->client_id;
     $getObject->academic_year = $defaultUser->client->client_preferences->academics->academic_year;
     $getObject->academic_term = $defaultUser->client->client_preferences->academics->academic_term;

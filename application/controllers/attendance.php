@@ -313,6 +313,13 @@ class Attendance extends Myschoolgh {
             // set the client data
             $this->iclient = $params->client_data;
 
+            // get the client logo content
+            if(!empty($this->iclient->client_logo)) {
+                $type = pathinfo($this->iclient->client_logo, PATHINFO_EXTENSION);
+                $logo_data = file_get_contents($this->iclient->client_logo);
+                $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+            }
+
             // set the preferences
             $prefs = !is_object($params->client_data->client_preferences) ? json_decode($params->client_data->client_preferences) : $params->client_data->client_preferences;
             
@@ -321,8 +328,8 @@ class Attendance extends Myschoolgh {
             $table_content .= "<tr>\n
                     <td width=\"27%\">{$information}</td>
                     <td width=\"46%\" align=\"center\">
-                        <img src=\"{$this->baseUrl}{$this->iclient->client_logo}\" width=\"70px\"><br>
-                        <span style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</span><br>
+                        ".(!empty($this->iclient->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\"><br>" : "")."
+                        <h2 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($this->iclient->client_name)."</h2>
                         <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
                         <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
                     </td>

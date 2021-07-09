@@ -975,7 +975,7 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "
                     <td align=\"center\" width=\"45%\">
                         ".(!empty($this->iclient->client_logo) ? "<img width=\"100px\" src=\"{$client_logo}\"><br>" : "")."
-                        <span style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</span><br>
+                        <h2 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($this->iclient->client_name)."</h2>
                         <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
                         <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
                     </td>";

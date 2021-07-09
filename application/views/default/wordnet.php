@@ -5,7 +5,14 @@ $word = $_GET["q"] ?? "";
 $param = (object) [
     "term" => $word
 ];
-$search = $wordObj->search($param);
 
-echo json_encode($search);
+// search results
+$search = null;
+
+// if the search term is not empty
+if(!empty($word)) {
+    $search = $wordObj->search($param);
+}
+
+echo !empty($search) ? json_encode($search) : null;
 ?>

@@ -687,9 +687,12 @@ class Timetable extends Myschoolgh {
                         </td>
                         <td width=\"46%\" align=\"center\">
                             ".(!empty($this->iclient->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\"><br>" : "")."
-                            <div style=\"padding:0px; font-weight:bold; font-size:20px; margin:0px;\">".strtoupper($this->iclient->client_name)."</div>
-                            <div style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</div>
-                            <div style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</div>
+                            <h2 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($this->iclient->client_name)."</h2>
+                            <div style=\"padding:0px;margin:0px;\">{$this->iclient->client_address}</div>
+                            <div style=\"padding:0px;margin:0px;\">
+                                {$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."
+                                ".(!empty($this->iclient->client_email) ? " | {$this->iclient->client_email}" : "")."
+                            </div>
                         </td>
                         <td width=\"27%\" style=\"padding:10px;\">
                             <strong style=\"font-size:15px;\">Academic Year:</strong> {$prefs->academics->academic_year}<br>

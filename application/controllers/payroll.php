@@ -759,7 +759,7 @@ class Payroll extends Myschoolgh {
                     $result .= '<tr style="padding: 5px; border-bottom: solid 1px #ccc;">
                             <td colspan="4" align="center" style="padding: 10px;">
                                 '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\"><br>" : "").'
-                                <span style="padding:0px; font-weight:bold; font-size:20px; margin:0px;">'.strtoupper($client->client_name).'</span><br>
+                                <h2 style="color:#6777ef;font-family:helvetica;padding:0px;margin:0px;">'.strtoupper($client->client_name).'</h2>
                                 <span style="padding:0px; font-weight:bold; margin:0px;">'.$client->client_address.'</span><br>
                                 <span style="padding:0px; font-weight:bold; margin:0px;">'.$client->client_contact.' '.(!$client->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null).'</span>
                             </td>

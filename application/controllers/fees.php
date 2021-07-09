@@ -1536,7 +1536,7 @@ class Fees extends Myschoolgh {
                 <div class="text-dark bg-white col-md-12" style="padding:30px">
                     <div align="center">
                         '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
-                        <h1 style="padding:0px;margin:0px;color:#6777ef">'.$client->client_name.'</h1>
+                        <h2 style="color:#6777ef;font-family:helvetica;padding:0px;margin:0px;">'.strtoupper($client->client_name).'</h2>
                         <div>'.$client->client_address.'</div>
                         '.(!empty($client->client_email) ? "<div>{$client->client_email}</div>" : "").'
                     </div>

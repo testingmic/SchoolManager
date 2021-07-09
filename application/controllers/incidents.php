@@ -340,9 +340,9 @@ class Incidents extends Myschoolgh {
         // initial variable
         $html_content = "";
         $html_content .= '
-            <div align="center" style="margin:10px;">
+            <div align="center" style="margin:20px;">
                 '.(isset($client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
-                <h2 style="color:#6777ef;padding:0px;margin:0px;">'.$params->client->client_name.'</h2>
+                <h2 style="color:#6777ef;font-family:helvetica;padding:0px;margin:0px;">'.strtoupper($params->client->client_name).'</h2>
                 <div>'.$params->client->client_address.'</div>
                 '.(!empty($params->client->client_email) ? "<div>{$params->client->client_email}</div>" : "").'
             </div>';
