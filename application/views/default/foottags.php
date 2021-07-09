@@ -131,6 +131,7 @@
     <script src="<?= $baseUrl; ?>assets/js/grading.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/import.js"></script>
     <?php } ?>
+    <script src="<?= $baseUrl; ?>assets/js/notification.js"></script>
     <?php if(isset($formToShow)) { ?>
     <script>fieldDefault = <?= json_encode($formToShow) ?>, thisSelectRow = <?= $formData["thisSelectRow"] ?>, thisRowId = <?= $formData["thisRowId"] ?>;</script>
     <?php } ?>
@@ -158,11 +159,6 @@
         $(() => {
             <?php if(isset($verify_payment)) { ?>
             verify_payment();
-            <?php } ?>
-            <?php if(!empty($announcementNotice)) { ?>
-                <?= $announcementNotice->modal_function_script; ?>
-                $(`div[class~="announcementModal_<?= $announcementNotice->item_id ?>"]`).modal("show");
-                <?= "{$announcementNotice->modal_function}();" ?>
             <?php } ?>
             <?php if($idb_init) { ?>
             setTimeout(() => { $(`button[id="idb_init"]`).trigger("click"); }, 1000);

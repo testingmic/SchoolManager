@@ -83,7 +83,6 @@ $SITEURL = array_map("xss_clean", $SITEURL);
 $myClass = load_class('myschoolgh', 'models');
 $usersClass = load_class('users', 'controllers');
 $accessObject = load_class('accesslevel', 'controllers');
-$noticeClass = load_class('notification', 'controllers');
 
 // Check the site status
 GLOBAL $SITEURL, $session;

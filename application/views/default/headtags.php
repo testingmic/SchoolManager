@@ -9,13 +9,10 @@ $appName = config_item("site_name");
 // confirm that user id has been parsed
 $clientId = $session->clientId;
 $loggedUserId = $session->userId;
-$cur_user_id = (confirm_url_id(1)) ? xss_clean($SITEURL[1]) : $loggedUserId;
+$cur_user_id = $SITEURL[1] ?? $loggedUserId;
 
 // get the user data
 $userData = $defaultUser;
-
-// if no user credentials was found
-// if(!$userData) { $session->remove(["userId", "clientId"]); }
 
 // if the user is not loggedin then show the login form
 if(!$usersClass->loggedIn()) { require "login.php"; exit(-1); }
@@ -42,13 +39,8 @@ $userPrefs->user_image = $userData->image;
 $sidebar_pref = $userPrefs->sidebar_nav ?? null;
 $theme_color = $userPrefs->theme_color ?? null;
 
-// quick links
-$quick_links = is_object($userPrefs->quick_links) ? (array) $userPrefs->quick_links : $userPrefs->quick_links;
-$my_quick_links = is_array($quick_links) ? array_keys($quick_links) : $quick_links;
-
 // auto close modal options
 $auto_close_modal = (!isset($userPrefs->auto_close_modal) || (isset($userPrefs->auto_close_modal) && ($userPrefs->auto_close_modal == "allow"))) ? false : true;
-$text_editor = (!isset($userPrefs->text_editor) || (isset($userPrefs->text_editor) && ($userPrefs->text_editor == "trix"))) ? "trix" : "ckeditor";
 
 // user notifications
 $userNotifications = [];
@@ -237,30 +229,14 @@ load_helpers(['menu_helper']);
                     </div>
                     </div>
                 </li>
-                <li class="dropdown dropdown-list-toggle"><a href="#" data-toggle="dropdown"
-                    class="nav-link notification-toggle nav-link-lg"><i class="far fa-bell"></i></a>
+                <li class="dropdown dropdown-list-toggle"><a href="#" data-toggle="dropdown" class="nav-link notification-toggle nav-link-lg"><i class="far fa-bell"></i></a>
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
-                    <div class="dropdown-header">Notifications
-                        <div class="float-right">
-                        <a href="#" data-function="mark_as_read" data-item="notifications">Mark All As Read</a>
+                        <div class="dropdown-header">Notifications
+                            <div class="float-right mark_all_as_read">
+                                <span onclick="return mark_all_notification_as_read()" class="underline text-blue">Mark All As Read</span>
+                            </div>
                         </div>
-                    </div>
-                    <div id="notifications_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-icons">
-                        
-                        <!-- <a href="#" class="dropdown-item dropdown-item-unread">
-                            <span class="dropdown-item-icon bg-primary text-white">
-                                <i class="fas fa-code"></i>
-                            </span>
-                            <span class="dropdown-item-desc">
-                                Template update is available now!
-                                <span class="time text-primary">2 Min Ago</span>
-                            </span>
-                        </a> -->
-
-                    </div>
-                    <div class="dropdown-footer text-center">
-                        <a href="<?= $baseUrl ?>notifications">View All <i class="fas fa-chevron-right"></i></a>
-                    </div>
+                        <div id="notifications_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-icons"></div>
                     </div>
                 </li>
                 <?php } ?>
