@@ -74,7 +74,6 @@ if($usersClass->loggedIn()) {
                       please fill in your password
                     </div>
                   </div>
-                  <input type="hidden" name="verify" value="true" id="verify" hidden>
                   <div class="form-group">
                     <button type="submit" class="btn btn-primary btn-lg btn-block" tabindex="4">
                       Login

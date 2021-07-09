@@ -2,7 +2,7 @@
 //: set the page header type
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
+header("Access-Control-Allow-Methods: GET,POST,PUT");
 header("Access-Control-Max-Age: 3600");
 
 // global variables
@@ -47,6 +47,7 @@ $params = $apisObject->paramFormat($method, $incomingData, $_POST, $_GET, $_FILE
 
 // control
 if((($inner_url == "devlog") && ($outer_url == "auth")) || ($inner_url == "auth" && !$outer_url) || ($inner_url == "auth" && $outer_url == "logout")) {
+    
     // get the list access token
     $response = (object) ["result" => "Sorry! Please ensure that all the required variables are not empty."];
 
@@ -55,6 +56,7 @@ if((($inner_url == "devlog") && ($outer_url == "auth")) || ($inner_url == "auth"
     
     // if the parameters were parsed
     if($method !== "POST") {
+        http_response_code(405);
         $response->result = "Sorry! The method must be POST.";
     } elseif($outer_url == "logout") { 
         // append the user id and 
@@ -62,8 +64,10 @@ if((($inner_url == "devlog") && ($outer_url == "auth")) || ($inner_url == "auth"
         // logout the user
         $response->result = $logObj->logout($params);
     } elseif(isset($params->username, $params->password) && !isset($params->firstname)) {
+        
         // remote login
-        $remote_login = (isset($params->verify)) ? false : true;
+        $remote_login = (bool) isset($params->verify);
+
         // set the parameters as an object
         $parameters = (object)[
             "username" => $params->username,
@@ -86,6 +90,7 @@ if((($inner_url == "devlog") && ($outer_url == "auth")) || ($inner_url == "auth"
 
     // print the error description
     echo json_encode($response);
+
     // Auth the user and regenerate an access token for use
     exit;
 }
@@ -109,6 +114,8 @@ if((!isset($apiAccessValues->user_id) && empty($session->userId)) || (isset($_GE
 
         // set the remote access to true
         $remote = true;
+        $params->remote = true;
+        
         // convert the item into an integer
         $dailyRequestLimit = (int) $apiAccessValues->requests_limit;
         $totalRequests = (int) $apiAccessValues->requests_count;
@@ -162,6 +169,9 @@ $endpoint = trim($endpoint, "/");
 /** Load the parameters */
 $Api->endpoints = $apisObject->apiEndpoint($endpoint, $method, $outer_url);
 
+// set the default parameters
+$Api->default_params = $params;
+
 /* Run a check for the parameters and method parsed by the user */
 $paramChecker = $Api->keysChecker($params);
 
@@ -175,7 +185,7 @@ if( $paramChecker['code'] !== 100) {
 
     // unacceptable query made
     if($remote) {
-        http_response_code(405);
+        http_response_code($paramChecker['code']);
     }
 
     // print the json output

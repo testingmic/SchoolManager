@@ -438,8 +438,7 @@ class Attendance extends Myschoolgh {
         
         $table_content .= "</table>\n";
         $table_content .= "</div>";
-        
-        // print $table_content;
+
         // exit;
         return [
             "data" => [

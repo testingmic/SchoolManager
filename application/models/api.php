@@ -87,14 +87,30 @@ class Api {
         if( !isset($this->endpoints[$this->inner_url]) ) {
             // remove the key from the list
             unset($this->endpoints["devlog"]);
-            // return the error response
-            return $this->output(404, ['accepted' => ["endpoints" => $this->endpoints ] ]);
+
+            $code = empty($this->inner_url) ? 200 : 404;
+
+            // log the api request
+            if(isset($params["remote"])) { $this->logRequest($this->default_params, $code); }
+
+            // return error if not valid
+            return $this->output($code, ['accepted' => ["endpoints" => $this->endpoints ] ]);
         }
         elseif( !isset( $this->endpoints[$this->inner_url][$this->method] ) ) {
-            return $this->output(400, ['accepted' => ["method" => $this->endpoints[$this->inner_url] ] ]);
+            
+            // log the api request
+            if(isset($params["remote"])) { $this->logRequest($this->default_params, 405); }
+
+            // return error if not valid
+            return $this->output(405, ['accepted' => ["method" => $this->endpoints[$this->inner_url] ] ]);
         }
         // continue process
         elseif(!isset($this->endpoints[$this->inner_url][$this->method][$this->outer_url])) {
+            
+            // log the api request
+            if(isset($params["remote"])) { $this->logRequest($this->default_params, 404); }
+            
+            // return error if not valid
             return $this->output(404, ['accepted' => ["endpoints" => $this->endpoints[$this->inner_url][$this->method]] ]);
         } else {
             // set the acceptable parameters
@@ -122,7 +138,12 @@ class Api {
                 }
                 // if an invalid parameter was parsed
                 if($errorFound) {
-                    return $this->output(405, ['accepted' => ["parameters" => $accepted['params'] ]]);
+
+                    // log the api request
+                    if(isset($params["remote"])) { $this->logRequest($this->default_params, 400); }
+
+                    // return invalid parameters parsed to the endpoint
+                    return $this->output(400, ['accepted' => ["parameters" => $accepted['params'] ]]);
                 } else {
 
                     /**
@@ -168,6 +189,11 @@ class Api {
 
                     // If it does not evaluate to true
                     if(!$confirm) {
+
+                        // log the api request
+                        if(isset($params["remote"])) { $this->logRequest($this->default_params, 401); }
+
+                        // return the response of required parameters
                         return $this->output(401, ['required' => $required_text]);
                     } else {
                         // return all tests parsed
@@ -258,7 +284,7 @@ class Api {
 
             // log the user request
             $this->update_onlineStatus($this->userId);
-            // $this->logRequest($this->default_params, $code);
+            $params->remote ? $this->logRequest($this->default_params, $code) : null;
         }
 
         // output the results
@@ -291,39 +317,33 @@ class Api {
      * 
      * @return Bool
      */
-    private function logRequest(array $default_params, $code = null) {
+    private function logRequest($default_params, $code = null) {
 		
 		try {
 
 			// check if a request has been made today and then increment
 			if($this->todayRequestCheck()) {
 				// update the request count
-				$this->myschoolgh->query("
-					UPDATE users_api_queries SET requests_count = (requests_count+1) WHERE  DATE(request_date) = CURDATE()
-				");
+				$this->myschoolgh->query("UPDATE users_api_queries SET requests_count = (requests_count+1) WHERE  DATE(request_date) = CURDATE() AND client_id = '{$this->clientId}' LIMIT 1");
 			} else {
 				// insert a new query count
-				$this->myschoolgh->query("
-					INSERT INTO users_api_queries SET requests_count = '1', request_date = now()
-				");
+				$this->myschoolgh->query("INSERT INTO users_api_queries SET requests_count = '1', request_date = now(), client_id = '{$this->clientId}'");
 			}
 
 			// log the request parsed by the user
 			$stmt = $this->myschoolgh->prepare("
 				INSERT INTO users_api_requests SET  user_id = ?,
 				request_uri = ?, user_ipaddress = ?, user_agent = ?, response_code = ?,
-				request_payload = ?, request_method = ?
+				request_payload = ?, request_method = ?, client_id = ?
 			");
 			$stmt->execute([
 				$this->userId, $this->uri, ip_address(), 
 				"{$this->myClass->platform} {$this->myClass->browser}",
-				$code, json_encode($default_params), $this->method
+				$code, json_encode($default_params), $this->method, $this->clientId
 			]);
 
 			return true;
-		} catch(PDOException $e) {
-			return $e->getMessage();
-		}
+		} catch(PDOException $e) {}
 
 	}
     
@@ -336,17 +356,13 @@ class Api {
 
 		try {
 
-			$stmt = $this->myschoolgh->prepare("
-				SELECT COUNT(*) AS row_count FROM users_api_queries
-				WHERE DATE(request_date) = CURDATE()
-			");
+			$stmt = $this->myschoolgh->prepare("SELECT COUNT(*) AS row_count FROM users_api_queries WHERE DATE(request_date) = CURDATE() AND client_id = '{$this->clientId}' LIMIT 1");
 			$stmt->execute();
 
 			return (!empty($stmt->fetch(PDO::FETCH_OBJ)->row_count)) ? true : false; 
 
-		} catch(PDOException $e) {
-			return false;
-		}
+		} catch(PDOException $e) {}
+
 	}
 
     /**

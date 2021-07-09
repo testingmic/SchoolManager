@@ -152,6 +152,7 @@ class Auth extends Myschoolgh {
 
                             // if a remote call was made for the access token
                             if($params->remote) {
+                                
                                 // get any active access token available or generate a new one if none exists
                                 $access = $this->temporary_access($results);
 
@@ -256,6 +257,7 @@ class Auth extends Myschoolgh {
      * @return Array
      */
     public function temporary_access(stdClass $params) {
+
         // create the temporary accesstoken
         $token = random_string("alnum", mt_rand(68, 70));
         $expiry = date("Y-m-d H:i:s", strtotime("+2 hours"));
@@ -290,8 +292,11 @@ class Auth extends Myschoolgh {
 
             // create the temporary token
             $this->db->query("INSERT INTO users_api_keys 
-                SET user_id = '{$params->user_id}', username = '{$params->username}', access_token = '".password_hash($token, PASSWORD_DEFAULT)."', access_type = 'temp', 
-                expiry_date = '".date("Y-m-d")."', expiry_timestamp = now(), requests_limit = '5000', access_key = '{$token}'
+                SET user_id = '{$params->user_id}', username = '{$params->username}', 
+                access_token = '".password_hash($token, PASSWORD_DEFAULT)."', access_type = 'temp', 
+                expiry_date = '".date("Y-m-d", strtotime("+2 hours"))."', 
+                expiry_timestamp = '".date("Y-m-d H:i:s", strtotime("+2 hours"))."', 
+                requests_limit = '5000', access_key = '{$token}', client_id = '{$params->client_id}'
             ");
 
         } catch(PDOException $e) {} 

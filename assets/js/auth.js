@@ -11,7 +11,7 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
             $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-success">${data.result.data}</div>`);
             if ($(`input[name="recover"]`).length) {
                 $(`input[name="email"]`).val("");
-                $(`form[id="auth-   "] *`).prop("disabled", false);
+                $(`form[id="auth-form"] *`).prop("disabled", false);
             } else {
                 if ($(`link[name="current_url"]`).length) {
                     setTimeout(() => {

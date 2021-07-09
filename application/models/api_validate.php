@@ -39,7 +39,7 @@ class Api_validate {
 			
 			/** Set the Authorization Code **/
 			$accessToken = isset($headers['Authorization']) ? xss_clean($headers['Authorization']) : xss_clean($_GET['access_token']);
-
+			
 			/** Split the Authorization Code **/
 			$authorizationToken = base64_decode(str_ireplace("Bearer", "", $accessToken));
 
@@ -97,6 +97,7 @@ class Api_validate {
 				FROM users_api_keys a WHERE a.username = '{$username}' AND a.status = ? AND (TIMESTAMP(a.expiry_timestamp) >= CURRENT_TIMESTAMP()) LIMIT 100
 			");
 			$stmt->execute([1]);
+			
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 				// verify the access token that has been parsed
 				if(password_verify($accessToken, $result->access_token)) {
@@ -109,9 +110,7 @@ class Api_validate {
 				}
 			}
 			
-		} catch(PDOException $e) {
-			return $e->getMessage();
-		}
+		} catch(PDOException $e) {}
 
 		return false;
 	}
@@ -133,6 +132,7 @@ class Api_validate {
 		// loop through each item and append to the params array
 		// confirm that the incoming data is not empty
 		if( !empty($json) ) {
+
 			// loop through the list if its a valid array
 			if( is_array($json) ) {
 
@@ -191,7 +191,7 @@ class Api_validate {
 				// loop through the url items
 				foreach($get as $key => $value) {
 					// only parse if the value is not empty
-					if( (!empty($value) && ($key != "access_token")) || ($value == 0) ) {
+					if( ($key !== "access_token") ) {
 						// append the parameters
 						$params[$key] = (is_array($value)) ? array_map("xss_clean", $value) : xss_clean($value);
 					}
@@ -203,6 +203,7 @@ class Api_validate {
 		else if( ($method == "POST") ) {
 			// empty the parameters list
 			$params = [];
+			
 			// run this section if the content is not empty
 			if(!empty($post)) {
 				// loop through the url items
