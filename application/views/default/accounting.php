@@ -22,13 +22,20 @@ $response->title = "{$pageTitle} : {$appName}";
 // add the scripts to load
 $response->scripts = ["assets/js/filters.js"];
 
-// get the list of all classes
-$params = (object)[
-    "clientId" => $clientId,
-    "userData" => $defaultUser,
-    "client_data" => $defaultUser->client,
-    "transaction_id" => $filter->transaction_id ?? null
-];
+// load fees allocation list for the students
+$accounts_list = "";
+$stmt = $myClass->db->prepare("
+    SELECT *
+    FROM accounts
+    WHERE client_id = ? AND status = ?
+");
+$stmt->execute([$clientId, 1]);
+$accounts_array_list = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+// fees category
+foreach($accounts_array_list as $category) {
+    $accounts_list .= "<option value=\"{$category->item_id}\">{$category->account_name}</option>";
+}
 
 $response->html = '
     <section class="section">
@@ -46,18 +53,91 @@ $response->html = '
                         <div class="padding-20">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true"><i class="fa fa-list"></i> Transaction Reports</a>
+                                    <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true"><i class="fa fa-list"></i> Account Statement</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="accounts-tab2" data-toggle="tab" href="#accounts" role="tab" aria-selected="true"><i class="fa fa-list"></i> Account Reports</a>
+                                    <a class="nav-link" id="transaction-tab2" data-toggle="tab" href="#transaction" role="tab" aria-selected="true"><i class="fa fa-list"></i> Transactions Statement</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="transaction_notes-tab2" data-toggle="tab" href="#transaction_notes" role="tab" aria-selected="true"><i class="fa fa-list"></i> Transactions Notes</a>
                                 </li>
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
-                                <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
-                                    
+                                <div class="tab-pane fade" id="transaction_notes" role="tabpanel" aria-labelledby="transaction_notes-tab2">
+                                    <div class="row account_note_report">
+                                        <div class="col-md-4">
+                                            <label>Select Account</label>
+                                            <select data-width="100%" id="account_id" name="account_id" class="selectpicker form-control">
+                                                <option value="">Select Account</option>
+                                                '.$accounts_list.'
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 mb-1">
+                                            <label>Start Date</label>                                
+                                            <input value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
+                                        </div>
+                                        <div class="col-md-3 mb-1">
+                                            <label>End Date</label>
+                                            <input value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
+                                        </div>
+                                        <div class="col-md-2 col-12 form-group">
+                                            <label for="">&nbsp;</label>
+                                            <button id="generate_Account_Notes_Report" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> Generate</button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="tab-pane fade" id="accounts" role="tabpanel" aria-labelledby="accounts-tab2">
-                                    
+                                <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
+                                    <div class="row generate_report">
+                                        <div class="col-lg-4">
+                                            <label>Select Account</label>
+                                            <select data-width="100%" id="account_id" name="account_id" class="selectpicker form-control">
+                                                <option value="">Select Account</option>
+                                                '.$accounts_list.'
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3 mb-1">
+                                            <label>Start Date</label>                                
+                                            <input value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
+                                        </div>
+                                        <div class="col-md-3 mb-1">
+                                            <label>End Date</label>
+                                            <input value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
+                                        </div>
+                                        <div class="col-md-2 col-12 form-group">
+                                            <label for="">&nbsp;</label>
+                                            <button id="generate_Account_Statement" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> Generate</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="transaction" role="tabpanel" aria-labelledby="transaction-tab2">
+                                    <div class="row transaction_report">
+                                        <div class="col-md-3">
+                                            <label>Select Account</label>
+                                            <select data-width="100%" id="account_id" name="account_id" class="selectpicker form-control">
+                                                <option value="">Select Account</option>
+                                                '.$accounts_list.'
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label>Transaction Type</label>
+                                            <select data-width="100%" id="item_type" name="item_type" class="selectpicker form-control">
+                                                <option value="Deposit">Deposit (Income)</option>
+                                                <option value="Expense">Expense</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2 mb-1">
+                                            <label>Start Date</label>                                
+                                            <input value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
+                                        </div>
+                                        <div class="col-md-2 mb-1">
+                                            <label>End Date</label>
+                                            <input value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
+                                        </div>
+                                        <div class="col-md-2 col-12 form-group">
+                                            <label for="">&nbsp;</label>
+                                            <button id="generate_Transaction_Report" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> Generate</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

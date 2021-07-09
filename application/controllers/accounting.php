@@ -8,7 +8,7 @@ class Accounting extends Myschoolgh {
 		parent::__construct();
 
         // get the client data
-        $client_data = $params->client_data;
+        $client_data = $params->client_data ?? null;
         $this->iclient = $client_data;
 
         // run this query
@@ -92,8 +92,9 @@ class Accounting extends Myschoolgh {
 
             // insert the record
             $stmt = $this->db->prepare("INSERT INTO accounts_type_head SET client_id = ?, name = ?, type = ?,
-            description = ?, created_by = ?, item_id = ?");
-            $stmt->execute([$params->clientId, $params->name, $params->account_type, $params->description ?? null, $params->userId, $item_id]);
+            description = ?, created_by = ?, item_id = ?, academic_year = ?, academic_term = ?");
+            $stmt->execute([$params->clientId, $params->name, $params->account_type, $params->description ?? null, 
+                $params->userId, $item_id, $params->academic_year, $params->academic_term]);
 
             // log the user activity
             $this->userLogs("accounts_typehead", $item_id, null, "{$params->userData->name} added a new account type head", $params->userId);
@@ -141,8 +142,11 @@ class Accounting extends Myschoolgh {
             // insert the record
             $stmt = $this->db->prepare("UPDATE accounts_type_head SET name = ?, type = ?
                 ".(isset($params->description) ? ", description='{$params->description}'" : null)."
-            WHERE item_id = ? AND client_id = ? LIMIT 1");
-            $stmt->execute([$params->name, $params->account_type, $params->type_id, $params->clientId]);
+            WHERE item_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
+            $stmt->execute([
+                $params->name, $params->account_type, $params->type_id, 
+                $params->clientId, $params->academic_year, $params->academic_term
+            ]);
 
             // log the user activity
             $this->userLogs("accounts_typehead", $params->type_id, $prevData[0], "{$params->userData->name} updated the existing account type head", $params->userId);
@@ -653,7 +657,7 @@ class Accounting extends Myschoolgh {
             if(!empty($params->client_data->client_logo)) {
                 $type = pathinfo($params->client_data->client_logo, PATHINFO_EXTENSION);
                 $logo_data = file_get_contents($params->client_data->client_logo);
-                $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+                $this->client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
             }
 
             // date range algorithm
@@ -675,8 +679,16 @@ class Accounting extends Myschoolgh {
             }
 
             $start_date = !isset($params->start_date) ? "01-01-2021" : $params->start_date;
-            $end_date = !isset($params->end_date) ?  date("t-m-Y") : $params->end_date;
+            $end_date = !isset($params->end_date) ?  date("t-m-Y") : $params->end_date;       
+
+            // account notes
+            $loadNotes = (bool) isset($params->display) && ($params->display == "notes");
             
+            // end the query if the user wants notes
+            if($loadNotes)  {
+                return $this->format_transaction_notes($params);
+            }
+
             // set the date range
             $date_range = "{$start_date} To {$end_date}";
 
@@ -688,7 +700,7 @@ class Accounting extends Myschoolgh {
 
                 // load the transactions for each account
                 $transactions = $this->list_transactions($params)["data"];
-
+                
                 // count the transactions 
                 $transactions_count = count($transactions);
 
@@ -725,7 +737,7 @@ class Accounting extends Myschoolgh {
                     <table border='0' width='100%' style='border:solid 1px #dee2e6'>
                         <tr>
                             <td align='center' width='25%'>
-                                ".(!empty($params->client_data->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "")."
+                                ".(!empty($params->client_data->client_logo) ? "<img width=\"70px\" src=\"{$this->client_logo}\">" : "")."
                                 <h4 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($params->client_data->client_name)."</h4>
                             </td>
                             <td align='center'>
@@ -771,7 +783,8 @@ class Accounting extends Myschoolgh {
                             </tr>
                         </table>
                         <table border='0' width='100%' cellpadding='5px;' style='border:solid 1px #dee2e6;font-size:11px;'>
-                            <thead>
+                            ".(!$loadNotes ? 
+                            "<thead>
                                 <tr style='text-transform:uppercase;font-size:10px;'>
                                     <th>Date Created</th>
                                     <th>Item Date</th>
@@ -779,9 +792,9 @@ class Accounting extends Myschoolgh {
                                     <th>Debits</th>
                                     <th>Credits</th>
                                 </tr>
-                            </thead>";
+                            </thead>" : null);
                         
-                        if(!empty($transactions)) {
+                        if(!empty($transactions) && !$loadNotes) {
                             foreach ($transactions as $item => $value) {
                                 $html_content .= "
                                 <tr>
@@ -801,21 +814,18 @@ class Accounting extends Myschoolgh {
                                 </tr>";
                             }
                         } else {
-                            $html_content .= "
-                            <tr>
-                                <td colspan='5' style='height:50px' align='center'><strong>***NO TRANSACTION FOUND***</strong></td>
-                            </tr>";
+                            $html_content .= !$loadNotes ? "<tr><td colspan='5' style='height:50px' align='center'><strong>***NO TRANSACTION FOUND***</strong></td></tr>" : null;
                         }
-                $html_content .= "
-                            <tr>
-                                <td colspan='3' align='center'><strong>***END OF STATEMENT***</strong></td>
-                                <td style='padding:7px;border:solid 1px #dee2e6;height:50px'>".number_format($total_debits, 2)."</td>
-                                <td style='padding:7px;border:solid 1px #dee2e6;height:50px'>".number_format($total_credits, 2)."</td>
-                            </tr>
+                $html_content .= (
+                    !$loadNotes ? "
+                        <tr>
+                            <td colspan='3' align='center'><strong>***END OF STATEMENT***</strong></td>
+                            <td style='font-weight:bold;padding:7px;border:solid 1px #dee2e6;height:50px'>".number_format($total_debits, 2)."</td>
+                            <td style='font-weight:bold;padding:7px;border:solid 1px #dee2e6;height:50px'>".number_format($total_credits, 2)."</td>
+                        </tr>" : "")." 
                     </table>
                     </div>
                 </div>";
-
 
                 $html_content .= $count !== $key + 1 ? "\n<div class=\"page_break\"></div>" : null;
             }
@@ -825,6 +835,177 @@ class Accounting extends Myschoolgh {
 
 
         return $html_content;
+    }
+
+
+    /**
+     * Account Statement Notes
+     * 
+     * @return String
+     */
+    public function format_transaction_notes(stdClass $params) {
+
+        try {
+
+            // get the accounts list
+            $accounts_list = $this->list_accounts($params)["data"];
+            $count = count($accounts_list);
+
+            $html_content = "";
+
+            // confirm that the account is not empty
+            if(!empty($accounts_list)) {
+
+                // loop through the accounts
+                foreach($accounts_list as $account_key => $account) {
+
+                    $query = "1";
+                    $query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+                    $query .= (isset($params->q) && !empty($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
+                    $query .= (isset($params->item_type) && !empty($params->item_type)) ? " AND a.item_type='{$params->item_type}'" : null;
+                    $query .= (isset($params->account_id) && !empty($params->account_id)) ? " AND a.account_id='{$params->account_id}'" : null;
+                    $query .= (isset($params->account_type) && !empty($params->account_type)) ? " AND a.account_type='{$params->account_type}'" : null;
+                    $query .= (isset($params->transaction_id) && !empty($params->transaction_id)) ? " AND a.item_id='{$params->transaction_id}'" : null;
+                    $query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
+                    $query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
+                    $query .= isset($params->date) && !empty($params->date) ? " AND DATE(a.record_date) ='{$params->date}'" : "";
+                    $query .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "record_date") : null;
+                    
+                    // get the transactions
+                    $stmt = $this->db->prepare("
+                        SELECT 
+                            SUM(a.amount) AS total_sum, MONTH(a.record_date) AS record_month, a.account_type, a.item_type,
+                            (SELECT c.name FROM accounts_type_head c WHERE c.item_id = a.account_type LIMIT 1) AS account_type_name,
+                            (SELECT b.account_name FROM accounts b WHERE b.item_id = a.account_id LIMIT 1) AS account_name
+                        FROM accounts_transaction a
+                        WHERE {$query} AND a.client_id = ? AND a.account_id = ? GROUP BY a.account_type, MONTH(a.record_date)
+                    ");
+                    $stmt->execute([$params->clientId, $account->item_id]);
+                    $result = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    
+                    // group the item types
+                    $item_types = [];
+                    foreach ($result as $type) {
+                        $item_types[$type->item_type][] = $type;
+                    }
+
+                    // group by month
+                    $months_data = [];
+
+                    // loop through the months of the year
+                    foreach($item_types as $item => $record) {
+                        // loop through the item types
+                        foreach($record as $i_key => $i_value) {
+                            // loop through the months
+                            for($i = 0; $i < 12; $i++) {
+                                // change the month
+                                $month = date("F", strtotime("January + ".($i_value->record_month -1)." month"));
+                                // append to the record month
+                                $months_data[$item][$month][$i_value->account_type] = $i_value;
+                            }
+                        }
+                    }
+
+                    // get the list of income
+                    $income_heads["Deposit"] = $this->pushQuery("item_id, name, description", "accounts_type_head", "client_id = '{$params->clientId}' AND status='1' AND type='Income'");
+                    $income_heads["Expense"] = $this->pushQuery("item_id, name, description", "accounts_type_head", "client_id = '{$params->clientId}' AND status='1' AND type='Expense'");
+
+                    // get an array of the items
+                    $income_array = array_column($income_heads["Deposit"], "item_id");
+                    $expense_array = array_column($income_heads["Expense"], "item_id");
+                    
+                    // line totals
+                    $line_total = [];
+
+                    $html_content .= "
+                        <div style='padding:10px'>
+                            <table border='0' width='100%' style='border:solid 1px #dee2e6'>
+                                <tr>
+                                    <td align='center' width='25%'>
+                                        ".(!empty($params->client_data->client_logo) ? "<img width=\"70px\" src=\"{$this->client_logo}\">" : "")."
+                                        <h4 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($params->client_data->client_name)."</h4>
+                                    </td>
+                                    <td align='center'>
+                                        <div style='padding-bottom:5px;font-size:20px'><strong>STATEMENT OF ACCOUNT</strong></div>
+                                        <div style='padding-bottom:5px;font-size:13px;'><strong>FOR ACCOUNT NUMBER: {$account->account_number}</strong></div>
+                                        <div style='padding-bottom:5px;'><strong>{$account->account_name}</strong></div>
+                                    </td>
+                                    <td align='right' valign='top' width='27%'>
+                                        <strong>eStatement</strong>
+                                        <div>{$account->account_bank}</div>
+                                        <div style='margin-top:5px;font-size:11px'><em>{$account->description}</em></div>
+                                    </td>
+                                </tr>
+                            </table>";
+
+                    // loop through the items
+                    foreach(["Deposit", "Expense"] as $item) {
+
+                        // create the table
+                        $html_content .= "
+                        <div style='margin-bottom:20px'>
+                            <table width='100%' cellpadding='5px;' style='border:solid 1px #dee2e6;'>
+                                <thead>
+                                    <tr>
+                                        <th width='12%' style='background:#555758;color:#fff;'></th>";
+                                        for($i = 0; $i < date("m"); $i++) {
+                                            $month = date("M", strtotime("January + {$i} month"));
+                                            $html_content .= "<th style='color:#fff;text-transform:uppercase;background:#555758' align='right'>{$month}</th>\n";
+                                        }
+                            $html_content .= "
+                                        <th align='right' style='background:#555758;color:#fff;'>TOTAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>";
+                                    foreach($income_heads[$item] as $type) {
+                                        $html_content .= "<tr>\n";
+                                        $html_content .= "<td>{$type->name}</td>\n";
+
+                                        // loop through the months
+                                        for($i = 0; $i < date("m"); $i++) {
+
+                                            $month = date("F", strtotime("January + {$i} month"));
+
+                                            // get the name 
+                                            $item_amount = isset($months_data[$item][$month][$type->item_id]) ? $months_data[$item][$month][$type->item_id]->total_sum : 0;
+                                            
+                                            if(isset($months_data[$item][$month][$type->item_id])) {
+                                                if($months_data[$item][$month][$type->item_id]->account_type === $type->item_id) {
+                                                    $html_content .= "<td style='border:solid 1px #dee2e6;' align='right'>".number_format($item_amount, 2)."</td>\n";
+                                                } else {
+                                                    $html_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+                                                }
+                                            } else {
+                                                $html_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+                                            }
+
+                                            $line_total[$item][$type->item_id][] = $item_amount;
+
+                                        }
+
+                                        $html_content .= "<td style='border:solid 1px #dee2e6;' align='right'><strong>".array_sum($line_total[$item][$type->item_id])."</strong></td>";
+
+                                        $html_content .= "</tr>\n";
+                                    }
+                        $html_content .= "
+                                <tbody>
+                            </table>
+                        </div>";
+                    }
+
+                    // append the next page div tag
+                    $html_content .= $count !== $account_key + 1 ? "\n<div class=\"page_break\"></div>" : null;
+
+                }
+            
+            } else {
+                $html_content = "<h3>Sorry! An invalid request was parsed.</h3>";
+            }
+
+            return $html_content;
+
+        } catch(PDOException $e) {}
+
     }
 
 }

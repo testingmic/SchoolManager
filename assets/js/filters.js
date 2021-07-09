@@ -136,6 +136,29 @@ $(`button[id="generate_Fees_Report"]`).on("click", function() {
     window.open(`${baseUrl}download/fees?category_id=${category_id}&class_id=${class_id}&student_id=${student_id}&start_date=${start_date}&end_date=${end_date}`);
 });
 
+$(`button[id="generate_Account_Statement"]`).on("click", function() {
+    let account_id = $(`div[class~="generate_report"] select[name="account_id"]`).val(),
+        start_date = $(`div[class~="generate_report"] input[name="start_date"]`).val(),
+        end_date = $(`div[class~="generate_report"] input[name="end_date"]`).val();
+    window.open(`${baseUrl}download/accounting?account_id=${account_id}&start_date=${start_date}&end_date=${end_date}`);
+});
+
+$(`button[id="generate_Account_Notes_Report"]`).on("click", function() {
+    let account_id = $(`div[class~="account_note_report"] select[name="account_id"]`).val(),
+        start_date = $(`div[class~="account_note_report"] input[name="start_date"]`).val(),
+        end_date = $(`div[class~="account_note_report"] input[name="end_date"]`).val();
+    window.open(`${baseUrl}download/accounting?account_id=${account_id}&start_date=${start_date}&end_date=${end_date}&display=notes`);
+});
+
+
+$(`button[id="generate_Transaction_Report"]`).on("click", function() {
+    let account_id = $(`div[class~="transaction_report"] select[name="account_id"]`).val(),
+        start_date = $(`div[class~="transaction_report"] input[name="start_date"]`).val(),
+        item_type = $(`div[class~="transaction_report"] select[name="item_type"]`).val(),
+        end_date = $(`div[class~="transaction_report"] input[name="end_date"]`).val();
+    window.open(`${baseUrl}download/accounting?account_id=${account_id}&start_date=${start_date}&end_date=${end_date}&item_type=${item_type}`);
+});
+
 $(`button[id="filter_Staff_List"]`).on("click", function() {
     department_id = $(`select[name="department_id"]`).val(),
         user_type = $(`select[name="user_type"]`).val(),
