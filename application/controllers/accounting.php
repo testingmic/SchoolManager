@@ -919,15 +919,15 @@ class Accounting extends Myschoolgh {
 
                     $html_content .= "
                         <div style='padding:10px'>
-                            <table border='0' width='100%' style='border:solid 1px #dee2e6'>
+                            <table border='0' width='100%' style='border:solid 1px #dee2e6; margin-bottom:10px'>
                                 <tr>
                                     <td align='center' width='25%'>
                                         ".(!empty($params->client_data->client_logo) ? "<img width=\"70px\" src=\"{$this->client_logo}\">" : "")."
                                         <h4 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($params->client_data->client_name)."</h4>
                                     </td>
                                     <td align='center'>
-                                        <div style='padding-bottom:5px;font-size:20px'><strong>STATEMENT OF ACCOUNT</strong></div>
-                                        <div style='padding-bottom:5px;font-size:13px;'><strong>FOR ACCOUNT NUMBER: {$account->account_number}</strong></div>
+                                        <div style='padding-bottom:5px;font-size:20px'><strong>NOTES OF ACCOUNT</strong></div>
+                                        <div style='padding-bottom:5px;font-size:15px;'><strong>FOR ACCOUNT NUMBER: {$account->account_number}</strong></div>
                                         <div style='padding-bottom:5px;'><strong>{$account->account_name}</strong></div>
                                     </td>
                                     <td align='right' valign='top' width='27%'>
@@ -938,28 +938,33 @@ class Accounting extends Myschoolgh {
                                 </tr>
                             </table>";
 
+                    // begin another data stream
+                    $item_content = "";
+                    $months_group = [];
+
                     // loop through the items
                     foreach(["Deposit", "Expense"] as $item) {
 
                         // create the table
-                        $html_content .= "
+                        $item_content .= "
                         <div style='margin-bottom:20px'>
+                            <div><strong>{$item} Line</strong></div>
                             <table width='100%' cellpadding='5px;' style='border:solid 1px #dee2e6;'>
                                 <thead>
                                     <tr>
                                         <th width='12%' style='background:#555758;color:#fff;'></th>";
                                         for($i = 0; $i < date("m"); $i++) {
                                             $month = date("M", strtotime("January + {$i} month"));
-                                            $html_content .= "<th style='color:#fff;text-transform:uppercase;background:#555758' align='right'>{$month}</th>\n";
+                                            $item_content .= "<th style='color:#fff;text-transform:uppercase;background:#555758' align='right'>{$month}</th>\n";
                                         }
-                            $html_content .= "
+                            $item_content .= "
                                         <th align='right' style='background:#555758;color:#fff;'>TOTAL</th>
                                     </tr>
                                 </thead>
                                 <tbody>";
                                     foreach($income_heads[$item] as $type) {
-                                        $html_content .= "<tr>\n";
-                                        $html_content .= "<td>{$type->name}</td>\n";
+                                        $item_content .= "<tr>\n";
+                                        $item_content .= "<td><span style='font-size:13px;'>{$type->name}</span></td>\n";
 
                                         // loop through the months
                                         for($i = 0; $i < date("m"); $i++) {
@@ -971,31 +976,99 @@ class Accounting extends Myschoolgh {
                                             
                                             if(isset($months_data[$item][$month][$type->item_id])) {
                                                 if($months_data[$item][$month][$type->item_id]->account_type === $type->item_id) {
-                                                    $html_content .= "<td style='border:solid 1px #dee2e6;' align='right'>".number_format($item_amount, 2)."</td>\n";
+                                                    $item_content .= "<td style='border:solid 1px #dee2e6;font-size:13px;' align='right'>".number_format($item_amount, 2)."</td>\n";
                                                 } else {
-                                                    $html_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+                                                    $item_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
                                                 }
                                             } else {
-                                                $html_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+                                                $item_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
                                             }
 
+                                            // get the line total
                                             $line_total[$item][$type->item_id][] = $item_amount;
+
+                                            // set the month total
+                                            $months_group[$item][$month][] = $item_amount;
 
                                         }
 
-                                        $html_content .= "<td style='border:solid 1px #dee2e6;' align='right'><strong>".array_sum($line_total[$item][$type->item_id])."</strong></td>";
+                                        $item_content .= "<td style='border:solid 1px #dee2e6;' align='right'><strong>".number_format(array_sum($line_total[$item][$type->item_id]), 2)."</strong></td>";
 
-                                        $html_content .= "</tr>\n";
+                                        $item_content .= "</tr>\n";
+
                                     }
-                        $html_content .= "
+                                    $item_content .= "<tr>";
+                                    $item_content .= "<td><strong>Total</strong></td>";
+
+                                    if(isset($months_group[$item])) {
+                                        foreach($months_group[$item] as $_this => $_that) {
+                                            $item_content .= "<td align='right'>
+                                                <strong>".number_format(array_sum($_that), 2)."</strong>
+                                            </td>";
+                                        }
+                                    }
+                        $item_content .= "
+                                    </tr>
                                 <tbody>
                             </table>
                         </div>";
                     }
 
+                    // group the months values
+                    $months_group = [];
+                    $months = json_encode($months_data);
+                    $months_data = json_decode($months, true);
+
+                    // loop through the deposit and expense
+                    foreach(["Deposit", "Expense"] as $item) {
+                        // if the key acqually exists
+                        if(isset($months_data[$item])) {
+                            // loop through the data string
+                            foreach($months_data[$item] as $month => $data) {
+                                $items = array_column(array_values($data), "total_sum");
+                                $months_group[$item][$month] = array_sum($items);
+                            }
+                        }
+                    }
+
+                    // group the total values
+                    $total = [];
+                    foreach(["Deposit", "Expense"] as $item) {
+                        foreach($line_total[$item] as $key => $value) {
+                            if(isset($total[$item])) {
+                                $total[$item] += array_sum($value);
+                            } else {
+                                $total[$item] = array_sum($value);
+                            }
+                        }
+                    }
+
+                    // summary of each item
+                    $html_content .= "
+                    <table border='0' width='100%' cellpadding='5px' style='border:solid 1px #dee2e6; margin-bottom:10px'>
+                        <tr>
+                            <td></td>
+                            <td valign='top' align='right' width='20%'>
+                                <div style='margin-bottom:5px'><strong>START DATE:</strong> {$params->start_date}</div>
+                                <div><strong>END DATE:</strong> {$params->end_date}</div>
+                            </td>
+                            <td valign='top' align='right' width='20%'>
+                                <div style='margin-bottom:5px'><strong>INCOME:</strong> ".number_format($total["Deposit"], 2)."</div>
+                                <div><strong>EXPENSE:</strong> ".number_format($total["Expense"], 2)."</div>
+
+                                <div><strong>BALANCE:</strong> ".number_format(($total["Deposit"]-$total["Expense"]), 2)."</div>
+                            </td>
+                        </tr>
+                    </table>";
+
+                    // append the data stream
+                    $html_content .= $item_content;
+                    $html_content .= "</div>";
+
                     // append the next page div tag
                     $html_content .= $count !== $account_key + 1 ? "\n<div class=\"page_break\"></div>" : null;
 
+                    break;
                 }
             
             } else {
