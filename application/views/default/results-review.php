@@ -20,10 +20,10 @@ $pageTitle = "Review Result";
 $response->title = "{$pageTitle} : {$appName}";
 
 // get the report id
-$report_id = $SITEURL[1] ?? null;
+$result_id = $SITEURL[1] ?? null;
 
 // return error if the report id was not parsed
-if(empty($report_id)) {
+if(empty($result_id)) {
     $response->html = page_not_found();
 } else {
 
@@ -32,7 +32,7 @@ if(empty($report_id)) {
         "userData" => $defaultUser,
         "client_data" => $defaultUser->client,
         "clientId" => $clientId,
-        "report_id" => $report_id,
+        "result_id" => $result_id,
         "show_scores" => true
     ];
 
@@ -43,7 +43,7 @@ if(empty($report_id)) {
     $reportObj = load_class("terminal_reports", "controllers", $report_param);
 
     // load the reports list
-    $reports_list = $reportObj->reports_list($report_param)["data"];
+    $reports_list = $reportObj->results_list($report_param)["data"];
 
     // return error if the report was not found
     if(empty($reports_list)) {

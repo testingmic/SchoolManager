@@ -551,3 +551,10 @@ label {
     color: #05a027;
     border:solid 1px #05a027;
 }
+
+.buttons-html5 {
+    border-color: #a9afb4;
+}
+.buttons-html5, .print-buttons {
+    width:50px;
+}

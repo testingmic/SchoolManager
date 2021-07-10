@@ -1059,7 +1059,7 @@ class Crons {
 
 // create new object
 $jobs = new Crons;
-$this->loadEmailRequests();
-$this->inApp_Emails();
+$jobs->loadEmailRequests();
+$jobs->inApp_Emails();
 $jobs->scheduler();
 ?>

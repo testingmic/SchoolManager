@@ -879,7 +879,7 @@ var setActiveNavLink = () => {
 
 var initDataTables = () => {
     if ($('.datatable').length > 0) {
-        $('.datatable').dataTable({
+        $('.datatable').DataTable({
             search: null,
             lengthMenu: [
                 [10, 30, 50, 75, 100, 200, -1],
@@ -890,15 +890,28 @@ var initDataTables = () => {
                 lengthMenu: "Display _MENU_ rows"
             },
             dom: '<"row"<"col-lg-12 mb-2">><"row d-flex justify-content-between"<B><"align-left"><f>>rt<"bottom"ip><"clear">',
-            buttons: [
-                'copy', 'excel', 'csv', 'pdf', 'print'
-            ],
+            buttons: ['copy', 'excel', 'csv', 'pdf', 'print'],
             initComplete: function() {
-                $('.buttons-copy').html('<i class="fa fa-copy"></i>').removeClass("buttons-copy").addClass("btn font-18 btn-outline-dark").attr("title", "Copy Table Content");
-                $('.buttons-excel').html('<i class="fa fa-file-excel"></i>').removeClass("btn-success buttons-excel").addClass("btn font-18 btn-outline-success").attr("title", "Export Table to Excel");
-                $('.buttons-csv').html('<i class="fa fa-file-csv"></i>').removeClass("btn-secondary buttons-csv").addClass("btn font-18 btn-outline-primary").attr("title", "Export Table to CSV File");
-                $('.buttons-pdf').html('<i class="fa fa-file-pdf"></i>').removeClass("buttons-pdf").addClass("btn font-18 btn-outline-danger").attr("title", "Export Table to PDF");
-                $('.buttons-print').html('<i class="fa fa-print"></i>').removeClass("btn-secondary buttons-print").addClass("btn font-18 btn-outline-secondary").attr("title", "Print Table Content");;
+                $('.buttons-copy').html('<i class="fa fa-copy"></i>')
+                    .removeClass("buttons-copy")
+                    .addClass("btn font-18 btn-outline-dark")
+                    .attr("title", "Copy Table Content");
+                $('.buttons-excel').html('<i class="fa fa-file-excel"></i>')
+                    .removeClass("btn-success buttons-excel")
+                    .addClass("btn font-18 btn-outline-success")
+                    .attr("title", "Export Table to Excel");
+                $('.buttons-csv').html('<i class="fa fa-file-csv"></i>')
+                    .removeClass("btn-secondary buttons-csv")
+                    .addClass("btn font-18 btn-outline-primary")
+                    .attr("title", "Export Table to CSV File");
+                $('.buttons-pdf').html('<i class="fa fa-file-pdf"></i>')
+                    .removeClass("buttons-pdf")
+                    .addClass("btn font-18 btn-outline-danger")
+                    .attr("title", "Export Table to PDF");
+                $('.buttons-print').html('<i class="fa fa-print"></i>')
+                    .removeClass("btn-secondary buttons-print")
+                    .addClass("btn font-18 btn-outline-secondary print-buttons")
+                    .attr("title", "Print Table Content");
             }
         });
     }

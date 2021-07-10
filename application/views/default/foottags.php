@@ -107,8 +107,8 @@
     <script src="<?= $baseUrl; ?>assets/bundles/sweetalert/sweetalert.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/datatables/datatables.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js"></script>
-    <script src="<?= $baseUrl; ?>assets/bundles/datatables/export-tables/buttons.print.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/bundles/datatables/export-tables/dataTables.buttons.min.js"></script>
+    <script src="<?= $baseUrl; ?>assets/bundles/datatables/export-tables/buttons.print.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/inputmask/jquery.inputmask.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/magnify.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/notify.js"></script>
@@ -159,9 +159,6 @@
         $(() => {
             <?php if(isset($verify_payment)) { ?>
             verify_payment();
-            <?php } ?>
-            <?php if($idb_init) { ?>
-            setTimeout(() => { $(`button[id="idb_init"]`).trigger("click"); }, 1000);
             <?php } ?>
             <?php if(isset($_GET["end_id"]) && preg_match("/^[a-z0-9]+$/", $_GET["end_id"])) { ?>
             $(`button[data-function="update"][data-item="<?= $_GET["end_id"] ?>"]`).trigger("click");

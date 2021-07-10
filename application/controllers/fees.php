@@ -1632,12 +1632,12 @@ class Fees extends Myschoolgh {
                                                 foreach($data as $key => $record) {
                                                     $amount += $record->amount;
                                                     $receipt .='<tr>
-                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.($key+1).'</td>
+                                                        <td width="6%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.($key+1).'</td>
                                                         '.(empty($student_data) ? '<td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
                                                             '.$record->student_info->name.'
                                                         </td>' : '').'
-                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.$record->category_name.'</td>
-                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
+                                                        <td width="15%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.$record->category_name.'</td>
+                                                        <td width="15%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
                                                             <strong>'.$record->payment_method.'</strong>
                                                             '.(
                                                                 $record->payment_method === "Cheque" ? 
@@ -1645,9 +1645,9 @@ class Fees extends Myschoolgh {
                                                                 ".(!empty($record->cheque_number) ? "<br><strong>#{$record->cheque_number}</strong>" : null)."" : ""    
                                                             ).'
                                                         </td>
-                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.(!$record->description ? $record->description : null).'</td>
-                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.$record->recorded_date.'</td>
-                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).' align="right"><strong>'.$record->amount.'</strong></td>
+                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.($record->description ? $record->description : null).'</td>
+                                                        <td width="15%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.$record->recorded_date.'</td>
+                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).' width="10%" align="right"><strong>'.number_format($record->amount, 2).'</strong></td>
                                                     </tr>';
                                                 }
                                             } else {

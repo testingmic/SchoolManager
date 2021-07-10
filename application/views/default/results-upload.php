@@ -36,9 +36,9 @@ $reports_list = load_class("terminal_reports", "controllers", $report_param)->re
 $terminal_reports_list = "";
 foreach($reports_list as $key => $report) {
 
-    $action = "<a href='{$baseUrl}results-review/{$report->report_id}' title='Click to view the details of this report' class='btn mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a href='{$baseUrl}results-review/{$report->report_id}' title='Click to view the details of this report' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
     if(($report->created_by == $defaultUser->user_id) && ($report->status == "Pending")) {
-        $action .= " <a onclick='return modify_report_result(\"submit\",\"{$report->report_id}\")' href='#' title='Submit this terminal report to Admin for Review and Approval' class='btn mb-1 btn-outline-success'><i class='fa fa-check'></i></a>";
+        $action .= " <a onclick='return modify_report_result(\"submit\",\"{$report->report_id}\")' href='#' title='Submit this terminal report to Admin for Review and Approval' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-check'></i> Validate</a>";
     }
     $terminal_reports_list .= "
     <tr>
@@ -53,7 +53,7 @@ foreach($reports_list as $key => $report) {
             {$report->date_created}
         </td>
         <td>{$myClass->the_status_label($report->status)}</td>
-        <td align='center'>{$action}</td>
+        <td align='center' width='14%'>{$action}</td>
     </tr>";
 }
 

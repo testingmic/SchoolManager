@@ -54,7 +54,7 @@ class Terminal_reports extends Myschoolgh {
      * 
      * @return Array
      */
-    public function reports_list(stdClass $params) {
+    public function results_list(stdClass $params) {
         
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
         $params->query = 1;
@@ -65,11 +65,15 @@ class Terminal_reports extends Myschoolgh {
         $params->query .= isset($params->course_id) && !empty($params->course_id) ? " AND a.course_id='{$params->course_id}'" : null;
         $params->query .= isset($params->course_code) && !empty($params->course_code) ? " AND a.course_code='{$params->course_code}'" : null;
         $params->query .= isset($params->status) && !empty($params->status) ? " AND a.status='{$params->status}'" : null;
-        $params->query .= isset($params->report_id) && !empty($params->report_id) ? " AND a.report_id='{$params->report_id}'" : null;
+        $params->query .= isset($params->result_id) && !empty($params->result_id) ? " AND a.report_id='{$params->result_id}'" : null;
 
         // query the academic year and term
-        $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : " AND a.academic_year='{$this->academic_year}'";
-        $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : " AND a.academic_term='{$this->academic_term}'";
+        $params->academic_year = isset($params->academic_year) && !empty($params->academic_year) ? $params->academic_year : $this->academic_year;
+        $params->academic_term = isset($params->academic_term) && !empty($params->academic_term) ? $params->academic_term : $this->academic_term;
+
+        // set the academic year and term
+        $params->query .= " AND a.academic_year='{$params->academic_year}'";
+        $params->query .= " AND a.academic_term='{$params->academic_term}'";
 
         try {
 
@@ -103,16 +107,19 @@ class Terminal_reports extends Myschoolgh {
     /**
      * Get the results
      * 
+     * @param String $result_id
+     * @param String $where
+     * 
      * @return Array
      */
-    public function result_score_list($report_id = null, $where = null) {
+    public function result_score_list($result_id = null, $where = null) {
 
         try {
 
             global $usersClass;
             
             $groupStudent = false;
-            $where_clause = !empty($report_id) ? "a.report_id = '{$report_id}'" : $where;
+            $where_clause = !empty($result_id) ? "a.report_id = '{$result_id}'" : $where;
 
             if(!empty($where) && is_object($where)) {
                 $where_clause = "1";
@@ -123,9 +130,16 @@ class Terminal_reports extends Myschoolgh {
             }
 
             $stmt = $this->db->prepare("SELECT 
-                a.*, u.date_of_birth, u.unique_id, u.guardian_id
+                    a.*, (
+                        SELECT CONCAT(
+                            COALESCE(u.date_of_birth,'NULL'),'|',COALESCE(u.unique_id,'NULL'),'|',COALESCE(u.guardian_id,'NULL')
+                        ) 
+                        FROM users u 
+                        WHERE 
+                            u.item_id = a.student_item_id AND u.academic_term = a.academic_term AND u.academic_year = a.academic_year 
+                        LIMIT 1
+                    ) AS student_info
                 FROM grading_terminal_scores a
-                LEFT JOIN users u ON u.item_id = a.student_item_id
                 WHERE {$where_clause} LIMIT 150
             ");
             $stmt->execute();
@@ -243,7 +257,7 @@ class Terminal_reports extends Myschoolgh {
 
         // get the grading structure
         if(!empty($client_data->grading_structure)) {
-            $columns = json_decode($client_data->grading_structure);
+            $columns = $client_data->grading_structure;
             if(isset($columns->columns)) {
                 $count = 0;
                 foreach($columns->columns as $key => $column) {
@@ -312,7 +326,8 @@ class Terminal_reports extends Myschoolgh {
 
         // get the client data
         $client_data = $this->client_data($params->clientId);
-        $columns = json_decode($client_data->grading_structure, true);
+        $columns = json_encode($client_data->grading_structure);
+        $columns = json_decode($columns, true);
 
         // get the grading structure
         if(!empty($client_data->grading_structure)) {
@@ -501,7 +516,7 @@ class Terminal_reports extends Myschoolgh {
                         $student["total_score"], $average_score, $teacher_ids, $student["remarks"], $params->userId,
                         $params->academic_year, $params->academic_term, $key, $params->clientId, $report_id
                     ]);
-                    $data = "The Terminal Report was successfully inserted.";
+                    $data = "The Exam Results Marks was successfully inserted.";
                     // log the user activity
                     $this->userLogs("terminal_report", $key, json_encode($student), "{$params->userData->name} uploaded the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of Student With ID: {$key}", $params->userId);
                 } else {
@@ -523,7 +538,7 @@ class Terminal_reports extends Myschoolgh {
                         // log the user activity
                         $this->userLogs("terminal_report", $key, $check[0], "{$params->userData->name} updated the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of <strong>{$check[0]->student_name}</strong> With ID: {$key}", $params->userId);
                     }
-                    $data = "The Terminal Report was successfully updated.";
+                    $data = "The Exam Results Marks was successfully updated.";
                 }
             }
 
@@ -571,7 +586,7 @@ class Terminal_reports extends Myschoolgh {
             return $data;
 
         } catch(PDOException $e) {
-            return $e->getMessage();
+            return $this->unexpected_error;
         }
     }
 
