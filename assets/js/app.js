@@ -9,8 +9,6 @@ $.pagecontent = $("#pagecontent");
 $.mainprogress = $(".main-progress-bar");
 $.pageoverlay = $(".pageoverlay");
 $.pageloader = $(".loader");
-$.env = "development";
-$.chatinterval = 5000;
 
 $.most_recent_page = $(`div[class="last_visited_page"]`).attr("value");
 $form_modal = $(`div[id="formsModal"]`);
@@ -35,16 +33,16 @@ $.array_stream = {};
 $.today = new Date().toISOString().slice(0, 10);
 
 'use strict';
-var devlog = $.env == "development" ? console.log : () => {}
 
 var form_error = (message) => {
-    return `<div class="form-content-loader" style="display: flex; position: absolute;">
-                <div class="offline-content text-center">
-                    <p><i class="fa text-warning fa-exclamation-triangle fa-2x"></i></p>
-                    <small class="text-danger" style='font-size:12px; padding-top:10px'>${message}</small>
-                    <p><small class="text-danger font-weight-bold cursor" data-dismiss="modal" id="close-div">Close</small></p>
-                </div>
-            </div>`;
+    return `
+    <div class="form-content-loader" style="display: flex; position: absolute;">
+        <div class="offline-content text-center">
+            <p><i class="fa text-warning fa-exclamation-triangle fa-2x"></i></p>
+            <small class="text-danger" style='font-size:12px; padding-top:10px'>${message}</small>
+            <p><small class="text-danger font-weight-bold cursor" data-dismiss="modal" id="close-div">Close</small></p>
+        </div>
+    </div>`;
 }
 $(window).on("beforeunload", (evt) => {
     window.location.href = `${baseUrl}main`;
@@ -188,7 +186,7 @@ var init = () => {
 
 var linkClickStopper = (element) => {
 
-    devlog("linkClickStopper(" + element.selector + "). I'm waiting for click =>")
+
 
     $("a", element).on("click", (event) => {
 
@@ -207,11 +205,11 @@ var linkClickStopper = (element) => {
         if (target === "" || target === undefined ||
             target.substr(target.length - 1) === '#' ||
             target.indexOf('#') >= 0) {
-            devlog("page anchor", target)
+        
             return;
         }
 
-        devlog("CLICK! I called =>")
+    
         linkHandler(target, true)
     });
 }
@@ -234,7 +232,7 @@ var formSubmitStopper = (element) => {
 }
 
 var linkHandler = (target, pushstate) => {
-    devlog("linkHandler(). I called =>");
+
 
     if (target.slice(0, -1) === $.baseurl || target === $.baseurl || target === $.default) {
         target = $.most_recent_page;
@@ -559,7 +557,7 @@ var ajax_trigger_form_submit = () => {
 }
 
 var loadPage = (loc, pushstate) => {
-    devlog("loadPage(", loc, ") I called =>")
+
 
     if (loc == `${$.baseurl}` || loc == `${$.baseurl}/dashboard`) {
         $(`[id="history-refresh"]`).addClass("hidden");
@@ -849,30 +847,15 @@ var initPlugins = () => {
 }
 
 var setActiveNavLink = () => {
-    devlog("setActiveNavLink() I called =>");
-    var splitter = String(window.location).split('/');
-    var cUrl = splitter[0];
 
-    if (cUrl.substr(cUrl.length - 1) == '#') {
-        cUrl = cUrl.slice(0, -1);
-    } else {
-        if (splitter[6] !== undefined && splitter[5] == 'bulk') splitter[5] = 'bulk/' + splitter[6];
-        if (splitter[5] !== undefined && splitter[5] == 'classinfo') splitter[5] = 'classes';
-        if (splitter[5] !== undefined && splitter[4] == 'students' && splitter[5] == 'info' || splitter[5] == 'edit') splitter[5] = '';
-        if (splitter[5] !== undefined && splitter[4] == 'staff' && splitter[5] == 'info') splitter[5] = '';
-        if (splitter[5] !== undefined && splitter[4] == 'transportation' && splitter[5] == 'vehicleinfo') splitter[5] = 'vehicles';
-        cUrl = $.protocol + '//' + splitter[2] + '/' + splitter[3] + '/' + splitter[4] + (splitter.length > 5 ? '/' + splitter[5] : "");
-    }
-    cUrl = cUrl.charAt(cUrl.length - 1) == '/' && cUrl != $.baseurl + '/' ? cUrl.slice("/", -1) : cUrl;
-
+    let location = window.location.href;
     $.navigation.removeClass('active');
+    $("ul.dropdown-menu").css("display", "none");
 
     $.navigation.find('a').each((index, el) => {
-        if ($(el)[0].href == cUrl) {
+        if ($(el)[0].href == location) {
             let parentDropdown = $(el).parent("li").parent("ul");
             parentDropdown.css("display", "block");
-            $(el).parent("li").parent("ul").parent("li").addClass('active');
-            $("ul.dropdown-menu").not(parentDropdown).css("display", "none");
         } else {}
     });
 }

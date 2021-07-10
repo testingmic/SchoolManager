@@ -827,6 +827,17 @@ class Accounting extends Myschoolgh {
                     </div>
                 </div>";
 
+                // display the contact details of the client
+                $html_content .= '
+                <div class="border-bottom" style="border: 2px solid #2196F3; margin-top:10px"></div>
+                <div align="center" style="font-size:13px;padding-top:10px; margin-bottom:20px;">
+                    <strong>Location: </strong>'.$params->client_data->client_location.' | 
+                    <strong>Contact:</strong> '.$params->client_data->client_contact.'
+                    '.(!empty($params->client_data->client_secondary_contact) ? " | {$params->client_data->client_secondary_contact}" : "").'
+                    | <strong>Address: </strong> '.(strip_tags($params->client_data->client_address)).'
+                </div>';
+
+
                 $html_content .= $count !== $key + 1 ? "\n<div class=\"page_break\"></div>" : null;
             }
         } else {
@@ -952,13 +963,13 @@ class Accounting extends Myschoolgh {
                             <table width='100%' cellpadding='5px;' style='border:solid 1px #dee2e6;'>
                                 <thead>
                                     <tr>
-                                        <th width='12%' style='background:#555758;color:#fff;'></th>";
+                                        <th width='15%' style='background:#2196F3;color:#fff;'></th>";
                                         for($i = 0; $i < date("m"); $i++) {
                                             $month = date("M", strtotime("January + {$i} month"));
-                                            $item_content .= "<th style='color:#fff;text-transform:uppercase;background:#555758' align='right'>{$month}</th>\n";
+                                            $item_content .= "<th style='color:#fff;text-transform:uppercase;background:#2196F3' align='right'>{$month}</th>\n";
                                         }
                             $item_content .= "
-                                        <th align='right' style='background:#555758;color:#fff;'>TOTAL</th>
+                                        <th align='right' style='background:#2196F3;color:#fff;'>TOTAL</th>
                                     </tr>
                                 </thead>
                                 <tbody>";
@@ -997,8 +1008,10 @@ class Accounting extends Myschoolgh {
                                         $item_content .= "</tr>\n";
 
                                     }
-                                    $item_content .= "<tr>";
-                                    $item_content .= "<td><strong>Total</strong></td>";
+                                    $item_content .= "<tr style='border:solid 1px #dee2e6; background:#555758; color: #fff'>";
+                                    $item_content .= "<td><strong>TOTAL</strong></td>";
+
+                                    $summary_total = 0;
 
                                     if(isset($months_group[$item])) {
                                         foreach($months_group[$item] as $_this => $_that) {
@@ -1006,29 +1019,19 @@ class Accounting extends Myschoolgh {
                                                 <strong>".number_format(array_sum($_that), 2)."</strong>
                                             </td>";
                                         }
+
+                                        foreach($months_group[$item] as $_this => $_that) {
+                                            $summary_total += array_sum($_that);
+                                        }
                                     }
                         $item_content .= "
+                                        <td align='right'>
+                                            <strong>".number_format($summary_total, 2)."</strong>
+                                        </td>
                                     </tr>
                                 <tbody>
                             </table>
                         </div>";
-                    }
-
-                    // group the months values
-                    $months_group = [];
-                    $months = json_encode($months_data);
-                    $months_data = json_decode($months, true);
-
-                    // loop through the deposit and expense
-                    foreach(["Deposit", "Expense"] as $item) {
-                        // if the key acqually exists
-                        if(isset($months_data[$item])) {
-                            // loop through the data string
-                            foreach($months_data[$item] as $month => $data) {
-                                $items = array_column(array_values($data), "total_sum");
-                                $months_group[$item][$month] = array_sum($items);
-                            }
-                        }
                     }
 
                     // group the total values
@@ -1065,15 +1068,25 @@ class Accounting extends Myschoolgh {
                     $html_content .= $item_content;
                     $html_content .= "</div>";
 
+                    // display the contact details of the client
+                    $html_content .= '
+                        <div class="border-bottom" style="border: 2px solid #2196F3; margin-top:0px"></div>
+                        <div align="center" style="font-size:13px;padding-top:10px; margin-bottom:20px;">
+                            <strong>Location: </strong>'.$params->client_data->client_location.' | 
+                            <strong>Contact:</strong> '.$params->client_data->client_contact.'
+                            '.(!empty($params->client_data->client_secondary_contact) ? " | {$params->client_data->client_secondary_contact}" : "").'
+                            | <strong>Address: </strong> '.(strip_tags($params->client_data->client_address)).'
+                        </div>';
+
                     // append the next page div tag
                     $html_content .= $count !== $account_key + 1 ? "\n<div class=\"page_break\"></div>" : null;
-
-                    break;
                 }
             
             } else {
                 $html_content = "<h3>Sorry! An invalid request was parsed.</h3>";
             }
+
+            
 
             return $html_content;
 

@@ -17,8 +17,6 @@ var load_Pay_Fees_Form = () => {
         if (response.code === 200) {
             $(`div[id="fees_payment_history"]`).html(response.data.result.form);
             $(`button[id="payment_cancel"]`).removeClass("hidden");
-            $(`div[id="fees_payment_form"] input[id="amount"]`).focus();
-
             if (response.data.result.query !== undefined) {
                 if (response.data.result.query.paid_status !== undefined) {
                     if (response.data.result.query.paid_status == 1) {
@@ -36,7 +34,7 @@ var load_Pay_Fees_Form = () => {
                     $(`div[id="fees_payment_form"] *`).prop("disabled", false);
                 }
             }
-
+            $(`div[id="fees_payment_form"] input[id="amount"]`).focus();
         } else {
             swal({
                 text: response.data.result,
@@ -192,7 +190,7 @@ var save_Receive_Payment = () => {
     });
 }
 
-var log_fees_payment = (reference_id, transaction_id) => {
+var log_Momo_Card_Payment = (reference_id, transaction_id) => {
 
     let amount = parseFloat($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
         description = $(`div[id="fees_payment_form"] textarea[name="description"]`).val(),
@@ -222,6 +220,9 @@ var log_fees_payment = (reference_id, transaction_id) => {
             $(`div[id="fees_payment_form"] input, div[id="fees_payment_form"] textarea`).val("");
             load_Pay_Fees_Form();
         }
+        $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
+    }).catch(() => {
+        $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
     });
 
 }
@@ -249,14 +250,13 @@ var receive_Momo_Card_Payment = () => {
         }
         amount = amount * 100;
 
-        $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "flex");
-
         var popup = PaystackPop.setup({
             key: pk_payment_key,
             email: email_address,
             amount: amount,
             currency: myPrefs.labels.currency,
             onClose: function() {
+                $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
                 swal({
                     text: "Payment Process Cancelled",
                     icon: "error",
@@ -267,7 +267,8 @@ var receive_Momo_Card_Payment = () => {
                     code = "error";
                 if (response.message == "Approved") {
                     code = "success";
-                    log_fees_payment(response.reference, response.transaction);
+                    $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "flex");
+                    log_Momo_Card_Payment(response.reference, response.transaction);
                 } else {
                     swal({ text: message, icon: code });
                     $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
@@ -295,6 +296,7 @@ var cancel_Payment_Form = () => {
     }).then((proceed) => {
         if (proceed) {
             $(`div[id="fees_payment_history"]`).html(``);
+            $(`select[name="category_id"]`).val("").change();
             $(`button[id="payment_cancel"]`).addClass("hidden");
             $(`div[id="fees_payment_form"] *`).prop("disabled", true);
             $(`div[id="fees_payment_preload"] *`).prop("disabled", false);

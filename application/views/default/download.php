@@ -397,8 +397,8 @@ elseif(confirm_url_id(1, "accounting")) {
     $accountsObj = load_class("accounting", "controllers");
     $pages_content .= $accountsObj->statement($getObject);
 }
-print $pages_content;
-exit;
+// print $pages_content;
+// exit;
 // load the html content
 $dompdf->loadHtml($pages_content);
 

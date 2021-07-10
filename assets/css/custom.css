@@ -548,12 +548,17 @@ label {
 
 .btn-outline-success {
     background: #fff;
-    color: #05a027;
-    border:solid 1px #05a027;
+    color: #0e9425!important;
+    border:solid 1px #0e9425!important;
+}
+
+.btn-outline-success:hover {
+    color: #fff;
+    background: #0e9425!important;
 }
 
 .buttons-html5 {
-    border-color: #a9afb4;
+    border-color: #a9afb4!important;
 }
 .buttons-html5, .print-buttons {
     width:50px;

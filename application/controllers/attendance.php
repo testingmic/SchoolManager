@@ -333,18 +333,25 @@ class Attendance extends Myschoolgh {
                         <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
                         <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
                     </td>
-                    <td width=\"27%\">
-                        <strong style=\"font-size:12px;\">Academic Year:</strong> {$prefs->academics->academic_year}<br>
-                        <strong style=\"font-size:12px;\">Academic Term:</strong> {$prefs->academics->academic_term}<br>
-                        <strong style=\"font-size:12px;\">Generated On:</strong> ".date("Y-m-d h:iA")."<br>
+                    <td width=\"27%\" valign=\"top\">
+                        <strong style=\"\">Academic Year:</strong> {$prefs->academics->academic_year}<br>
+                        <strong style=\"\">Academic Term:</strong> {$prefs->academics->academic_term}<br>
+                        <strong style=\"\">Generated At:</strong> ".date("Y-m-d h:i:s A")."<br>
                     </td>\n
-                </tr>\n
-            </table><br>\n";
+                </tr>
+                ".($isDownloadable ?
+                    "<tr>
+                        <td colspan='3' align='center'>
+                            <div style='margin-top:10px;font-size:18px;margin-bottom:10px'><strong>ATTENDANCE LOG</strong></div>
+                        </td>
+                    </tr>"
+                : "")."
+            </table>\n";
                
         }
 
         // populate the information
-        $table_content .= "<table border=\"1\" width=\"100%\" cellpadding=\"2px\" class=\"table table-striped table-bordered datatable\">\n";
+        $table_content .= "<table width=\"100%\" cellpadding=\"2px\" style=\"border: 1px solid #dee2e6;\" class=\"table table-striped table-bordered datatable\">\n";
 
         // rearrange the users list
         function rearrange_list($users_list) {
@@ -363,11 +370,11 @@ class Attendance extends Myschoolgh {
         foreach($array_list as $key => $data) {
             // skip the days list range
             if($key !== "days_range_list") {
-                $table_content .= "<tr>\n";
-                $table_content .= "<th width=\"10%\" align=\"left\">".($isDownloadable ? "<strong>Name</strong>" : "Student Name")."</th>\n";
+                $table_content .= "<tr> \n";
+                $table_content .= "<th ".($isDownloadable ? "style='border: 1px solid #dee2e6;'" : "")." width=\"10%\" align=\"left\">".($isDownloadable ? "<strong>Name</strong>" : "Student Name")."</th>\n";
                 foreach($data as $key => $value) {
                     $new_array_list[$value["record"]["date"]["raw"]] = rearrange_list($value["record"]["users_data"]);
-                    $table_content .= "<th width=\"{$width}%\" align=\"center\"><strong>{$value["record"]["date"]["day"]}</strong></th>\n";
+                    $table_content .= "<th ".($isDownloadable ? "style='border: 1px solid #dee2e6;'" : "")." width=\"{$width}%\" align=\"center\"><strong>{$value["record"]["date"]["day"]}</strong></th>\n";
                 }
                 $table_content .= "</tr>\n";
             }
@@ -413,30 +420,66 @@ class Attendance extends Myschoolgh {
         // set the table body
         $table_content .= "<tbody>";
 
+        // color demarcation
+        $colors = [
+            "P" => [
+                "color" => "#54ca68",
+                "title" => "Present"
+            ],
+            "A" => [
+                "color" => "#fc544b",
+                "title" => "Absent"
+            ],
+            "L" => [
+                "color" => "#ffa426",
+                "title" => "Late"
+            ],
+            "H" => [
+                "color" => "#3abaf4",
+                "title" => "Holiday"
+            ]
+        ];
+
         // list the users
         foreach($names_array as $user) {
             $table_content .= "<tr>\n";
-            $table_content .= "<td width=\"10%\">{$user->name}</td>\n";
+            $table_content .= "<td width=\"10%\" ".($isDownloadable ? "style='border: 1px solid #dee2e6;'" : "").">{$user->name}</td>\n";
 
             // check the user status
             foreach($new_array_list as $key => $attendance) {
                 if(empty($attendance)) {
-                    $table_content .= "<td width=\"{$width}%\" align=\"center\"></td>\n";
+                    $table_content .= "<td ".($isDownloadable ? "style='border: 1px solid #dee2e6;'" : "")." width=\"{$width}%\" align=\"center\"></td>\n";
                 } else {
                     $status = $attendance[$user->item_id]["state"] ?? "nothing";
                     
-                    $the_status = $isDownloadable ? $statuses[$status]["title"] : $statuses[$status]["icon"];
+                    $the_status = $isDownloadable ? "<span style='font-weight:bold;color:{$colors[$statuses[$status]["title"]]["color"]}'>{$statuses[$status]["title"]}</span>" : $statuses[$status]["icon"];
                     
-                    $table_content .= "<td width=\"{$width}%\" align=\"center\">{$the_status}</td>\n";
+                    $table_content .= "<td ".($isDownloadable ? "style='border: 1px solid #dee2e6;'" : "")." width=\"{$width}%\" align=\"center\">{$the_status}</td>\n";
                 }
             }
 
             $table_content .= "</tr>\n";
         }
-        $table_content .= "</tbody>\n";
 
-        
+        $table_content .= "</tbody>\n";
         $table_content .= "</table>\n";
+
+        // append the legend
+        if($isDownloadable) {
+            $table_content .= "<div style='margin-top:20px'><table cellpadding='5px' width='100%'>
+            <tr>
+                <td style='border: 1px solid #dee2e6;' colspan='".count($colors)."' align='center'><strong>LEGEND</strong></td>
+            </tr>
+            <tr>";
+            foreach($colors as $key => $color) {
+                $table_content .= "
+                <td align='center'>
+                    <span style='font-weight:bold;color:{$color["color"]}'>{$key}: {$color["title"]}</span>
+                </td>";
+            }
+            $table_content .= "</tr></table></div>";
+        }
+
         $table_content .= "</div>";
 
         // exit;

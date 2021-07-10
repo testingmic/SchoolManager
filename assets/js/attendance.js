@@ -176,6 +176,7 @@ var load_attendance_log = () => {
         });
     } else {
         $(`a[id="download_link"]`).addClass("hidden");
+        $.pageoverlay.show();
         $.get(`${baseUrl}api/attendance/attendance_report`, { class_id, month_year, user_type }).then((response) => {
             if (response.code == 200) {
                 let attendance_list = response.data.result;
@@ -197,7 +198,9 @@ var load_attendance_log = () => {
             } else {
                 swal({ text: response.data.result, icon: "error", });
             }
+            $.pageoverlay.hide();
         }).catch(() => {
+            $.pageoverlay.hide();
             swal({ text: swalnotice.ajax_error, icon: "error", });
         });
     }
