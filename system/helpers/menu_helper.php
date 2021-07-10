@@ -240,6 +240,16 @@
         </ul>
     </li>
     <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Reports / Promotion</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>results-upload">Upload / Manage Results</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
+            <?php if($accessObject->hasAccess("promote", "promotion")) { ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>promote-students">Promote Students</a></li>
+            <?php } ?>
+        </ul>
+    </li>
+    <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-open"></i><span>E-Learning</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>e-learning">E-Books / Videos</a></li>

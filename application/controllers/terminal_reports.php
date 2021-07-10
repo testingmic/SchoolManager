@@ -56,12 +56,26 @@ class Terminal_reports extends Myschoolgh {
      */
     public function results_list(stdClass $params) {
         
+        // additional variables
+        global $defaultUser;
+
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
         $params->query = 1;
-
+        
+        // get the teachers id
+        if(in_array($defaultUser->user_type, ["teacher", "parent", "student"])) {
+            if($defaultUser->user_type == "teacher") {
+                $params->teacher_id = !isset($params->teacher_id) ? $defaultUser->unique_id : $params->teacher_id;
+            }
+            elseif($defaultUser->user_type == "student") {
+                $params->class_id = !isset($params->class_id) ? $defaultUser->class_id : $params->class_id;
+            }
+        }
+        
         // append some additional queries
         $params->query .= isset($params->created_by) && !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
         $params->query .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : null;
+        $params->query .= isset($params->teacher_id) && !empty($params->teacher_id) ? " AND (a.teacher_ids='{$params->teacher_id}' OR a.created_by='{$defaultUser->user_id}')" : null;
         $params->query .= isset($params->course_id) && !empty($params->course_id) ? " AND a.course_id='{$params->course_id}'" : null;
         $params->query .= isset($params->course_code) && !empty($params->course_code) ? " AND a.course_code='{$params->course_code}'" : null;
         $params->query .= isset($params->status) && !empty($params->status) ? " AND a.status='{$params->status}'" : null;
@@ -132,7 +146,8 @@ class Terminal_reports extends Myschoolgh {
             $stmt = $this->db->prepare("SELECT 
                     a.*, (
                         SELECT CONCAT(
-                            COALESCE(u.date_of_birth,'NULL'),'|',COALESCE(u.unique_id,'NULL'),'|',COALESCE(u.guardian_id,'NULL')
+                            COALESCE(u.name,'NULL'),'|',COALESCE(u.date_of_birth,'NULL'),'|',
+                            COALESCE(u.unique_id,'NULL'),'|',COALESCE(u.guardian_id,'NULL')
                         ) 
                         FROM users u 
                         WHERE 
@@ -140,7 +155,7 @@ class Terminal_reports extends Myschoolgh {
                         LIMIT 1
                     ) AS student_info
                 FROM grading_terminal_scores a
-                WHERE {$where_clause} LIMIT 150
+                WHERE {$where_clause} LIMIT 200
             ");
             $stmt->execute();
 
@@ -154,19 +169,23 @@ class Terminal_reports extends Myschoolgh {
                 }
                 $result->scores = $scores_array;
 
+                // breakdown the student info
+                $result->student_info = $this->stringToArray($result->student_info, "|", ["student_name", "date_of_birth", "unique_id", "guardian_id"]);
+
                 // if the request is to group by each student
                 if($groupStudent) {
+                    
                     // if the student array has not been set already
                     if(!isset($data[$result->student_item_id]["data"])) {
                         // set the data
                         $data[$result->student_item_id]["data"] = [
-                            "student_name" => $result->student_name,
-                            "unique_id" => $result->unique_id,
+                            "student_name" => $result->student_info["student_name"],
+                            "unique_id" => $result->student_info["unique_id"],
                             "average_score" => $result->average_score,
                             "class_name" => $result->class_name,
-                            "guardian_list" => $usersClass->guardian_list($result->guardian_id, $result->client_id, true),
-                            "date_of_birth" => $result->date_of_birth,
-                            "student_age" => convert_to_years($result->date_of_birth, date("Y-m-d")),
+                            "guardian_list" => $usersClass->guardian_list($result->student_info["guardian_id"], $result->client_id, true),
+                            "date_of_birth" => $result->student_info["date_of_birth"],
+                            "student_age" => convert_to_years($result->student_info["date_of_birth"], date("Y-m-d")),
                             "academic_year" => $result->academic_year,
                             "academic_term" => $result->academic_term,
                         ];
@@ -963,7 +982,7 @@ class Terminal_reports extends Myschoolgh {
 
             // loop through the report set
             foreach($report_data as $key => $student) {
-                
+
                 // get the student attendance logs
                 $attendance_param->the_current_user_id = $key;
                 $attendance_log = $attendanceObj->range_summary($attendance_param)->summary;
@@ -1015,16 +1034,20 @@ class Terminal_reports extends Myschoolgh {
 
                 // // get the results submitted by the teachers for each subject
                 foreach($student["sheet"] as $score) {
-                    $table .= "<tr>";
-                    $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->course_name}</td>";
-                    // get the scores
-                    foreach($score->scores as $s_score) {
-                        $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">{$s_score}</td>";
+                    // only show the subject if approved
+                    if($score->status === "Approved") {
+                        // append to the table
+                        $table .= "<tr>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->course_name}</td>";
+                        // get the scores
+                        foreach($score->scores as $s_score) {
+                            $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">{$s_score}</td>";
+                        }
+                        $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">{$score->total_score}</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;\">".strtoupper($score->teachers_name)."</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->class_teacher_remarks}</td>";
+                        $table .= "</tr>";
                     }
-                    $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">{$score->total_score}</td>";
-                    $table .= "<td style=\"border: 1px solid #dee2e6;\">".strtoupper($score->teachers_name)."</td>";
-                    $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->class_teacher_remarks}</td>";
-                    $table .= "</tr>";
                 }
                 $table .= "</table>";
 

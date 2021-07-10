@@ -61,7 +61,9 @@ if(empty($result_id)) {
         $approveResult = $accessObject->hasAccess("approve", "results");
 
         // set the scores
+        $isSubmitted = (bool) in_array($data->status, ["Submitted"]);
         $isApproved = (bool) in_array($data->status, ["Approved", "Cancelled"]);
+        $isOwner = (bool) ($data->created_by == $defaultUser->user_id) || ($data->teacher_ids == $defaultUser->unique_id);
 
         // loop through the scores list
         foreach($data->scores_list as $key => $score) {
@@ -69,6 +71,11 @@ if(empty($result_id)) {
             // set the scores
             $is_disabled = in_array($score->status, ["Submitted", "Saved"]) && $modifyResult ? null : "disabled='disabled'";
             
+            // set the disabled feature
+            if($isSubmitted && !$approveResult) {
+                $is_disabled = "disabled='disabled'";
+            }
+
             // marks list
             $marks_list = "";
 
@@ -76,8 +83,11 @@ if(empty($result_id)) {
             foreach($score->scores as $s_key => $s_value) {
                 $scores_array[] = $s_key;
                 $marks_list .= "
-                <td>
-                    <input ".(!$is_disabled ? "data-input_type_q='marks' data-input_row_id='{$score->student_item_id}'" : "disabled='disabled'")." type='number' data-input_name='{$s_key}' data-input_type='score' style='width:7rem' value='{$s_value}' class='form-control text-center'>
+                <td align='center'>
+                    ".(!$is_disabled ?
+                        "<input ".(!$is_disabled ? "data-input_type_q='marks' data-input_row_id='{$score->student_item_id}'" : "disabled='disabled'")." type='number' data-input_name='{$s_key}' data-input_type='score' style='width:7rem' value='{$s_value}' class='form-control text-center'>"
+                        : "<span>{$s_value}</span>"
+                    )."
                 </td>";
             }
             // append to the scores
@@ -89,15 +99,22 @@ if(empty($result_id)) {
                     <strong class='text-primary'>{$score->student_unique_id}</strong>
                 </td>
                 ".$marks_list."
-                <td>
-                    <input type='number' style='width:7rem' value='{$score->total_score}' disabled='disabled' data-input_total_id='{$score->student_item_id}' class='form-control text-center'>
+                <td align='center'>
+                    ".(!$is_disabled ?
+                        "<input type='number' style='width:7rem' value='{$score->total_score}' disabled='disabled' data-input_total_id='{$score->student_item_id}' class='form-control text-center'>"
+                        : $score->total_score
+                    )."
                 </td>
                 <td>
-                    <input {$is_disabled} type='text' data-input_method='remarks' data-input_type='score' style='width:13rem' data-input_row_id='{$score->student_item_id}' class='form-control' value='{$score->class_teacher_remarks}'>
+                ".(!$is_disabled ? 
+                    "<input {$is_disabled} type='text' data-input_method='remarks' data-input_type='score' style='width:13rem' data-input_row_id='{$score->student_item_id}' class='form-control' value='{$score->class_teacher_remarks}'>"
+                    : $score->class_teacher_remarks
+                )."
                 </td>";
                 // if the result has not yet been approved
                 if(!$isApproved) {
-                    $scores_list .= "<td>
+                    $scores_list .= "
+                    <td>
                         ".(!$is_disabled && $modifyResult ? "<span data-input_save_button='{$score->student_item_id}' onclick='return save_result(\"$score->student_item_id\",\"student\");' title='Save Student Marks' class='btn mb-2 hidden btn-sm btn-outline-success'><i class='fa fa-save'></i></span>" : null)."
                         ".(!$is_disabled && $approveResult ? "<span data-input_approve_button='{$score->student_item_id}' onclick='return modify_result(\"approve\",\"{$score->report_id}_{$score->student_item_id}\");' title='Approve this Mark' class='btn btn-sm btn-outline-primary'><i class='fa fa-check-circle'></i></span>" : null)."
                     </td>";
@@ -110,6 +127,11 @@ if(empty($result_id)) {
         foreach($scores_array as $header) {
             $header = ucwords(str_ireplace("_", " ", $header));
             $scores_header .= "<th>{$header}</th>";
+        }
+
+        // set the disabled feature
+        if(($isSubmitted && !$approveResult) || ($isApproved && $approveResult)) {
+            $response->scripts = [];
         }
 
         // set the report information
@@ -163,6 +185,10 @@ if(empty($result_id)) {
                                     <span class="float-left">Status</span>
                                     <span class="float-right text-muted">'.$myClass->the_status_label($data->status).'</span>
                                 </p>
+                                '.(!$isApproved && $isOwner && !$isSubmitted ? '
+                                <p class="clearfix text-center mt-3 border-top pt-3">
+                                    <span onclick="return modify_report_result(\'Submit\',\''.$data->report_id.'\')" class="btn btn-outline-success">SUBMIT RESULT</span>
+                                </p>': '').'
                             </div>
                         </div>
                     </div>
@@ -193,7 +219,8 @@ if(empty($result_id)) {
                                     <h5>Student Results List</h5>
                                 </div>
                                 <div>
-                                    '.($modifyResult && !$isApproved ? "<span data-input_save_button='{$data->report_id}' onclick='return save_result(\"$data->report_id\",\"results\");' title='Save Student Marks' class='btn btn-outline-success'><i class='fa fa-save'></i> Save</span>" : null).'
+                                    '.($modifyResult  && !$isApproved && !$isSubmitted ? "<span data-input_save_button='{$data->report_id}' onclick='return save_result(\"$data->report_id\",\"results\");' title='Save Student Marks' class='btn btn-outline-success'><i class='fa fa-save'></i> Save</span>" : null).'
+                                    '.($approveResult && !$isApproved && $isSubmitted ? "<span data-input_save_button='{$data->report_id}' onclick='return save_result(\"$data->report_id\",\"results\");' title='Save Student Marks' class='btn btn-outline-success'><i class='fa fa-save'></i> Save</span>" : null).'
                                     '.($approveResult && !$isApproved ? "<span data-input_approve_button='{$data->report_id}' onclick='return save_result(\"{$data->report_id}\",\"approve_results\");' title='Approve this Mark' class='btn btn-outline-primary'><i class='fa fa-check-circle'></i> Approve</span>" : null).'
                                 </div>
                             </div>

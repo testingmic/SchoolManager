@@ -3625,10 +3625,13 @@ class Forms extends Myschoolgh {
         $the_form = [];
 
         // get the client data
+        global $defaultUser;
         $client_data = $this->client_data($clientId);
 
         // get the list of all classes
         $classes_param = (object) [
+            "filter" => $defaultUser->user_type,
+            "userId" => $defaultUser->user_id,
             "columns" => "id, item_id, name",
             "clientId" => $clientId,
             "limit" => 99999
@@ -3693,6 +3696,7 @@ class Forms extends Myschoolgh {
         $the_form = [];
 
         // get the client data
+        global $defaultUser;
         $client_data = $additional->client_data;
 
         // run this query
@@ -3708,6 +3712,8 @@ class Forms extends Myschoolgh {
 
         // get the list of all classes
         $classes_param = (object) [
+            "filter" => $defaultUser->user_type,
+            "userId" => $defaultUser->user_id,
             "columns" => "id, item_id, name",
             "clientId" => $clientId,
             "limit" => 99999

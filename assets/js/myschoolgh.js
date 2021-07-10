@@ -435,3 +435,40 @@ var clear_dictionary_form = () => {
 var print_receipt = (receipt_id) => {
     window.open(`${baseUrl}receipt/${receipt_id}`, `Payment Receipt`, `menubar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes`);
 }
+
+var modify_report_result = (action, report_id) => {
+    let s_title = (action == "Submit") ? "Submit Results" : (action == "cancel" ? "Cancel Results" : "Approve Results");
+    swal({
+        title: s_title,
+        text: `You have opted to ${action} this Results. Please note that you will not be able to update the record once it has been submitted. Do you want to proceed?`,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.pageoverlay.show();
+            let label = {
+                "action": action,
+                "report_id": report_id
+            };
+            $.post(`${baseUrl}api/terminal_reports/modify`, { label }).then((response) => {
+                let s_code = "error";
+                if (response.code == 200) {
+                    s_code = "success";
+                }
+                swal({
+                    text: response.data.result,
+                    icon: s_code,
+                });
+                if (response.data.additional.href !== undefined) {
+                    setTimeout(() => {
+                        loadPage(response.data.additional.href);
+                    }, 2000);
+                }
+                $.pageoverlay.hide();
+            }).catch(() => {
+                $.pageoverlay.hide();
+            });
+        }
+    });
+}

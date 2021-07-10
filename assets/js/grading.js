@@ -239,44 +239,6 @@ var load_report_csv_file_data = (formdata) => {
     });
 }
 
-var modify_report_result = (action, report_id) => {
-
-    let s_title = (action == "submit") ? "Submit Results" : (action == "cancel" ? "Cancel Results" : "Approve Results");
-    swal({
-        title: s_title,
-        text: `You have opted to ${action} this Results. Please note that you will not be able to update the record once it has been submitted. Do you want to proceed?`,
-        icon: 'warning',
-        buttons: true,
-        dangerMode: true,
-    }).then((proceed) => {
-        if (proceed) {
-            $.pageoverlay.show();
-            let label = {
-                "action": action,
-                "report_id": report_id
-            };
-            $.post(`${baseUrl}api/terminal_reports/modify`, { label }).then((response) => {
-                let s_code = "error";
-                if (response.code == 200) {
-                    s_code = "success";
-                }
-                swal({
-                    text: response.data.result,
-                    icon: s_code,
-                });
-                if (response.data.additional.href !== undefined) {
-                    setTimeout(() => {
-                        loadPage(response.data.additional.href);
-                    }, 2000);
-                }
-                $.pageoverlay.hide();
-            }).catch(() => {
-                $.pageoverlay.hide();
-            });
-        }
-    });
-}
-
 var generate_terminal_report = () => {
     let academic_term = $(`select[name="academic_term"]`).val(),
         academic_year = $(`select[name="academic_year"]`).val(),

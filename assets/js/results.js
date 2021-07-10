@@ -56,7 +56,7 @@ var modify_result = (action, report_id) => {
 
 var save_result = (record_id, record_type) => {
     let s_title = (record_type == "approve_results") ? "Approve Results" : "Save Results",
-        s_message = (record_type == "approve_results") ? `You have opted to Approve this Results. Please note that you will not be able to update the record once it has been submitted. Do you want to proceed?` : "Do you want to save this updaed results?";
+        s_message = (record_type == "approve_results") ? `You have opted to Approve this Results. Please note that you will not be able to update the record once it has been submitted. Do you want to proceed?` : "Do you want to save this updated results?";
 
     swal({
         title: s_title,

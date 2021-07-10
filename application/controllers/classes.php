@@ -23,7 +23,7 @@ class Classes extends Myschoolgh {
 
         if(isset($params->filter, $params->userId)) {
             if(in_array($params->filter, ["teacher"])) {
-                $params->class_teacher = $params->userId;
+                // $params->class_teacher = $params->userId;
             }
         }
 
