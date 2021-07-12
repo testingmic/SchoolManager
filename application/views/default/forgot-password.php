@@ -6,7 +6,7 @@ $user_current_url = current_url();
 $session->remove("redirect");
 
 // if the user is not loggedin then show the login form
-if($usersClass->loggedIn()) { 
+if(loggedIn()) { 
     header("location: {$baseUrl}main");
     exit;
 }

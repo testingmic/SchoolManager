@@ -848,16 +848,23 @@ var initPlugins = () => {
 
 var setActiveNavLink = () => {
 
-    let location = window.location.href;
+    let location = window.location.href,
+        screen_width = $(window).width();
+
     $.navigation.removeClass('active');
     $("ul.dropdown-menu").css("display", "none");
 
-    $.navigation.find('a').each((index, el) => {
-        if ($(el)[0].href == location) {
-            let parentDropdown = $(el).parent("li").parent("ul");
-            parentDropdown.css("display", "block");
-        } else {}
-    });
+    if(screen_width < 900) {
+        $(`body`).removeClass("sidebar-show").addClass("sidebar-gone");
+    } else {
+        $(`body`).removeClass("sidebar-gone").addClass("sidebar-show");
+        $.navigation.find('a').each((index, el) => {
+            if ($(el)[0].href == location) {
+                let parentDropdown = $(el).parent("li").parent("ul");
+                parentDropdown.css("display", "block");
+            } else {}
+        });
+    }
 }
 
 var initDataTables = () => {

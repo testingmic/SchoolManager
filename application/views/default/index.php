@@ -1,7 +1,9 @@
 <?php
 global $functions, $db, $usersClass;
 
-if($usersClass->loggedIn()):
+$isLoggedIn = loggedIn();
+
+if($isLoggedIn):
 	$token ="";
 	//using the switch case to get the right file to display
 	if(isset($SITEURL[1])):

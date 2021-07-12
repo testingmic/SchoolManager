@@ -61,7 +61,7 @@ foreach($transactions_list as $key => $transaction) {
         // if the user has permission to modify record
         if($hasModify) {
             // $checkbox = "<input class='cursor' style='height:15px' id='check_{$transaction->item_id}' type='checkbox'> &nbsp;";
-            $action .= "&nbsp;<button onclick='return delete_record(\"{$transaction->item_id}\", \"transaction\");' title='Click to reverse this transaction' class='btn btn-outline-danger mb-1 btn-sm'><i class='fa fa-recycle'></i></button>";
+            $action .= "&nbsp;<button onclick='return reverse_transaction(\"{$transaction->item_id}\");' title='Click to reverse this transaction' class='btn btn-outline-danger mb-1 btn-sm'><i class='fa fa-recycle'></i></button>";
         }
     }
 

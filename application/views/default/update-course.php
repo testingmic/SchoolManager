@@ -357,7 +357,7 @@ if(!empty($item_id)) {
                                     add_new_item($data->item_id) 
                                 : null ).'
                             </div>
-                            <div class="slim-scroll p-0 m-0" style="max-height:400px; overflow-y:auto;">
+                            <div class="slim-scroll p-0 m-0">
                                 '.($attachments_list ? $attachments_list : 
                                     '<div class="text-left font-italic">There are you attachments uploaded under this course</div>'
                                 ).'

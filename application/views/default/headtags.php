@@ -15,7 +15,7 @@ $cur_user_id = $SITEURL[1] ?? $loggedUserId;
 $userData = $defaultUser;
 
 // if the user is not loggedin then show the login form
-if(!$usersClass->loggedIn()) { require "login.php"; exit(-1); }
+if(!loggedIn()) { require "login.php"; exit(-1); }
 
 // clientdata
 $clientData = $myClass->client_data($clientId);

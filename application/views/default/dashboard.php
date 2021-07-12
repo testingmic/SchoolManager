@@ -445,8 +445,7 @@ if($isBooking) {
 
                     // list the items
                     $action = "";
-                    $action .= "&nbsp;<a  href='#' onclick='return loadPage(\"{$baseUrl}fees-view/{$each->item_id}/print\");' class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
-
+                    $action .= "&nbsp;<a title='Click to print this receipt' href='#' onclick=\"return print_receipt('{$each->item_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
                     $fees_history .= "<tr data-row_id=\"{$each->item_id}\">";
                     $fees_history .= "<td>".($key+1)."</td>";
                     $fees_history .= "
@@ -475,7 +474,7 @@ if($isBooking) {
                         <div class="card-header">
                             <h4>All Expenses</h4>
                         </div>
-                        <div class="card-body trix-slim-scroll" style="max-height:435px;height:435px;overflow-y:auto;">
+                        <div class="card-body trix-slim-scroll">
                             <div class="table-responsive">
                                 <table data-empty="" class="table table-striped datatable">
                                     <thead>
@@ -708,7 +707,7 @@ if($isBooking) {
                                 </div>
                             </div>' : '
                             <div class="card-header">
-                                <h5 class="pb-0 mb-0">My Kids</h5>
+                                <h5 class="pb-0 mb-0">My Wards</h5>
                             </div>
                             <div class="card-body pr-2 trix-slim-scroll mt-0 pt-0 pb-0" style="max-height:575px;min-height:435px;overflow-y:auto;">
                                 <div class="py-2" style="width:98%">
@@ -717,6 +716,19 @@ if($isBooking) {
                             </div>'
                         ).'
                     </div>
+                    '.($isParent ? 
+                    '<div>
+                        <div class="card">
+                            <div class="card-header pl-2">
+                                <h4>Upcoming Events</h4>
+                            </div>
+                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
+                                <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
+                                    '.$upcoming_events_list.'
+                                </ul>
+                            </div>
+                        </div>
+                    </div>' : null).'
                 </div>
                 <div class="col-lg-8 col-md-12">
                     <div class="row">
@@ -947,18 +959,19 @@ if($isBooking) {
                         </div>
                     </div>' : ''
                 ).'
-                <div class="col-lg-4 col-md-6 col-12 col-sm-12">
-                    <div class="card">
-                        <div class="card-header pl-2">
-                            <h4>Upcoming Events</h4>
+                '.(!$isParent ? 
+                    '<div class="col-lg-4 col-md-6 col-12 col-sm-12">
+                        <div class="card">
+                            <div class="card-header pl-2">
+                                <h4>Upcoming Events</h4>
+                            </div>
+                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
+                                <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
+                                    '.$upcoming_events_list.'
+                                </ul>
+                            </div>
                         </div>
-                        <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
-                            <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
-                                '.$upcoming_events_list.'
-                            </ul>
-                        </div>
-                    </div>
-                </div>
+                    </div>' : null).'
                 '.($isAdminAccountant ? 
                     '<div class="col-lg-4 col-md-6 col-12 col-sm-12">
                         <div class="card">

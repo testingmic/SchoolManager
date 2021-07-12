@@ -62,7 +62,7 @@ foreach($list_data as $key => $each) {
     $type_list .= "<td>".($key+1)."</td>";
     $type_list .= "<td>{$each->name}</td>";
     $type_list .= "<td><span class='badge badge-".($each->type == "Income" ? "success" : "danger")."'>".($each->type)."</span></td>";
-    $type_list .= $hasUpdate ? "<td>{$action}</td>" : null;
+    $type_list .= $hasUpdate ? "<td align='center'>{$action}</td>" : null;
     $type_list .= "</tr>";
 }
 
@@ -93,7 +93,7 @@ $response->html = '
                                         <th width="5%" class="text-center">#</th>
                                         <th>Name</th>
                                         <th>Type</th>
-                                        '.($hasUpdate ? '<th width="13%" align="center"></th>' : null).'
+                                        '.($hasUpdate ? '<th width="15%" align="center"></th>' : null).'
                                     </tr>
                                 </thead>
                                 <tbody>'.$type_list.'</tbody>

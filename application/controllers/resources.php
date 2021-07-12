@@ -7,13 +7,16 @@ class Resources extends Myschoolgh {
     public function __construct(stdClass $params = null) {
 		parent::__construct();
 
+        // global variable
+        global $defaultClientData;
+
         // get the client data
-        $client_data = $params->client_data;
+        $client_data = $params->client_data ?? $defaultClientData;
         $this->iclient = $client_data;
 
         // run this query
-        $this->academic_term = $client_data->client_preferences->academics->academic_term;
-        $this->academic_year = $client_data->client_preferences->academics->academic_year;
+        $this->academic_term = $client_data->client_preferences->academics->academic_term ?? null;
+        $this->academic_year = $client_data->client_preferences->academics->academic_year ?? null;
 	}
 
 

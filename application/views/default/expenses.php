@@ -59,7 +59,7 @@ foreach($transactions_list as $key => $transaction) {
 
         // if the user has permission to modify record
         if($hasModify) {
-            $action .= "&nbsp;<button onclick='return delete_record(\"{$transaction->item_id}\", \"transaction\");' title='Click to reverse this transaction' class='btn btn-outline-danger mb-1 btn-sm'><i class='fa fa-recycle'></i></button>";
+            $action .= "&nbsp;<button onclick='return reverse_transaction(\"{$transaction->item_id}\");' title='Click to reverse this transaction' class='btn btn-outline-danger mb-1 btn-sm'><i class='fa fa-recycle'></i></button>";
         }
     }
 
@@ -74,6 +74,7 @@ foreach($transactions_list as $key => $transaction) {
     $list_transactions .= "<td align='center'>{$action}</td>";
     $list_transactions .= "</tr>";
 }
+
 $response->array_stream["transactions_array_list"] = $transactions_array_list;
 
 $response->html = '

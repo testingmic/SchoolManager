@@ -836,7 +836,7 @@ class Fees extends Myschoolgh {
                     ]);
 
                      // log the user activity
-                    $this->userLogs("fees_allocation", $params->student_id, null, 
+                    $this->userLogs("fees_allocation", $params->student_id ?? $params->class_id, null, 
                         "{$params->userData->name} updated the fee allocation for <strong>{$class_check[0]->category_name}</strong> to: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
 
                 } else {
@@ -855,7 +855,7 @@ class Fees extends Myschoolgh {
                     ]);
 
                     // log the user activity
-                    $this->userLogs("fees_allocation", $params->class_id, null, 
+                    $this->userLogs("fees_allocation", $params->class_id ?? $params->student_id, null, 
                         "{$params->userData->name} added the fee allocation for <strong>{$class_check[0]->category_name}</strong> of: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
                 }
 

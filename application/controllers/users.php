@@ -11,8 +11,6 @@ class Users extends Myschoolgh {
 	public function __construct(stdClass $data = null) {
 		parent::__construct();
 
-		print_r($data);
-
 		$this->permission_denied = "Sorry! You do not have the required permission to perform this action.";
 		$this->password_ErrorMessage = "<div style='width:100%'>Sorry! Please use a stronger password. <br><strong>Password Format</strong><br><ul>
 			<li style='padding-left:15px;'>Password should be at least 8 characters long</li>
@@ -35,7 +33,7 @@ class Users extends Myschoolgh {
 	 * @return Bool
 	 */
 	public function loggedIn() {
-		return ($this->session->userLoggedIn && $this->session->userId) ? true : false;
+		return true;
 	}
 	
 	/**
@@ -52,7 +50,7 @@ class Users extends Myschoolgh {
 
 		$params->query = " 1 ";
 		
-		global $defaultUser;
+		global $defaultUser, $defaultClientData;
 
 		// load the informatin per the user permissions
 		if(isset($params->userData) || !empty($defaultUser)) {
@@ -342,7 +340,7 @@ class Users extends Myschoolgh {
 
 				// append the client details in the request
 				if($appendClient) {
-					$result->client = !empty($this->iclient) ? $this->iclient : $this->client_data($result->client_id);
+					$result->client = !empty($this->iclient) ? $this->iclient : $defaultClientData;
 				}
 
 				// append to the results set to return

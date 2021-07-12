@@ -36,8 +36,18 @@ IF ($offset = STRPOS($URL, '?')) { $URL = SUBSTR($URL, 0, $offset); } ELSE IF ($
 	$URL = SUBSTR($URL, 0, $offset);
 }
 
+/**
+ * Confirm User is Logged In
+ * 
+ * @return Bool
+ */
+function loggedIn() {
+    global $session;
+    return ($session->userLoggedIn && $session->userId) ? true : false;
+}
+
 // call the main core function and start processing your document
-REQUIRE "system/core/myschoolgh.php";
+require_once "system/core/myschoolgh.php";
 
 // Load the models class
 load_class('models', 'models');
@@ -80,9 +90,9 @@ $SITEURL = (($URL == '') || ($URL == 'index.php') || ($URL == 'index.html')) ? A
 
 // call the user logged in class
 $defaultUser = (object) [];
+$defaultClientData = (object) [];
 $SITEURL = array_map("xss_clean", $SITEURL);
 $myClass = load_class('myschoolgh', 'models');
-$usersClass = load_class('users', 'controllers');
 $accessObject = load_class('accesslevel', 'controllers');
 
 // Check the site status
@@ -90,6 +100,12 @@ GLOBAL $SITEURL, $session;
 
 // if the session is set
 if(!empty($session->userId)) {
+
+	// get the client data
+	$defaultClientData = $myClass->client_data($session->client_id);
+
+	// parse the client data
+	$init_param = (object) ["client_data" => $defaultClientData];
 	
 	// the query parameter to load the user information
 	$i_params = (object) [
@@ -102,10 +118,9 @@ if(!empty($session->userId)) {
 		"append_client" => true, 
 		"user_status" => ["Pending", "Active"]
 	];
+	$usersClass = load_class('users', 'controllers', $init_param);
 	$defaultUser = $usersClass->list($i_params)["data"];
 	$defaultAcademics = [];
-
-	// print_r($defaultUser); exit;
 
 	// if the result is not empty
 	if(!empty($defaultUser)) {
@@ -126,7 +141,6 @@ if(!empty($session->userId)) {
 		// set this as init
 		$defaultUser->appPrefs->termEnded = false;
 		
-
 		// set additional parameters
 		$isEmployee = (bool) ($defaultUser->user_type == "employee");
 		$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);

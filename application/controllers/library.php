@@ -1172,7 +1172,7 @@ class Library extends Myschoolgh {
         $item_id = random_string("alnum", 32);
 		
 		$counter = $this->append_zeros(($this->itemsCount("books", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
-        $code = $this->iclient->client_preferences->labels->book.$counter;
+        $code = $this->iclient->client_preferences->labels->book_label.$counter;
 
 		// confirm that a logo was parsed
         if(isset($params->book_image)) {
