@@ -24,40 +24,44 @@ $accepted_url = [
 load_helpers(['payment_helper']);
 
 // get the client data
-$client_id = $SITEURL[1];
-$client = isset($defaultClientData->client_name) ? $defaultClientData : $myClass->client_data($client_id);
+$client_id = $SITEURL[1] ?? null;
 
-// check the url
-$errorFound = check_url($getObject);
+// if the client id is not empty
+if(!empty($client_id)) {
+    $client = isset($defaultClientData->client_name) ? $defaultClientData : $myClass->client_data($client_id);
 
-// convert the parameters into an object
-$getObject = (object) $getObject;
+    // check the url
+    $errorFound = check_url($getObject);
 
-// load class
-if(!$errorFound && isset($client->client_id)) {
+    // convert the parameters into an object
+    $getObject = (object) $getObject;
 
-    // parse the client data
-    $client_info = (object) ["client_data" => $client];
-    
-    // append the client id to it
-    $getObject->clientId = $client->client_id;
+    // load class
+    if(!$errorFound && isset($client->client_id)) {
 
-    // load the class
-    $paymentObj = load_class($accepted_url[$SITEURL[2]]["class"], "controllers", $client_info);
+        // parse the client data
+        $client_info = (object) ["client_data" => $client];
+        
+        // append the client id to it
+        $getObject->clientId = $client->client_id;
 
-    // remove the client preferences
-    $clientPref = $client->client_preferences;
-    
-    // init parameters
-    $getObject->item_specified = false;
+        // load the class
+        $paymentObj = load_class($accepted_url[$SITEURL[2]]["class"], "controllers", $client_info);
 
-    // assign new variables
-    if(confirm_url_id(4, "checkout")) {
-        $getObject->item_specified = true;
-        $getObject->checkout_url = $SITEURL[3];
-    }
-    if(confirm_url_id(3) && !confirm_url_id(4)) {
-        $getObject->student_id = $SITEURL[3];
+        // remove the client preferences
+        $clientPref = $client->client_preferences;
+        
+        // init parameters
+        $getObject->item_specified = false;
+
+        // assign new variables
+        if(confirm_url_id(4, "checkout")) {
+            $getObject->item_specified = true;
+            $getObject->checkout_url = $SITEURL[3];
+        }
+        if(confirm_url_id(3) && !confirm_url_id(4)) {
+            $getObject->student_id = $SITEURL[3];
+        }
     }
 }
 ?>

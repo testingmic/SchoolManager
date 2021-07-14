@@ -533,7 +533,7 @@ class Payment extends Myschoolgh {
                 if(preg_match("/^[0-9+]+$/", $session->user_contact)) {
                     
                     // append the message
-                    $message = "Hello {$student_name},\nFees Payment was successfully processed.\nAmount Paid: {$amount}\nBalance: {$outstandingBalance}\n";
+                    $message = "Hello {$student_name},\nFees Payment was successfully processed.\nAmount Paid: {$currency} {$amount}\nBalance: {$currency} {$outstandingBalance}\n";
                     
                     // calculate the message text count
                     $chars = strlen($message);

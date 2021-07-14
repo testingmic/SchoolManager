@@ -1328,7 +1328,7 @@ class Fees extends Myschoolgh {
                 if(strlen($params->contact_number) > 9 && preg_match("/^[0-9+]+$/", $params->contact_number)) {
                     
                     // append the message
-                    $message = "Hello {$student_name},\nFees Payment was successfully processed.\nAmount Paid: {$params->amount}\nBalance: {$outstandingBalance}\n";
+                    $message = "Hello {$student_name},\nFees Payment was successfully processed.\nAmount Paid: {$currency} {$params->amount}\nBalance: {$currency} {$outstandingBalance}\n";
                     
                     // calculate the message text count
                     $chars = strlen($message);
