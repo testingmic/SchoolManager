@@ -3,14 +3,25 @@ var notify = (text, type = "error") => {
     $.notify(text, type);
 }
 
+var close_payment_window = () => {
+    window.location.href='';
+}
+
 var validate_payment = (reference_id, transaction_id) => {
-    let data = { "reference_id": reference_id,"transaction_id": transaction_id };
-    $.post(`${baseUrl}api/fees/momocard_payment`, data).then((response) => {
+    let param = JSON.parse($(`div[id="make_fee_payment"] input[name="payment_param"]`).val()),
+        data = { "reference_id": reference_id,"transaction_id": transaction_id, "param": param };
+    
+    $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "flex");
+    
+    $.post(`${baseUrl}api/payment/verify`, data).then((response) => {
         if (response.code == 200) {
             notify(`Fees payment was successful.`, `success`);
+            $(`div[id="make_fee_payment"] *`).val("");
+            $(`div[id="make_fee_payment"] div[id="success_loader"]`).css("display", "flex");
         }
         $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "none");
     }).catch(() => {
+        notify(`Sorry! An Error occured while validating payment.`);
         $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "none");
     });
 }
@@ -26,13 +37,10 @@ var make_fee_payment = () => {
         notify(`Please specify a valid email address.`);
         $(`div[id="make_fee_payment"] input[name="email"]`).focus();
     }
-    else if(!contact.length) {
-        notify(`Please specify a valid contact number.`);
-        $(`div[id="make_fee_payment"] input[name="contact"]`).focus();
-    } else if(isNaN(amount)) {
+    else if(isNaN(amount)) {
         notify(`Please specify a valid amount.`);
         $(`div[id="make_fee_payment"] input[name="amount"]`).focus();
-    } else if(amount > outstanding) { 
+    } else if(amount > outstanding) {
         notify(`Sorry! The amount to be paid must not exceed the oustanding balance.`);
         $(`div[id="make_fee_payment"] input[name="amount"]`).focus();
     } else {
@@ -69,7 +77,6 @@ var make_fee_payment = () => {
             }
             $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "none");
         }).catch((err) => {
-            console.log(err);
             $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "none");
             notify(`Sorry! An Error occured while processing the request.`);
         });

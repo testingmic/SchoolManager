@@ -5,8 +5,13 @@ class Payment extends Myschoolgh {
 
     private $secret_key = "sk_test_3ceb4c33b4b0ea31cb10ef3b41ef05a673758cee";
     
-    public function __construct()
-    {
+    public function __construct() {
+
+        global $myschoolgh, $session;
+
+		$this->db = $myschoolgh;
+        $this->session = $session;
+
         $this->default_email = "emmallob14@gmail.com";
 
         $this->url["init"] = "https://api.paystack.co/transaction/initialize";
@@ -105,14 +110,21 @@ class Payment extends Myschoolgh {
         ));
 
         //execute post
-        $result = json_decode(curl_exec($ch));
-        return [
-            "data" => $result
-        ];
+        $data = curl_exec($ch);
+
+        $result = json_decode($data);
+        
+        return ["data" => $result];
+
     }
 
     /**
      * Init Transaction
+     * 
+     * @param   Array   $params->param        [clientId, student_id, checkout_url]
+     * @param   String  $params->email
+     * @param   String  $params->contact
+     * @param   Float   $params->amount
      * 
      * @return Array
      */
@@ -139,7 +151,7 @@ class Payment extends Myschoolgh {
             }
 
             // validate the contact number
-            if(!preg_match("/^[0-9+]+$/", $params->contact)) {
+            if(isset($params->contact) && !preg_match("/^[0-9+]+$/", $params->contact)) {
                 return ["code" => 203, "result" => "Sorry! Please enter a valid contact number."];
             }
 
@@ -149,6 +161,7 @@ class Payment extends Myschoolgh {
             }
 
             // param information
+            $params->email = strtolower($params->email);
             $param = $params->param;
 
             // load information
@@ -207,14 +220,15 @@ class Payment extends Myschoolgh {
             $client = $params->client_data;
 
             // set a new payment reference
-            $session->reference_id = empty($session->reference_id) ? random_string("alnum", 14) : $session->reference_id;
+            $session->reference_id = "MT".random_string("numeric", 12);
+            $session->user_contact = $params->contact ?? null;
 
             // set the data to return if request was successful
             $data = [
                 "data" => [
                     "email" => $params->email,
                     "amount" => $params->amount * 100,
-                    "contact" => $params->contact,
+                    "contact" => $params->contact ?? null,
                     "subaccount" => $client->client_account,
                     "payment_key" => $this->pk_public_key,
                     "reference" => $session->reference_id,
@@ -224,7 +238,311 @@ class Payment extends Myschoolgh {
 
             return $data;
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+    }
+
+    /**
+     * Verify Transaction
+     * 
+     * @param   Array   $params->param          [clientId, student_id, checkout_url]
+     * @param   String  $params->reference_id
+     * @param   String  $params->transaction_id
+     * 
+     * @return Array
+     */
+    public function verify(stdClass $params) {
+
+        try {
+            
+            // global variable
+            global $session;
+            
+            // validate the param variable
+            if(!isset($params->param) || (isset($params->param) && !is_array($params->param))) {
+                return ["code" => 203, "result" => "Missing Parameter! Param variable is required and must be an array."];
+            }
+
+            // params
+            $param = $params->param;
+
+            // if both items were not parsed
+            if(!isset($param["student_id"]) && !isset($param["checkout_url"])) {
+                return ["code" => 203, "result" => "Missing Parameter! student_id and/or checkout_url is required."];
+            }
+
+            // confirm the reference_id exists
+            if(empty($session->reference_id)) {
+                return ["code" => 203, "result" => "Sorry! Payment validation unsuccessful."];
+            }
+
+            // payment parameter
+            $data = (object) ["reference" => $params->reference_id, "route" => "verify"];
+
+            // confirm the payment
+            $payment_check = $this->get($data);
+
+            // check
+            if(empty($payment_check["data"])) {
+                return ["code" => 203, "data" => "Sorry! We could not validate the transaction."];
+            }
+
+            // academic year
+            $clientPref = $params->client_data->client_preferences;
+            $academic_year = $clientPref->academics->academic_year;
+            $academic_term = $clientPref->academics->academic_term;
+
+            // if payment status is true
+            if($payment_check["data"]->status === true) {
+
+                // confirm the reference_id
+                if($session->reference_id !== $payment_check["data"]->data->reference) {
+                    return ["code" => 203, "result" => "Sorry! Payment validation unsuccessful."];
+                }
+
+                // set the amount 
+                $amount = $payment_check["data"]->data->amount / 100;
+
+                // get the metadata url
+                $meta_data = $payment_check["data"]->data->metadata->referrer;
+                
+                // clean metadata
+                $clean_meta = str_ireplace(["http://", "https://", "localhost/myschool_gh"], ["", "", "app.myschoolgh.com"], $meta_data);
+
+                // split the referrer information
+                $split = explode("/", $clean_meta);
+                
+                // count the partitions
+                $count = count($split);
+                $student_param = (object) ["clientId" => $params->clientId];
+
+                // get the items from the back
+                $last = $split[$count-1];
+
+                // get the last parameter
+                if(isset($split[5]) && ($last == "checkout")) {
+                    // set the client id and the checkout url
+                    $student_param->clientId = $split[2];
+                    $student_param->checkout_url = $split[4];
+                }
+                // if the checkout url was not parsed
+                elseif(!isset($split[5]) && isset($split[4])) {
+                    // set the client id and the student id
+                    $student_param->clientId = $split[2];
+                    $student_param->student_id = $split[4];
+                }
+                
+                // append the client id to it
+                $student_param->client_data = $params->client_data;
+
+                // create a new object
+                $paymentObj = load_class("fees", "controllers", $student_param);
+
+                // get the student payment information
+                $student_param->clean_payment_info = true;
+                $paymentRecord = $paymentObj->confirm_student_payment_record($student_param);
+
+                /** If no allocation record was found */
+                if(empty($paymentRecord)) {
+                    return ["code" => 203, "data" => "Sorry! An invalid checkout url was parsed for processing."];
+                }
+
+                // confirm if the data parsed is an array
+                if(is_array($paymentRecord)) {
+
+                    // initials    
+                    $amount_due = 0;
+                    $total_amount_paid = 0;
+                    $balance = 0;
+
+                    $fees_list = [];
+                    $amount_paid = [];
+                    $paying = $amount;
+
+                    // loop through the allocations list
+                    foreach($paymentRecord as $fee) {
+
+                        // add up to the values
+                        $balance += $fee->balance;
+                        $amount_due += $fee->amount_due;
+                        $total_amount_paid += $fee->amount_paid;
+
+                        // algorithm to get the items being paid for
+                        if($paying > 0) {
+                            if(($fee->balance < $paying) || ($fee->balance == $paying)) {
+                                $paying = $paying - $fee->balance;
+                                $fees_list[$fee->category_id] = 0;
+                                // if the paid status is not equal to one
+                                if($fee->balance != 0.00) {
+                                    $amount_paid[$fee->category_id] = $fee->balance;
+                                }
+                            } elseif($fee->balance > $paying) {
+                                $n_value = $fee->balance - $paying;
+                                $amount_paid[$fee->category_id] = $paying;
+                                $fees_list[$fee->category_id] = $n_value;
+                                $paying = 0;
+                            } else {
+                                $n_value = $fee->balance - $paying;
+                                $amount_paid[$fee->category_id] = $paying;
+                                $fees_list[$fee->category_id] = $n_value;
+                                $paying -= $fee->balance; 
+                            }
+                        }
+                    }
+
+                    /* Outstanding balance calculator */
+                    $outstandingBalance = $balance - $amount;
+                    $totalPayment = $total_amount_paid + $amount;
+                    
+                    // set the paid status
+                    $paid_status = ((round($totalPayment) === round($outstandingBalance)) || (round($totalPayment) > round($outstandingBalance))) ? 1 : 2;
+
+                } else {
+                    /* Outstanding balance calculator */
+                    $outstandingBalance = $paymentRecord->balance - $amount;
+                    $totalPayment = $paymentRecord->amount_paid + $amount;
+
+                    // set the paid status
+                    $paid_status = ((round($totalPayment) === round($paymentRecord->amount_due)) || (round($totalPayment) > round($paymentRecord->amount_due))) ? 1 : 2;
+                }
+
+                /* Confirm if the user has any credits */
+                if($outstandingBalance < 0) {
+                    $creditBalance = $outstandingBalance * -1;
+                    $outstandingBalance = 0;
+                }
+
+                // get the currency
+                $append_sql = "";
+                $payment_method = "MoMo_Card";
+                $currency = $payment_check["data"]->data->currency;
+                $email_address = $payment_check["data"]->data->customer->email;
+
+                // if the payment method is momo or card payment
+                $append_sql .= ", paidin_by='{$email_address}', paidin_contact='".($session->user_contact ?? null)."'";
+
+                /* Record the payment made by the user */
+                if(!is_array($paymentRecord)) {
+
+                    // generate a unique id for the payment record
+                    $uniqueId = random_string('alnum', 15);
+                    $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+                    $receiptId = $params->client_data->client_preferences->labels->receipt_label.$counter;
+                    $receiptId = strtoupper($receiptId);
+                    
+                    // log the payment record
+                    $stmt = $this->db->prepare("INSERT INTO fees_collection
+                        SET client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
+                        category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
+                        description = ?, currency = ?, receipt_id = ?, payment_method = ? {$append_sql}
+                    ");
+                    $stmt->execute([
+                        $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id ?? null, 
+                        $paymentRecord->class_id, $paymentRecord->category_id, $amount, $paymentRecord->student_id, 
+                        $paymentRecord->academic_year, $paymentRecord->academic_term, 
+                        "Self Service Fees Payment", $currency, $receiptId, $payment_method
+                    ]);
+                    /* Update the user payment record */
+                    $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
+                        last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", paid_status='{$paid_status}'" : "")."
+                        WHERE checkout_url = ? AND client_id = ? LIMIT 1
+                    ");
+                    $stmt->execute([$totalPayment, $outstandingBalance, $student_param->checkout_url, $params->clientId]);
+
+                    /* Record the user activity log */
+                    $this->userLogs("fees_payment", $params->checkout_url, null, "Received an amount of <strong>{$params->amount}</strong> as Payment for <strong>{$paymentRecord->category_name}</strong> from <strong>{$paymentRecord->student_details["student_name"]}</strong>. Outstanding Balance is <strong>{$outstandingBalance}</strong>", $params->userId);
+                    
+                    // additional data
+                    $additional["payment"] = $this->confirm_student_payment_record($params);
+                    $additional["uniqueId"] = $uniqueId;
+
+                } else {
+
+                    // generate a new payment_id
+                    $payment_id = random_string('alnum', 15);
+
+                    // get the student name
+                    $student = $this->pushQuery("name AS student_name", "users", "item_id = '{$student_param->student_id}' AND academic_year='{$academic_year}' AND academic_term='{$academic_term}' LIMIT 1");
+                    $student_name = !empty($student) ? $student[0]->student_name : "Unknown";
+
+                    // loop through the payment record
+                    foreach($paymentRecord as $record) {
+
+                        // loop through the items which were paid for
+                        if(isset($amount_paid[$record->category_id])) {
+
+                            // get the total amount paid
+                            $total_paid = $amount_paid[$record->category_id];
+                            $total_balance = ($record->balance - $total_paid);
+                            $totalPayment = ($record->amount_paid + $total_paid);
+
+                            // set the paid status
+                            $paid_status = ((round($totalPayment) === round($record->amount_due)) || (round($totalPayment) > round($record->amount_due))) ? 1 : 2;
+
+                            // generate a unique id for the payment record
+                            $uniqueId = random_string('alnum', 15);
+                            $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+                            $receiptId = $clientPref->labels->receipt_label.$counter;
+                            $receiptId = strtoupper($receiptId);
+
+                            // insert the new record into the database
+                            $stmt = $this->db->prepare("INSERT INTO fees_collection
+                                SET client_id = ?, item_id = ?, student_id = ?, payment_id = ?, department_id = ?, class_id = ?, 
+                                category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
+                                description = ?, currency = ?, receipt_id = ?, payment_method = ? {$append_sql}
+                            ");
+                            $stmt->execute([
+                                $params->clientId, $uniqueId, $record->student_id, $payment_id,
+                                $record->department_id ?? null, $record->class_id, $record->category_id, 
+                                $total_paid, $params->userId, $record->academic_year, $record->academic_term, 
+                                $params->description ?? null, $currency, $receiptId, $payment_method
+                            ]);
+
+                            /* Update the user payment record */
+                            $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
+                                last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", 
+                                paid_status='{$paid_status}'" : "")." WHERE checkout_url = ? AND client_id = ? LIMIT 1
+                            ");
+                            $stmt->execute([($record->amount_paid + $total_paid), $total_balance, $record->checkout_url, $params->clientId]);
+
+                            /* Record the user activity log */
+                            $this->userLogs("fees_payment", $record->checkout_url, null, "Received an amount of <strong>{$total_paid}</strong> as Payment for <strong>{$record->category_name}</strong> from <strong>{$student_name}</strong>. Outstanding Balance is <strong>{$total_balance}</strong>", $params->userId);
+                            
+                            // set a new parameter for the checkout and category id
+                            $params->checkout_url = $record->checkout_url;
+                        }
+                    }
+
+                }
+
+                /* Update the student credit balance */
+                if(isset($creditBalance)) {
+                    // update the user data
+                    $this->db->query("UPDATE users SET account_balance = (account_balance + $creditBalance) WHERE item_id = '{$params->student_id}' AND client_id = '{$params->clientId}' LIMIT 1");
+                }
+
+                // log the transaction information
+                $this->db->query("INSERT INTO transaction_logs SET client_id = '{$params->clientId}', transaction_id = '{$params->transaction_id}', 
+                    endpoint = 'fees', reference_id = '{$params->reference_id}', amount='{$amount}', metadata='{$meta_data}'"
+                );
+
+                // unset the reference id
+                $session->remove(["reference_id", "user_contact", "payment"]);
+
+                return [
+                    "code" => 200,
+                    "data" => "Fees payment successful."
+                ];
+
+            } else {
+                return ["code" => 203, "data" => "Sorry! We could not validate the transaction."];
+            }
+
+        } catch(PDOException $e) {
+            return ["code" => 203, "data" => "Sorry! An unexpected error occurred while processing the request."];
+        }
 
     }
 

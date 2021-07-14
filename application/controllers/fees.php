@@ -1169,6 +1169,9 @@ class Fees extends Myschoolgh {
                 /* Outstanding balance calculator */
                 $outstandingBalance = $balance - $params->amount;
                 $totalPayment = $total_amount_paid + $params->amount;
+
+                // set the paid status
+                $paid_status = ((round($totalPayment) === round($outstandingBalance)) || (round($totalPayment) > round($outstandingBalance))) ? 1 : 2;
                 
             } else {
                 /* Outstanding balance calculator */
@@ -1232,9 +1235,7 @@ class Fees extends Myschoolgh {
                 $stmt->execute([$totalPayment, $outstandingBalance, $params->checkout_url, $params->clientId]);
 
                 /* Record the user activity log */
-                $this->userLogs("fees_payment", $params->checkout_url, null, "{$params->userData->name} received an amount of 
-                    <strong>{$params->amount}</strong> as Payment for <strong>{$paymentRecord->category_name}</strong> from <strong>{$paymentRecord->student_details["student_name"]}</strong>. 
-                    Outstanding Balance is <strong>{$outstandingBalance}</strong>", $params->userId);
+                $this->userLogs("fees_payment", $params->checkout_url, null, "{$params->userData->name} received an amount of <strong>{$params->amount}</strong> as Payment for <strong>{$paymentRecord->category_name}</strong> from <strong>{$paymentRecord->student_details["student_name"]}</strong>. Outstanding Balance is <strong>{$outstandingBalance}</strong>", $params->userId);
                 
                 // additional data
                 $additional["payment"] = $this->confirm_student_payment_record($params);
@@ -1290,9 +1291,7 @@ class Fees extends Myschoolgh {
                         $stmt->execute([($record->amount_paid + $total_paid), $total_balance, $record->checkout_url, $params->clientId]);
 
                         /* Record the user activity log */
-                        $this->userLogs("fees_payment", $record->checkout_url, null, "{$params->userData->name} received an amount of 
-                            <strong>{$total_paid}</strong> as Payment for <strong>{$record->category_name}</strong> from 
-                            <strong>{$student_name}</strong>. Outstanding Balance is <strong>{$total_balance}</strong>", $params->userId);
+                        $this->userLogs("fees_payment", $record->checkout_url, null, "{$params->userData->name} received an amount of <strong>{$total_paid}</strong> as Payment for <strong>{$record->category_name}</strong> from <strong>{$student_name}</strong>. Outstanding Balance is <strong>{$total_balance}</strong>", $params->userId);
                         
                         // set a new parameter for the checkout and category id
                         $params->checkout_url = $record->checkout_url;
@@ -1314,8 +1313,7 @@ class Fees extends Myschoolgh {
             // Log the transaction information
             if(isset($params->transaction_id) && isset($params->reference_id)) {
                 // Insert the transaction
-                $this->db->query("
-                    INSERT INTO transaction_logs SET client_id = '{$params->clientId}',
+                $this->db->query("INSERT INTO transaction_logs SET client_id = '{$params->clientId}',
                     transaction_id = '{$params->transaction_id}', endpoint = 'fees', reference_id = '{$params->reference_id}', amount='{$params->amount}'
                 ");
             }

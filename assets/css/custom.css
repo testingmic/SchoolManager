@@ -84,6 +84,19 @@
     left: 0;
 }
 
+.form-content-loader {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border-radius: 10px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.85);
+    position: absolute;
+    z-index: 99999;
+    top: 0;
+    left: 0;
+}
+
 .form-content-loader .offline-content {
     width: 100%;
     font-size: 17px;

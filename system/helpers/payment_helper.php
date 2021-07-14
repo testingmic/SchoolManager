@@ -17,7 +17,7 @@ function check_url($params) {
     if(!isset($accepted_url[$SITEURL[2]])) {
         return true;
     }
-    
+
     // confirm the parameters
     $accepted = $accepted_url[$SITEURL[2]];
 
@@ -76,8 +76,8 @@ function pay_student_fees_checkout() {
     $payment_form .= "</div>";
     $payment_form .= "<div class='form-group mb-1'>\n";
     $payment_form .= "<input class='form-control' disabled hidden type='hidden' name='payment_param' value='".json_encode($getObject)."'>\n";
-    $payment_form .= "<label>Phone Number <span class='required'>*</span></label>";
-    $payment_form .= "<input maxlength='15' type='text' placeholder='Please enter your phone number' class='form-control' id='contact' name='contact'>";
+    $payment_form .= "<label>Phone Number</label>";
+    $payment_form .= "<input maxlength='15' type='text' placeholder='Please phone number (optional)' class='form-control' id='contact' name='contact'>";
     $payment_form .= "</div>";
     $payment_form .= "<div class='form-group mb-1'>";
     $payment_form .= "<div class='row'>";

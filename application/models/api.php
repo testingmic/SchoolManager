@@ -260,7 +260,7 @@ class Api {
             $params->devAccess = $this->accessCheck->hasAccess('developer', 'control') ? true : false;
             
             // if the client id is empty and yet the user is not selecting which account to manage
-            if(empty($this->userId) && (!in_array($this->outer_url, ["select", "pay"]) && !in_array($this->inner_url, ["account", "payment"]))) {
+            if(empty($this->userId) && (!in_array($this->outer_url, ["select", "pay", "verify"]) && !in_array($this->inner_url, ["account", "payment"]))) {
                 return $this->output($code, $result);
             }
 

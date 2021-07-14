@@ -109,7 +109,7 @@ $skipProcessing = false;
  * 
  * @return JSON
  */
-if(($inner_url == "payment") && ($outer_url == "pay")) {
+if(($inner_url == "payment") && (in_array($outer_url, ["pay", "verify"]))) {
 
     // end query if the client id was not parsed
     if(!isset($params->param["clientId"])) {

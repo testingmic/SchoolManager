@@ -105,6 +105,12 @@ if(!$errorFound && isset($client->client_id)) {
                                     <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                 </div>
                             </div>
+                            <div class="form-content-loader" id="success_loader" style="display: none; position: absolute; border:solid 1px #ccc;">
+                                <div class="offline-content text-center">
+                                    <p class="m-0 p-0"><i class="fa fa-check text-success fa-3x"></i>Payment Successful</p>
+                                    <p class="m-0 p-0"><small onclick="return close_payment_window();" class="text-danger underline">Close</small></p>
+                                </div>
+                            </div>
                             <div class="bg-whitesmoke p-3 border">
                                 <?php
                                 // get the payment form
