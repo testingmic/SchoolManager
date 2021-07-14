@@ -120,13 +120,21 @@ class Payment extends Myschoolgh {
 
         try {
 
+            // global variable
+            global $session;
+
             // trim all the variables parsed
             $params->amount = substr($params->amount, 0, 6);
             $params->contact = substr($params->contact, 0, 12);
             $params->email = substr($params->email, 0, 60);
 
+            // validate the param variable
+            if(!isset($params->param) || (isset($params->param) && !is_array($params->param))) {
+                return ["code" => 203, "result" => "Sorry! Param variable is required and must be an array."];
+            }
+
             // validate the amount
-            if(!preg_match("/^[0-9]+$/", $params->amount)) {
+            if(!preg_match("/^[0-9.]+$/", $params->amount)) {
                 return ["code" => 203, "result" => "Sorry! Please enter a valid amount."];
             }
 
@@ -140,8 +148,66 @@ class Payment extends Myschoolgh {
                 return ["code" => 203, "result" => "Sorry! Please enter a valid email address."];
             }
 
+            // param information
+            $param = $params->param;
+
+            // load information
+            $load_param = (object) [];
+
+            // if both items were not parsed
+            if(!isset($param["student_id"]) && !isset($param["checkout_url"])) {
+                return ["code" => 203, "result" => "Missing Parameter! student_id and/or checkout_url is required."];
+            }
+            
+            // append the student id
+            if(isset($param["student_id"])) {
+                $load_param->student_id = $param["student_id"];
+            }
+
+            // append the checkout id
+            if(isset($param["checkout_url"])) {
+                $load_param->checkout_url = $param["checkout_url"];
+            }
+
+            // append the client id to it
+            $load_param->clientId = $params->clientId;
+            $load_param->client_data = $params->client_data;
+
+            // create a new object
+            $paymentObj = load_class("fees", "controllers", $load_param);
+
+            // load the payment information
+            $pay_info = $paymentObj->confirm_student_payment_record($load_param);
+
+            // payment information
+            if(empty($pay_info)) {
+                return ["code" => 203, "data" => "Sorry! The checkout url parsed is either incorrect or has expired."];
+            }
+
+            // get the payment information
+            $isMultiple = (bool) (count($pay_info) == 1);
+
+            // get the payment form
+            $payInit = $pay_info[0];
+
+            // get the balance payable
+            $balance = 0;
+
+            // loop through the payment info to get the balance payable
+            foreach($pay_info as $pay) {
+                $balance += $pay->balance;
+            }
+
+            // ensure the amount to be paid is not more than the balance
+            if($params->amount > $balance) {
+                return ["code" => 203, "data" => "Sorry! The amount to be paid must not exceed the oustanding balance."];
+            }
+
             // set the client data
             $client = $params->client_data;
+
+            // set a new payment reference
+            $session->reference_id = empty($session->reference_id) ? random_string("alnum", 14) : $session->reference_id;
 
             // set the data to return if request was successful
             $data = [
@@ -151,6 +217,7 @@ class Payment extends Myschoolgh {
                     "contact" => $params->contact,
                     "subaccount" => $client->client_account,
                     "payment_key" => $this->pk_public_key,
+                    "reference" => $session->reference_id,
                     "currency" => $client->client_preferences->labels->currency
                 ]
             ];

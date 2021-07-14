@@ -39,13 +39,14 @@ var make_fee_payment = () => {
         $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "flex");
         $.post(`${baseUrl}api/payment/pay`, {email, contact, amount, param}).then((response) => {
             if(response.code == 200) {
+                let ajax = response.data.result;
                 var popup = PaystackPop.setup({
-                    key: response.payment_key,
-                    email: response.email,
-                    amount: response.amount,
-                    currency: response.currency,
-                    subaccount: response.subaccount,
-                    ref: response.reference,
+                    key: ajax.payment_key,
+                    email: ajax.email,
+                    amount: ajax.amount,
+                    currency: ajax.currency,
+                    subaccount: ajax.subaccount,
+                    reference: ajax.reference,
                     onClose: function() {
                         $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "none");
                         notify(`Payment Process Cancelled.`);
@@ -67,7 +68,8 @@ var make_fee_payment = () => {
                 notify(response.data.result);
             }
             $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "none");
-        }).catch(() => {
+        }).catch((err) => {
+            console.log(err);
             $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "none");
             notify(`Sorry! An Error occured while processing the request.`);
         });

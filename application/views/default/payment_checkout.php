@@ -124,7 +124,6 @@ if(!$errorFound && isset($client->client_id)) {
 <?php if(!$errorFound) { ?>
     <script>var baseUrl = "<?= $baseUrl ?>";</script>
     <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
-    <script src="<?= $baseUrl; ?>assets/bundles/sweetalert/sweetalert.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/notify.js"></script>
     <script src="https://js.paystack.co/v2/inline.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/pay.js"></script>
