@@ -45,6 +45,10 @@ $apiAccessValues = $apisObject->validateApiKey();
 // get the parameters
 $params = $apisObject->paramFormat($method, $incomingData, $_POST, $_GET, $_FILES);
 
+// get the endpoints
+$endpoint = "{$inner_url}/{$outer_url}/";
+$endpoint = trim($endpoint, "/");
+
 // control
 if((($inner_url == "devlog") && ($outer_url == "auth")) || ($inner_url == "auth" && !$outer_url) || ($inner_url == "auth" && $outer_url == "logout")) {
     
@@ -95,91 +99,135 @@ if((($inner_url == "devlog") && ($outer_url == "auth")) || ($inner_url == "auth"
     exit;
 }
 
-// confirm that the access token parameter was parsed but did not pass the test
-// confirm if a valid api access key was parsed
-if((!isset($apiAccessValues->user_id) && empty($session->userId)) || (isset($_GET['access_token']) && !isset($apiAccessValues->user_id))) {
-	// set the bug good
-    $bugs = true;
-    // set the http header
-    http_response_code(401);
-    // set the description
-	$response->description = "Sorry! An invalid Access Token was supplied or the Access Token has expired.";
-} else {
-    // if the user is making the request from an api endpoint
-    if(isset($apiAccessValues->user_id)) {
-        
-        // initiate an empty array of the parameters parsed
-        $userId = $apiAccessValues->user_id;
-        $clientId = $apiAccessValues->client_id;
-
-        // set the remote access to true
-        $remote = true;
-        $params->remote = true;
-        
-        // convert the item into an integer
-        $dailyRequestLimit = (int) $apiAccessValues->requests_limit;
-        $totalRequests = (int) $apiAccessValues->requests_count;
-
-        // if the total request is greater or equal to the request limit
-        // then return false
-        if($totalRequests >= $dailyRequestLimit) {
-            $bugs = true;
-            // set the too many requests header
-            http_response_code(429);
-            // set the information to return to the user
-            $response->description = "Sorry! You have reached the maximum of {$dailyRequestLimit} requests that can be made daily.";
-        }
-        
-    }
-
-    // set the userId
-    $myClass->userId = !empty($session->userId) ? $session->userId : $userId;
-    $myClass->clientId = !empty($session->clientId) ? $session->clientId : $clientId;
-}
-
-// confirm that a bug was found
-if($bugs) {
-
-    // parse the remote request
-    !empty($params) ? $response->remote_request['payload'] = $params : null;
-
-    // print the error description
-    echo json_encode($response);
-    exit;
-}
-
-/* Usage of the Api Class */
-$Api = load_class('api', 'models', ["userId" => $userId, "clientId" => $clientId]);
+// default value
+$skipProcessing = false;
 
 /**
- * Test examples using the inner url of users
+ * Process the Offline Payment Request
+ * 
+ * @param $params
+ * 
+ * @return JSON
  */
-$Api->inner_url = $inner_url;
-$Api->outer_url = $outer_url;
-$Api->method = $method;
-$Api->uri = $requestUri;
+if(($inner_url == "payment") && ($outer_url == "pay")) {
 
-/** Revert the params back into an array */
-$params = (array) $params;
+    // end query if the client id was not parsed
+    if(!isset($params->param["clientId"])) {
+        // return error message
+        $response->result = "The Client ID is required.";
+        echo json_encode($response);
+        exit;
+    }
 
-// get the endpoints
-$endpoint = "{$inner_url}/{$outer_url}/";
-$endpoint = trim($endpoint, "/");
+    /* Usage of the Api Class */
+    $Api = load_class('api', 'models', ["clientId" => $params->param["clientId"]]);
 
-/** Load the parameters */
-$Api->endpoints = $apisObject->apiEndpoint($endpoint, $method, $outer_url);
+    /** Load the parameters */
+    $Api->endpoints = $apisObject->apiEndpoint($endpoint, $method, $outer_url);
+    $Api->inner_url = $inner_url;
+    $Api->outer_url = $outer_url;
+    $Api->appendClient = true;
+    $Api->method = $method;
+    $Api->uri = $requestUri;
 
-// set the default parameters
-$Api->default_params = $params;
+    // set the default parameters
+    $Api->default_params = $params;
+    $params = (array) $params;
 
-/* Run a check for the parameters and method parsed by the user */
-$paramChecker = $Api->keysChecker($params);
+    /* Run a check for the parameters and method parsed by the user */
+    $paramChecker = $Api->keysChecker($params);
+    
+    /** Skip processing */
+    $skipProcessing = true;
+}
 
-$remote = isset($params["remote"]) ? (bool) $params["remote"] : $remote;
+/** If the value of $skipProcessing is TRUE */
+if(!$skipProcessing) {
+
+    // confirm that the access token parameter was parsed but did not pass the test
+    // confirm if a valid api access key was parsed
+    if((!isset($apiAccessValues->user_id) && empty($session->userId)) || (isset($_GET['access_token']) && !isset($apiAccessValues->user_id))) {
+        // set the bug good
+        $bugs = true;
+        // set the http header
+        http_response_code(401);
+        // set the description
+        $response->description = "Sorry! An invalid Access Token was supplied or the Access Token has expired.";
+    } else {
+        // if the user is making the request from an api endpoint
+        if(isset($apiAccessValues->user_id)) {
+            
+            // initiate an empty array of the parameters parsed
+            $userId = $apiAccessValues->user_id;
+            $clientId = $apiAccessValues->client_id;
+
+            // set the remote access to true
+            $remote = true;
+            $params->remote = true;
+            
+            // convert the item into an integer
+            $dailyRequestLimit = (int) $apiAccessValues->requests_limit;
+            $totalRequests = (int) $apiAccessValues->requests_count;
+
+            // if the total request is greater or equal to the request limit
+            // then return false
+            if($totalRequests >= $dailyRequestLimit) {
+                $bugs = true;
+                // set the too many requests header
+                http_response_code(429);
+                // set the information to return to the user
+                $response->description = "Sorry! You have reached the maximum of {$dailyRequestLimit} requests that can be made daily.";
+            }
+            
+        }
+
+        // set the userId
+        $myClass->userId = !empty($session->userId) ? $session->userId : $userId;
+        $myClass->clientId = !empty($session->clientId) ? $session->clientId : $clientId;
+    }
+
+    // confirm that a bug was found
+    if($bugs) {
+
+        // parse the remote request
+        !empty($params) ? $response->remote_request['payload'] = $params : null;
+
+        // print the error description
+        echo json_encode($response);
+        exit;
+    }
+
+    /* Usage of the Api Class */
+    $Api = load_class('api', 'models', ["userId" => $userId, "clientId" => $clientId]);
+
+    /**
+     * Test examples using the inner url of users
+     */
+    $Api->inner_url = $inner_url;
+    $Api->outer_url = $outer_url;
+    $Api->method = $method;
+    $Api->uri = $requestUri;
+
+    /** Revert the params back into an array */
+    $params = (array) $params;
+
+    /** Load the parameters */
+    $Api->endpoints = $apisObject->apiEndpoint($endpoint, $method, $outer_url);
+
+    // set the default parameters
+    $Api->default_params = $params;
+
+    /* Run a check for the parameters and method parsed by the user */
+    $paramChecker = $Api->keysChecker($params);
+
+    $remote = isset($params["remote"]) ? (bool) $params["remote"] : $remote;
+
+}
 
 // in continuing your script then you can also do the following
 // if an error was found
 if( $paramChecker['code'] !== 100) {
+
     // check the message to parse
     $paramChecker['data']['result'] = $paramChecker['data']['result'] ?? $paramChecker['description'];
 
@@ -191,9 +239,9 @@ if( $paramChecker['code'] !== 100) {
     // print the json output
     echo json_encode($paramChecker);
 } else {
-    
     /** Set the default parameters */
     $Api->default_params = $params;
+
     /** Revert the params back into an array */
     $param = (object) $params;
     $param->remote = $remote;

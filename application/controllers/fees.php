@@ -371,6 +371,9 @@ class Fees extends Myschoolgh {
      */
     public function student_allocation_array(stdClass $params) {
         
+        // global variables
+        global $isStudent, $isParent, $isWardParent, $defaultUser;
+
         // load fees allocation list for class
         $owning = false;
         $student_allocation_list = "";
@@ -427,7 +430,10 @@ class Fees extends Myschoolgh {
                         $student_allocation_list .= "<span class='badge badge-success'>Paid</span>";
                     } else {
                         $owning = true;
-                        $student_allocation_list .= "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?checkout_url={$student->checkout_url}\");' class='btn btn-sm btn-outline-success'>Pay</button>";
+                        $_class = "class='btn btn-sm btn-outline-success'";
+                        $student_allocation_list .= $isParent ? "
+                            <a {$_class} href='{$this->baseUrl}payment_checkout/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
+                        " : "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?checkout_url={$student->checkout_url}\");' {$_class}>Pay Fee</button>";
                     }
                     // delete the record if possible => that is allowed only if the student has not already made an payment
                     if(!empty($params->canAllocate) && empty($student->amount_paid)) {
@@ -1017,7 +1023,7 @@ class Fees extends Myschoolgh {
                     (
                         SELECT 
                             CONCAT(
-                                u.name,'|',COALESCE(u.department, 'NULL'),'|',COALESCE(u.account_balance,'0')
+                                u.name,'|',COALESCE(u.department, 'NULL'),'|',COALESCE(u.account_balance,'0'),'|',COALESCE(u.unique_id,'0')
                             ) 
                         FROM users u 
                         WHERE 
@@ -1053,7 +1059,7 @@ class Fees extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 
                 // payment information
-                $result->student_details = $this->stringToArray($result->student_details, "|", ["student_name", "department_id", "account_balance"], true);
+                $result->student_details = $this->stringToArray($result->student_details, "|", ["student_name", "department_id", "account_balance", "unique_id"], true);
 
                 // set the account balance
                 $result->account_balance = isset($result->student_details["account_balance"]) ? (float) $result->student_details["account_balance"] : 0;

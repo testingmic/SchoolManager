@@ -186,8 +186,6 @@ var init = () => {
 
 var linkClickStopper = (element) => {
 
-
-
     $("a", element).on("click", (event) => {
 
         if ($(event.currentTarget).hasClass('modal-trigger') ||

@@ -21,6 +21,7 @@ class Myschoolgh extends Models {
     public $end_date;
 	public $client_data;
 	public $academic_calendar_years = [];
+	public $pk_public_key = "pk_test_0b00163f9532f2e6b27819fa20127b8bd4e2c260";
 	
 	// class opening days
     public $default_opening_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];

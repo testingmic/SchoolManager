@@ -17,6 +17,7 @@ class Api {
     /* method will contain the request method parsed by the user */
     public $method;
     public $uri;
+    public $appendClient;
     public $default_params;
 
     /* the endpoint variable is only accessible in the class */
@@ -42,35 +43,40 @@ class Api {
         $this->config = $config;
         $this->myschoolgh = $myschoolgh;
         
-        $this->userId = $param["userId"];
-        $this->clientId = $param["clientId"];
+        $this->userId = $param["userId"] ?? null;
+        $this->clientId = $param["clientId"] ?? null;
 
-        // the query parameter to load the user information
-        $i_params = (object) [
-            "limit" => 1,
-            "user_id" => $this->userId,
-            "clientId" => $this->clientId
-        ];
+        // set the access object parameters
+        $this->accessCheck = $accessObject;
 
-        // load the user data
-        $the_data = $usersClass->list($i_params);
-        $this->userData = isset($the_data["data"]) ? $the_data["data"] : null;
-        
-        // if the user data is not empty
-        if(!empty($this->userData)) {
-            // get the first key
-            $this->userData =  $this->userData[0];
-            // set the access object parameters
-            $this->accessCheck = $accessObject;
-            $this->accessCheck->userId = $param["userId"];
-            $this->accessCheck->clientId = $param["clientId"];
-            $this->accessCheck->userPermits = $this->userData->user_permissions;
+        // if the users class is not empty
+        if(!empty($usersClass)) {
+
+            // the query parameter to load the user information
+            $i_params = (object) [
+                "limit" => 1,
+                "user_id" => $this->userId,
+                "clientId" => $this->clientId
+            ];
+
+            // load the user data
+            $the_data = $usersClass->list($i_params);
+            $this->userData = isset($the_data["data"]) ? $the_data["data"] : null;
+            
+            // if the user data is not empty
+            if(!empty($this->userData)) {
+                // get the first key
+                $this->userData =  $this->userData[0];
+                $this->accessCheck->userId = $param["userId"];
+                $this->accessCheck->clientId = $param["clientId"];
+                $this->accessCheck->userPermits = $this->userData->user_permissions;
+            }
+            // set the global variables
+            $this->myClass->userId = $this->userId;
         }
+
         // myschoolgh class initializing
         $this->myClass = $myClass;
-
-        // set the global variables
-        $this->myClass->userId = $this->userId;
     }
 
     /**
@@ -239,6 +245,11 @@ class Api {
         // parse the code to return
         $code = !empty($code) ? $code : 201;
 
+        // if the append client variable is not empty
+        if(!empty($this->appendClient)) {
+            $params->client_data = $client_data;
+        }
+
         // end the query here if nothing was found
         if(isset($this->accessCheck)) {
 
@@ -249,7 +260,7 @@ class Api {
             $params->devAccess = $this->accessCheck->hasAccess('developer', 'control') ? true : false;
             
             // if the client id is empty and yet the user is not selecting which account to manage
-            if(empty($this->userId) && (($this->outer_url !== "select" && $this->inner_url !== "account"))) {
+            if(empty($this->userId) && (!in_array($this->outer_url, ["select", "pay"]) && !in_array($this->inner_url, ["account", "payment"]))) {
                 return $this->output($code, $result);
             }
 

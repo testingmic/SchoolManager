@@ -752,10 +752,12 @@ class Forms extends Myschoolgh {
                         <div style=\"height:150px\" title=\"Click to preview: {$eachFile->name}\" data-toggle=\"tooltip\">
                             <div><span class=\"text text-{$eachFile->color}\"><i class=\"{$eachFile->favicon} fa-6x\"></i></span></div>
                         </div>";
+                        
                         $caption = "
                         <div class=\"file_caption text-left\">
-                            <span {$preview_link}><strong>{$eachFile->name}</strong></span> <span class=\"text-muted tx-11\">({$eachFile->size})</span>
-                            <br><strong class=\"mt-2\">{$eachFile->uploaded_by}</strong>
+                            <span {$preview_link}><strong>{$eachFile->name}</strong></span>
+                            <span class=\"text-muted tx-11\">({$eachFile->size})</span>
+                            <br><strong class=\"mt-2\"><i class=\"fa fa-calendar\"></i> ".date("jS F Y", strtotime($eachFile->datetime))."</strong>
                         </div>";
 
                         $view_option = $show_view ? "<a href=\"#\" onclick=\"return loadPage('{$this->baseUrl}{$show_view}/{$record_id}_{$eachFile->unique_id}');\" title=\"Click to view details of file\" class=\"btn btn-sm btn-primary\"><i class=\"fa fa-eye\"></i></a>" : "";
@@ -769,7 +771,7 @@ class Forms extends Myschoolgh {
 
                         // display this if the object is deletable.
                         if($is_deletable) {
-                            $delete_btn = "&nbsp;<a href=\"#\" onclick=\"return delete_existing_file_attachment('{$record_id}_{$eachFile->unique_id}');\" style=\"padding:5px\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+                            $delete_btn = "&nbsp;<a href=\"#\" onclick=\"return delete_existing_file_attachment('{$record_id}_{$eachFile->unique_id}');\" style=\"padding:5px\" class='btn btn-sm anchor btn-outline-danger'><i class='fa fa-trash'></i></a>";
                         }
 
                         $the_class = "attachment-item";
@@ -791,7 +793,7 @@ class Forms extends Myschoolgh {
                             }
                             $image_desc = "
                                 <div class=\"gallery-desc\">
-                                    <a class=\"image-popup\" href=\"{$this->baseUrl}{$eachFile->path}\" title=\"{$eachFile->name} ({$eachFile->size}) on {$eachFile->datetime}\">
+                                    <a class=\"image-popup anchor\" href=\"{$this->baseUrl}{$eachFile->path}\" title=\"{$eachFile->name} ({$eachFile->size}) on {$eachFile->datetime}\">
                                         <i class=\"fa fa-search\"></i>
                                     </a>
                                 </div>";
@@ -805,7 +807,7 @@ class Forms extends Myschoolgh {
                         
 
                         // append to the list
-                        $files_list .= "<div data-file_container='{$record_id}_{$eachFile->unique_id}' class=\"{$list_class} attachment-container text-center p-3\">";
+                        $files_list .= "<div data-file_container='{$record_id}_{$eachFile->unique_id}' class=\"{$list_class} attachment-container text-center p-1 mb-2\">";
                         $files_list .= $isImage ? "<div class=\"gallery-item\">" : null;
                             $files_list .= "
                                 <div class=\"col-lg-12 p-0 {$the_class} border\" {$padding} data-attachment_item='{$record_id}_{$eachFile->unique_id}'>

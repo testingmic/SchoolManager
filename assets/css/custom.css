@@ -238,7 +238,7 @@ textarea.form-control {
     padding-top: 5px;
     background: #607d8b;
     color: #fff;
-    height: 80px;
+    height: 90px;
     padding: 5px;
     border-radius: 0px 0px 10px 10px;
 }
@@ -562,4 +562,8 @@ label {
 }
 .buttons-html5, .print-buttons {
     width:50px;
+}
+
+.card {
+    border-radius: 5px;
 }

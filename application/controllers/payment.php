@@ -4,7 +4,6 @@ class Payment extends Myschoolgh {
     
 
     private $secret_key = "sk_test_3ceb4c33b4b0ea31cb10ef3b41ef05a673758cee";
-    private $public_key = "pk_test_0b00163f9532f2e6b27819fa20127b8bd4e2c260";
     
     public function __construct()
     {
@@ -111,5 +110,56 @@ class Payment extends Myschoolgh {
             "data" => $result
         ];
     }
+
+    /**
+     * Init Transaction
+     * 
+     * @return Array
+     */
+    public function pay(stdClass $params) {
+
+        try {
+
+            // trim all the variables parsed
+            $params->amount = substr($params->amount, 0, 6);
+            $params->contact = substr($params->contact, 0, 12);
+            $params->email = substr($params->email, 0, 60);
+
+            // validate the amount
+            if(!preg_match("/^[0-9]+$/", $params->amount)) {
+                return ["code" => 203, "result" => "Sorry! Please enter a valid amount."];
+            }
+
+            // validate the contact number
+            if(!preg_match("/^[0-9+]+$/", $params->contact)) {
+                return ["code" => 203, "result" => "Sorry! Please enter a valid contact number."];
+            }
+
+            // validate the email address
+            if(!filter_var($params->email, FILTER_VALIDATE_EMAIL)) {
+                return ["code" => 203, "result" => "Sorry! Please enter a valid email address."];
+            }
+
+            // set the client data
+            $client = $params->client_data;
+
+            // set the data to return if request was successful
+            $data = [
+                "data" => [
+                    "email" => $params->email,
+                    "amount" => $params->amount * 100,
+                    "contact" => $params->contact,
+                    "subaccount" => $client->client_account,
+                    "payment_key" => $this->pk_public_key,
+                    "currency" => $client->client_preferences->labels->currency
+                ]
+            ];
+
+            return $data;
+
+        } catch(PDOException $e) {}
+
+    }
+
 }
 ?>
