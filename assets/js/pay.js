@@ -9,7 +9,7 @@ var close_payment_window = () => {
 
 var validate_payment = (reference_id, transaction_id) => {
     let param = JSON.parse($(`div[id="make_fee_payment"] input[name="payment_param"]`).val()),
-        data = { "reference_id": reference_id,"transaction_id": transaction_id, "param": param };
+        data = { "reference_id": reference_id, "transaction_id": transaction_id, "param": param };
     
     $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "flex");
     

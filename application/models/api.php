@@ -49,6 +49,9 @@ class Api {
         // set the access object parameters
         $this->accessCheck = $accessObject;
 
+        // myschoolgh class initializing
+        $this->myClass = $myClass;
+        
         // if the users class is not empty
         if(!empty($usersClass)) {
 
@@ -74,9 +77,6 @@ class Api {
             // set the global variables
             $this->myClass->userId = $this->userId;
         }
-
-        // myschoolgh class initializing
-        $this->myClass = $myClass;
     }
 
     /**

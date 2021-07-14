@@ -70,27 +70,41 @@ function pay_student_fees_checkout() {
     $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Student Name:</strong> {$payInit->student_details["student_name"]}</div>";
     $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Student ID:</strong> {$payInit->student_details["unique_id"]}</div>";
     $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Outstanding Balance: </strong>{$clientPref->labels->currency} {$balance}</div>";
+    
+    // if the item was specified
+    if($getObject->item_specified) {
+        $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Payment For: </strong>{$payInit->category_name}</div>";
+        
+    }
+
+    // append to the payment form
     $payment_form .= "<div class='form-group mb-1 border-top pt-2 border-primary'>";
-    $payment_form .= "<label>Email Address <span class='required'>*</span></label>";
-    $payment_form .= "<input maxlength='60' type='email' placeholder='Please enter your email address' class='form-control' id='email' name='email'>";
-    $payment_form .= "</div>";
-    $payment_form .= "<div class='form-group mb-1'>\n";
-    $payment_form .= "<input class='form-control' disabled hidden type='hidden' name='payment_param' value='".json_encode($getObject)."'>\n";
-    $payment_form .= "<label>Phone Number</label>";
-    $payment_form .= "<input maxlength='15' type='text' placeholder='Please phone number (optional)' class='form-control' id='contact' name='contact'>";
-    $payment_form .= "</div>";
-    $payment_form .= "<div class='form-group mb-1'>";
-    $payment_form .= "<div class='row'>";
-    $payment_form .= "<div class='col-md-8'>";
-    $payment_form .= "<label>Amount <span class='required'>*</span></label>";
-    $payment_form .= "<input maxlength='10' type='number' placeholder='Enter amount (eg. 3.50)' class='form-control' id='amount' name='amount'>";
-    $payment_form .= "<input type='hidden' value='{$balance}' disabled hidden class='form-control' id='outstanding' name='outstanding'>";
-    $payment_form .= "</div>";
-    $payment_form .= "<div class='col-md-4'>";
-    $payment_form .= "<label>&nbsp;</label>";
-    $payment_form .= "<button onclick='return make_fee_payment()' class='btn btn-block btn-primary'>Pay</button>";
-    $payment_form .= "</div>";
-    $payment_form .= "</div>";
+
+    if($balance > 0) {
+        $payment_form .= "<label>Email Address <span class='required'>*</span></label>";
+        $payment_form .= "<input maxlength='60' type='email' placeholder='Please enter your email address' class='form-control' id='email' name='email'>";
+        $payment_form .= "</div>";
+        $payment_form .= "<div class='form-group mb-1'>\n";
+        $payment_form .= "<input class='form-control' disabled hidden type='hidden' name='payment_param' value='".json_encode($getObject)."'>\n";
+        $payment_form .= "<label>Phone Number</label>";
+        $payment_form .= "<input maxlength='15' type='text' placeholder='Please phone number (optional)' class='form-control' id='contact' name='contact'>";
+        $payment_form .= "</div>";
+        $payment_form .= "<div class='form-group mb-1'>";
+        $payment_form .= "<div class='row'>";
+        $payment_form .= "<div class='col-md-8'>";
+        $payment_form .= "<label>Amount <span class='required'>*</span></label>";
+        $payment_form .= "<input maxlength='10' type='number' placeholder='Enter amount (eg. 3.50)' class='form-control' id='amount' name='amount'>";
+        $payment_form .= "<input type='hidden' value='{$balance}' disabled hidden class='form-control' id='outstanding' name='outstanding'>";
+        $payment_form .= "</div>";
+        $payment_form .= "<div class='col-md-4'>";
+        $payment_form .= "<label>&nbsp;</label>";
+        $payment_form .= "<button onclick='return make_fee_payment()' class='btn btn-block btn-primary'>Pay</button>";
+        $payment_form .= "</div>";
+        $payment_form .= "</div>";
+    } else {
+        $payment_form .= "<div class='text-center font-18 text-success'>Current Outstanding Balance is 0. Hence there is no fee to pay for.</div>";
+    }
+
     $payment_form .= "</div>";
 
     return $payment_form;

@@ -47,10 +47,14 @@ if(!$errorFound && isset($client->client_id)) {
 
     // remove the client preferences
     $clientPref = $client->client_preferences;
+    
+    // init parameters
+    $getObject->item_specified = false;
 
     // assign new variables
     if(confirm_url_id(4, "checkout")) {
-        $getObject->checkout_url = $SITEURL[4];
+        $getObject->item_specified = true;
+        $getObject->checkout_url = $SITEURL[3];
     }
     if(confirm_url_id(3) && !confirm_url_id(4)) {
         $getObject->student_id = $SITEURL[3];
@@ -84,7 +88,6 @@ if(!$errorFound && isset($client->client_id)) {
                 <div class="card-block p-3">
                 
                     <div class="row" id="make_fee_payment">
-                        <div class="col-lg-12"><h3 class="border-bottom text-center pb-1">PAYMENT CHECKOUT</h3></div>
                         <?php if($errorFound || !isset($client->client_name)) { print "<p align='center' class='col-lg-12 text-danger'>{$myClass->permission_denied}</p>"; } else { ?>
                         <div class="col-md-6 mb-3">
                             <div class="client-logo text-center pt-2">

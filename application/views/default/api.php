@@ -119,8 +119,18 @@ if(($inner_url == "payment") && (in_array($outer_url, ["pay", "verify"]))) {
         exit;
     }
 
+    /** Set the API Parameter */
+    $api_param = [
+        "clientId" => $params->param["clientId"]
+    ];
+
+    // append the user id if the user is logged in
+    if(!empty($session->userId)) {
+        $api_param["userId"] = $session->userId;
+    }
+
     /* Usage of the Api Class */
-    $Api = load_class('api', 'models', ["clientId" => $params->param["clientId"]]);
+    $Api = load_class('api', 'models', $api_param);
 
     /** Load the parameters */
     $Api->endpoints = $apisObject->apiEndpoint($endpoint, $method, $outer_url);

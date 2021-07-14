@@ -1241,6 +1241,9 @@ class Fees extends Myschoolgh {
                 $additional["payment"] = $this->confirm_student_payment_record($params);
                 $additional["uniqueId"] = $uniqueId;
 
+                // set the student name
+                $student_name = $paymentRecord->student_details["student_name"];
+
             } else {
 
                 // generate a new payment_id
@@ -1325,7 +1328,7 @@ class Fees extends Myschoolgh {
                 if(strlen($params->contact_number) > 9 && preg_match("/^[0-9+]+$/", $params->contact_number)) {
                     
                     // append the message
-                    $message = "Hello,\nFees Payment was successfully processed.\nAmount: {$params->amount}\nBalance: {$outstandingBalance}\n";
+                    $message = "Hello {$student_name},\nFees Payment was successfully processed.\nAmount Paid: {$params->amount}\nBalance: {$outstandingBalance}\n";
                     
                     // calculate the message text count
                     $chars = strlen($message);

@@ -4,6 +4,7 @@ class Payment extends Myschoolgh {
     
 
     private $secret_key = "sk_test_3ceb4c33b4b0ea31cb10ef3b41ef05a673758cee";
+    private $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
     
     public function __construct() {
 
@@ -283,6 +284,7 @@ class Payment extends Myschoolgh {
 
             // confirm the payment
             $payment_check = $this->get($data);
+            $session->payment = $payment_check;
 
             // check
             if(empty($payment_check["data"])) {
@@ -423,6 +425,11 @@ class Payment extends Myschoolgh {
                 // if the payment method is momo or card payment
                 $append_sql .= ", paidin_by='{$email_address}', paidin_contact='".($session->user_contact ?? null)."'";
 
+                // count the number of rows found
+                if(isset($student_param->checkout_url) && count($paymentRecord) == 1) {
+                    $paymentRecord = $paymentRecord[0];
+                }
+
                 /* Record the payment made by the user */
                 if(!is_array($paymentRecord)) {
 
@@ -452,11 +459,10 @@ class Payment extends Myschoolgh {
                     $stmt->execute([$totalPayment, $outstandingBalance, $student_param->checkout_url, $params->clientId]);
 
                     /* Record the user activity log */
-                    $this->userLogs("fees_payment", $params->checkout_url, null, "Received an amount of <strong>{$params->amount}</strong> as Payment for <strong>{$paymentRecord->category_name}</strong> from <strong>{$paymentRecord->student_details["student_name"]}</strong>. Outstanding Balance is <strong>{$outstandingBalance}</strong>", $params->userId);
+                    $this->userLogs("fees_payment", $student_param->checkout_url, null, "Received an amount of <strong>{$amount}</strong> as Payment for <strong>{$paymentRecord->category_name}</strong> from <strong>{$paymentRecord->student_details["student_name"]}</strong>. Outstanding Balance is <strong>{$outstandingBalance}</strong>", $params->userId);
                     
-                    // additional data
-                    $additional["payment"] = $this->confirm_student_payment_record($params);
-                    $additional["uniqueId"] = $uniqueId;
+                    // set the student name
+                    $student_name = $paymentRecord->student_details["student_name"];
 
                 } else {
 
@@ -521,6 +527,66 @@ class Payment extends Myschoolgh {
                 if(isset($creditBalance)) {
                     // update the user data
                     $this->db->query("UPDATE users SET account_balance = (account_balance + $creditBalance) WHERE item_id = '{$params->student_id}' AND client_id = '{$params->clientId}' LIMIT 1");
+                }
+
+                // if the contact number is not empty
+                if(preg_match("/^[0-9+]+$/", $session->user_contact)) {
+                    
+                    // append the message
+                    $message = "Hello {$student_name},\nFees Payment was successfully processed.\nAmount Paid: {$amount}\nBalance: {$outstandingBalance}\n";
+                    
+                    // calculate the message text count
+                    $chars = strlen($message);
+                    $message_count = ceil($chars / $this->sms_text_count);
+                    
+                    // get the sms balance
+                    $balance = $this->pushQuery("sms_balance", "smsemail_balance", "client_id='{$params->clientId}' LIMIT 1");
+                    $balance = $balance[0]->sms_balance ?? 0;
+
+                    // return error if the balance is less than the message to send
+                    if($balance > $message_count) {
+
+                        //open connection
+                        $ch = curl_init();
+
+                        // set the field parameters
+                        $fields_string = [
+                            "key" => $this->mnotify_key,
+                            "recipient" => [$session->user_contact],
+                            "sender" => !empty($params->client_data->sms_sender) ? $params->client_data->sms_sender : $this->sms_sender,
+                            "message" => $message
+                        ];
+
+                        // send the message
+                        curl_setopt_array($ch, 
+                            array(
+                                CURLOPT_URL => "https://api.mnotify.com/api/sms/quick",
+                                CURLOPT_RETURNTRANSFER => true,
+                                CURLOPT_ENCODING => "",
+                                CURLOPT_MAXREDIRS => 10,
+                                CURLOPT_TIMEOUT => 30,
+                                CURLOPT_POST => true,
+                                CURLOPT_SSL_VERIFYPEER => false,
+                                CURLOPT_CAINFO => dirname(__FILE__)."\cacert.pem",
+                                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                                CURLOPT_CUSTOMREQUEST => "POST",
+                                CURLOPT_POSTFIELDS => json_encode($fields_string),
+                                CURLOPT_HTTPHEADER => [
+                                    "Content-Type: application/json",
+                                ]
+                            )
+                        );
+
+                        //execute post
+                        $result = json_decode(curl_exec($ch));
+                        
+                        // if the sms was successful
+                        if(!empty($result)) {
+                            // reduce the SMS balance
+                            $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$message_count}), sms_sent = (sms_sent + {$message_count}) WHERE client_id = '{$params->clientId}' LIMIT 1");
+                        }
+                    }
+
                 }
 
                 // log the transaction information
