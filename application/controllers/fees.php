@@ -432,7 +432,7 @@ class Fees extends Myschoolgh {
                         $owning = true;
                         $_class = "class='btn btn-sm btn-outline-success'";
                         $student_allocation_list .= $isParent ? "
-                            <a {$_class} href='{$this->baseUrl}payment_checkout/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
+                            <a {$_class} href='{$this->baseUrl}pay/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
                         " : "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?checkout_url={$student->checkout_url}\");' {$_class}>Pay Fee</button>";
                     }
                     // delete the record if possible => that is allowed only if the student has not already made an payment

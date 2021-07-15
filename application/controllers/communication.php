@@ -150,10 +150,11 @@ class Communication extends Myschoolgh {
             // prepare and execute the statement
             $stmt = $this->db->prepare("INSERT INTO smsemail_templates SET 
                 item_id = ?, name = ?, message = ?, type = ?, client_id = ?, created_by = ?,
-                academic_year = ?, academic_term = ?    
+                academic_year = ?, academic_term = ?, module = ?   
             ");
             $stmt->execute([$item_id, $params->name, $params->message, $params->type, 
-                $params->clientId, $params->userId, $params->academic_year, $params->academic_term
+                $params->clientId, $params->userId, $params->academic_year, 
+                $params->academic_term, $params->module ?? null
             ]);
 
             // log the user activity
@@ -198,7 +199,8 @@ class Communication extends Myschoolgh {
             $params->message = htmlspecialchars($params->message);
             
             // prepare and execute the statement
-            $stmt = $this->db->prepare("UPDATE smsemail_templates SET name = ?, message = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
+            $stmt = $this->db->prepare("UPDATE smsemail_templates SET name = ?, message = ?
+                ".(isset($params->module) ? ", module='{$params->module}'" : null)." WHERE item_id = ? AND client_id = ? LIMIT 1");
             $stmt->execute([$params->name, $params->message, $params->template_id, $params->clientId]);
 
             // log the user activity

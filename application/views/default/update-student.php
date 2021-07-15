@@ -383,9 +383,9 @@ if(!empty($user_id)) {
                                 '.(
                                     !empty($student_allocation_list["owning"]) ? 
                                         '<div class="text-right">
-                                            <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}payment_checkout/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'"').' class="btn btn-outline-primary"><i class="fa fa-adjust"></i> Make Fees Payment</a>
+                                            <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}pay/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'"').' class="btn btn-outline-primary"><i class="fa fa-adjust"></i> Make Fees Payment</a>
                                         </div>'
-                                    : null
+                                    : '<div class="badge badge-success">Full Paid</div>'
                                 ).'
                                 </div>
                             </div>

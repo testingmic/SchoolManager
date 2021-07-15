@@ -612,6 +612,8 @@ class Payroll extends Myschoolgh {
             // get the last row generated
             $payslip_id = $this->lastRowId("payslips WHERE client_id='{$params->clientId}'");
 
+            // log the data in the statement account
+            
             // log the user activity
             $this->userLogs("payslip", $params->employee_id, null, "<strong>{$params->userData->name}</strong> generated a payslip for: <strong>{$data->name}</strong> for the month: <strong>{$params->month_id} {$params->year_id}</strong>", $params->userId);
 

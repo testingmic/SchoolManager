@@ -24,9 +24,10 @@ var reset_communication_form = (form_url, title = "Create Template") => {
     }).then((proceed) => {
         if (proceed) {
             $(`a[id="templates_list-tab2"]`).trigger("click");
+            $(`trix-editor[id="ajax-form-content"]`).html("");
             $(`form[class="ajax-data-form"] input, form[class="ajax-data-form"] textarea`).val("");
             $(`div[id="communication_form"] [class="card-header"]`).html(title);
-            $(`trix-editor[id="ajax-form-content"]`).html("");
+            $(`div[id="communication_form"] select[name="module"]`).val("").change();
             $(`div[id="communication_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}${form_url}`);
         }
     });
@@ -40,12 +41,25 @@ var view_template = (template_id, form_url) => {
             $(`a[id="add_template-tab2"]`).trigger("click");
             $(`div[id="communication_form"] input[name="name"]`).val(data.name);
             $(`div[id="communication_form"] input[name="type"]`).val(data.type);
+            $(`div[id="communication_form"] select[name="module"]`).val(data.module).change();
             $(`div[id="communication_form"] input[name="template_id"]`).val(data.item_id);
             $(`div[id="communication_form"] textarea[name="message"]`).val(data.message);
             $(`div[id="communication_form"] trix-editor[input="trix-editor-input"]`).html(data.message);
             $(`div[id="communication_form"] [class="card-header"]`).html("Update Template");
             $(`div[id="communication_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}${form_url}`);
         }
+    }
+}
+
+var append_dynamic_tag = (tag, route) => {
+    if(route === "sms") {
+        let msg = $(`div[id="communication_form"] textarea[name="message"]`).val();
+        let new_msg = `${msg} ${tag}`;
+        $(`div[id="communication_form"] textarea[name="message"]`).val(new_msg);
+    } else {
+        let msg = $(`div[id="communication_form"] trix-editor[input="trix-editor-input"]`).html();
+        let new_msg = `${msg} ${tag}`;
+        $(`div[id="communication_form"] trix-editor[input="trix-editor-input"]`).html(new_msg);
     }
 }
 

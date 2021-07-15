@@ -39,7 +39,7 @@ if(!empty($list_data) && !empty($params->account_id)) {
 }
 
 // init value
-$type_list = "";
+$accounts_list = "";
 $bank_accounts_array = [];
 
 // if the user has the required permissions
@@ -53,18 +53,51 @@ foreach($list_data as $key => $each) {
     // set the action button
     $action = "";
     if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to edit this bank account details' href='#' onclick='return update_bank_account(\"{$each->item_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a title='Click to edit this bank account details' href='#' onclick='return update_bank_account(\"{$each->item_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i> Update Record</a>";
         // $action .= "&nbsp;<a href='#' title='Click to delete this Account' onclick='return delete_record(\"{$each->item_id}\", \"accounts\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     // append to the rows
-    $type_list .= "<tr data-row_id=\"{$each->item_id}\">";
-    $type_list .= "<td>".($key+1)."</td>";
-    $type_list .= "<td>{$each->account_name}</td>";
-    $type_list .= "<td>{$each->account_number}</td>";
-    $type_list .= "<td>{$each->description}</td>";
-    $type_list .= $hasUpdate ? "<td align='center'>{$action}</td>" : null;
-    $type_list .= "</tr>";
+    $accounts_list .= "
+    <div class='col-md-6'>
+        <div class='card'>
+            <div class='card-body p-2'>
+                <h4>{$each->account_name}</h4>
+                <table border='1' width='100%' class='table table-bordered table-striped'>
+                    <tbody>
+                        <tr>
+                            <td><strong>Account Number: </strong></td>
+                            <td><span class='font-18'>{$each->account_number}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bank Name: </strong></td>
+                            <td>{$each->account_bank}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Opening Balance: </strong></td>
+                            <td>{$each->currency} ".number_format($each->opening_balance, 2)."</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total Credit: </strong></td>
+                            <td>{$each->currency} ".number_format($each->total_credit, 2)."</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total Debit: </strong></td>
+                            <td>{$each->currency} ".number_format($each->total_debit, 2)."</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Current Balance: </strong></td>
+                            <td>{$each->currency} ".number_format($each->balance, 2)."</td>
+                        </tr>
+                        <tr>
+                            <td colspan='2'>{$each->description}</td>
+                        </tr>
+                        ".($hasUpdate ? "<tr><td colspan='2' align='center'>{$action}</td></tr>" : null)."
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>";
 }
 
 // load the form
@@ -87,19 +120,8 @@ $response->html = '
                     <div class="card-header"><i class="fa fa-list"></i> &nbsp; Accounts List</div>
                     <div class="card-body">
 
-                        <div class="table-responsive">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
-                                <thead>
-                                    <tr>
-                                        <th width="5%" class="text-center">#</th>
-                                        <th>Name</th>
-                                        <th>Number</th>
-                                        <th>Description</th>
-                                        '.($hasUpdate ? '<th width="13%" align="center"></th>' : null).'
-                                    </tr>
-                                </thead>
-                                <tbody>'.$type_list.'</tbody>
-                            </table>
+                        <div class="row">
+                            '.$accounts_list.'
                         </div>
 
                     </div>

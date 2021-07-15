@@ -4603,6 +4603,12 @@ class Forms extends Myschoolgh {
         ];
         
         $data = isset($params->data) && !empty($params->data) ? $params->data : null;
+        $dynamic_tags = "";
+
+        // loop through the dynamic tags
+        foreach(["{name}", "{balance}"] as $tag) {
+            $dynamic_tags .= "<span onclick=\"return append_dynamic_tag('{$tag}','{$params->route}')\" class=\"tags mr-2\">{$tag}</span>";
+        }
         
         $html = "
         <div class='row'>
@@ -4616,6 +4622,15 @@ class Forms extends Myschoolgh {
                                 <label>Name <span class=\"required\">*</span></label>
                                 <input type=\"text\" name=\"name\" value=\"".($data->name ?? null)."\" class=\"form-control\">
                             </div>
+                            ".($params->route == "sms" ? 
+                            "<div class=\"form-group\">
+                                <label>SMS Module</label>
+                                <select class=\"selectpicker\" name=\"module\" data-width=\"100%\">
+                                    <option>Select Module (Optional)</option>
+                                    <option value=\"f\">Fees Payment Reminder</option>
+                                </select>
+                            </div>"
+                            : null)."
                             ".($params->route == "email" ? 
                             "<div class=\"form-group hidden\">
                                 <label>Subject</label>
@@ -4636,6 +4651,11 @@ class Forms extends Myschoolgh {
                                         " : null
                                     )
                                 )."
+                            </div>
+                            <div class=\"form-group mt-0\">
+                                <div class=\"tags-container\">
+                                    {$dynamic_tags}
+                                </div>
                             </div>
                             <div class=\"form-group\">
                                 <div class=\"row\">
@@ -4675,8 +4695,10 @@ class Forms extends Myschoolgh {
         $class_array_list = $this->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'");
         $users_array_list = $this->pushQuery("name, user_type, unique_id, item_id", "users", 
             "client_id='{$params->clientId}' AND status='1' AND academic_year='{$params->preferences->academics->academic_year}'
-            AND academic_term='{$params->preferences->academics->academic_term}'"
-        );
+            AND academic_term='{$params->preferences->academics->academic_term}'");
+
+        // sms email modules
+        $modules = [""];
 
         // loop through the forms
         foreach($forms as $route) {

@@ -580,3 +580,16 @@ label {
 .card {
     border-radius: 5px;
 }
+.tags {
+    border: solid 1px #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    color: #000;
+    font-size:13px;
+    cursor: pointer;
+}
+
+.tags:hover {
+    background: #847c7c;
+    color: #fff;
+}
