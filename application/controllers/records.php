@@ -110,8 +110,8 @@ class Records extends Myschoolgh {
             "payslip" => [
                 "table" => "payslips",
                 "update" => "deleted='1', status='0'",
-                "where" => "item_id='{$record_id}' AND activated='0' AND deleted='0'",
-                "query" => "SELECT name FROM payslips WHERE item_id='{$record_id}' AND status ='0' AND client_id='{$userData->client_id}' LIMIT 1"
+                "where" => "item_id='{$record_id}' AND validated='0' AND deleted='0'",
+                "query" => "SELECT id FROM payslips WHERE item_id='{$record_id}' AND status ='0' AND client_id='{$userData->client_id}' LIMIT 1"
             ],
             "user" => [
                 "table" => "users",
@@ -173,13 +173,49 @@ class Records extends Myschoolgh {
                 $result = $stmt->fetch(PDO::FETCH_OBJ);
             } catch(PDOException $e) {
                 // quit the execution of the file
-                return ["code" => 203, "data" => "Sorry! There was an error while processing the request."];
-                // return ["code" => 203, "data" => $e->getMessage()];
+                return ["code" => 203, "data" => $e->getMessage() ." Sorry! There was an error while processing the request."];
             }
 
             // return if no result was found
             if(empty($result)) {
                 return ["code" => 203, "data" => "Sorry! There was no record found for the specified id."];
+            }
+
+            // payslip modification
+            if($params->resource == "payslip") {
+
+                // log the data in the statement account
+                $check = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1'");
+                
+                // if the account is not empty
+                if(!empty($check)) {
+
+                    // transaction record
+                    $check_2 = $this->pushQuery("payment_medium, account_id, record_date, item_id, amount, 
+                        balance, academic_year, academic_term, description", "accounts_transaction", 
+                        "item_id='{$params->record_id}' LIMIT 1");
+                                    
+                    // if there is an existing payslip record
+                    if(!empty($check_2)) {
+                        
+                        // log the transaction record
+                        $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                            item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                            reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                            description = ?, academic_year = ?, academic_term = ?, balance = ?, state = 'Approved'
+                        ");
+                        $stmt->execute([
+                            $params->record_id, $params->clientId, $check_2[0]->account_id, "payroll", "Deposit", null, 
+                            $check_2[0]->amount, $params->userId, $check_2[0]->record_date, $check_2[0]->payment_medium, 
+                            "{$check_2[0]->description}: Reversed", $check_2[0]->academic_year, $check_2[0]->academic_term, 
+                            ($check[0]->balance + $check_2[0]->amount)
+                        ]);
+
+                        // add up to the income
+                        $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$check_2[0]->amount}), balance = (balance + {$check_2[0]->amount}) WHERE item_id = '{$check_2[0]->account_id}' LIMIT 1");
+                    }
+                }
+                
             }
 
             // update the database record
@@ -235,6 +271,9 @@ class Records extends Myschoolgh {
                 }
                 $this->db->query("UPDATE payslips SET validated='1', validated_date = now(), status='1' WHERE item_id='{$record_id}' LIMIT 1");
 
+                // change the state of the transaction to approved
+                $this->db->query("UPDATE accounts_transaction SET state='Approved', validated_date = now(), validated_by = '{$params->userId}' WHERE item_id='{$record_id}' AND state != 'Approved' LIMIT 5");
+
                 // log the user activity
                 $this->userLogs("payslip", $record_id, null, "<strong>{$params->userData->name}</strong> validated the payslip: <strong>{$payslip[0]->employee_name}</strong> for the month: <strong>{$payslip[0]->payslip_month} {$payslip[0]->payslip_year}</strong>", $params->userId);
 
@@ -255,7 +294,7 @@ class Records extends Myschoolgh {
                 if(empty($transaction)) {
                     return ["code" => 203, "data" => "Sorry! An invalid id was supplied or the transaction has already been validated."];
                 }
-                $this->db->query("UPDATE accounts_transaction SET state='Approved', validated_date = now(), validated_by = '{$params->userId}' WHERE item_id='{$record_id}' LIMIT 1");
+                $this->db->query("UPDATE accounts_transaction SET state='Approved', validated_date = now(), validated_by = '{$params->userId}' WHERE item_id='{$record_id}' AND state != 'Approved' LIMIT 5");
 
                 // log the user activity
                 $this->userLogs("accounts_transaction", $record_id, null, "<strong>{$params->userData->name}</strong> validated the transaction.", $params->userId);

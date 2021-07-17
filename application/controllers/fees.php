@@ -355,7 +355,6 @@ class Fees extends Myschoolgh {
                 $class_allocation_list .= "<td>{$each->class_name}</td>";
                 $class_allocation_list .= "<td>{$each->category_name}</td>";
                 $class_allocation_list .= "<td>{$each->currency} {$each->amount}</td>";
-                $class_allocation_list .= "<td align='center'></td>";
                 $class_allocation_list .= "</tr>";
             }
         }

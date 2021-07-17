@@ -8,7 +8,7 @@ class Accounting extends Myschoolgh {
 		parent::__construct();
 
         // get the client data
-        $client_data = $params->client_data ?? null;
+        $client_data = $params->client_data ?? [];
         $this->iclient = $client_data;
 
         // run this query
@@ -87,6 +87,11 @@ class Accounting extends Myschoolgh {
                 return ["code" => 203, "data" => $this->is_required("Account Type")];
             }
 
+            // check if the name matches any of these values
+            if(in_array(strtolower($params->name), ["payroll", "payslip", "school fees", "fees", "fee"])) {
+                return ["code" => 203, "data" => "Sorry! You cannot add any account type head with the names [payroll, payslip, fee or fees]."];
+            }
+
             // create an item_id
             $item_id = random_string("alnum", 15);
 
@@ -127,6 +132,11 @@ class Accounting extends Myschoolgh {
     public function update_accounttype(stdClass $params) {
 
         try {
+
+            // check if the name matches any of these values
+            if(in_array(strtolower($params->name), ["payroll", "payslip", "school fees", "fees", "fee"])) {
+                return ["code" => 203, "data" => "Sorry! You cannot change any account type head to the names [payroll, payslip, fee or fees]."];
+            }
 
             // old record
             $prevData = $this->pushQuery("*", "accounts_type_head", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
@@ -235,6 +245,12 @@ class Accounting extends Myschoolgh {
             // create an item_id
             $item_id = random_string("alnum", 15);
 
+            // Verify the account id parsed
+            $check = $this->pushQuery("id", "accounts", "client_id='{$params->clientId}' AND status='1'");
+
+            // if empty, end the query
+            if(count($check) > 9) { return ["code" => 203, "data" => "Maximum Accounts Reached! You cannot create more than 10 accounts."]; }
+
             // insert the record
             $stmt = $this->db->prepare("INSERT INTO accounts SET client_id = ?, account_name = ?, account_number = ?,
             description = ?, opening_balance = ?, created_by = ?, item_id = ?, balance = ?, total_credit = ?, account_bank = ?");
@@ -315,7 +331,13 @@ class Accounting extends Myschoolgh {
     /**
      * List Account Type Head
      * 
-     * @param stdClass $params
+     * @param stdClass  $params
+     * @param String    $params->q
+     * @param String    $params->account_id
+     * @param String    $params->account_type
+     * @param String    $params->transaction_id
+     * @param String    $params->date
+     * @param String    $params->date_range
      * 
      * @return Array
      */
@@ -361,6 +383,11 @@ class Accounting extends Myschoolgh {
                 // if attachment variable was parsed
                 $result->attachment = json_decode($result->attachment);
                 $result->state_label = $this->the_status_label($result->state);
+
+                // set the new name if the account type is payroll or fees
+                if(empty($result->account_type_name) && in_array($result->account_type, ["payroll", "fees"])) {
+                    $result->account_type_name = ucfirst($result->account_type);
+                }
 
                 // if the files is set
                 if(!isset($result->attachment->files)) {
@@ -852,6 +879,14 @@ class Accounting extends Myschoolgh {
     /**
      * Account Statement Notes
      * 
+     * @param String    $params->q
+     * @param String    $params->item_type
+     * @param String    $params->account_id
+     * @param String    $params->account_type
+     * @param String    $params->transaction_id
+     * @param String    $params->date
+     * @param String    $params->date_range
+     * 
      * @return String
      */
     public function format_transaction_notes(stdClass $params) {
@@ -1092,6 +1127,36 @@ class Accounting extends Myschoolgh {
 
         } catch(PDOException $e) {}
 
+    }
+
+    /**
+     * Set The Default Account
+     * 
+     * @param String $params->account_id
+     * 
+     * @return Array
+     */
+    public function set_primary_account(stdClass $params) {
+
+        try {
+            
+            // Verify the account id parsed
+            $check = $this->pushQuery("id", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' AND status='1'");
+
+            // if empty, end the query
+            if(empty($check)) { return ["code" => 203, "data" => "Sorry! An invalid account id was parsed."]; }
+
+            // set all accounts default_account column to 0
+            $this->db->query("UPDATE accounts SET default_account='0' WHERE client_id='{$params->clientId}' AND status='1' LIMIT 10");
+
+            // change the account default account
+            $this->db->query("UPDATE accounts SET default_account='1' WHERE item_id='{$params->account_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+
+            // return success message
+            return ["code" => 200, "data" => "Account was successfully set as the default primary account."];            
+            
+        } catch(PDOException $e) {}
+    
     }
 
 }

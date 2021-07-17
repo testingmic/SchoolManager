@@ -46,53 +46,61 @@ $bank_accounts_array = [];
 $hasUpdate = $accessObject->hasAccess("accounts", "accounting");
 
 // loop through the list of account type heads
-foreach($list_data as $key => $each) {
+foreach($list_data as $key => $account) {
     // append to the array list
-    $bank_accounts_array[$each->item_id] = $each;
+    $bank_accounts_array[$account->item_id] = $account;
 
     // set the action button
     $action = "";
     if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to edit this bank account details' href='#' onclick='return update_bank_account(\"{$each->item_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i> Update Record</a>";
-        // $action .= "&nbsp;<a href='#' title='Click to delete this Account' onclick='return delete_record(\"{$each->item_id}\", \"accounts\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a title='Click to edit this bank account details' href='#' onclick='return update_bank_account(\"{$account->item_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i> Update Record</a>";
+        // $action .= "&nbsp;<a href='#' title='Click to delete this Account' onclick='return delete_record(\"{$account->item_id}\", \"accounts\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
+
+    // set the default account
+    $default_account = $account->default_account ? "<span title='Default Primary Account' class='text-success'><i class='fa fa-check-circle'></i></span>" : null;
 
     // append to the rows
     $accounts_list .= "
     <div class='col-md-6'>
         <div class='card'>
             <div class='card-body p-2'>
-                <h4>{$each->account_name}</h4>
+                <h4>{$account->account_name} <span data-account_id='{$account->item_id}' class='default_account'>{$default_account}</span></h4>
                 <table border='1' width='100%' class='table table-bordered table-striped'>
                     <tbody>
                         <tr>
                             <td><strong>Account Number: </strong></td>
-                            <td><span class='font-18'>{$each->account_number}</span></td>
+                            <td><span class='font-18'>{$account->account_number}</span></td>
                         </tr>
                         <tr>
                             <td><strong>Bank Name: </strong></td>
-                            <td>{$each->account_bank}</td>
+                            <td>{$account->account_bank}</td>
                         </tr>
                         <tr>
                             <td><strong>Opening Balance: </strong></td>
-                            <td>{$each->currency} ".number_format($each->opening_balance, 2)."</td>
+                            <td>{$account->currency} ".number_format($account->opening_balance, 2)."</td>
                         </tr>
                         <tr>
                             <td><strong>Total Credit: </strong></td>
-                            <td>{$each->currency} ".number_format($each->total_credit, 2)."</td>
+                            <td>{$account->currency} ".number_format($account->total_credit, 2)."</td>
                         </tr>
                         <tr>
                             <td><strong>Total Debit: </strong></td>
-                            <td>{$each->currency} ".number_format($each->total_debit, 2)."</td>
+                            <td>{$account->currency} ".number_format($account->total_debit, 2)."</td>
                         </tr>
                         <tr>
                             <td><strong>Current Balance: </strong></td>
-                            <td>{$each->currency} ".number_format($each->balance, 2)."</td>
+                            <td>{$account->currency} ".number_format($account->balance, 2)."</td>
                         </tr>
                         <tr>
-                            <td colspan='2'>{$each->description}</td>
+                            <td colspan='2'>{$account->description}</td>
                         </tr>
-                        ".($hasUpdate ? "<tr><td colspan='2' align='center'>{$action}</td></tr>" : null)."
+                        <tr>
+                            <td colspan='2' align='center'>
+                                ".($hasUpdate ? "{$action}" : null)."
+                                <span data-account_id='{$account->item_id}' class='default_account_button'>".(!$account->default_account ? "<button onclick='return mark_as_default(\"{$account->item_id}\")' data-account_id='{$account->item_id}' class='btn mb-1 btn-primary btn-sm'>Set As Default</button>" : null)."</span>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

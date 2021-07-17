@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $defaultClientData;
 
 // initial variables
 $appName = config_item("site_name");
@@ -27,8 +27,8 @@ $clientId = $session->clientId;
 $generatePermission = $accessObject->hasAccess("generate", "payslip");
 $validatePayslip = $accessObject->hasAccess("validate", "payslip");
 
-$staff_param = (object) ["clientId" => $clientId];
-$payslips_list = load_class("payroll", "controllers")->paysliplist($staff_param);
+$staff_param = (object) ["clientId" => $clientId, "client_data" => $defaultClientData];
+$payslips_list = load_class("payroll", "controllers", $staff_param)->paysliplist($staff_param);
 
 $staff_list = "";
 
@@ -80,7 +80,7 @@ foreach($payslips_list["data"] as $key => $each) {
     //: Set the new status
 	$status = ($each->status == 1) ? "<span class='badge badge-success'><i class=\"fa fa-check-circle\"></i> Paid</span>" : "<span class='badge badge-primary'><i class=\"fa fa-check-circle\"></i> Pending</span>";
 
-    $staff_list .= "<tr data-row_id=\"{$each->id}\">";
+    $staff_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $staff_list .= "<td>".($key+1)."</td>";
     $staff_list .= "
         <td>

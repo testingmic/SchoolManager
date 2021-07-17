@@ -2,15 +2,27 @@
 
 class Payroll extends Myschoolgh {
 
-    public function __construct()
-    {
-        parent::__construct();
+    private $iclient = [];
+
+    public function __construct(stdClass $params = null) {
+		parent::__construct();
+
+        // get the client data
+        $client_data = $params->client_data ?? [];
+        $this->iclient = $client_data;
+
+        // run this query
+        $this->academic_term = $client_data->client_preferences->academics->academic_term;
+        $this->academic_year = $client_data->client_preferences->academics->academic_year;
 
         // set the colors to use for the loading of pages
-        $this->color_set = ["#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
-                    "#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
-                    "#007bff", "#6c757d", "#28a745", "#17a2b8", "#ffc107", "#dc3545"];
-    }
+        $this->color_set = [
+            "#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
+            "#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
+            "#007bff", "#6c757d", "#28a745", "#17a2b8", "#ffc107", "#dc3545"
+        ];
+
+	}
 
     /**
      * List Payrolls
@@ -547,130 +559,228 @@ class Payroll extends Myschoolgh {
         $t_allowances = 0;
         $t_deductions = 0;
         $params->basic_salary = isset($params->basic_salary) ? (int) $params->basic_salary : $data->basic_salary;
+
+        try {
+
+            // Begin the transaction
+            $this->db->beginTransaction();
         
-        // process the employee allowances
-        if(isset($params->allowances) && !empty($params->allowances)) {
-            // loop through the allowance list
-            foreach($params->allowances as $key => $value) {
-                // check if the key is not null
-                if($key !== "null") {
-                    // set the value
-                    $allowances[] = [
-                        'allowance_id' => (int) $key,
-                        'allowance_amount' => $value,
-                        'allowance_type' => 'Allowance'
-                    ];
-                    $t_allowances += $value;
+            // process the employee allowances
+            if(isset($params->allowances) && !empty($params->allowances)) {
+                // loop through the allowance list
+                foreach($params->allowances as $key => $value) {
+                    // check if the key is not null
+                    if($key !== "null") {
+                        // set the value
+                        $allowances[] = [
+                            'allowance_id' => (int) $key,
+                            'allowance_amount' => $value,
+                            'allowance_type' => 'Allowance'
+                        ];
+                        $t_allowances += $value;
+                    }
                 }
             }
-        }
 
-        // process the employee allowances
-        if(isset($params->deductions) && !empty($params->deductions)) {
-            // loop through the allowance list
-            foreach($params->deductions as $key => $value) {
-                // check if the key is not null
-                if($key !== "null") {
-                    // set the value
-                    $allowances[] = [
-                        'allowance_id' => (int) $key,
-                        'allowance_amount' => $value,
-                        'allowance_type' => 'Deduction'
-                    ];
-                    $t_deductions += $value;
+            // process the employee allowances
+            if(isset($params->deductions) && !empty($params->deductions)) {
+                // loop through the allowance list
+                foreach($params->deductions as $key => $value) {
+                    // check if the key is not null
+                    if($key !== "null") {
+                        // set the value
+                        $allowances[] = [
+                            'allowance_id' => (int) $key,
+                            'allowance_amount' => $value,
+                            'allowance_type' => 'Deduction'
+                        ];
+                        $t_deductions += $value;
+                    }
                 }
             }
-        }
 
-        // set the employee allowances
-        $params->_allowances = $allowances;
+            // set the employee allowances
+            $params->_allowances = $allowances;
 
-        /** Simple calculations */
-        $net_salary = $params->basic_salary + $t_allowances - $t_deductions;
-        $gross_salary = $params->basic_salary + $t_allowances;
+            /** Simple calculations */
+            $net_salary = $params->basic_salary + $t_allowances - $t_deductions;
+            $gross_salary = $params->basic_salary + $t_allowances;
 
-        // load the allowance for the specified month and year
-        $employeePayslip = $this->pushQuery("*", "payslips", "payslip_month='{$params->month_id}' AND payslip_year='{$params->year_id}' AND client_id='{$params->clientId}' AND deleted='0' AND employee_id='{$params->employee_id}' LIMIT 1");
-        $payslip_id = !empty($employeePayslip) ? $employeePayslip[0]->id : null;
-        
-        /** If there is already a record */
-        if(empty($payslip_id)) {
-            /** Create new record id */
-            $item_id = random_string("alnum", 52);
-
-            /** Insert the Payslip Record */
-            $stmt = $this->db->prepare("INSERT INTO payslips SET item_id = ?, client_id =?, employee_id=?, basic_salary=?, 
-                total_allowance =?, total_deductions=?, net_salary=?, payslip_month = ?, payslip_month_id=?, 
-                payslip_year=?, payment_mode =?, comments =?, gross_salary = ?, created_by = ?
-            ");
-            $stmt->execute([$item_id, $params->clientId, $params->employee_id, $params->basic_salary, 
-                $t_allowances, $t_deductions, $net_salary, $params->month_id,
-                date("Y-m-t", strtotime("{$params->month_id} {$params->year_id}")),
-                $params->year_id, $params->payment_mode ?? null,
-                $params->comments ?? null, $gross_salary, $params->userId
-            ]);
-            // get the last row generated
-            $payslip_id = $this->lastRowId("payslips WHERE client_id='{$params->clientId}'");
-
-            // log the data in the statement account
+            // load the allowance for the specified month and year
+            $employeePayslip = $this->pushQuery("*", "payslips", "payslip_month='{$params->month_id}' AND payslip_year='{$params->year_id}' AND client_id='{$params->clientId}' AND deleted='0' AND employee_id='{$params->employee_id}' LIMIT 1");
+            $payslip_id = !empty($employeePayslip) ? $employeePayslip[0]->id : null;
             
-            // log the user activity
-            $this->userLogs("payslip", $params->employee_id, null, "<strong>{$params->userData->name}</strong> generated a payslip for: <strong>{$data->name}</strong> for the month: <strong>{$params->month_id} {$params->year_id}</strong>", $params->userId);
+            /** If there is already a record */
+            if(empty($payslip_id)) {
+                
+                /** Create new record id */
+                $item_id = random_string("alnum", 32);
 
-        } else {
-            /** Payslip details */
-            $payslip = $employeePayslip[0];
-
-            /* Delete the employee allowance records and insert a new data */
-            $stmt = $this->db->prepare("DELETE FROM payslips_details WHERE employee_id = ? AND client_id = ? AND payslip_month = ? AND payslip_year = ? LIMIT 20");
-            $stmt->execute([$params->employee_id, $params->clientId, $params->month_id, $params->year_id]);
-
-            /** Insert the Payslip Record */
-            $stmt = $this->db->prepare("UPDATE payslips SET basic_salary=?, 
-                total_allowance =?, total_deductions=?, net_salary=?, payment_mode =?, 
-                comments =?, gross_salary = ?, payslip_month_id=? WHERE
-                client_id =? AND employee_id=? AND payslip_month = ? AND payslip_year=?
-            ");
-            $stmt->execute([$params->basic_salary, 
-                $t_allowances, $t_deductions, $net_salary, $params->payment_mode ?? null, 
-                $params->comments ?? null, $gross_salary, date("Y-m-t", strtotime("{$params->month_id} {$params->year_id}")),
-                $params->clientId, $params->employee_id, $params->month_id, $params->year_id
-            ]);
-
-            /** Data to save */
-            $log = "
-            <p class='mb-0 pb-0'><strong>Basic Salary:</strong> {$payslip->basic_salary} => {$params->basic_salary}</p>
-            <p class='mb-0 pb-0'><strong>Total Allowances:</strong> {$payslip->total_allowance} => {$t_allowances}</p>
-            <p class='mb-0 pb-0'><strong>Gross Salary:</strong> {$payslip->gross_salary} => {$gross_salary}</p>
-            <p class='mb-0 pb-0'><strong>Total Deductions:</strong> {$payslip->total_deductions} => {$t_deductions}</p>
-            <p class='mb-0 pb-0'><strong>Net Salary:</strong> {$payslip->net_salary} => {$net_salary}</p>";
-
-            // log the user activity
-            $this->userLogs("payslip", $params->employee_id, $log, "<strong>{$params->userData->name}</strong> updated the payslip for: <strong>{$data->name}</strong> for the month: <strong>{$params->month_id} {$params->year_id}</strong>", $params->userId);
-        }
-
-        /* Loop through the list of user allowances */
-        foreach($params->_allowances as $key => $eachAllowance) {
-            // if the allowance id is not empty
-            if($eachAllowance['allowance_id']) {
-                // run this section if the request is allowance
-                $stmt = $this->db->prepare("
-                    INSERT INTO 
-                        payslips_details
-                    SET 
-                        allowance_id = '{$eachAllowance['allowance_id']}', 
-                        employee_id = ?, amount = '{$eachAllowance['allowance_amount']}', 
-                        detail_type = '{$eachAllowance['allowance_type']}', 
-                        client_id = ?, payslip_id = ?,
-                        payslip_month = ?, payslip_year = ?
+                /** Insert the Payslip Record */
+                $stmt = $this->db->prepare("INSERT INTO payslips SET item_id = ?, client_id =?, employee_id=?, basic_salary=?, 
+                    total_allowance =?, total_deductions=?, net_salary=?, payslip_month = ?, payslip_month_id=?, 
+                    payslip_year=?, payment_mode =?, comments =?, gross_salary = ?, created_by = ?
                 ");
-                $stmt->execute([$params->employee_id, $params->clientId, $payslip_id, $params->month_id, $params->year_id]);
+                $stmt->execute([
+                    $item_id, $params->clientId, $params->employee_id, $params->basic_salary, 
+                    $t_allowances, $t_deductions, $net_salary, $params->month_id,
+                    date("Y-m-t", strtotime("{$params->month_id} {$params->year_id}")),
+                    $params->year_id, $params->payment_mode ?? null,
+                    $params->comments ?? null, $gross_salary, $params->userId
+                ]);
+                // get the last row generated
+                $payslip_id = $this->lastRowId("payslips WHERE client_id='{$params->clientId}'");
+
+                // log the data in the statement account
+                $check = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1'");
+                
+                // if the account is not empty
+                if(!empty($check)) {
+
+                    // get the account unique id
+                    $account_id = $check[0]->item_id;
+                    $payment_mode = isset($params->payment_mode) ? strtolower($params->payment_mode) : "cheque";
+                    
+                    // log the transaction record
+                    $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                        item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                        reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                        description = ?, academic_year = ?, academic_term = ?, balance = ?
+                    ");
+                    $stmt->execute([
+                        $item_id, $params->clientId, $account_id, "payroll", 'Expense', null, $net_salary, $params->userId, 
+                        date("Y-m-d"), $payment_mode, "Auto Generation of PaySlip - {$params->month_id} {$params->year_id} for <strong>{$data->name}</strong>",
+                        $this->academic_year ?? null, $this->academic_term ?? null, ($check[0]->balance - $net_salary)
+                    ]);
+
+                    // add up to the expense
+                    $this->db->query("UPDATE accounts SET total_debit = (total_debit + {$net_salary}), balance = (balance - {$net_salary}) WHERE item_id = '{$account_id}' LIMIT 1");
+
+                }
+
+                // log the user activity
+                $this->userLogs("payslip", $params->employee_id, null, "<strong>{$params->userData->name}</strong> generated a payslip for: <strong>{$data->name}</strong> for the month: <strong>{$params->month_id} {$params->year_id}</strong>", $params->userId);
+
+            } else {
+                /** Payslip details */
+                $payslip = $employeePayslip[0];
+
+                /* Delete the employee allowance records and insert a new data */
+                $stmt = $this->db->prepare("DELETE FROM payslips_details WHERE employee_id = ? AND client_id = ? AND payslip_month = ? AND payslip_year = ? LIMIT 20");
+                $stmt->execute([$params->employee_id, $params->clientId, $params->month_id, $params->year_id]);
+
+                /** Insert the Payslip Record */
+                $stmt = $this->db->prepare("UPDATE payslips SET basic_salary=?, 
+                    total_allowance =?, total_deductions=?, net_salary=?, payment_mode =?, 
+                    comments =?, gross_salary = ?, payslip_month_id=? WHERE
+                    client_id =? AND employee_id=? AND payslip_month = ? AND payslip_year=?
+                ");
+                $stmt->execute([$params->basic_salary, 
+                    $t_allowances, $t_deductions, $net_salary, $params->payment_mode ?? null, 
+                    $params->comments ?? null, $gross_salary, date("Y-m-t", strtotime("{$params->month_id} {$params->year_id}")),
+                    $params->clientId, $params->employee_id, $params->month_id, $params->year_id
+                ]);
+
+                // log the data in the statement account
+                $check = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1'");
+                
+                // run this query if the net salary has changed.
+                // This will affect the balance in the database. It has changed then reverse the previous
+                // transaction and log a new one.
+                if(round($payslip->net_salary) !== round($net_salary)) {
+
+                    // if the account is not empty
+                    if(!empty($check)) {
+
+                        // transaction record
+                        $check_2 = $this->pushQuery("payment_medium, account_id, record_date, item_id, amount, 
+                            balance, academic_year, academic_term, description", "accounts_transaction", 
+                            "item_id='{$payslip->item_id}' LIMIT 1");
+                        
+                        // if there is an existing payslip record
+                        if(!empty($check_2)) {
+                            
+                            // log the transaction record
+                            $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                                item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                                reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                                description = ?, academic_year = ?, academic_term = ?, balance = ?, state='Approved'
+                            ");
+                            $stmt->execute([
+                                $payslip->item_id, $params->clientId, $check_2[0]->account_id, "payroll", "Deposit", null, $check_2[0]->amount, 
+                                $params->userId, $check_2[0]->record_date, $check_2[0]->payment_medium, 
+                                "{$check_2[0]->description}: Reversed due to Change of Amount.",
+                                $check_2[0]->academic_year, $check_2[0]->academic_term, ($check[0]->balance + $check_2[0]->amount)
+                            ]);
+
+                            // add up to the income
+                            $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$check_2[0]->amount}), balance = (balance + {$check_2[0]->amount}) WHERE item_id = '{$check_2[0]->account_id}' LIMIT 1");
+                        }
+
+                        // get the account unique id
+                        $account_id = $check[0]->item_id;
+                        $payment_mode = isset($params->payment_mode) ? strtolower($params->payment_mode) : "cheque";
+                        
+                        // log the transaction record
+                        $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                            item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                            reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                            description = ?, academic_year = ?, academic_term = ?, balance = ?
+                        ");
+                        $stmt->execute([
+                            $payslip->item_id, $params->clientId, $account_id, "payroll", 'Expense', null, $net_salary, $params->userId, 
+                            date("Y-m-d"), $payment_mode, "Auto Generation of PaySlip - {$params->month_id} {$params->year_id} for <strong>{$data->name}</strong>",
+                            $this->academic_year ?? null, $this->academic_term ?? null, ($check[0]->balance - $net_salary)
+                        ]);
+
+                        // add up to the expense
+                        $this->db->query("UPDATE accounts SET total_debit = (total_debit + {$net_salary}), balance = (balance - {$net_salary}) WHERE item_id = '{$account_id}' LIMIT 1");
+
+                    }
+                }
+
+                /** Data to save */
+                $log = "
+                <p class='mb-0 pb-0'><strong>Basic Salary:</strong> {$payslip->basic_salary} => {$params->basic_salary}</p>
+                <p class='mb-0 pb-0'><strong>Total Allowances:</strong> {$payslip->total_allowance} => {$t_allowances}</p>
+                <p class='mb-0 pb-0'><strong>Gross Salary:</strong> {$payslip->gross_salary} => {$gross_salary}</p>
+                <p class='mb-0 pb-0'><strong>Total Deductions:</strong> {$payslip->total_deductions} => {$t_deductions}</p>
+                <p class='mb-0 pb-0'><strong>Net Salary:</strong> {$payslip->net_salary} => {$net_salary}</p>";
+
+                // log the user activity
+                $this->userLogs("payslip", $params->employee_id, $log, "<strong>{$params->userData->name}</strong> updated the payslip for: <strong>{$data->name}</strong> for the month: <strong>{$params->month_id} {$params->year_id}</strong>", $params->userId);
             }
+
+            /* Loop through the list of user allowances */
+            foreach($params->_allowances as $key => $eachAllowance) {
+                // if the allowance id is not empty
+                if($eachAllowance['allowance_id']) {
+                    // run this section if the request is allowance
+                    $stmt = $this->db->prepare("
+                        INSERT INTO 
+                            payslips_details
+                        SET 
+                            allowance_id = '{$eachAllowance['allowance_id']}', 
+                            employee_id = ?, amount = '{$eachAllowance['allowance_amount']}', 
+                            detail_type = '{$eachAllowance['allowance_type']}', 
+                            client_id = ?, payslip_id = ?,
+                            payslip_month = ?, payslip_year = ?
+                    ");
+                    $stmt->execute([$params->employee_id, $params->clientId, $payslip_id, $params->month_id, $params->year_id]);
+                }
+            }
+
+            $this->db->commit();
+
+            return [
+                "data" => "The Payslip of {$data->name} for {$params->month_id} {$params->year_id} was successfully generated."
+            ];
+
+        } catch(PDOException $e) {
+            $this->db->rollBack();
+            return ["code" => 203, "data" => $e->getMessage()];
         }
 
-        return [
-            "data" => "The Payslip of {$data->name} for {$params->month_id} {$params->year_id} was successfully generated."
-        ];
     }
 
     /**

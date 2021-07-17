@@ -355,10 +355,7 @@ $(`form[class="form_send_message"]`).on("submit", function(evt) {
 
                 },
                 error: function() {
-                    swal({
-                        text: swalnotice["ajax_error"],
-                        icon: "error",
-                    });
+                    swal({text: swalnotice["ajax_error"], icon: "error"});
                 }
             });
         }

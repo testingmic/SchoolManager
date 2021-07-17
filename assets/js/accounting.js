@@ -15,7 +15,6 @@ var reset_account_form = (form_url, title = "Add Account Type Head") => {
             $(`div[id="accounts_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}${form_url}`);
         }
     });
-
 }
 
 var view_transaction = (transaction_id) => {
@@ -120,6 +119,43 @@ var update_bank_account = (account_id) => {
             $(`div[id="accounts_form"] form[class="ajax-data-form"]`).attr("action", `${baseUrl}api/accounting/update_account`);
         }
     }
+}
+
+var mark_as_default = (account_id) => {
+    swal({
+        title: `Set as Primary Account`,
+        text: `
+            You have opted to set this Account as the Default Primary Account. By doing so, all fees receivables and salary payment (under the payroll section) will be logged in this account.
+            Do you wish to proceed?`,
+        icon: `warning`,
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $.post(`${baseUrl}api/accounting/set_primary_account`, {account_id}).then((response) => {
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
+                if(response.code == 200) {
+                    $(`span[class='default_account']`).html(``);
+                    $(`span[class='default_account_button'][data-account_id='${account_id}']`).html(``);
+                    $(`span[class='default_account'][data-account_id='${account_id}']`).html(`<span title='Default Primary Account' class='text-success'><i class='fa fa-check-circle'></i></span>`);
+
+                    $.each($(`span[class='default_account_button']`), function() {
+                        let _account_id = $(this).attr("data-account_id");
+                        if(_account_id !== account_id) {
+                            $(`span[class='default_account_button'][data-account_id='${_account_id}']`).html(`
+                                <button onclick='return mark_as_default("${_account_id}")' data-account_id='${_account_id}' class='btn mb-1 btn-primary btn-sm'>Set As Default</button>
+                            `);
+                        }
+                    });
+                }
+            }).catch(() => {
+                swal({text: swalnotice["ajax_error"], icon: "error"});
+            });
+        }
+    });
 }
 
 $(`input[id="all_delete"]`).on("click", function() {

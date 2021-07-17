@@ -148,7 +148,6 @@ if(!$receivePayment) {
                                                     <th>Class</th>
                                                     <th>Fees Category</th>
                                                     <th>Amount</th>
-                                                    <th align="center"></th>
                                                 </tr>
                                             </thead>
                                             <tbody>'.$class_allocation_list.'</tbody>
