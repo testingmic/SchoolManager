@@ -816,8 +816,8 @@ class Accounting extends Myschoolgh {
                                     <th>Date Created</th>
                                     <th>Item Date</th>
                                     <th>Description</th>
-                                    <th>Debits</th>
-                                    <th>Credits</th>
+                                    <th align='right'>Debits</th>
+                                    <th align='right'>Credits</th>
                                 </tr>
                             </thead>" : null);
                         
@@ -836,8 +836,8 @@ class Accounting extends Myschoolgh {
                                         <div>".$value->description."</div>
                                         <div>".$value->reference."</div>
                                     </td>
-                                    <td style='padding:7px;border:solid 1px #dee2e6;'>".($value->item_type == "Expense" ? number_format($value->amount, 2) : null)."</td>
-                                    <td style='padding:7px;border:solid 1px #dee2e6;'>".($value->item_type == "Deposit" ? number_format($value->amount, 2) : null)."</td>
+                                    <td align='right' style='padding:7px;border:solid 1px #dee2e6;'>".($value->item_type == "Expense" ? number_format($value->amount, 2) : null)."</td>
+                                    <td align='right' style='padding:7px;border:solid 1px #dee2e6;'>".($value->item_type == "Deposit" ? number_format($value->amount, 2) : null)."</td>
                                 </tr>";
                             }
                         } else {
@@ -847,8 +847,8 @@ class Accounting extends Myschoolgh {
                     !$loadNotes ? "
                         <tr>
                             <td colspan='3' align='center'><strong>***END OF STATEMENT***</strong></td>
-                            <td style='font-weight:bold;padding:7px;border:solid 1px #dee2e6;height:50px'>".number_format($total_debits, 2)."</td>
-                            <td style='font-weight:bold;padding:7px;border:solid 1px #dee2e6;height:50px'>".number_format($total_credits, 2)."</td>
+                            <td align='right' style='font-weight:bold;padding:7px;border:solid 1px #dee2e6;height:50px;font-size:15px;'>".number_format($total_debits, 2)."</td>
+                            <td align='right' style='font-weight:bold;padding:7px;border:solid 1px #dee2e6;height:50px;font-size:15px;'>".number_format($total_credits, 2)."</td>
                         </tr>" : "")." 
                     </table>
                     </div>

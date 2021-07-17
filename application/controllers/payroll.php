@@ -632,7 +632,7 @@ class Payroll extends Myschoolgh {
                 $payslip_id = $this->lastRowId("payslips WHERE client_id='{$params->clientId}'");
 
                 // log the data in the statement account
-                $check = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1'");
+                $check = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1' LIMIT 1");
                 
                 // if the account is not empty
                 if(!empty($check)) {
@@ -682,7 +682,7 @@ class Payroll extends Myschoolgh {
                 ]);
 
                 // log the data in the statement account
-                $check = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1'");
+                $check = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1' LIMIT 1");
                 
                 // run this query if the net salary has changed.
                 // This will affect the balance in the database. It has changed then reverse the previous
@@ -728,7 +728,7 @@ class Payroll extends Myschoolgh {
                             description = ?, academic_year = ?, academic_term = ?, balance = ?
                         ");
                         $stmt->execute([
-                            $payslip->item_id, $params->clientId, $account_id, "payroll", 'Expense', null, $net_salary, $params->userId, 
+                            $payslip->item_id, $params->clientId, $account_id, "payroll", "Expense", null, $net_salary, $params->userId, 
                             date("Y-m-d"), $payment_mode, "Auto Generation of PaySlip - {$params->month_id} {$params->year_id} for <strong>{$data->name}</strong>",
                             $this->academic_year ?? null, $this->academic_term ?? null, ($check[0]->balance - $net_salary)
                         ]);

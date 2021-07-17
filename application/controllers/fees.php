@@ -1214,17 +1214,20 @@ class Fees extends Myschoolgh {
                 $receiptId = $this->iclient->client_preferences->labels->receipt_label.$counter;
                 $receiptId = strtoupper($receiptId);
 
+                // generate a new payment_id
+                $payment_id = $receiptId;
+
                 // log the payment record
                 $stmt = $this->db->prepare("INSERT INTO fees_collection
                     SET client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
                     category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
-                    description = ?, currency = ?, receipt_id = ?, payment_method = ? {$append_sql}
+                    description = ?, currency = ?, receipt_id = ?, payment_method = ?, payment_id = ? {$append_sql}
                 ");
                 $stmt->execute([
                     $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id ?? null, 
                     $paymentRecord->class_id, $paymentRecord->category_id, $params->amount, $params->userId, 
                     $paymentRecord->academic_year, $paymentRecord->academic_term, 
-                    $params->description ?? null, $currency, $receiptId, $params->payment_method
+                    $params->description ?? null, $currency, $receiptId, $params->payment_method, $payment_id
                 ]);
                 /* Update the user payment record */
                 $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
@@ -1303,6 +1306,32 @@ class Fees extends Myschoolgh {
                 $last_info = $this->confirm_student_payment_record($params);
                 $additional["payment"] = $last_info[count($last_info)-1];
                 $additional["uniqueId"] = $uniqueId;
+
+            }
+
+            // log the data in the statement account
+            $check = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1' LIMIT 1");
+                
+            // if the account is not empty
+            if(!empty($check)) {
+
+                // get the account unique id
+                $account_id = $check[0]->item_id;
+                
+                // log the transaction record
+                $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                    item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                    reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                    description = ?, academic_year = ?, academic_term = ?, balance = ?
+                ");
+                $stmt->execute([
+                    $payment_id, $params->clientId, $account_id, "fees", "Deposit", null, $params->amount, $params->userId, 
+                    date("Y-m-d"), $params->payment_method, "Fees Payment - for <strong>{$student_name}</strong>",
+                    $paymentRecord->academic_year, $paymentRecord->academic_term, ($check[0]->balance - $params->amount)
+                ]);
+
+                // add up to the expense
+                $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$params->amount}), balance = (balance + {$params->amount}) WHERE item_id = '{$account_id}' LIMIT 1");
 
             }
 
