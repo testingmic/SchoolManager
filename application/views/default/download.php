@@ -302,7 +302,7 @@ elseif(confirm_url_id(1, "terminal") && isset($_GET["academic_term"], $_GET["aca
 
     // generate the report
     $data = $reportObj->generate($params);
-
+    
     $start = 0;
     $count = count($data["data"]["sheets"]);
 

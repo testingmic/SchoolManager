@@ -269,7 +269,7 @@ $(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() 
     let option_link = $(`select[name="course_id"]`).length !== 0 ? "course_id" : "student_id";
     let option_name = option_link === "course_id" ? "Select the Course" : "Select the Student";
     $(`div[id="terminal_reports"] select[name='${option_link}']`).find('option').remove().end();
-    $(`div[id="terminal_reports"] select[name='${option_link}']`).append(`<option value="null">${option_name}</option>`);
+    $(`div[id="terminal_reports"] select[name='${option_link}']`).append(`<option value="">${option_name}</option>`);
     if (class_id !== "null") {
         let link = $(`select[name="course_id"]`).length !== 0 ? "courses" : "users";
         $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);

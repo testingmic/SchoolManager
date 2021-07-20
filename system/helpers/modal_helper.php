@@ -246,7 +246,7 @@ function propagating_data($clientData) {
                         <h3>Propagating Data</h3>
                     </div>
                     <div class="text-danger">
-                        Please wait while process completes <i class="fa fa-spin fa-spinner"></i>
+                        Please wait while the process completes <i class="fa fa-spin fa-spinner"></i>
                     </div>
                 </div>
             </div>

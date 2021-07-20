@@ -141,7 +141,6 @@ class Account extends Myschoolgh {
 
         // confirm that this files already exists
         if(!in_array($client_state, ["Complete", "Propagation"])) {
-
             // generate a new script for this client
             $filename = "assets/js/scripts/{$params->clientId}_{$params->userData->user_type}_events.js";
             $data = $this->init_calender();
@@ -154,7 +153,9 @@ class Account extends Myschoolgh {
             $stmt->execute([$params->userId]);
         }
 
+        // return a success message
         return [
+            "code" => 200,
             "data" => "Account setup is successfully completed."
         ];
     }

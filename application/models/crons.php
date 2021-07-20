@@ -580,6 +580,11 @@ class Crons {
 
 		// load client data
 		$client_data = $this->client_data($clientId);
+		$original_client = $client_data;
+
+		try {
+
+		$this->db->beginTransaction();
 
 		// confirm that the status is propagation of record
 		if($client_data->client_state === "Propagation") {
@@ -635,14 +640,15 @@ class Crons {
 				$columns = array_keys($student);
 
 				// format the student promotion information
-				$is_promoted = explode("_", $student["is_promoted"]);
+				$is_promoted = !empty($student["is_promoted"]) ? explode("_", $student["is_promoted"]) : null;
 				
 				// append new variables
-				$student["class_id"] = ($is_promoted[0] == 1) ? $is_promoted[2] : $student["class_id"];
+				$student["class_id"] = (!empty($is_promoted) && ($is_promoted[0] == 1)) ? $is_promoted[2] : $student["class_id"];
 				$student["academic_year"] = $next_academic_year;
 				$student["academic_term"] = $next_academic_term;
 				$student["date_created"] = date("Y-m-d H:i:s");
 				$student["last_login"] = date("Y-m-d H:i:s");
+				$student["verified_date"] = !empty($student["verified_date"]) ? $student["verified_date"] : date("Y-m-d H:i:s");
 				$student["last_visited_page"] = "{{APPURL}}dashboard";
 
 				// get the new values
@@ -677,7 +683,7 @@ class Crons {
 					foreach($ivalue as $ivkey => $ivvalue) {
 						$school_fees[$ivvalue["category_id"]]["due"] = isset($school_fees[$ivvalue["category_id"]]["due"]) ? ($school_fees[$ivvalue["category_id"]]["due"] + $ivvalue["amount"]["due"]) : $ivvalue["amount"]["due"];
 						$school_fees[$ivvalue["category_id"]]["paid"] = isset($school_fees[$ivvalue["category_id"]]["paid"]) ? ($school_fees[$ivvalue["category_id"]]["paid"] + $ivvalue["amount"]["paid"]) : $ivvalue["amount"]["paid"];
-						$school_fees[$ivvalue["category_id"]]["balance"] = isset($school_fees[$ivvalue["category_id"]]["balance"]) ? ($school_fees[$ivvalue["category_id"]]["balance"] + $ivvalue["amount"]["balance"]) : $ivvalue["amount"]["due"];
+						$school_fees[$ivvalue["category_id"]]["balance"] = isset($school_fees[$ivvalue["category_id"]]["balance"]) ? ($school_fees[$ivvalue["category_id"]]["balance"] + $ivvalue["amount"]["balance"]) : $ivvalue["amount"]["balance"];
 					}
 				}
 			}
@@ -699,7 +705,7 @@ class Crons {
 				"summary" => $school_fees_summary
 			];
 
-			// get only fees that array list that the student has a balance
+			// get only fees in the array list that the student has a balance
 			$student_ownings = array();
 
 			// algorithm to calculate how much money the school should have received 
@@ -714,7 +720,7 @@ class Crons {
 			}
 
 			// get fees category
-			$fees_category = $this->db->prepare("SELECT * FROM fees_category WHERE client_id = ? AND status = ? LIMIT 20");
+			$fees_category = $this->db->prepare("SELECT * FROM fees_category WHERE client_id = ? AND status = ? LIMIT 30");
 			$fees_category->execute([$clientId, 1]);
 			$fees_category_log = $fees_category->fetchAll(PDO::FETCH_OBJ);
 
@@ -727,7 +733,7 @@ class Crons {
 			$update_query = $this->db->prepare("UPDATE clients_terminal_log SET fees_log = ?, arrears_log = ?, fees_category_log = ? WHERE student_id = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
 			$insert_query = $this->db->prepare("INSERT INTO clients_terminal_log SET client_id = ?, fees_log = ?, arrears_log = ?, fees_category_log = ?, student_id = ?, academic_year = ?, academic_term = ?");
 			
-			// Through the Students Fees Log List
+			// Loop through the Students Fees Log List
 			foreach($students_query_array as $key => $value) {
 				// loop through the students fees payments list
 				foreach($value as $ikey => $ivalue) {
@@ -784,7 +790,7 @@ class Crons {
 				$courses_plan_query_string = "";
 				$courses_resource_query_string = "";
 
-				// loop through the students list
+				// loop through the courses list
 				foreach($courses_list as $ikey => $course) {
 					
 					// get the keys
@@ -793,7 +799,7 @@ class Crons {
 					// append new variables
 					$course["academic_year"] = $next_academic_year;
 					$course["academic_term"] = $next_academic_term;
-					$course["date_created"] = date("Y-m-d");
+					$course["date_created"] = date("Y-m-d H:i:s");
 					$course["date_updated"] = date("Y-m-d H:i:s");
 
 					// get the new values
@@ -807,11 +813,20 @@ class Crons {
 					foreach($columns as $key => $column) {
 						// exempt some data from the query
 						if(!in_array($key, [0, $last_key])) {
-							$query_string .= "{$column}='{$values[$key]}',";
+							$query_string .= in_array($column, ["start_date", "end_date", "programme_id"]) ? "{$column}=NULL," : "{$column}='{$values[$key]}',";
 						}
 					}
 					$courses_query_string .= trim($query_string, ",").";";
 				}
+				
+				// check for empty string
+				if(strlen($courses_query_string) > 20) {
+					$this->db->query($courses_query_string);
+				}
+			}
+			
+			// IMPORT THE COURSES LIST
+			if(in_array("courses_plan", $data_to_import)) {
 
 				// GET THE LIST OF COURSE PLAN
 				$course_plan = $this->db->prepare("SELECT a.*
@@ -831,8 +846,8 @@ class Crons {
 					$columns = array_keys($course_plan_item);
 					
 					// append new variables
-					$course_plan_item["start_date"] = $preferences->academics->next_term_starts;
-					$course_plan_item["end_date"] = "";
+					$course_plan_item["start_date"] = NULL;
+					$course_plan_item["end_date"] = NULL;
 					$course_plan_item["academic_year"] = $next_academic_year;
 					$course_plan_item["academic_term"] = $next_academic_term;
 					$course_plan_item["date_created"] = date("Y-m-d");
@@ -849,11 +864,21 @@ class Crons {
 					foreach($columns as $key => $column) {
 						// exempt some data from the query
 						if(!in_array($key, [0, $last_key])) {
-							$query_string .= "{$column}='{$values[$key]}',";
+							$query_string .= in_array($column, ["start_date", "end_date", "programme_id"]) && empty($values[$key]) ? "{$column}=NULL," : "{$column}='{$values[$key]}',";
 						}
 					}
 					$courses_plan_query_string .= trim($query_string, ",").";";
 				}
+				
+				// run the query for the course plan
+				if(strlen($courses_plan_query_string) > 20) {
+					$this->db->query($courses_plan_query_string);
+				}
+
+			}
+
+			// IMPORT THE COURSES LIST
+			if(in_array("courses_resource", $data_to_import)) {
 
 				// LOAD THE COURSE RESOURCES LIST
 				$list_course_resources = $this->db->prepare("SELECT a.*
@@ -888,23 +913,18 @@ class Crons {
 					foreach($columns as $key => $column) {
 						// exempt some data from the query
 						if(!in_array($key, [0, $last_key])) {
-							$query_string .= "{$column}='{$values[$key]}',";
+							$query_string .= in_array($column, ["start_date", "end_date", "programme_id"]) && empty($values[$key]) ? "{$column}=NULL," : "{$column}='{$values[$key]}',";
 						}
 					}
 					$courses_resource_query_string .= trim($query_string, ",").";";
 				}
-				
-				// check for empty string
-				if(strlen($courses_query_string) > 20) {
-					$this->db->query($courses_query_string);
-				}
-				if(strlen($courses_plan_query_string) > 20) {
-					$this->db->query($courses_plan_query_string);
-				}
+
+				// run the query for the course resources
 				if(strlen($courses_resource_query_string) > 20) {
 					$this->db->query($courses_resource_query_string);
 				}
-			}			
+
+			}
 	
 			// IMPORT THE FEES ALLOCATIONS LIST
 			if(in_array("fees_allocation", $data_to_import)) {
@@ -973,6 +993,7 @@ class Crons {
 					$allocation["academic_year"] = $next_academic_year;
 					$allocation["academic_term"] = $next_academic_term;
 					$allocation["paid_status"] = 0;
+					$allocation["editable"] = 0;
 					$allocation["amount_paid"] = 0.00;
 					$allocation["last_payment_id"] = NULL;
 					$allocation["last_payment_date"] = NULL;
@@ -991,7 +1012,7 @@ class Crons {
 					foreach($columns as $key => $column) {
 						// exempt some data from the query
 						if(!in_array($key, [0, $last_key])) {
-							$query_string .= "{$column}='{$values[$key]}',";
+							$query_string .= in_array($column, ["last_payment_date", "programme_id"]) && empty($values[$key]) ? "{$column}=NULL," : "{$column}='{$values[$key]}',";
 						}
 					}
 					$student_fees_allocation_query_string .= trim($query_string, ",").";";
@@ -1011,6 +1032,15 @@ class Crons {
 			$stmt = $this->db->prepare("UPDATE clients_accounts SET client_preferences = ?, client_state = ? WHERE client_id = ? LIMIT 1");
 			$stmt->execute([json_encode($preferences), "Complete", $clientId]);
 
+		}
+
+		$this->db->commit();
+
+		print "Processing of Academic Term Data was successful.\n";
+
+		} catch(PDOException $e) {
+			$this->db->rollBack();
+			print "{$e->getMessage()}\n";
 		}
 
 	}

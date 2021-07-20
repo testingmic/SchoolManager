@@ -32,8 +32,11 @@ if(empty($accessObject->hasAccess("close", "settings"))) {
     $import_list = [
         "students" => "Students",
         "courses" => "Courses / Subjects",
+        "courses_plan" => "Course / Lesson Plan",
+        "courses_resource" => "Course Resources",
         "fees_allocation" => "Fees Allocation"
     ];
+    
     // import div
     $import_div = "";
     $count = 0;

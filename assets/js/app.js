@@ -809,8 +809,6 @@ var initPlugins = () => {
                 datepicker: false,
                 minTime: input.hasClass('timetabletime') ? $.minTimetableTime : false,
                 maxTime: input.hasClass('timetabletime') ? $.maxTimetableTime : false
-                    // onShow : timerange,
-                    // onChangeDateTime: timerange
             });
         });
     }

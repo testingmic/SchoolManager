@@ -754,12 +754,12 @@ class Fees extends Myschoolgh {
             $stmt = $myschoolgh->prepare("UPDATE fees_payments SET 
                     amount_due = ?, balance = ($params->amount - amount_paid)
                 WHERE category_id = ? AND student_id = ? AND client_id = ? 
-                    AND academic_year = ? AND academic_term = ?");
+                    AND academic_year = ? AND academic_term = ? AND editable = ?");
 
             /** Execute the prepared statement */
             return $stmt->execute([
                 $params->amount, $params->category_id, $params->student_id, $params->clientId, 
-                $params->academic_year, $params->academic_term
+                $params->academic_year, $params->academic_term, 1
             ]);
         }
 

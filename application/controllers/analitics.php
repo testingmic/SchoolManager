@@ -46,7 +46,6 @@ class Analitics extends Myschoolgh {
 
         $this->last_term_starts = $academics->last_term_starts ?? $academics->term_starts;
         $this->last_term_ends = $academics->last_term_ends ?? $academics->term_ends;
-
     }
 
     /**
@@ -573,6 +572,7 @@ class Analitics extends Myschoolgh {
                             COUNT(*) AS value, {$this->group_by}(a.recorded_date) AS value_date, SUM(a.amount) AS amount_value
                         FROM fees_collection a 
                         WHERE 
+                            a.academic_year='{$this->academic_year}' AND a.academic_term='{$this->academic_term}' AND
                             a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
                             AND (
                                 DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
@@ -598,7 +598,9 @@ class Analitics extends Myschoolgh {
                     $stmt = $this->db->prepare("
                         SELECT {$this->group_by}(a.recorded_date) AS value_date, SUM(a.amount) AS value 
                         FROM fees_collection a
-                        WHERE a.status = '1' AND a.reversed = '0' {$this->student_id_query} {$this->fees_category_id}
+                        WHERE 
+                        a.academic_year='{$this->academic_year}' AND a.academic_term='{$this->academic_term}' AND
+                        a.status = '1' AND a.reversed = '0' {$this->student_id_query} {$this->fees_category_id}
                         AND (
                             DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
                         ) {$this->class_idm_query}
