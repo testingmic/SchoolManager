@@ -62,7 +62,7 @@ if(!empty($item_id)) {
                 </div>
             </div>
             <div class="section-body">
-            <div class="row mt-sm-4">
+            <div class="row">
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card">
                     <div class="card-header">

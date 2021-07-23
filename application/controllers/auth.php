@@ -75,11 +75,6 @@ class Auth extends Myschoolgh {
                     // using the foreach to fetch the information
                     while($results = $stmt->fetch(PDO::FETCH_OBJ)) {
 
-                        // check the client state
-                        if($results->client_state === "Pending") {
-                            // return ["code" => 201, "data" => "Sorry! You must first activate your account to continue."];
-                        }
-
                         // verify the password
                         if(password_verify($params->password, $results->password)) {
 
@@ -132,6 +127,11 @@ class Auth extends Myschoolgh {
                                 $session->set("clientId", $results->client_id);
                                 $session->set("activated", $results->user_status);
                                 $session->set("userRole", $results->access_level);
+
+                                // check the client state
+                                if($results->client_state === "Pending") {
+                                    $session->set("initialAccount_Created", true);
+                                }
 
                                 // set the last timetable id in session
                                 $session->set("last_TimetableId", $results->last_timetable_id);
@@ -925,6 +925,8 @@ class Auth extends Myschoolgh {
                 "academics" => [
                     "academic_year" => date("Y") . "/" . (date("Y") - 1),
                     "academic_term" => "",
+                    "term_starts" => "",
+                    "term_ends" => "",
                     "next_academic_year" => "",
                     "next_academic_term" => ""
                 ],
@@ -1004,7 +1006,7 @@ class Auth extends Myschoolgh {
             ");
             $m_stmt->execute([
                 'verify_account', $client_id, $item_id, json_encode($reciepient),
-                $user_id, "[".config_item('site_name')."] Account Verification", $message, $item_id
+                $item_id, "[".config_item('site_name')."] Account Verification", $message, $item_id
             ]);
 
             // insert the user activity
@@ -1015,9 +1017,10 @@ class Auth extends Myschoolgh {
                 "userLoggedIn" => random_string('alnum', 50),
                 "userName" => $username,
                 "clientId" => $client_id,
-                "userId" => $user_id,
+                "userId" => $item_id,
                 "userRole" => $access_level,
                 "last_TimetableId" => true,
+                "initialAccount_Created" => true,
                 "activated" => 0,
                 "ready_App" => true
             ]);

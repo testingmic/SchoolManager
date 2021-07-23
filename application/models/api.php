@@ -62,6 +62,11 @@ class Api {
                 "clientId" => $this->clientId
             ];
 
+            // append the query if the user has not yet activated the account
+            if(!empty($this->session->initialAccount_Created)) {
+                $i_params->user_status = ["Pending", "Active"];
+            }
+
             // load the user data
             $the_data = $usersClass->list($i_params);
             $this->userData = isset($the_data["data"]) ? $the_data["data"] : null;

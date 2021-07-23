@@ -232,6 +232,7 @@ class Assignments extends Myschoolgh {
             $stmt = $this->db->prepare("
                 INSERT INTO assignments SET client_id = ?, created_by = ?, item_id = '{$item_id}', state = '{$state}'
                 ".(isset($params->assignment_type) ? ", assignment_type = '{$params->assignment_type}'" : null)."
+                ".(isset($params->assignment_group) ? ", assignment_group = '{$params->assignment_group}'" : null)."
                 ".(isset($params->assignment_title) ? ", assignment_title = '{$params->assignment_title}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
                 ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
@@ -338,6 +339,7 @@ class Assignments extends Myschoolgh {
             $stmt = $this->db->prepare("
                 UPDATE assignments SET date_updated = now()
                 ".(isset($params->assignment_type) ? ", assignment_type = '{$params->assignment_type}'" : null)."
+                ".(isset($params->assignment_group) ? ", assignment_group = '{$params->assignment_group}'" : null)."
                 ".(isset($params->assignment_title) ? ", assignment_title = '{$params->assignment_title}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
                 ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."

@@ -377,22 +377,35 @@ class Forms extends Myschoolgh {
         $html_content .= "<input {$disabled} class='form-control' value='".($params->data->assignment_title ?? null)."' name='assignment_title' id='assignment_title'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
-        $html_content .= "<div class='col-md-6'>";
+
+        $html_content .= "<div class='col-md-4'>";
+        $html_content .= "<div class='form-group'>";
+        $html_content .= "<label>Select Category <span class='required'>*</span></label>";
+        $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='assignment_group' id='assignment_group'>";
+        $html_content .= "<option value=''>Select Assignment Category</option>";
+        foreach(["Assignment", "Test", "Quiz", "Group Work"] as $value) {
+            $html_content .= "<option ".($class_id && $params->data->assignment_group == $value ? "selected" : null)." value='{$value}'>{$value}</option>";
+        }
+        $html_content .= "</select>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
+
+        $html_content .= "<div class='col-md-4'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Class <span class='required'>*</span></label>";
         $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='class_id' id='class_id'>";
-        $html_content .= "<option value='null'>Select Class</option>";
+        $html_content .= "<option value=''>Select Class</option>";
         foreach($this->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'") as $class) {
             $html_content .= "<option ".($class_id == $class->item_id ? "selected" : null)." value='{$class->item_id}'>{$class->name}</option>";
         }
         $html_content .= "</select>";
         $html_content .= "</div>";
         $html_content .= "</div>";
-        $html_content .= "<div class='col-md-6'>";
+        $html_content .= "<div class='col-md-4'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Course <span class='required'>*</span></label>";
         $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='course_id' id='course_id'>";
-        $html_content .= "<option value='null'>Select Course</option>";
+        $html_content .= "<option value=''>Select Course</option>";
         
         // display the courses list
         if(isset($ass_data)) {

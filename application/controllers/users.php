@@ -203,7 +203,7 @@ class Users extends Myschoolgh {
 			$leftJoinQuery = !empty($leftJoin) ? ", 
 				up.gross_salary, up.net_allowance, up.allowances, up.deductions, up.net_salary, up.basic_salary,
 				up.account_name, up.account_number, up.bank_name, up.bank_branch, up.ssnit_number, up.tin_number" : null;
-			
+
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT 
 				".((isset($params->columns) ? $params->columns : "
@@ -1135,7 +1135,7 @@ class Users extends Myschoolgh {
 	public function update(stdClass $params) {
 
 		// confirm that the user_id does not already exist
-		$i_params = (object) ["limit" => 1, "user_id" => $params->user_id];
+		$i_params = (object) ["limit" => 1, "user_id" => $params->user_id, "user_status" => ["Pending", "Active"]];
 		$the_user = $this->list($i_params)["data"];
 
 		// get the user data
@@ -1144,7 +1144,7 @@ class Users extends Myschoolgh {
 		}
 
 		// permisssions checker test
-		if(!in_array($params->userData->user_type, ["insurance_company", "admin"]) && ($the_user[0]->created_by !== $params->userData->user_id)) {
+		if(isset($params->userData->user_type) && !in_array($params->userData->user_type, ["admin"]) && ($the_user[0]->created_by !== $params->userData->user_id)) {
 			return ["code" => 201, "data" => "Sorry! You are not permitted to modify this user account details."];
 		}
 
