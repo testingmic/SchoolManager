@@ -83,7 +83,7 @@ class Courses extends Myschoolgh {
                     (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM courses a
-                WHERE {$params->query} AND a.deleted = ? ORDER BY TIMESTAMP(a.date_updated) DESC LIMIT {$params->limit}
+                WHERE {$params->query} AND a.deleted = ? ORDER BY a.name LIMIT {$params->limit}
             ");
             $stmt->execute([0]);
 

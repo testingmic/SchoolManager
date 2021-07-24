@@ -51,17 +51,23 @@ $response->html = '
                             <div class="prepare_assessment_log">
                                 <div class="form-group">
                                     <label>Title <span class="required">*</span></label>
-                                    <input class="form-control" value="" name="assessment_title" id="assessment_title">
+                                    <textarea style="height:60px" class="form-control" value="" name="assessment_title" id="assessment_title"></textarea>
                                 </div>
-                                <div class="form-group">
-                                    <label>Select Assignment Category <span class="required">*</span></label>
-                                    <select data-width="100%" class="selectpicker form-control" name="assessment_type" id="assessment_type">
-                                        <option value="">Select Category</option>';
-                                        foreach(["Test", "Quiz", "Assignment", "Group Work"] as $value) {
-                                            $response->html .= "<option ".(isset($assessment_type) && ($assessment_type == $value) ? "selected" : null)." value='{$value}'>{$value}</option>";
-                                        }
-                                        $response->html .= '
-                                    </select>
+                                <div class="row">
+                                    <div class="col-md-7 form-group">
+                                        <label>Select Assignment Category <span class="required">*</span></label>
+                                        <select data-width="100%" class="selectpicker form-control" name="assessment_type" id="assessment_type">
+                                            <option value="">Select Category</option>';
+                                            foreach($myClass->assessment_group as $value) {
+                                                $response->html .= "<option ".(isset($assessment_type) && ($assessment_type == $value) ? "selected" : null)." value='{$value}'>{$value}</option>";
+                                            }
+                                            $response->html .= '
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5 form-group">
+                                        <label>Total Marks</label>
+                                        <input type="number" min="0" max="100" name="overall_score" id="overall_score" class="form-control">
+                                    </div>
                                 </div>
                                 <div class="form-group">
                                     <label>Select Class <span class="required">*</span></label>
@@ -106,8 +112,23 @@ $response->html = '
             <div class="col-12 col-md-12 col-lg-7">
                 <div class="card">
                     <div class="padding-20">
-                        
-                    
+                        <div></div>
+                        <div class="table-responsive hdidden" id="award_marks">
+                            <table data-empty="" id="student_staff_list" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th width="5%" class="text-center">#</th>
+                                        <th>Student Name</th>
+                                        <th width="30%">Awarded Mark</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <div align="right">
+                                <button onclick="return;" class="btn text-uppercase btn-outline-primary">Award Marks & Save</button>
+                                <button onclick="return;" class="btn text-uppercase btn-success">Award Marks & Close</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

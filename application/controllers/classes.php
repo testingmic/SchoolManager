@@ -130,7 +130,7 @@ class Classes extends Myschoolgh {
                 }
             } else {
                 // generate a new class code
-                $counter = $this->append_zeros(($this->itemsCount("classes", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+                $counter = $this->append_zeros(($this->itemsCount("classes", "client_id = '{$params->clientId}'") + 1), 2);
                 $params->class_code = $this->client_data($params->clientId)->client_preferences->labels->{"class_label"}.$counter;
             }
 
@@ -209,7 +209,7 @@ class Classes extends Myschoolgh {
                 }
             } elseif(empty($prevData[0]->class_code) || !isset($params->class_code)) {
                 // generate a new class code
-                $counter = $this->append_zeros(($prevData[0]->id), $this->append_zeros);
+                $counter = $this->append_zeros(($prevData[0]->id), 2);
                 $params->class_code = $this->client_data($params->clientId)->client_preferences->labels->{"class_label"}.$counter;
             }
 

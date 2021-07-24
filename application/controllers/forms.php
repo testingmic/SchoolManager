@@ -383,7 +383,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<label>Select Category <span class='required'>*</span></label>";
         $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='assignment_group' id='assignment_group'>";
         $html_content .= "<option value=''>Select Assignment Category</option>";
-        foreach(["Assignment", "Test", "Quiz", "Group Work"] as $value) {
+        foreach($this->assessment_group as $value) {
             $html_content .= "<option ".($class_id && $params->data->assignment_group == $value ? "selected" : null)." value='{$value}'>{$value}</option>";
         }
         $html_content .= "</select>";
@@ -1698,8 +1698,8 @@ class Forms extends Myschoolgh {
                     <div class="col-lg-4 col-md-4 mt-2">
                         <label for="guardian_info[guardian_relation]['.$key_id.']">Relationship</label>
                         <select data-width="100%" name="guardian_info[guardian_relation]['.$key_id.']" id="guardian_info[guardian_relation]['.$key_id.']" class="form-control selectpicker">
-                            <option value="null">Select Relation</option>';
-                            foreach($this->pushQuery("id, name", "guardian_relation", "status='1' AND client_id='{$clientId}'") as $each) {
+                            <option value="">Select Relation</option>';
+                            foreach($this->pushQuery("id, name", "guardian_relation", "status='1'") as $each) {
                                 $guardian .= "<option ".($each->name == $eachItem->relationship ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
                     $guardian .= '</select>
@@ -1810,7 +1810,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="blood_group">Blood Broup</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
-                            <option value="null">Select Blood Group</option>';
+                            <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
                                 $response .= "<option ".($isData && ($each->name == $userData->blood_group) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
@@ -1866,8 +1866,8 @@ class Forms extends Myschoolgh {
                         <div class="col-lg-4 col-md-4 mt-2">
                             <label for="guardian_info[guardian_relation][1]">Relationship</label>
                             <select data-width="100%" name="guardian_info[guardian_relation][1]" id="guardian_info[guardian_relation][1]" class="form-control selectpicker">
-                                <option value="null">Select Relation</option>';
-                                foreach($this->pushQuery("id, name", "guardian_relation", "status='1' AND client_id='{$clientId}'") as $each) {
+                                <option value="">Select Relation</option>';
+                                foreach($this->pushQuery("id, name", "guardian_relation", "status='1'") as $each) {
                                     $response .= "<option value=\"{$each->name}\">{$each->name}</option>";                            
                                 }
                         $response .= '</select>
@@ -2041,7 +2041,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="blood_group">Blood Broup</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
-                            <option value="null">Select Blood Group</option>';
+                            <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
                                 $response .= "<option ".($isData && ($each->name == $userData->blood_group) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
@@ -2064,8 +2064,8 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="relationship">Relationship</label>
                         <select data-width="100%" name="relationship" id="relationship" class="form-control selectpicker">
-                            <option value="null">Select Relation</option>';
-                            foreach($this->pushQuery("id, name", "guardian_relation", "status='1' AND client_id='{$clientId}'") as $each) {
+                            <option value="">Select Relation</option>';
+                            foreach($this->pushQuery("id, name", "guardian_relation", "status='1'") as $each) {
                                 $response .= "<option ".(isset($userData->relationship) && $userData->relationship === $each->name ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
                 $response .= '</select>
@@ -2528,7 +2528,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="blood_group">Blood Broup</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
-                            <option value="null">Select Blood Group</option>';
+                            <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
                                 $response .= "<option ".($isData && ($each->name == $userData->blood_group) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
@@ -3151,7 +3151,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="blood_group">Blood Broup</label>
                         <select data-width="100%" name="blood_group" id="blood_group" class="form-control selectpicker">
-                            <option value="null">Select Blood Group</option>';
+                            <option value="">Select Blood Group</option>';
                             foreach($this->pushQuery("id, name", "blood_groups") as $each) {
                                 $response .= "<option ".($isData && ($each->name == $userData->blood_group) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }

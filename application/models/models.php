@@ -251,6 +251,8 @@ class Models {
             "end_academic_term" => "Are you sure you want to end this academic term. You will be locked out from the system for not more than 10 minute to allow processing? Once confirmed, you cannot reverse the action."
         ];
 
+        $this->assessment_group = ["Assignment", "Test", "Quiz", "Group Work"];
+
     }
 
     /**

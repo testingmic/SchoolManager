@@ -144,10 +144,15 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
                 <?php } elseif($token && ($key == "verify_account" || $key == "verify_user")) {
 
                   // verify user account
-                  $stmt = $myschoolgh->prepare("SELECT a.username, a.client_id, a.item_id, a.item_id AS user_id, u.client_preferences 
-                  FROM users a 
-                    LEFT JOIN clients_accounts u ON u.client_id = a.client_id
-                  WHERE a.verify_token=? LIMIT 1");
+                  $stmt = $myschoolgh->prepare("SELECT 
+                      a.username, a.client_id, a.item_id, a.item_id AS user_id, 
+                      u.client_preferences, a.changed_password, a.username
+                    FROM users a 
+                    LEFT JOIN 
+                      clients_accounts u ON u.client_id = a.client_id
+                    WHERE 
+                      a.verify_token=? LIMIT 1
+                  ");
                   $stmt->execute([$token]);
                   $result = $stmt->fetch(PDO::FETCH_OBJ);
 
@@ -179,11 +184,38 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
 
                       // log the user activity
                       $myClass->userLogs("verify_account", $result->user_id, null, "{$result->username}'s - account was successfully activated.", $result->user_id, $result->client_id, "Account was manually activated using the Activation link.");
-
                       $session->remove("refresh_page");
 
                       // print the success notification
                       print "<div class='alert alert-success text-center'>Congrats! Your account was successfully activated. You can now login to continue.</div>";
+
+                      // generate a new password for the user
+                      if(($key == "verify_user") && !$result->changed_password) {
+
+                        // create the user agent
+                        $user_agent = load_class('user_agent', 'libraries');
+
+                        // create the reset password token
+                        $random_string = random_string("alnum", 32);
+                        $request_token = random_string('alnum', mt_rand(60, 75));
+
+                        // the agent
+                        $ip = $user_agent->ip_address();
+                        $br = $user_agent->browser()." ".$user_agent->platform();
+
+                        // set the token expiry time to 2 hour from the moment of request
+                        $expiry_time = time()+(60*60*2);
+
+                        // generate the
+                        $stmt = $myschoolgh->prepare("INSERT INTO users_reset_request SET
+                          item_id = '{$random_string}', username='{$result->username}', user_id='{$result->user_id}', 
+                          request_token='{$request_token}', user_agent='{$br}|{$ip}', expiry_time='{$expiry_time}'
+                        ");
+                        $stmt->execute();
+
+                        // redirect the user to the reset password page
+                        redirect("{$baseUrl}verify?dw=password&token={$request_token}","refresh:3000");
+                      }
                   ?>
 
                 <?php

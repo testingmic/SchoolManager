@@ -901,6 +901,20 @@ var initDataTables = () => {
             }
         });
     }
+
+    if ($('.raw_datatable').length > 0) {
+        $('.raw_datatable').DataTable({
+            search: null,
+            lengthMenu: [
+                [10, 30, 50, 75, 100, 200, -1],
+                [10, 30, 50, 75, 100, 200, "All"]
+            ],
+            language: {
+                sEmptyTable: "Nothing Found",
+                lengthMenu: "Display _MENU_ rows"
+            }
+        });
+    }
 }
 
 var moneyFormat = (value, decimals) => {

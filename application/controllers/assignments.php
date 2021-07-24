@@ -413,7 +413,7 @@ class Assignments extends Myschoolgh {
             "client_id='{$params->clientId}' AND class_id='{$params->class_id}' AND user_type='student' AND user_status='Active' AND status='1'");
         
         /** Load the courses list */
-        $result["courses_list"] = $this->pushQuery("id, item_id, name", "courses", "class_id LIKE '%{$params->class_id}%' AND status='1'"); 
+        $result["courses_list"] = $this->pushQuery("id, item_id, name, course_code", "courses", "class_id LIKE '%{$params->class_id}%' AND status='1'"); 
 
         /** Return the results */
         return [
@@ -1530,5 +1530,59 @@ class Assignments extends Myschoolgh {
         ];
         
     }
+
+    /**
+     * Log The Assessment Record of An Outstanding Assessment
+     * 
+     * @return Array
+     */
+    public function log_assessment(stdClass $params) {
+
+        try {
+
+            // global variable
+            global $usersClass;
+
+            // check the overall_score
+            if(isset($params->overall_score) && !preg_match("/^[0-9]+$/", $params->overall_score)) {
+                return ["code" => 203, "data" => "Sorry! The overall score must be a numeric integer."];
+            }
+
+            // get the id equivalent of the class id
+            if(isset($params->class_id) && !preg_match("/^[0-9]+$/", $params->class_id)) {
+                $params->class_id = $this->pushQuery("id", "classes", "item_id='{$params->class_id}' LIMIT 1")[0]->id ?? null;
+            }
+
+            // confirm the course information
+            $course_id = $this->pushQuery("id", "courses", "item_id='{$params->course_id}' LIMIT 1")[0]->id ?? null;
+
+            // if the course id is empty
+            if(empty($course_id)) {
+                return ["code" => 203, "data" => "Sorry! An invalid course id was submitted."];
+            }
+
+            // load the students list based on the class id parsed
+            $users_list = $this->pushQuery("item_id, name, image, unique_id","users", 
+                "client_id='{$params->clientId}' AND class_id='{$params->class_id}' AND academic_term='{$params->academic_term}' AND
+                academic_year='{$params->academic_year}' AND user_type='student' AND user_status='Active'"
+            );
+
+            return [
+                "students_list" => $users_list,
+                "parsed_data" => [
+                    "assessment_title" => $params->assessment_title,
+                    "assessment_type" => $params->assessment_type,
+                    "class_id" => $params->class_id,
+                    "course_id" => $params->course_id,
+                    "overall_score" => $params->overall_score,
+                    "date_due" => $params->date_due ?? date("Y-m-d"),
+                    "time_due" => $params->time_due ?? date("H:i")
+                ]
+            ];
+
+        } catch(PDOException $e) {}
+
+    }
+    
 }
 ?>

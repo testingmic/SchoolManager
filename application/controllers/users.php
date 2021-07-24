@@ -802,10 +802,11 @@ class Users extends Myschoolgh {
 		$params->phone = !empty($params->phone) ? preg_replace("/[\s]/", "", $params->phone) : null;
 
 		// client id
+		$params->email = $params->email ?? null;
 		$params->client_id = isset($params->clientId) ? strtoupper($params->clientId) : null;
 
 		/** Check the email address if not empty */
-		if(!isset($params->email) || (isset($params->email) && !filter_var($params->email, FILTER_VALIDATE_EMAIL))) {
+		if(!empty($params->email) && !filter_var($params->email, FILTER_VALIDATE_EMAIL)) {
 			return ["code" => 203, "data" => "Sorry! Provide a valid email address."];
 		}
 
@@ -832,10 +833,11 @@ class Users extends Myschoolgh {
 			$params->changed_password = 0;
 
 			// this user created the account
+			$params->username = $params->username ?? null;
 			$params->created_by = $params->userData->user_id;
 
 			/** Set username if the username is empty */
-			$params->username = empty($params->username) ? explode("@", $params->email)[0] : $params->username;
+			$params->username = empty($params->username) && !empty($params->email) ? explode("@", $params->email)[0] : $params->username;
 
 			/** Check the username if not empty */
 			if(!isset($params->lastname)) {
@@ -923,7 +925,8 @@ class Users extends Myschoolgh {
 
 		// set the unique id
 		$params->unique_id = isset($params->unique_id) && !empty($params->unique_id) ? $params->unique_id : $unique_id;
-
+		$params->unique_id = strtoupper($params->unique_id);
+		
 		// grouping guardian
 		$guardian = [];
 		if(isset($params->guardian_info) && is_array($params->guardian_info)) {
@@ -1038,7 +1041,7 @@ class Users extends Myschoolgh {
 
 						// generate a new unique user id
 						$counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='parent'") + 1), $this->append_zeros);
-						$unique_id = $theClientData->client_preferences->labels->parent_label.$counter.date("Y");
+						$unique_id = strtoupper($theClientData->client_preferences->labels->parent_label.$counter.date("Y"));
 
 						// explode the first and lastnames
 						$expl = explode(" ", $value["guardian_fullname"]);
@@ -1052,19 +1055,20 @@ class Users extends Myschoolgh {
 
 						// join the names as the fullname
 						$fullname = "{$firstname} {$othername} {$lastname}";
+						$p_username = !empty($value["guardian_email"]) ? $value["guardian_email"] : "";
 						
 						// insert the name of the guardian
 						$stmt = $this->db->prepare("INSERT INTO users SET 
-							firstname = ?, lastname = ?, othername = ?, name = ?,
+							firstname = ?, lastname = ?, othername = ?, name = ?, username = ?,
 							phone_number = ?, `email` = ?, `relationship` = ?, user_type = ?,
 							`address` = ?, `unique_id` = ?, `client_id` = ?, item_id = ?
 						");
 						$stmt->execute([
-							$firstname, $lastname, $othername, $fullname, $value["guardian_contact"], 
+							$firstname, $lastname, $othername, $fullname, $p_username, $value["guardian_contact"], 
 							$value["guardian_email"], $value["guardian_relation"], "parent", 
 							$value["guardian_address"], $unique_id, $params->clientId, $guardian_id 
 						]);
-						$guardian_ids[] = $unique_id;
+						$guardian_ids[] = $guardian_id;
 					}
 					
 				}
@@ -1263,7 +1267,7 @@ class Users extends Myschoolgh {
 				".(isset($params->previous_school_remarks) ? ", previous_school_remarks='{$params->previous_school_remarks}'" : null)."
 				".(isset($params->previous_school_qualification) ? ", previous_school_qualification='{$params->previous_school_qualification}'" : null)."
 
-				".(isset($params->unique_id) ? ", unique_id='{$params->unique_id}'" : null)."
+				".(isset($params->unique_id) ? ", unique_id='".strtoupper($params->unique_id)."'" : null)."
 				".(isset($params->class_id) ? ", class_id='{$params->class_id}'" : null)."
 				".(isset($params->blood_group) ? ", blood_group='{$params->blood_group}'" : null)."
 				".(isset($params->religion) ? ", religion='{$params->religion}'" : null)."
@@ -1317,13 +1321,14 @@ class Users extends Myschoolgh {
 
 						// generate a new unique user id
 						$counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='parent'") + 1), $this->append_zeros);
-						$unique_id = $theClientData->client_preferences->labels->parent_label.$counter.date("Y");
+						$unique_id = strtoupper($theClientData->client_preferences->labels->parent_label.$counter.date("Y"));
 
 						// create a new random string
 						$guardian_id = random_string("alnum", 32);
 
 						// join the names as the fullname
 						$fullname = "{$firstname} {$othername} {$lastname}";
+						$p_username = !empty($value["guardian_email"]) ? $value["guardian_email"] : "";
 
 						// confirm that the guardian information does not already exist
 						if(empty($this->pushQuery("id", "users", "item_id='{$value["guardian_id"]}' AND status='1' AND user_type='parent' LIMIT 1"))) {
@@ -1332,24 +1337,24 @@ class Users extends Myschoolgh {
 								firstname = ?, lastname = ?, othername = ?, name = ?,
 								phone_number = ?, email = ?, `relationship` = ?, 
 								`address` = ?, `unique_id` = ?, `client_id` = ?, 
-								user_type = ?, item_id = ?
+								user_type = ?, item_id = ?, username = ?
 							");
 							$stmt->execute([
 								$firstname, $lastname, $othername, $fullname, 
 								$value["guardian_contact"], $value["guardian_email"], 
 								$value["guardian_relation"], $value["guardian_address"], 
-								$unique_id, $params->clientId, 'parent', $guardian_id
+								$unique_id, $params->clientId, 'parent', $guardian_id, $p_username
 							]);
 						}
 						// update the guardian record if the information already exist
 						else {
 							$stmt = $this->db->prepare("UPDATE users SET 
-								firstname = ?, lastname = ?, othername = ?, name = ?,
+								firstname = ?, lastname = ?, othername = ?, name = ?, username = ?,
 								phone_number = ?, email = ?, `relationship` = ?, `address` = ? 
 								WHERE `item_id` = ? AND `client_id` = ? AND user_type = ? LIMIT 1
 							");
 							$stmt->execute([
-								$firstname, $lastname, $othername, $fullname,$value["guardian_contact"], 
+								$firstname, $lastname, $othername, $fullname, $p_username, $value["guardian_contact"], 
 								$value["guardian_email"], $value["guardian_relation"], $value["guardian_address"], 
 								$value["guardian_id"], $params->clientId, 'parent'
 							]);
