@@ -214,7 +214,7 @@ var publish_AssignmentQuestion = (assignment_id, questions_count) => {
                         text: "Congrats! The assignment was successfully published.",
                         icon: "success",
                     });
-                    loadPage(`${baseUrl}update-assignment/${assignment_id}/view`);
+                    loadPage(`${baseUrl}update-assessment/${assignment_id}/view`);
                 }
             }).catch(() => {
                 swal({

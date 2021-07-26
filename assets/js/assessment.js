@@ -43,6 +43,7 @@ var award_marks = (mode) => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            $(`div[id="award_marks"] *`).attr("disabled", true);
             let students_list = {};
             $.each($(`input[data-item="marks"]`), function(i, e) {
                 let item = $(this);
@@ -63,15 +64,21 @@ var award_marks = (mode) => {
                 "students_list": students_list
             }
             $.post(`${baseUrl}api/assignments/save_assessment`, content).then((response) => {
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
                 if (response.code == 200) {
-                   
+                    if(response.data.additional !== undefined) {
+                        setTimeout(() => {
+                            loadPage(response.data.additional.href);
+                        }, 2000);
+                    }
                 } else {
-                    swal({
-                        text: response.data.result,
-                        icon: "error",
-                    });
+                    $(`div[id="award_marks"] *`).attr("disabled", false);
                 }
             }).catch(() => {
+                $(`div[id="award_marks"] *`).attr("disabled", false);
                 swal({
                     text: "Sorry! There was an error while processing the request.",
                     icon: "error",

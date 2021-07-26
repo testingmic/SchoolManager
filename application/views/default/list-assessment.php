@@ -19,7 +19,7 @@ jump_to_main($baseUrl);
 $response = (object) [];
 $response->scripts = [];
 $filter = (object) $_POST;
-$response->title = "Assignments List : {$appName}";
+$response->title = "Class Assessment List : {$appName}";
 
 $response->scripts = ["assets/js/filters.js"];
 
@@ -55,7 +55,7 @@ $color = [
 $assignments = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to update assignment record' href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to update assignment record' href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate && $each->assignment_type == "multiple_choice") {
         $action .= "&nbsp;<a title='Click to manage questions for this assignment' href='#' onclick='return loadPage(\"{$baseUrl}add-assignment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
@@ -68,7 +68,7 @@ foreach($item_list["data"] as $key => $each) {
     $assignments .= "<tr data-row_id=\"{$each->id}\">";
     $assignments .= "<td>".($key+1)."</td>";
     $assignments .= "<td>
-        <a href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");'>
+        <a href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");'>
             {$each->assignment_title}</a> <strong class='badge p-1 pr-2 pl-2 badge-{$color[$each->assignment_group]}'>{$each->assignment_group}</strong>
         ".(
         $hasUpdate ? 
@@ -121,10 +121,10 @@ if(!empty($filter->class_id)) {
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Assignments List</h1>
+            <h1>Class Assessment List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item">Assignments List</div>
+                <div class="breadcrumb-item">Class Assessment List</div>
             </div>
         </div>
         <div class="row" id="filter_Department_Class">

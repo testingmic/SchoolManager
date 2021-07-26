@@ -257,7 +257,8 @@ if(!empty($item_id)) {
                             </table>
                         </div>
                         <div class="card card-default student-assignment-details"></div>
-                    </div>' : null
+                    </div>' : 
+                    '<input data-grading="'.$data->grading.'" data-assignment_id="'.$data->item_id.'" type="hidden" name="data-student-id" class="data-student-id">'
                 );
 
             } else {
@@ -368,7 +369,7 @@ if(!empty($item_id)) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-assignments">Assignments List</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-assessment">Assessments List</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>
@@ -515,6 +516,17 @@ if(!empty($item_id)) {
                         ).'
                         <div class="tab-pane fade '.(!$isAuto ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
                             <div class="trix-slim-scroll">
+                            '.(
+                                !$isAuto && !empty($data->assignment_description) ?
+                                '<div class="cardd">
+                                    <div class="card-header p-0">
+                                        <h4>Description</h4>
+                                    </div>
+                                    <div class="mb-4">
+                                    '.$data->assignment_description.'
+                                    </div>
+                                </div>' : null
+                            ).'
                                 '.$grading_info.'
                             </div>
                         </div>';

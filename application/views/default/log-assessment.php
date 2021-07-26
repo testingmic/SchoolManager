@@ -134,7 +134,7 @@ $response->html = '
                                     <button onclick="return cancel_assessment();" class="btn text-uppercase btn-danger">Cancel</button>
                                 </div>
                                 <div class="col-lg-8" align="right">
-                                    <button onclick="return award_marks(\'save\'\);" class="btn text-uppercase btn-outline-primary">Award Marks & Save</button>
+                                    <button onclick="return award_marks(\'save\');" class="btn text-uppercase btn-outline-primary">Award Marks & Save</button>
                                     <button onclick="return award_marks(\'close\');" class="btn text-uppercase btn-success">Award Marks & Close</button>
                                 </div>
                             </div>

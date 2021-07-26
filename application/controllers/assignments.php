@@ -390,7 +390,7 @@ class Assignments extends Myschoolgh {
             }
 
             // set the value
-			$additional = ["href" => "{$this->baseUrl}update-assignment/{$params->assignment_id}/view"];
+			$additional = ["href" => "{$this->baseUrl}update-assessment/{$params->assignment_id}/view"];
 
             # set the output to return when successful
             $return = ["code" => 200, "data" => "Assignment successfully updated.", "refresh" => 2000, "additional" => $additional];
@@ -1679,7 +1679,7 @@ class Assignments extends Myschoolgh {
 			$return["additional"] = ["clear" => true];
 
             // if the request is to add a quiz
-            $return["additional"]["href"] = "{$this->baseUrl}list-assignments";
+            $return["additional"]["href"] = "{$this->baseUrl}update-assessment/{$item_id}";
 
 			// return the output
             return $return;
