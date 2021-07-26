@@ -35,7 +35,7 @@ $response->html = '
         <h1>'.$pageTitle.'</h1>
         <div class="section-header-breadcrumb">
             <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-            <div class="breadcrumb-item active"><a href="'.$baseUrl.'fees-history">Payment History List</a></div>
+            <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-assignments">List Assessement Logs</a></div>
             <div class="breadcrumb-item">'.$pageTitle.'</div>
         </div>
     </div>
@@ -51,7 +51,7 @@ $response->html = '
                             <div class="prepare_assessment_log">
                                 <div class="form-group">
                                     <label>Title <span class="required">*</span></label>
-                                    <textarea style="height:60px" class="form-control" value="" name="assessment_title" id="assessment_title"></textarea>
+                                    <input style="height:50px" class="form-control" value="" name="assessment_title" id="assessment_title">
                                 </div>
                                 <div class="row">
                                     <div class="col-md-7 form-group">
@@ -101,6 +101,10 @@ $response->html = '
                                         <input class="form-control" type="time" value="" name="time_due" id="time_due">
                                     </div>
                                 </div>
+                                <div class="form-group">
+                                    <label>Assignment Additional Description</label>
+                                    <textarea style="height:60px" class="form-control" name="assessment_description" id="assessment_description"></textarea>
+                                </div>
                                 <div class="form-group text-right border-top mt-2 pt-4">
                                     <button onclick="return prepare_assessment_log('.$assessment_log_id.')" data-function="save" type="button-submit" class="btn btn-outline-success">Prepare Assessment</button>
                                 </div>
@@ -112,23 +116,29 @@ $response->html = '
             <div class="col-12 col-md-12 col-lg-7">
                 <div class="card">
                     <div class="padding-20">
-                        <div></div>
-                        <div class="table-responsive hdidden" id="award_marks">
-                            <table data-empty="" id="student_staff_list" class="table table-bordered table-striped">
-                                <thead>
-                                    <tr>
-                                        <th width="5%" class="text-center">#</th>
-                                        <th>Student Name</th>
-                                        <th width="30%">Awarded Mark</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                            <div align="right">
-                                <button onclick="return;" class="btn text-uppercase btn-outline-primary">Award Marks & Save</button>
-                                <button onclick="return;" class="btn text-uppercase btn-success">Award Marks & Close</button>
+                        <div id="award_marks" class="hidden">
+                            <div class="table-responsive">
+                                <table data-empty="" id="student_staff_list" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%" class="text-center">#</th>
+                                            <th>Student Name</th>
+                                            <th width="30%">Awarded Mark</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>                         
                             </div>
-                        </div>
+                            <div class="row">
+                                <div class="col-md-4" align="left">
+                                    <button onclick="return cancel_assessment();" class="btn text-uppercase btn-danger">Cancel</button>
+                                </div>
+                                <div class="col-lg-8" align="right">
+                                    <button onclick="return award_marks(\'save\'\);" class="btn text-uppercase btn-outline-primary">Award Marks & Save</button>
+                                    <button onclick="return award_marks(\'close\');" class="btn text-uppercase btn-success">Award Marks & Close</button>
+                                </div>
+                            </div>
+                        </div> 
                     </div>
                 </div>
             </div>

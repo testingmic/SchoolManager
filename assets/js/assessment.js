@@ -30,6 +30,73 @@ $(`div[id='log_assessment'] select[name='class_id']`).on("change", function() {
     }
 });
 
+var award_marks = (mode) => {
+    let title = (mode == "save") ? "Award Marks & Save" : "Award Marks & Close",
+        message = (mode == "save") ? `Are you sure you want to submit this form? You will be able update the list later on.`
+            : `Are you sure you want to submit this form? You will lose the opportunity to update the marks awarded to students.`;
+        
+    swal({
+        title: title,
+        text: message,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            let students_list = {};
+            $.each($(`input[data-item="marks"]`), function(i, e) {
+                let item = $(this);
+                let student_id = item.attr("data-student_id"),
+                    student_name = item.attr("data-student_name"),
+                    awarded_score = parseInt(item.val());
+                    students_list[student_id] = {
+                        name: student_name,
+                        student_id: student_id,
+                        score: awarded_score
+                    }
+            });
+            
+            assessment_form["mode"] = mode;
+
+            let content = {
+                "data": assessment_form,
+                "students_list": students_list
+            }
+            $.post(`${baseUrl}api/assignments/save_assessment`, content).then((response) => {
+                if (response.code == 200) {
+                   
+                } else {
+                    swal({
+                        text: response.data.result,
+                        icon: "error",
+                    });
+                }
+            }).catch(() => {
+                swal({
+                    text: "Sorry! There was an error while processing the request.",
+                    icon: "error",
+                });
+            });
+        }
+    });
+}
+
+var cancel_assessment = () => {
+    swal({
+        title: "Cancel Form",
+        text: "Are you sure you want to cancel the awarding of marks to students?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $(`table[id="student_staff_list"] tbody`).html("");
+            $(`div[id="log_assessment"] *`).attr("disabled", false);
+            $(`div[id="award_marks"]`).addClass("hidden");
+        }
+    });
+}
+
 var track_marks_limit = (max_score) => {
     $(`input[data-item="marks"]`).on("input", function() {
         let item = $(this);
@@ -47,7 +114,8 @@ var track_marks_limit = (max_score) => {
 var prepare_assessment_log = (assessment_log_id = "") => {
     let overall_score = $(`input[name="overall_score"]`).val();
     let data = {
-        "assessment_title" : $(`textarea[name="assessment_title"]`).val(),
+        "assessment_description" : $(`textarea[name="assessment_description"]`).val(),
+        "assessment_title" : $(`input[name="assessment_title"]`).val(),
         "assessment_type" : $(`select[name="assessment_type"]`).val(),
         "class_id" : $(`select[name="class_id"]`).val(),
         "course_id" : $(`select[name="course_id"]`).val(),
@@ -66,7 +134,7 @@ var prepare_assessment_log = (assessment_log_id = "") => {
     $(`div[id="log_assessment"] *`).attr("disabled", true);
     assessment_form = data;
     $(`div[id="award_marks"]`).addClass("hidden");
-    $.post(`${baseUrl}api/assignments/log_assessment`, data).then((response) => {
+    $.post(`${baseUrl}api/assignments/prepare_assessment`, data).then((response) => {
         if (response.code == 200) {
             if(response.data.result.students_list !== undefined) {
                 let students_list = "";

@@ -102,6 +102,10 @@ class Assignments extends Myschoolgh {
                 if(isset($result->handed_in)) {
                     $result->handedin_label = $this->the_status_label($result->handed_in);
                 }
+
+                // convert the assigned to list into an array
+                $assigned_to_list = !empty($result->assigned_to_list) ? json_decode($result->assigned_to_list, true) : null;
+                $result->assigned_to_list = ($result->assigned_to == "selected_students" && empty($assigned_to_list)) ? $result->assigned_to_list : $assigned_to_list;
                 
                 // if not minified request
                 if(!$isMinified) {
@@ -121,11 +125,13 @@ class Assignments extends Myschoolgh {
                     $result->course_tutor = json_decode($result->course_tutor, true);
 
                     // loop through the array list
-                    foreach($result->course_tutor as $tutor) {
-                        // get the course tutor information
-                        $tutor_info = $this->pushQuery("name, item_id, unique_id, phone_number, email, image", "users", "item_id='{$tutor}' AND user_status='Active' LIMIT 1");
-                        if(!empty($tutor_info)) {
-                            $result->course_tutors[] = $tutor_info[0];
+                    if(!empty($result->course_tutor)) {
+                        foreach($result->course_tutor as $tutor) {
+                            // get the course tutor information
+                            $tutor_info = $this->pushQuery("name, item_id, unique_id, phone_number, email, image", "users", "item_id='{$tutor}' AND user_status='Active' LIMIT 1");
+                            if(!empty($tutor_info)) {
+                                $result->course_tutors[] = $tutor_info[0];
+                            }
                         }
                     }
 
@@ -1536,7 +1542,7 @@ class Assignments extends Myschoolgh {
      * 
      * @return Array
      */
-    public function log_assessment(stdClass $params) {
+    public function prepare_assessment(stdClass $params) {
 
         try {
 
@@ -1579,6 +1585,104 @@ class Assignments extends Myschoolgh {
                     "time_due" => $params->time_due ?? date("H:i")
                 ]
             ];
+
+        } catch(PDOException $e) {}
+
+    }
+
+    /**
+     * Save the Marks Obtained by Each Student
+     * 
+     * @param Array $params->data           An array of the assessment log data
+     * @param Array $params->students_list  An array of the list of students with their marks
+     * 
+     * @return Array
+     */
+    public function save_assessment(stdClass $params) {
+
+        // confirm that the data is an array
+        if(!is_array($params->data)) {
+            return ["code" => 203, "data" => "Sorry! The data parameter must be an array."];
+        }
+
+        // confirm that the students_list is an array
+        if(!is_array($params->students_list)) {
+            return ["code" => 203, "data" => "Sorry! The students_list parameter must be an array."];
+        }
+
+        // confirm that all the parameters are extent
+        $required = ["assessment_title", "assessment_type", "class_id", "course_id", "date_due", "time_due", "overall_score", "mode"];
+        $parsed = array_keys($params->data);
+        $not_found = [];
+
+        // confirm if all the keys required was parsed
+        foreach($required as $key) {
+            if(!in_array($key, $parsed)) {
+                $not_found[] = $key;
+            }
+        }
+
+        // assigned_to
+        $item_id = isset($data["assignment_id"]) ? $data["assignment_id"] : random_string("alnum", 32);
+        $assigned_to = "selected_students";
+        $students_list = $params->students_list;
+        $data = $params->data;
+        $update_log = $data["assignment_id"] ?? null;
+
+        $state = $data["mode"] == "close" ? "Close" : "Graded";
+
+        // return error
+        if(!empty($not_found)) {
+            return ["code" => 203, "data" => "Sorry! The variables ".implode(" | ", $not_found)." was not parsed."];
+        }
+
+        try {
+
+            // insert the record into the database
+            $stmt = $this->db->prepare("INSERT INTO assignments SET
+               item_id = ?, client_id = ?, assignment_group = ?, assigned_to = ?, assigned_to_list = ?, course_tutor = ?,
+               course_id = ?, class_id = ?, grading = ?, assignment_title = ?, assignment_description = ?,
+               insertion_mode = ?, created_by = ?, due_date = ?, due_time = ?, state = ?, date_published = now(), 
+               academic_year = ?, academic_term = ?
+            ");
+            $stmt->execute([
+                $item_id, $params->clientId, $data["assessment_type"], $assigned_to, 
+                json_encode(array_keys($students_list)),
+                $params->userId, $data["course_id"], $data["class_id"], 
+                $data["overall_score"], $data["assessment_title"], $data["assessment_description"] ?? null, 
+                "Manual", $params->userId, $data["date_due"], $data["time_due"],
+                $state, $params->academic_year, $params->academic_term
+            ]);
+
+            // set the query string
+            $insert = $this->db->prepare("INSERT INTO assignments_submitted SET client_id = ?, assignment_id = ?,
+            student_id = ?, score = ?, graded = ?, handed_in = ?, date_graded = now()");
+
+            $update = $this->db->prepare("UPDATE assignments_submitted SET score = ?, graded = ?, 
+                handed_in = ?, date_graded = now()
+                WHERE client_id = ? AND assignment_id = ? AND student_id = ? LIMIT 1
+            ");
+
+            // insert the student marks data
+            foreach($students_list as $student_id => $student) {
+                if($update_log) {
+                    $update->execute([$student["score"], 1, "Submitted", $params->clientId, $item_id, $student_id]);
+                } else {
+                    $insert->execute([$params->clientId, $item_id, $student_id, $student["score"], 1, "Submitted"]);
+                }
+            }
+
+            // set the output to return when successful
+            $return = ["code" => 200, "data" => "Assignment successfully created.", "refresh" => 2000];
+			
+			// append to the response
+			$return["additional"] = ["clear" => true];
+
+            // if the request is to add a quiz
+            $return["additional"]["href"] = "{$this->baseUrl}list-assignments";
+
+			// return the output
+            return $return;
 
         } catch(PDOException $e) {}
 

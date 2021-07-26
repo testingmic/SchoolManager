@@ -173,20 +173,24 @@ if(!empty($item_id)) {
 			$the_students_list->execute();
             $result = $the_students_list->fetchAll(PDO::FETCH_OBJ);
 
+            // is manual or auto insertion
+            $isAuto = (bool) ($data->insertion_mode === "Auto");
+
             // ensure the result is not empty
             if(!empty($result)) {
                 
+                // if its a multi choice question or a file upload question set
                 $function = $isMultipleChoice ? "review_QuizAssignment" : "load_singleStudentData";
 
                 $grading_info .= '
-                <div class="col-lg-6" id="assignment-content">
+                <div class="col-lg-'.($isAuto ? 7 : 9).'" id="assignment-content">
                     '.( $isActive ?
                         '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
                             <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
                             '.(!$isMultipleChoice ? '<button class="btn btn-outline-success" onclick="return save_AssignmentMarks();"><i class="fa fa-save"></i> Save</button>' : '').'
                         </div>' : (
-                            $isAdmin ? '
-                                <button class="btn btn-outline-danger" onclick="return reopen_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Reopen</button>
+                            $isAdmin && $isAuto ? '
+                                <button class="btn mb-2 btn-outline-danger" onclick="return reopen_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Reopen</button>
                             ' : ''
                         )
                     ).'
@@ -211,7 +215,7 @@ if(!empty($item_id)) {
                                         <div class="d-flex justify-content-start">
                                             <div class="mr-2">
                                                 '.($isSubmitted ?
-                                                    '<a title="Click to view document submitted by '.$student->name.'" style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">
+                                                    '<a title="Click to view document submitted by '.$student->name.'" style="text-decoration:none" class="anchor" href="javascript:void(0)" '.($isAuto ? 'onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')"' : null).' data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'">
                                                         <img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt="">
                                                     </a>' : 
                                                     '<img class="rounded-circle cursor author-box-picture" width="40px" src="'.$baseUrl.''.$student->image.'" alt="">'
@@ -219,7 +223,7 @@ if(!empty($item_id)) {
                                             </div>
                                             <div>
                                                 <p class="p-0 m-0">
-                                                    '.($isSubmitted ? '<a style="text-decoration:none" class="anchor" href="javascript:void(0)" onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')" data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'"><strong>'.$student->name.'</strong></a>' : "<strong>{$student->name}</strong>").'
+                                                    '.($isSubmitted ? '<a style="text-decoration:none" class="anchor" href="javascript:void(0)" '.($isAuto ? 'onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')"' : null).' data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'"><strong>'.$student->name.'</strong></a>' : "<strong>{$student->name}</strong>").'
                                                 </p>
                                                 <p class="p-0 m-0">'.$myClass->the_status_label($student->handed_in).'</p>
                                             </div>
@@ -227,7 +231,7 @@ if(!empty($item_id)) {
                                     </td>
                                     <td>
                                         <div class="input-group">
-                                            <input '.(!$isActive || $isMultipleChoice ? 'disabled="disabled"' : 'name="test_grading" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" class="form-control"> <span>/ '.$data->grading.'</span>
+                                            <input '.(!$isActive || $isMultipleChoice ? 'disabled="disabled"' : 'name="test_grading" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" class="form-control font-16"> &nbsp; <span class="font-20">/ '.$data->grading.'</span>
                                         </div>
                                     </td>
                                 </tr>';
@@ -237,22 +241,24 @@ if(!empty($item_id)) {
                         </table>
                     </div>
                 </div>
-                <div class="col-lg-6">
-                    <div class="details-content-save"></div>
-                    <div class="grading-history-div" style="display:none">
-                        <table class="table">
-                            <tbody>
-                                <tr>
-                                    <td align="right">
-                                        <span data-function="grading-history" class="text-primary cursor" title="View Grading History">Grading History</span>
-                                        <input data-grading="'.$data->grading.'" data-assignment_id="'.$data->item_id.'" type="hidden" name="data-student-id" class="data-student-id">
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="card card-default student-assignment-details"></div>
-                </div>';
+                '.($isAuto ?
+                    '<div class="col-lg-5">
+                        <div class="details-content-save"></div>
+                        <div class="grading-history-div" style="display:none">
+                            <table class="table">
+                                <tbody>
+                                    <tr>
+                                        <td align="right">
+                                            <span data-function="grading-history" class="text-primary cursor" title="View Grading History">Grading History</span>
+                                            <input data-grading="'.$data->grading.'" data-assignment_id="'.$data->item_id.'" type="hidden" name="data-student-id" class="data-student-id">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card card-default student-assignment-details"></div>
+                    </div>' : null
+                );
 
             } else {
                $grading_info .= '<div style="width:100%;" class="text-center">No student has handed in their answers yet.</div>'; 
@@ -416,32 +422,34 @@ if(!empty($item_id)) {
                 <div class="card">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
-                    '.($isTutorAdmin && $isMultipleChoice ? 
-                        '<li class="nav-item">
-                            <a class="nav-link '.(!$updateItem ? "active" : null).'" id="questions-tab2" data-toggle="tab" href="#questions" role="tab" aria-selected="true">
-                                Questions Set
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
-                                Additional Details
-                            </a>
-                        </li>
-                        ' : '
-                        <li class="nav-item">
-                            <a class="nav-link '.(!$updateItem ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
-                                Additional Details
-                            </a>
-                        </li>
-                        '    
+                    '.($isAuto ?
+                        ($isTutorAdmin && $isMultipleChoice ? 
+                            '<li class="nav-item">
+                                <a class="nav-link '.(!$updateItem ? "active" : null).'" id="questions-tab2" data-toggle="tab" href="#questions" role="tab" aria-selected="true">
+                                    Questions Set
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
+                                    Additional Details
+                                </a>
+                            </li>
+                            ' : '
+                            <li class="nav-item">
+                                <a class="nav-link '.(!$updateItem ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
+                                    Additional Details
+                                </a>
+                            </li>
+                            '    
+                        ) : null
                     ).'
                     <li class="nav-item">
-                        <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
+                        <a class="nav-link '.(!$isAuto ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
                             '.($isTutorAdmin ? "Grade Students" : "Handin Assignment").'
                         </a>
                     </li>';
 
-                    if($hasUpdate) {
+                    if($hasUpdate && $isAuto) {
                         $response->html .= '
                         <li class="nav-item">
                             <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
@@ -485,24 +493,33 @@ if(!empty($item_id)) {
                                     </div>
                                 </div>
                             </div>' : 
-                            '<div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="details" role="tabpanel" aria-labelledby="details-tab2">
-                                <div class="pt-0">
-                                    <div class="py-3 pt-0">
-                                        '.$data->assignment_description.'
+                            ($isAuto ?
+                                '<div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="details" role="tabpanel" aria-labelledby="details-tab2">
+                                    <div class="pt-0">
+                                        '.(
+                                            $data->assignment_description ? 
+                                            '<div class="py-3 pt-0">
+                                                '.$data->assignment_description.'
+                                            </div>' : null
+                                        ).'
+                                        '.(
+                                            $data->attachment_html ? 
+                                            '<div class="py-1 pt-0">
+                                                '.$data->attachment_html.'
+                                            </div>' : null
+                                        ).'
                                     </div>
-                                    <div class="py-1 pt-0">
-                                        '.($data->attachment_html ?? null).'
-                                    </div>
-                                </div>
-                            </div>'
+                                </div>'
+                                : null
+                            )
                         ).'
-                        <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
-                            <div class="trix-slim-scroll" style="max-height:900px;overflow-y:auto;">
+                        <div class="tab-pane fade '.(!$isAuto ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
+                            <div class="trix-slim-scroll">
                                 '.$grading_info.'
                             </div>
                         </div>';
                         
-                        if($hasUpdate) {
+                        if($hasUpdate && $isAuto) {
                             $response->html .= '<div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                             $response->html .= $the_form;
                             $response->html .= '</div>';

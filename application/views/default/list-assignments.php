@@ -42,6 +42,15 @@ $hasUpdate = $accessObject->hasAccess("update", "assignments");
 
 $hasFiltering = $accessObject->hasAccess("filters", "settings");
 
+// colors for the list
+$color = [
+    "Test" => "success",
+    "Assignment" => "warning",
+    "Quiz" => "primary",
+    "Exam" => "dark",
+    "Group Work" => "secondary",
+];
+
 // unset the sessions if $session->currentQuestionId is not empty
 $assignments = "";
 foreach($item_list["data"] as $key => $each) {
@@ -58,13 +67,16 @@ foreach($item_list["data"] as $key => $each) {
 
     $assignments .= "<tr data-row_id=\"{$each->id}\">";
     $assignments .= "<td>".($key+1)."</td>";
-    $assignments .= "<td><a href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
+    $assignments .= "<td>
+        <a href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");'>
+            {$each->assignment_title}</a> <strong class='badge p-1 pr-2 pl-2 badge-{$color[$each->assignment_group]}'>{$each->assignment_group}</strong>
+        ".(
         $hasUpdate ? 
             "<br>Class: <strong>{$each->class_name}</strong>
             <br>Course: <strong>{$each->course_name}</strong>" : 
             "<br>Course:</strong> {$each->course_name}</strong>"
         )."</td>";
-    $assignments .= "<td>{$each->due_date} @ {$each->due_time}</td>";
+    $assignments .= "<td>{$each->due_date} ".(!empty($each->due_time) ? "@ {$each->due_time}" : null)."</td>";
 
     // show this section if the user has the necessary permissions
     if($hasUpdate) {
@@ -167,7 +179,7 @@ $response->html = '
                                         ).'
                                         <th>Date Created</th>
                                         <th>Status</th>
-                                        <th align="center" width="12%"></th>
+                                        <th align="center" width="10%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$assignments.'</tbody>
