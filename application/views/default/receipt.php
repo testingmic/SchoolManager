@@ -15,6 +15,7 @@ if($session->clientId) {
     // client id
     $clientId = $session->clientId;
 
+    $receipt = "";
     $date_range = "";
     $date_range .= isset($getObject->start_date) && !empty($getObject->start_date) ? $getObject->start_date : null;
     $date_range .= isset($getObject->end_date) && !empty($getObject->end_date) ? ":" . $getObject->end_date : null;
@@ -24,10 +25,11 @@ if($session->clientId) {
         "clientId" => $clientId,
         "item_id" => $receipt_id,
         "userData" => $defaultUser,
+        "date_range" => $date_range,
         "client_data" => $defaultUser->client,
         "student_id" => $getObject->student_id ?? null,
         "category_id" => $getObject->category_id ?? null,
-        "date_range" => $date_range,
+        "payment_id" => $receipt_id ?? null,
     ];
 
     // create a new object
@@ -41,10 +43,10 @@ if($session->clientId) {
 
         // create a new object
         $param = (object) [
-            "getObject" => $getObject,
             "data" => $data,
+            "clientId" => $clientId,
+            "getObject" => $getObject,
             "receipt_id" => $receipt_id,
-            "clientId" => $clientId
         ];
         
         // load the receipt 

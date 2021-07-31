@@ -60,8 +60,8 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
             // get the list of employee payslips
             $payslips = "";
 
-            $staff_param = (object) ["clientId" => $clientId, "employee_id" => $userId];
-            $payslips_list = load_class("payroll", "controllers")->paysliplist($staff_param)["data"];
+            $staff_param = (object) ["clientId" => $clientId, "employee_id" => $userId, "client_data" => $defaultUser->client];
+            $payslips_list = load_class("payroll", "controllers", $staff_param)->paysliplist($staff_param)["data"];
             
             // if the payslip information is not empty
             if(!empty($payslips_list)) {

@@ -363,10 +363,11 @@ class Accounting extends Myschoolgh {
             $stmt = $this->db->prepare("
                 SELECT a.*,
                     (SELECT c.name FROM accounts_type_head c WHERE c.item_id = a.account_type LIMIT 1) AS account_type_name,
-                    (SELECT b.account_name FROM accounts b WHERE b.item_id = a.account_id LIMIT 1) AS account_name,
+                    c.account_name, c.account_bank, c.account_number,
                     (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info,
                     (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment
                 FROM accounts_transaction a
+                LEFT JOIN accounts c ON c.item_id = a.account_id
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
             ");
             $stmt->execute([1]);

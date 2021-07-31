@@ -782,12 +782,13 @@ class Analitics extends Myschoolgh {
             $category_list = $stmt->fetchAll(PDO::FETCH_OBJ);
 
             $grouping = [];
+            $summary_total = [];
             $category_array = [];
             foreach($category_list as $category) {
                 $grouping[$category->type][] = $category->name;
                 $category_array[$category->type][$category->month_name][$category->name] = $category;
+                $summary_total[$category->type][$category->name] = isset($summary_total[$category->type][$category->name]) ? ($summary_total[$category->type][$category->name] + $category->amount) : $category->amount;
             }
-
             $result["category"] = $category_array;
 
             $grouped = [];
@@ -843,6 +844,13 @@ class Analitics extends Myschoolgh {
             $result["summary"]["totals"]["net_salary"] = [
                 "title" => "Net Salary",
                 "total" => array_sum($net_salary_array)
+            ];
+            $result["summary_total"] = [
+                "list" => $summary_total,
+                "total" => [
+                    "Allowance" => isset($summary_total["Allowance"]) ? array_sum($summary_total["Allowance"]) : 0,
+                    "Deduction" => isset($summary_total["Deduction"]) ? array_sum($summary_total["Deduction"]) : 0
+                ]
             ];
             
             return $result;

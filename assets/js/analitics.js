@@ -617,7 +617,8 @@ var salaryReport = (_salary) => {
     });
 
     let deductions_list = _salary.category.Deduction,
-        allowances_list = _salary.category.Allowance;
+        allowances_list = _salary.category.Allowance,
+        summary_total = _salary.summary_total;
     let break_down = $(`div[data-chart="full_breakdown_chart"]`);
     let table_html = `<table class="table table-bordered">
                 <thead>
@@ -626,6 +627,7 @@ var salaryReport = (_salary) => {
     $.each(deductions_list, function(i, e) {
         table_html += `<th style="color:#fff;">${i}</th>`;
     });
+    table_html += `<td style="color:#fff;" align="center">TOTAL</td>`;
     table_html += `</tr></thead><tbody>`;
 
     let deductions_totals = new Array(),
@@ -649,9 +651,8 @@ var salaryReport = (_salary) => {
             let amount = (deductions_list[ii][e].amount !== undefined) ? format_currency(deductions_list[ii][e].amount) : 0;
             table_html += `<td>${myPrefs.labels.currency}${amount}</td>`;
         });
+        table_html += `<td align="center"><strong>${myPrefs.labels.currency}${format_currency(summary_total.list.Deduction[e])}</strong></td>`;
         table_html += `</tr>`;
-
-
     });
 
     table_html += `<tr style="background-color:#f4f4f4;">`;
@@ -660,6 +661,7 @@ var salaryReport = (_salary) => {
         let _amount = format_currency(ev);
         table_html += `<td><strong>${myPrefs.labels.currency}${_amount}</strong></td>`;
     });
+    table_html += `<td align="center"><strong>${myPrefs.labels.currency}${format_currency(summary_total.total.Deduction)}</strong></td>`;
     table_html += `</tr>`;
 
     table_html += `</tbody></table>`;
@@ -669,6 +671,7 @@ var salaryReport = (_salary) => {
     $.each(allowances_list, function(i, e) {
         table_html += `<th style="color:#fff;">${i}</th>`;
     });
+    table_html += `<td align="center" style="color:#fff;">TOTAL</td>`;
     table_html += `</tr></thead><tbody>`;
     $.each(_salary.grouping.Allowance, function(i, e) {
         table_html += `<tr>`;
@@ -677,6 +680,7 @@ var salaryReport = (_salary) => {
             let amount = (allowances_list[ii][e].amount !== undefined) ? format_currency(allowances_list[ii][e].amount) : 0;
             table_html += `<td>${myPrefs.labels.currency}${amount}</td>`;
         });
+        table_html += `<td align="center"><strong>${myPrefs.labels.currency}${format_currency(summary_total.list.Allowance[e])}</strong></td>`;
         table_html += `</tr>`;
     });
 
@@ -686,6 +690,7 @@ var salaryReport = (_salary) => {
         let _amount = format_currency(ev);
         table_html += `<td><strong>${myPrefs.labels.currency}${_amount}</strong></td>`;
     });
+    table_html += `<td align="center"><strong>${myPrefs.labels.currency}${format_currency(summary_total.total.Allowance)}</strong></td>`;
     table_html += `</tr>`;
 
     table_html += `</tbody></table>`;

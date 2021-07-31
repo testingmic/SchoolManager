@@ -108,6 +108,12 @@ foreach($list_data as $key => $account) {
     </div>";
 }
 
+if(empty($list_data)) {
+    $accounts_list .= "
+        <div class='text-danger text-center col-lg-12'>Sorry! No accounts have been added yet.</div>
+    ";
+}
+
 // load the form
 $the_form = $hasUpdate ? load_class("forms", "controllers")->bank_accounts_form($params) : null;
 $response->array_stream["bank_accounts_array"] = $bank_accounts_array;

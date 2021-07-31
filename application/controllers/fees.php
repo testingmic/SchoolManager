@@ -62,7 +62,7 @@ class Fees extends Myschoolgh {
 		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id IN {$this->inList($params->class_id)}" : "";
         $filters .= isset($params->department_id) && !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : "";
         $filters .= !empty($student_id) ? " AND a.student_id IN {$this->inList($student_id)}" : "";
-        $filters .= isset($params->item_id) && !empty($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";
+        $filters .= isset($params->item_id) && !isset($params->payment_id) && !empty($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";
         $filters .= isset($params->query) && !empty($params->query) ? " AND {$params->query}" : "";
         $filters .= isset($params->programme_id) && !empty($params->programme_id) ? " AND a.programme_id='{$params->programme_id}'" : "";
         $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id IN {$this->inList($params->category_id)}" : ""; 
@@ -70,6 +70,11 @@ class Fees extends Myschoolgh {
         $filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}' AND u.academic_term='{$params->academic_term}'" : "";
         $filters .= isset($params->date) && !empty($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";
         $filters .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "recorded_date") : null;
+
+        // set the payment id
+        if(isset($params->payment_id)) {
+            $filters .= isset($params->payment_id) && !empty($params->payment_id) ? " AND (a.item_id='{$params->payment_id}' OR a.payment_id='{$params->payment_id}')" : "";
+        }
 
         // if the return_where_clause was parsed
         // then return the filters that have been pushed
@@ -1205,6 +1210,9 @@ class Fees extends Myschoolgh {
             // if the payment method is momo or card payment
             $append_sql .= ", paidin_by='".($params->email_address ?? null)."', paidin_contact='".($params->contact_number ?? null)."'";
 
+            // log the data in the statement account
+            $check_account = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1' LIMIT 1");
+
             /* Record the payment made by the user */
             if(!is_array($paymentRecord)) {
 
@@ -1245,6 +1253,29 @@ class Fees extends Myschoolgh {
 
                 // set the student name
                 $student_name = $paymentRecord->student_details["student_name"];
+
+                // if the account is not empty
+                if(!empty($check_account)) {
+
+                    // get the account unique id
+                    $account_id = $check_account[0]->item_id;
+                    
+                    // log the transaction record
+                    $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                        item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                        reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                        description = ?, academic_year = ?, academic_term = ?, balance = ?, state = 'Approved', validated_date = now()
+                    ");
+                    $stmt->execute([
+                        $payment_id, $params->clientId, $account_id, "fees", "Deposit", null, $params->amount, $params->userId, 
+                        date("Y-m-d"), $params->payment_method, "Fees Payment - for <strong>{$student_name}</strong>",
+                        $paymentRecord->academic_year, $paymentRecord->academic_term, ($check_account[0]->balance - $params->amount)
+                    ]);
+
+                    // add up to the expense
+                    $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$params->amount}), balance = (balance + {$params->amount}) WHERE item_id = '{$account_id}' LIMIT 1");
+
+                }
 
             } else {
 
@@ -1300,38 +1331,36 @@ class Fees extends Myschoolgh {
                         
                         // set a new parameter for the checkout and category id
                         $params->checkout_url = $record->checkout_url;
+
+                        // if the account is not empty
+                        if(!empty($check_account)) {
+
+                            // get the account unique id
+                            $account_id = $check_account[0]->item_id;
+                            
+                            // log the transaction record
+                            $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                                item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                                reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                                description = ?, academic_year = ?, academic_term = ?, balance = ?, state = 'Approved', validated_date = now()
+                            ");
+                            $stmt->execute([
+                                $payment_id, $params->clientId, $account_id, "fees", "Deposit", null, $total_paid, $params->userId, 
+                                date("Y-m-d"), $params->payment_method, "Fees Payment - for <strong>{$student_name}</strong>",
+                                $record->academic_year, $record->academic_term, ($check_account[0]->balance - $total_paid)
+                            ]);
+
+                            // add up to the expense
+                            $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$total_paid}), balance = (balance + {$total_paid}) WHERE item_id = '{$account_id}' LIMIT 1");
+
+                        }
+
                     }
                 }
 
                 $last_info = $this->confirm_student_payment_record($params);
                 $additional["payment"] = $last_info[count($last_info)-1];
-                $additional["uniqueId"] = $uniqueId;
-
-            }
-
-            // log the data in the statement account
-            $check = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1' LIMIT 1");
-                
-            // if the account is not empty
-            if(!empty($check)) {
-
-                // get the account unique id
-                $account_id = $check[0]->item_id;
-                
-                // log the transaction record
-                $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
-                    item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
-                    reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
-                    description = ?, academic_year = ?, academic_term = ?, balance = ?
-                ");
-                $stmt->execute([
-                    $payment_id, $params->clientId, $account_id, "fees", "Deposit", null, $params->amount, $params->userId, 
-                    date("Y-m-d"), $params->payment_method, "Fees Payment - for <strong>{$student_name}</strong>",
-                    $paymentRecord->academic_year, $paymentRecord->academic_term, ($check[0]->balance - $params->amount)
-                ]);
-
-                // add up to the expense
-                $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$params->amount}), balance = (balance + {$params->amount}) WHERE item_id = '{$account_id}' LIMIT 1");
+                $additional["uniqueId"] = $payment_id;
 
             }
 

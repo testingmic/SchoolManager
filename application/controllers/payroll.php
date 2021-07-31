@@ -12,8 +12,8 @@ class Payroll extends Myschoolgh {
         $this->iclient = $client_data;
 
         // run this query
-        $this->academic_term = $client_data->client_preferences->academics->academic_term;
-        $this->academic_year = $client_data->client_preferences->academics->academic_year;
+        $this->academic_term = $client_data->client_preferences->academics->academic_term ?? null;
+        $this->academic_year = $client_data->client_preferences->academics->academic_year ?? null;
 
         // set the colors to use for the loading of pages
         $this->color_set = [
@@ -305,6 +305,9 @@ class Payroll extends Myschoolgh {
             return ["code" => 203, "data" => "Please select a valid month to load record."];
         }
 
+        // set the employee_id
+        $params->employee_id = empty($params->employee_id) ? $params->userId : $params->employee_id;
+
         // confirm that the user_id does not already exist
 		$i_params = (object) [
             "limit" => 1, "user_id" => $params->employee_id, 
@@ -373,7 +376,7 @@ class Payroll extends Myschoolgh {
                         if($ii > 1) {
                             $allowances_list .= '
                             <div class="text-center">
-                                <button class="remove-row cursor btn btn-outline-danger" data-type="allowance" data-value="'.$ii.'"><i class="fa fa-trash"></i></button>
+                                <button class="cursor btn btn-outline-danger" onclick="return removeRow(\'allowance\',\''.$ii.'\');"><i class="fa fa-trash"></i></button>
                             </div>';
                         }
                 $allowances_list .= '</div></div>';
@@ -431,7 +434,7 @@ class Payroll extends Myschoolgh {
                         if($ii > 1) {
                             $deductions_list .= '
                             <div class="text-center">
-                                <button class="remove-row cursor btn btn-outline-danger" data-type="deductions" data-value="'.$ii.'"><i class="fa fa-trash"></i></button>
+                                <button class="cursor btn btn-outline-danger" onclick="return removeRow(\'deductions\',\''.$ii.'\');"><i class="fa fa-trash"></i></button>
                             </div>';
                         }
                 $deductions_list .= '</div></div>';

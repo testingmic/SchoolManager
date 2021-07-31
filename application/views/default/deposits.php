@@ -67,7 +67,10 @@ foreach($transactions_list as $key => $transaction) {
 
     $list_transactions .= "<tr data-row_id=\"{$transaction->item_id}\">";
     $list_transactions .= "<td>{$count}</td>";
-    $list_transactions .= "<td>{$checkbox} <label class='cursor' for='check_{$transaction->item_id}'>{$transaction->account_name}</label></td>";
+    $list_transactions .= "<td>{$checkbox}
+    <label class='cursor' for='check_{$transaction->item_id}'>
+        {$transaction->account_name}
+    </label></td>";
     $list_transactions .= "<td>{$transaction->account_type_name}</td>";
     $list_transactions .= "<td>{$transaction->reference}</td>";
     $list_transactions .= "<td>".ucfirst($transaction->payment_medium)."</td>";

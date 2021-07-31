@@ -42,8 +42,13 @@ foreach($transactions_list as $key => $transaction) {
 
     $list_transactions .= "<tr>";
     $list_transactions .= "<td>{$count}</td>";
-    $list_transactions .= "<td>{$transaction->account_name}</td>";
-    $list_transactions .= "<td>{$transaction->item_type}</td>";
+    $list_transactions .= "<td>
+        <strong>
+            {$transaction->account_name} 
+                <br> {$transaction->account_bank}
+                <br> {$transaction->account_number}
+        </strong>
+    </td>";
     $list_transactions .= "<td>{$transaction->account_type_name}</td>";
     $list_transactions .= "<td>{$transaction->reference}</td>";
     $list_transactions .= "<td>".ucfirst($transaction->payment_medium)."</td>";
@@ -81,7 +86,6 @@ $response->html = '
                                             <thead>
                                                 <th></th>
                                                 <th>Account Name</th>
-                                                <th>Type</th>
                                                 <th>Account Type Head</th>
                                                 <th>Ref No.</th>
                                                 <th>Pay Via</th>

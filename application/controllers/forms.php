@@ -3794,7 +3794,7 @@ class Forms extends Myschoolgh {
         $forms = [];
 
         // get the list of banks
-        $banks_list = $this->pushQuery("id, bank_name, phone_number", "fees_collection_banks", "1 ORDER BY bank_name");
+        $banks_list = $this->pushQuery("id, bank_name, phone_number", "banks_list", "1 ORDER BY bank_name");
         
         $bank = '
         <form class="ajax-data-form" action="'.$this->baseUrl.'api/payroll/paymentdetails" method="POST" id="ajax-data-form-content">
@@ -4122,7 +4122,7 @@ class Forms extends Myschoolgh {
                                     <div class="col-lg-4 text-right font-weight-bold">Payment Mode:</div>
                                     <div class="col-lg-8">
                                         <div class="input-group mb-3">
-                                            <select name="payment_mode" id="payment_mode" class="form-control selectpicker2">
+                                            <select name="payment_mode" id="payment_mode" class="form-control selectpicker">
                                                 <option value="null">Select</option>
                                                 <option value="Bank">Bank</option>
                                                 <option value="Cash">Cash</option>
@@ -4134,7 +4134,7 @@ class Forms extends Myschoolgh {
                                     <div class="col-lg-4 text-right font-weight-bold">Status:</div>
                                     <div class="col-lg-8">
                                         <div class="input-group mb-3">
-                                            <select name="payment_status" id="payment_status" class="form-control selectpicker2">
+                                            <select name="payment_status" id="payment_status" class="form-control selectpicker">
                                                 <option value="1">Paid</option>
                                                 <option value="0">Unpaid</option>
                                             </select>
@@ -4398,7 +4398,7 @@ class Forms extends Myschoolgh {
         $data = isset($params->data) && !empty($params->data) ? $params->data : null;
 
         // get the list of banks
-        $banks_list = $this->pushQuery("id, bank_name, phone_number", "fees_collection_banks", "1 ORDER BY bank_name");
+        $banks_list = $this->pushQuery("id, bank_name, phone_number", "banks_list", "1 ORDER BY bank_name");
 
         $html = "";
         $html .= "<div id=\"accounts_form\" class=\"col-12 col-md-5 col-lg-4\">";

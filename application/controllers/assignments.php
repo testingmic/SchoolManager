@@ -1629,7 +1629,7 @@ class Assignments extends Myschoolgh {
         $data = $params->data;
         $update_log = $data["assignment_id"] ?? null;
 
-        $state = $data["mode"] == "close" ? "Close" : "Graded";
+        $state = $data["mode"] == "close" ? "Closed" : "Graded";
 
         // return error
         if(!empty($not_found)) {

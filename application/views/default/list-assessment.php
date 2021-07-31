@@ -61,6 +61,11 @@ foreach($item_list["data"] as $key => $each) {
         $action .= "&nbsp;<a title='Click to manage questions for this assignment' href='#' onclick='return loadPage(\"{$baseUrl}add-assignment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
     }
 
+    // if the state is either closed or graded
+    if(in_array($each->state, ["Closed", "Graded"])) {
+        $action .= "&nbsp;<a href='#' title='Click to view student marks this Assignment' onclick='return view_marks(\"{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-list'></i></a>";
+    }
+
     if($hasDelete && in_array($each->state, ["Pending", "Draft"])) {
         $action .= "&nbsp;<a href='#' title='Click to delete this Assignment' onclick='return delete_record(\"{$each->id}\", \"assignments\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }

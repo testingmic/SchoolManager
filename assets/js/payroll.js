@@ -1,9 +1,6 @@
-var removeRow = () => {
-    $(`span[class~="remove-row"]`).on('click', function() {
-        let type = $(this).attr('data-type');
-        let rowId = $(this).attr('data-value');
-        $(`div[class~="${type}-div"] [data-row="${rowId}"]`).remove();
-    });
+var removeRow = (type, rowId) => {
+    $(`div[class~="${type}-div"] [data-row="${rowId}"]`).remove();
+    triggerCalculator(type);
 }
 
 var addDeductions = () => {
@@ -29,7 +26,7 @@ var addDeductions = () => {
                         <input placeholder="Amount" min="0" max="20000" class="form-control" type="text" name="deductions_amount[]" id="deductions_amount_${dlastRow}">
                     </div>
                     <div class="text-center">
-                        <span class="remove-row cursor btn btn-outline-danger" data-type="deductions" data-value="${dlastRow}"><i class="fa fa-trash"></i></span>
+                        <span class="remove-row cursor btn btn-outline-danger" onclick="return removeRow('deductions','${dlastRow}');"><i class="fa fa-trash"></i></span>
                     </div>
                 </div>
             </div>
@@ -37,7 +34,6 @@ var addDeductions = () => {
         if ($(`div[class~="deductions-list"]`).length) {
             deductionsKeyControl();
         }
-        removeRow();
     });
 }
 
@@ -64,7 +60,7 @@ var addAllowance = () => {
                         <input placeholder="Amount" min="0" max="20000" class="form-control" type="text" name="allowance_amount[]" id="allowance_amount_${lastRowId}">
                     </div>
                     <div class="text-center">
-                        <span class="remove-row cursor btn btn-outline-danger" data-type="allowance" data-value="${lastRowId}"><i class="fa fa-trash"></i></span>
+                        <span class="remove-row cursor btn btn-outline-danger" onclick="return removeRow('allowance','${lastRowId}');"><i class="fa fa-trash"></i></span>
                     </div>
                 </div>
             </div>
@@ -72,7 +68,6 @@ var addAllowance = () => {
         if ($(`div[class~="allowances-list"]`).length) {
             allowanceKeyControl();
         }
-        removeRow();
     });
 }
 
@@ -122,16 +117,12 @@ var deductionsKeyControl = () => {
     });
 }
 
-var triggerCalculator = () => {
-    $(`span[class~="remove-row"]`).on('click', function() {
-        let type = $(this).attr('data-type');
-        let rowId = $(this).attr('data-value');
-        if (type == "allowance") {
-            recalculateAllowance();
-        } else {
-            recalculateDeductions();
-        }
-    });
+var triggerCalculator = (type = "allowance") => {
+    if (type == "allowance") {
+        recalculateAllowance();
+    } else {
+        recalculateDeductions();
+    }
 }
 
 var save_staff_allowances = () => {
@@ -341,7 +332,6 @@ var load_employee_payslip = () => {
 
             addAllowance();
             addDeductions();
-            removeRow();
             allowanceKeyControl();
             deductionsKeyControl();
             triggerCalculator();
@@ -359,7 +349,6 @@ var load_employee_payslip = () => {
 }
 
 if ($(`input[id^="deductions_amount_"]`).length) {
-    removeRow();
     addAllowance();
     addDeductions();
 }
