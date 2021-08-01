@@ -25,6 +25,7 @@ $response->scripts = ["assets/js/filters.js"];
 
 // the query parameter to load the user information
 $assignments_param = (object) [
+    "show_marks" => true,
     "clientId" => $clientId,
     "userData" => $defaultUser,
     "department_id" => $filter->department_id ?? null,
@@ -53,8 +54,10 @@ $color = [
 
 // unset the sessions if $session->currentQuestionId is not empty
 $assignments = "";
+$assessment_array = [];
 foreach($item_list["data"] as $key => $each) {
     
+    $assessment_array[$each->item_id] = $each;
     $action = "<a title='Click to update assignment record' href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate && $each->assignment_type == "multiple_choice") {
@@ -63,7 +66,7 @@ foreach($item_list["data"] as $key => $each) {
 
     // if the state is either closed or graded
     if(in_array($each->state, ["Closed", "Graded"])) {
-        $action .= "&nbsp;<a href='#' title='Click to view student marks this Assignment' onclick='return view_marks(\"{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-list'></i></a>";
+        $action .= "&nbsp;<a href='#' title='Click to view student marks this Assignment' onclick='return view_AssessmentMarks(\"{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-list'></i></a>";
     }
 
     if($hasDelete && in_array($each->state, ["Pending", "Draft"])) {
@@ -122,6 +125,8 @@ if(!empty($filter->class_id)) {
     ];
     $courses_list = load_class("courses", "controllers")->list($courses_param)["data"];
 }
+
+$response->array_stream["assessment_array"] = $assessment_array;
 
 $response->html = '
     <section class="section">

@@ -960,7 +960,19 @@ class Accounting extends Myschoolgh {
                     // get an array of the items
                     $income_array = array_column($income_heads["Deposit"], "item_id");
                     $expense_array = array_column($income_heads["Expense"], "item_id");
-                    
+
+                    // add the fees and payroll to the list
+                    $income_heads["Deposit"][] = (object) [
+                        "item_id" => "fees_payment",
+                        "name" => "Fees",
+                        "description" => "This is the general category for the fees."
+                    ];
+                    $income_heads["Expense"][] = (object) [
+                        "item_id" => "payslip",
+                        "name" => "Payroll",
+                        "description" => "This is the general category for the payroll recording."
+                    ];
+
                     // line totals
                     $line_total = [];
 
@@ -1020,7 +1032,8 @@ class Accounting extends Myschoolgh {
 
                                             // get the name 
                                             $item_amount = isset($months_data[$item][$month][$type->item_id]) ? $months_data[$item][$month][$type->item_id]->total_sum : 0;
-                                            
+                                            // print_r($months_data[$item]["July"][$type->item_id]);
+
                                             if(isset($months_data[$item][$month][$type->item_id])) {
                                                 if($months_data[$item][$month][$type->item_id]->account_type === $type->item_id) {
                                                     $item_content .= "<td style='border:solid 1px #dee2e6;font-size:13px;' align='right'>".number_format($item_amount, 2)."</td>\n";
@@ -1073,14 +1086,18 @@ class Accounting extends Myschoolgh {
                     // group the total values
                     $total = [];
                     foreach(["Deposit", "Expense"] as $item) {
-                        foreach($line_total[$item] as $key => $value) {
-                            if(isset($total[$item])) {
-                                $total[$item] += array_sum($value);
-                            } else {
-                                $total[$item] = array_sum($value);
+                        if(isset($line_total[$item])) {
+                            foreach($line_total[$item] as $key => $value) {
+                                if(isset($total[$item])) {
+                                    $total[$item] += array_sum($value);
+                                } else {
+                                    $total[$item] = array_sum($value);
+                                }
                             }
                         }
                     }
+                    $total["Expense"] = $total["Expense"] ?? 0;
+                    $total["Deposit"] = $total["Deposit"] ?? 0;
 
                     // summary of each item
                     $html_content .= "

@@ -382,6 +382,30 @@ var validate_transaction = (record_id, redirect) => {
     });
 }
 
+var view_AssessmentMarks = (assessment_id) => {
+    if ($.array_stream["assessment_array"][assessment_id] !== undefined) {
+        let assessment = $.array_stream["assessment_array"][assessment_id],
+            students_list = `<div class="row">`;
+        $.each(assessment.marks_list, function(i, e) {
+            students_list += `
+            <div class="col-md-6 mb-2">
+                <div class="d-flex justify-content-start">
+                    <div class="mr-2"><img class="rounded-circle cursor author-box-picture" width="60px" src="${baseUrl}${e.student_image}"></div>
+                    <div>
+                        <h5 class="p-0 m-0">${e.student_name}</h5>
+                        <p class="p-0 m-0">Marks: ${e.score}</p>
+                        <p class="p-0 m-0"><i class="fa fa-calendar"></i> ${e.date_submitted}</p>
+                    </div>
+                </div>
+            </div>`;
+        });
+        students_list += `</div>`;
+
+        $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html(students_list);
+        $(`div[id="viewOnlyModal"]`).modal("show");
+    }
+}
+
 $(`div[class~="settingSidebar"] input[name="dictionary"]`).on("keyup", function(evt) {
     let search_term = $(this).val();
     if (evt.keyCode == 13 && !evt.shiftKey) {

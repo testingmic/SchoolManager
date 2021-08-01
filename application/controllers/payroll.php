@@ -528,7 +528,7 @@ class Payroll extends Myschoolgh {
     public function generatepayslip(stdClass $params) {
 
         // global variable
-        global $usersClass, $accessObject;
+        global $usersClass, $accessObject, $noticeClass;
 
         if(!$accessObject->hasAccess("generate", "payslip")) {
             return ["code" => 203, "data" => "Sorry! You do not have the permissions to generate a payslip."];
@@ -663,6 +663,23 @@ class Payroll extends Myschoolgh {
 
                 // log the user activity
                 $this->userLogs("payslip", $params->employee_id, null, "<strong>{$params->userData->name}</strong> generated a payslip for: <strong>{$data->name}</strong> for the month: <strong>{$params->month_id} {$params->year_id}</strong>", $params->userId);
+
+                // form the notification parameters
+                $item_param = (object) [
+                    '_item_id' => $item_id,
+                    'user_id' => $params->employee_id,
+                    'subject' => "PaySlip for: {$params->month_id} {$params->year_id}",
+                    'username' => $data->name,
+                    'remote' => false, 
+                    'message' => "Your Payslip for <strong>{$params->month_id} {$params->year_id}</strong> has been generated successfully. Visit the payslips page to view it.",
+                    'notice_type' => 12,
+                    'userId' => $params->userId,
+                    'clientId' => $params->clientId,
+                    'initiated_by' => 'system'
+                ];
+
+                // add a new notification
+                $noticeClass->add($item_param);
 
             } else {
                 /** Payslip details */

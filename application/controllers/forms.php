@@ -4507,7 +4507,7 @@ class Forms extends Myschoolgh {
         }
 
         // load the accounts
-        $accounts_list = $this->pushQuery("account_name, item_id, account_number", "accounts", "client_id = '{$params->clientId}' AND status='1'");
+        $accounts_list = $this->pushQuery("account_name, item_id, account_number, account_bank, default_account", "accounts", "client_id = '{$params->clientId}' AND status='1'");
         $accounts_head_list = $this->pushQuery("name, item_id", "accounts_type_head", "client_id = '{$params->clientId}' AND status='1' AND type='{$form_route[$params->route]["type"]}'");
 
         $html = "
@@ -4530,7 +4530,7 @@ class Forms extends Myschoolgh {
                                     $html .= "<option value=\"\">Select Account</option>";
                                 }
                                 foreach($accounts_list as $account) {
-                                   $html .= "<option ".(!empty($data) && $account->item_id === $data->account_id ? "selected" : null)." value=\"{$account->item_id}\">{$account->account_name}</option>"; 
+                                   $html .= "<option ".((!empty($data) && $account->item_id === $data->account_id) || $account->default_account ? "selected" : null)." value=\"{$account->item_id}\">{$account->account_name} - {$account->account_bank}</option>"; 
                                 }
                             $html .= "</select>
                             <input type=\"hidden\" readonly value=\"".($data->item_id ?? null)."\" name=\"transaction_id\" class=\"form-control\">

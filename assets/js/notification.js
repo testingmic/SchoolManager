@@ -13,7 +13,7 @@ var load_notifications = (userId = null) => {
                         }
                     }
                     notifications += `
-                    <a href="" data-notice_id="${e.item_id}" class="notification dropdown-item dropdown-item-${state}">
+                    <a href="#" data-notice_id="${e.item_id}" class="${state == "unread" ? "notification" : ""} dropdown-item dropdown-item-${state}">
                         <span class="dropdown-item-icon ${e.favicon_color} text-white">
                             <i class="fas ${e.favicon}"></i>
                         </span>

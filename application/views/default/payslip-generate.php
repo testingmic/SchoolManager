@@ -70,7 +70,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                     <select data-width="100%" class="form-control selectpicker" name="month_id">
                                         <option value="">Please Select </option>';
                                         for($i = 0; $i < 12; $i++) {
-                                            $month = date("F", strtotime("January +{$i} month"));
+                                            $month = date("F", strtotime("December +{$i} month 3 day"));
                                             $response->html .= "<option ".(($month == date("F")) ? "selected" : "")." value=\"{$month}\">{$month}</option>";                            
                                         }
                                         $response->html .= '

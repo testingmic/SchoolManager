@@ -116,9 +116,9 @@ class Notification extends Myschoolgh {
                 INSERT users_notification SET date_created=now()
                 ".(isset($params->_item_id) ? ", item_id='{$params->_item_id}'" : null)."
                 ".(isset($params->user_id) ? ", user_id='{$params->user_id}'" : null)."
-                ".(isset($params->subject) ? ", subject='{$params->subject}'" : null)."
+                ".(isset($params->subject) ? ', subject="'.$params->subject.'"' : null)."
                 ".(isset($params->clientId) ? ", client_id='{$params->clientId}'" : null)."
-                ".(isset($params->message) ? ", message='{$params->message}'" : null)."
+                ".(isset($params->message) ? ', message="'.$params->message.'"' : null)."
                 ".(isset($params->initiated_by) ? ", initiated_by='{$params->initiated_by}'" : null)."
                 ".(isset($params->notice_type) ? ", notice_type='{$params->notice_type}'" : null)."
                 ".(isset($params->userId) ? ", created_by='{$params->userId}'" : null)."
@@ -131,7 +131,7 @@ class Notification extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            return false;
+            return;
         }
 
     }

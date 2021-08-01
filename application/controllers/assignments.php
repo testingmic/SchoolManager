@@ -89,6 +89,7 @@ class Assignments extends Myschoolgh {
             $stmt->execute([1]);
 
             $isMinified = isset($params->minified) ? true : false;
+            $showMarks = isset($params->show_marks) ? true : false;
 
             $data = [];
 
@@ -153,6 +154,10 @@ class Assignments extends Myschoolgh {
                     }
                 }
 
+                if($showMarks && in_array($result->state, ["Closed", "Graded"])) {
+                    $result->marks_list = $this->marks_list($result->item_id);
+                }
+
                 $data[] = $result;
             }
 
@@ -162,6 +167,28 @@ class Assignments extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {} 
+
+    }    
+
+    /**
+     * Return the Marks Obtained by Students 
+     * 
+     * @param String    $assignment_id
+     * 
+     * @return Array
+     */
+    public function marks_list($assignment_id) {
+
+        // make the request
+        $marks_list = $this->pushQuery(
+            "a.student_id, 
+                (SELECT u.name FROM users u WHERE u.item_id=a.student_id LIMIT 1) AS student_name, 
+                (SELECT u.image FROM users u WHERE u.item_id=a.student_id LIMIT 1) AS student_image, 
+                a.score, a.handed_in, a.graded, a.date_submitted", 
+            "assignments_submitted a", "a.assignment_id='{$assignment_id}'"
+        );
+
+        return $marks_list;
 
     }
 
