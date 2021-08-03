@@ -53,11 +53,11 @@ foreach($password_requests as $key => $request) {
             <td>{$request->fullname} <span class='badge p-1 badge-{$color[$request->token_status]}'>{$request->user_role}</span></td>
             <td>{$request->request_date}</td>
             <td>{$request->reset_agent}</td>
-            <td><span class='font-weight-bold text-{$color[$request->token_status]}'>{$request->token_status}</span></td>
+            <td><span id='change_status_{$request->item_id}' class='font-weight-bold text-{$color[$request->token_status]}'>{$request->token_status}</span></td>
             <td align='center'>
                 ".(in_array($request->token_status, ["PENDING"]) ? 
                     "<div class='change_password_{$request->item_id}'>
-                        <button class='btn btn-outline-success p-1 pl-2 pr-2 mr-1 mb-1'><i class='fa fa-lock'></i> Change</outline>
+                        <button onclick='return show_ChangePasword_Form(\"{$request->item_id}\", \"{$request->request_token}\")' class='btn btn-outline-success p-1 pl-2 pr-2 mr-1 mb-1'><i class='fa fa-lock'></i> Change</outline>
                         <button onclick='return cancel_ChangePassword(\"{$request->item_id}\")' class='btn btn-outline-danger p-1 pl-2 pr-2 mb-1'><i class='fa fa-trash'></i> Cancel</button>
                     </div>" : 
                     null
@@ -121,7 +121,38 @@ $response->html = '
                 </div>
             </div>
         </div>
-    </section>';
+    </section>
+    <div class="modal fade" id="change_Password" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-top modal-md" style="width:100%;height:100%;" role="document">
+            <div class="modal-content">
+                <div class="form-content-loader" style="display: none; position: absolute">
+                    <div class="offline-content text-center">
+                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                    </div>
+                </div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Change Password</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body mb-0 pb-0">
+                    <div class="form-group mb-1">
+                        <label>Password</label>
+                        <input autocomplete="Off" type="text" name="password" id="password" class="form-control">
+                    </div>
+                    <div class="form-group pb-0 mb-0">
+                        <label>Confirm Password</label>
+                        <input autocomplete="Off" type="text" name="password_2" id="password_2" class="form-control">
+                    </div>      
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" name="token">
+                    <input type="hidden" name="request_id">
+                    <button onclick="return change_Password();" class="btn btn-outline-success">Change Password</button>
+                    <button onclick="return cancel_ChangePasword_Form();" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>';
     
 // print out the response
 echo json_encode($response);

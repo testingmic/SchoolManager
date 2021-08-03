@@ -1038,4 +1038,108 @@ class Auth extends Myschoolgh {
 
     }
 
+
+    /**
+     * Password Manager Control
+     * 
+     * @param Array $params->data       This contains all the required data
+     * 
+     * @return Array
+     */
+    public function password_manager(stdClass $params) {
+
+        try {
+
+            global $noticeClass;
+
+            if(!is_array($params->data)) {
+                return ["code" => 203, "data" => "Sorry! Invalid data parsed."];
+            }
+
+            // confirm that the request and request id were parsed
+            if(!isset($params->data["request"]) || !isset($params->data["request_id"])) {
+                return ["code" => 203, "data" => "Sorry! Invalid data parsed."];
+            }
+
+            // set parameters
+            $request = $params->data["request"];
+            $request_id = $params->data["request_id"];
+
+            if(!in_array($request, ["change", "cancel", "resend"])) {
+                return ["code" => 203, "data" => "Sorry! Invalid data parsed."];
+            }
+
+            // check
+            $check = $this->pushQuery("id, user_id, username", "users_reset_request", "item_id = '{$request_id}' LIMIT 1");
+
+            // confirm that the request exists
+            if(empty($check)) {
+                return ["code" => 203, "data" => "Sorry! Invalid request id was parsed for processing."];
+            }
+
+            // if the request is cancel
+            if($request == "cancel") {
+                $this->db->query("UPDATE users_reset_request SET request_token = NULL, token_status = 'ANNULED' WHERE item_id = '{$request_id}' LIMIT 1");
+            }
+
+            // change password
+            elseif($request == "change") {
+
+                // if the password parameter was not parsed
+                if(!isset($params->data["password"]) || !isset($params->data["password_2"])) {
+                    return ["code" => 203, "data" => "Sorry! The password parameter is request."];
+                }
+                // if the password is empty
+                if(empty($params->data["password"]) || empty($params->data["password_2"])) {
+                    return ["code" => 203, "data" => "Sorry! The password parameter cannot be empty."];
+                }
+                // password test
+                if(!passwordTest($params->data["password"])) {
+                    return ["code" => 203, "data" => $this->password_ErrorMessage_2 ];
+                }
+                // confirm if the passwords match
+                if($params->data["password"] !== $params->data["password_2"]) {
+                    return ["code" => 203, "data" => "Sorry! The passwords supplied does not match."];
+                }
+
+                // change the password
+                $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE item_id = ? AND client_id = ? LIMIT 10");
+                $stmt->execute([password_hash($params->data["password"], PASSWORD_DEFAULT), $check[0]->user_id, $params->clientId]);
+
+                // update the table
+                $ip = ip_address();
+                $br = $this->browser." ".$this->platform;
+
+                // process the form
+                $stmt = $this->db->query("UPDATE users_reset_request SET request_token=NULL, reset_date=now(), reset_agent='{$br}|{$ip}', token_status='USED', expiry_time='".time()."' WHERE item_id='{$request_id}' LIMIT 1");
+
+                // form the notification parameters
+                $item_param = (object) [
+                    '_item_id' => $request_id,
+                    'user_id' => $check[0]->user_id,
+                    'subject' => "Password Change",
+                    'username' => $check[0]->username,
+                    'remote' => false, 
+                    'message' => "Your password was successfully changed by <strong>{$params->userData->name}.",
+                    'notice_type' => 4,
+                    'userId' => $params->userId,
+                    'clientId' => $params->clientId,
+                    'initiated_by' => 'system'
+                ];
+
+                // add a new notification
+                $noticeClass->add($item_param);
+            }
+
+            return [
+                "additional" => ["request" => $request],
+                "data" => "Password change request successfully cancelled."
+            ];
+
+
+        } catch(PDOException $e) {
+
+        }
+
+    }
 }
