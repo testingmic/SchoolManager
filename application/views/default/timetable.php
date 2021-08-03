@@ -150,8 +150,8 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
                                                     </p>
                                                     <p class='clearfix pb-0 mb-2 text-right'>
                                                         <a href='#' onclick='return delete_record(\"{$value->item_id}\", \"timetable\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Delete</a>
-                                                        ".($isPermitted ? "<a href='{$baseUrl}timetable-allocate/{$value->item_id}' class='btn btn-outline-warning btn-sm'><i class='fa fa-copy'></i> Allocate</a>" : null)."
-                                                        <a class='btn btn-outline-primary btn-sm' href='{$baseUrl}timetable/{$value->item_id}'><i class='fa fa-edit'></i> Modify</a>
+                                                        ".($isPermitted ? "<a href='{$baseUrl}timetable-allocate/{$value->item_id}' title='Allocate subjects / courses to each time.' class='btn btn-outline-warning btn-sm'><i class='fa fa-copy'></i> Allocate</a>" : null)."
+                                                        <a class='btn btn-outline-primary btn-sm' href='{$baseUrl}timetable/{$value->item_id}' title='Modify the timetable structure.'><i class='fa fa-edit'></i> Modify</a>
                                                     </p>
                                                 </div>
                                             ";
@@ -165,11 +165,8 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
                                 <div class="col-lg-'.($timetable_found ? 12 : 9).' mb-3">
                                     <div class="row">
                                         <div class="col-xl-4 col-md-4 col-12 form-group">
-                                            <div class="input-group mb-3">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Class</span>
-                                                </div>
-                                                <select class="form-control" name="class_id">
+                                            <div class="mb-1">
+                                                <select class="form-control selectpicker" data-width="100%" name="class_id">
                                                     <option value="">Please Select Class</option>';
                                                     foreach($class_list as $each) {
                                                         $response->html .= "<option ".($class_id == $each->item_id ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";
@@ -179,39 +176,39 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
                                             </div>
                                         </div>
                                         <div class="col-md-8">
-                                            <div class="input-group mb-3">
+                                            <div class="input-group mb-3" title="Timetable name eg. JHS 4 Timetable">
                                                 <div class="input-group-prepend">
-                                                    <span class="input-group-text">Timetable Name<span class="required">*</span></span>
+                                                    <span class="input-group-text">Name<span class="required">*</span></span>
                                                 </div>
                                                 <input type="text" value="'.($d_name ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="name" id="name">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="input-group mb-3">
+                                            <div class="input-group mb-3" title="Start time for lesson each day.">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Start Time<span class="required">*</span></span>
                                                 </div>
-                                                <input type="time" value="'.($d_time ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="start_time" id="start_time">
+                                                <input max="22:00" type="time" value="'.($d_time ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="start_time" id="start_time">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="input-group mb-3">
+                                            <div class="input-group mb-3" title="Number of Slots / Lessons per day">
                                                 <div class="input-group-prepend">
-                                                    <span class="input-group-text">No. of Slots<span class="required">*</span></span>
+                                                    <span class="input-group-text">Slots<span class="required">*</span></span>
                                                 </div>
                                                 <input type="number" pattern="[0-9]{1,2}" value="'.($d_slots ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="slots" id="slots">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="input-group mb-3">
+                                            <div class="input-group mb-3" title="Number of Days in the Week for Class">
                                                 <div class="input-group-prepend">
-                                                    <span class="input-group-text">No. of Days<span class="required">*</span></span>
+                                                    <span class="input-group-text">Days<span class="required">*</span></span>
                                                 </div>
                                                 <input type="number" pattern="[0-7]{1,2}" value="'.($d_days ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="days" id="days">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <div class="input-group mb-3">
+                                            <div class="input-group mb-3" title="Duration for each lesson in minutes">
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Duration<span class="required">*</span></span>
                                                 </div>

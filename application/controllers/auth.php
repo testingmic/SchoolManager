@@ -543,7 +543,7 @@ class Auth extends Myschoolgh {
                         $stmt = $this->db->prepare("INSERT INTO users_reset_request SET 
                             item_id = '{$random_string}', username='{$username}', user_id='{$user_id}', 
                             request_token='{$request_token}', user_agent='{$br}|{$ip}', 
-                            expiry_time='{$expiry_time}'
+                            expiry_time='{$expiry_time}', client_id = '{$results->client_id}'
                         ");
                         $stmt->execute();
                         

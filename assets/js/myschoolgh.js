@@ -385,21 +385,70 @@ var validate_transaction = (record_id, redirect) => {
 var view_AssessmentMarks = (assessment_id) => {
     if ($.array_stream["assessment_array"][assessment_id] !== undefined) {
         let assessment = $.array_stream["assessment_array"][assessment_id],
-            students_list = `<div class="row">`;
+            students_list = `<div class="row">
+                <div class="col-lg-12 mb-3">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th colspan="3"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-weight-bold">Subject:</td>
+                                <td colspan="3">${assessment.assignment_title} 
+                                    <strong class='badge p-1 pr-2 pl-2 badge-${assessment.assignment_group_label}'>
+                                        ${assessment.assignment_group}
+                                    </strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Class:</td>
+                                <td>${assessment.class_name}</td>
+                                <td class="font-weight-bold">Course/Subject:</td>
+                                <td>${assessment.course_name}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Date Published:</td>
+                                <td>${assessment.date_published}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Student Name</th>
+                            <th>Date Submitted</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
         $.each(assessment.marks_list, function(i, e) {
             students_list += `
-            <div class="col-md-6 mb-2">
-                <div class="d-flex justify-content-start">
-                    <div class="mr-2"><img class="rounded-circle cursor author-box-picture" width="60px" src="${baseUrl}${e.student_image}"></div>
-                    <div>
-                        <h5 class="p-0 m-0">${e.student_name}</h5>
-                        <p class="p-0 m-0">Marks: ${e.score}</p>
-                        <p class="p-0 m-0"><i class="fa fa-calendar"></i> ${e.date_submitted}</p>
+                <tr>
+                    <td></td>
+                    <td>
+                    <div class="d-flex justify-content-start">
+                        <div class="mr-2">
+                            <img class="rounded-circle cursor author-box-picture" width="40px" src="${baseUrl}${e.student_image}">
+                        </div>
+                        <div>
+                            <h6 class="p-0 m-0">${e.student_name}</h6>
+                            <p>${e.unique_id}</p>
+                        </div> 
                     </div>
-                </div>
-            </div>`;
+                    </td>
+                    <td>${e.date_submitted}</td>
+                    <td>${e.score}</td>
+                </tr>`;
         });
-        students_list += `</div>`;
+        students_list += `
+                </tbody>
+            </table>
+        </div>`;
 
         $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html(students_list);
         $(`div[id="viewOnlyModal"]`).modal("show");

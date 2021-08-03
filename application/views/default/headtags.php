@@ -63,6 +63,7 @@ if(!isset($userPrefs->messages)) {
 
 // if the user has the permission to end the academic term
 $endPermission = $accessObject->hasAccess("close", "settings");
+$changePassword = $accessObject->hasAccess("change_password", "permissions");
 
 // load the helper
 load_helpers(['menu_helper']);
@@ -265,6 +266,11 @@ load_helpers(['menu_helper']);
                         <?php if($accessObject->hasAccess("manage", "settings") && $isSchool) { ?>
                         <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon">
                             <i class="fas fa-cog"></i> Settings
+                        </a>
+                        <?php } ?>
+                        <?php if($changePassword) { ?>
+                        <a href="<?= $baseUrl ?>password_manager" class="dropdown-item has-icon">
+                            <i class="fas fa-key"></i> Password Manager
                         </a>
                         <?php } ?>
                         <?php if($accessObject->hasAccess("close", "settings") && $isSchool) { ?>

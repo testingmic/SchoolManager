@@ -57,6 +57,7 @@ $assignments = "";
 $assessment_array = [];
 foreach($item_list["data"] as $key => $each) {
     
+    $each->assignment_group_label = $color[$each->assignment_group];
     $assessment_array[$each->item_id] = $each;
     $action = "<a title='Click to update assignment record' href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 

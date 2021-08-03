@@ -181,11 +181,10 @@ class Assignments extends Myschoolgh {
 
         // make the request
         $marks_list = $this->pushQuery(
-            "a.student_id, 
-                (SELECT u.name FROM users u WHERE u.item_id=a.student_id LIMIT 1) AS student_name, 
-                (SELECT u.image FROM users u WHERE u.item_id=a.student_id LIMIT 1) AS student_image, 
+            "a.student_id, u.name AS student_name, u.image AS student_image, u.unique_id,
                 a.score, a.handed_in, a.graded, a.date_submitted", 
-            "assignments_submitted a", "a.assignment_id='{$assignment_id}'"
+            "assignments_submitted a LEFT JOIN users u ON u.item_id = a.student_id", 
+            "a.assignment_id='{$assignment_id}'"
         );
 
         return $marks_list;

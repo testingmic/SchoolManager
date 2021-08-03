@@ -235,7 +235,7 @@ if(!empty($user_id)) {
                             $level_data .= "<div class='col-lg-3 col-md-4'>";
                             $level_data .= "<input {$isDisabled} checked='checked' type='checkbox' id='access_level[$key][$nkey]' class='brands-checkbox' name='access_level[$key][$nkey][]'>";
                         }
-                        $level_data .= "<label class='cursor' for='access_level[$key][$nkey]'> &nbsp; ".ucfirst($nkey)."</label>";
+                        $level_data .= "<label class='cursor' for='access_level[$key][$nkey]'> &nbsp; ".ucwords(str_ireplace("_", " ", $nkey))."</label>";
                         $level_data .= "</div>";
                         
                     }
@@ -418,7 +418,7 @@ if(!empty($user_id)) {
                                     <div class="row">
                                         <input type="hidden" readonly name="user_id" id="user_id" value="'.$user_id.'">
                                         <div class="col-lg-12 text-right">
-                                            <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> Save Permissions</button>
+                                            <button type="submit" '.$isDisabled.' class="btn btn-success"><i class="fa fa-save"></i> Save Permissions</button>
                                         </div>
                                     </div>
                                 </form>

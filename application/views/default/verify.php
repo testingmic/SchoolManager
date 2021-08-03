@@ -209,7 +209,8 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
                         // generate the
                         $stmt = $myschoolgh->prepare("INSERT INTO users_reset_request SET
                           item_id = '{$random_string}', username='{$result->username}', user_id='{$result->user_id}', 
-                          request_token='{$request_token}', user_agent='{$br}|{$ip}', expiry_time='{$expiry_time}'
+                          request_token='{$request_token}', user_agent='{$br}|{$ip}', expiry_time='{$expiry_time}',
+                          client_id = '{$result->client_id}'
                         ");
                         $stmt->execute();
 
