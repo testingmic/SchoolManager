@@ -23,11 +23,15 @@ $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = ["assets/js/password.js"];
 
 $change_requests = "";
+$search_term = isset($_GET["lookup"]) ? xss_clean($_GET["lookup"]) : null;
 
 // load the list of all reset requests
 $password_requests = $myClass->pushQuery(
-    "a.*, (SELECT b.name FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS fullname,
-    (SELECT b.user_type FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_role", 
+    "a.*, 
+    (SELECT b.name FROM users b WHERE b.item_id = a.changed_by LIMIT 1) AS changed_by_name,
+    (SELECT b.name FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS fullname,
+    (SELECT b.user_type FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_role,
+    (SELECT b.unique_id FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_unique_id", 
     "users_reset_request a", "a.client_id = '{$clientId}' ORDER BY a.id DESC");
 
 // colors
@@ -50,10 +54,16 @@ foreach($password_requests as $key => $request) {
     $change_requests .= "
         <tr>
             <td>".($key+1)."</td>
-            <td>{$request->fullname} <span class='badge p-1 badge-{$color[$request->token_status]}'>{$request->user_role}</span></td>
-            <td>{$request->request_date}</td>
+            <td>{$request->fullname} 
+                <span class='badge p-1 badge-{$color[$request->user_role]}'>".ucwords($request->user_role)."</span>
+                <div><strong>{$request->user_unique_id}</strong></div>
+            </td>
+            <td><i class='fa fa-calendar'></i> {$request->request_date}</td>
             <td>{$request->reset_agent}</td>
-            <td><span id='change_status_{$request->item_id}' class='font-weight-bold text-{$color[$request->token_status]}'>{$request->token_status}</span></td>
+            <td>
+                <span id='change_status_{$request->item_id}' class='font-weight-bold text-{$color[$request->token_status]}'>{$request->token_status}</span>
+                <div>".(!empty($request->reset_date) ? "<i class='fa fa-calendar'></i> {$request->reset_date}" : null)."</div>
+            </td>
             <td align='center'>
                 ".(in_array($request->token_status, ["PENDING"]) ? 
                     "<div class='change_password_{$request->item_id}'>
@@ -86,7 +96,7 @@ $response->html = '
                                     <a class="nav-link active" id="change_requests-tab2" data-toggle="tab" href="#change_requests" role="tab" aria-selected="true"><i class="fa fa-list"></i> Password Change Requests</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="change_password-tab2" data-toggle="tab" href="#change_password" role="tab" aria-selected="true"><i class="fa fa-list"></i> Change Password</a>
+                                    <a class="nav-link" id="change_password_form-tab2" data-toggle="tab" href="#change_password_form" role="tab" aria-selected="true"><i class="fa fa-list"></i> Change Username And/Or Password</a>
                                 </li>
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
@@ -101,7 +111,7 @@ $response->html = '
                                                         <th>Request Date</th>
                                                         <th>User Agent</th>
                                                         <th>Status</th>
-                                                        <th align="center" width="18%"></th>
+                                                        <th align="center" width="10%"></th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>'.$change_requests.'</tbody>
@@ -109,10 +119,53 @@ $response->html = '
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="change_password" role="tabpanel" aria-labelledby="change_password-tab2">
-                                    <div class="row account_note_report">
-                                        
-                                    
+                                <div class="tab-pane fade" id="change_password_form" role="tabpanel" aria-labelledby="change_password_form-tab2">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    SEARCH USER
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="form-group">
+                                                        <label>Enter Fullname or Unique ID</label>
+                                                        <input value="'.$search_term.'" type="text" placeholder="Search by Name or UNIQUE ID" name="search_user_term" id="search_user_term" class="form-control">
+                                                    </div>
+                                                    <div align="center" class="form-group mb-2">
+                                                        <button class="btn btn-outline-primary" onclick="return search_By_Fullname_Unique_ID()"><i class="fa fa-filter"></i> Search</button>
+                                                    </div>
+                                                    <div class="mt-0 mb-2 border-bottom"></div>
+                                                    <div id="search_user_term_list" class="slim-scroll custom-600px"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+
+                                            <div class="card hidden" id="change_Username_Password">
+                                                <div class="card-body">
+
+                                                    <div class="form-group mb-1">
+                                                        <label>Username</label>
+                                                        <input autocomplete="Off" type="text" name="username" id="username" class="form-control">
+                                                    </div>
+                                                    <div class="form-group mb-1">
+                                                        <label>Password</label>
+                                                        <input autocomplete="Off" type="text" name="passwd" id="passwd" class="form-control">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Confirm Password</label>
+                                                        <input autocomplete="Off" type="text" name="passwd_2" id="passwd_2" class="form-control">
+                                                    </div>
+                                                    <div class="form-group text-right">
+                                                        <input type="hidden" name="user_id" id="user_id">
+                                                        <button onclick="return change_Username_Password_Form();" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>
+                                                        <button onclick="return change_Username_Password();" class="btn btn-outline-success"><i class="fa fa-lock"></i> Change Password</button>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -147,7 +200,7 @@ $response->html = '
                 <div class="modal-footer">
                     <input type="hidden" name="token">
                     <input type="hidden" name="request_id">
-                    <button onclick="return change_Password();" class="btn btn-outline-success">Change Password</button>
+                    <button onclick="return change_Password();" class="btn btn-outline-success"><i class="fa fa-lock"></i> Change Password</button>
                     <button onclick="return cancel_ChangePasword_Form();" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>
                 </div>
             </div>

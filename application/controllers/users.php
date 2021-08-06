@@ -101,7 +101,6 @@ class Users extends Myschoolgh {
 				$params->query .= (isset($params->date_range)) ? $this->dateRange($params->date_range) : null;
 				$params->query .= (isset($params->gender) && !empty($params->gender)) ? " AND a.gender='{$params->gender}'" : null;
 			} else {
-				$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
 				$params->query .= (isset($params->email)) ? " AND a.email='{$params->email}'" : null;
 				$params->query .= (isset($params->or_clause) && !empty($params->or_clause)) ? $params->or_clause : null;
 				$params->query .= (isset($params->date_of_birth) && !empty($params->date_of_birth)) ? " AND a.date_of_birth='{$params->date_of_birth}'" : null;
@@ -121,7 +120,7 @@ class Users extends Myschoolgh {
 			$params->query .= " AND a.guardian_id LIKE '%{$params->userId}%'";
 		}
 
-		$params->query .= isset($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
+		$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
 
 		// if a search parameter was parsed in the request
 		$order_by = "ORDER BY a.id ASC";
@@ -146,8 +145,7 @@ class Users extends Myschoolgh {
 					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
 					(SELECT name FROM departments WHERE departments.id = a.department LIMIT 1) AS department_name,
 					(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name,
-					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name
-				";
+					(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name";
 
 				// exempt current user
 				if(($params->minified === "chat_list_users")) {
@@ -167,7 +165,7 @@ class Users extends Myschoolgh {
 				if($params->minified === "simplied_load_withclass") {
 
 					// if the user type was parsed and the type is guardian
-					if($params->user_type == "guardian") {
+					if(isset($params->user_type) && ($params->user_type == "guardian")) {
 						// make a query for the guardian list
 						$query = $this->pushQuery("a.name, a.item_id AS user_id, a.unique_id, a.image, 
 							a.email, a.phone_number, a.residence, a.relationship,
@@ -230,6 +228,7 @@ class Users extends Myschoolgh {
 			$data = [];
 			$users_group = [];
 
+			// if the client data is parsed
 			if(isset($params->client_data)) {
 				$this->academic_year = $params->client_data->client_preferences->academics->academic_year;
     			$this->academic_term = $params->client_data->client_preferences->academics->academic_term;
@@ -393,7 +392,67 @@ class Users extends Myschoolgh {
 			// return the data
 			return [
 				"data" => $data,
-				"code" => !empty($data) ? 200 : 201
+				"code" => 200
+			];
+
+		} catch(PDOException $e) {
+			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
+		}
+
+	}
+
+	/**
+	 * Quick Search
+	 * 
+	 * @return Array
+	 */
+	public function quick_search(stdClass $params) {
+
+		 
+		try {
+
+			// look up query
+			$params->query = " 1 ";
+			$params->query .= (isset($params->lookup)) ? " AND ((a.name LIKE '%{$params->lookup}%') OR (a.unique_id LIKE '%{$params->lookup}%'))" : null;
+
+			// set the columns to load
+			$params->columns = "
+				a.client_id, a.guardian_id, a.item_id AS user_id, a.name, a.preferences,	
+				cl.name AS class_name, a.academic_year, a.academic_term, a.username,
+				a.unique_id, a.email, a.image, a.phone_number, a.user_type, a.class_id, a.account_balance,
+				a.gender, a.enrollment_date, a.residence, a.religion, a.date_of_birth, a.last_visited_page,
+				(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
+				(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
+				(SELECT name FROM departments WHERE departments.id = a.department LIMIT 1) AS department_name,
+				(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name,
+				(SELECT name FROM blood_groups WHERE blood_groups.id = a.blood_group LIMIT 1) AS blood_group_name";
+			
+			// prepare and execute the statement
+			$sql = $this->db->prepare("SELECT {$params->columns} FROM users a
+				LEFT JOIN country c ON c.id = a.country
+				LEFT JOIN classes cl ON cl.id = a.class_id
+				WHERE {$params->query} AND a.deleted = ? AND a.status = ? LIMIT {$params->limit}
+			");
+			$sql->execute([0, 1]);
+
+			$data = [];
+			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
+
+				if(!in_array($result->user_type, ["student"]) || 
+					(
+						in_array($result->user_type, ["student"]) && 
+						$result->academic_year == $this->academic_year && 
+						$result->academic_term == $this->academic_term
+					)
+				) {
+					$data[] = $result;
+				}
+			}
+
+			// return the data"Sorry! There was an error while processing the request."
+			return [
+				"data" => $data,
+				"code" => 200
 			];
 
 		} catch(PDOException $e) {

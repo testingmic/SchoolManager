@@ -1050,36 +1050,80 @@ class Auth extends Myschoolgh {
 
         try {
 
-            global $noticeClass;
+            global $noticeClass, $accessObject;
+
+            // confirm if the user has the required permission
+            if(!$accessObject->hasAccess("change_password", "permissions")) {
+                return ["code" => 203, "data" => $this->permission_denied];
+            }
 
             if(!is_array($params->data)) {
                 return ["code" => 203, "data" => "Sorry! Invalid data parsed."];
             }
 
             // confirm that the request and request id were parsed
-            if(!isset($params->data["request"]) || !isset($params->data["request_id"])) {
+            if(!isset($params->data["request"])) {
                 return ["code" => 203, "data" => "Sorry! Invalid data parsed."];
             }
 
             // set parameters
             $request = $params->data["request"];
-            $request_id = $params->data["request_id"];
+            $request_id = $params->data["request_id"] ?? null;
+            $message = "Request was successfully processed.";
 
-            if(!in_array($request, ["change", "cancel", "resend"])) {
+            // check the request parsed
+            if(!in_array($request, ["change", "cancel", "resend", "modify"])) {
                 return ["code" => 203, "data" => "Sorry! Invalid data parsed."];
             }
 
-            // check
-            $check = $this->pushQuery("id, user_id, username", "users_reset_request", "item_id = '{$request_id}' LIMIT 1");
+            // run this section if the request is either to change, cancel or resend token
+            if(in_array($request, ["change", "cancel", "resend"])) {
+                // clean the request_id
+                $request_id = xss_clean($request_id);
 
-            // confirm that the request exists
-            if(empty($check)) {
-                return ["code" => 203, "data" => "Sorry! Invalid request id was parsed for processing."];
+                // confirm that the request and request id were parsed
+                if(empty($request_id)) {
+                    return ["code" => 203, "data" => "Sorry! Invalid data parsed."];
+                }
+                
+                // run the check
+                $check = $this->pushQuery("id, user_id, username", "users_reset_request", "item_id = '{$request_id}' LIMIT 1");
+
+                // confirm that the request exists
+                if(empty($check)) {
+                    return ["code" => 203, "data" => "Sorry! Invalid request id was parsed for processing."];
+                }
+
+                // send a notification to the user
+                $notice_param = (object) [
+                    '_item_id' => $request_id,
+                    'user_id' => $check[0]->user_id,
+                    'subject' => "Password Change",
+                    'username' => $check[0]->username,
+                    'remote' => false, 
+                    'notice_type' => 4,
+                    'userId' => $params->userId,
+                    'clientId' => $params->clientId,
+                    'initiated_by' => 'system'
+                ];
             }
+
+            // set some new variables
+            $ip = ip_address();
+            $br = $this->browser." ".$this->platform;
 
             // if the request is cancel
             if($request == "cancel") {
+                // cancel request token
                 $this->db->query("UPDATE users_reset_request SET request_token = NULL, token_status = 'ANNULED' WHERE item_id = '{$request_id}' LIMIT 1");
+                
+                // add a new notification
+                $notice_param->message = "Your password reset request was cancelled by <strong>{$params->userData->name}.";
+                $notice_param->subject = "Password Reset Cancelled";
+                $noticeClass->add($notice_param);
+
+                // set the message to submit
+                $message = "Password change request successfully cancelled.";
             }
 
             // change password
@@ -1089,57 +1133,104 @@ class Auth extends Myschoolgh {
                 if(!isset($params->data["password"]) || !isset($params->data["password_2"])) {
                     return ["code" => 203, "data" => "Sorry! The password parameter is request."];
                 }
+
                 // if the password is empty
                 if(empty($params->data["password"]) || empty($params->data["password_2"])) {
                     return ["code" => 203, "data" => "Sorry! The password parameter cannot be empty."];
                 }
+
                 // password test
                 if(!passwordTest($params->data["password"])) {
                     return ["code" => 203, "data" => $this->password_ErrorMessage_2 ];
                 }
+
                 // confirm if the passwords match
                 if($params->data["password"] !== $params->data["password_2"]) {
                     return ["code" => 203, "data" => "Sorry! The passwords supplied does not match."];
                 }
 
                 // change the password
-                $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE item_id = ? AND client_id = ? LIMIT 10");
+                $stmt = $this->db->prepare("UPDATE users SET password = ?, last_password_change=now() WHERE item_id = ? AND client_id = ? LIMIT 10");
                 $stmt->execute([password_hash($params->data["password"], PASSWORD_DEFAULT), $check[0]->user_id, $params->clientId]);
 
-                // update the table
-                $ip = ip_address();
-                $br = $this->browser." ".$this->platform;
-
                 // process the form
-                $stmt = $this->db->query("UPDATE users_reset_request SET request_token=NULL, reset_date=now(), reset_agent='{$br}|{$ip}', token_status='USED', expiry_time='".time()."' WHERE item_id='{$request_id}' LIMIT 1");
-
-                // form the notification parameters
-                $item_param = (object) [
-                    '_item_id' => $request_id,
-                    'user_id' => $check[0]->user_id,
-                    'subject' => "Password Change",
-                    'username' => $check[0]->username,
-                    'remote' => false, 
-                    'message' => "Your password was successfully changed by <strong>{$params->userData->name}.",
-                    'notice_type' => 4,
-                    'userId' => $params->userId,
-                    'clientId' => $params->clientId,
-                    'initiated_by' => 'system'
-                ];
+                $stmt = $this->db->query("UPDATE users_reset_request SET request_token=NULL, reset_date=now(), reset_agent='{$br}|{$ip}', token_status='USED', expiry_time='".time()."', changed_by = '{$params->userId}' WHERE item_id='{$request_id}' LIMIT 1");
 
                 // add a new notification
-                $noticeClass->add($item_param);
+                $notice_param->message = "Your password was successfully changed by <strong>{$params->userData->name}.";
+                $noticeClass->add($notice_param);
+
+                // set the message to submit
+                $message = "Password change request successfully changed.";
             }
 
-            return [
-                "additional" => ["request" => $request],
-                "data" => "Password change request successfully cancelled."
-            ];
+            // change username and/or password
+            elseif($request == "modify") {
+
+                // set the username
+                $request_id = xss_clean($params->data["user_id"]);
+                $username = $params->data["username"] ?? null;
+
+                // confirm that the user_id, password and password_2 variables were all parsed
+                if(!isset($params->data["user_id"]) || !isset($params->data["password"]) || !isset($params->data["password_2"])) {
+                    return ["code" => 203, "data" => "Sorry! The user_id, password and password_2 variables are all required."];
+                }
+
+                // if the password is empty
+                if(empty($params->data["password"]) || empty($params->data["password_2"])) {
+                    return ["code" => 203, "data" => "Sorry! The password parameter cannot be empty."];
+                }
+
+                // password test
+                if(!passwordTest($params->data["password"])) {
+                    return ["code" => 203, "data" => $this->password_ErrorMessage_2 ];
+                }
+
+                // confirm if the passwords match
+                if($params->data["password"] !== $params->data["password_2"]) {
+                    return ["code" => 203, "data" => "Sorry! The passwords supplied does not match."];
+                }
+
+                // get the user details using the username
+                $check = $this->pushQuery("id, username, email, name, user_type", "users", "item_id = '{$request_id}' ORDER BY id DESC LIMIT 1");
+                
+                // confirm that the request and request id were parsed
+                if(empty($check)) {
+                    return ["code" => 203, "data" => "Sorry! An invalid user id was parsed."];
+                }
+
+                // if the username parsed does not match the existing one
+                if(!empty($username) && ($username !== $check[0]->username)) {
+
+                    // check the username to see if its available to be used
+                    $check_2 = $this->pushQuery("id", "users", "username = '{$username}' AND item_id != '{$request_id}' ORDER BY id DESC LIMIT 1");
+                    
+                    // return error message
+                    if(empty($check_2)) {
+                        return ["code" => 203, "data" => "Sorry! The username parsed is not available for use."];
+                    }
+                }
+
+                // set the new password
+                $stmt = $this->db->prepare("UPDATE users SET username = ?, password = ?, last_password_change=now() WHERE item_id = ? AND client_id = ? LIMIT 10");
+                $stmt->execute([$username, password_hash($params->data["password"], PASSWORD_DEFAULT), $request_id, $params->clientId]);
+
+                // reset the requests list
+                $stmt = $this->db->query("UPDATE users_reset_request SET request_token=NULL, reset_date=now(), reset_agent='{$br}|{$ip}', token_status='ANNULED', expiry_time='".time()."', changed_by = '{$params->userId}' WHERE user_id='{$request_id}' AND token_status='PENDING' LIMIT 10");
+
+                // if the usernames are not the same
+                if(!empty($username) && ($username !== $check[0]->username)) {
+                    // change the username in the login_history table
+                    $stmt = $this->db->query("UPDATE users_login_history SET username='{$username}' WHERE username='{$check[0]->username}' AND client_id='{$params->clientId}' ORDER BY id DESC LIMIT 1000");
+                    $stmt = $this->db->query("UPDATE users_reset_request SET username='{$username}' WHERE username='{$check[0]->username}' AND client_id='{$params->clientId}' ORDER BY id DESC LIMIT 1000");
+                }
+
+            }
+
+            return ["additional" => ["request" => $request], "data" => $message];
 
 
-        } catch(PDOException $e) {
-
-        }
+        } catch(PDOException $e) {}
 
     }
 }
