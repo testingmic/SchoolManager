@@ -924,6 +924,17 @@ class Users extends Myschoolgh {
             }
         }
 
+		// generate a new unique user id
+		$theClientData = !empty($this->iclient) ? $this->iclient : $this->client_data($params->clientId);
+
+		// set the label and generate a new unique id
+		$label = $params->user_type === "student" ? "student_label" : ($params->user_type === "parent" ? "parent_label" : "staff_label");
+		$counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='{$params->user_type}'") + 1), $this->append_zeros);
+        $unique_id = $theClientData->client_preferences->labels->$label.$counter.date("Y");
+
+		// set the username to the unique_id if the username is empty
+		$params->username = empty($params->username) ? strtoupper($unique_id) : $params->username;
+
 		/** Check the username if not empty */
 		if(!isset($params->username) || (isset($params->username) && strlen($params->username) < 3)) {
 			return ["code" => 203, "data" => "Sorry! Username must be at least 3 characters long."];
@@ -966,21 +977,17 @@ class Users extends Myschoolgh {
 			return ["code" => 203, "data" => "Sorry! An invalid user_type was provided for processing."];
 		}
 
-		// confirm that the email does not already exist
-		$i_params = (object) ["limit" => 1, "email" => $params->email];
-		
-		// get the user data
-		if(!empty($this->list($i_params)["data"])) {
-			return ["code" => 203, "data" => "Sorry! The email is already in use."];
+		// if the email address is not empty
+		if(!empty($params->email)) {
+
+			// confirm that the email does not already exist
+			$i_params = (object) ["limit" => 1, "email" => $params->email];
+			
+			// get the user data
+			if(!empty($this->list($i_params)["data"])) {
+				return ["code" => 203, "data" => "Sorry! The email is already in use."];
+			}
 		}
-
-		// generate a new unique user id
-		$theClientData = !empty($this->iclient) ? $this->iclient : $this->client_data($params->clientId);
-
-		// set the label and generate a new unique id
-		$label = $params->user_type === "student" ? "student_label" : ($params->user_type === "parent" ? "parent_label" : "staff_label");
-		$counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='{$params->user_type}'") + 1), $this->append_zeros);
-        $unique_id = $theClientData->client_preferences->labels->$label.$counter.date("Y");
 
 		// set the unique id
 		$params->unique_id = isset($params->unique_id) && !empty($params->unique_id) ? $params->unique_id : $unique_id;
@@ -1009,6 +1016,12 @@ class Users extends Myschoolgh {
 			$token = random_string("alnum", mt_rand(60, 75));
             $token_expiry = time()+(60*60*6);
 
+			// set a default password for students and parents
+			if(in_array($params->user_type, ["student", "parent", "employee"]) || !isset($params->email)) {
+				// set this as a default password if no email was parsed or the usertype is student, parent and employee
+				$params->password = "password";
+			}
+
 			// encrypt the password sent
 			$encrypt_password = password_hash($params->password, PASSWORD_DEFAULT);
 			
@@ -1022,6 +1035,8 @@ class Users extends Myschoolgh {
 
 			// init course ids
 			$course_ids = [];
+			$add_message = "";
+
 			// append tutor to courses list
 			if(isset($params->courses_ids)) {
 				$course_ids = $this->append_user_courses($params->courses_ids, $params->user_id, $params->clientId);
@@ -1151,13 +1166,13 @@ class Users extends Myschoolgh {
 				$reciepient = ["recipients_list" => [["fullname" => $params->fullname,"email" => $params->email,"customer_id" => $params->user_id]]];
 
 				// insert the email content to be processed by the cron job
-				$stmt = $this->db->prepare("
-					INSERT INTO users_messaging_list SET template_type = ?, item_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?, users_id = ?
-				");
-				$stmt->execute([
-					'account-verify', random_string("alnum", 32), json_encode($reciepient),
+				$stmt = $this->db->prepare("INSERT INTO users_messaging_list SET template_type = ?, item_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?, users_id = ?");
+				$stmt->execute(['account-verify', random_string("alnum", 32), json_encode($reciepient),
 					$params->created_by, "[".config_item('site_name')."] Account Verification", $message, $params->user_id
 				]);
+
+				// add message
+				$add_message = "A verification link has been sent via email.";
 
 			}
 			
@@ -1168,7 +1183,7 @@ class Users extends Myschoolgh {
 			$this->db->commit();
 
 			# set the output to return when successful
-			$return = ["code" => 200, "data" => "User account successfully created. A verification link has been sent via email.", "refresh" => 2000];
+			$return = ["code" => 200, "data" => "User account successfully created. {$add_message}", "refresh" => 2000];
 			
 			# append to the response
 			if($loggedInAccount) {

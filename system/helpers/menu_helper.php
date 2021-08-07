@@ -1,13 +1,17 @@
-<?php function communication_menu() { global $baseUrl; ?>
-<li class="dropdown">
+<?php function communication_menu() { global $baseUrl, $accessObject; ?>
+<?php if($accessObject->hasAccess("manage", "communication")) { ?>
+    <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails & SMS</span></a>
         <ul class="dropdown-menu">
+            <?php if($accessObject->hasAccess("send", "communication")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_send">Send SMS / Email</a></li>
+            <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_report">SMS / Email Report</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>sms_template">SMS Templates</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>email_template">Email Templates</a></li>
         </ul>
     </li>
+    <?php } ?>
 <?php } ?>
 <?php function incidents_menu() { global $baseUrl, $accessObject; ?>
     <?php if($accessObject->hasAccess("view", "incident")) { ?>

@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $myschoolgh, $defaultUser;
+global $myClass, $myschoolgh, $defaultUser, $accessObject;
 
 // initial variables
 $appName = config_item("site_name");
@@ -19,8 +19,19 @@ $response = (object) [];
 $pageTitle = "SMS Templates";
 $response->title = "{$pageTitle} : {$appName}";
 
+// not found
+if(!$accessObject->hasAccess("templates", "communication")) {
+    // end the query here
+    $response->html = page_not_found("permission_denied");
+
+    // echo the response
+    echo json_encode($response);
+    exit;
+}
+
 // add the scripts to load
 $response->scripts = ["assets/js/communication.js"];
+
 
 // set the parameters
 $params = (object) [

@@ -68,14 +68,17 @@ if((count($support_array) > 1) || empty($ticket_id)) {
 }
 
 // not found
-if(!empty($ticket_id) && empty($support_array)) {
+if(!empty($ticket_id) && empty($support_array) || !$accessObject->hasAccess("support", "settings")) {
     // end the query here
-    $response->html = page_not_found();
+    $response->html = page_not_found("permission_denied");
 
     // echo the response
     echo json_encode($response);
     exit;
-} elseif($ticket_id && !empty($support_array)) {
+
+}
+// else if the support ticket was parsed and the item is not empty
+elseif($ticket_id && !empty($support_array)) {
     $data = $support_array[0];
     $item_found = true;
     $disabled = ($data->status == "Closed") ? "disabled='disabled'" : null;
@@ -187,7 +190,10 @@ $response->html = '
             
             // if a single reply id was parsed
             if($item_found) {
+
+                // start the activities list
                 $response->html .= '<div class="activities">';
+                
                 // loop through the replies list
                 foreach($data->replies as $reply) {
 

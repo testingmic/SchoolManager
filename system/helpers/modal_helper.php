@@ -189,7 +189,7 @@ function page_not_found($request = "not_found", $string = "The page you were loo
     global $baseUrl, $_SERVER;
 
     $notFound = (bool) ($request == "not_found");
-    $message = $notFound ? $string : "You don't have permission to access the requested object. It is either read-protected or not readable by the server.";
+    $message = $notFound ? $string : "<span class='text-danger'>You don't have permission to access the requested object. It is either read-protected or not readable by the server.</span>";
     $title = $notFound ? "404" : "403";
 
     return '

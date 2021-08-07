@@ -79,7 +79,7 @@ if(!empty($item_id)) {
         // student listing
         $student_listing = '
         <div class="table-responsive table-student_staff_list">
-            <table data-empty="" class="table table-bordered table-striped datatable">
+            <table data-empty="" class="table table-bordered table-striped raw_datatable">
                 <thead>
                     <tr>
                         <th width="5%" class="text-center">#</th>

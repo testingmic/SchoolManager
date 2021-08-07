@@ -178,7 +178,7 @@ var change_Username_Password = () => {
             };
             $.post(`${baseUrl}api/auth/password_manager`, {data}).then((response) => {
                 if(response.code == 200) {
-                    
+                    cancel_ChangePasword_Form();
                 }
                 swal({
                     text: response.data.result,

@@ -241,9 +241,11 @@ load_helpers(['menu_helper']);
                         <div id="notifications_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-icons"></div>
                     </div>
                 </li>
+                <?php if($accessObject->hasAccess("support", "settings")) { ?>
                 <li class="dropdown dropdown-list-toggle">
                     <a title="Support Tickets List" href="<?= $baseUrl ?>support" class="nav-link nav-link-lg"><i class="fa fa-phone-volume"></i></a>
                 </li>
+                <?php } ?>
                 <?php } ?>
                 <li class="dropdown">
                     <a href="#" data-toggle="dropdown"

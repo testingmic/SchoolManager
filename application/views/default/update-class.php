@@ -82,7 +82,7 @@ if(!empty($item_id)) {
         // student listing
         $student_listing = '
         <div class="table-responsive table-student_staff_list">
-            <table data-empty="" class="table table-bordered table-striped datatable">
+            <table data-empty="" class="table table-bordered table-striped raw_datatable">
                 <thead>
                     <tr>
                         <th width="5%" class="text-center">#</th>
@@ -203,7 +203,6 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
-                            <div class="col-lg-12 pl-0"><h5>CLASS STUDENTS LIST</h5></div>
                             '.$student_listing.'
                         </div>
                         <div class="tab-pane fade" id="calendar" role="tabpanel" aria-labelledby="calendar-tab2">
