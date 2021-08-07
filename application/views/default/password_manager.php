@@ -150,15 +150,15 @@ $response->html = '
                                                     </div>
                                                     <div class="form-group mb-1">
                                                         <label>Password</label>
-                                                        <input autocomplete="Off" type="text" name="passwd" id="passwd" class="form-control">
+                                                        <input autocomplete="off" type="new-password" name="passwd" id="passwd" class="form-control">
                                                     </div>
                                                     <div class="form-group">
                                                         <label>Confirm Password</label>
-                                                        <input autocomplete="Off" type="text" name="passwd_2" id="passwd_2" class="form-control">
+                                                        <input autocomplete="off" type="new-password" name="passwd_2" id="passwd_2" class="form-control">
                                                     </div>
                                                     <div class="form-group text-right">
                                                         <input type="hidden" name="user_id" id="user_id">
-                                                        <button onclick="return change_Username_Password_Form();" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>
+                                                        <button onclick="return cancel_ChangePasword_Form();" class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>
                                                         <button onclick="return change_Username_Password();" class="btn btn-outline-success"><i class="fa fa-lock"></i> Change Password</button>
                                                     </div>
 
@@ -190,11 +190,11 @@ $response->html = '
                 <div class="modal-body mb-0 pb-0">
                     <div class="form-group mb-1">
                         <label>Password</label>
-                        <input autocomplete="Off" type="text" name="password" id="password" class="form-control">
+                        <input autocomplete="off" type="text" name="password" id="password" class="form-control">
                     </div>
                     <div class="form-group pb-0 mb-0">
                         <label>Confirm Password</label>
-                        <input autocomplete="Off" type="text" name="password_2" id="password_2" class="form-control">
+                        <input autocomplete="off" type="text" name="password_2" id="password_2" class="form-control">
                     </div>      
                 </div>
                 <div class="modal-footer">

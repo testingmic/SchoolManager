@@ -76,7 +76,12 @@ $response->html = '
             </div>
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
-                    <div class="card-body">
+                    <div class="card-body" id="elearning">
+                        <div class="form-content-loader" style="display: none; position: absolute">
+                            <div class="offline-content text-center">
+                                <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                            </div>
+                        </div>
                         <div id="total_count"></div>
                         <div id="elearning_resources_list" style="min-height:100px"></div>
                     </div>

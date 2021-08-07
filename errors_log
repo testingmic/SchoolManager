@@ -1,1 +1,0 @@
-[06-Aug-2021 06:00:12 Africa/Accra] PHP Notice:  Undefined index: request_id in /var/www/html/myschool_gh/application/controllers/auth.php on line 1159

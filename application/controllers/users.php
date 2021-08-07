@@ -418,7 +418,7 @@ class Users extends Myschoolgh {
 			// set the columns to load
 			$params->columns = "
 				a.client_id, a.guardian_id, a.item_id AS user_id, a.name, a.preferences,	
-				cl.name AS class_name, a.academic_year, a.academic_term, a.username,
+				cl.name AS class_name, a.academic_year, a.academic_term, a.username, a.last_password_change,
 				a.unique_id, a.email, a.image, a.phone_number, a.user_type, a.class_id, a.account_balance,
 				a.gender, a.enrollment_date, a.residence, a.religion, a.date_of_birth, a.last_visited_page,
 				(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,

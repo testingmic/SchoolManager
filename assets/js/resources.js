@@ -1,5 +1,6 @@
 var course_resources_list = (search_term = "") => {
     let content = $(`div[id="courses_resources_list"]`);
+    $(`div[id="elearning"] div[class="form-content-loader"]`).css("display", "flex");
     $.get(`${baseUrl}api/resources/e_courses?rq=${search_term}`).then((response) => {
         if (response.code === 200) {
             if (response.data.result.pagination !== undefined) {
@@ -8,6 +9,9 @@ var course_resources_list = (search_term = "") => {
             content.html(response.data.result.html);
             init_image_popup();
         }
+        $(`div[id="elearning"] div[class="form-content-loader"]`).css("display", "none");
+    }).catch(() => {
+        $(`div[id="elearning"] div[class="form-content-loader"]`).css("display", "none");
     });
 }
 
@@ -28,7 +32,9 @@ $(`div[id="course_resource"] input[name="search_term"]`).on("keyup", function(ev
 });
 
 var elearning_resources_list = (search_term = "") => {
-    let content = $(`div[id="elearning_resources_list"]`);
+    let content = $(`div[id="elearning_resources_list"]`),
+        location = `${baseUrl}e-learning?lookup=${search_term.rq}`;
+    $(`div[id="elearning"] div[class="form-content-loader"]`).css("display", "flex");
     $.get(`${baseUrl}api/resources/e_resources`, search_term).then((response) => {
         if (response.code === 200) {
             if (response.data.result.pagination !== undefined) {
@@ -37,12 +43,17 @@ var elearning_resources_list = (search_term = "") => {
             content.html(response.data.result.html);
             init_image_popup();
         }
+        window.history.pushState({ current: location }, "", location);
+        $(`div[id="elearning"] div[class="form-content-loader"]`).css("display", "none");
+    }).catch(() => {
+        $(`div[id="elearning"] div[class="form-content-loader"]`).css("display", "none");
     });
 }
 if ($(`div[id="elearning_resources_list"]`).length) {
-    elearning_resources_list();
+    let data = {rq: ""};
+    elearning_resources_list(data);
 }
-var search_Resource = () => {
+var search_E_learning_Resource = () => {
     let rq = $(`input[name="search_term"]`).val(),
         class_id = $(`select[name="class_id"]`).val(),
         course_id = $(`select[name="course_id"]`).val(),
@@ -59,7 +70,7 @@ var search_Resource = () => {
 
 $(`div[id="e_resources"] input[name="search_term"]`).on("keyup", function(evt) {
     if (evt.keyCode == 13 && !evt.shiftKey) {
-        search_Resource();
+        search_E_learning_Resource();
     }
 });
 

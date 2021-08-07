@@ -237,6 +237,8 @@ if(!$skipProcessing) {
 // in continuing your script then you can also do the following
 // if an error was found
 if( $paramChecker['code'] !== 100) {
+    // set it if not existent
+    $paramChecker['description'] = $paramChecker['description'] ?? null;
 
     // check the message to parse
     $paramChecker['data']['result'] = $paramChecker['data']['result'] ?? $paramChecker['description'];

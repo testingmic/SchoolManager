@@ -39,6 +39,8 @@ var cancel_ChangePasword_Form = () => {
     $(`div[id="change_Password"] *`).val(``).attr("disabled", true);
     $(`div[id="change_Username_Password"]`).addClass("hidden");
     $(`div[id="change_Username_Password"] *`).val(``);
+    $(`input[id="search_user_term"]`).val(``).focus();
+    $(`div[id="search_user_term_list"]`).html(``);
 }
 
 var show_change_Username_Password_form = (user_id, username, fullname) => {
@@ -54,15 +56,18 @@ var show_change_Username_Password_form = (user_id, username, fullname) => {
     }
 }
 
+$(`input[id="search_user_term"]`).on("keyup", function(evt) {
+    if (evt.keyCode == 13 && !evt.shiftKey) {
+        search_By_Fullname_Unique_ID();
+    }
+});
+
 var search_By_Fullname_Unique_ID = () => {
     let lookup = $(`input[id="search_user_term"]`).val();
-
     if (!lookup.length) {
         $(`div[id="search_user_term_list"]`).html(``);
-        swal({
-            text: "Sorry! The search term cannot be empty.",
-            icon: "error",
-        });
+        notify("Sorry! The search term cannot be empty.");
+        $(`input[id="search_user_term"]`).val(``).focus();
     } else {
         $(`div[id="search_user_term_list"]`).html(`<div align="center">Processing request <i class="fa fa-spin fa-spinner"></i></div>`);
         $.get(`${baseUrl}api/users/quick_search`, { lookup: lookup }).then((response) => {
@@ -101,10 +106,18 @@ var search_By_Fullname_Unique_ID = () => {
                                     <td><strong>Class: </strong></td>
                                     <td>${data.class_name}</td>
                                 </tr>` : ""}
+                                ${data.last_password_change !== null ? `
+                                <tr>
+                                    <td><strong>Last Change Date: </strong></td>
+                                    <td>${data.last_password_change}</td>
+                                </tr>` : ""}
                             </table>
                         </div>
                     </div>`;
                 });
+                if(!results_list) {
+                    results_list = `<div class="text-danger text-center">No user found for the search term <strong>${lookup}</strong></div>`;
+                }
                 $(`div[id="search_user_term_list"]`).html(results_list);
                 window.history.pushState({ current: location }, "", location);
                 linkClickStopper($(`div[id="search_user_term_list"]`));
