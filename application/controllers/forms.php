@@ -1657,6 +1657,7 @@ class Forms extends Myschoolgh {
         $isData = !empty($userData) && isset($userData->user_id) ? true : false;
 
         $guardian = "";
+        $guardian_list = [];
 
         // if the guardian information is parsed
         if(!empty($userData->guardian_list)) {
@@ -1710,6 +1711,11 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>';
             }
+        }
+
+        // get the list of all guardians
+        if(!$isData) {
+            $guardian_list = $this->pushQuery("name, item_id, unique_id, phone_number, email", "users", "client_id='{$clientId}' AND user_type='parent' AND status='1' AND deleted='0'");
         }
 
         $response = '
@@ -1833,7 +1839,20 @@ class Forms extends Myschoolgh {
             </div>
 
             <div class="row mb-3 pb-4">
-                <div class="col-lg-12"><h5>GUARDIAN INFORMATION</h5></div>
+                <div class="col-lg-12 mb-4 border-bottom pb-3">
+                    <div class="row">
+                        <div class="col-lg-9 col-md-8"><h5>GUARDIAN INFORMATION</h5></div>
+                        '.(
+                            !$isData ? '
+                            <div class="col-lg-3 col-md-4">
+                                <select id="switch_select" data-width="100%" class="selectpicker form-control">
+                                    <option value="add_new">Add New Guardian</option>
+                                    <option value="select_existing">Select Existing Guardian</option>
+                                </select>
+                            </div>' : null
+                        ).'
+                    </div>
+                </div>
                 <div class="col-lg-12" id="student_guardian_list">';
                 
                 // if the data
@@ -1879,13 +1898,35 @@ class Forms extends Myschoolgh {
                     </div>';
                 }
 
-                $response .= '</div>
+                $response .= '</div>';
+
+                // if not data was parsed
+                if(!$isData) {
+
+                    // append to the html content
+                    $response .= '<div class="col-lg-12" style="display:none" id="student_guardian_list_existing">';
+
+                    $response .= '<div class="form-group">
+                        <label>Select Existing Guardian</label>
+                        <select name="guardian_id" id="guardian_id" data-width="100%" class="selectpicker form-control">
+                            <option value="">Select Guardian</option>';
+                    
+                    // loop through the guardian list
+                    foreach($guardian_list as $guardian) {
+                        $response .= "<option value=\"{$guardian->item_id}\">{$guardian->name} ($guardian->unique_id) - {$guardian->phone_number}</option>";
+                    }
+
+                        
+                    $response .= '</select></div>';
+                }
+                $response .= '
+                </div>
             </div>
             <div class="row mb-4 border-bottom pb-4">
                 <div class="col-lg-12"><h5>ACADEMICS</h5></div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="department_id">Department <span class="required">*</span></label>
+                        <label for="department_id">Department</label>
                         <select data-width="100%" name="department_id" id="department_id" class="form-control selectpicker">
                             <option value="">Select Student Department</option>';
                             foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {

@@ -17,6 +17,9 @@ class Assignments extends Myschoolgh {
      * @return Array
      */
     public function list(stdClass $params) {
+
+        // global variable
+        global $defaultUser;
         
         $query = "";
         $params->query = "1";
@@ -64,6 +67,9 @@ class Assignments extends Myschoolgh {
             $params->query .= " AND a.state NOT IN ('Cancelled', 'Draft')";
         }
 
+        // is student 
+        $isAStudent = (bool) ($params->userData->user_type == "student");
+
         $params->query .= " AND a.academic_year='{$params->academic_year}'";
         $params->query .= " AND a.academic_term='{$params->academic_term}'";
 
@@ -96,69 +102,77 @@ class Assignments extends Myschoolgh {
             // loop through the results list
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
-                // labels
-                $result->handedin_label = $this->the_status_label("Pending");
-
-                // handedin label
-                if(isset($result->handed_in)) {
-                    $result->handedin_label = $this->the_status_label($result->handed_in);
-                }
-
                 // convert the assigned to list into an array
-                $assigned_to_list = !empty($result->assigned_to_list) ? json_decode($result->assigned_to_list, true) : null;
+                $assigned_to_list = !empty($result->assigned_to_list) ? json_decode($result->assigned_to_list, true) : [];
                 $result->assigned_to_list = ($result->assigned_to == "selected_students" && empty($assigned_to_list)) ? $result->assigned_to_list : $assigned_to_list;
                 
-                // if not minified request
-                if(!$isMinified) {
+                // if the assigned to is not selected students
+                if(
+                    ($result->assigned_to !== "selected_students") || (
+                        ($result->assigned_to === "selected_students") && 
+                        in_array($defaultUser->user_id, $assigned_to_list)
+                    ) || !$isAStudent
+                ) {
+                    // labels
+                    $result->handedin_label = $result->state !== "Closed" ? $this->the_status_label("Pending") : $this->the_status_label($result->state);
 
-                    // is an attachment assignment
-                    $isAttachment = (bool) ($result->assignment_type == "file_attachment");
-
-                    // clean the assignment description
-                    $result->assignment_description = custom_clean(htmlspecialchars_decode($result->assignment_description));
-
-                    // count the number of students assigned to
-                    if(isset($result->students_assigned)) {
-                        $result->students_assigned = ($result->assigned_to === "selected_students") ? count($this->stringToArray($result->assigned_to_list)) : $result->students_assigned;
+                    // handedin label
+                    if(isset($result->handed_in)) {
+                        $result->handedin_label = $this->the_status_label($result->handed_in);
                     }
 
-                    // set the course tutor into an array
-                    $result->course_tutor = json_decode($result->course_tutor, true);
+                    // if not minified request
+                    if(!$isMinified) {
 
-                    // loop through the array list
-                    if(!empty($result->course_tutor)) {
-                        foreach($result->course_tutor as $tutor) {
-                            // get the course tutor information
-                            $tutor_info = $this->pushQuery("name, item_id, unique_id, phone_number, email, image", "users", "item_id='{$tutor}' AND user_status='Active' LIMIT 1");
-                            if(!empty($tutor_info)) {
-                                $result->course_tutors[] = $tutor_info[0];
+                        // is an attachment assignment
+                        $isAttachment = (bool) ($result->assignment_type == "file_attachment");
+
+                        // clean the assignment description
+                        $result->assignment_description = custom_clean(htmlspecialchars_decode($result->assignment_description));
+
+                        // count the number of students assigned to
+                        if(isset($result->students_assigned)) {
+                            $result->students_assigned = ($result->assigned_to === "selected_students") ? count($this->stringToArray($result->assigned_to_list)) : $result->students_assigned;
+                        }
+
+                        // set the course tutor into an array
+                        $result->course_tutor = json_decode($result->course_tutor, true);
+
+                        // loop through the array list
+                        if(!empty($result->course_tutor)) {
+                            foreach($result->course_tutor as $tutor) {
+                                // get the course tutor information
+                                $tutor_info = $this->pushQuery("name, item_id, unique_id, phone_number, email, image", "users", "item_id='{$tutor}' AND user_status='Active' LIMIT 1");
+                                if(!empty($tutor_info)) {
+                                    $result->course_tutors[] = $tutor_info[0];
+                                }
                             }
+                        }
+
+                        // if attachment variable was parsed
+                        if($isAttachment) {
+                            // if the assignment is an attachment type
+                            $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
+                            $result->attached_attachment_html = isset($result->attached_document->files) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
+
+                            // decode the attachments as well
+                            $result->attachment = json_decode($result->attachment);
+                            $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : "";
+                        }
+
+                        // loop through the information
+                        foreach(["created_by_info"] as $each) {
+                            // convert the created by string into an object
+                            $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
                         }
                     }
 
-                    // if attachment variable was parsed
-                    if($isAttachment) {
-                        // if the assignment is an attachment type
-                        $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
-                        $result->attached_attachment_html = isset($result->attached_document->files) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
-
-                        // decode the attachments as well
-                        $result->attachment = json_decode($result->attachment);
-                        $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : "";
+                    if($showMarks && in_array($result->state, ["Closed", "Graded"])) {
+                        $result->marks_list = $this->marks_list($result->item_id);
                     }
 
-                    // loop through the information
-                    foreach(["created_by_info"] as $each) {
-                        // convert the created by string into an object
-                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
-                    }
+                    $data[] = $result;
                 }
-
-                if($showMarks && in_array($result->state, ["Closed", "Graded"])) {
-                    $result->marks_list = $this->marks_list($result->item_id);
-                }
-
-                $data[] = $result;
             }
 
             return [

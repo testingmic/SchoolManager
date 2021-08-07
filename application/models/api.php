@@ -151,10 +151,10 @@ class Api {
                 if($errorFound) {
 
                     // log the api request
-                    if(isset($params["remote"])) { $this->logRequest($this->default_params, 400); }
+                    if(isset($params["remote"])) { $this->logRequest($this->default_params, 405); }
 
                     // return invalid parameters parsed to the endpoint
-                    return $this->output(400, ['accepted' => ["parameters" => $accepted['params'] ]]);
+                    return $this->output(405, ['accepted' => ["parameters" => $accepted['params'] ]]);
                 } else {
 
                     /**

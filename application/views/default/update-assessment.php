@@ -62,6 +62,9 @@ if(!empty($item_id)) {
         $data->isGraded = $isGraded;
         $data->hasUpdate = $hasUpdate;
 
+        // is manual or auto insertion
+        $isAuto = (bool) ($data->insertion_mode === "Auto");
+
         // get the assignment form
         $the_form = load_class("forms", "controllers")->create_assignment($item_param, "update_assignment");
 
@@ -172,9 +175,6 @@ if(!empty($item_id)) {
 			");
 			$the_students_list->execute();
             $result = $the_students_list->fetchAll(PDO::FETCH_OBJ);
-
-            // is manual or auto insertion
-            $isAuto = (bool) ($data->insertion_mode === "Auto");
 
             // ensure the result is not empty
             if(!empty($result)) {
@@ -293,7 +293,7 @@ if(!empty($item_id)) {
             }
             
             // display the content if the assignment type is a file_attachment
-            if(!$isMultipleChoice) {
+            if(!$isMultipleChoice && $isActive) {
                 
                 // display the file upload option
                 $grading_info .= 

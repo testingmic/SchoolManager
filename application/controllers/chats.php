@@ -52,8 +52,8 @@ class Chats extends Myschoolgh {
                 SELECT 
                     a.id AS item_id, a.message_unique_id, a.sender_id, a.receiver_id, a.message AS full_message, 
                     a.date_created, a.seen_status, a.seen_date, DATE(a.date_created) AS raw_date,
-                    (SELECT CONCAT(name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online) FROM users WHERE users.item_id = a.sender_id LIMIT 1) AS sender_info,
-                    (SELECT CONCAT(name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online) FROM users WHERE users.item_id = a.receiver_id LIMIT 1) AS receiver_info
+                    (SELECT CONCAT(name,'|',COALESCE(phone_number,'NULL'),'|',COALESCE(email,'NULL'),'|',image,'|',COALESCE(last_seen,'NULL'),'|',online) FROM users WHERE users.item_id = a.sender_id LIMIT 1) AS sender_info,
+                    (SELECT CONCAT(name,'|',COALESCE(phone_number,'NULL'),'|',COALESCE(email,'NULL'),'|',image,'|',COALESCE(last_seen,'NULL'),'|',online) FROM users WHERE users.item_id = a.receiver_id LIMIT 1) AS receiver_info
                 FROM users_chat a WHERE {$query}
                 ORDER BY TIMESTAMP(a.date_created) DESC LIMIT 100
             ");
@@ -130,8 +130,8 @@ class Chats extends Myschoolgh {
                 SELECT 
                     DISTINCT a.message_unique_id, a.id AS item_id, a.message_unique_id, a.sender_id, a.receiver_id, a.message AS full_message, 
                     a.date_created, a.seen_status, a.seen_date, DATE(a.date_created) AS raw_date,
-                    (SELECT CONCAT(name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online) FROM users WHERE users.item_id = a.receiver_id LIMIT 1) AS receipient_info,
-                    (SELECT CONCAT(name,'|',phone_number,'|',email,'|',image,'|',last_seen,'|',online) FROM users WHERE users.item_id = a.sender_id LIMIT 1) AS sender_info
+                    (SELECT CONCAT(name,'|',COALESCE(phone_number,'NULL'),'|',COALESCE(email,'NULL'),'|',image,'|',COALESCE(last_seen,'NULL'),'|',online) FROM users WHERE users.item_id = a.receiver_id LIMIT 1) AS receipient_info,
+                    (SELECT CONCAT(name,'|',COALESCE(phone_number,'NULL'),'|',COALESCE(email,'NULL'),'|',image,'|',COALESCE(last_seen,'NULL'),'|',online) FROM users WHERE users.item_id = a.sender_id LIMIT 1) AS sender_info
                 FROM users_chat a WHERE 
                     (a.receiver_id = '{$userId}' AND a.receiver_deleted = '0') OR
                     (a.sender_id = '{$userId}' AND a.sender_deleted = '0')
@@ -427,10 +427,11 @@ class Chats extends Myschoolgh {
             "message_id" => $params->message_id,
             "user_id" => $params->sender_id
         ];
-        $prev_messages = $this->list($data)["data"];
+        $prev_messages = [];
+        // $prev_messages = $this->list($data)["data"];
 
         /** Update the seeen status for messages between these two users */
-        $s_stmt = $this->db->prepare("UPDATE users_chat SET seen_status = ?, seen_date=now() WHERE receiver_id = ? AND sender_id = ? AND seen_status = ? LIMIT 20");
+        // $s_stmt = $this->db->prepare("UPDATE users_chat SET seen_status = ?, seen_date=now() WHERE receiver_id = ? AND sender_id = ? AND seen_status = ? LIMIT 20");
         // $s_stmt->execute([1, $params->sender_id, $params->userId, 0]);
         
         /** Return the results */
@@ -442,6 +443,7 @@ class Chats extends Myschoolgh {
             ]
         ];
     }
+
 }
 
 ?>

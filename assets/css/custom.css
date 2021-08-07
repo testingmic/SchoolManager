@@ -593,3 +593,15 @@ label {
     background: #847c7c;
     color: #fff;
 }
+
+.chat-box .chat-content .chat-item>img {
+    width: 40px!important;
+}
+
+.chat-box .chat-content .chat-item.chat-right .chat-details {
+    margin-right: 55px;
+}
+
+.chat-box .chat-content .chat-item {
+    margin-bottom: 20px;
+}

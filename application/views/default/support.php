@@ -163,8 +163,8 @@ $response->html = '
                 </div>
             </div>
             <div>
-                <button '.$disabled.' class="btn bg-teal"><i></i> Reply to Ticket</button>
-                <button '.$disabled.' onclick="return close_ticket(\''.$ticket_id.'\')" class="btn btn-danger">Close</button>
+                '.(!$disabled ? '<button class="btn bg-teal"><i></i> Reply to Ticket</button>' : null).'
+                '.(!$disabled ? '<button onclick="return close_ticket(\''.$ticket_id.'\')" class="btn btn-danger">Close</button>' : null).'
             </div>
             <div class="mt-4">
                 <div class="activities">

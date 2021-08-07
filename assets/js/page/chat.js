@@ -13,7 +13,7 @@ $.chatCtrl = function(element, chat) {
 
     var target = $(element);
     element = `<div class="chat-item ${chat.position}" style="display:none">
-          <img src="${chat.picture}">
+          <img src="${chat.picture}" width="40px">
           <div class="chat-details">
             <div class="chat-text">${chat.text}</div>
             <div class="chat-time">${chat.time}</div>
@@ -83,7 +83,7 @@ var format_chat_message = (chat) => {
     let position = (chat.sender_id == $myPrefs.userId) ? "chat-right" : "chat-left",
         seen_notice = ((chat.sender_id == $myPrefs.userId) && (chat.seen_time !== null)) ? `<span title="Seen at: ${chat.seen_timer}" class="text-success" style="font-size:12px;float:right;left:0px"><i class="fa fa-check-circle"></i></span>` : "";
     return `<div class="chat-item ${position}" style="display:none">
-          <img src="${baseUrl}${chat.sender_info.image}">
+          <img src="${baseUrl}${chat.sender_info.image}" width="40px">
           <div class="chat-details">
             ${seen_notice}
             <div class="chat-text">${chat.raw_message}</div>
@@ -97,31 +97,23 @@ var display_messages = async(message_id, user_id, name, image, last_seen = "Onli
     current_focused_user_id = user_id,
         current_focused_msg_id = message_id;
     $(`div[class="chat"] div[class~="chat-header"]`).html(`
-      <img src="${baseUrl}${image}" alt="avatar">
+      <img src="${baseUrl}${image}" alt="avatar" width="40px">
       <div class="chat-about"><div class="chat-with">${name}</div><div class="chat-num-messages">${last_seen}</div></div>
     `);
 
     $(`form[id="chat-form"] *`).prop("disabled", false);
     $(`div[class~="chat-box"] div[class~="chat-content"]`).html(``);
 
-    let user_chats = await load_idb_record("chats", current_focused_msg_id),
-        the_chat_list = {};
+    let the_chat_list = {};
 
-    if (user_chats[current_focused_msg_id] !== undefined) {
-        the_chat_list = user_chats[current_focused_msg_id];
-    } else {
-        let messages = await $.post(`${baseUrl}api/chats/list`, { user_id: user_id });
-        if (messages.code == 200) {
-            let results_list = messages.data.result
+    let messages = await $.post(`${baseUrl}api/chats/list`, { user_id: user_id });
+    if (messages.code == 200) {
+        let results_list = messages.data.result
 
-            the_chat_list = results_list.messages[results_list.message_id];
-            current_focused_msg_id = results_list.message_id;
-
-            if (current_focused_msg_id !== "null") {
-                replace_id_record(the_chat_list, "chats", current_focused_msg_id);
-            }
-        }
+        the_chat_list = results_list.messages[results_list.message_id];
+        current_focused_msg_id = results_list.message_id;
     }
+
     current_focused_msg_id = message_id;
     $(`form[id="chat-form"] input`).focus();
 
@@ -162,7 +154,7 @@ $(`div[class~="chat-search"] input[id="search_user"]`).on("keyup", function(even
                             online_msg = user.online ? "Online" : `Left ${user.offline_ago}`;
                         users_list += `
                         <li id="search_list" style="width:100%" data-message_id="${user.message_unique_id}" onclick="return display_messages('${user.message_unique_id}','${user.user_id}','${user.name}','${user.image}','${user.offline_ago}')" class="clearfix d-flex">
-                            <img src="${baseUrl}${user.image}" alt="avatar">
+                            <img src="${baseUrl}${user.image}" alt="avatar" width="40px">
                             <div class="about" style="width:100%">
                                 <div class="name">${user.name}</div>
                                 <div class="status">

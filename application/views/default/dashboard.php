@@ -290,11 +290,11 @@ if($isBooking) {
         // unset the sessions if $session->currentQuestionId is not empty
         foreach($assignments_array_list["data"] as $key => $each) {
             
-            $action = "<a  href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a  href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
             $assigments_list .= "<tr data-row_id=\"{$each->id}\">";
             $assigments_list .= "<td>".($key+1)."</td>";
-            $assigments_list .= "<td><a  href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
+            $assigments_list .= "<td><a  href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
                 $can_Update_Assign ? 
                     "<br>Class: <strong>{$each->class_name}</strong>
                     <br>Course: <strong>{$each->course_name}</strong>" : 
@@ -512,7 +512,7 @@ if($isBooking) {
                     </div>
                     <div class="card-body trix-slim-scroll" style="max-height:435px;height:435px;overflow-y:auto;">
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-striped datatable">
+                            <table data-empty="" class="table table-striped raw_datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>

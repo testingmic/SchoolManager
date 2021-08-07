@@ -22,6 +22,17 @@ var generate_payment_report = (student_id) => {
     window.open(`${baseUrl}receipt?category_id=${category_id}&start_date=${start_date}&end_date=${end_date}&student_id=${student_id}`);
 }
 
+$(`select[id="switch_select"]`).on("change", function() {
+    let value = $(`select[id="switch_select"]`).val();
+    if(value === "add_new") {
+        $(`div[id="student_guardian_list"]`).slideDown("slow");
+        $(`div[id="student_guardian_list_existing"]`).slideUp("slow");
+    } else {
+        $(`div[id="student_guardian_list"]`).slideUp("slow");
+        $(`div[id="student_guardian_list_existing"]`).slideDown("slow");
+    }
+});
+
 $(`div[id="student_guardian_list"] button[class~="append-row"]`).on('click', async function(e) {
 
     let htmlData = $('div[id="student_guardian_list"] div[data-row]:last select').html(),
