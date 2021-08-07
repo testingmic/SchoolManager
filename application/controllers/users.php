@@ -995,16 +995,26 @@ class Users extends Myschoolgh {
 		
 		// grouping guardian
 		$guardian = [];
-		if(isset($params->guardian_info) && is_array($params->guardian_info)) {
-			foreach($params->guardian_info as $key => $value) {
-				foreach($value as $kk => $vv) {
-					$guardian[$kk][$key] = $vv;
-				}
-			}
-		}
 		
 		// insert the user information
 		try {
+
+			// if the guardian id is not empty then discard the guardian id parsed
+			if(isset($params->guardian_id) && !empty($params->guardian_id)) {
+				// set the new id
+				$guardian_ids = [$params->guardian_id];
+			} else {
+				// if the guardian info is not empty and is an array
+				if(isset($params->guardian_info) && is_array($params->guardian_info)) {
+					// loop through the array list and append the key and values
+					foreach($params->guardian_info as $key => $value) {
+						// loop through the list again for efficient grouping
+						foreach($value as $kk => $vv) {
+							$guardian[$kk][$key] = $vv;
+						}
+					}
+				}
+			}
 
 			// begin transaction
 			$this->db->beginTransaction();
@@ -1106,7 +1116,6 @@ class Users extends Myschoolgh {
 			if(!empty($guardian)) {
 				// init the guardian id
 				$guardian_ids = [];
-
 				// loop through the guardian array list
 				foreach($guardian as $key => $value) {
 
@@ -1146,10 +1155,11 @@ class Users extends Myschoolgh {
 					}
 					
 				}
-				// update the user information if the guardian_ids is not empty
-				if(!empty($guardian_ids)) {
-					$this->db->query("UPDATE users SET guardian_id='".implode(",", $guardian_ids)."' WHERE item_id='{$params->user_id}' AND user_type = 'student' LIMIT 1");
-				}
+			}
+
+			// update the user information if the guardian_ids is not empty
+			if(!empty($guardian_ids)) {
+				$this->db->query("UPDATE users SET guardian_id='".implode(",", $guardian_ids)."' WHERE item_id='{$params->user_id}' AND user_type = 'student' LIMIT 1");
 			}
 			
 			// if the email address was parsed
@@ -1230,9 +1240,12 @@ class Users extends Myschoolgh {
 		$params->phone = isset($params->phone) ? str_ireplace(["(", ")", "-", "_"], "", $params->phone) : null;
 		$params->phone = !empty($params->phone) ? preg_replace("/[\s]/", "", $params->phone) : null;
 
-		/** Check the email address if not empty */
-		if(!isset($params->email) || (isset($params->email) && !filter_var($params->email, FILTER_VALIDATE_EMAIL))) {
-			return ["code" => 201, "data" => "Sorry! Provide a valid email address."];
+		// if the email address is not empty
+		if(!empty($params->email)) {
+			/** Check the email address if not empty */
+			if(!isset($params->email) || (isset($params->email) && !filter_var($params->email, FILTER_VALIDATE_EMAIL))) {
+				return ["code" => 201, "data" => "Sorry! Provide a valid email address."];
+			}
 		}
 
 		/** Check the contact number if not empty */
@@ -1255,7 +1268,7 @@ class Users extends Myschoolgh {
 			$i_params = (object) ["limit" => 1, "email" => $params->email];
 			// get the user data
 			if(!empty($this->list($i_params)["data"])) {
-				// return ["code" => 201, "response" => "Sorry! The email is already in use."];
+				return ["code" => 201, "response" => "Sorry! The email is already in use."];
 			}
 		}
 

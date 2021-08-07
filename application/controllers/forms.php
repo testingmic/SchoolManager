@@ -1732,8 +1732,8 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="unique_id">Student ID (optional)</label>
-                        <input type="text" value="'.($userData->unique_id ?? null).'" name="unique_id" id="unique_id" class="form-control">
+                        <label for="unique_id">Student ID (optional) '.(!$isData ? '<small class="text-danger">Leave empty for auto generation</small>' : null).'</label>
+                        <input type="text" value="'.($userData->unique_id ?? null).'" '.($isData ? "disabled='disabled'" : null).' name="unique_id" id="unique_id" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -1837,7 +1837,6 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>
-
             <div class="row mb-3 pb-4">
                 <div class="col-lg-12 mb-4 border-bottom pb-3">
                     <div class="row">
@@ -1905,7 +1904,6 @@ class Forms extends Myschoolgh {
 
                     // append to the html content
                     $response .= '<div class="col-lg-12" style="display:none" id="student_guardian_list_existing">';
-
                     $response .= '<div class="form-group">
                         <label>Select Existing Guardian</label>
                         <select name="guardian_id" id="guardian_id" data-width="100%" class="selectpicker form-control">
@@ -1917,10 +1915,11 @@ class Forms extends Myschoolgh {
                     }
 
                         
-                    $response .= '</select></div>';
+                    $response .= '</select>';
+                    $response .= '</div>';
+                    $response .= '</div>';
                 }
                 $response .= '
-                </div>
             </div>
             <div class="row mb-4 border-bottom pb-4">
                 <div class="col-lg-12"><h5>ACADEMICS</h5></div>
@@ -2071,7 +2070,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="country">Country</label>
                         <select data-width="100%" name="country" id="country" class="form-control selectpicker">
-                            <option value="null">Select Country</option>';
+                            <option value="">Select Country</option>';
                             foreach($this->pushQuery("*", "country") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->country) ? "selected" : null)." value=\"{$each->id}\">{$each->country_name}</option>";                            
                             }

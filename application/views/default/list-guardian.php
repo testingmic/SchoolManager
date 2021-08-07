@@ -70,7 +70,16 @@ foreach($guardian_list as $kkey => $each) {
     // append to the list of all guardians
     $guardians .= "<tr data-row_id=\"{$each->user_id}\">";
     $guardians .= "<td>".($kkey+1)."</td>";
-    $guardians .= "<td><img title=\"Click to view full details\" onclick=\"return loadPage('{$baseUrl}update-guardian/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
+    $guardians .= "<td>
+        <div class='d-flex justify-content-start'>
+            <div class='mr-1'>
+                <img title='Click to view student details' onclick=\"return loadPage('{$baseUrl}update-student/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\">
+            </div>
+            <div>
+                {$each->name} <br><strong class='text-primary'>{$each->unique_id}</strong>
+            </div>
+        </div>
+    </td>";
     $guardians .= "<td>{$each->relationship}</td>";
     $guardians .= "<td>{$each->email}</td>";
     $guardians .= "<td>{$each->phone_number}</td>";

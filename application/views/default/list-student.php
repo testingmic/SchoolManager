@@ -62,7 +62,16 @@ foreach($student_list["data"] as $key => $each) {
 
     $students .= "<tr data-row_id=\"{$each->user_id}\">";
     $students .= "<td>".($key+1)."</td>";
-    $students .= "<td><img title='Click to view student details' onclick=\"return loadPage('{$baseUrl}update-student/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"> &nbsp; {$each->name}</td>";
+    $students .= "<td>
+        <div class='d-flex justify-content-start'>
+            <div class='mr-1'>
+                <img title='Click to view student details' onclick=\"return loadPage('{$baseUrl}update-student/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\">
+            </div>
+            <div>
+                {$each->name} <br><strong class='text-primary'>{$each->unique_id}</strong>
+            </div>
+        </div>
+    </td>";
     $students .= "<td>{$each->class_name}</td>";
     $students .= "<td>{$each->gender}</td>";
     $students .= "<td>{$each->blood_group_name}</td>";

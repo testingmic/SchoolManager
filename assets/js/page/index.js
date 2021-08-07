@@ -27,6 +27,7 @@ $(`select[id="switch_select"]`).on("change", function() {
     if(value === "add_new") {
         $(`div[id="student_guardian_list"]`).slideDown("slow");
         $(`div[id="student_guardian_list_existing"]`).slideUp("slow");
+        $(`div[id="student_guardian_list_existing"] select`).val("").change();
     } else {
         $(`div[id="student_guardian_list"]`).slideUp("slow");
         $(`div[id="student_guardian_list_existing"]`).slideDown("slow");
