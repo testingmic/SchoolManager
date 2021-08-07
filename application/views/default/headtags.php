@@ -205,7 +205,7 @@ load_helpers(['menu_helper']);
                 <?php } ?>
                 <?php if($isActiveAccount && $isSchool) { ?>
                 <li class="dropdown dropdown-list-toggle">
-                    <a href="#" data-toggle="dropdown" class="nav-link nav-link-lg message-toggle" data-notification="message"><i class="far fa-envelope"></i></a>
+                    <a href="#" data-toggle="dropdown" title="Email Messages" class="nav-link nav-link-lg message-toggle" data-notification="message"><i class="far fa-envelope"></i></a>
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
                     <div class="dropdown-header">Messages
                         <div class="float-right">
@@ -231,7 +231,7 @@ load_helpers(['menu_helper']);
                     </div>
                     </div>
                 </li>
-                <li class="dropdown dropdown-list-toggle"><a href="#" data-toggle="dropdown" class="nav-link notification-toggle nav-link-lg"><i class="far fa-bell"></i></a>
+                <li class="dropdown dropdown-list-toggle"><a title="Notifications List" href="#" data-toggle="dropdown" class="nav-link notification-toggle nav-link-lg"><i class="far fa-bell"></i></a>
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
                         <div class="dropdown-header">Notifications
                             <div class="float-right mark_all_as_read">
@@ -240,6 +240,9 @@ load_helpers(['menu_helper']);
                         </div>
                         <div id="notifications_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-icons"></div>
                     </div>
+                </li>
+                <li class="dropdown dropdown-list-toggle">
+                    <a title="Support Tickets List" href="<?= $baseUrl ?>support" class="nav-link nav-link-lg"><i class="fa fa-phone-volume"></i></a>
                 </li>
                 <?php } ?>
                 <li class="dropdown">

@@ -902,8 +902,10 @@ var initDataTables = () => {
         });
     }
 
-    if ($('.raw_datatable').length > 0) {
-        $('.raw_datatable').DataTable({
+    if ($(`table[class~="raw_datatable"]`).length > 0) {
+        let t_order = $(`table[class~="raw_datatable"]`).attr("data-order_item") == undefined ? "asc" : $(`table[class~="raw_datatable"]`).attr("data-order_item");
+        $(`table[class~="raw_datatable"]`).DataTable({
+            order: [1, t_order],
             search: null,
             lengthMenu: [
                 [10, 30, 50, 75, 100, 200, -1],
