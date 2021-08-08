@@ -253,6 +253,32 @@ class Models {
 
         $this->assessment_group = ["Assignment", "Test", "Quiz", "Group Work"];
 
+        $this->support_sections = [
+            "Students" => "Students",
+            "Students_Fees_Allocation" => "Student > Fees Allocation",
+            "Students_Fees_Payment" => "Student > Fees Payment",
+            "Student_Incidents" => "Student > Incidents",
+            "Courses" => "Courses",
+            "Courses_Lesson_Planner" => "Courses > Lesson Planner",
+            "Courses_Materials" => "Courses > Materials",
+            "Courses_Downloads" => "Courses > Download",
+            "Attendance_Log" => "Attendance > Log",
+            "Attendance_Report" => "Attendance > Report",
+            "Payments" => "Payments",
+            "Timetable" => "Timetable",
+            "Timetable_Generation" => "Timetable > Generation",
+            "Timetable_Allocation" => "Timetable > Allocation",
+            "Timetable_Download" => "Timetable > Download",
+            "Assessments_List" => "Assessments List",
+            "Assessments_Log" => "Assessments > Log",
+            "Assessments_Creation" => "Assessments > Creation",
+            "Assessments_Submission" => "Assessments > Submission",
+            "Library_Management" => "Library Management",
+            "Payroll_Management" => "Payroll Management",
+            "Events_Management" => "Events Management",
+            "Simple_Accounting" => "Simple Accounting",
+        ];
+
     }
 
     /**

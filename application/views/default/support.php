@@ -53,6 +53,7 @@ if((count($support_array) > 1) || empty($ticket_id)) {
         // view button
         $checkbox = "";
         $ticket->department = str_ireplace("_", " ", $ticket->department);
+        $ticket->section = str_ireplace("_", " ", $ticket->section);
 
         // if the record is still pending
         $action = "{$baseUrl}support/ticket/{$ticket->id}";
@@ -61,8 +62,9 @@ if((count($support_array) > 1) || empty($ticket_id)) {
         $support_tickets .= "<td>{$ticket->id}</td>";
         $support_tickets .= "<td><a class=\"text-success\" href=\"{$action}\">{$ticket->subject}</a></td>";
         $support_tickets .= "<td>{$ticket->department}</td>";
+        $support_tickets .= "<td>{$ticket->section}</td>";
         $support_tickets .= "<td>".$myClass->the_status_label($ticket->status)."</td>";
-        $support_tickets .= "<td>".date("jS M Y", strtotime($ticket->date_created))."</td>";
+        $support_tickets .= "<td>".date("jS M Y h:iA", strtotime($ticket->date_created))."</td>";
         $support_tickets .= "</tr>";
     }
 }
@@ -79,9 +81,21 @@ if(!empty($ticket_id) && empty($support_array) || !$accessObject->hasAccess("sup
 }
 // else if the support ticket was parsed and the item is not empty
 elseif($ticket_id && !empty($support_array)) {
+    // get the first array key item
     $data = $support_array[0];
+
+    // set the item found variable to true
     $item_found = true;
-    $disabled = ($data->status == "Closed") ? "disabled='disabled'" : null;
+
+    // replace underscores with space
+    $data->department = str_ireplace("_", " ", $data->department);
+    $data->section = str_ireplace("_", " ", $data->section);
+    
+    // confirm if the ticket is closed
+    $isClosed = (bool) ($data->status == "Closed");
+
+    // set the disabled status
+    $disabled = $isClosed ? "disabled='disabled'" : null;
 }
 
 // access permissions check
@@ -111,8 +125,9 @@ $response->html = '
                                 <tr>
                                     <th width="8%" class="text-center">#</th>
                                     <th>Subject</th>
-                                    <th width="20%">Department</th>
-                                    <th width="12%">Status</th>
+                                    <th width="20%">Help Desk</th>
+                                    <th width="17%">Section</th>
+                                    <th width="10%">Status</th>
                                     <th width="15%">Last Updated</th>
                                 </tr>
                             </thead>
@@ -124,8 +139,10 @@ $response->html = '
             ' : 
             '<div class="card mb-2">
                 <div class="card-header bg-teal">
-                    <h4 class="card-title text-white">Ticket #'.$ticket_id.' - '.$data->subject.'</h4>
-                    <div class="card-tools"></div>
+                    <div class="row" style="width:100%">
+                        <div class="col-md-8"><h4 class="card-title text-white">Ticket #'.$ticket_id.' - '.$data->subject.'</h4></div>
+                        <div class="col-md-4 p-0 text-right">'.(!empty($data->section) ? "<strong>APP SECTION:</strong> <span class='font-20'>{$data->section}</span>" : null).'</div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -164,7 +181,7 @@ $response->html = '
             </div>
             <div>
                 '.(!$disabled ? '<button class="btn bg-teal"><i></i> Reply to Ticket</button>' : null).'
-                '.(!$disabled ? '<button onclick="return close_ticket(\''.$ticket_id.'\')" class="btn btn-danger">Close</button>' : null).'
+                '.(!$disabled ? '<button onclick="return modify_ticket(\'close\',\''.$ticket_id.'\')" class="btn btn-danger">Close</button>' : null).'
             </div>
             <div class="mt-4">
                 <div class="activities">
@@ -177,7 +194,7 @@ $response->html = '
                                 <div class="d-flex justify-content-between">
                                     <div class="font-weight-bold text-primary">'.$data->user_info->name.'</div>
                                     <div>
-                                        <span class="text-job text-primary">'.$data->date_created.'</span>
+                                        <span class="text-job font-13 text-primary">'.$data->date_created.'</span>
                                     </div>
                                 </div>
                             </div>
@@ -211,7 +228,7 @@ $response->html = '
                                     <div class="d-flex justify-content-between">
                                         <div class="font-weight-bold text-primary">'.$reply->user_info->name.'</div>
                                         <div>
-                                            <span class="text-job text-primary">'.$reply->date_created.'</span>
+                                            <span class="text-job font-13 text-primary">'.$reply->date_created.'</span>
                                         </div>
                                     </div>
                                 </div>
@@ -220,13 +237,13 @@ $response->html = '
                         } else {
                             // if the user_type is an support admin
                             $content .= '
-                            <div class="d-flex justify-content-between" style="width:100%">
-                                <div class="card" style="width:100%">
-                                    <div class="card-body p-3 bg-green">
+                            <div class="d-flex justify-content-between" style="width:100%;border-radius:10px;">
+                                <div class="card" style="width:100%;border-radius:10px;">
+                                    <div class="card-body p-3 bg-green" style="border-radius:10px;">
                                         <div class="d-flex justify-content-between">
                                             <div class="font-weight-bold text-white">'.$reply->user_info->name.'</div>
                                             <div>
-                                                <span class="text-job text-white">'.$reply->date_created.'</span>
+                                                <span class="text-job font-13 text-white">'.$reply->date_created.'</span>
                                             </div>
                                         </div>
                                         <div class="mt-2">'.$reply->content.'</div>
@@ -289,6 +306,16 @@ if(empty($item_found)) {
                             <option value="Usage_Problem">Usage Problem</option>
                             <option value="Abuse">Abuse</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Section:</label>
+                        <select name="section" data-width="100%" class="selectpicker form-control">
+                            <option value="">Please Select Section of App</option>';
+                            foreach($myClass->support_sections as $value => $section) {
+                                $response->html .= "<option value='{$value}'>{$section}</option>";
+                            }
+                        $response->html .= '
+                            </select>
                     </div>
                     <div class="form-group">
                         <label>Subject</label>

@@ -36,7 +36,7 @@ var reply_ticket = () => {
     });
 }
 
-var close_ticket = (ticket_id) => {
+var modify_ticket = (todo, ticket_id) => {
     swal({
         title: "Close Ticket",
         text: "Are you sure you want to close this ticket? Once closed, you cannot reply to it again.",
@@ -45,7 +45,7 @@ var close_ticket = (ticket_id) => {
         dangerMode: true,
     }).then((proceed) => {
         if(proceed) {
-            $.post(`${baseUrl}api/support/close`, {ticket_id}).then((response) => {
+            $.post(`${baseUrl}api/support/${todo}`, {ticket_id}).then((response) => {
                 if(response.code == 200) {
                     notify(response.data.result, "success");
                     setTimeout(() => {

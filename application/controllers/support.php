@@ -91,8 +91,8 @@ class Support extends Myschoolgh {
 
             // insert the ticket data information
             $stmt = $this->db->prepare("INSERT INTO support_tickets SET 
-                client_id =?, content = ?, user_id = ?, subject = ?, department = ?, date_created = now()");
-            $stmt->execute([$params->clientId, $params->content, $params->userId, $params->subject, $params->department]);
+                client_id =?, content = ?, user_id = ?, subject = ?, department = ?, date_created = now(), section = ?");
+            $stmt->execute([$params->clientId, $params->content, $params->userId, $params->subject, $params->department, $params->section ?? null]);
 
             // return success message
             return ["code" => 200, "data" => "Your ticket was successfully created."];
@@ -187,9 +187,39 @@ class Support extends Myschoolgh {
 
             // close the ticket
             $this->db->query("UPDATE support_tickets SET status = 'Closed' WHERE id='{$params->ticket_id}' LIMIT 1");
+            $this->db->query("UPDATE support_tickets SET status = 'Closed' WHERE parent_id='{$params->ticket_id}' LIMIT 100");
 
             // return success message
             return ["code" => 200, "data" => "Ticket successfully closed."];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+        
+    }
+
+    /**
+     * Reopen a closed ticket
+     * 
+     * @param $params->ticket_id
+     * 
+     * @return Array
+     */
+    public function reopen(stdClass $params) {
+
+        try {
+
+            // confirm if the ticket exists
+            if(empty($this->pushQuery("id", "support_tickets", "id='{$params->ticket_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
+                return ["code" => 203, "data" => "Sorry! An invalid ticket id was parsed."];
+            }
+
+            // close the ticket
+            $this->db->query("UPDATE support_tickets SET status = 'Reopened' WHERE id='{$params->ticket_id}' LIMIT 1");
+            $this->db->query("UPDATE support_tickets SET status = 'Reopened' WHERE parent_id='{$params->ticket_id}' LIMIT 100");
+
+            // return success message
+            return ["code" => 200, "data" => "Ticket successfully Reopened."];
 
         } catch(PDOException $e) {
             return $this->unexpected_error;
