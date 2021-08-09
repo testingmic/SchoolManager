@@ -118,8 +118,15 @@ class Support extends Myschoolgh {
             // global variables
             global $noticeClass, $accessObject;
 
+            // set the table
+            $params->section = $params->section ?? "ticket";
+            $table = ($params->section == "ticket") ? "support_tickets" : "knowledge_base";
+
+            // the message to send
+            $message = ($params->section == "ticket") ? "Reply was successfully shared." : "Comment was successfully sent.";
+
             // check the query
-            $query = $this->pushQuery("status, user_id, subject", "support_tickets", "id='{$params->ticket_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            $query = $this->pushQuery("status, user_id, subject", $table, "id='{$params->ticket_id}' AND client_id='{$params->clientId}' LIMIT 1");
 
             // confirm if the ticket exists
             if(empty($query)) {
@@ -136,7 +143,7 @@ class Support extends Myschoolgh {
             $status = (($query[0]->user_id == $params->userId) || ($params->userData->user_type !== "support")) ? "Waiting" : "Answered";
 
             // insert the reply
-            $stmt = $this->db->prepare("INSERT INTO support_tickets SET client_id = ?, parent_id = ?, content = ?, user_id = ?");
+            $stmt = $this->db->prepare("INSERT INTO {$table} SET client_id = ?, parent_id = ?, content = ?, user_id = ?");
             $stmt->execute([$params->clientId, $params->ticket_id, $params->content, $params->userId]);
 
             // send a notice
@@ -158,10 +165,10 @@ class Support extends Myschoolgh {
             }
 
             // update the last_update column of the ticket
-            $this->db->query("UPDATE support_tickets SET date_updated = now(), status='{$status}' WHERE id='{$params->ticket_id}' LIMIT 1");
+            $this->db->query("UPDATE {$table} SET date_updated = now(), status='{$status}' WHERE id='{$params->ticket_id}' LIMIT 1");
 
             // return success message
-            return ["code" => 200, "data" => "Reply was successfully shared."];
+            return ["code" => 200, "data" => $message];
 
         } catch(PDOException $e) {
             return $this->unexpected_error;
@@ -180,17 +187,24 @@ class Support extends Myschoolgh {
 
         try {
 
+            // set the table
+            $params->section = $params->section ?? "ticket";
+            $table = ($params->section == "ticket") ? "support_tickets" : "knowledge_base";
+
+            // the message to send
+            $message = ($params->section == "ticket") ? "Ticket successfully closed." : "Article successfully closed.";
+
             // confirm if the ticket exists
-            if(empty($this->pushQuery("id", "support_tickets", "id='{$params->ticket_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
+            if(empty($this->pushQuery("id", $table, "id='{$params->ticket_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
                 return ["code" => 203, "data" => "Sorry! An invalid ticket id was parsed."];
             }
 
             // close the ticket
-            $this->db->query("UPDATE support_tickets SET status = 'Closed' WHERE id='{$params->ticket_id}' LIMIT 1");
-            $this->db->query("UPDATE support_tickets SET status = 'Closed' WHERE parent_id='{$params->ticket_id}' LIMIT 100");
+            $this->db->query("UPDATE {$table} SET status = 'Closed' WHERE id='{$params->ticket_id}' LIMIT 1");
+            $this->db->query("UPDATE {$table} SET status = 'Closed' WHERE parent_id='{$params->ticket_id}' LIMIT 100");
 
             // return success message
-            return ["code" => 200, "data" => "Ticket successfully closed."];
+            return ["code" => 200, "data" => $message];
 
         } catch(PDOException $e) {
             return $this->unexpected_error;
@@ -225,6 +239,72 @@ class Support extends Myschoolgh {
             return $this->unexpected_error;
         }
         
+    }
+
+    /**
+     * List Knowledge Base Items
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function knowledgebase_list(stdClass $params) {
+
+        $params->query = "1";
+
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+        $params->parent_id = $params->parent_id ?? 0;
+
+        // additional query parameters
+        $params->query .= (isset($params->q)) ? " AND a.subject LIKE '%{$params->q}%'" : null;
+        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->knowledge_id) && !empty($params->knowledge_id)) ? " AND a.id='{$params->knowledge_id}'" : null;
+        $params->query .= isset($params->parent_id) ? " AND a.parent_id='{$params->parent_id}'" : null;
+
+        $order = isset($params->order) ? $params->order : "DESC";
+
+        try {
+
+            // display the replies as well
+            $q_param = (object) ["clientId" => $params->clientId];
+            $showReplies = (bool) (isset($params->show_all) && !empty($params->show_all));
+
+            // perform the query
+            $stmt = $this->db->prepare("
+                SELECT a.*,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_info
+                FROM knowledge_base a
+                WHERE {$params->query} ORDER BY a.id {$order} LIMIT {$params->limit}
+            ");
+            $stmt->execute();
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // loop through the information
+                foreach(["user_info"] as $each) {
+                    // convert the created by string into an object
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "email", "image","user_type"]);
+                }
+                // show the replies
+                if($showReplies && ($result->parent_id == 0)) {
+                    $q_param->parent_id = $result->id;
+                    $q_param->order = "ASC";
+                    $result->replies = $this->knowledgebase_list($q_param)["data"];
+                }
+
+                $data[] = $result;
+            }
+
+            return [
+                "code" => 200,
+                "data" => $data
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
+
     }
 
 }

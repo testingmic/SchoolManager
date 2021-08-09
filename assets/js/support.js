@@ -1,8 +1,9 @@
 var submit_ticket = () => {
     let department = $(`div[id="ticket_form"] select[name="department"]`).val(),
+        section = $(`div[id="ticket_form"] select[name="section"]`).val(),
         subject = $(`div[id="ticket_form"] input[name="subject"]`).val(),
         content = $(`div[id="ticket_form"] textarea[name="content"]`).val();
-    $.post(`${baseUrl}api/support/create`, {department, subject, content}).then((response) => {
+    $.post(`${baseUrl}api/support/create`, {department, subject, content, section}).then((response) => {
         if(response.code == 200) {
             notify(response.data.result, "success");
             $(`div[id="tickets"]`).modal("hide");
@@ -18,15 +19,15 @@ var submit_ticket = () => {
     });
 }
 
-var reply_ticket = () => {
-    let ticket_id = $(`div[id="ticket_form"] input[name="ticket_id"]`).val(),
-        content = $(`div[id="ticket_form"] textarea[name="content"]`).val();
-    $.post(`${baseUrl}api/support/reply`, {ticket_id, content}).then((response) => {
+var reply_ticket = (ticket_id, section) => {
+    let content = $(`div[id="ticket_form"] textarea[name="content"]`).val();
+    $.post(`${baseUrl}api/support/reply`, {ticket_id, content, section}).then((response) => {
         if(response.code == 200) {
             notify(response.data.result, "success");
             $(`div[id="ticket_form"] input, div[id="ticket_form"] textarea`).val(``);
             setTimeout(() => {
-                loadPage(`${baseUrl}support/ticket/${ticket_id}`);
+                let url_link = (section == "ticket") ? `${baseUrl}support/${section}/${ticket_id}` : `${baseUrl}${section}/item/${ticket_id}`;
+                loadPage(url_link);
             }, 2000);
         } else {
             notify(response.data.result);
@@ -36,7 +37,7 @@ var reply_ticket = () => {
     });
 }
 
-var modify_ticket = (todo, ticket_id) => {
+var modify_ticket = (todo, ticket_id, section) => {
     swal({
         title: "Close Ticket",
         text: "Are you sure you want to close this ticket? Once closed, you cannot reply to it again.",
@@ -45,11 +46,12 @@ var modify_ticket = (todo, ticket_id) => {
         dangerMode: true,
     }).then((proceed) => {
         if(proceed) {
-            $.post(`${baseUrl}api/support/${todo}`, {ticket_id}).then((response) => {
+            $.post(`${baseUrl}api/support/${todo}`, {ticket_id, section}).then((response) => {
                 if(response.code == 200) {
                     notify(response.data.result, "success");
                     setTimeout(() => {
-                        loadPage(`${baseUrl}support/ticket/${ticket_id}`);
+                        let url_link = (section == "ticket") ? `${baseUrl}support/${section}/${ticket_id}` : `${baseUrl}${section}/item/${ticket_id}`;
+                        loadPage(url_link);
                     }, 2000);
                 } else {
                     notify(response.data.result);

@@ -335,7 +335,7 @@ if ( ! function_exists('repeater'))
  * @param	number	$word_limit	Number to limit the words to 
  * @return	text
  */
-function limit_words($str, $word_limit = null) {
+function limit_words($str, $word_limit = 20) {
 	
 	$words = strip_tags($str);
 	
