@@ -76,7 +76,7 @@ $response->html = '
                                         <th width="15%">Students Count</th>
                                         <th>Class Teacher</th>
                                         <th>Class Assistant</th>
-                                        <th align="center" width="10%"></th>
+                                        <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$classes.'</tbody>

@@ -106,7 +106,7 @@ $response->html = '
         <div class="section-header-breadcrumb">
             <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
             '.($ticket_id ? '<div class="breadcrumb-item"><a href="'.$baseUrl.'support">Support Tickets</a></div>' : '<div class="breadcrumb-item">Support Tickets</div>').'
-            '.($ticket_id && !empty($support_array) ? '<div class="breadcrumb-item active">Ticket# '.$ticket_id.'</div>' : '<div class="breadcrumb-item active">Support Ticket</div>').'
+            '.($ticket_id && !empty($support_array) ? '<div class="breadcrumb-item active">Ticket# '.$ticket_id.'</div>' : null).'
         </div>
     </div>
     <div class="row">

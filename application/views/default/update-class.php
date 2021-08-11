@@ -123,58 +123,65 @@ if(!empty($item_id)) {
                     </div>
                 </div>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Description</h4>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="py-3 pt-0">
-                            '.$data->description.'
+                '.(!empty($data->description) ? 
+                    '<div class="card">
+                        <div class="card-header">
+                            <h4>Description</h4>
                         </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Class Teacher Details</h4>
-                    </div>
-                    <div class="card-body pt-0 pb-0">
-                        <div class="py-3 pt-0">
-                            <p class="clearfix">
-                                <span class="float-left">Fullname</span>
-                                <span class="float-right text-muted">'.($data->class_teacher_info->name ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Email</span>
-                                <span class="float-right text-muted">'.($data->class_teacher_info->email ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Contact</span>
-                                <span class="float-right text-muted">'.($data->class_teacher_info->phone_number ?? null).'</span>
-                            </p>
+                        <div class="card-body pt-0">
+                            <div class="py-3 pt-0">
+                                '.$data->description.'
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Class Assistant Details</h4>
-                    </div>
-                    <div class="card-body pt-0 pb-0">
-                        <div class="py-3 pt-0">
-                            <p class="clearfix">
-                                <span class="float-left">Fullname</span>
-                                <span class="float-right text-muted">'.($data->class_assistant_info->name ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Email</span>
-                                <span class="float-right text-muted">'.($data->class_assistant_info->email ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Contact</span>
-                                <span class="float-right text-muted">'.($data->class_assistant_info->phone_number ?? null).'</span>
-                            </p>
+                    </div>' : null
+                ).'
+                '.(!empty($data->class_teacher_info) ?
+                    '<div class="card">
+                        <div class="card-header">
+                            <h4>Class Teacher Details</h4>
                         </div>
-                    </div>
-                </div>
+                        <div class="card-body pt-0 pb-0">
+                            <div class="py-3 pt-0">
+                                <p class="clearfix">
+                                    <span class="float-left">Fullname</span>
+                                    <span class="float-right text-muted">'.($data->class_teacher_info->name ?? null).'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Email</span>
+                                    <span class="float-right text-muted">'.($data->class_teacher_info->email ?? null).'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Contact</span>
+                                    <span class="float-right text-muted">'.($data->class_teacher_info->phone_number ?? null).'</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>' : null
+                ).'
+                '.(!empty($data->class_assistant_info) ? 
+                    '<div class="card">
+                        <div class="card-header">
+                            <h4>Class Assistant Details</h4>
+                        </div>
+                        <div class="card-body pt-0 pb-0">
+                            <div class="py-3 pt-0">
+                                <p class="clearfix">
+                                    <span class="float-left">Fullname</span>
+                                    <span class="float-right text-muted">'.($data->class_assistant_info->name ?? null).'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Email</span>
+                                    <span class="float-right text-muted">'.($data->class_assistant_info->email ?? null).'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Contact</span>
+                                    <span class="float-right text-muted">'.($data->class_assistant_info->phone_number ?? null).'</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>' : null
+                ).'
+                
             </div>
             <div class="col-12 col-md-12 col-lg-8">
                 <div class="card">

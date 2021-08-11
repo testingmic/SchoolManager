@@ -100,8 +100,16 @@ var cancel_assessment = () => {
             $(`table[id="student_staff_list"] tbody`).html("");
             $(`div[id="log_assessment"] *`).attr("disabled", false);
             $(`div[id="award_marks"]`).addClass("hidden");
+            $(`div[id="init_data"]`).removeClass("hidden");
         }
     });
+}
+
+var cancel_form = () => {
+    $(`div[id="init_data"]`).removeClass("hidden");
+    $(`table[id="student_staff_list"] tbody`).html("");
+    $(`div[id="log_assessment"] *`).attr("disabled", false);
+    $(`div[id="award_marks"]`).addClass("hidden");
 }
 
 var track_marks_limit = (max_score) => {
@@ -165,6 +173,18 @@ var prepare_assessment_log = (assessment_log_id = "") => {
                         </td>
                     </tr>`;
                 });
+                if(!students_list) {
+                    students_list += `
+                    <tr>
+                        <td align="center" colspan="3">
+                        Sorry! No student found for the selected class. <span onclick="return cancel_form()" class="underline text-primary">Click to cancel</span>
+                        </td>
+                    </tr>`;
+                    $(`div[id="award_marks"] div[id="buttons"]`).addClass("hidden");
+                } else {
+                    $(`div[id="award_marks"] div[id="buttons"]`).removeClass("hidden");
+                }
+                $(`div[id="init_data"]`).addClass("hidden");
                 $(`div[id="award_marks"]`).removeClass("hidden");
                 $(`table[id="student_staff_list"] tbody`).html(students_list);
                 track_marks_limit(overall_score);

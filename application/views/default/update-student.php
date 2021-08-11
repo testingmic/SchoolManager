@@ -206,11 +206,11 @@ if(!empty($user_id)) {
                 $guardian .= "<div class='col-lg-2'><strong>Relation:</strong><br> {$each->relationship}</div>";
                 $guardian .= "<div class='col-lg-3'><strong>Contact:</strong><br> {$each->contact}</div>";
                 $guardian .= "<div class='col-lg-4'><strong>Email:</strong><br> {$each->email}</div>";
-                $guardian .= "<div class='col-lg-12'><strong>Address:</strong><br> {$each->address}</div>";
+                $guardian .= !empty($each->address) ? "<div class='col-lg-12'><strong>Address:</strong><br> {$each->address}</div>" : null;
 
                 // if the user has permissions to update the student record
                 if($hasUpdate) {
-                    $guardian .= "<div class='col-lg-12 text-right'>
+                    $guardian .= "<div class='col-lg-12 mt-2 text-right'>
                         <a href=\"{$baseUrl}update-guardian/{$each->user_id}/view\" class=\"btn btn-sm btn-outline-success\" title=\"View guardian full details\"><i class=\"fa fa-eye\"></i> View</a>
                         <a onclick=\"return modifyWardGuardian('{$each->user_id}_{$data->user_id}','remove');\" href=\"javascript:void(0);\" class=\"btn btn-outline-danger anchor btn-sm\">Remove</a>
                     </div>";
@@ -385,7 +385,7 @@ if(!empty($user_id)) {
                                         '<div class="text-right">
                                             <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}pay/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'"').' class="btn btn-outline-primary"><i class="fa fa-adjust"></i> Make Fees Payment</a>
                                         </div>'
-                                    : '<div class="badge badge-success">Full Paid</div>'
+                                    : '<div class="badge badge-success">Fully Paid</div>'
                                 ).'
                                 </div>
                             </div>
@@ -424,12 +424,12 @@ if(!empty($user_id)) {
                                 </div>
                                 <div class="col-lg-2">
                                     <label>&nbsp;<br></label>
-                                    <button type="button" onclick="return generate_payment_report(\''.$user_id.'\');" class="btn btn-block btn-primary"><i class="fa fa-adjust"></i> Generate</button>
+                                    <button type="button" onclick="return generate_payment_report(\''.$user_id.'\');" class="btn btn-block btn-primary">Generate</button>
                                 </div>
 
                                 <div class="border-top pt-3 col-lg-12 mt-3">
                                     <div class="table-responsive">
-                                        <table width="100%" class="table table-striped table-bordered datatable">
+                                        <table width="100%" class="table table-striped table-bordered raw_datatable">
                                             <thead>
                                                 <tr>
                                                     <th data-width="40" style="width: 40px;">#</th>

@@ -73,7 +73,7 @@ $response->html = '
                                         <th>Section Code</th>
                                         <th width="15%">Students Count</th>
                                         <th>Section Leader</th>
-                                        <th align="center" width="13%"></th>
+                                        <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$sections.'</tbody>

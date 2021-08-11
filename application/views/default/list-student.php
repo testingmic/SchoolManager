@@ -68,7 +68,10 @@ foreach($student_list["data"] as $key => $each) {
                 <img title='Click to view student details' onclick=\"return loadPage('{$baseUrl}update-student/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\">
             </div>
             <div>
-                {$each->name} <br><strong class='text-primary'>{$each->unique_id}</strong>
+                {$each->name} <br>
+                <a title='Click to view student record' href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$each->user_id}/view\");'>
+                    <strong class='text-primary'>{$each->unique_id}</strong>
+                </a>
             </div>
         </div>
     </td>";

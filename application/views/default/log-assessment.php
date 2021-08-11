@@ -35,7 +35,7 @@ $response->html = '
         <h1>'.$pageTitle.'</h1>
         <div class="section-header-breadcrumb">
             <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-            <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-assignments">List Assessement Logs</a></div>
+            <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-assessment">List Assessement Logs</a></div>
             <div class="breadcrumb-item">'.$pageTitle.'</div>
         </div>
     </div>
@@ -65,7 +65,7 @@ $response->html = '
                                         </select>
                                     </div>
                                     <div class="col-md-5 form-group">
-                                        <label>Total Marks</label>
+                                        <label>Total Marks <span class="required">*</span></label>
                                         <input type="number" min="0" max="100" name="overall_score" id="overall_score" class="form-control">
                                     </div>
                                 </div>
@@ -116,6 +116,7 @@ $response->html = '
             <div class="col-12 col-md-12 col-lg-7">
                 <div class="card">
                     <div class="padding-20">
+                        <div class="text-center" id="init_data">The students list for gradding will appear here.</div>
                         <div id="award_marks" class="hidden">
                             <div class="table-responsive">
                                 <table data-empty="" id="student_staff_list" class="table table-bordered table-striped">
@@ -129,7 +130,7 @@ $response->html = '
                                     <tbody></tbody>
                                 </table>                         
                             </div>
-                            <div class="row">
+                            <div class="row" id="buttons">
                                 <div class="col-md-4" align="left">
                                     <button onclick="return cancel_assessment();" class="btn text-uppercase btn-danger">Cancel</button>
                                 </div>

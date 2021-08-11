@@ -42,44 +42,61 @@ $count = 0;
 $item_found = false;
 $isPermitted = false;
 $knowledge_base_list = "";
+$knowledge_base_table_list = "";
 
 // loop through the templates list
 if((count($support_array) > 1) || empty($knowledge_id)) {
-    foreach($support_array as $key => $ticket) {
-        $count++;
 
-        // view button
-        $checkbox = "";
-        $ticket->section = str_ireplace("_", " ", $ticket->section);
+    // if the support array is not empty
+    if(!empty($support_array)) {
+        // loop through the list
+        foreach($support_array as $key => $ticket) {
+            $count++;
 
-        // if the record is still pending
-        $action = "{$baseUrl}knowledgebase/item/{$ticket->id}";
+            // view button
+            $checkbox = "";
+            $ticket->section = str_ireplace("_", " ", $ticket->section);
 
-        // $knowledge_base_list .= "<tr class=\"cursor clickable-row\" data-href=\"{$action}\" data-row_id=\"{$ticket->id}\">";
-        // $knowledge_base_list .= "<td>{$ticket->id}</td>";
-        // $knowledge_base_list .= "<td><a class=\"text-success\" href=\"{$action}\">{$ticket->subject}</a></td>";
-        // $knowledge_base_list .= "<td>{$ticket->section}</td>";
-        // $knowledge_base_list .= "<td>".count($ticket->replies)."</td>";
-        // $knowledge_base_list .= "<td>".date("jS M Y h:iA", strtotime($ticket->date_created))."</td>";
-        // $knowledge_base_list .= "</tr>";
-        
-        $knowledge_base_list .= "
-        <div class='col-lg-4 col-md-6'>
+            // if the record is still pending
+            $action = "{$baseUrl}knowledgebase/item/{$ticket->id}";
+
+            // $knowledge_base_table_list .= "<tr class=\"cursor clickable-row\" data-href=\"{$action}\" data-row_id=\"{$ticket->id}\">";
+            // $knowledge_base_table_list .= "<td>{$ticket->id}</td>";
+            // $knowledge_base_table_list .= "<td><a class=\"text-success\" href=\"{$action}\">{$ticket->subject}</a></td>";
+            // $knowledge_base_table_list .= "<td>{$ticket->section}</td>";
+            // $knowledge_base_table_list .= "<td>".count($ticket->replies)."</td>";
+            // $knowledge_base_table_list .= "<td>".date("jS M Y h:iA", strtotime($ticket->date_created))."</td>";
+            // $knowledge_base_table_list .= "</tr>";
+            
+            $knowledge_base_list .= "
+            <div class='col-lg-4 col-md-6'>
+                <div class='card'>
+                    <div class='card-body p-0'>
+                        <div class='card-header pb-0'>
+                            <h3><a class=\"text-success\" href=\"{$action}\">{$ticket->subject}</a></h3>
+                        </div>
+                        <div class='card-body mb-1' style='max-height:300px;overflow:hidden;'>{$ticket->content}</div>
+                        <div class='card-footer pt-0 mt-3' align='right'>
+                            <a class='btn btn-outline-success' href=\"{$action}\">
+                                <i class='fa fa-book-open'></i> Read Article
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>";
+        }
+    } else {
+        // set the default variable
+        $knowledge_base_list = "
+        <div class='col-lg-12 text-center'>
             <div class='card'>
-                <div class='card-body p-0'>
-                    <div class='card-header pb-0'>
-                        <h3><a class=\"text-success\" href=\"{$action}\">{$ticket->subject}</a></h3>
-                    </div>
-                    <div class='card-body mb-1' style='max-height:300px;overflow:hidden;'>{$ticket->content}</div>
-                    <div class='card-footer pt-0 mt-3' align='right'>
-                        <a class='btn btn-outline-success' href=\"{$action}\">
-                            <i class='fa fa-book-open'></i> Read Article
-                        </a>
-                    </div>
+                <div class='card-body text-danger'>
+                    Sorry! No article has been uploaded the moment. Please check back later.
                 </div>
             </div>
         </div>";
     }
+
 }
 
 // not found
@@ -118,7 +135,7 @@ $response->html = '
         <div class="section-header-breadcrumb">
             <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
             '.($knowledge_id ? '<div class="breadcrumb-item"><a href="'.$baseUrl.'knowledgebase">Knowledge Base</a></div>' : '<div class="breadcrumb-item">Knowledge Base</div>').'
-            '.($knowledge_id && !empty($support_array) ? '<div class="breadcrumb-item active">'.$data->subject.'</div>' : '<div class="breadcrumb-item active">Knowledge Base Item</div>').'
+            '.($knowledge_id && !empty($support_array) ? '<div class="breadcrumb-item active">'.$data->subject.'</div>' : null).'
         </div>
     </div>
     <div class="row">
@@ -145,7 +162,7 @@ $response->html = '
                                     <th width="15%">Last Updated</th>
                                 </tr>
                             </thead>
-                            <tbody>'.$knowledge_base_list.'</tbody>
+                            <tbody>'.$knowledge_base_table_list.'</tbody>
                         </table>
                     </div>
                 </div>

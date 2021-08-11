@@ -236,21 +236,24 @@ if(!empty($item_id)) {
                     </div>
                 </div>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Description</h4>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="py-3 pt-0">
-                            '.$data->description.'
+                '.(!empty($data->description) ? 
+                    '<div class="card">
+                        <div class="card-header">
+                            <h4>Description</h4>
                         </div>
-                    </div>
-                </div>
+                        <div class="card-body pt-0">
+                            <div class="py-3 pt-0">
+                                '.$data->description.'
+                            </div>
+                        </div>
+                    </div>' : null
+                );
+                $response->html .= !empty($data->course_tutors) ? '
                 <div class="card">
                     <div class="card-header">
                         <h4>Course Tutor(s) Details</h4>
                     </div>
-                    <div class="card-body pt-0 pb-0">';
+                    <div class="card-body pt-0 pb-0">' : null;
                     foreach($data->course_tutors as $tutor) {
                         $response->html .= '
                         <div class="pb-2 pt-3 border-bottom">
@@ -268,8 +271,9 @@ if(!empty($item_id)) {
                             </p>
                         </div>';
                     }
-                    $response->html .= '</div>
-                </div>
+                    $response->html .= !empty($data->course_tutors) ? '</div></div>' : null;
+
+            $response->html .= '
             </div>
             <div class="col-12 col-md-12 col-lg-9">
                 <div class="card">

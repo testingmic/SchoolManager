@@ -643,8 +643,8 @@ class Users extends Myschoolgh {
 									<img src=\"{$this->baseUrl}{$ward->image}\" class='rounded-circle cursor author-box-picture' width='50px'>
 								</div>
 								<div>
-									<h4>{$ward->name}</h4>
-									({$ward->unique_id})<br>
+									<h4 class=\"mb-0 pb-0\">{$ward->name}</h4>
+									<span class=\"text-primary\">{$ward->unique_id}</span><br>
 									".(!empty($ward->class_name) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-home'></i> {$ward->class_name}</p>" : "")."
 									".(!empty($ward->gender) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-user'></i> {$ward->gender}</p>" : "")."
 									".(!empty($ward->date_of_birth) ? "<p class=\"mb-0 pb-0\"><i class='fa fa-calendar-check'></i> {$ward->date_of_birth}</p>" : "")."

@@ -73,10 +73,13 @@ foreach($guardian_list as $kkey => $each) {
     $guardians .= "<td>
         <div class='d-flex justify-content-start'>
             <div class='mr-1'>
-                <img title='Click to view student details' onclick=\"return loadPage('{$baseUrl}update-student/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\">
+                <img title='Click to view guardian details' onclick=\"return loadPage('{$baseUrl}update-guardian/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\">
             </div>
             <div>
-                {$each->name} <br><strong class='text-primary'>{$each->unique_id}</strong>
+                {$each->name} <br>
+                <a title='Click to view guardian record' href='#' onclick='return loadPage(\"{$baseUrl}update-guardian/{$each->user_id}/view\");'>
+                    <strong class='text-primary'>{$each->unique_id}</strong>
+                </a>
             </div>
         </div>
     </td>";

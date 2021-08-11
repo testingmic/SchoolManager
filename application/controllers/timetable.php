@@ -88,7 +88,7 @@ class Timetable extends Myschoolgh {
                     ", "timetables_slots_allocation a 
                         LEFT JOIN courses b ON b.item_id = a.course_id
                         LEFT JOIN classes c ON c.item_id = a.class_id", 
-                    "a.timetable_id = '{$result->item_id}' AND a.status='1' {$query}");
+                    "a.timetable_id = '{$result->item_id}' AND b.academic_year = '{$params->academic_year}' AND b.academic_term='{$params->academic_term}' AND a.status='1' {$query}");
                     
                     $allocations = [];
                     foreach($allocate as $alot) {
@@ -652,7 +652,7 @@ class Timetable extends Myschoolgh {
         // if the user is currently logged in and the timetable id parsed is not the same as the current session value
         if(!empty($this->session->userId) && (isset($params->timetable_id) && $params->timetable_id !== $this->session->last_TimetableId)) {
             // update the user information
-            $this->db->query("UPDATE users SET last_timetable_id = '{$params->timetable_id}' WHERE item_id = '{$this->session->userId}' LIMIT 1");
+            $this->db->query("UPDATE users SET last_timetable_id = '{$params->timetable_id}' WHERE item_id = '{$this->session->userId}' LIMIT 10");
             // save the item in session
             $this->session->set("last_TimetableId", $params->timetable_id);
         }

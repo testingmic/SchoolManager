@@ -121,16 +121,18 @@ if(!empty($item_id)) {
                     </div>
                 </div>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Description</h4>
-                    </div>
-                    <div class="card-body pt-0">
-                        <div class="py-3 pt-0">
-                            '.$data->description.'
+                '.(!empty($data->description) ? 
+                    '<div class="card">
+                        <div class="card-header">
+                            <h4>Description</h4>
                         </div>
-                    </div>
-                </div>
+                        <div class="card-body pt-0">
+                            <div class="py-3 pt-0">
+                                '.$data->description.'
+                            </div>
+                        </div>
+                    </div>' : null
+                ).'
                 <div class="card">
                     <div class="card-header">
                         <h4>Personal Details</h4>
