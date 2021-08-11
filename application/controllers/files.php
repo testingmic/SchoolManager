@@ -78,10 +78,10 @@ class Files extends Myschoolgh {
         $root_dir = "assets/uploads";
         
         // return if the user is not logged in
-        if((!isset($params->userData->user_id) || !isset($params->module) || !isset($params->label)) && !isset($params->attachments_list)) {
+        if((!isset($params->userData->user_id) || !isset($params->module) || (!isset($params->label)) && !isset($params->attachments_list))) {
             return "error";
         }
-
+        
         // perform all this checks if the attachmments list was not parsed
         if(!isset($params->attachments_list)) {
 

@@ -1,17 +1,13 @@
-<?php function communication_menu() { global $baseUrl, $accessObject; ?>
-<?php if($accessObject->hasAccess("manage", "communication")) { ?>
-    <li class="dropdown">
+<?php function communication_menu() { global $baseUrl; ?>
+<li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails & SMS</span></a>
         <ul class="dropdown-menu">
-            <?php if($accessObject->hasAccess("send", "communication")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_send">Send SMS / Email</a></li>
-            <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_report">SMS / Email Report</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>sms_template">SMS Templates</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>email_template">Email Templates</a></li>
         </ul>
     </li>
-    <?php } ?>
 <?php } ?>
 <?php function incidents_menu() { global $baseUrl, $accessObject; ?>
     <?php if($accessObject->hasAccess("view", "incident")) { ?>
@@ -120,11 +116,10 @@
         </ul>
     </li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Assessments</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Assignments</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>add-assessment">Create Assessment</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>log-assessment">Log Assessment</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>list-assignments">List Assignments</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>add-assignment">Create Assignment</a></li>
         </ul>
     </li>
     <?php } ?>
@@ -262,11 +257,10 @@
     </li>
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Assessments</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Assignments</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>add-assessment">Create Assessment</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>log-assessment">Log Assessment</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>list-assignments">List Assignments</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>add-assignment">Create Assignment</a></li>
         </ul>
     </li>
     <li class="dropdown">
@@ -305,9 +299,9 @@
     </li>
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Assessments</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Assignments</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>list-assignments">List Assignments</a></li>
         </ul>
     </li>
     <li class="dropdown">
@@ -355,9 +349,9 @@
     <?php } ?>
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Assessments</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Assignments</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>list-assignments">List Assignments</a></li>
         </ul>
     </li>
     <li class="dropdown">

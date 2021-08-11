@@ -63,10 +63,7 @@ function ajax_file_upload(formdata) {
             if (response.code == 200) {
                 load_ajax_file_uploads(response.data.result);
             } else {
-                Toast.fire({
-                    icon: "error",
-                    title: response.data.result
-                });
+                notify(response.data.result);
             }
         },
         complete: function() {

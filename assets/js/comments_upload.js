@@ -86,6 +86,8 @@ function ajax_post_file_upload(formdata) {
             $("input.comment_attachment_file_upload").val("");
             if (response.code == 200) {
                 load_ajax_post_file_uploads(response.data.result);
+            } else {
+                notify(response.data.result);
             }
         },
         complete: function() {

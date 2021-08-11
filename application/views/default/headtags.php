@@ -284,9 +284,12 @@ load_helpers(['menu_helper']);
                         <?php } ?>
                         <?php if($accessObject->hasAccess("close", "settings") && $isSchool) { ?>
                         <a href="<?= $baseUrl ?>manager" class="dropdown-item has-icon">
-                            <i class="fas fa-bolt"></i> <span class="mr-3">Manage</span> <?= $endPermission && $defaultUser->appPrefs->termEnded ? '<span class="notification beep"></span>' : null ?>
+                            <i class="fas fa-bolt"></i> <span class="mr-3">Manage Calendar</span> <?= $endPermission && $defaultUser->appPrefs->termEnded ? '<span class="notification beep"></span>' : null ?>
                         </a>
                         <?php } ?>
+                        <a title="Knowledge Base" href="<?= $baseUrl ?>knowledgebase" class="dropdown-item has-icon">
+                            <i class="fa fa-book-open"></i> Knowledge Base
+                        </a>
                     <?php } ?>
                     <div class="dropdown-divider"></div>
                     <a href="#" onclick="return logout()" class="dropdown-item anchor has-icon text-danger">

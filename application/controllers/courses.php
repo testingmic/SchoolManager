@@ -1012,17 +1012,19 @@ class Courses extends Myschoolgh {
         $html .= "<table cellpadding=\"6px\" cellspacing=\"1px\" width=\"100%\">\n";
         $html .= "
             <tr>
-                <td width=\"40%\" style=\"border:solid 1px #ccc\">
+                <td width=\"30%\" style=\"border:solid 1px #ccc\">
                     <span style=\"font-size:13px\">Academic Year: ".strtoupper($content->academic_year)."</span><br>
                     <span style=\"font-size:13px\">Academic Term: ".strtoupper($content->academic_term)."</span><br>
                 </td>
-                <td width=\"60%\" style=\"border:solid 1px #ccc\">
+                <td width=\"70%\" style=\"border:solid 1px #ccc\">
                     <span style=\"font-size:24px\">".strtoupper($content->name)."</span><br>
                     <span style=\"font-size:13px;padding-right:40px;\"><strong>CODE:</strong> {$content->course_code}</span><br>
                     <span style=\"font-size:13px\"><strong>WEEKLY MEETINGS:</strong> {$content->weekly_meeting}</span><br>
                     <span style=\"font-size:13px\"><strong>CREDIT HOURS:</strong> {$content->credit_hours}</span>
                 </td>
             </tr>
+            </table>
+            <table cellpadding=\"6px\" cellspacing=\"1px\" width=\"100%\">
             <tr><td colspan=\"2\">{$content->description}</td></tr>";
             $html .= "<tr><td colspan=\"2\"><span style=\"font-size:24px\">LESSON PLAN</span></td></tr>";
         foreach($content->lesson_plan as $key => $plan) {
