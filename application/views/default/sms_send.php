@@ -83,6 +83,13 @@ $response->html = '
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>
+        <div class="d-flex justify-content-between">
+            <div></div>
+            <div>
+                <span class="p-1 mb-2 font-20 bg-amber" id="sms_balance">'.($settings->sms_balance ?? 0).' SMS Units</span>
+                <button onclick="return topup_sms()" class="btn mb-2 btn-success"><i class="fa fa-database"></i> Top Up</button>
+            </div>
+        </div>
         <form method="post" action="'.$baseUrl.'api/communication/send_message" class="form_send_message" id="send_form_'.$route.'" data-route="'.$route.'">
             <div class="row send_smsemail">
                 <div class="col-12 col-sm-12 col-lg-12">

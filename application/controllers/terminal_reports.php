@@ -238,8 +238,11 @@ class Terminal_reports extends Myschoolgh {
      */
     public function download_csv(stdClass $params) {
 
+        // set the global variable
+        global $defaultClientData;
+
         // get the client data
-        $client_data = $this->client_data($params->clientId);
+        $client_data = $defaultClientData;
 
         // old record
         $class_name = $this->pushQuery("id, item_id, name", "classes", "item_id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
@@ -326,6 +329,9 @@ class Terminal_reports extends Myschoolgh {
      * @return Array
      */
     public function upload_csv(stdClass $params) {
+
+        // set the global variable
+        global $defaultClientData;
         
         // reading tmp_file name
         $report_file = fopen($params->report_file['tmp_name'], 'r');
@@ -344,7 +350,7 @@ class Terminal_reports extends Myschoolgh {
         $headers = ["Student Name","Student ID","Subject Name","Subject Code"];
 
         // get the client data
-        $client_data = $this->client_data($params->clientId);
+        $client_data = $defaultClientData;
         $columns = json_encode($client_data->grading_structure);
         $columns = json_decode($columns, true);
 

@@ -69,6 +69,9 @@ class Sections extends Myschoolgh {
      */
     public function add(stdClass $params) {
 
+        // get the default client data
+        global $defaultClientData;
+
         // create a new department code
         if(isset($params->section_code) && !empty($params->section_code)) {
             // replace any empty space with 
@@ -80,7 +83,7 @@ class Sections extends Myschoolgh {
         } else {
             // generate a new department code
             $counter = $this->append_zeros(($this->itemsCount("sections", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
-            $params->section_code = $this->client_data($params->clientId)->client_preferences->labels->{"section_label"}.$counter;
+            $params->section_code = $defaultClientData->client_preferences->labels->{"section_label"}.$counter;
         }
 
         // convert the code to uppercase
@@ -148,6 +151,9 @@ class Sections extends Myschoolgh {
 
         try {
 
+            // get global variable data
+            global $defaultClientData;
+
             // old record
             $prevData = $this->pushQuery("*", "sections", "id='{$params->section_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
@@ -167,7 +173,7 @@ class Sections extends Myschoolgh {
             } elseif(empty($prevData[0]->section_code) || !isset($params->section_code)) {
                 // generate a new class code
                 $counter = $this->append_zeros(($this->itemsCount("sections", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
-                $params->section_code = $this->client_data($params->clientId)->client_preferences->labels->{"section_label"}.$counter;
+                $params->section_code = $defaultClientData->client_preferences->labels->{"section_label"}.$counter;
             }
 
             // convert the code to uppercase

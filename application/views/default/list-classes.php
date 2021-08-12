@@ -42,7 +42,7 @@ foreach($item_list["data"] as $key => $each) {
 
     $classes .= "<tr data-row_id=\"{$each->id}\">";
     $classes .= "<td>".($key+1)."</td>";
-    $classes .= "<td>{$each->name}</td>";
+    $classes .= "<td><span class='text-uppercase font-15 text-info'><a href='#' onclick='return loadPage(\"{$baseUrl}update-class/{$each->id}/view\");'>{$each->name}</a></span></td>";
     $classes .= "<td>{$each->class_code}</td>";
     $classes .= "<td>{$each->class_size}</td>";
     $classes .= "<td>{$each->students_count}</td>";

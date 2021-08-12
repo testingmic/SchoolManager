@@ -387,7 +387,7 @@ if($isSupport) {
                             <div class="card-body bg-info text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="font-13 mb-0">Total Students</h6>
+                                        <h6 class="font-14 text-uppercase font-weight-bold mb-0">Total Students</h6>
                                         <span data-count="total_students_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -404,7 +404,7 @@ if($isSupport) {
                             <div class="card-body bg-info text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="font-13 mb-0">Teaching Stafff</h6>
+                                        <h6 class="font-14 text-uppercase font-weight-bold mb-0">Teaching Stafff</h6>
                                         <span data-count="total_teachers_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -421,7 +421,7 @@ if($isSupport) {
                             <div class="card-body bg-info text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="font-13 mb-0">Employees / Users</h6>
+                                        <h6 class="font-14 text-uppercase font-weight-bold mb-0">Employees / Users</h6>
                                         <span data-count="total_employees_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -437,7 +437,7 @@ if($isSupport) {
                         <div class="card bg-info text-white">
                             <div class="card-body pb-1 pt-3">
                                 <div align="center">
-                                    <h6 class="border-bottom font-13 p-0 pb-2 mb-2 m-0">'.date("l, F d, Y").'</h6>
+                                    <h6 class="border-bottom font-14 text-uppercase font-weight-bold p-0 pb-2 mb-2 m-0">'.date("l, F d, Y").'</h6>
                                     <h3 class="p-0 m-0">'.date("h:i A").'</h3>
                                 </div>
                             </div>

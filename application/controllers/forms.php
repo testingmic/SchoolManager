@@ -1978,7 +1978,12 @@ class Forms extends Myschoolgh {
             </div>
             <input type="hidden" id="user_id" value="'.($userData->user_id ?? null).'" name="user_id">
             <div class="row">
-                <div class="col-lg-12 text-right">
+                <div class="col-lg-6">
+                    '.($isData ? 
+                        '<button onclick="return loadPage(\''.$baseUrl.'update-student/'.$userData->user_id.'\');" type="button" class="btn btn-dark"><i class="fa fa-ban"></i> Discard Changes</button>': null
+                    ).'
+                </div>
+                <div class="col-lg-6 text-right">
                     <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
@@ -3239,11 +3244,12 @@ class Forms extends Myschoolgh {
      * @return Array
      */
     public function settings_form($clientId, $form_id = "ajax-data-form-content") {
+        
         // global
-        global $defaultUser;
+        global $defaultUser, $defaultClientData;
         
         // get the client data
-        $client_data = !empty($clientId) ? $this->client_data($clientId) : (object)[];
+        $client_data = !empty($clientId) ? $defaultClientData : (object)[];
 
         // run this query
         $prefs = !empty($client_data) ? $client_data->client_preferences : (object)[];
@@ -3713,8 +3719,8 @@ class Forms extends Myschoolgh {
         $the_form = [];
 
         // get the client data
-        global $defaultUser;
-        $client_data = $this->client_data($clientId);
+        global $defaultUser, $defaultClientData;
+        $client_data = $defaultClientData;
 
         // get the list of all classes
         $classes_param = (object) [

@@ -380,11 +380,16 @@ class Fees extends Myschoolgh {
 
         // load fees allocation list for class
         $owning = false;
+        $allocated = false;
         $student_allocation_list = "";
         $student_allocation_array = $this->students_fees_allocation($params)["data"];
 
         // if the result is not empty
         if(!empty($student_allocation_array)) {
+
+            // set the allocation to true
+            $allocated = true;
+            $showStudentData = (bool) !isset($params->show_student);
 
             // loop through the results list
             foreach($student_allocation_array as $key => $student) {
@@ -407,20 +412,25 @@ class Fees extends Myschoolgh {
 
                 // append to the url string
                 $student_allocation_list .= "<tr data-row_id=\"{$student->id}\">";
-                $student_allocation_list .= "<td>".($key+1)."</td>";
-                $student_allocation_list .= "<td>
-                    <div class='d-flex justify-content-start'>
-                        ".(!empty($student->student_info->image) ? "
-                        <div class='mr-2'>
-                            <img src='{$this->baseUrl}{$student->student_info->image}' width='40px' height='40px'>
-                        </div>" : "")."
-                        <div>
-                            {$student->student_info->name} <br class='p-0 m-0'>
-                            <strong>{$student->student_info->unique_id}</strong>
-                            {$label}
+                $student_allocation_list .= "<td width='8%'>".($key+1)."</td>";
+
+                // if not to show student data was parsed
+                if($showStudentData) {
+                    // set the student name, image and registration id
+                    $student_allocation_list .= "<td>
+                        <div class='d-flex justify-content-start'>
+                            ".(!empty($student->student_info->image) ? "
+                            <div class='mr-2'>
+                                <img src='{$this->baseUrl}{$student->student_info->image}' width='40px' height='40px'>
+                            </div>" : "")."
+                            <div>
+                                {$student->student_info->name} <br class='p-0 m-0'>
+                                <strong>{$student->student_info->unique_id}</strong>
+                                {$label}
+                            </div>
                         </div>
-                    </div>
-                </td>";
+                    </td>";
+                }
                 $student_allocation_list .= "<td>{$student->category_name}</td>";
                 $student_allocation_list .= "<td>{$student->currency} {$student->amount_due}</td>";
                 $student_allocation_list .= "<td>{$student->currency} {$student->amount_paid}</td>";
@@ -448,11 +458,14 @@ class Fees extends Myschoolgh {
 
                 $student_allocation_list .= "</tr>";
             }
+
         }
+        $allocated = empty($student_allocation_array) ? false : $allocated;
         if(isset($params->parse_owning)) {
             return [
                 "list" => $student_allocation_list,
-                "owning" => $owning
+                "owning" => $owning,
+                "allocated" => $allocated
             ];
         } else {
             return $student_allocation_list;
@@ -1576,6 +1589,9 @@ class Fees extends Myschoolgh {
      * @return Array
      */
     public function receipt(stdClass $params) {
+        
+        // global variable
+        global $defaultClientData;
 
         // init variable
         $student_data = [];
@@ -1593,7 +1609,7 @@ class Fees extends Myschoolgh {
         // get the client data
         $amount = 0;
         $data = $params->data;
-        $client = $this->client_data($params->clientId);
+        $client = $defaultClientData;
         $clientPrefs = $client->client_preferences;
 
         // get the client logo content

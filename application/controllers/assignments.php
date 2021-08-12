@@ -19,7 +19,7 @@ class Assignments extends Myschoolgh {
     public function list(stdClass $params) {
 
         // global variable
-        global $defaultUser;
+        global $defaultUser, $defaultClientData;
         
         $query = "";
         $params->query = "1";
@@ -28,7 +28,8 @@ class Assignments extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
-        $client_data = $this->client_data($this->clientId);
+        // set some default client data
+        $client_data = $defaultClientData;
         $params->academic_term = isset($params->academic_term) ? $params->academic_term : $client_data->client_preferences->academics->academic_term;
         $params->academic_year = isset($params->academic_year) ? $params->academic_year : $client_data->client_preferences->academics->academic_year;
         

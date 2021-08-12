@@ -81,6 +81,9 @@ class Departments extends Myschoolgh {
      * @return Array
      */
     public function add(stdClass $params) {
+
+        // global variable
+        global $defaultClientData;
  
         // create a new department code
         if(isset($params->department_code) && !empty($params->department_code)) {
@@ -93,7 +96,7 @@ class Departments extends Myschoolgh {
         } else {
             // generate a new department code
             $counter = $this->append_zeros(($this->itemsCount("departments", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
-            $params->department_code = $this->client_data($params->clientId)->client_preferences->labels->{"department_label"}.$counter;
+            $params->department_code = $defaultClientData->client_preferences->labels->{"department_label"}.$counter;
         }
 
         // convert the code to uppercase
@@ -161,6 +164,9 @@ class Departments extends Myschoolgh {
 
         try {
 
+            // get the default variable
+            global $defaultClientData;
+
             // old record
             $prevData = $this->pushQuery("*", "departments", "id='{$params->department_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
@@ -180,7 +186,7 @@ class Departments extends Myschoolgh {
             } elseif(empty($prevData[0]->department_code) || !isset($params->department_code)) {
                 // generate a new class code
                 $counter = $this->append_zeros(($this->itemsCount("departments", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
-                $params->department_code = $this->client_data($params->clientId)->client_preferences->labels->{"department_label"}.$counter;
+                $params->department_code = $defaultClientData->client_preferences->labels->{"department_label"}.$counter;
             }
 
             // convert the code to uppercase

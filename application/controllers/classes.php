@@ -1,10 +1,18 @@
 <?php 
 
 class Classes extends Myschoolgh {
+    
+    private $iclient = [];
 
-    public function __construct()
-    {
+    public function __construct(stdClass $data = null) {
+    
         parent::__construct();
+
+        $this->iclient = $data->client_data ?? [];
+
+		// run this query
+        $this->academic_term = $data->client_data->client_preferences->academics->academic_term ?? null;
+        $this->academic_year = $data->client_data->client_preferences->academics->academic_year ?? null;
     }
     
     /**
@@ -27,6 +35,9 @@ class Classes extends Myschoolgh {
             }
         }
 
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
+
         $params->query .= (isset($params->q) && !empty($params->q)) ? " AND a.name='{$params->q}'" : null;
         $params->query .= (isset($params->class_teacher) && !empty($params->class_teacher)) ? " AND a.class_teacher LIKE '%{$params->class_teacher}%'" : null;
         $params->query .= (isset($params->class_assistant) && !empty($params->class_assistant)) ? " AND a.class_assistant='{$params->class_assistant}'" : null;
@@ -39,7 +50,24 @@ class Classes extends Myschoolgh {
             $stmt = $this->db->prepare("
                 SELECT ".(isset($params->columns) ? $params->columns : " a.*,
                     (SELECT name FROM departments WHERE departments.id = a.department_id LIMIT 1) AS department_name,
-                    (SELECT COUNT(*) FROM users b WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' AND b.class_id = a.id AND b.client_id = a.client_id) AS students_count,
+                    (
+                        SELECT COUNT(*) FROM users b 
+                        WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
+                        AND b.class_id = a.id AND b.client_id = a.client_id 
+                        AND b.academic_term='{$params->academic_term}' AND b.academic_year='{$params->academic_year}'
+                    ) AS students_count,
+                    (
+                        SELECT COUNT(*) FROM users b 
+                        WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
+                        AND b.gender='Male' AND b.class_id = a.id AND b.client_id = a.client_id
+                        AND b.academic_term='{$params->academic_term}' AND b.academic_year='{$params->academic_year}'
+                    ) AS students_male_count,
+                    (
+                        SELECT COUNT(*) FROM users b 
+                        WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
+                        AND b.gender='Female' AND b.class_id = a.id AND b.client_id = a.client_id
+                        AND b.academic_term='{$params->academic_term}' AND b.academic_year='{$params->academic_year}'
+                    ) AS students_female_count,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.class_assistant LIMIT 1) AS class_assistant_info,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.class_teacher LIMIT 1) AS class_teacher_info
@@ -120,6 +148,9 @@ class Classes extends Myschoolgh {
 
         try {
 
+            // global variable
+            global $defaultClientData;
+
             // create a new class code
             if(isset($params->class_code) && !empty($params->class_code)) {
                 // replace any empty space with 
@@ -131,7 +162,7 @@ class Classes extends Myschoolgh {
             } else {
                 // generate a new class code
                 $counter = $this->append_zeros(($this->itemsCount("classes", "client_id = '{$params->clientId}'") + 1), 2);
-                $params->class_code = $this->client_data($params->clientId)->client_preferences->labels->{"class_label"}.$counter;
+                $params->class_code = $defaultClientData->client_preferences->labels->{"class_label"}.$counter;
             }
 
             // init
@@ -191,6 +222,9 @@ class Classes extends Myschoolgh {
 
         try {
 
+            // get a default client data
+            global $defaultClientData;
+
             // old record
             $prevData = $this->pushQuery("*", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
@@ -210,7 +244,7 @@ class Classes extends Myschoolgh {
             } elseif(empty($prevData[0]->class_code) || !isset($params->class_code)) {
                 // generate a new class code
                 $counter = $this->append_zeros(($prevData[0]->id), 2);
-                $params->class_code = $this->client_data($params->clientId)->client_preferences->labels->{"class_label"}.$counter;
+                $params->class_code = $defaultClientData->client_preferences->labels->{"class_label"}.$counter;
             }
 
             // convert the code to uppercase

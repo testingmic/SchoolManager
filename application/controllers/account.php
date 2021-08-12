@@ -325,7 +325,8 @@ initiateCalendar();";
         }
 
         // get the client data
-        $client_data = $this->client_data($params->clientId);
+        global $defaultClientData;
+        $client_data = $defaultClientData;
 
 
         // insert a new record

@@ -315,7 +315,7 @@ var generate_list = (route) => {
                 users_receipients_list += `
                 <tr row_id="${e.item_id}">
                     <td>${count}</td>
-                    <td><label for="user_${e.item_id}" class="cursor underline">${e.name}</label></td>
+                    <td><label for="recipients_${e.item_id}" class="cursor underline text-uppercase text-info">${e.name}</label></td>
                     <td>${the_value !== null ? the_value : ""}</td>
                     <td><input ${the_value !== null ? `class="user_contact" name="recipients[]" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
                 </tr>`;
@@ -330,7 +330,7 @@ var generate_list = (route) => {
                 users_receipients_list += `
                 <tr row_id="${e.item_id}">
                     <td>${count}</td>
-                    <td><label for="user_${e.item_id}" class="cursor underline">${e.name}</label></td>
+                    <td><label for="recipients_${e.item_id}" class="cursor text-uppercase text-info">${e.name}</label></td>
                     <td>${the_value !== null ? the_value : ""}</td>
                     <td><input ${the_value !== null ? `class="user_contact" name="recipients[]" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
                 </tr>`;
@@ -344,7 +344,7 @@ var generate_list = (route) => {
                 users_receipients_list += `
                 <tr row_id="${e.item_id}">
                     <td>${count}</td>
-                    <td><label for="user_${e.item_id}" class="cursor underline">${e.name}</label></td>
+                    <td><label for="recipients_${e.item_id}" class="cursor text-uppercase text-info">${e.name}</label></td>
                     <td>${the_value !== null ? the_value : ""}</td>
                     <td><input ${the_value !== null ? `class="user_contact" name="recipients[]" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
                 </tr>`;

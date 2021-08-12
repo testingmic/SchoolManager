@@ -296,7 +296,7 @@ if(!empty($user_id)) {
                     <div class="author-box-center">
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
                         <div class="clearfix"></div>
-                        <div class="font-25 font-weight-bold text-uppercase">'.$data->name.'</div>
+                        <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
                         <div class="author-box-job"><strong>'.strtoupper($data->user_type).'</strong></div>
                     </div>
                 </div>

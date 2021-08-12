@@ -285,7 +285,7 @@ class Courses extends Myschoolgh {
      */
     public function add(stdClass $params) {
 
-        global $accessObject;
+        global $accessObject, $defaultClientData;
 
         // check permission
         if(!$accessObject->hasAccess("add", "course")) {
@@ -303,7 +303,7 @@ class Courses extends Myschoolgh {
         } else {
             // generate a new Course code
             $counter = $this->append_zeros(($this->itemsCount("courses", "client_id = '{$params->clientId}'") + 1), 3);
-            $params->course_code = $this->client_data($params->clientId)->client_preferences->labels->{"course_label"}.$counter;
+            $params->course_code = $defaultClientData->client_preferences->labels->{"course_label"}.$counter;
         }
         
         // convert the code to uppercase
@@ -369,7 +369,7 @@ class Courses extends Myschoolgh {
      */
     public function update(stdClass $params) {
 
-        global $accessObject;
+        global $accessObject, $defaultClientData;
 
         // check permission
         if(!$accessObject->hasAccess("update", "course")) {
@@ -398,7 +398,7 @@ class Courses extends Myschoolgh {
             } elseif(empty($prevData[0]->course_code) && !isset($params->course_code)) {
                 // generate a new class code
                 $counter = $this->append_zeros(($this->itemsCount("courses", "client_id = '{$params->clientId}'") + 1), 3);
-                $params->course_code = $this->client_data($params->clientId)->client_preferences->labels->{"course_label"}.$counter;
+                $params->course_code = $defaultClientData->client_preferences->labels->{"course_label"}.$counter;
                 $params->course_code = strtoupper($params->course_code);
             }
 
@@ -512,11 +512,13 @@ class Courses extends Myschoolgh {
     public function add_unit(stdClass $params) {
 
         try {
-
+            // get & set some default variables
+            global $defaultClientData;
             $item_id = random_string("alnum", 32);
+            
             // set the academic_term and the academic_year
-            $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->client_data($params->clientId)->client_preferences->academics->academic_term;
-            $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->client_data($params->clientId)->client_preferences->academics->academic_year;
+            $params->academic_term = isset($params->academic_term) ? $params->academic_term : $defaultClientData->client_preferences->academics->academic_term;
+            $params->academic_year = isset($params->academic_year) ? $params->academic_year : $defaultClientData->client_preferences->academics->academic_year;
 
             // execute the statement
             $stmt = $this->db->prepare("
@@ -641,6 +643,8 @@ class Courses extends Myschoolgh {
 
         try {
 
+            // get and set some default data
+            global $defaultClientData;
             $item_id = random_string("alnum", 32);
 
             if(isset($params->unit_id)) {
@@ -648,8 +652,8 @@ class Courses extends Myschoolgh {
             }
 
             // set the academic_term and the academic_year
-            $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->client_data($params->clientId)->client_preferences->academics->academic_term;
-            $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->client_data($params->clientId)->client_preferences->academics->academic_year;
+            $params->academic_term = isset($params->academic_term) ? $params->academic_term : $defaultClientData->client_preferences->academics->academic_term;
+            $params->academic_year = isset($params->academic_year) ? $params->academic_year : $defaultClientData->client_preferences->academics->academic_year;
 
             // execute the statement
             $stmt = $this->db->prepare("

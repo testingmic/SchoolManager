@@ -67,7 +67,11 @@ if(!empty($user_id)) {
         $receivePayment = !empty($canReceive) ? $canReceive : $isParent;
 
         // load fees allocation list for class
-        $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "student_id" => $user_id, "receivePayment" => $receivePayment, "client_data" => $defaultUser->client, "parse_owning" => true];
+        $allocation_param = (object) [
+            "clientId" => $clientId, "userData" => $defaultUser, 
+            "student_id" => $user_id, "receivePayment" => $receivePayment, 
+            "client_data" => $defaultUser->client, "parse_owning" => true, "show_student" =>  false
+        ];
         
         // load the class timetable
         $timetable = load_class("timetable", "controllers", $allocation_param)->class_timetable($data->class_guid, $clientId);
@@ -260,8 +264,8 @@ if(!empty($user_id)) {
             </div>
             <div class="col-md-3">
                 <div class="card">
-                    <div class="card-body text-center bg-pink">
-                        <div class="font-18 text-dark">SECTION</div>
+                    <div class="card-body pl-0 pr-0 text-center bg-pink">
+                        <div class="font-18 text-dark">DEPARTMENT</div>
                         <div class="font-22 font-weight-bold text-uppercase text-dark">
                             '.($data->department_name ? $data->department_name : '-' ).'
                         </div>
@@ -270,8 +274,8 @@ if(!empty($user_id)) {
             </div>
             <div class="col-md-3">
                 <div class="card">
-                    <div class="card-body text-center bg-success">
-                        <div class="font-18 text-dark">DEPARTMENT</div>
+                    <div class="card-body pl-0 pr-0 text-center bg-success">
+                        <div class="font-18 text-dark">SECTION</div>
                         <div class="font-22 font-weight-bold text-uppercase text-dark">
                             '.($data->section_name ? $data->section_name : '-' ).'
                         </div>
@@ -284,9 +288,10 @@ if(!empty($user_id)) {
                     <div class="author-box-center m-0 p-0">
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                     </div>
+                    <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
                     <div class="text-center">
-                        <div class="author-box-description">'.$data->description.'</div>
-                        <div class="w-100 mt-3">
+                        <div class="author-box-description mt-0">'.$data->description.'</div>
+                        <div class="w-100 mt-2">
                             <a class="btn btn-primary" href="'.$baseUrl.'modify-student/'.$user_id.'"><i class="fa fa-edit"></i> Edit Student</a>
                         </div>
                     </div>
@@ -357,10 +362,10 @@ if(!empty($user_id)) {
                     </li>
                     '.($viewAllocation ? 
                     '<li class="nav-item">
-                        <a class="nav-link" id="fees-tab2" data-toggle="tab" href="#fees" role="tab" aria-selected="true">Fees Allocation</a>
+                        <a class="nav-link" id="fees-tab2" data-toggle="tab" href="#fees" role="tab" aria-selected="true">Student Bill</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab" aria-selected="true">Fees Payment</a>
+                        <a class="nav-link" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab" aria-selected="true">Fees Payment History</a>
                     </li>' : '').'
                     <li class="nav-item">
                         <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab" aria-selected="true">Timetable</a>
@@ -412,7 +417,15 @@ if(!empty($user_id)) {
                                         '<div class="text-right">
                                             <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}pay/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'"').' class="btn btn-outline-primary"><i class="fa fa-adjust"></i> Make Fees Payment</a>
                                         </div>'
-                                    : '<div class="badge badge-success">Fully Paid</div>'
+                                    : ($student_allocation_list["allocated"] ? 
+                                        '<div class="btn btn-success">Fees Fully Paid</div>' :
+                                        '<button title="Click to Allocate Fees to Student" onclick="return loadPage(\''.$baseUrl.'fees-allocate/'.$user_id.'\')" class="btn btn-primary">
+                                            <i class="fa fa-ankh"></i> Set Student Bill
+                                        </button>')
+                                ).'
+                                '.(
+                                    $student_allocation_list["allocated"] ? 
+                                        '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'" target="_blank" class="btn btn-primary"><i class="fa fa-print"></i> Print Bill</a>' : null
                                 ).'
                                 </div>
                             </div>
@@ -421,7 +434,6 @@ if(!empty($user_id)) {
                                     <thead>
                                         <tr>
                                             <th width="5%" class="text-center">#</th>
-                                            <th>Student Name</th>
                                             <th>Category</th>
                                             <th>Due</th>
                                             <th>Paid</th>

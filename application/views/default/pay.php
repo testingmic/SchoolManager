@@ -28,6 +28,8 @@ $client_id = $SITEURL[1] ?? null;
 
 // if the client id is not empty
 if(!empty($client_id)) {
+    
+    // get the client data
     $client = isset($defaultClientData->client_name) ? $defaultClientData : $myClass->client_data($client_id);
 
     // check the url

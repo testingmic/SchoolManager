@@ -1201,7 +1201,7 @@ class Users extends Myschoolgh {
 
 				// set the url
 				$url_link = $redirect == "student" ? "{$this->baseUrl}fees-allocate/{$params->user_id}" : 
-					"{$this->baseUrl}update-{$redirect}/{$params->user_id}/update";
+					"{$this->baseUrl}update-{$redirect}/{$params->user_id}";
 
 				// append the redirection url
 				$return["additional"] = [
@@ -1558,6 +1558,12 @@ class Users extends Myschoolgh {
 
 			// commit all opened transactions
 			$this->db->commit();
+
+			// set the url
+			$url_link = $params->user_type == "student" ? "{$this->baseUrl}update-student/{$params->user_id}" : null;
+
+			// append the redirection url
+			if($url_link) { $additional = ["href" => $url_link]; }
 
 			#record the password change request
             return ["code" => 200, "data" => "Account successfully updated.", "additional" => $additional ];

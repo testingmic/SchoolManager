@@ -338,9 +338,10 @@ elseif(confirm_url_id(1, "incident")) {
 /** Fees Report */
 elseif(confirm_url_id(1, "fees")) {
 
-    // get the parameters
-    $getObject = (object) $_GET;
-    
+    /** Start processing */
+    $getObject = (array) $_GET;
+    $getObject = (object) array_map("xss_clean", $getObject);
+
     // set the date range
     $date_range = "";
     $date_range .= isset($getObject->start_date) && !empty($getObject->start_date) ? $getObject->start_date : null;
@@ -396,6 +397,17 @@ elseif(confirm_url_id(1, "accounting")) {
 
     $accountsObj = load_class("accounting", "controllers");
     $pages_content .= $accountsObj->statement($getObject);
+}
+
+/** Print Student Bill */
+elseif(confirm_url_id(1, "student_bill")) {
+
+    // get the parameters
+    $getObject = (array) $_GET;
+    $getObject = (object) array_map("xss_clean", $getObject);
+
+    $pages_content = "Student Bill.";
+
 }
 // print $pages_content;
 // exit;

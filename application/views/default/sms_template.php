@@ -91,17 +91,17 @@ $response->html = '
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>
+        <div class="d-flex justify-content-between">
+            <div></div>
+            <div>
+                <span class="p-1 mb-2 font-20 bg-amber" id="sms_balance">'.($settings->sms_balance ?? 0).' SMS Units</span>
+                <button onclick="return topup_sms()" class="btn mb-2 btn-success"><i class="fa fa-database"></i> Top Up</button>
+            </div>
+        </div>
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <div></div>
-                            <div>
-                                <span class="btn mb-2 font-20 btn-danger" id="sms_balance">'.($settings->sms_balance ?? 0).' SMS Units</span>
-                                <button onclick="return topup_sms()" class="btn mb-2 btn-success"><i class="fa fa-database"></i> Top Up</button>
-                            </div>
-                        </div>
                         <div class="padding-20">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
