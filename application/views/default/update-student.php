@@ -236,22 +236,53 @@ if(!empty($user_id)) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-student">Students List</a></div>
-                    <div class="breadcrumb-item">'.$pageTitle.'</div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-student">Students</a></div>
+                    <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>
             <div class="section-body">
             <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center bg-amber">
+                        <div class="font-18 text-dark">REGISTRATION ID</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-dark">'.$data->unique_id.'</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center bg-info">
+                        <div class="font-18 text-dark">CLASS</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-dark">'.$data->class_name.'</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center bg-pink">
+                        <div class="font-18 text-dark">SECTION</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-dark">
+                            '.($data->department_name ? $data->department_name : '-' ).'
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center bg-success">
+                        <div class="font-18 text-dark">DEPARTMENT</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-dark">
+                            '.($data->section_name ? $data->section_name : '-' ).'
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
                 <div class="card-body">
                     <div class="author-box-center m-0 p-0">
-                        <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
-                        <div class="clearfix"></div>
-                        <div class="font-25 font-weight-bold text-uppercase">'.$data->name.'</div>
-                        <div class="author-box-name font-22 text-success font-weight-bold">'.$data->unique_id.'</div>
-                        '.($data->class_name ? '<div class="author-box-job">'.$data->class_name.'</div>' : null).'
-                        '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : null).'
+                        <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                     </div>
                     <div class="text-center">
                         <div class="author-box-description">'.$data->description.'</div>

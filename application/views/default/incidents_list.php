@@ -89,7 +89,7 @@ $response->html = '
             <h1>Incidents List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item">Incidents List</div>
+                <div class="breadcrumb-item">Incidents</div>
             </div>
         </div>
         <div class="row">

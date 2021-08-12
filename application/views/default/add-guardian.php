@@ -27,7 +27,7 @@ $response->html = '
             <h1>'.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-guardian">Guardian List</a></div>
+                <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-guardian">Guardians</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>

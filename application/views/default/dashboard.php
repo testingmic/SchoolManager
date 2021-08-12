@@ -13,7 +13,7 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 // initial variables
-global $accessObject, $defaultUser, $isAdminAccountant, $isTutorStudent, $isParent, $isStudent, $isSupport;
+global $accessObject, $defaultUser, $isAdminAccountant, $isTutorStudent, $isParent, $isStudent, $isSupport, $defaultClientData, $clientPrefs;
 $appName = config_item("site_name");
 
 // confirm that user id has been parsed
@@ -379,19 +379,15 @@ if($isSupport) {
     // set the response dataset
     $response->html = '
         <section class="section">
-            <div class="d-flex mt-3 justify-content-between" '.$data_stream.'>
-                <div class="section-header">
-                    <h1>Dashboard</h1>
-                </div>
-            </div>
+            <div class="d-flex mt-3 justify-content-between" '.$data_stream.'></div>
             '.($isAdminAccountant ?
                 '<div class="row">
                     <div class="col-xl-3 col-lg-6 col-md-6">
                         <div class="card">
-                            <div class="card-body card-type-3">
+                            <div class="card-body bg-info text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="text-muted font-13 mb-0">Total Students</h6>
+                                        <h6 class="font-13 mb-0">Total Students</h6>
                                         <span data-count="total_students_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -405,10 +401,10 @@ if($isSupport) {
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
                         <div class="card">
-                            <div class="card-body card-type-3">
+                            <div class="card-body bg-info text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="text-muted font-13 mb-0">Teaching Stafff</h6>
+                                        <h6 class="font-13 mb-0">Teaching Stafff</h6>
                                         <span data-count="total_teachers_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -422,10 +418,10 @@ if($isSupport) {
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
                         <div class="card">
-                            <div class="card-body card-type-3">
+                            <div class="card-body bg-info text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="text-muted font-13 mb-0">Employees / Users</h6>
+                                        <h6 class="font-13 mb-0">Employees / Users</h6>
                                         <span data-count="total_employees_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -438,43 +434,71 @@ if($isSupport) {
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
-                            <div class="card-body card-type-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <h6 class="text-muted font-13 mb-0">Parents</h6>
-                                        <span data-count="total_parents_count" class="font-weight-bold mb-0">0</span>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="card-circle l-bg-yellow text-white">
-                                            <i class="fas fa-anchor"></i>
-                                        </div>
-                                    </div>
+                        <div class="card bg-info text-white">
+                            <div class="card-body pb-1 pt-3">
+                                <div align="center">
+                                    <h6 class="border-bottom font-13 p-0 pb-2 mb-2 m-0">'.date("l, F d, Y").'</h6>
+                                    <h3 class="p-0 m-0">'.date("h:i A").'</h3>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>' : ''
             ).'
-            <div class="row default_period" data-current_period="'.$global_period.'">
-                '.($isAdminAccountant ?
-                '<div class="col-md-12">
+            '.($isAdminAccountant ?
+            '<div class="row">
+                <div class="col-lg-8 col-md-12">
                     <div class="card">
-                        <div class="card-header">
-                            <h4 class="text-uppercase font-13">Revenue Flow Chart</h4>
-                        </div>
-                        <div class="card-body quick_loader">
-                            <div class="form-content-loader" style="display: flex; position: absolute">
-                                <div class="offline-content text-center">
-                                    <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                        <div class="card-body">
+                            <div class="row">
+                                <div align="center" class="col-sm-3">
+                                    <img width="160px" src="'.$baseUrl.''.$defaultClientData->client_logo.'">
                                 </div>
-                            </div>
-                            <div class="card-body" data-chart="revenue_flow_chart">
-                                <canvas id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></canvas>
+                                <div align="center" class="p-1 col-sm-9">
+                                    <div style="align-items:center;">
+                                        <h3 class="text-uppercase">'.$defaultClientData->client_name.'</h3>
+                                        <div class="'.(!empty($defaultClientData->client_slogan) ? "mb-1" : null).' text-uppercase font-15">'.$defaultClientData->client_slogan.'</div>
+                                        <div class="font-15">'.$defaultClientData->client_email.'</div>
+                                        <div class="text-uppercase mt-2 font-17">'.$defaultClientData->client_location.'</div>
+                                        <div class="text-uppercase mt-2 font-17">
+                                            '.$defaultClientData->client_contact.'
+                                            '.(!empty($defaultClientData->client_secondary_contact) ? " / {$defaultClientData->client_secondary_contact}" : null).'
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>' : '').'
+                </div>
+                <div class="col-lg-4 col-md-12">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-body pb-2" align="center">
+                                    <p class="font-16 p-0 m-0 text-primary">Academic Year</p>
+                                    <h5 class="mt-2 pt-0">'.$clientPrefs->academics->academic_year.'</h5>
+                                    <span class="font-16 font-weight-bold">
+                                        '.date("F d, Y", strtotime($clientPrefs->academics->year_starts)).' 
+                                            &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
+                                        '.date("F d, Y", strtotime($clientPrefs->academics->year_ends)).'
+                                    </span>
+                                    <hr>
+                                    <p class="font-16 p-0 m-0 text-primary">Term</p>
+                                    <h5 class="mt-0 pt-0 text-uppercase">'.$clientPrefs->academics->academic_term.'</h5>
+                                    <span class="font-16 font-weight-bold">
+                                        '.date("F d, Y", strtotime($clientPrefs->academics->term_starts)).' 
+                                            &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
+                                        '.date("F d, Y", strtotime($clientPrefs->academics->term_ends)).'
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            ' : 
+            null).'
+            <div class="row default_period" data-current_period="'.$global_period.'">
                 '.($isWardTutorParent ?
                 '<div class="col-lg-4 col-md-12">
                     <div class="card">
@@ -641,78 +665,6 @@ if($isSupport) {
                 </div>
                 ' : '').'
             </div>
-            '.($isAdminAccountant ?
-                '<div class="row">
-                    <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
-                            <div class="card-body card-type-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <h6 class="text-muted font-13 mb-0">Books Category</h6>
-                                        <span data-count="library_category_count" class="font-weight-bold mb-0">0</span>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="card-circle l-bg-purple-dark text-white">
-                                            <i class="fas fa-book-open"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
-                            <div class="card-body card-type-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <h6 class="text-muted font-13 mb-0">Books Available</h6>
-                                        <span data-count="library_books_count" class="font-weight-bold mb-0">0</span>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="card-circle bg-green text-white">
-                                            <i class="fas fa-book-reader"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
-                            <div class="card-body card-type-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <h6 class="text-muted font-13 mb-0">Departments</h6>
-                                        <span data-count="departments_count" class="font-weight-bold mb-0">0</span>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="card-circle bg-pink text-white">
-                                            <i class="fas fa-bookmark"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card">
-                            <div class="card-body card-type-3">
-                                <div class="row">
-                                    <div class="col">
-                                        <h6 class="text-muted font-13 mb-0">Classes</h6>
-                                        <span data-count="total_classes_count" class="font-weight-bold mb-0">0</span>
-                                    </div>
-                                    <div class="col-auto">
-                                        <div class="card-circle bg-red text-white">
-                                            <i class="fas fa-home"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>' : ''
-            ).'
             <div class="row">
                 '.($isAdminAccountant ? 
                     '<div class="col-lg-4 col-md-12 col-12 col-sm-12">

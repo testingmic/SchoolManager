@@ -1,6 +1,6 @@
 <?php
 // global variables
-global $usersClass, $accessObject, $myClass, $isSchool;
+global $usersClass, $accessObject, $myClass, $isSchool, $defaultClientData, $clientPrefs;
 
 // base url
 $baseUrl = config_item("base_url");

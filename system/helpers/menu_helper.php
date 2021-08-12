@@ -43,7 +43,7 @@
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-staff">Staff List</a></li>
             <?php if($accessObject->hasAccess("add", "teacher") || $accessObject->hasAccess("add", "accountant") || $accessObject->hasAccess("add", "employee")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>add-staff">Add Staff</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>add-staff">Employ Staff</a></li>
             <?php } ?>
         </ul>
     </li>   
@@ -88,16 +88,6 @@
         </ul>
     </li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Reports / Promotion</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>results-upload">Upload / Manage Results</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
-            <?php if($accessObject->hasAccess("promote", "promotion")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>promote-students">Promote Students</a></li>
-            <?php } ?>
-        </ul>
-    </li>
-    <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-open"></i><span>E-Learning</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>e-learning">E-Books / Videos</a></li>
@@ -121,6 +111,16 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>add-assessment">Create Assessment</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>log-assessment">Log Assessment</a></li>
+        </ul>
+    </li>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Reports / Promotion</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>results-upload">Upload / Manage Results</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
+            <?php if($accessObject->hasAccess("promote", "promotion")) { ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>promote-students">Promote Students</a></li>
+            <?php } ?>
         </ul>
     </li>
     <?php } ?>

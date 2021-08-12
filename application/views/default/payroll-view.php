@@ -117,15 +117,53 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                 </div>
                 <div class="section-body">
                 <div class="row mt-sm-4">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body text-center bg-amber">
+                                <div class="font-18 text-dark">STAFF ID</div>
+                                <div class="font-22 font-weight-bold text-uppercase text-dark">'.$data->unique_id.'</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body text-center bg-pink">
+                                <div class="font-18 text-dark">APPOINTMENT DATE</div>
+                                <div class="font-22 font-weight-bold text-uppercase text-dark">
+                                    '.($data->enrollment_date ? $data->enrollment_date : '-' ).'
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body text-center bg-info">
+                                <div class="font-18 text-dark">POSITION</div>
+                                <div class="font-22 font-weight-bold text-uppercase text-dark">'.$data->position.'</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-body text-center bg-success">
+                                <div class="font-18 text-dark">DEPARTMENT</div>
+                                <div class="font-22 font-weight-bold text-uppercase text-dark">
+                                    '.($data->section_name ? $data->section_name : '-' ).'
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-12 col-md-12 col-lg-4">
                         <div class="card author-box">
                         <div class="card-body">
                             <div class="author-box-center">
                                 <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
                                 <div class="clearfix"></div>
-                                <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
+                                <div class="author-box-name text-uppercase text-primary font-weight-bold font-22">'.$data->name.'</div>
                                 '.($data->class_name ? '<div class="author-box-job">'.$data->class_name.'</div>' : '').'
-                                '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : '').'
+                                '.($data->phone_number ? '<div class="author-box-job"><i class="fa fa-phone"></i> '.$data->phone_number.'</div>' : '').'
+                                '.($data->email ? '<div class="author-box-job"><i class="fa fa-envelope"></i> '.$data->email.'</div>' : '').'
+                                '.($data->residence ? '<div class="author-box-job"><i class="fa fa-globe"></i> '.$data->residence.'</div>' : '').'
                             </div>
                         </div>
                         </div>
@@ -154,62 +192,6 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                     <p class="clearfix">
                                         <span class="float-left">Net Salary</span>
                                         <span class="float-right text-muted">'.$data->net_salary.'</span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <h4>Personal Details</h4>
-                            </div>
-                            <div class="card-body pt-0 pb-0">
-                                <div class="py-4">
-                                    <p class="clearfix">
-                                        <span class="float-left">Gender</span>
-                                        <span class="float-right text-muted">'.$data->gender.'</span>
-                                    </p>
-                                    '.(!empty($data->section_name) ? 
-                                    '<p class="clearfix">
-                                        <span class="float-left">Section</span>
-                                        <span class="float-right text-muted">'.$data->section_name.'</span>
-                                    </p>' : '').'
-                                    <p class="clearfix">
-                                        <span class="float-left">Birthday</span>
-                                        <span class="float-right text-muted">'.$data->date_of_birth.'</span>
-                                    </p>
-                                    <p class="clearfix">
-                                        <span class="float-left">Appointment Date</span>
-                                        <span class="float-right text-muted">'.$data->enrollment_date.'</span>
-                                    </p>
-                                    <p class="clearfix">
-                                        <span class="float-left">Primary Contact</span>
-                                        <span class="float-right text-muted">'.$data->phone_number.'</span>
-                                    </p>
-                                    '.(!empty($data->phone_number_2) ? 
-                                    '<p class="clearfix">
-                                        <span class="float-left">Secondary Contact</span>
-                                        <span class="float-right text-muted">'.$data->phone_number_2.'</span>
-                                    </p>' : '').'
-                                    <p class="clearfix">
-                                        <span class="float-left">E-Mail</span>
-                                        <span class="float-right text-muted">'.$data->email.'</span>
-                                    </p>
-                                    <p class="clearfix">
-                                        <span class="float-left">Blood Group</span>
-                                        <span class="float-right text-muted">'.$data->blood_group_name.'</span>
-                                    </p>
-                                    '.(!empty($data->position) ? 
-                                    '<p class="clearfix">
-                                        <span class="float-left">Position</span>
-                                        <span class="float-right text-muted">'.$data->position.'</span>
-                                    </p>' : '').'
-                                    <p class="clearfix">
-                                        <span class="float-left">Residence</span>
-                                        <span class="float-right text-muted">'.$data->residence.'</span>
-                                    </p>
-                                    <p class="clearfix">
-                                        <span class="float-left">Country</span>
-                                        <span class="float-right text-muted">'.$data->country_name.'</span>
                                     </p>
                                 </div>
                             </div>

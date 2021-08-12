@@ -258,12 +258,38 @@ if(!empty($user_id)) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-staff">List Staff</a></div>
-                    <div class="breadcrumb-item">'.$pageTitle.'</div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-staff">Staff</a></div>
+                    <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>
             <div class="section-body">
             <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center bg-amber">
+                        <div class="font-18 text-dark">STAFF ID</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-dark">'.$data->unique_id.'</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center bg-info">
+                        <div class="font-18 text-dark">POSITION</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-dark">'.$data->position.'</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-body text-center bg-success">
+                        <div class="font-18 text-dark">DEPARTMENT</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-dark">
+                            '.($data->section_name ? $data->section_name : '-' ).'
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
                 <div class="card-body">
@@ -271,9 +297,7 @@ if(!empty($user_id)) {
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
                         <div class="clearfix"></div>
                         <div class="font-25 font-weight-bold text-uppercase">'.$data->name.'</div>
-                        <div class="author-box-name font-22 text-success font-weight-bold">'.$data->unique_id.'</div>
                         <div class="author-box-job"><strong>'.strtoupper($data->user_type).'</strong></div>
-                        '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : '').'
                     </div>
                 </div>
                 </div>

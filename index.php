@@ -123,6 +123,9 @@ if(!empty($session->userId)) {
 	$defaultUser = $usersClass->list($i_params)["data"];
 	$defaultAcademics = [];
 
+	// set the client preferences
+	$clientPrefs = $defaultClientData->client_preferences;
+
 	// if the result is not empty
 	if(!empty($defaultUser)) {
 		

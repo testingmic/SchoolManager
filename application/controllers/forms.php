@@ -2467,7 +2467,7 @@ class Forms extends Myschoolgh {
     public function staff_form($clientId, $baseUrl, $userData = null) {
 
         $isData = !empty($userData) && isset($userData->name) ? true : false;
-
+        global $clientPrefs;
         $guardian = "";
 
         $response = '
@@ -2593,6 +2593,17 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12"><h5>ACADEMICS</h5></div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
+                        <label for="user_type">Designation <span class="required">*</span></label>
+                        <select data-width="100%" name="user_type" id="user_type" class="form-control selectpicker">
+                            <option value="">Select Designation</option>';
+                            foreach($this->user_roles_list as $key => $value) {
+                                $response .= "<option ".($isData && ($key == $userData->user_type) ? "selected" : null)." value=\"{$key}\">{$value}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
                         <label for="department_id">Department <span class="required">*</span></label>
                         <select data-width="100%" name="department_id" id="department_id" class="form-control selectpicker">
                             <option value="">Select Department</option>';
@@ -2615,11 +2626,11 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-12 col-md-6 '.($isData && $userData->user_type !== "teacher" ? "hidden" : "").'" id="course_ids_container">
                     <div class="form-group">
-                        <label for="courses_ids">Courses</label>
+                        <label for="courses_ids">Courses <span class="text-danger">(Select if designation is a teacher)</span></label>
                         <select multiple data-width="100%" name="courses_ids[]" id="courses_ids" class="form-control selectpicker">
                             <option value="">Select Course</option>';
-                            foreach($this->pushQuery("id, name", "courses", "status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && in_array($each->id, $userData->course_ids) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                            foreach($this->pushQuery("id, name, course_code", "courses", "status='1' AND client_id='{$clientId}' AND academic_year='{$clientPrefs->academics->academic_year}' AND academic_term='{$clientPrefs->academics->academic_term}'") as $each) {
+                                $response .= "<option ".($isData && in_array($each->id, $userData->course_ids) ? "selected" : null)." value=\"{$each->id}\">{$each->course_code}: {$each->name}</option>";                            
                             }
                         $response .= '</select>
                     </div>
@@ -2627,17 +2638,6 @@ class Forms extends Myschoolgh {
             </div>
             <div class="row mb-4 border-bottom pb-4">
                 <div class="col-lg-12"><h5>LOGIN INFORMATION</h5></div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="user_type">User Permission <span class="required">*</span></label>
-                        <select data-width="100%" name="user_type" id="user_type" class="form-control selectpicker">
-                            <option value="">Select User Permission</option>';
-                            foreach($this->user_roles_list as $key => $value) {
-                                $response .= "<option ".($isData && ($key == $userData->user_type) ? "selected" : null)." value=\"{$key}\">{$value}</option>";                            
-                            }
-                        $response .= '</select>
-                    </div>
-                </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="username">Username</label>
@@ -3288,6 +3288,12 @@ class Forms extends Myschoolgh {
                     <input type="text" value="'.($client_data->client_name ?? null).'" name="general[name]" class="form-control">
                 </div>
             </div>
+            <div class="col-lg-12 col-md-12">
+                <div class="form-group">
+                    <label for="name">Slogan</label>
+                    <input type="text" value="'.($client_data->client_slogan ?? null).'" name="general[slogan]" class="form-control">
+                </div>
+            </div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="website">School Website</label>
@@ -3318,7 +3324,7 @@ class Forms extends Myschoolgh {
                     <input type="text" name="general[location]" value="'.($client_data->client_location ?? null).'" class="form-control">
                 </div>
             </div>
-            <div class="col-lg-12"><h5>ACADEMIC CALENDAR</h5></div>
+            <div class="col-lg-12"><h5>CURRENT ACADEMIC CALENDAR</h5></div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="academic_year">Academic Year</label>
@@ -3331,6 +3337,19 @@ class Forms extends Myschoolgh {
                     </select>
                 </div>
             </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="term_starts">Academic Year Start</label>
+                    <input type="text" value="'.($prefs->academics->year_starts ?? null).'" name="general[academics][year_starts]" id="year_starts" data-maxdate="'.$last_date.'" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="term_ends">Academic Year Ends</label>
+                    <input type="text" value="'.($prefs->academics->year_ends ?? null).'" name="general[academics][year_ends]" id="year_ends" data-maxdate="'.$last_date.'" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-12"></div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="academic_term">Academic Term</label>
@@ -3355,6 +3374,7 @@ class Forms extends Myschoolgh {
                     <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" data-maxdate="'.$last_date.'" class="form-control datepicker">
                 </div>
             </div>
+            <div class="col-lg-12"><h5>NEXT ACADEMIC CALENDAR</h5></div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="next_academic_year">Next Academic Year</label>
@@ -3367,6 +3387,19 @@ class Forms extends Myschoolgh {
                     </select>
                 </div>
             </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="term_starts">Academic Year Start</label>
+                    <input type="text" value="'.($prefs->academics->next_year_starts ?? null).'" name="general[academics][next_year_starts]" id="next_year_starts" data-maxdate="'.$last_date.'" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="term_ends">Academic Year Ends</label>
+                    <input type="text" value="'.($prefs->academics->next_year_ends ?? null).'" name="general[academics][next_year_ends]" id="next_year_ends" data-maxdate="'.$last_date.'" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-12"></div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="next_academic_term">Next Academic Term</label>

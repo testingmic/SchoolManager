@@ -57,7 +57,7 @@ $response->html = '
             <h1>Sections List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item">Sections List</div>
+                <div class="breadcrumb-item">Sections</div>
             </div>
         </div>
         <div class="row">

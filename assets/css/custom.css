@@ -605,3 +605,20 @@ label {
 .chat-box .chat-content .chat-item {
     margin-bottom: 20px;
 }
+
+.card, .card-body {
+    border-radius: 0px!important;
+}
+
+.dashboard-height {
+    min-height: 260px;
+}
+
+.bg-info {
+    background-color: #3abaf4b8 !important;
+}
+
+.profile-picture {
+    width: 200px;
+    box-shadow: 0px 1px 2px #000;
+}
