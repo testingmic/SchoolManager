@@ -93,8 +93,8 @@ $defaultUser = (object) [];
 $defaultClientData = (object) [];
 $SITEURL = array_map("xss_clean", $SITEURL);
 $myClass = load_class('myschoolgh', 'models');
-$accessObject = load_class('accesslevel', 'controllers');
 $noticeClass = load_class('notification', 'controllers');
+$accessObject = load_class('accesslevel', 'controllers');
 
 // Check the site status
 GLOBAL $SITEURL, $session;
@@ -135,14 +135,12 @@ if(!empty($session->userId)) {
 		$accessObject->userPermits = json_decode($defaultUser->user_permissions);
 		$accessObject->appPrefs = $defaultUser->client->client_preferences;
 		$defaultUser->appPrefs = $defaultUser->client->client_preferences;
-		$isSchool = (bool) ($defaultUser->client->setup == "School");
-		$isBooking = (bool) ($defaultUser->client->setup == "Booking");
-		$isChurch = (bool) ($defaultUser->client->setup == "Church");
-		
-		// set this as init
-		$defaultUser->appPrefs->termEnded = false;
 		
 		// set additional parameters
+		$isSupport = (bool) ($defaultUser->user_type == "support");
+		$isSchool = (bool) ($defaultUser->client->setup == "School");
+
+		// set new variables
 		$isEmployee = (bool) ($defaultUser->user_type == "employee");
 		$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
 		$isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
@@ -153,11 +151,18 @@ if(!empty($session->userId)) {
 		$isTeacher = $isTutor = (bool) ($defaultUser->user_type == "teacher");
 		$isParent = (bool) ($defaultUser->user_type == "parent");
 		$isStudent = (bool) ($defaultUser->user_type == "student");
-		
-		// if academics is set
-		if(isset($defaultUser->client->client_preferences->academics)) {
-			$defaultAcademics = $defaultUser->client->client_preferences->academics;
-			$defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
+
+		// if the user is not support then run this section
+		if(!$isSupport) {
+
+			// set this as init
+			$defaultUser->appPrefs->termEnded = false;
+			
+			// if academics is set
+			if(isset($defaultUser->client->client_preferences->academics)) {
+				$defaultAcademics = $defaultUser->client->client_preferences->academics;
+				$defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
+			}
 		}
 	}
 }

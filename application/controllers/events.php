@@ -429,7 +429,7 @@ class Events extends Myschoolgh {
                         INTERVAL YEAR(CURDATE()) - YEAR(date_of_birth)
                             + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(date_of_birth), 1, 0)
                         YEAR)
-                    BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+                    BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL {$this->birthday_days_interval} DAY)
                 ) AND client_id = '{$data->client_id}' AND user_status='Active' AND status='1' AND deleted='0' ORDER BY date_of_birth ASC LIMIT 200"
             );
             

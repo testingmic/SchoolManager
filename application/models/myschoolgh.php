@@ -20,6 +20,7 @@ class Myschoolgh extends Models {
 	public $start_date;
     public $end_date;
 	public $client_data;
+	public $birthday_days_interval;
 	public $academic_calendar_years = [];
 	public $pk_public_key = "pk_test_0b00163f9532f2e6b27819fa20127b8bd4e2c260";
 	
@@ -78,6 +79,9 @@ class Myschoolgh extends Models {
 				foreach(["client_preferences", "grading_system", "grading_structure"] as $value) {
 					$result->{$value} = json_decode($result->{$value});
 				}
+
+				// set this value
+				$this->birthday_days_interval = 30;
 
 				// academic year logs
 				$result->academic_year_logs = $this->pushQuery("*", "academic_years", "client_id='{$result->client_id}'");

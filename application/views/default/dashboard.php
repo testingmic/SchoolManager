@@ -13,7 +13,7 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 // initial variables
-global $accessObject, $defaultUser, $isAdminAccountant, $isTutorStudent, $isParent, $isStudent;
+global $accessObject, $defaultUser, $isAdminAccountant, $isTutorStudent, $isParent, $isStudent, $isSupport;
 $appName = config_item("site_name");
 
 // confirm that user id has been parsed
@@ -37,171 +37,8 @@ $userData->mini_description = true;
 $userData->the_user_type = $defaultUser->user_type;
 
 // if not booking set
-if($isBooking) {
-
-    $count = 0;
-
-    // set the params
-    $params = (object) ["clientId" => $clientId];
-
-    // make a request for the logs analitics
-    $bookingObj = load_class("booking", "controllers");
-    $analitics = $bookingObj->analitics($params)["data"];
-
-    // set the members list
-    $members_list = "";
-    $response->scripts = ["assets/js/booking_log.js"];
-    $response->array_stream["dashboard_analitics"] = $analitics;
-
-    foreach($analitics["members_summary"]["list"] as $member) {
-
-        // set the action
-        $action = "";
-        $count++;
-
-        // append to the list
-        $members_list .= "<tr data-row_id=\"{$member->item_id}\">";
-        $members_list .= "<td align='center'>{$count}</td>";
-        $members_list .= "<td>{$member->fullname}</td>";
-        $members_list .= "<td>{$member->contact}</td>";
-        $members_list .= "<td>{$member->gender}</td>";
-        $members_list .= "<td>{$member->residence}</td>";
-        $members_list .= "<td>{$member->bible_class_name}</td>";
-        $members_list .= "</tr>";
-    }
-
-    // set the panel for booking information
-    // set the response dataset
-    $response->html = '
-    <section class="section">
-        <div class="d-flex mt-3 justify-content-between">
-            <div class="section-header">
-                <h1>Dashboard</h1>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card">
-                    <div class="card-body card-type-3">
-                        <div class="row">
-                            <div class="col">
-                                <h6 class="text-muted mb-0">Total Logs</h6>
-                                <span class="font-weight-bold mb-0">
-                                    '.$analitics["logs_summary"]["Count"]["Logs"].'
-                                </span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="card-circle l-bg-orange text-white">
-                                    <i class="fas fa-list"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card">
-                    <div class="card-body card-type-3">
-                        <div class="row">
-                            <div class="col">
-                                <h6 class="text-muted mb-0">Total Attendees</h6>
-                                <span class="font-weight-bold mb-0">
-                                    '.$analitics["logs_summary"]["Count"]["Members"].'
-                                </span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="card-circle l-bg-cyan text-white">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card">
-                    <div class="card-body card-type-3">
-                        <div class="row">
-                            <div class="col">
-                                <h6 class="text-muted mb-0">Male Attendees</h6>
-                                <span class="font-weight-bold mb-0">
-                                    '.$analitics["logs_summary"]["Gender"]["Male"].'
-                                </span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="card-circle l-bg-green text-white">
-                                    <i class="fas fa-user-tie"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card">
-                    <div class="card-body card-type-3">
-                        <div class="row">
-                            <div class="col">
-                                <h6 class="text-muted mb-0">Female Attendees</h6>
-                                <span class="font-weight-bold mb-0">
-                                    '.$analitics["logs_summary"]["Gender"]["Female"].'
-                                </span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="card-circle l-bg-yellow text-white">
-                                    <i class="fas fa-user-nurse"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-12 col-md-12 col-12 col-sm-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h4>Attendance Graph</h4>
-                    </div>
-                    <div class="card-body quick_loader" style="max-height:465px;height:465px;">
-                        <div class="form-content-loader" style="display: flex; position: absolute">
-                            <div class="offline-content text-center">
-                                <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
-                            </div>
-                        </div>
-                        <div class="card-body" data-chart="attendance_log_chart">
-                            <div id="attendance_log_chart"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-sm-12 col-lg-12 hidden">
-                <div class=""><h5>Members List</h5></div>
-                <div class="card">                    
-                    <div class="card-body">
-                        <div class="table-responsive table-student_staff_list">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
-                                <thead>
-                                    <tr>
-                                        <th width="8%" class="text-center">#</th>
-                                        <th>Name</th>
-                                        <th>Contact</th>
-                                        <th>Gender</th>
-                                        <th>Residence</th>
-                                        <th>Bible Class</th>
-                                    </tr>
-                                </thead>
-                                <tbody>'.$members_list.'</tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-    </section>';
+if($isSupport) {
+    
 } else {
 
     // append more values for loading
@@ -256,6 +93,7 @@ if($isBooking) {
         
         // loop through the array list
         foreach($events_list->birthday_list as $event) {
+            
             // format the date of birth
             $clean_date = date("Y").'-'.$event["description"]->the_month.'-'.$event["description"]->the_day;
 
@@ -553,7 +391,7 @@ if($isBooking) {
                             <div class="card-body card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="text-muted mb-0">Total Students</h6>
+                                        <h6 class="text-muted font-13 mb-0">Total Students</h6>
                                         <span data-count="total_students_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -570,7 +408,7 @@ if($isBooking) {
                             <div class="card-body card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="text-muted mb-0">Teaching Stafff</h6>
+                                        <h6 class="text-muted font-13 mb-0">Teaching Stafff</h6>
                                         <span data-count="total_teachers_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -587,7 +425,7 @@ if($isBooking) {
                             <div class="card-body card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="text-muted mb-0">Employees / Users</h6>
+                                        <h6 class="text-muted font-13 mb-0">Employees / Users</h6>
                                         <span data-count="total_employees_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -604,7 +442,7 @@ if($isBooking) {
                             <div class="card-body card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="text-muted mb-0">Parents</h6>
+                                        <h6 class="text-muted font-13 mb-0">Parents</h6>
                                         <span data-count="total_parents_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -623,7 +461,7 @@ if($isBooking) {
                 '<div class="col-md-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>Revenue Flow Chart</h4>
+                            <h4 class="text-uppercase font-13">Revenue Flow Chart</h4>
                         </div>
                         <div class="card-body quick_loader">
                             <div class="form-content-loader" style="display: flex; position: absolute">
@@ -720,7 +558,7 @@ if($isBooking) {
                     '<div>
                         <div class="card">
                             <div class="card-header pl-2">
-                                <h4>Upcoming Events</h4>
+                                <h4 class="text-uppercase font-13">Upcoming Events</h4>
                             </div>
                             <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
@@ -810,7 +648,7 @@ if($isBooking) {
                             <div class="card-body card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="text-muted mb-0">Books Category</h6>
+                                        <h6 class="text-muted font-13 mb-0">Books Category</h6>
                                         <span data-count="library_category_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -827,7 +665,7 @@ if($isBooking) {
                             <div class="card-body card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="text-muted mb-0">Books Available</h6>
+                                        <h6 class="text-muted font-13 mb-0">Books Available</h6>
                                         <span data-count="library_books_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -844,7 +682,7 @@ if($isBooking) {
                             <div class="card-body card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="text-muted mb-0">Departments</h6>
+                                        <h6 class="text-muted font-13 mb-0">Departments</h6>
                                         <span data-count="departments_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -861,7 +699,7 @@ if($isBooking) {
                             <div class="card-body card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="text-muted mb-0">Classes</h6>
+                                        <h6 class="text-muted font-13 mb-0">Classes</h6>
                                         <span data-count="total_classes_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
@@ -880,7 +718,7 @@ if($isBooking) {
                     '<div class="col-lg-4 col-md-12 col-12 col-sm-12">
                         <div class="card">
                             <div class="card-header">
-                            <h4>Class Count</h4>
+                            <h4 class="text-uppercase font-13">Class Count</h4>
                             </div>
                             <div class="card-body trix-slim-scroll quick_loader" id="class_count_list" style="max-height:465px;height:465px;overflow-y:auto;">
                                 <div class="form-content-loader" style="display: flex; position: absolute">
@@ -894,7 +732,7 @@ if($isBooking) {
                     <div class="col-lg-8 col-md-12 col-12 col-sm-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Revenue</h4>
+                                <h4 class="text-uppercase font-13">Revenue</h4>
                             </div>
                             <div class="card-body quick_loader" style="max-height:465px;height:465px;">
                                 <div class="form-content-loader" style="display: flex; position: absolute">
@@ -927,7 +765,7 @@ if($isBooking) {
                     <div class="col-lg-12 col-md-12 col-12 col-sm-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Attendance Logs</h4>
+                                <h4 class="text-uppercase font-13">Attendance Logs</h4>
                             </div>
                             <div class="card-body pb-0">
                                 <div data-chart_container="attendance_log_chart">
@@ -939,7 +777,7 @@ if($isBooking) {
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Students</h4>
+                                <h4 class="text-uppercase font-13">Students</h4>
                             </div>
                             <div class="card-body" data-chart="male_female_comparison">
                                 <canvas style="max-height:225px;height:225px;" id="male_female_comparison"></canvas>
@@ -963,7 +801,7 @@ if($isBooking) {
                     '<div class="col-lg-4 col-md-6 col-12 col-sm-12">
                         <div class="card">
                             <div class="card-header pl-2">
-                                <h4>Upcoming Events</h4>
+                                <h4 class="text-uppercase font-13">Upcoming Events</h4>
                             </div>
                             <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
@@ -976,7 +814,7 @@ if($isBooking) {
                     '<div class="col-lg-4 col-md-6 col-12 col-sm-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Upcoming Birthdays</h4>
+                                <h4 class="text-uppercase font-13">Upcoming Birthdays</h4>
                             </div>
                             <div class="card-body trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">

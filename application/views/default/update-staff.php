@@ -270,8 +270,8 @@ if(!empty($user_id)) {
                     <div class="author-box-center">
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
                         <div class="clearfix"></div>
-                        <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
-                        '.($data->class_name ? '<div class="author-box-job">'.$data->class_name.'</div>' : '').'
+                        <div class="font-25 font-weight-bold text-uppercase">'.$data->name.'</div>
+                        <div class="author-box-name font-22 text-success font-weight-bold">'.$data->unique_id.'</div>
                         <div class="author-box-job"><strong>'.strtoupper($data->user_type).'</strong></div>
                         '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : '').'
                     </div>

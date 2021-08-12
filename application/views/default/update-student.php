@@ -227,7 +227,7 @@ if(!empty($user_id)) {
         $response->array_stream["student_guardian_array_{$user_id}"] = $data->guardian_id;
 
         // if the request is to view the student information
-        $updateItem = confirm_url_id(2, "update") ? true : false;
+        $updateItem = false;
 
         // append the html content
         $response->html = '
@@ -245,16 +245,19 @@ if(!empty($user_id)) {
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
                 <div class="card-body">
-                    <div class="author-box-center">
+                    <div class="author-box-center m-0 p-0">
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
                         <div class="clearfix"></div>
-                        <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
+                        <div class="font-25 font-weight-bold text-uppercase">'.$data->name.'</div>
+                        <div class="author-box-name font-22 text-success font-weight-bold">'.$data->unique_id.'</div>
                         '.($data->class_name ? '<div class="author-box-job">'.$data->class_name.'</div>' : null).'
                         '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : null).'
                     </div>
                     <div class="text-center">
                         <div class="author-box-description">'.$data->description.'</div>
-                        <div class="w-100 d-sm-none"></div>
+                        <div class="w-100 mt-3">
+                            <a class="btn btn-primary" href="'.$baseUrl.'modify-student/'.$user_id.'"><i class="fa fa-edit"></i> Edit Student</a>
+                        </div>
                     </div>
                 </div>
                 </div>
@@ -335,13 +338,6 @@ if(!empty($user_id)) {
                         <a class="nav-link" id="incident-tab2" data-toggle="tab" href="#incident" role="tab" aria-selected="true">Incidents</a>
                     </li>';
 
-                    if($hasUpdate) {
-                        $response->html .= '
-                        <li class="nav-item">
-                            <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab" aria-selected="false">Update Record</a>
-                        </li>';
-                    }
-                    
                     $response->html .= '
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
@@ -464,13 +460,6 @@ if(!empty($user_id)) {
                             </div>
                             '.$incidents_list.'
                         </div>
-                        <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
-                        
-                        if($hasUpdate) {
-                            $response->html .= $user_form;
-                        }
-
-                        $response->html .= '</div>
                     </div>
                 </div>
                 </div>

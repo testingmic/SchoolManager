@@ -276,7 +276,7 @@ class Communication extends Myschoolgh {
                     "name, user_type, unique_id, item_id, {$column}", "users", 
                     "client_id='{$params->clientId}' AND status='1' AND 
                     academic_year='{$this->academic_year}' AND user_status = 'Active' AND
-                    academic_term='{$this->academic_term}' AND class_id='{$class_check[0]->id}' LIMIT 500"
+                    academic_term='{$this->academic_term}' AND class_id='{$class_check[0]->id}' LIMIT 1000"
                 );
             }
 

@@ -757,7 +757,7 @@ class Fees extends Myschoolgh {
 
             /** Update the existing record */
             $stmt = $myschoolgh->prepare("UPDATE fees_payments SET 
-                    amount_due = ?, balance = ($params->amount - amount_paid)
+                    amount_due = ?, balance = ({$params->amount} - amount_paid)
                 WHERE category_id = ? AND student_id = ? AND client_id = ? 
                     AND academic_year = ? AND academic_term = ? AND editable = ?");
 
@@ -803,8 +803,17 @@ class Fees extends Myschoolgh {
                     return ["code" => 203, "data" => "Sorry! An invalid student id was supplied."];
                 }
 
+                // get the payment record
+                $paymentRecord = $this->confirm_student_payment_record($params, "simple_load");
+
+                // if the payment status is true then return error
+                if(!empty($paymentRecord) && ($paymentRecord->paid_status == 1)) {
+                    return ["code" => 203, "data" => "Sorry! {$student_check[0]->name} has fully paid the {$student_check[0]->category_name} therefore cannot be changed."];
+                }
+
                 /** Confirm if a record already exist */
-                if($this->confirm_student_payment_record($params, "simple_load")) {
+                if($paymentRecord) {
+
                     // update the user information
                     update_student_fees($params);
                     
@@ -874,16 +883,21 @@ class Fees extends Myschoolgh {
                 
                 // loop through the students list
                 foreach($student_list["data"] as $key => $student) {
+                    
                     /** Append the student id as the current user id */
                     $params->student_id = $student->user_id;
-                    
-                    /** Confirm if a record already exist */
-                    if($this->confirm_student_payment_record($params, "simple_load")) {
+
+                    // get the payment record
+                    $paymentRecord = $this->confirm_student_payment_record($params, "simple_load");
+
+                    // If the student payment fees record already exists however the paid status still remains 0
+                    if(!empty($paymentRecord) && ($paymentRecord->paid_status !== 1)) {
                         update_student_fees($params);
-                    } else {
+                    } elseif(empty($paymentRecord)) {
                         /** Insert a new record */
                         insert_student_fees($params);
                     }
+
                 }
 
                 $this->db->commit();

@@ -1,6 +1,6 @@
 <?php
 // global variables
-global $usersClass, $accessObject, $myClass, $isBooking, $isSchool, $isChurch;
+global $usersClass, $accessObject, $myClass, $isSchool;
 
 // base url
 $baseUrl = config_item("base_url");
@@ -152,11 +152,7 @@ load_helpers(['menu_helper']);
                     <li><a href="#" class="nav-link nav-link-lg hidden" data-rel="tooltip" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
                     <?php if($isActiveAccount) { ?>
                     <li class="border-left text-white d-none d-md-block">
-                        <?php if($isBooking) { ?>
-                        <a href="#" class="nav-link text-white nav-link-lg">
-                            <strong class="font-18px">MEMBERSHIP SERVICE BOOKING</strong>
-                        </a>
-                        <?php } else { ?>
+                        <?php if(!$isSupport) { ?>
                         <a href="#" class="nav-link text-white nav-link-lg">
                             Academic Year/Term:
                             <strong class="font-18px">
@@ -203,7 +199,7 @@ load_helpers(['menu_helper']);
                     </div>
                 </li>
                 <?php } ?>
-                <?php if($isActiveAccount && $isSchool) { ?>
+                <?php if($isActiveAccount) { ?>
                 <li class="dropdown dropdown-list-toggle">
                     <a href="#" data-toggle="dropdown" title="Email Messages" class="nav-link nav-link-lg message-toggle" data-notification="message"><i class="far fa-envelope"></i></a>
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
@@ -243,12 +239,9 @@ load_helpers(['menu_helper']);
                 </li>
                 <?php if($accessObject->hasAccess("support", "settings")) { ?>
                 <li class="dropdown dropdown-list-toggle">
-                    <a title="Support Tickets List" href="<?= $baseUrl ?>support" class="nav-link nav-link-lg"><i class="fa fa-phone-volume"></i></a>
+                    <a title="Support Tickets List" href="<?= $baseUrl ?>support" class="nav-link nav-link-lg"><i class="fa fa-phone-volume"></i> Support</a>
                 </li>
                 <?php } ?>
-                <li class="dropdown dropdown-list-toggle">
-                    <a title="Knowledge Base" href="<?= $baseUrl ?>knowledgebase" class="nav-link nav-link-lg"><i class="fa fa-info-circle"></i></a>
-                </li>
                 <?php } ?>
                 <li class="dropdown">
                     <a href="#" data-toggle="dropdown"
@@ -313,7 +306,7 @@ load_helpers(['menu_helper']);
                         <li><a href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
                         <?php 
                         // set the menu function 
-                        $menu_function = $isBooking ? "booking_menu" : $userData->user_type."_menu";
+                        $menu_function = $isSupport ? "support_menu" : $userData->user_type."_menu";
                         
                         // confirm that the function exists
                         if(function_exists($menu_function)) {

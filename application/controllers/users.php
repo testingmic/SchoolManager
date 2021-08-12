@@ -242,7 +242,7 @@ class Users extends Myschoolgh {
 					# return an empty result
 					unset($result->password);
 					unset($result->item_id);
-					$result->preferences = json_decode($result->preferences);
+					$result->preferences = !empty($result->preferences) ? json_decode($result->preferences) : (object) [];
 				}
 
 				$result->course_ids = !empty($result->course_ids) ? json_decode($result->course_ids, true) : [];
@@ -1105,6 +1105,7 @@ class Users extends Myschoolgh {
 				".(isset($params->city) ? ", city='{$params->city}'" : null)."
 				".(isset($params->date_of_birth) ? ", date_of_birth='{$params->date_of_birth}'" : null)."
 			");
+			
 			// execute the insert user data
 			$stmt->execute([$params->user_id, $params->user_type, $access_level, $token, $token_expiry, $params->changed_password]);
 
@@ -1197,9 +1198,15 @@ class Users extends Myschoolgh {
 			
 			# append to the response
 			if($loggedInAccount) {
+
+				// set the url
+				$url_link = $redirect == "student" ? "{$this->baseUrl}fees-allocate/{$params->user_id}" : 
+					"{$this->baseUrl}update-{$redirect}/{$params->user_id}/update";
+
+				// append the redirection url
 				$return["additional"] = [
 					"clear" => true,
-					"href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"
+					"href" => $url_link
 				];
 			}
 

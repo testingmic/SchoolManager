@@ -19,13 +19,12 @@ jump_to_main($baseUrl);
 $response = (object) [];
 $response->scripts = [];
 $filter = (object) $_POST;
-$response->title = "Class Assessment List : {$appName}";
+$response->title = "Assignments List : {$appName}";
 
 $response->scripts = ["assets/js/filters.js"];
 
 // the query parameter to load the user information
 $assignments_param = (object) [
-    "show_marks" => true,
     "clientId" => $clientId,
     "userData" => $defaultUser,
     "department_id" => $filter->department_id ?? null,
@@ -43,31 +42,14 @@ $hasUpdate = $accessObject->hasAccess("update", "assignments");
 
 $hasFiltering = $accessObject->hasAccess("filters", "settings");
 
-// colors for the list
-$color = [
-    "Test" => "success",
-    "Assignment" => "warning",
-    "Quiz" => "primary",
-    "Exam" => "dark",
-    "Group Work" => "secondary",
-];
-
 // unset the sessions if $session->currentQuestionId is not empty
 $assignments = "";
-$assessment_array = [];
 foreach($item_list["data"] as $key => $each) {
     
-    $each->assignment_group_label = $color[$each->assignment_group];
-    $assessment_array[$each->item_id] = $each;
-    $action = "<a title='Click to update assignment record' href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to update assignment record' href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate && $each->assignment_type == "multiple_choice") {
         $action .= "&nbsp;<a title='Click to manage questions for this assignment' href='#' onclick='return loadPage(\"{$baseUrl}add-assignment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
-    }
-
-    // if the state is either closed or graded
-    if(in_array($each->state, ["Closed", "Graded"])) {
-        $action .= "&nbsp;<a href='#' title='Click to view student marks this Assignment' onclick='return view_AssessmentMarks(\"{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-list'></i></a>";
     }
 
     if($hasDelete && in_array($each->state, ["Pending", "Draft"])) {
@@ -76,16 +58,13 @@ foreach($item_list["data"] as $key => $each) {
 
     $assignments .= "<tr data-row_id=\"{$each->id}\">";
     $assignments .= "<td>".($key+1)."</td>";
-    $assignments .= "<td>
-        <a href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");'>
-            {$each->assignment_title}</a> <strong class='badge p-1 pr-2 pl-2 badge-{$color[$each->assignment_group]}'>{$each->assignment_group}</strong>
-        ".(
+    $assignments .= "<td><a href='#' onclick='return loadPage(\"{$baseUrl}update-assignment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
         $hasUpdate ? 
             "<br>Class: <strong>{$each->class_name}</strong>
             <br>Course: <strong>{$each->course_name}</strong>" : 
             "<br>Course:</strong> {$each->course_name}</strong>"
         )."</td>";
-    $assignments .= "<td>{$each->due_date} ".(!empty($each->due_time) ? "@ {$each->due_time}" : null)."</td>";
+    $assignments .= "<td>{$each->due_date} @ {$each->due_time}</td>";
 
     // show this section if the user has the necessary permissions
     if($hasUpdate) {
@@ -127,15 +106,13 @@ if(!empty($filter->class_id)) {
     $courses_list = load_class("courses", "controllers")->list($courses_param)["data"];
 }
 
-$response->array_stream["assessment_array"] = $assessment_array;
-
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Class Assessment List</h1>
+            <h1>Assignments List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item">Class Assessment List</div>
+                <div class="breadcrumb-item">Assignments List</div>
             </div>
         </div>
         <div class="row" id="filter_Department_Class">
@@ -190,7 +167,7 @@ $response->html = '
                                         ).'
                                         <th>Date Created</th>
                                         <th>Status</th>
-                                        <th align="center" width="10%"></th>
+                                        <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$assignments.'</tbody>

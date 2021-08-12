@@ -16,7 +16,7 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Create Assessment";
+$pageTitle = "Create Assignment";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [
     "assets/js/upload.js", 
@@ -208,7 +208,7 @@ $response->html = '
             <h1>'.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-assessment">Assessments List</a></div>
+                <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-assignments">Assignments List</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>

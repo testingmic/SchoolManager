@@ -1877,7 +1877,7 @@ class Forms extends Myschoolgh {
                             <div class="d-flex justify-content-end">
                                 <div class="mr-1">
                                     <br>
-                                    <button data-row="1" class="btn append-row btn-primary" type="button"><i class="fa fa-plus"></i> Add</button>
+                                    <button data-row="1" class="btn append-row btn-primary" type="button">Add</button>
                                 </div>
                             </div>
                         </div>
@@ -1900,7 +1900,7 @@ class Forms extends Myschoolgh {
                 $response .= '</div>';
 
                 // if not data was parsed
-                if(!$isData) {
+                if(!$isData || $isData && empty($guardian)) {
 
                     // append to the html content
                     $response .= '<div class="col-lg-12" style="display:none" id="student_guardian_list_existing">';
@@ -4746,9 +4746,26 @@ class Forms extends Myschoolgh {
         // get the list of all templates
         $templates_array = $this->pushQuery("name, id, item_id, type, message", "smsemail_templates", "client_id='{$params->clientId}' AND status='1'");
         $class_array_list = $this->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'");
-        $users_array_list = $this->pushQuery("name, user_type, unique_id, item_id", "users", 
-            "client_id='{$params->clientId}' AND status='1' AND academic_year='{$params->preferences->academics->academic_year}'
-            AND academic_term='{$params->preferences->academics->academic_term}'");
+        
+        // get the list of all other users
+        $other_users_list = $this->pushQuery("name, user_type, unique_id, item_id", "users", 
+            "client_id='{$params->clientId}' AND status='1' AND user_type != 'student'");
+
+        // get the list of only students
+        $students_array_list = $this->pushQuery("name, user_type, unique_id, item_id", "users", 
+            "client_id='{$params->clientId}' AND status='1'
+            AND academic_year = '{$params->preferences->academics->academic_year}' AND
+            academic_term = '{$params->preferences->academics->academic_term}' AND user_type='student'
+        ");
+        $users_array_list = [];
+
+        // get the users list
+        foreach($other_users_list as $user) {
+            $users_array_list[] = $user;
+        }
+        foreach($students_array_list as $user) {
+            $users_array_list[] = $user;
+        }
 
         // sms email modules
         $modules = [""];

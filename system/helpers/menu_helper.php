@@ -25,7 +25,7 @@
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-student">Students List</a></li>
             <?php if($accessObject->hasAccess("add", "student")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>add-student">Add Student</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>add-student">New Admission</a></li>
             <?php } ?>
         </ul>
     </li>
