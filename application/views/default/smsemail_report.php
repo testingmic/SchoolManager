@@ -84,7 +84,7 @@ $response->html = '
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="send_sms" role="tabpanel" aria-labelledby="send_sms-tab2">
                                     <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered table-condensed table-striped datatable">
+                                        <table class="table table-bordered table-condensed table-striped raw_datatable">
                                             <thead>
                                                 <th></th>
                                                 <th>Campaign Name</th>
@@ -100,7 +100,7 @@ $response->html = '
                                 </div>
                                 <div class="tab-pane fade" id="send_email" role="tabpanel" aria-labelledby="send_email-tab2">
                                     <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered table-condensed table-striped datatable">
+                                        <table class="table table-bordered table-condensed table-striped raw_datatable">
                                             <thead>
                                                 <th></th>
                                                 <th>Campaign Name</th>

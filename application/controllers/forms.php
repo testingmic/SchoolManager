@@ -4845,6 +4845,145 @@ class Forms extends Myschoolgh {
                                 )."
                             </div>
                         </div>
+                        <div class=\"col-md-12 hidden\" id=\"class_select_{$route}\">
+                            <div class=\"form-group mb-1\">
+                                <label>Class <span class=\"required\">*</span></label>
+                                <select data-selectors=\"{$route}\" data-route=\"{$route}\" name=\"class_id\" class=\"form-control selectpicker\" data-width=\"100%\">
+                                    <option value=''>Select</option>";
+                                    foreach($class_array_list as $class) {
+                                        $html[$route] .= "<option value='{$class->item_id}'>{$class->name}</option>";
+                                    }
+                        $html[$route] .= "</select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=\"row mt-3\">
+                        <div class=\"col-md-12 mb-xs\">
+                            <div class=\"form-group\">
+                                <div class=\"checkbox-replace\">
+                                    <label class=\"i-checks cursor\"><input data-route=\"{$route}\" type=\"checkbox\" name=\"send_later\"><i></i> Send Later</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=\"row\">
+                        <div class=\"col-md-8\">
+                            <div class=\"form-group\">
+                                <label class=\"control-label\">Schedule Date <span class=\"required\">*</span></label>
+                                <div class=\"input-group\">
+                                    <input data-route=\"{$route}\" disabled data-maxdate=\"".date("Y-m-d", strtotime("+3 months"))."\" type=\"text\" class=\"form-control datepicker\" name=\"schedule_date\">
+                                </div>
+                                <span class=\"error\"></span>
+                            </div>
+                        </div>
+                        <div class=\"col-md-4\">
+                            <div class=\"form-group\">
+                                <label class=\"control-label\">Schedule Time <span class=\"required\">*</span></label>
+                                <div class=\"input-group\">
+                                    <input data-route=\"{$route}\" type=\"time\" disabled name=\"schedule_time\" class=\"form-control\" value=\"\">
+                                    <span class=\"error\"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class=\"row mt-3\">
+                        <div class=\"col-md-6\" align=\"left\"></div>
+                        <input type=\"hidden\" data-route=\"{$route}\" readonly name=\"type\" value=\"{$route}\">
+                        <div class=\"col-md-6\" align=\"right\">
+                            <button class=\"btn btn-outline-success\" type=\"submit\"><i class=\"fa fa-mail-bulk\"></i> Send Message</button>
+                        </div>
+                    </div>
+                </form>
+            </div>";
+
+        }
+        $html["templates_array"] = $templates_array;
+        $html["users_array_list"] = $users_array_list;
+        $html["class_array_list"] = $class_array_list;
+
+        return $html;
+    }
+
+    /**
+     * Send SMS & Email Form
+     * 
+     * @return Array
+     */
+    public function smsemail_form_old(stdClass $params) {
+        
+        $html = [];
+        $forms = ["email", "sms"];
+        global $usersClass;
+
+        // get the list of all templates
+        $templates_array = $this->pushQuery("name, id, item_id, type, message", "smsemail_templates", "client_id='{$params->clientId}' AND status='1'");
+        $class_array_list = $this->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'");
+        
+        // get the list of all other users
+        $other_users_list = $this->pushQuery("name, user_type, unique_id, item_id", "users", 
+            "client_id='{$params->clientId}' AND status='1' AND user_type != 'student'");
+
+        // get the list of only students
+        $students_array_list = $this->pushQuery("name, user_type, unique_id, item_id", "users", 
+            "client_id='{$params->clientId}' AND status='1'
+            AND academic_year = '{$params->preferences->academics->academic_year}' AND
+            academic_term = '{$params->preferences->academics->academic_term}' AND user_type='student'
+        ");
+        $users_array_list = [];
+
+        // get the users list
+        foreach($other_users_list as $user) {
+            $users_array_list[] = $user;
+        }
+        foreach($students_array_list as $user) {
+            $users_array_list[] = $user;
+        }
+
+        // sms email modules
+        $modules = [""];
+
+        // loop through the forms
+        foreach($forms as $route) {
+
+            // append to the form
+            $html[$route] = "";
+            $html[$route] .= "
+            <div class=\"send_smsemail\">
+                <form method=\"post\" action=\"{$this->baseUrl}api/communication/send_message\" class=\"form_send_message\" id=\"send_form_{$route}\" data-route=\"{$route}\">
+                    <div class=\"row\">
+                        <div class=\"col-md-6\">
+                            <div class=\"form-group mb-1\">
+                                <label>Campaign Name <span class=\"required\">*</span></label>
+                                <input type=\"text\" name=\"campaign_name\" class=\"form-control\">
+                            </div>
+                        </div>
+                        <div class=\"col-md-6\">
+                            <div class=\"form-group mb-1\">
+                                <label>Template</label>
+                                <select type=\"text\" data-route=\"{$route}\" data-width=\"100%\" name=\"template_id\" class=\"form-control selectpicker\">
+                                    <option value=''>Select Template</option>";
+                                    foreach($templates_array as $key => $template) {
+                                        $templates_array[$key]->message = htmlspecialchars_decode($template->message);
+                                        if($template->type == $route) {
+                                            $html[$route] .= "<option value='{$template->item_id}'>{$template->name}</option>";
+                                        }
+                                    }
+                        $html[$route] .= "</select>
+                            </div>
+                        </div>
+                        <div class=\"col-md-12\">
+                            <div class=\"form-group mb-1\">
+                                <label>Message <span class=\"required\">*</span></label>
+                                ".(
+                                    ($route === "email") ? $this->textarea_editor(null, "faketext", "ajax-form-content", "message") : 
+                                    "<textarea data-route=\"{$route}\" maxlength=\"480\" name=\"message\" style=\"height:200px\" class=\"form-control\"></textarea>
+                                    <div class=\"text-right alert-danger\"> 
+                                        <span class=\"remaining_count p-1\">0 characters remaining</span>
+                                        <span id=\"messages\">0 message</span>
+                                    </div>"
+                                )."
+                            </div>
+                        </div>
                         <div class=\"col-md-6\">
                             <div class=\"form-group mb-1\">
                                 <label>Type <span class=\"required\">*</span></label>
@@ -4951,7 +5090,6 @@ class Forms extends Myschoolgh {
 
         return $html;
     }
-
 
     /**
      * Booking Log Form

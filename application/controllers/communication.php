@@ -257,18 +257,32 @@ class Communication extends Myschoolgh {
                 return ["code" => 203, "data" => "Sorry! An invalid recipient group type was parsed. Must either be 'group', 'individual' or 'class'."];
             }
 
+            // if the recipient array is empty then return error
+            if(empty($params->recipients)) {
+                return ["code" => 203, "data" => $this->is_required("Message Recipient")];
+            }
+
+            // recipient list must be a valid array
+            if(!is_array($params->recipients)) {
+                return ["code" => 203, "data" => "Sorry! The recipient list must be a valid array."];
+            }
+
             // set the init variables
             $units = 0;
             $recipients_array = [];
+            $actual_recipients_array = [];
             $column = $isSMS ? "phone_number" : "email";
 
             // class the class id if it actually exists
             if($params->recipient_type == "class") {
+
                 // if no class id was selected
                 if(empty($params->class_id)) { return ["code" => 203, "data" => $this->is_required("Class ID")]; }
 
                 // old record
-                $class_check = $this->pushQuery("id, name", "classes", "item_id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+                $class_check = $this->pushQuery("id, name", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+
+                // return error message
                 if(empty($class_check)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
 
                 // get the recipients array list
@@ -282,14 +296,18 @@ class Communication extends Myschoolgh {
 
             // if the recipient_type is individual but no user was selected.
             if($params->recipient_type == "individual") {
+
                 // if the recipients list was not parsed
                 if(!isset($params->recipients) || empty($params->recipients)) { 
                     return ["code" => 203, "data" => $this->is_required("Message Recipient")];
                 }
+
                 // if the $params->recipients is an array list
                 if(is_array($params->recipients)) {
+
                     // loop through the array list
                     foreach($params->recipients as $recipient) {
+
                         // get the user info
                         $user = $this->pushQuery(
                             "name, user_type, unique_id, item_id, {$column}", "users", 
@@ -310,22 +328,29 @@ class Communication extends Myschoolgh {
                 if(!isset($params->role_group) || empty($params->role_group)) { 
                     return ["code" => 203, "data" => $this->is_required("Role Group")];
                 }
+
                 // get the recipients array list
                 $recipients_array = $this->pushQuery(
-                    "name, user_type, unique_id, item_id, {$column}", "users", 
-                    "client_id='{$params->clientId}' AND
+                    "name, user_type, unique_id, item_id, {$column}", "users", "client_id='{$params->clientId}' AND
                         user_type IN {$this->inList($params->role_group)} AND user_type != 'student'"
                 );
-                // get the list of students only
-                $students_list = $this->pushQuery(
-                    "name, user_type, unique_id, item_id, {$column}", "users", 
-                    "client_id='{$params->clientId}' AND status='1' AND 
-                    academic_year='{$this->academic_year}' AND user_status = 'Active' AND
-                    academic_term='{$this->academic_term}' AND user_type = 'student' LIMIT 500"
-                );
+            }
 
-                // merge the two results set
-                $recipients_array = array_merge($recipients_array, $students_list);
+            // return false if the recipients list is empty
+            if(empty($recipients_array)) {
+                return ["code" => 203, "data" => "Sorry! No recipient found ."];
+            }
+
+            // loop through the recipients array
+            foreach($recipients_array as $recipient) {
+                if(in_array($recipient->item_id, $params->recipients)) {
+                    $actual_recipients_array[] = $recipient;
+                }
+            }
+
+            // return false if the recipients list is empty
+            if(empty($actual_recipients_array)) {
+                return ["code" => 203, "data" => "Sorry! No recipient found ."];
             }
 
             // perform this action if the message type is sms
@@ -340,7 +365,7 @@ class Communication extends Myschoolgh {
                 $balance = $balance[0]->sms_balance ?? 0;
 
                 // messages to send
-                $units = $message_count * count($recipients_array);
+                $units = $message_count * count($actual_recipients_array);
 
                 // return error if the balance is less than the message to send
                 if($units > $balance) {
@@ -353,17 +378,12 @@ class Communication extends Myschoolgh {
 
             }
 
-            // return false if the recipients list is empty
-            if(empty($recipients_array)) {
-                return ["code" => 203, "data" => "Sorry! No recipient found ."];
-            }
-
             // convert into json string
-            $json = json_encode($recipients_array);
-            $recipients_array = json_decode($json, true);
+            $json = json_encode($actual_recipients_array);
+            $actual_recipients_array = json_decode($json, true);
 
             // get the list of all user ids
-            $recipient_ids = array_column($recipients_array, "item_id");
+            $recipient_ids = array_column($actual_recipients_array, "item_id");
 
             // set the scheduled date and time
             $params->schedule_time = empty($params->schedule_time) ? date("H:i:s") : $params->schedule_time;
@@ -388,7 +408,7 @@ class Communication extends Myschoolgh {
             ");
             $stmt->execute([
                 $params->clientId, $item_id, $params->type, $params->campaign_name, $params->subject ?? null,
-                $params->message, $params->recipient_type, json_encode($recipients_array),
+                $params->message, $params->recipient_type, json_encode($actual_recipients_array),
                 json_encode($recipient_ids), $units, $time_to_send, $params->userId
             ]);
 

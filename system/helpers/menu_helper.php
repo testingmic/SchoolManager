@@ -2,8 +2,9 @@
 <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails & SMS</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_send">Send SMS / Email</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_report">SMS / Email Report</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>sms_send">Send SMS</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>email_send">Send Email</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_report">SMS / Email Reports</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>sms_template">SMS Templates</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>email_template">Email Templates</a></li>
         </ul>
@@ -405,19 +406,12 @@
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
 <?php } ?>
-<?php function booking_menu() { global $baseUrl, $accessObject; ?>
+<?php function support_menu() { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Members</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Clients</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>booking_members">List All Members</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>booking_members_edit">Add Member</a></li>
-        </ul>
-    </li>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-list"></i><span>Attedance Booking</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>booking_list">Booking History</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>booking_log">Log Member Attendance</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>clients_list">List All Clients</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>clients_register">Register New Client</a></li>
         </ul>
     </li>
 <?php } ?>

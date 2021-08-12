@@ -115,7 +115,7 @@ $response->html = '
                                 <input type="hidden" name="myemail_address" value="'.$defaultUser->email.'">
                                 <div class="tab-pane fade show active" id="templates_list" role="tabpanel" aria-labelledby="templates_list-tab2">
                                     <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered table-condensed table-striped datatable">
+                                        <table class="table table-bordered table-condensed table-striped raw_datatable">
                                             <thead>
                                                 <th></th>
                                                 <th>Name</th>

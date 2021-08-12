@@ -100,7 +100,7 @@ $response->html = '
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="templates_list" role="tabpanel" aria-labelledby="templates_list-tab2">
                                     <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered table-striped datatable">
+                                        <table class="table table-bordered table-striped raw_datatable">
                                             <thead>
                                                 <th></th>
                                                 <th>Name</th>

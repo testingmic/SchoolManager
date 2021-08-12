@@ -1,7 +1,6 @@
 var sms_characters_counter = () => {
     var $remaining = $(`span[class~="remaining_count"]`),
         $messages = $remaining.next();
-
     $(`textarea[name="message"]`).on("input", function() {
         var chars = this.value.length,
             messages = Math.ceil(chars / sms_text_count),
@@ -221,7 +220,7 @@ var topup_sms = () => {
     $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html($.parseHTML(packages_list));
 }
 
-$(`div[class="send_smsemail"] input[name="send_later"]`).on("click", function() {
+$(`div[class~="send_smsemail"] input[name="send_later"]`).on("click", function() {
     let route = $(this).attr("data-route");
     if ($(`input[name="send_later"][data-route="${route}"]`).is(':checked')) {
         $(`input[name="schedule_date"][data-route="${route}"]`).prop("disabled", false);
@@ -232,7 +231,7 @@ $(`div[class="send_smsemail"] input[name="send_later"]`).on("click", function() 
     }
 });
 
-$(`div[class="send_smsemail"] select[name="template_id"]`).on("change", function() {
+$(`div[class~="send_smsemail"] select[name="template_id"]`).on("change", function() {
     let route = $(this).attr("data-route"),
         template_id = $(this).val();
 
@@ -247,37 +246,125 @@ $(`div[class="send_smsemail"] select[name="template_id"]`).on("change", function
         });
         if (template !== "") {
             if (route === "sms") {
-                $(`div[class="send_smsemail"] textarea[name="message"]`).html(template.message);
+                $(`div[class~="send_smsemail"] textarea[name="message"]`).html(template.message);
                 sms_characters_counter();
             } else {
-                $(`div[class="send_smsemail"] trix-editor[input="trix-editor-input"]`).html(template.message);
+                $(`div[class~="send_smsemail"] trix-editor[input="trix-editor-input"]`).html(template.message);
             }
         } else {
             if (route === "sms") {
                 $(`textarea[name="message"]`).html("");
             } else {
-                $(`div[class="send_smsemail"] trix-editor[input="trix-editor-input"]`).html("");
+                $(`div[class~="send_smsemail"] trix-editor[input="trix-editor-input"]`).html("");
             }
         }
 
     }
 });
 
-$(`div[class="send_smsemail"] select[name="role_id"]`).on("change", function() {
-    let route = $(this).attr("data-route"),
-        value = $(this).val();
+$(`div[class~="send_smsemail"] div[id^="class_select_"] select,
+    div[class~="send_smsemail"] div[id^="individual_select_"] select,
+    div[class~="send_smsemail"] div[id^="role_group_select_"] select`).on("change", function() {
+    $(`input[id="select_all"]`).attr("disabled", true).prop('checked', false);
+    $(`div[id="message_form"] *`).attr("disabled", true).val(``);
+    $(`tbody[class="receipients_list"]`).html(`<tr><td align="center" colspan="4">No receipient selected at the moment.</td></tr>`);
 
-    $(`div[class="send_smsemail"] div[id='individual_select_list_${route}'] select`).find('option').remove().end();
-    $(`div[id='individual_select_list_${route}'] select`).append(`<option value=''>Select</option>`);
-
-    $.each($.array_stream["users_array_list"], function(i, e) {
-        if (e.user_type == value) {
-            $(`div[id='individual_select_list_${route}'] select`).append(`<option value='${e.item_id}'>${e.name}</option>`);
-        }
-    });
+    let $remaining = $(`span[class~="remaining_count"]`),
+        $messages = $remaining.next();
+    $remaining.text(`${sms_text_count} characters remaining`);
+    $messages.text(`0 message`);
 });
 
-$(`div[class="send_smsemail"] select[name="recipient_type"]`).on("change", function() {
+var generate_list = (route) => {
+    let recipient_type = $(`select[name="recipient_type"]`).val(),
+        role_group = $(`div[id="role_group_select_${route}"] select`).val(),
+        individual_select = $(`div[id="individual_select_${route}"] select`).val(),
+        class_select = $(`div[id="class_select_${route}"] select`).val(),
+        users_receipients_list = ``;
+
+    $(`tbody[class="receipients_list"]`).html(`<tr><td align="center" colspan="4">Processing request <i class="fa fa-spin fa-spinner"></i>.</td></tr>`);
+    
+    $(`input[id="select_all"]`).attr("disabled", true);
+    if(!recipient_type) {
+        notify("Sorry! Please select recipient group type.");
+        return false;
+    }
+    else if((recipient_type === "group") && !role_group.length) {
+        notify("Sorry! Please select at least a category of user group.");
+        return false;
+    }
+    else if((recipient_type === "individual") && !individual_select.length) {
+        notify("Sorry! Please select the category within which the individual recipient falls.");
+        return false;
+    }
+    else if((recipient_type === "class") && !class_select.length) {
+        notify("Sorry! Please select the class to load the students.");
+        return false;
+    }
+
+    // the list of members
+    let count = 0;
+    let members_list = $.array_stream["users_array_list"];
+
+    // set the list of members
+    if((recipient_type === "class") && class_select.length) {
+        $.each(members_list, function(i, e) {
+            if ((e.user_type == "student") && (e.class_id == class_select)) {
+                count++;
+                let the_value = (route == "sms") ? e.phone_number : e.email;
+                users_receipients_list += `
+                <tr row_id="${e.item_id}">
+                    <td>${count}</td>
+                    <td><label for="user_${e.item_id}" class="cursor underline">${e.name}</label></td>
+                    <td>${the_value !== null ? the_value : ""}</td>
+                    <td><input ${the_value !== null ? `class="user_contact" name="recipients[]" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
+                </tr>`;
+            }
+        });
+    }
+    else if((recipient_type === "individual") && individual_select) {
+        $.each(members_list, function(i, e) {
+            if ((e.user_type == individual_select)) {
+                count++;
+                let the_value = (route == "sms") ? e.phone_number : e.email;
+                users_receipients_list += `
+                <tr row_id="${e.item_id}">
+                    <td>${count}</td>
+                    <td><label for="user_${e.item_id}" class="cursor underline">${e.name}</label></td>
+                    <td>${the_value !== null ? the_value : ""}</td>
+                    <td><input ${the_value !== null ? `class="user_contact" name="recipients[]" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
+                </tr>`;
+            }
+        });
+    } else if((recipient_type === "group") && role_group.length) {
+        $.each(members_list, function(i, e) {
+            if ($.inArray(e.user_type, role_group) !== -1) {
+                count++;
+                let the_value = (route == "sms") ? e.phone_number : e.email;
+                users_receipients_list += `
+                <tr row_id="${e.item_id}">
+                    <td>${count}</td>
+                    <td><label for="user_${e.item_id}" class="cursor underline">${e.name}</label></td>
+                    <td>${the_value !== null ? the_value : ""}</td>
+                    <td><input ${the_value !== null ? `class="user_contact" name="recipients[]" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
+                </tr>`;
+            }
+        });
+    }
+    
+    if(!users_receipients_list) {
+        users_receipients_list = `<tr><td align="center" colspan="4">No member was found under the selected category.</td></tr>`;
+    } else {
+        $(`div[id="message_form"] *`).attr("disabled", false).val(``);
+        $(`input[id="select_all"]`).attr("disabled", false);
+        $(`div[id="message_form"] input[name="type"]`).val(route);
+        $(`input[name="schedule_time"], input[name="schedule_date"]`).attr("disabled", true);
+    }
+
+    $(`tbody[class="receipients_list"]`).html(users_receipients_list);
+}
+
+$(`div[class~="send_smsemail"] select[name="recipient_type"]`).on("change", function() {
 
     let route = $(this).attr("data-route"),
         value = $(this).val(),
@@ -286,26 +373,33 @@ $(`div[class="send_smsemail"] select[name="recipient_type"]`).on("change", funct
         role_group_select = $(`div[id="role_group_select_${route}"]`),
         individual_select_list = $(`div[id="individual_select_list_${route}"]`);
 
+    $(`tbody[class="receipients_list"]`).html(`<tr><td align="center" colspan="4">No receipient selected at the moment.</td></tr>`);
+    
+    $(`div[id="message_form"] *`).attr("disabled", true).val(``);
     if (value == "group") {
         role_group_select.removeClass("hidden");
         class_select.addClass("hidden");
         individual_select.addClass("hidden");
         individual_select_list.addClass("hidden");
+        $(`button[id="generate_list_button"]`).removeClass("hidden");
     } else if (value == "individual") {
         class_select.addClass("hidden");
         role_group_select.addClass("hidden");
         individual_select.removeClass("hidden");
         individual_select_list.removeClass("hidden");
+        $(`button[id="generate_list_button"]`).removeClass("hidden");
     } else if (value == "class") {
         class_select.removeClass("hidden");
         role_group_select.addClass("hidden");
         individual_select.addClass("hidden");
         individual_select_list.addClass("hidden");
+        $(`button[id="generate_list_button"]`).removeClass("hidden");
     } else {
         class_select.addClass("hidden");
         role_group_select.addClass("hidden");
         individual_select.addClass("hidden");
         individual_select_list.addClass("hidden");
+        $(`button[id="generate_list_button"]`).addClass("hidden");
     }
 
 });
@@ -326,11 +420,12 @@ $(`form[class="form_send_message"]`).on("submit", function(evt) {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-            if (route === "email") {
+            if ((route === "email") && $(`trix-editor[id="ajax-form-content"]`).length) {
                 theFormData.delete("faketext");
                 let content = $(`trix-editor[id="ajax-form-content"]`).html();
                 theFormData.append("message", htmlEntities(content));
             }
+            $(`div[id="message_form"] div[class="form-content-loader"]`).css("display", "flex");
             $.ajax({
                 url: `${baseUrl}api/communication/send_smsemail`,
                 data: theFormData,
@@ -344,21 +439,48 @@ $(`form[class="form_send_message"]`).on("submit", function(evt) {
                         icon: responseCode(response.code),
                     });
                     if (response.code == 200) {
+                        let $remaining = $(`span[class~="remaining_count"]`),
+                        $messages = $remaining.next();
+                        $remaining.text(`${sms_text_count} characters remaining`);
+                        $messages.text(`0 message`);
+                        $(`div[id="message_form"] *`).attr("disabled", true).val(``);
                         $(`form[class="form_send_message"] select`).val("").change();
                         $(`form[class="form_send_message"] input, form[class="form_send_message"] textarea`).val("");
                         setTimeout(() => {
-                            // loadPage(`${baseUrl}smsemail_report/${response.data.additional.item_id}`);
+                            loadPage(`${baseUrl}smsemail_report?msg_id=${response.data.additional.item_id}`);
                         }, 2000);
                     }
                 },
                 complete: function() {
-
+                    $(`div[id="message_form"] div[class="form-content-loader"]`).css("display", "none");
                 },
                 error: function() {
+                    $(`div[id="message_form"] div[class="form-content-loader"]`).css("display", "none");
                     swal({text: swalnotice["ajax_error"], icon: "error"});
                 }
             });
         }
     });
 
+});
+
+var cancel_sending_form = () => {
+    swal({
+        title: "Cancel Form",
+        text: "Are you sure you want to cancel this form?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            $(`div[id="message_form"] *`).attr("disabled", true).val(``);
+        }
+    });
+}
+
+$(`div[id="message_form"] *`).attr("disabled", true);
+$(`div[class="trix-dialogs"] input[type="url"][name="href"], button[data-trix-attribute="href"]`).remove();
+
+$(`div[class~="send_smsemail"] input[id="select_all"]`).on("click", function () {
+    $(this).parents(`table[class~="table"]`).find(`input[class="user_contact"]:checkbox`).prop('checked', this.checked);
 });
