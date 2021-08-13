@@ -97,11 +97,8 @@ if(!empty($user_id)) {
                 // loop through the courses that the teacher handles
                 foreach($courses_list["data"] as $key => $each) {
 
-                    $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-course/{$each->id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+                    $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
-                    if($courseUpdate) {
-                        $action .= "&nbsp;<a href='#' onclick='return loadPage(\"{$baseUrl}update-course/{$each->id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-                    }
                     if($courseDelete) {
                         $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
                     }

@@ -120,8 +120,6 @@ $response->html = '
                                             <option value="teacher">Teacher</option>
                                             <option value="accountant">Accountant</option>
                                             <option value="employee">Employees</option>
-                                            <option value="guardian">Parent</option>
-                                            <option value="student">Student</option>
                                         </select>
                                     </div>
                                 </div>
@@ -177,7 +175,7 @@ $response->html = '
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Campaign Name <span class="required">*</span></label>
+                                <label>Email Campaign Name <span class="required">*</span></label>
                                 <input type="text" name="campaign_name" class="form-control">
                             </div>
                             <div class="form-group">

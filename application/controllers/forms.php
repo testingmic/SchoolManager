@@ -1799,7 +1799,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="country">Country</label>
                         <select data-width="100%" name="country" id="country" class="form-control selectpicker">
-                            <option value="null">Select Country</option>';
+                            <option value="">Select Country</option>';
                             foreach($this->pushQuery("*", "country") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->country) ? "selected" : null)." value=\"{$each->id}\">{$each->country_name}</option>";                            
                             }
@@ -2556,7 +2556,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="country">Country</label>
                         <select data-width="100%" name="country" id="country" class="form-control selectpicker">
-                            <option value="null">Select Country</option>';
+                            <option value="">Select Country</option>';
                             foreach($this->pushQuery("*", "country") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->country) ? "selected" : null)." value=\"{$each->id}\">{$each->country_name}</option>";                            
                             }
@@ -3179,7 +3179,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="country">Country</label>
                         <select data-width="100%" name="country" id="country" class="form-control selectpicker">
-                            <option value="null">Select Country</option>';
+                            <option value="">Select Country</option>';
                             foreach($this->pushQuery("*", "country") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->country) ? "selected" : null)." value=\"{$each->id}\">{$each->country_name}</option>";                            
                             }

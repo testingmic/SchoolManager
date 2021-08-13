@@ -39,7 +39,7 @@ if(loggedIn()) {
       <div class="container mt-5">
         <div class="row">
           <div class="col-12 col-sm-8 offset-sm-2 col-md-6 offset-md-3 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
-            <div class="text-left border-radius mb-2 p-2 bg-white">
+            <div class="text-left mb-2 p-2 bg-white">
                 <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="70px" /></div>
                 <div>
                     <div class="font-25px text-center font-weight-bold text-dark"><?= config_item('site_name') ?></div> 
@@ -84,7 +84,7 @@ if(loggedIn()) {
                 <div class="form-results"></div>
               </div>
             </div>
-            <div class="mt-3 border-radius text-dark p-3 bg-white text-center">
+            <div class="mt-3 mb-3 text-dark p-3 bg-white text-center">
               Don't have an account? <a href="<?= $baseUrl ?>register">Create One</a>
             </div>
           </div>
