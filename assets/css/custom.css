@@ -615,8 +615,9 @@ label {
 }
 
 .profile-picture {
-    width: 200px;
-    box-shadow: 0px 1px 2px #000;
+    width: 210px;
+    padding: 10px;
+    box-shadow: 0px 1px 2px rgb(59, 59, 59);
 }
 
 .card, .card-body, .btn, textarea, input, select, .badge {

@@ -138,7 +138,7 @@ class Users extends Myschoolgh {
 
 				// set the columns to load
 				$params->columns = "
-					a.client_id, a.guardian_id, a.item_id AS user_id, a.name, a.preferences,	
+					a.client_id, a.guardian_id, a.item_id AS user_id, a.name, a.preferences, a.description,	
 					a.unique_id, a.email, a.image, a.phone_number, a.user_type, a.class_id, a.account_balance,
 					a.gender, a.enrollment_date, a.residence, a.religion, a.date_of_birth, a.last_visited_page,
 					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
@@ -360,7 +360,7 @@ class Users extends Myschoolgh {
 			if(isset($params->minified) && ($params->minified == "chat_list_users")) {
 				// recent chats list
 				$chatsObj = load_class("chats", "controllers");
-				$chats_list = $chatsObj->recent($params->userId);
+				$chats_list = isset($params->userId) ? $chatsObj->recent($params->userId) : [];
 
 				// set the data to return
 				$data = [

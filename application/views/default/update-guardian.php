@@ -83,10 +83,12 @@ if(!empty($user_id)) {
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
                 <div class="card-body">
+                    <div class="author-box-center m-0 p-0">
+                        <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
+                    </div>
                     <div class="author-box-center">
-                        <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
                         <div class="clearfix"></div>
-                        <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
+                        <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
                         <div class="author-box-job">'.$data->residence.'</div>
                     </div>
                     <div class="text-center">
