@@ -23,7 +23,6 @@ $response->title = "{$pageTitle} : {$appName}";
 
 // item id
 $item_id = $SITEURL[1] ?? null;
-$pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty
 if(!empty($item_id)) {
@@ -236,24 +235,21 @@ if(!empty($item_id)) {
                     </div>
                 </div>
                 </div>
-                '.(!empty($data->description) ? 
-                    '<div class="card">
-                        <div class="card-header">
-                            <h4>Description</h4>
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Description</h4>
+                    </div>
+                    <div class="card-body p-0 pt-0">
+                        <div class="p-3 pt-0">
+                        '.(!empty($data->description) ? $data->description : "<div class='text-center'>Description Not Set</div>").'
                         </div>
-                        <div class="card-body pt-0">
-                            <div class="py-3 pt-0">
-                                '.$data->description.'
-                            </div>
-                        </div>
-                    </div>' : null
-                );
-                $response->html .= !empty($data->course_tutors) ? '
+                    </div>
+                </div>
                 <div class="card">
                     <div class="card-header">
                         <h4>Course Tutor(s) Details</h4>
                     </div>
-                    <div class="card-body pt-0 pb-0">' : null;
+                    <div class="card-body pt-0 pb-0">';
                     foreach($data->course_tutors as $tutor) {
                         $response->html .= '
                         <div class="pb-2 pt-3 border-bottom">
@@ -271,7 +267,8 @@ if(!empty($item_id)) {
                             </p>
                         </div>';
                     }
-                    $response->html .= !empty($data->course_tutors) ? '</div></div>' : null;
+                $response->html .= empty($data->course_tutors) ? "<div class='p-3 text-center'>Course Tutors Not Set</div>" : null;
+                $response->html .= '</div></div>';
 
             $response->html .= '
             </div>

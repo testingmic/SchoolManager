@@ -26,7 +26,6 @@ $response->scripts = [
 
 // student id
 $user_id = $SITEURL[1] ?? null;
-$pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty
 if(!empty($user_id)) {
@@ -174,7 +173,7 @@ if(!empty($user_id)) {
                             '.($data ? "
                                 <div class='mb-3'>
                                     <div class='card-body p-2 pl-0'>
-                                        <div class='d-flex justify-content-between'>
+                                        <div class='d-flex mb-3 justify-content-between'>
                                             <div><h5>WARDS LIST</h5></div>
                                             ".($hasUpdate ? "<div><button onclick='return load_quick_form(\"modify_guardian_ward\",\"{$data->user_id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-user'></i> Add Ward</button></div>" : "")."
                                         </div>

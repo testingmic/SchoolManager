@@ -1089,13 +1089,13 @@ class Forms extends Myschoolgh {
                 <div class='col-md-6'>
                     <div class='form-group'>
                         <label>Start Date</label>
-                        <input value='".($params->data->start_date ?? null)."' type='text' name='start_date' id='start_date' class='form-control datepicker'>
+                        <input value='".($params->data->start_date ?? null)."' type='text' name='start_date' id='start_date' data-maxdate='".date("Y-m-d", strtotime("+6 months"))."' class='form-control datepicker'>
                     </div>
                 </div>
                 <div class='col-md-6'>
                     <div class='form-group'>
                         <label>End Date</label>
-                        <input value='".($params->data->end_date ?? null)."' type='text' name='end_date' id='end_date' class='form-control datepicker'>
+                        <input value='".($params->data->end_date ?? null)."' type='text' name='end_date' id='end_date' data-maxdate='".date("Y-m-d", strtotime("+6 months"))."' class='form-control datepicker'>
                     </div>
                 </div>
                 <div class='col-md-12'>
@@ -2505,7 +2505,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="enrollment_date">Date Employed <span class="required">*</span></label>
-                        <input type="date" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control">
+                        <input type="text" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control datepicker">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2540,13 +2540,13 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
-                        <input type="date" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control">
+                        <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="email">Email Address</label>
-                        <input type="email" value="'.($userData->email ?? null).'" name="email" id="email" class="form-control">
+                        <input type="email" data-auto_config="email" value="'.($userData->email ?? null).'" name="email" id="email" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2655,7 +2655,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" value="'.($userData->username ?? null).'" name="username" id="username" class="form-control">
+                        <input type="text" data-auto_config="username" value="'.($userData->username ?? null).'" name="username" id="username" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">

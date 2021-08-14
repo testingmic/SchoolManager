@@ -174,6 +174,7 @@ var buy_sms_package = (amount, package_id) => {
         });
         popup.openIframe();
     } catch(e) {
+        console.log(e);
         swal({
             text: "Connection Failed! Please check your internet connection to proceed.",
             icon: "error",
@@ -474,6 +475,13 @@ var cancel_sending_form = () => {
     }).then((proceed) => {
         if (proceed) {
             $(`div[id="message_form"] *`).attr("disabled", true).val(``);
+            $(`input[id="select_all"]`).attr("disabled", true).prop('checked', false);
+            $(`div[id="message_form"] *`).attr("disabled", true).val(``);
+            $(`tbody[class="receipients_list"]`).html(`<tr><td align="center" colspan="4">No receipient selected at the moment.</td></tr>`);
+            let $remaining = $(`span[class~="remaining_count"]`),
+                $messages = $remaining.next();
+            $remaining.text(`${sms_text_count} characters remaining`);
+            $messages.text(`0 message`);
         }
     });
 }

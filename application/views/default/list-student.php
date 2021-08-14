@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $defaultAcademics;
+global $myClass, $accessObject, $defaultUser, $defaultAcademics, $defaultCurrency;
 
 // initial variables
 $appName = config_item("site_name");
@@ -77,9 +77,9 @@ foreach($student_list["data"] as $key => $each) {
     </td>";
     $students .= "<td>{$each->class_name}</td>";
     $students .= "<td>{$each->gender}</td>";
-    $students .= "<td>{$each->blood_group_name}</td>";
     $students .= "<td>{$each->date_of_birth}</td>";
     $students .= "<td>{$each->department_name}</td>";
+    $students .= "<td>{$defaultCurrency} {$each->debt}</td>";
     $students .= "<td class='text-center'>{$action}</td>";
     $students .= "</tr>";
 }
@@ -148,9 +148,9 @@ $response->html = '
                                         <th>Student Name</th>
                                         <th>Class</th>
                                         <th>Gender</th>
-                                        <th>Blood Group</th>
                                         <th>Date of Birth</th>
                                         <th>Department</th>
+                                        <th>Debt</th>
                                         <th align="center" width="13%"></th>
                                     </tr>
                                 </thead>

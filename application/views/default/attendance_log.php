@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Attendance Log";
+$pageTitle = "Attendance Log Summary";
 $response->title = "{$pageTitle} : {$appName}";
 
 // permissive users to be created by each access level

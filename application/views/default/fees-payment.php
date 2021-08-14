@@ -18,7 +18,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 $getObject = (object) $_GET;
-$pageTitle = "Fees Payment";
+$pageTitle = "Pay Fees";
 $response->title = "{$pageTitle} : {$appName}";
 
 $receivePayment = $accessObject->hasAccess("receive", "fees");

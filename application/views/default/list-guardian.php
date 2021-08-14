@@ -34,13 +34,10 @@ $hasUpdate = $accessObject->hasAccess("update", "guardian");
 $guardians = "";
 foreach($guardian_list as $kkey => $each) {
 
-    $action = "<a title='Click to view guardian information' href='#' onclick='return loadPage(\"{$baseUrl}update-guardian/{$each->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
-
-    if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to update guardian information' href='#' onclick='return loadPage(\"{$baseUrl}update-guardian/{$each->user_id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-    }
+    $action = "<a title='Click to view guardian information' href='#' onclick='return loadPage(\"{$baseUrl}update-guardian/{$each->user_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    
     if($hasDelete) {
-        $action .= "&nbsp;<a href='#' title='Click to delete guardian record' onclick='return delete_record(\"{$each->user_id}\", \"guardian\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a href='#' title='Click to delete guardian record' onclick='return delete_record(\"{$each->user_id}\", \"guardian\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     // load the guardian wards list
@@ -87,7 +84,7 @@ foreach($guardian_list as $kkey => $each) {
     $guardians .= "<td>{$each->email}</td>";
     $guardians .= "<td>{$each->phone_number}</td>";
     $guardians .= "<td>{$wards_list}</td>";
-    $guardians .= "<td class='text-center'>{$action}</td>";
+    $guardians .= "<td width='13%' class='text-center'>{$action}</td>";
     $guardians .= "</tr>";
 }
 
@@ -114,7 +111,7 @@ $response->html = '
                                         <th>Email</th>
                                         <th>Contact</th>
                                         <th width="25%">Wards</th>
-                                        <th  align="center" width="13%"></th>
+                                        <th width="13%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$guardians.'</tbody>

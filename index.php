@@ -138,6 +138,7 @@ if(!empty($session->userId)) {
 		$accessObject->userPermits = json_decode($defaultUser->user_permissions);
 		$accessObject->appPrefs = $defaultUser->client->client_preferences;
 		$defaultUser->appPrefs = $defaultUser->client->client_preferences;
+		$defaultCurrency = $defaultClientData->client_preferences->labels->currency;
 		
 		// set additional parameters
 		$isSupport = (bool) ($defaultUser->user_type == "support");

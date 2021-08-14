@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 
-$response->title = "Fees History : {$appName}";
+$response->title = "Fees Payment History : {$appName}";
 $response->scripts = ["assets/js/filters.js"];
 
 $filter = (object) $_POST;
@@ -92,10 +92,10 @@ foreach($item_list["data"] as $key => $fees) {
 $response->html = '
 <section class="section">
     <div class="section-header">
-        <h1>Fees Payments List</h1>
+        <h1>Fees Payment History</h1>
         <div class="section-header-breadcrumb">
             <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-            <div class="breadcrumb-item">Fees Payments List</div>
+            <div class="breadcrumb-item">Fees Payment History</div>
         </div>
     </div>
     <div class="row" id="filter_Department_Class">

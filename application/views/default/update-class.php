@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Class Details";
+$pageTitle = "Class Information";
 $response->title = "{$pageTitle} : {$appName}";
 
 

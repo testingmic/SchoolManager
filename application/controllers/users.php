@@ -213,7 +213,12 @@ class Users extends Myschoolgh {
 					(SELECT name FROM sections WHERE sections.id = a.section LIMIT 1) AS section_name, a.blood_group AS blood_group_name,
 					(SELECT phone_number FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_phone
 				")).", (SELECT b.permissions FROM users_roles b WHERE b.user_id = a.item_id AND b.client_id = a.client_id LIMIT 1) AS user_permissions, 
-					a.course_ids, cl.name AS class_name, cl.item_id AS class_guid {$leftJoinQuery}
+					a.course_ids, cl.name AS class_name, cl.item_id AS class_guid,
+					(
+						SELECT SUM(p.balance) FROM fees_payments p 
+						WHERE p.student_id = a.item_id AND p.exempted = '0' 
+							AND p.academic_year = a.academic_year AND p.academic_term = a.academic_term
+					) AS debt {$leftJoinQuery}
 				FROM users a 
 				LEFT JOIN country c ON c.id = a.country
 				LEFT JOIN classes cl ON cl.id = a.class_id
@@ -294,6 +299,8 @@ class Users extends Myschoolgh {
 				if(isset($params->no_permissions)) {
 					unset($result->user_permissions);
 				}
+
+				$result->debt = number_format($result->debt, 2);
 
 				// append the was present
 				if(isset($params->append_waspresent)) {
@@ -1194,14 +1201,19 @@ class Users extends Myschoolgh {
 			$this->db->commit();
 
 			# set the output to return when successful
-			$return = ["code" => 200, "data" => "User account successfully created. {$add_message}", "refresh" => 2000];
+			$return = ["code" => 200, "data" => ucfirst($redirect)." account successfully created. {$add_message}", "refresh" => 2000];
 			
 			# append to the response
 			if($loggedInAccount) {
 
 				// set the url
-				$url_link = $redirect == "student" ? "{$this->baseUrl}fees-allocate/{$params->user_id}" : 
-					"{$this->baseUrl}update-{$redirect}/{$params->user_id}";
+				if(($redirect == "student")) {
+					$url_link = "{$this->baseUrl}fees-allocate/{$params->user_id}?new_admission";
+				} elseif(in_array($params->user_type, ["admin", "teacher", "employee", "accountant"])) {
+					$url_link = "{$this->baseUrl}payroll-view/{$params->user_id}?new_staff";
+				} else {
+					$url_link = "{$this->baseUrl}update-{$redirect}/{$params->user_id}";
+				}
 
 				// append the redirection url
 				$return["additional"] = [
@@ -1344,6 +1356,9 @@ class Users extends Myschoolgh {
 				$this->remove_all_user_courses($params);
 			}
 
+			// append academic year and term if a student
+			$append_query = ($params->user_type == "student") ? "AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}'" : null;
+
 			// insert the user information
 			$stmt = $this->db->prepare("
 				UPDATE users SET last_updated = now(), course_ids = ?
@@ -1388,7 +1403,7 @@ class Users extends Myschoolgh {
 				".(isset($params->city) ? ", city='{$params->city}'" : null)."
 				".(isset($params->date_of_birth) ? ", date_of_birth='{$params->date_of_birth}'" : null)."
 				
-				WHERE item_id = ? LIMIT 1
+				WHERE item_id = ? {$append_query} LIMIT 1
 			");
 
 			// execute the insert user data
@@ -1560,13 +1575,13 @@ class Users extends Myschoolgh {
 			$this->db->commit();
 
 			// set the url
-			$url_link = $params->user_type == "student" ? "{$this->baseUrl}update-student/{$params->user_id}" : null;
+			$url_link = ($params->user_type == "student") ? "{$this->baseUrl}update-student/{$params->user_id}" : null;
 
 			// append the redirection url
 			if($url_link) { $additional = ["href" => $url_link]; }
 
 			#record the password change request
-            return ["code" => 200, "data" => "Account successfully updated.", "additional" => $additional ];
+            return ["code" => 200, "data" => ucfirst($redirect). " record successfully updated.", "additional" => $additional ];
 
 		} catch(PDOException $e) {
 			$this->db->rollBack();

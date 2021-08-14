@@ -1291,6 +1291,11 @@ class Fees extends Myschoolgh {
                 $outstandingBalance = 0;
             }
 
+            // if there is any credit balance then end the query
+            if($creditBalance) {
+                return ["code" => 203, "data" => "Sorry! You cannot pay more than the outstanding balance."];
+            }
+
             // get the currency
             $params->payment_method = isset($params->payment_method) ? ucfirst($params->payment_method) : "Cash";
             $currency = $defaultUser->client->client_preferences->labels->currency ?? null;

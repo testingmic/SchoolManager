@@ -443,7 +443,7 @@ if(!empty($user_id)) {
                                 </div>
                             </div>
                             <div class="table-responsive">
-                                <table data-empty="" class="table table-striped datatable">
+                                <table data-empty="" class="table table-striped raw_datatable">
                                     <thead>
                                         <tr>
                                             <th width="5%" class="text-center">#</th>

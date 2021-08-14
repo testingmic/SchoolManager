@@ -101,6 +101,7 @@ $response->html = '
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
+                    <input disabled type="hidden" name="myemail_address" value="'.$defaultUser->email.'">
                     <div class="card-body">
                         <div class="padding-20">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
@@ -112,7 +113,6 @@ $response->html = '
                                 </li>
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
-                                <input type="hidden" name="myemail_address" value="'.$defaultUser->email.'">
                                 <div class="tab-pane fade show active" id="templates_list" role="tabpanel" aria-labelledby="templates_list-tab2">
                                     <div class="table-responsive trix-slim-scroll">
                                         <table class="table table-bordered table-condensed table-striped raw_datatable">

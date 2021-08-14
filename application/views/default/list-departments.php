@@ -32,10 +32,10 @@ $hasUpdate = $accessObject->hasAccess("update", "department");
 $departments = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "&nbsp;<a title='Click to update department record' href='#' onclick='return loadPage(\"{$baseUrl}update-department/{$each->id}\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+    $action = "&nbsp;<a title='Click to update department record' href='#' onclick='return loadPage(\"{$baseUrl}update-department/{$each->id}\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-edit'></i></a>";
     
     if($hasDelete) {
-        $action .= "&nbsp;<a href='#' title='Click to delete this Department' onclick='return delete_record(\"{$each->id}\", \"department\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a href='#' title='Click to delete this Department' onclick='return delete_record(\"{$each->id}\", \"department\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     $departments .= "<tr data-row_id=\"{$each->id}\">";
@@ -70,7 +70,7 @@ $response->html = '
                                         <th>Department Code</th>
                                         <th width="15%">Students Count</th>
                                         <th>Head of Department</th>
-                                        <th align="center" width="10%"></th>
+                                        <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$departments.'</tbody>

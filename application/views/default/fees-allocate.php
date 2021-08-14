@@ -60,7 +60,7 @@ if(!empty($user_id)) {
         $feesObject = load_class("fees", "controllers", $feesParam);
 
         // get the class and student fees allocation
-        $show_button = true;
+        $dont_show_button = false;
         $allocation_list = "";
         $studentAllocation = $feesObject->students_fees_allocation($feesParam)["data"];
         $classAllocation = $feesObject->class_fees_allocation($feesParam)["data"];
@@ -124,7 +124,6 @@ if(!empty($user_id)) {
                 // set the status
                 $status = null;
                 $delete_btn = null;
-                $show_button = true;
 
                 // set the button
                 $save_btn = "<button title='Save this fee allocation.' onclick='return save_category(\"{$allocation->category_id}\",\"{$user_id}\")' data-save_category='{$allocation->category_id}' class='btn btn-sm btn-outline-success {$request_buttons}'><i class='fa fa-save'></i></button>";
@@ -147,15 +146,14 @@ if(!empty($user_id)) {
                         $undo_button = null;
                         $delete_btn = null;
                         $save_btn = null;
-                        $show_button = false;
                         $disabled = "disabled='disabled'";
                         $status = "<span class='p-1 badge badge-success'>Paid</span>";
                     } else if($get_match["paid_status"] === 2) {
-                        $show_button = true;
+                        $dont_show_button = true;
                         $delete_btn = null;
                         $status = "<span class='p-1 badge badge-primary'>Part Payment</span>";
-                    } else {
-                        $show_button = true;
+                    } else if($get_match["paid_status"] === 0) {
+                        $dont_show_button = true;
                         $status = "<span class='p-1 badge badge-danger'>Not Paid</span>";
                     }
                     $status = $is_exempted ? "<span class='p-1 badge badge-dark'>Exempted</span>" : $status;
@@ -168,9 +166,9 @@ if(!empty($user_id)) {
                 $allocation_list .= "
                     <tr data-row_id='{$allocation->category_id}'>
                         <td><span class='font-18'>{$allocation->category_name}</span><br>{$status}</td>
-                        <td><input value='{$amount_due}' disabled class='form-control font-weight-bold font-17 text-center'></td>
-                        <td><input value='{$amount_paid}' disabled class='form-control font-17 text-center'></td>
-                        <td><input min='0' max='{$amount_due}' value='{$balance}' {$idisabled} ".($disabled ? $disabled : "data-item='amount' data-category_id='{$allocation->category_id}'")." class='form-control font-weight-bold font-17 p-0 text-center {$exempt_class}' type='number'></td>
+                        <td><input style='min-width:90px' value='{$amount_due}' disabled class='form-control font-weight-bold font-17 text-center'></td>
+                        <td><input style='min-width:90px' value='{$amount_paid}' disabled class='form-control font-17 text-center'></td>
+                        <td><input style='min-width:90px' min='0' max='{$amount_due}' value='{$balance}' {$idisabled} ".($disabled ? $disabled : "data-item='amount' data-category_id='{$allocation->category_id}'")." class='form-control font-weight-bold font-17 p-0 text-center {$exempt_class}' type='number'></td>
                         <td align='center'>{$b}{$save_btn}{$delete_btn}{$undo_button}{$e}</td>
                     </tr>";
             }
@@ -217,26 +215,28 @@ if(!empty($user_id)) {
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-end">
-                                    '.($show_button ? '
+                                    '.($dont_show_button ? '
                                         <button onclick="return save_student_bill(\''.$user_id.'\',\''.$data->name.'\')" title="Click to save student bill." class="btn btn-success"><i class="fa fa-save"></i> Save Student Bill</button>
                                     ' : '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'" target="_blank" class="btn btn-primary"><i class="fa fa-print"></i> Print Bill</a>'
                                     ).'
                                 </div>
                                 <div class="mt-3 border-top pt-3">
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th class="mb-3 font-weight-bold">CATEGORY</th>
-                                                <th width="18%" class="mb-3 font-weight-bold">DUE</th>
-                                                <th width="18%" class="mb-3 font-weight-bold">PAID</th>
-                                                <th width="20%" class="mb-3 font-weight-bold">'.$headers["balance"].'</th>
-                                                <th class="mb-3 font-weight-bold"></th>                    
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            '.$allocation_list.'
-                                        </tbody>
-                                    </table>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th class="mb-3 font-weight-bold">CATEGORY</th>
+                                                    <th width="18%" class="mb-3 font-weight-bold">DUE</th>
+                                                    <th width="18%" class="mb-3 font-weight-bold">PAID</th>
+                                                    <th width="20%" class="mb-3 font-weight-bold">'.$headers["balance"].'</th>
+                                                    <th class="mb-3 font-weight-bold"></th>                    
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                '.$allocation_list.'
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>

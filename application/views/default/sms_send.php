@@ -95,6 +95,7 @@ $response->html = '
                 <div class="col-12 col-sm-12 col-lg-12">
                     <div class="card">
                         <div class="card-body">
+                            <input disabled type="hidden" name="myemail_address" value="'.$defaultUser->email.'">
                             <div class="row">
                                 <div class="col-3">
                                     <label>Type:</label>
