@@ -1,2 +1,2 @@
-[14-Aug-2021 18:33:37 Africa/Accra] PHP Notice:  Undefined variable: pageTitle in /var/www/html/myschool_gh/application/views/default/list-classes.php on line 55
-[14-Aug-2021 18:33:39 Africa/Accra] PHP Notice:  Undefined variable: pageTitle in /var/www/html/myschool_gh/application/views/default/list-classes.php on line 55
+[14-Aug-2021 20:44:42 Africa/Accra] PHP Notice:  Undefined property: stdClass::$class_name in /var/www/html/myschool_gh/application/controllers/fees.php on line 1923
+[14-Aug-2021 21:38:03 Africa/Accra] PHP Notice:  Undefined variable: creditBalance in /var/www/html/myschool_gh/application/controllers/fees.php on line 1295

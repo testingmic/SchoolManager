@@ -320,7 +320,7 @@ function ajax_form_button() {
 function add_new_item($item_id = null) {
 	global $accessObject;
 	$buttons = "
-    <div class=\"btn-group dropdown d-inline mr-2\">
+    <div class=\"btn-group dropdown d-inline\">
 		<button type=\"button\" class=\"btn btn-outline-info btn-icon-text dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">
 			Add New
 		</button>

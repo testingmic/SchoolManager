@@ -291,12 +291,12 @@ if(!empty($user_id)) {
                     <div class="text-center">
                         <div class="author-box-description mt-0">'.$data->description.'</div>
                         <div class="w-100 mt-2">
-                            <a class="btn mb-1 btn-primary" href="'.$baseUrl.'modify-student/'.$user_id.'"><i class="fa fa-edit"></i> Edit Record</a>
+                            '.($hasUpdate ? '<a class="btn mb-1 btn-primary" href="'.$baseUrl.'modify-student/'.$user_id.'"><i class="fa fa-edit"></i> Edit Record</a>' : null).'
                             '.(
-                                $student_allocation_list["allocated"] && empty($student_allocation_list["owning"]) ?
-                                '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'" target="_blank" class="btn mb-1 btn-outline-warning"><i class="fa fa-print"></i> Print Bill</a>'
+                                isset($student_allocation_list) && $student_allocation_list["allocated"] && empty($student_allocation_list["owning"]) ?
+                                '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-1 btn-outline-warning"><i class="fa fa-print"></i> Print Bill</a>'
                                 : (
-                                    !$student_allocation_list["allocated"] ? 
+                                    isset($student_allocation_list) && !$student_allocation_list["allocated"] ? 
                                     '<a class="btn mb-1 btn-outline-warning" href="'.$baseUrl.'fees-allocate/'.$user_id.'?set"><i class="fa fa-ankh"></i> Set Student Bill</a>'
                                     : null
                                 )
@@ -437,7 +437,7 @@ if(!empty($user_id)) {
                                 ).'
                                 '.(
                                     $student_allocation_list["allocated"] ? 
-                                        '<span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'" target="_blank" class="btn mb-2 btn-primary"><i class="fa fa-print"></i> Print Bill</a></span>' : null
+                                        '<span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-primary"><i class="fa fa-print"></i> Print Bill</a></span>' : null
                                 ).'
                                 </div>
                             </div>

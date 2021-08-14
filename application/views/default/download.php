@@ -400,17 +400,35 @@ elseif(confirm_url_id(1, "accounting")) {
 }
 
 /** Print Student Bill */
-elseif(confirm_url_id(1, "student_bill")) {
+elseif(confirm_url_id(2) && confirm_url_id(1, "student_bill")) {
 
     // get the parameters
     $getObject = (array) $_GET;
     $getObject = (object) array_map("xss_clean", $getObject);
 
-    $pages_content = "Student Bill.";
+    // set the parameters
+    $item_param = (object) [
+        "userData" => $defaultUser,
+        "student_id" => $SITEURL[2],
+        "clientId" => $defaultUser->client_id,
+        "client_data" => $defaultUser->client,
+        "academic_year" => $getObject->academic_year ?? null,
+        "academic_term" => $getObject->academic_term ?? null
+    ];
+
+    if(isset($getObject->print)) {
+        $item_param->print = true;
+    }
+
+    // create a new object
+    $feesObject = load_class("fees", "controllers", $item_param);
+
+    $orientation = "P";
+    $pages_content .= $feesObject->bill($item_param);
 
 }
-// print $pages_content;
-// exit;
+print_r($pages_content);
+exit;
 // load the html content
 $dompdf->loadHtml($pages_content);
 

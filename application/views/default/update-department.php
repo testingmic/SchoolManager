@@ -150,18 +150,20 @@ if(!empty($item_id)) {
                     </div>
                     <div class="card-body pt-0 pb-0">
                         <div class="py-3 pt-0">
-                            <p class="clearfix">
-                                <span class="float-left">Fullname</span>
-                                <span class="float-right text-muted">'.($data->department_head_info->name ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Email</span>
-                                <span class="float-right text-muted">'.($data->department_head_info->email ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Contact</span>
-                                <span class="float-right text-muted">'.($data->department_head_info->phone_number ?? null).'</span>
-                            </p>
+                            '.(!empty($data->department_head_info->name) ?
+                                '<p class="clearfix">
+                                    <span class="float-left">Fullname</span>
+                                    <span class="float-right text-muted">'.($data->department_head_info->name ?? null).'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Email</span>
+                                    <span class="float-right text-muted">'.($data->department_head_info->email ?? null).'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Contact</span>
+                                    <span class="float-right text-muted">'.($data->department_head_info->phone_number ?? null).'</span>
+                                </p>' : '<div class="text-center">Department Head Not Set</div>'
+                            ).'
                         </div>
                     </div>
                 </div>
@@ -186,7 +188,6 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
-                            <div class="col-lg-12 pl-0"><h5>DEPARTMENT STUDENTS LIST</h5></div>
                             '.$student_listing.'
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';

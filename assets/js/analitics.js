@@ -324,7 +324,7 @@ var summaryReporting = (t_summary, date_range) => {
                 tooltip: {
                     y: {
                         formatter: function(val) {
-                            return "$" + format_currency(val)
+                            return myPrefs.labels.currency + format_currency(val)
                         }
                     }
                 }

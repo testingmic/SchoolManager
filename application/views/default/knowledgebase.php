@@ -102,11 +102,11 @@ if((count($support_array) > 1) || empty($knowledge_id)) {
 // not found
 if(!empty($knowledge_id) && empty($support_array) || !$accessObject->hasAccess("support", "settings")) {
     // end the query here
-    $response->html = page_not_found("permission_denied");
+    // $response->html = page_not_found("permission_denied");
 
     // echo the response
-    echo json_encode($response);
-    exit;
+    // echo json_encode($response);
+    // exit;
 
 }
 // else if the support ticket was parsed and the item is not empty

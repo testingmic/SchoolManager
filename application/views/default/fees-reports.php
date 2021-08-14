@@ -120,7 +120,7 @@ $response->html = '
                                                             </div>
                                                             <div class="d-flex justify-content-between">
                                                                 <div>
-                                                                    <h3 class="card-title"><i class="fas fa-dollar-sign col-green font-30 p-b-10"></i> <span data-count="total_revenue_received">0.00</span></h3>
+                                                                    <h3 class="card-title"><span>'.$defaultCurrency.'</span> <span data-count="total_revenue_received">0.00</span></h3>
                                                                 </div>
                                                                 <div style="width:60%">
                                                                     <div class="d-flex justify-content-between">

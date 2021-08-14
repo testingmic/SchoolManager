@@ -1208,7 +1208,7 @@ class Users extends Myschoolgh {
 
 				// set the url
 				if(($redirect == "student")) {
-					$url_link = "{$this->baseUrl}fees-allocate/{$params->user_id}?new_admission";
+					$url_link = "{$this->baseUrl}fees-allocate/{$params->user_id}?is_new_admission=1";
 				} elseif(in_array($params->user_type, ["admin", "teacher", "employee", "accountant"])) {
 					$url_link = "{$this->baseUrl}payroll-view/{$params->user_id}?new_staff";
 				} else {

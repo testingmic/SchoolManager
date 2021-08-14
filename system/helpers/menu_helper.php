@@ -1,14 +1,16 @@
-<?php function communication_menu() { global $baseUrl; ?>
-<li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails & SMS</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>sms_send">Send SMS</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>email_send">Send Email</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_report">SMS / Email Reports</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>sms_template">SMS Templates</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>email_template">Email Templates</a></li>
-        </ul>
-    </li>
+<?php function communication_menu() { global $baseUrl, $accessObject; ?>
+    <?php if($accessObject->hasAccess("manage", "communication")) { ?>
+        <li class="dropdown">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-envelope"></i><span>Emails & SMS</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>sms_send">Send SMS</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>email_send">Send Email</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>smsemail_report">SMS / Email Reports</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>sms_template">SMS Templates</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>email_template">Email Templates</a></li>
+            </ul>
+        </li>
+    <?php } ?>
 <?php } ?>
 <?php function incidents_menu() { global $baseUrl, $accessObject; ?>
     <?php if($accessObject->hasAccess("view", "incident")) { ?>
@@ -224,16 +226,8 @@
             <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
         </ul>
     </li>
-    <?php incidents_menu(); ?>             
+    <?php incidents_menu(); ?> 
     <li class="menu-header">Academics</li>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Academics</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-classes">List Classes</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-departments">List Departments</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-sections">List Sections</a></li>
-        </ul>
-    </li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
         <ul class="dropdown-menu">
@@ -278,7 +272,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-payslip">Payslip List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
         </ul>
     </li>
     <li class="menu-header">Communication</li>
@@ -378,15 +372,6 @@
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
         </ul>
-    </li>                        
-    <li class="menu-header">Academics</li>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Academics</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-classes">List Classes</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-departments">List Departments</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-sections">List Sections</a></li>
-        </ul>
     </li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Library</span></a>
@@ -400,7 +385,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-desktop"></i><span>Payroll</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>hr-payslip">Payslip List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
         </ul>
     </li>
     <li class="menu-header">Communication</li>

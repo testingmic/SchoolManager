@@ -192,7 +192,7 @@ if(!empty($item_id)) {
 
                         <div class='border-bottom mb-3'><h6>UNIT LESSONS</h6></div>
                         <div class='table-responsive trix-slim-scroll'>
-                            <table class='table table-bordered raw_datatable'>
+                            <table data-order_item='asc' class='table table-bordered raw_datatable'>
                                 <thead>
                                     <th>#</th>
                                     <th>Lesson Title</th>

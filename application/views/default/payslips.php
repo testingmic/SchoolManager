@@ -28,9 +28,9 @@ $generatePermission = $accessObject->hasAccess("generate", "payslip");
 $validatePayslip = $accessObject->hasAccess("validate", "payslip");
 
 $staff_param = (object) ["clientId" => $clientId, "client_data" => $defaultClientData];
-$payslips_list = load_class("payroll", "controllers", $staff_param)->paysliplist($staff_param);
+$payslips_array = load_class("payroll", "controllers", $staff_param)->paysliplist($staff_param);
 
-$staff_list = "";
+$payslips_list = "";
 
 $color = [
     "admin" => "success",
@@ -44,7 +44,7 @@ $allowances = 0;
 $deductions = 0;
 $net_salary = 0;
 
-foreach($payslips_list["data"] as $key => $each) {
+foreach($payslips_array["data"] as $key => $each) {
     
     $basic_salary += $each->basic_salary;
     $allowances += $each->total_allowance;
@@ -80,9 +80,9 @@ foreach($payslips_list["data"] as $key => $each) {
     //: Set the new status
 	$status = ($each->status == 1) ? "<span class='badge badge-success'><i class=\"fa fa-check-circle\"></i> Paid</span>" : "<span class='badge badge-primary'><i class=\"fa fa-check-circle\"></i> Pending</span>";
 
-    $staff_list .= "<tr data-row_id=\"{$each->item_id}\">";
-    $staff_list .= "<td>".($key+1)."</td>";
-    $staff_list .= "
+    $payslips_list .= "<tr data-row_id=\"{$each->item_id}\">";
+    $payslips_list .= "<td>".($key+1)."</td>";
+    $payslips_list .= "
         <td>
             <div class='d-flex justify-content-start'>
                 <div class='mr-2'>
@@ -96,11 +96,11 @@ foreach($payslips_list["data"] as $key => $each) {
                 </div>
             </div>
         </td>";
-    $staff_list .= "<td>{$each->payslip_month} {$each->payslip_year}</td>";
-    $staff_list .= "<td>{$summary}</td>";
-    $staff_list .= "<td>{$status}</td>";
-    $staff_list .= "<td class='text-center'>{$action}</td>";
-    $staff_list .= "</tr>";
+    $payslips_list .= "<td>{$each->payslip_month} {$each->payslip_year}</td>";
+    $payslips_list .= "<td>{$summary}</td>";
+    $payslips_list .= "<td>{$status}</td>";
+    $payslips_list .= "<td class='text-center'>{$action}</td>";
+    $payslips_list .= "</tr>";
     
 }
 
@@ -114,16 +114,17 @@ $response->html = '
             </div>
         </div>
         <div class="row">
+            '.($generatePermission ? '
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="text-right mb-2">
                     <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'payslip-generate"><i class="fa fa-plus"></i> Generate Payslip</a>
                 </div>
-            </div>
+            </div>' : null).'
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="table-responsive table-student_staff_list">
-                            <table data-empty="" class="table table-striped datatable">
+                        <div class="table-responsive">
+                            <table data-empty="" class="table table-striped '.($payslips_list ? "datatable" : "raw_datatable").'">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
@@ -134,7 +135,7 @@ $response->html = '
                                         <th width="14%" align="center"></th>
                                     </tr>
                                 </thead>
-                                <tbody>'.$staff_list.'</tbody>
+                                <tbody>'.$payslips_list.'</tbody>
                             </table>
                         </div>
                     </div>

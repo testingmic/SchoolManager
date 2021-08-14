@@ -891,9 +891,10 @@ class Payroll extends Myschoolgh {
                     $result .= '<tr style="padding: 5px; border-bottom: solid 1px #ccc;">
                             <td colspan="4" align="center" style="padding: 10px;">
                                 '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\"><br>" : "").'
-                                <h2 style="color:#6777ef;font-family:helvetica;padding:0px;margin:0px;">'.strtoupper($client->client_name).'</h2>
-                                <span style="padding:0px; font-weight:bold; margin:0px;">'.$client->client_address.'</span><br>
-                                <span style="padding:0px; font-weight:bold; margin:0px;">'.$client->client_contact.' '.(!$client->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null).'</span>
+                                <h2 style="font-size:30px;color:#6777ef;font-family:helvetica;padding:0px;margin:0px;">'.strtoupper($client->client_name).'</h2>
+                                <span style="padding:0px; margin:0px;">'.$client->client_address.'</span><br>
+                                '.(!empty($client->client_email) ? "<div><strong>Email:</strong> {$client->client_email}</div>" : "").'
+                                <span style="padding:0px; margin:0px;"><strong>Tel:</strong> '.$client->client_contact.' '.(!$client->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null).'</span>
                             </td>
                         </tr>
                         <tr>
@@ -945,17 +946,17 @@ class Payroll extends Myschoolgh {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td>Basic Salary</td>
+                                    <td style='padding:10px;'><strong>Basic Salary</strong></td>
                                     <td align=\"right\">GH&cent;{$data->basic_salary}</td>
                                 </tr>";
                                 foreach($allowancesQuery as $eachAllowance) {
                                     $result .= "<tr>
-                                        <td>{$eachAllowance->allowance_type}</td>
+                                        <td style='padding:10px;'>{$eachAllowance->allowance_type}</td>
                                         <td align=\"right\">GH&cent;{$eachAllowance->amount}</td>
                                     </tr>";
                                 }
                                 $result .= "<tr>
-                                    <td><strong>Gross Salary</strong></td>
+                                    <td style='padding:10px;'><strong>Gross Salary</strong></td>
                                     <td align=\"right\"><strong>GH&cent;".number_format(($data->basic_salary + array_sum(array_column($data->payslip_details["Allowance"], 'amount'))), 2)."</strong></td>
                                 </tr>
                             </table>
@@ -971,12 +972,12 @@ class Payroll extends Myschoolgh {
                                 </tr>";
                                 foreach($deductionsQuery as $eachAllowance) {
                                     $result .= "<tr>
-                                        <td>{$eachAllowance->allowance_type}</td>
-                                        <td align=\"right\">GH&cent;{$eachAllowance->amount}</td>
+                                        <td style='padding:10px;'>{$eachAllowance->allowance_type}</td>
+                                        <td style='padding:10px;' align=\"right\">GH&cent;{$eachAllowance->amount}</td>
                                     </tr>";
                                 }
                                 $result .= "<tr>
-                                    <td><strong>Total Deductions</strong></td>
+                                    <td style='padding:10px;'><strong>Total Deductions</strong></td>
                                     <td align=\"right\"><strong>GH&cent;".number_format(array_sum(array_column($deductionsQuery, 'amount')), 2)."</strong></td>
                                 </tr>
                             </table>
@@ -990,8 +991,8 @@ class Payroll extends Myschoolgh {
                             <table width=\"100%\" cellpadding=\"10px\" class=\"table\" {$border}>
                                 <tr>";
                                     $result .= "
-                                    <td width=\"50%\" style=\"background-color:#6777ef; color:#fff; padding:10px;font-weight:bolder;text-transform:uppercase\"><strong>Net Salary</strong></td>
-                                    <td align=\"right\" style=\"background-color:#f4f4f4;padding:10px;font-weight:bolder;text-transform:uppercase\">
+                                    <td  width=\"50%\" style=\"background-color:#6777ef; padding:10px; color:#fff; padding:10px;font-weight:bolder;text-transform:uppercase\"><strong>Net Salary</strong></td>
+                                    <td align=\"right\" style=\"background-color:#f4f4f4;font-size:20px;padding:10px;font-weight:bolder;text-transform:uppercase\">
                                         <strong>GH&cent;".number_format((($data->basic_salary + array_sum(array_column($allowancesQuery, 'amount')))-array_sum(array_column($deductionsQuery, 'amount'))), 2)."</strong>
                                     </td>
                                 </tr>
@@ -1006,9 +1007,7 @@ class Payroll extends Myschoolgh {
                 <tr>
                     <td colspan="4">
                         <p style="font-size:12px">
-                            Phone:  '.$client->client_contact.' | 
-                            Email: '.$client->client_email.' | 
-                            Website: '.$client->client_website.'
+                            <strong>Slogan: </strong>'.$client->client_slogan.'
                         </p>
                     </td>
                 </tr>

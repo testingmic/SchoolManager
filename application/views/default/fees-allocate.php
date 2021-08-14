@@ -24,6 +24,7 @@ $response->scripts = ["assets/js/fees_allocation.js"];
 
 // student id
 $user_id = $SITEURL[1] ?? null;
+$is_new_admission = (bool) (isset($_GET["is_new_admission"]) && !empty($_GET["is_new_admission"]));
 
 // if the user id is not empty
 if(!empty($user_id)) {
@@ -216,12 +217,13 @@ if(!empty($user_id)) {
                                 </div>
                                 <div class="d-flex justify-content-end">
                                     '.($dont_show_button ? '
-                                        <button onclick="return save_student_bill(\''.$user_id.'\',\''.$data->name.'\')" title="Click to save student bill." class="btn btn-success"><i class="fa fa-save"></i> Save Student Bill</button>
-                                    ' : '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'" target="_blank" class="btn btn-primary"><i class="fa fa-print"></i> Print Bill</a>'
-                                    ).'
+                                        <button onclick="return save_student_bill(\''.$user_id.'\',\''.$data->name.'\')" title="Click to save student bill." class="btn btn-success"><i class="fa fa-save"></i> Save Student Bill</button>&nbsp;
+                                    ' : null).'
+                                    '.($studentAllocationArray ? '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn btn-outline-primary"><i class="fa fa-print"></i> Print Bill</a>' : null).'
                                 </div>
                                 <div class="mt-3 border-top pt-3">
                                     <div class="table-responsive">
+                                        <input type="hidden" id="is_new_admission" name="is_new_admission" value="'.$is_new_admission.'">
                                         <table class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>

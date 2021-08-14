@@ -1286,6 +1286,7 @@ class Fees extends Myschoolgh {
             }
 
             /* Confirm if the user has any credits */
+            $creditBalance = 0;
             if($outstandingBalance < 0) {
                 $creditBalance = $outstandingBalance * -1;
                 $outstandingBalance = 0;
@@ -1709,7 +1710,8 @@ class Fees extends Myschoolgh {
                         '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
                         <h2 style="color:#6777ef;font-family:helvetica;padding:0px;margin:0px;">'.strtoupper($client->client_name).'</h2>
                         <div>'.$client->client_address.'</div>
-                        '.(!empty($client->client_email) ? "<div>{$client->client_email}</div>" : "").'
+                        '.(!empty($client->client_contact) ? "<div><strong>Tel:</strong> {$client->client_contact} / {$client->client_secondary_contact}</div>" : "").'
+                        '.(!empty($client->client_email) ? "<div><strong>Email:</strong> {$client->client_email}</div>" : "").'
                     </div>
                     <div style="background-color: #2196F3 !important;margin-top:5px;border-bottom: 1px solid #dee2e6 !important;height:3px;" class="pb-1 mb-3"></div>
                     <div class="invoice">
@@ -1844,10 +1846,7 @@ class Fees extends Myschoolgh {
                     </div>
                     <div class="border-bottom" style="border: 2px solid #2196F3; margin-top:10px"></div>
                     <div align="center" style="font-size:12px;padding-top:10px;">
-                        <strong>Location: </strong>'.$client->client_location.' | 
-                        <strong>Contact:</strong> '.$client->client_contact.'
-                        '.(!empty($client->client_secondary_contact) ? " | {$client->client_secondary_contact}" : "").'
-                        | <strong>Address: </strong> '.(strip_tags($client->client_address)).'
+                        <strong>Slogan: </strong>'.$client->client_slogan.'
                     </div>
                 </div>
             </div>
@@ -1862,6 +1861,179 @@ class Fees extends Myschoolgh {
         }
 
         return $receipt;
+    }
+
+    /**
+     * Student Bill
+     * 
+     * @return Array
+     */
+    public function bill(stdClass $params) {
+
+        try {
+
+            global $defaultClientData, $defaultCurrency;
+
+            // get the student information
+            $studentRecord = $this->pushQuery("
+                a.class_id, a.name, a.image, a.unique_id, a.enrollment_date, a.gender, a.email, a.phone_number,
+                (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name",
+                "users a", "a.client_id='{$params->clientId}' AND 
+                a.academic_year='{$this->academic_year}' AND a.academic_term='{$this->academic_term}' 
+                AND a.item_id='{$params->student_id}' LIMIT 1");
+
+            // confirm that student id is valid
+            if(empty($studentRecord)) {
+                return "An invalid student id was submitted for processing.";
+            }
+
+            // set some variables
+            $studentRecord = $studentRecord[0];
+            $isPDF = (bool) isset($params->isPDF);
+
+            // get the student allocation list
+            $client = $defaultClientData;
+            $clientPrefs = $client->client_preferences;
+            $allocation_list = $this->students_fees_allocation($params)["data"];
+
+            // get the client logo content
+            if(!empty($client->client_logo)) {
+                $type = pathinfo($client->client_logo, PATHINFO_EXTENSION);
+                $logo_data = file_get_contents($client->client_logo);
+                $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
+            }
+            
+            // set the bill form
+            $student_bill = '
+            <div style="margin:auto auto; '.($isPDF ? '' : "max-width:1050px;").';background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: \'Calibri Regular\'; width:100%;margin-bottom:2px">
+                <div class="row mb-3">
+                    <div class="text-dark bg-white col-md-12" style="padding-top:20px;">
+                        <div align="center">
+                            '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
+                            <h2 style="color:#6777ef;font-size:25px;font-family:helvetica;padding:0px;margin:0px;"> '.strtoupper($client->client_name).'</h2>
+                            <div>'.$client->client_address.'</div>
+                            '.(!empty($client->client_contact) ? "<div><strong>Tel:</strong> {$client->client_contact} / {$client->client_secondary_contact}</div>" : "").'
+                            '.(!empty($client->client_email) ? "<div><strong>Email:</strong> {$client->client_email}</div>" : "").'
+                        </div>
+                        <div style="background-color: #2196F3 !important;margin-top:5px;border-bottom: 1px solid #dee2e6 !important;height:3px;"></div>
+                        <div style="margin-top:0px;">
+                        <table border="0" width="100%" cellpadding="5px">
+                            <tr>
+                                <td align="center" colspan="2">
+                                    <h3 style="border-bottom:solid 1px #ccc;padding:0px;padding-bottom:5px;margin:0px;font-family:\'Calibri Regular\'">OFFICIAL STUDENT BILL</h3>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="50%">
+                                    <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Student Details</h3>
+                                    <div style="text-transform:uppercase;margin-bottom:5px;">Name: <strong>'.$studentRecord->name.'</strong></div>
+                                    <div style="text-transform:uppercase;margin-bottom:5px;">Student ID: <strong>'.$studentRecord->unique_id.'</strong></div>
+                                    <div style="text-transform:uppercase;margin-bottom:5px;">Class: <strong>'.$studentRecord->class_name.'<strong></div>
+                                </td>
+                                <td width="50%" align="right">
+                                    <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Academics</h3>
+                                    <div style="text-transform:uppercase;margin-bottom:5px;">Academic Year: <strong>'.$clientPrefs->academics->academic_year.'</strong></div>
+                                    <div style="text-transform:uppercase;margin-bottom:5px;">Term: <strong>'.$clientPrefs->academics->academic_term.'</strong></div>
+                                    <div style="margin-bottom:5px;">'.date("Y-m-d h:ia").'</div>
+                                </td>
+                            </tr>
+                        </table>
+                        <style>table.table tr td {border:solid 1px #dad7d7;padding:5px;}</style>
+                        <div style="background-color: #ccc !important;margin-top:1px;border-bottom: 1px solid #ccc !important;height:0.5px;margin-bottom:5px;"></div>
+                        <table border="0" class="table" width="100%">
+                            <tr>
+                                <td style="font-weight:bold;">#</td>
+                                <td style="font-weight:bold;">Fees Type</td>
+                                <td style="font-weight:bold;">Status</td>
+                                <td style="font-weight:bold;">Amount</td>
+                                <td style="font-weight:bold;">Discount</td>
+                                <td style="font-weight:bold;">Paid</td>
+                                <td style="font-weight:bold;" align="right">Balance</td>
+                            </tr>';
+                        if(empty($allocation_list)) {
+                            $student_bill .= "
+                            <tr>
+                                <td colspan='7' align='center'>No fees has been allocated to this student.</td>
+                            </tr>";
+                        } else {
+                            $total_paid = 0;
+                            $total_discount = 0;
+                            $total_balance = 0;
+                            $total_due = 0;
+                            foreach($allocation_list as $key => $fees) {
+
+                                $discount = $fees->exempted ? $fees->amount_due : 0;
+
+                                $total_discount += $discount;
+                                $total_balance += $fees->balance;
+                                $total_due += $fees->amount_due;
+                                $total_paid += $fees->amount_paid;
+                                
+                                if($fees->paid_status === 1) {
+                                    $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0aa038;color: #0aa038;'>Paid</span>";
+                                } elseif($fees->paid_status === 2) {
+                                    $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0b47d2;color: #0b47d2;'>Partly Paid</span>";
+                                } else {
+                                    $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #f13535;color: #f13535;'>Unpaid</span>";
+                                }
+
+                                $student_bill .= "<tr>";
+                                $student_bill .= "<td width='8%'>".($key+1)."</td>";
+                                $student_bill .= "<td>{$fees->category_name}</td>";
+                                $student_bill .= "<td>{$status}</td>";
+                                $student_bill .= "<td>{$defaultCurrency} {$fees->amount_due}</td>";
+                                $student_bill .= "<td>{$defaultCurrency} {$discount}</td>";
+                                $student_bill .= "<td>{$defaultCurrency} {$fees->amount_paid}</td>";
+                                $student_bill .= "<td align='right'>{$defaultCurrency} {$fees->balance}</td>";
+                                $student_bill .= "</tr>";
+                            }
+                            $student_bill .= "
+                            <tr>
+                                <td colspan='6' align='right'><strong>Grand Total:</strong></td>
+                                <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_due, 2)."</td>
+                            </tr>
+                            <tr>
+                                <td colspan='6' align='right'><strong>Paid:</strong></td>
+                                <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_paid, 2)."</td>
+                            </tr>
+                            <tr>
+                                <td colspan='6' align='right'><strong>Discount:</strong></td>
+                                <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_discount, 2)."</td>
+                            </tr>
+                            <tr>
+                                <td colspan='6' align='right'><strong>Balance:</strong></td>
+                                <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_balance, 2)."</td>
+                            </tr>
+                            <tr>
+                                <td colspan='7' align='center'>
+                                    <div style='padding:10px;'>{$client->client_slogan}</div>
+                                </td>
+                            </tr>                           
+                            ";
+                        }
+            $student_bill .= '
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>';
+
+            // append this section if download element was not parsed
+            if(isset($params->print)) {
+                $student_bill .= "
+                <script>
+                    window.onload = (evt) => { window.print(); }
+                    window.onafterprint = (evt) => { window.close(); }
+                </script>";
+            }
+
+
+            return $student_bill;
+
+        } catch(PDOException $e) {
+
+        }
+
     }
 
     /**
