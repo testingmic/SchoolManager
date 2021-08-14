@@ -48,10 +48,6 @@ foreach($api_staff_list["data"] as $key => $each) {
     
     $action = "<a title='Click to view staff information' href='#' onclick='return loadPage(\"{$baseUrl}update-staff/{$each->user_id}/view\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
-    if($accessObject->hasAccess("update", $each->user_type)) {
-        $action .= "&nbsp;<a title='Click to update staff record' href='#' onclick='return loadPage(\"{$baseUrl}update-staff/{$each->user_id}/update\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-    }
-
     if($accessObject->hasAccess("delete", $each->user_type)) {
         $action .= "&nbsp;<a href='#' title='Click to delete Staff Record' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
@@ -79,7 +75,7 @@ foreach($api_staff_list["data"] as $key => $each) {
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Staff List</h1>
+            <h1><i class="fa fa-user-tie"></i> Staff List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">Staff List</div>

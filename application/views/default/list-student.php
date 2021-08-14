@@ -96,7 +96,7 @@ $class_list = load_class("classes", "controllers")->list($classes_param)["data"]
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Students List</h1>
+            <h1><i class="fa fa-users"></i> Students List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">Students</div>

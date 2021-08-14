@@ -295,7 +295,7 @@ load_helpers(['menu_helper']);
                 <aside id="sidebar-wrapper">
                     
                     <div class="sidebar-brand">
-                        <a href="<?= $baseUrl ?>">
+                        <a href="<?= $baseUrl ?>dashboard" class="anchor">
                             <img alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" />
                             <span class="logo-name"><?= $appName ?></span>
                         </a>

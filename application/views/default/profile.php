@@ -17,12 +17,11 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Profile";
+$pageTitle = "My Profile";
 $response->title = "{$pageTitle} : {$appName}";
 
 // staff id
 $user_id = $session->userId;
-$pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty
 if(!empty($user_id)) {
@@ -62,7 +61,7 @@ if(!empty($user_id)) {
         $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1>'.$pageTitle.'</h1>
+                <h1><i class="fa fa-user-friends"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>

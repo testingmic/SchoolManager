@@ -26,7 +26,6 @@ $response->scripts = [
 
 // staff id
 $user_id = $SITEURL[1] ?? null;
-$pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty
 if(!empty($user_id)) {
@@ -104,12 +103,10 @@ if(!empty($user_id)) {
                     }
 
                     $course_listing .= "<tr data-row_id=\"{$each->id}\">";
-                    $course_listing .= "<td>&nbsp; {$each->name}</td>";
-                    $course_listing .= "<td>{$each->course_code}</td>";
-                    $course_listing .= "<td>{$each->credit_hours}</td>";
+                    $course_listing .= "<td>{$each->name} {$each->course_code}</td>";
                     $course_listing .= "<td>";
                     foreach($each->class_list as $class) {
-                        $course_listing .= "<p class='mb-0 pb-0'><span>".$class->name."</span></p>";
+                        $course_listing .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}update-class/{$class->id}\")'>".$class->name."</a></p>";
                     }
                     $course_listing .= "</td><td class='text-center'>{$action}</td>";
                     $course_listing .= "</tr>";
@@ -252,7 +249,7 @@ if(!empty($user_id)) {
         $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1>'.$pageTitle.'</h1>
+                <h1><i class="fa fa-user-tie"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-staff">Staff</a></div>
@@ -360,19 +357,15 @@ if(!empty($user_id)) {
                 <div class="card">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab"
-                        aria-selected="true">Summary</a>
-                    </li>
                     '.(
                         $isTeacher ? '
                         <li class="nav-item">
-                            <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#course_list" role="tab"
+                            <a class="nav-link active" id="calendar-tab2" data-toggle="tab" href="#course_list" role="tab"
                             aria-selected="true">Course List</a>
                         </li>' : null
                     ).'
                     <li class="nav-item">
-                        <a class="nav-link" id="incident-tab2" data-toggle="tab" href="#incident" role="tab"
+                        <a class="nav-link '.(!$isTeacher ? "active" : null).'" id="incident-tab2" data-toggle="tab" href="#incident" role="tab"
                         aria-selected="true">Incidents</a>
                     </li>';
 
@@ -395,19 +388,9 @@ if(!empty($user_id)) {
                     $response->html .= '
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
-                        <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
-                            '.($data->description ? "
-                                <div class='mb-3 border-bottom_'>
-                                    <div class='card-body p-2 pl-0'>
-                                        <div><h5>DESCRIPTION</h5></div>
-                                        {$data->description}
-                                    </div>
-                                </div>
-                            " : "").'
-                        </div>
                         '.(
                         $isTeacher ? '
-                            <div class="tab-pane fade" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
+                            <div class="tab-pane show active fade" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
                                 <div class="d-flex justify-content-between mb-4">
                                     <div class="mb-2"><h5>COURSES LIST</h5></div>
                                     '.($addCourse ? '
@@ -417,14 +400,12 @@ if(!empty($user_id)) {
                                     : null ).'
                                 </div>
                                 <div class="table-responsive">
-                                    <table data-empty="" class="table table-bordered table-striped datatable">
+                                    <table data-empty="" class="table table-bordered table-striped raw_datatable">
                                         <thead>
                                             <tr>
                                                 <th>Course Title</th>
-                                                <th>Course Code</th>
-                                                <th>Credit Hours</th>
-                                                <th width="15%">Class</th>
-                                                <th class="text-center" width="10%"></th>
+                                                <th width="30%">Class</th>
+                                                <th class="text-center" width="15%"></th>
                                             </tr>
                                         </thead>
                                         <tbody>'.$course_listing.'</tbody>
@@ -447,7 +428,7 @@ if(!empty($user_id)) {
                                 </form>
                             </div>' : null
                         ).'
-                        <div class="tab-pane fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
+                        <div class="tab-pane '.(!$isTeacher ? "show active" : null).' fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
                             <div class="d-flex justify-content-between">
                                 <div class="mb-2"><h5>INCIDENTS LOG</h5></div>
                                 '.($addIncident ? '
