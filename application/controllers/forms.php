@@ -1713,6 +1713,9 @@ class Forms extends Myschoolgh {
             }
         }
 
+        // user logo
+        $logoUploaded = (bool) ($isData && $userData->image);
+
         // get the list of all guardians
         if(!$isData) {
             $guardian_list = $this->pushQuery("name, item_id, unique_id, phone_number, email", "users", "client_id='{$clientId}' AND user_type='parent' AND status='1' AND deleted='0'");
@@ -1724,19 +1727,25 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12">
                     <h5>BIO INFORMATION</h5>
                 </div>
-                <div class="col-lg-4 col-md-6">
+                '.($logoUploaded ? 
+                '<div class="col-lg-3 col-md-4">
+                    <div class="form-group text-center">
+                        <img width="100px" src="'.$this->baseUrl.''.$userData->image.'">
+                    </div>
+                </div>' : '').'
+                <div class="col-lg-3 col-md-6">
                     <div class="form-group">
                         <label for="image">Student Image</label>
                         <input type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <div class="form-group">
                         <label for="unique_id">Student ID (optional) '.(!$isData ? '<small class="text-danger">Leave empty for auto generation</small>' : null).'</label>
                         <input type="text" value="'.($userData->unique_id ?? null).'" '.($isData ? "disabled='disabled'" : null).' name="unique_id" id="unique_id" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <div class="form-group">
                         <label for="enrollment_date">Enrollment Date <span class="required">*</span></label>
                         <input type="text" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control datepicker">
@@ -3219,8 +3228,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
                         <label for="description">Description</label>
-                        <input type="hidden" hidden id="trix-editor-input" value="'.($userData->description ?? null).'">
-                        <trix-editor name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
+                        <textarea type="text" name="description" id="description" class="form-control">'.($userData->description ?? null).'</textarea>
                     </div>
                 </div>
             </div>

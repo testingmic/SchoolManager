@@ -292,7 +292,16 @@ if(!empty($user_id)) {
                     <div class="text-center">
                         <div class="author-box-description mt-0">'.$data->description.'</div>
                         <div class="w-100 mt-2">
-                            <a class="btn btn-primary" href="'.$baseUrl.'modify-student/'.$user_id.'"><i class="fa fa-edit"></i> Edit Student</a>
+                            <a class="btn mb-1 btn-primary" href="'.$baseUrl.'modify-student/'.$user_id.'"><i class="fa fa-edit"></i> Edit Record</a>
+                            '.(
+                                $student_allocation_list["allocated"] && empty($student_allocation_list["owning"]) ?
+                                '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'" target="_blank" class="btn mb-1 btn-outline-warning"><i class="fa fa-print"></i> Print Bill</a>'
+                                : (
+                                    !$student_allocation_list["allocated"] ? 
+                                    '<a class="btn mb-1 btn-outline-warning" href="'.$baseUrl.'fees-allocate/'.$user_id.'?set"><i class="fa fa-ankh"></i> Set Student Bill</a>'
+                                    : null
+                                )
+                            ).'
                         </div>
                     </div>
                 </div>
@@ -409,23 +418,27 @@ if(!empty($user_id)) {
                         </div>
                         '.($viewAllocation ? 
                         '<div class="tab-pane fade" id="fees" role="tabpanel" aria-labelledby="fees-tab2">
-                            <div class="d-flex mb-3 pb-2 border-bottom justify-content-between">
-                                <div><h5>FEES ALLOCATION</h5></div>
-                                <div>
+                            <div class="row mb-3 pb-2 border-bottom">
+                                <div class="col-md-4"><h5>FEES ALLOCATION</h5></div>
+                                <div class="col-md-8 text-right">
                                 '.(
                                     !empty($student_allocation_list["owning"]) ? 
-                                        '<div class="text-right">
-                                            <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}pay/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'"').' class="btn btn-outline-primary"><i class="fa fa-adjust"></i> Make Fees Payment</a>
-                                        </div>'
-                                    : ($student_allocation_list["allocated"] ? 
-                                        '<div class="btn btn-success">Fees Fully Paid</div>' :
-                                        '<button title="Click to Allocate Fees to Student" onclick="return loadPage(\''.$baseUrl.'fees-allocate/'.$user_id.'\')" class="btn btn-primary">
-                                            <i class="fa fa-ankh"></i> Set Student Bill
-                                        </button>')
+                                        '<span class="text-right">
+                                            <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}pay/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'"').' class="btn mb-2 btn-outline-success"><i class="fa fa-adjust"></i> Make Fees Payment</a>
+                                        </span>
+                                        <button title="Click to Modify Fees Allocated to Student" onclick="return loadPage(\''.$baseUrl.'fees-allocate/'.$user_id.'\')" class="btn mb-2 btn-outline-warning">
+                                            <i class="fa fa-edit"></i> Modify Bill
+                                        </button>'
+                                    : ($student_allocation_list["allocated"] ? '<div class="btn mb-2 btn-success">Fees Fully Paid</div>' :
+                                        '<span>
+                                            <button title="Click to Allocate Fees to Student" onclick="return loadPage(\''.$baseUrl.'fees-allocate/'.$user_id.'\')" class="btn mb-2 btn-primary">
+                                                <i class="fa fa-ankh"></i> Set Student Bill
+                                            </button>
+                                        </span>')
                                 ).'
                                 '.(
                                     $student_allocation_list["allocated"] ? 
-                                        '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'" target="_blank" class="btn btn-primary"><i class="fa fa-print"></i> Print Bill</a>' : null
+                                        '<span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'" target="_blank" class="btn mb-2 btn-primary"><i class="fa fa-print"></i> Print Bill</a></span>' : null
                                 ).'
                                 </div>
                             </div>
@@ -437,6 +450,7 @@ if(!empty($user_id)) {
                                             <th>Category</th>
                                             <th>Due</th>
                                             <th>Paid</th>
+                                            <th>Balance</th>
                                             '.($receivePayment ? '<th width="10%" align="center"></th>' : '').'
                                         </tr>
                                     </thead>

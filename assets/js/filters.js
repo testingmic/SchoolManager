@@ -57,6 +57,21 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                         $.each(response.data.result, function(i, e) {
                             $(`select[name='student_id']`).append(`<option data-phone_number="${e.phone_number}" data-email="${e.email}" value='${e.user_id}'>${e.name}</option>`);
                         });
+                        if($(`table[id="simple_load_student"]`).length) {
+                            $(`table[id="simple_load_student"]`).dataTable().fnDestroy();
+                            $(`table[id="simple_load_student"]`).DataTable( {
+                                "aaData": response.data.result,
+                                "iDisplayLength": 10,
+                                "language": {
+                                    "sEmptyTable": "Nothing Found",
+                                },
+                                "columns": [
+                                    {"data": "name"},
+                                    {"data": "unique_id"},
+                                    {"data": "gender"}
+                                ]
+                            });
+                        }
                     }
                 });
             } else {

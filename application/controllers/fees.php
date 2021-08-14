@@ -16,7 +16,6 @@ if( !defined( 'SITE_URL' ) && !defined( 'SITE_DATE_FORMAT' ) ) die( 'Restricted 
 class Fees extends Myschoolgh {
 
     private $iclient = [];
-    private $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
 
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
@@ -245,8 +244,14 @@ class Fees extends Myschoolgh {
             $stmt->execute([1]);
 
             $data = [];
+            $setCategoryAsKey = (bool) isset($params->set_category_key);
+
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                $data[] = $result;
+                if($setCategoryAsKey) {
+                    $data[$result->category_id] = $result;
+                } else {
+                    $data[] = $result;
+                }
             }
 
             return [
@@ -313,6 +318,8 @@ class Fees extends Myschoolgh {
             $stmt->execute([1]);
 
             $data = [];
+            $setCategoryAsKey = (bool) isset($params->set_category_key);
+
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
                 // loop through the information
@@ -323,8 +330,14 @@ class Fees extends Myschoolgh {
                         $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["unique_id", "user_id", "name", "image", "user_type"]);
                     }
                 }
-
-                $data[] = $result;
+                $result->paid_status = (int) $result->paid_status;
+                $result->exempted = (int) $result->exempted;
+                
+                if($setCategoryAsKey) {
+                    $data[$result->category_id] = $result;
+                } else {
+                    $data[] = $result;
+                }
             }
 
             return [
@@ -356,7 +369,7 @@ class Fees extends Myschoolgh {
             // loop through the results list
             foreach($class_allocation_array as $key => $each) {
                 $class_allocation_list .= "<tr data-row_id=\"{$each->id}\">";
-                $class_allocation_list .= "<td>".($key+1)."</td>";
+                $class_allocation_list .= "<td width='7%'>".($key+1)."</td>";
                 $class_allocation_list .= "<td>{$each->class_name}</td>";
                 $class_allocation_list .= "<td>{$each->category_name}</td>";
                 $class_allocation_list .= "<td>{$each->currency} {$each->amount}</td>";
@@ -403,11 +416,16 @@ class Fees extends Myschoolgh {
                 $isPaid = (bool) ($student->amount_due < $student->amount_paid) || ($student->amount_due === $student->amount_paid);
 
                 // label
-                $label = "<span class='badge p-1 badge-success'>Paid</span>";
+                $label = "<br><span class='badge p-1 badge-success'>Paid</span>";
                 if($due === $balance) {
                     $label = "<br><span class='badge p-1 badge-danger'>Not Paid</span>";
                 } elseif($paid > 0 && !$isPaid) {
-                    $label = "<br><span class='badge p-1 badge-primary'>Partly Paid</span>";
+                    $label = "<br><span class='badge p-1 badge-primary'>Part Payment</span>";
+                } else {
+                    $label = "";
+                }
+                if($student->exempted) {
+                    $label = "";
                 }
 
                 // append to the url string
@@ -421,37 +439,45 @@ class Fees extends Myschoolgh {
                         <div class='d-flex justify-content-start'>
                             ".(!empty($student->student_info->image) ? "
                             <div class='mr-2'>
-                                <img src='{$this->baseUrl}{$student->student_info->image}' width='40px' height='40px'>
+                                <a href='#' onclick='return loadPage(\"{$this->baseUrl}update-student/{$student->student_info->user_id}\");'>
+                                    <img src='{$this->baseUrl}{$student->student_info->image}' width='40px' height='40px'>
+                                </a>
                             </div>" : "")."
                             <div>
                                 {$student->student_info->name} <br class='p-0 m-0'>
-                                <strong>{$student->student_info->unique_id}</strong>
+                                <a href='#' onclick='return loadPage(\"{$this->baseUrl}update-student/{$student->student_info->user_id}\");'><strong>{$student->student_info->unique_id}</strong></a>
                                 {$label}
                             </div>
                         </div>
                     </td>";
                 }
-                $student_allocation_list .= "<td>{$student->category_name}</td>";
+                $student_allocation_list .= "<td>{$student->category_name} ".(!$showStudentData ? $label : null)."</td>";
                 $student_allocation_list .= "<td>{$student->currency} {$student->amount_due}</td>";
                 $student_allocation_list .= "<td>{$student->currency} {$student->amount_paid}</td>";
+                $student_allocation_list .= "<td>{$student->currency} {$student->balance}</td>";
 
                 // confirm if the user has the permission to make payment
                 if(!empty($params->receivePayment)) {
                     $student_allocation_list .= "<td width='13%' align='center' class='pl-2'>";
-
                     // confirm if the fee has been paid
-                    if($isPaid) {
-                        $student_allocation_list .= "<span class='badge badge-success'>Paid</span>";
+                    if(!$student->exempted) {
+                        // if the fee is fully paid
+                        if($isPaid) {
+                            $student_allocation_list .= "<span class='badge badge-success'>Paid</span>";
+                        } else {
+                            // if the student is still owing
+                            $owning = true;
+                            $_class = "class='btn btn-sm btn-outline-success'";
+                            $student_allocation_list .= $isParent ? "
+                                <a {$_class} href='{$this->baseUrl}pay/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
+                            " : "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?checkout_url={$student->checkout_url}\");' {$_class}>Pay Fee</button>";
+                        }
+                        // delete the record if possible => that is allowed only if the student has not already made an payment
+                        if(!empty($params->canAllocate) && empty($student->amount_paid)) {
+                            $student_allocation_list .= " &nbsp; <button onclick='return remove_Fees_Allocation(\"{$student->id}\",\"student\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>";
+                        }
                     } else {
-                        $owning = true;
-                        $_class = "class='btn btn-sm btn-outline-success'";
-                        $student_allocation_list .= $isParent ? "
-                            <a {$_class} href='{$this->baseUrl}pay/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
-                        " : "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?checkout_url={$student->checkout_url}\");' {$_class}>Pay Fee</button>";
-                    }
-                    // delete the record if possible => that is allowed only if the student has not already made an payment
-                    if(!empty($params->canAllocate) && empty($student->amount_paid)) {
-                        $student_allocation_list .= " &nbsp; <button onclick='return remove_Fees_Allocation(\"{$student->id}\",\"student\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>";
+                        $student_allocation_list .= "<span class='badge badge-dark'>Exempted</span>";
                     }
                     $student_allocation_list .= "</td>";
                 }
@@ -519,24 +545,30 @@ class Fees extends Myschoolgh {
                 $label = "<span data-payment_label='status' class='badge badge-danger'>Not Paid</span>";    
             }
 
+            // if the student is exempted from paying for this fee
+            if($allocation->exempted) {
+                $allocation->paid_status = 1;
+                $label = "<span class='badge badge-dark'>Exempted</span>";
+            }
+
             /** Set the HMTL form to display */
             $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
             $html_form .= "<tr>";
-            $html_form .= "<td class='font-weight-bold' width='43%'>Amount Due:</td>";
-            $html_form .= "<td>{$currency} {$allocation->amount_due}</td>";
+            $html_form .= "<td class='font-weight-bold p-2' width='35%'>Amount Due:</td>";
+            $html_form .= "<td class='p-2'>{$currency} {$allocation->amount_due}</td>";
             $html_form .= "</tr>";
             $html_form .= "<tr>";
-            $html_form .= "<td class='font-weight-bold'>Amount Paid:</td>";
-            $html_form .= "<td><span data-checkout_url='{$allocation->checkout_url}' class='amount_paid'>{$currency} {$allocation->amount_paid}</span></td>";
+            $html_form .= "<td class='font-weight-bold p-2'>Amount Paid:</td>";
+            $html_form .= "<td class='p-2'><span data-checkout_url='{$allocation->checkout_url}' class='amount_paid'>{$currency} {$allocation->amount_paid}</span></td>";
             $html_form .= "</tr>";
             $html_form .= "<tr>";
-            $html_form .= "<td class='font-weight-bold'>Outstanding Balance:</td>";
-            $html_form .= "<td><span data-checkout_url='{$allocation->checkout_url}' data-amount_payable='{$outstanding}' class='outstanding'>{$currency} {$allocation->balance}</span></td>";
+            $html_form .= "<td class='font-weight-bold p-2'>Outstanding Balance:</td>";
+            $html_form .= "<td class='p-2'><span data-checkout_url='{$allocation->checkout_url}' data-amount_payable='{$outstanding}' class='outstanding'>{$currency} {$allocation->balance}</span></td>";
             $html_form .= "</tr>";
 
             $html_form .= "<tr>";
-            $html_form .= "<td>Status:</td>";
-            $html_form .= "<td>{$label}</td>";
+            $html_form .= "<td class='font-weight-bold p-2'>Status:</td>";
+            $html_form .= "<td class='p-2'>{$label}</td>";
             $html_form .= "</tr>";
             $html_form .= "</table>";
 
@@ -549,6 +581,7 @@ class Fees extends Myschoolgh {
             $amount_due = 0;
             $amount_paid = 0;
             $balance = 0;
+            $discount = 0;
             $owings_list = "<table width='100%' class='t_table mt-4 table-hover table-bordered'>";
             $owings_list .= "
                 <tr class='font-weight-bold'>
@@ -564,10 +597,11 @@ class Fees extends Myschoolgh {
             foreach($allocation as $fees) {
 
                 // add up to the values
-                $balance += $fees->balance;
+                $balance += $fees->exempted ? 0 : $fees->balance;
+                $discount += $fees->exempted ? $fees->balance : 0;
                 $amount_due += $fees->amount_due;
                 $amount_paid += $fees->amount_paid;
-            
+                
                 // assign a key to the concat value
                 $last_payment = $this->stringToArray(
                     $fees->last_payment_info, "|", [
@@ -583,10 +617,14 @@ class Fees extends Myschoolgh {
                     <td>{$fees->amount_paid}</td>
                     <td class='font-weight-bold'>{$fees->balance}</td>";
 
+                // begin the html
+                $owings_list .= "<td>";
+
                 // if the last payment info is not empty
                 if(!empty($last_payment)) {
+
                     // append to the list
-                    $owings_list .= "<td>
+                    $owings_list .= "
                         <span class='last_payment_id'><strong>Payment ID:</strong> {$last_payment["pay_id"]}</span><br>
                         <span class='amount_paid'><i class='fa fa-money-bill'></i> {$last_payment["currency"]} {$last_payment["amount"]}</span><br>
                         <span class='last_payment_date'><i class='fa fa-calendar-check'></i> {$last_payment["created_date"]}</span><br>
@@ -604,12 +642,16 @@ class Fees extends Myschoolgh {
                     
                     // show the paid button
                     $owings_list .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a href='{$this->baseUrl}receipt/{$last_payment["payment_uid"]}' class='btn btn-sm btn-outline-primary' target='_blank'><i class='fa fa-print'></i> Print Receipt</a></p>";
-
-                    $owings_list .= "</td>";
-                } else {
-                    $owings_list .= "<td></td>";
                 }
-                    
+
+                // if the student is exempted from paying for this fee
+                if($fees->exempted) {
+                    $owings_list .= "<span class='badge badge-dark'>Exempted</span>";
+                }
+
+                $owings_list .= "</td>";
+                
+                // append
                 $owings_list .= "</tr>";
             }
 
@@ -632,6 +674,7 @@ class Fees extends Myschoolgh {
 
             /**  */
             $balance = $balance;
+            $discount = number_format($discount, 2);
             $amount_due = number_format($amount_due, 2);
             $amount_paid = number_format($amount_paid, 2);
             
@@ -639,9 +682,15 @@ class Fees extends Myschoolgh {
             $html_form .= "<div class='table-responsive'>";
             $html_form .= "<table width='100%' class='t_table table-hover table-bordered'>";
             $html_form .= "<tr>";
-            $html_form .= "<td class='font-weight-bold' width='43%'>Amount Due:</td>";
-            $html_form .= "<td>{$currency} {$amount_due}</td>";
+            $html_form .= "<td class='font-weight-bold' width='35%'>Amount Due:</td>";
+            $html_form .= "<td><span class='font-17'>{$currency} {$amount_due}</span></td>";
             $html_form .= "</tr>";
+
+            $html_form .= "<tr>";
+            $html_form .= "<td class='font-weight-bold' width='35%'>Discount Amount:</td>";
+            $html_form .= "<td>{$currency} {$discount}</td>";
+            $html_form .= "</tr>";
+            
             $html_form .= "<tr>";
             $html_form .= "<td class='font-weight-bold'>Amount Paid:</td>";
             $html_form .= "<td><span data-checkout_url='general' class='amount_paid'>{$currency} {$amount_paid}</span></td>";
@@ -649,7 +698,7 @@ class Fees extends Myschoolgh {
 
             $html_form .= "<tr>";
             $html_form .= "<td class='font-weight-bold'>Outstanding Balance:</td>";
-            $html_form .= "<td><span data-checkout_url='general' data-amount_payable='{$balance}' class='outstanding'>{$currency} ".number_format($balance, 2)."</span></td>";
+            $html_form .= "<td><span data-checkout_url='general' data-amount_payable='{$balance}' class='outstanding font-17'>{$currency} ".number_format($balance, 2)."</span></td>";
             $html_form .= "</tr>";
 
             $html_form .= "<tr>";
@@ -691,7 +740,7 @@ class Fees extends Myschoolgh {
 
             // set the rows for the last payment id
             $html_form .= "<tr>";
-            $html_form .= "<td width='43%' class='font-weight-bold'>Last Payment Info:</td><td>";
+            $html_form .= "<td width='35%' class='font-weight-bold p-2'>Last Payment Info:</td><td class='p-2'>";
             
             // payment information
             $html_form .= "<span class='last_payment_id'><strong>Payment ID:</strong> {$data_content->last_payment_uid}</span><br>
@@ -727,6 +776,60 @@ class Fees extends Myschoolgh {
 
     }
 
+    /** 
+     * An annonymous function to insert the student fees record 
+     *
+     * @param stdClass $params
+     *  
+     * @return Bool
+     * 
+     */
+    public function insert_student_fees(stdClass $params) {
+            
+        // global variable
+        global $myschoolgh;
+
+        /** Insert the existing record */
+        $stmt = $myschoolgh->prepare("INSERT INTO fees_payments SET 
+            amount_due = ?, balance = ?, category_id = ?, student_id = ?, checkout_url = ?, client_id = ?,
+            academic_year = ?, academic_term = ?, class_id = ?, created_by = ?, currency = ?
+        ");
+
+        /** Execute the prepared statement */
+        return $stmt->execute([
+            $params->amount, $params->amount, $params->category_id, $params->student_id, 
+            random_string("alnum", 32), $params->clientId, 
+            $params->academic_year, $params->academic_term, $params->class_id, 
+            $params->userId, $params->currency
+        ]);
+
+    }
+
+    /** 
+     * An annonymous function to update the student fees record 
+     * 
+     * @param stdClass $params
+     * 
+     * @return Bool
+     */
+    public function update_student_fees(stdClass $params) {
+
+        // global variable
+        global $myschoolgh;
+
+        /** Update the existing record */
+        $stmt = $myschoolgh->prepare("UPDATE fees_payments SET 
+                amount_due = ?, balance = ({$params->amount} - amount_paid)
+            WHERE category_id = ? AND student_id = ? AND client_id = ? 
+                AND academic_year = ? AND academic_term = ? AND editable = ?");
+
+        /** Execute the prepared statement */
+        return $stmt->execute([
+            $params->amount, $params->category_id, $params->student_id, $params->clientId, 
+            $params->academic_year, $params->academic_term, 1
+        ]);
+    }
+
     /**
      * Allocate Fees to Class/Student
      * 
@@ -739,47 +842,6 @@ class Fees extends Myschoolgh {
         global $defaultUser;
 
         $params->currency = $defaultUser->client->client_preferences->labels->currency ?? null;
-
-        /** An annonymous function to insert the student fees record */
-        function insert_student_fees(stdClass $params) {
-            
-            // global variable
-            global $myschoolgh;
-
-            /** Insert the existing record */
-            $stmt = $myschoolgh->prepare("INSERT INTO fees_payments SET 
-                amount_due = ?, balance = ?, category_id = ?, student_id = ?, checkout_url = ?, client_id = ?,
-                academic_year = ?, academic_term = ?, class_id = ?, created_by = ?, currency = ?
-            ");
-
-            /** Execute the prepared statement */
-            return $stmt->execute([
-                $params->amount, $params->amount, $params->category_id, $params->student_id, 
-                random_string("alnum", 32), $params->clientId, 
-                $params->academic_year, $params->academic_term, $params->class_id, 
-                $params->userId, $params->currency
-            ]);
-
-        }
-
-        /** An annonymous function to update the student fees record */
-        function update_student_fees(stdClass $params) {
-
-            // global variable
-            global $myschoolgh;
-
-            /** Update the existing record */
-            $stmt = $myschoolgh->prepare("UPDATE fees_payments SET 
-                    amount_due = ?, balance = ({$params->amount} - amount_paid)
-                WHERE category_id = ? AND student_id = ? AND client_id = ? 
-                    AND academic_year = ? AND academic_term = ? AND editable = ?");
-
-            /** Execute the prepared statement */
-            return $stmt->execute([
-                $params->amount, $params->category_id, $params->student_id, $params->clientId, 
-                $params->academic_year, $params->academic_term, 1
-            ]);
-        }
 
         try {
 
@@ -828,7 +890,7 @@ class Fees extends Myschoolgh {
                 if($paymentRecord) {
 
                     // update the user information
-                    update_student_fees($params);
+                    $this->update_student_fees($params);
                     
                     // log the user activity
                     $this->userLogs("fees_allocation", $params->student_id, null, 
@@ -836,7 +898,7 @@ class Fees extends Myschoolgh {
 
                 } else {
                     /** Insert a new record */
-                    insert_student_fees($params);
+                    $this->insert_student_fees($params);
 
                     // log the user activity
                     $this->userLogs("fees_allocation", $params->student_id, null, 
@@ -905,10 +967,10 @@ class Fees extends Myschoolgh {
 
                     // If the student payment fees record already exists however the paid status still remains 0
                     if(!empty($paymentRecord) && ($paymentRecord->paid_status !== 1)) {
-                        update_student_fees($params);
+                       $this->update_student_fees($params);
                     } elseif(empty($paymentRecord)) {
                         /** Insert a new record */
-                        insert_student_fees($params);
+                        $this->insert_student_fees($params);
                     }
 
                 }
@@ -918,6 +980,7 @@ class Fees extends Myschoolgh {
                 return ["data" => "Fees Allocation was successfully executed."];
 
             }
+
         } catch(PDOException $e) {
             return $this->unexpected_error;
         }
@@ -1044,13 +1107,14 @@ class Fees extends Myschoolgh {
             // set the academic year and term
             $academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year; 
             $academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
-            
+            $removeExemptions = (bool) isset($params->remove_exempted_fees);
+
             // run the query
 			$stmt = $this->db->prepare("
 				SELECT 
                     a.checkout_url, a.student_id, a.class_id, a.category_id, a.amount_due, a.amount_paid, 
                     a.balance, a.paid_status, a.last_payment_id, a.academic_year, a.academic_term, a.date_created, 
-                    a.last_payment_date, a.currency,
+                    a.last_payment_date, a.currency, a.exempted,
                     (
                         SELECT 
                             CONCAT(
@@ -1074,10 +1138,12 @@ class Fees extends Myschoolgh {
                         WHERE b.item_id = a.last_payment_id LIMIT 1
                     ) AS last_payment_info
 				FROM fees_payments a
-				WHERE ".(isset($params->checkout_url) && ($params->checkout_url != "general") ? "checkout_url='{$params->checkout_url}'" : 
+				WHERE 
+                    ".(isset($params->checkout_url) && ($params->checkout_url != "general") ? "checkout_url='{$params->checkout_url}'" : 
                     " a.student_id = '{$params->student_id}'
-                    ".(!empty($category_id) ? " AND a.category_id = '{$params->category_id}'" : null)."
-                ")." AND a.academic_year = '{$academic_year}' AND a.academic_term = '{$academic_term}' 
+                    ".(!empty($category_id) ? " AND a.category_id = '{$params->category_id}'" : null)."")." AND 
+                    a.academic_year = '{$academic_year}' AND a.academic_term = '{$academic_term}'
+                    ".($removeExemptions ? " AND exempted = '0'" : null)."
                     AND a.client_id = '{$params->clientId}' AND a.status = '1' LIMIT ".(!empty($category_id) ? 1 : 100)."
 			");
 			$stmt->execute();
@@ -1103,7 +1169,7 @@ class Fees extends Myschoolgh {
                             "cheque_bank", "cheque_number", "paidin_by", "paidin_contact", "payment_uid"]
                     );
                 }
-
+                $result->exempted = (int) $result->exempted;
                 // append to the data array
                 $data[] = $result;
             }
@@ -1135,18 +1201,24 @@ class Fees extends Myschoolgh {
             // begin transaction
             $this->db->beginTransaction();
 
+            /** Validate the amount */
+            if(!$params->amount) {
+                return ["code" => 203, "data" => "Sorry! The amount cannot be empty."];
+            }
+            
+            // ensure the amount is a valid integer
+            if(!preg_match("/^[0-9.]+$/", $params->amount)) {
+                return ["code" => 203, "data" => "Sorry! The amount must be a valid numeric integer."];
+            }
+
             /** Get the checkout details */
+            $params->remove_exempted_fees = true;
             $params->clean_payment_info = true;
             $paymentRecord = $this->confirm_student_payment_record($params);
 
             /** If no allocation record was found */
             if(empty($paymentRecord)) {
                 return ["code" => 203, "data" => "Sorry! An invalid checkout url was parsed for processing."];
-            }
-
-            /** Validate the amount */
-            if(!$params->amount) {
-                return ["code" => 203, "data" => "Sorry! The amount cannot be empty."];
             }
 
             /** Validate email address */
@@ -1785,6 +1857,160 @@ class Fees extends Myschoolgh {
         }
 
         return $receipt;
+    }
+
+    /**
+     * Match Allocation
+     * 
+     * @param stdClass  $class_object
+     * @param Array     $student_array
+     * 
+     * @return Array
+     */
+    public function match_allocation($class_object = [], array $student_array = []) {
+
+        // if the arrays are not empty
+        if(!empty($class_object) && !empty($student_array)) {
+            if(isset($class_object->category_id)) {
+                return $student_array[$class_object->category_id] ?? [];
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * Quick Allocation of Fees
+     * 
+     * @param Array     $params->category_id
+     * @param String    $params->student_id
+     * 
+     * @return Array
+     */
+    public function quick_allocate(stdClass $params) {
+
+        try {
+
+            // get the global variable
+            global $defaultUser;
+
+            // parse the category id
+            if(!is_array($params->category_id)) {
+                return ["code" => 203, "data" => "Please the category_id variable must be an array."];
+            }
+
+            // student record
+            $studentRecord = $this->pushQuery("class_id", "users", "client_id='{$params->clientId}' AND 
+                academic_year='{$params->academic_year}' AND 
+                academic_term='{$params->academic_term}' AND item_id='{$params->student_id}' LIMIT 1");
+
+            // confirm that student id is valid
+            if(empty($studentRecord)) {
+                return ["code" => 203, "data" => "An invalid student id was submitted for processing."];
+            }
+            
+            // set a new parameter to be used for the execution
+            $allocation = (object) [
+                "userId" => $params->userId,
+                "clientId" => $params->clientId,
+                "student_id" => $params->student_id,
+                "class_id" => $studentRecord[0]->class_id,
+                "academic_year" => $params->academic_year, 
+                "academic_term" => $params->academic_term,
+            ];
+            $allocation->currency = $defaultUser->client->client_preferences->labels->currency ?? null;
+
+            // set the where clause
+            $where_clause = "a.client_id='{$params->clientId}' AND a.academic_year='{$params->academic_year}' AND 
+            a.academic_term='{$params->academic_term}' AND a.student_id='{$params->student_id}'";
+
+            // error bugs
+            $error_bugs = [];
+            $existing_record = [];
+
+            // first perform some initial checks
+            // loop through the category list
+            foreach($params->category_id as $category_id => $amount) {
+
+                // confirm fee allocation
+                $confirmAllocation = $this->pushQuery("
+                    a.amount_due, a.amount_paid, (SELECT b.name FROM fees_category b WHERE b.id=a.category_id LIMIT 1) AS category_name", 
+                    "fees_payments a", "{$where_clause} AND a.category_id='{$category_id}' LIMIT 1");
+
+                // set the amount
+                $allocation->amount = $amount;
+                $allocation->category_id = $category_id;
+
+                // update record if already existing
+                if($confirmAllocation) {
+                    // append to the existing record
+                    $existing_record[] = $category_id;
+
+                    // get the payment balance
+                    $amount_due = round(($confirmAllocation[0]->amount_due - $confirmAllocation[0]->amount_paid));
+                    $amount_payable = round($amount);
+                    
+                    // ensure that the amount due is more than the amount paid
+                    if(($amount_due !== $amount_payable) && ($amount_payable > $amount_due)) {
+                        // execute the statement
+                        $error_bugs[] = [
+                            "category" => $confirmAllocation[0]->category_name,
+                            "amount_due" => $amount_due,
+                            "specified" => $amount
+                        ];
+                    }
+                }
+            }
+            
+            // if some errors were found
+            if(!empty($error_bugs)) {
+                // set the inital bug information
+                $data = "The following error".(count($error_bugs) > 1 ? "s were" : " was")." detected:\n";
+                
+                // loop through the bugs list
+                foreach($error_bugs as $key => $bug) {
+                    $data .= ($key + 1).". The {$bug["category"]} balance should be equal to OR less than {$bug["amount_due"]}.\n";
+                }
+                return ["code" => 203, "data" => $data];
+            }
+
+            // execute the statement
+            $update_stmt = $this->db->prepare("UPDATE fees_payments SET balance = ?, exempted = ? WHERE category_id = ? AND student_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND editable = ?");
+
+            // loop through the category list
+            foreach($params->category_id as $category_id => $amount) {
+
+                // set the amount
+                $allocation->amount = $amount;
+                $allocation->category_id = $category_id;
+
+                // Confirm if the record already exist
+                if(in_array($category_id,  $existing_record)) {
+                    // Update the Existing Record
+                    $update_stmt->execute([$amount, 0, $category_id, $allocation->student_id, $params->clientId, $params->academic_year, $params->academic_term, 1]);
+                } else {
+                    // Insert the record
+                    $this->insert_student_fees($allocation);
+                }
+            }
+
+            // confirm if the exemptions list was parsed
+            if(isset($params->exemptions) && is_array($params->exemptions)) {
+                // loop through the exemptions list
+                foreach($params->exemptions as $category_id => $amount) {
+                    $this->db->query("UPDATE fees_payments SET exempted = '1' WHERE category_id='{$category_id}' AND student_id='{$params->student_id}' AND client_id='{$params->clientId}' LIMIT 1");
+                }
+            }
+
+            return [
+                "code" => 200, 
+                "data" => "Student fees record was successfully allocated."
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
     }
 
 }

@@ -72,15 +72,17 @@ if(!empty($user_id)) {
             <div class="row mt-sm-4">
                 <div class="col-12 col-md-12 col-lg-4">
                     <div class="card author-box">
-                    <div class="card-body">
-                        <div class="author-box-center">
-                            <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
-                            <div class="clearfix"></div>
-                            <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
-                            '.($data->class_name ? '<div class="author-box-job">'.$data->class_name.'</div>' : '').'
-                            '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : '').'
+                        <div class="card-body">
+                            <div class="author-box-center m-0 p-0">
+                                <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
+                            </div>
+                            <div class="author-box-center">
+                                <div class="clearfix"></div>
+                                <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
+                                <div class="author-box-job"><strong>'.strtoupper($data->user_type).'</strong></div>
+                                '.($data->department_name ? '<div class="author-box-job">('.$data->department_name.')</div>' : '').'
+                            </div>
                         </div>
-                    </div>
                     </div>
                     <div class="card">
                     <div class="card-header">

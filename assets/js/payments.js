@@ -63,7 +63,7 @@ var finalize_payment = (response, checkout_url) => {
 
     if (payment_info !== undefined) {
         $(`span[class="amount_paid"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.amount_paid}`);
-        $(`span[class="outstanding"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.balance}`);
+        $(`span[class~="outstanding"][data-checkout_url="${checkout_url}"]`).html(`${payment_info.currency} ${payment_info.balance}`);
         if (payment_info.paid_status === "1" || payment_info.paid_status === 1) {
             $(`span[data-payment_label='status']`)
                 .removeClass('badge-danger badge-primary')
@@ -84,22 +84,22 @@ var finalize_payment = (response, checkout_url) => {
             }
 
             $(`div[class='last_payment_container']`).html(`
-                    <table width="100%" class="t_table table-hover table-bordered">
-                        <tbody>
-                            <tr>
-                                <td width="43%">Last Payment Info:</td>
-                                <td>
-                                    <span class="last_payment_id"><strong>Payment ID:</strong> ${payment_info.last_payment_info.pay_id}</span><br>
-                                    <span class="amount_paid"><i class="fa fa-money-bill"></i> ${payment_info.last_payment_info.currency} ${payment_info.last_payment_info.amount}</span><br>
-                                    <span class="last_payment_date"><i class="fa fa-calendar-check"></i> ${payment_info.last_payment_info.created_date}</span><br>
-                                    <hr class=\"mt-1 mb-1\">
-                                    <span class="last_payment_date"><i class="fa fa-air-freshener"></i> ${payment_info.last_payment_info.payment_method}</span><br>
-                                    ${payment_method}
-                                    <p class="mt-3 mb-0 pb-0" id="print_receipt"><a class="btn btn-sm btn-outline-primary" target="_blank" href="${baseUrl}receipt/${payment_info.last_payment_id}"><i class="fa fa-print"></i> Print Receipt</a></p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>`);
+            <table width="100%" class="t_table table-hover table-bordered">
+                <tbody>
+                    <tr>
+                        <td width="35%" class='p-2'>Last Payment Info:</td>
+                        <td class='p-2'>
+                            <span class="last_payment_id"><strong>Payment ID:</strong> ${payment_info.last_payment_info.pay_id}</span><br>
+                            <span class="amount_paid"><i class="fa fa-money-bill"></i> ${payment_info.last_payment_info.currency} ${payment_info.last_payment_info.amount}</span><br>
+                            <span class="last_payment_date"><i class="fa fa-calendar-check"></i> ${payment_info.last_payment_info.created_date}</span><br>
+                            <hr class=\"mt-1 mb-1\">
+                            <span class="last_payment_date"><i class="fa fa-air-freshener"></i> ${payment_info.last_payment_info.payment_method}</span><br>
+                            ${payment_method}
+                            <p class="mt-3 mb-0 pb-0" id="print_receipt"><a class="btn btn-sm btn-outline-primary" target="_blank" href="${baseUrl}receipt/${payment_info.last_payment_id}"><i class="fa fa-print"></i> Print Receipt</a></p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>`);
         }
         $(`div[id="cheque_payment_filter"]`).addClass("hidden");
     }
@@ -120,11 +120,11 @@ var finalize_payment = (response, checkout_url) => {
 
 var save_Receive_Payment = () => {
 
-    let $balance = parseInt($(`span[class="outstanding"]`).attr("data-amount_payable")),
+    let $balance = parseInt($(`span[class~="outstanding"]`).attr("data-amount_payable")),
         $amount = parseFloat($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
         description = $(`div[id="fees_payment_form"] textarea[name="description"]`).val(),
         payment_method = $(`div[id="fees_payment_form"] select[name="payment_method"]`).val(),
-        checkout_url = $(`span[class="outstanding"]`).attr("data-checkout_url"),
+        checkout_url = $(`span[class~="outstanding"]`).attr("data-checkout_url"),
         student_id = $(`input[name='fees_payment_student_id']`).val(),
         email_address = $(`input[name="email_address"]`).val(),
         category_id = $(`input[name="fees_payment_category_id"]`).val(),
@@ -179,6 +179,7 @@ var save_Receive_Payment = () => {
                     text: response.data.result,
                     icon: s_icon,
                 });
+                $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
             }).catch(() => {
                 $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
                 swal({
@@ -194,7 +195,7 @@ var log_Momo_Card_Payment = (reference_id, transaction_id) => {
 
     let amount = parseFloat($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
         description = $(`div[id="fees_payment_form"] textarea[name="description"]`).val(),
-        checkout_url = $(`span[class="outstanding"]`).attr("data-checkout_url"),
+        checkout_url = $(`span[class~="outstanding"]`).attr("data-checkout_url"),
         student_id = $(`input[name='fees_payment_student_id']`).val(),
         email_address = $(`input[name="email_address"]`).val(),
         category_id = $(`input[name="fees_payment_category_id"]`).val();

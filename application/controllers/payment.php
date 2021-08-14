@@ -2,10 +2,6 @@
 
 class Payment extends Myschoolgh {
     
-
-    private $secret_key = "sk_test_3ceb4c33b4b0ea31cb10ef3b41ef05a673758cee";
-    private $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
-    
     public function __construct() {
 
         global $myschoolgh, $session;
@@ -62,7 +58,7 @@ class Payment extends Myschoolgh {
                 CURLOPT_CUSTOMREQUEST => "POST",
                 CURLOPT_POSTFIELDS => $fields_string,
                 CURLOPT_HTTPHEADER => [
-                    "Authorization: Bearer {$this->secret_key}",
+                    "Authorization: Bearer {$this->pk_secret_key}",
                     "Cache-Control: no-cache",
                 ]
             )
@@ -104,7 +100,7 @@ class Payment extends Myschoolgh {
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "GET",
             CURLOPT_HTTPHEADER => [
-                "Authorization: Bearer {$this->secret_key}",
+                "Authorization: Bearer {$this->pk_secret_key}",
                 "Content-Type: application/json",
                 "Cache-Control: no-cache",
             ]
