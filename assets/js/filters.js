@@ -48,33 +48,48 @@ if ($(`div[id="filter_Department_Class"]`).length) {
             $(`select[name='student_id']`).find('option').remove().end();
 
             $(`div[id="fees_payment_history"]`).html(``);
-            $(`div[id="fees_payment_form"] *`).prop("disabled", true);
-
+            $(`div[id="fees_allocation_wrapper"] input[id="select_all"], div[id="fees_payment_form"] *`).prop("disabled", true);
             $(`select[name='student_id']`).append(`<option value="">Please Select Student</option>`);
+            $(`div[id="fees_allocation_form"] select[name="category_id"],div[id="fees_allocation_form"] input[name="amount"]`).attr("disabled", true).val(``).change();
+            
             if (value.length && value !== "null") {
+                $(`table[id="simple_load_student"] tbody`).html(`<tr><td colspan="6" align="center">Loading Students Data <i class="fa fa-spin fa-spinner"></i></td></tr>`);
+                $(`div[id="fees_allocation_form"] select[name="category_id"],div[id="fees_allocation_form"] input[name="amount"]`).attr("disabled", false);
                 $.get(`${baseUrl}api/users/list?class_id=${value}&minified=simplified&user_type=student`).then((response) => {
                     if (response.code == 200) {
                         $.each(response.data.result, function(i, e) {
                             $(`select[name='student_id']`).append(`<option data-phone_number="${e.phone_number}" data-email="${e.email}" value='${e.user_id}'>${e.name}</option>`);
                         });
                         if($(`table[id="simple_load_student"]`).length) {
-                            $(`table[id="simple_load_student"]`).dataTable().fnDestroy();
-                            $(`table[id="simple_load_student"]`).DataTable( {
-                                "aaData": response.data.result,
-                                "iDisplayLength": 10,
-                                "language": {
-                                    "sEmptyTable": "Nothing Found",
-                                },
-                                "columns": [
-                                    {"data": "name"},
-                                    {"data": "unique_id"},
-                                    {"data": "gender"}
-                                ]
-                            });
+                            if(response.data.result.length) {
+                                let students_list = ``;
+                                $.each(response.data.result, function(i, e) {
+                                    students_list += `
+                                        <tr>
+                                            <td style="height:40px">${i+1}</td>
+                                            <td style="height:40px">
+                                                <span class="text-uppercase">${e.name}</span>
+                                                <span data-column="status" data-item="${e.user_id}"></span>
+                                                <div class="hidden"><strong>${e.unique_id}</strong></div>
+                                            </td>
+                                            <td style="height:40px"><span data-column="due" data-item="${e.user_id}"></span></td>
+                                            <td style="height:40px"><span data-column="paid" data-item="${e.user_id}"></span></td>
+                                            <td style="height:40px"><span data-column="balance" data-item="${e.user_id}"></span></td>
+                                            <td style="height:40px"><span data-column="select" data-item="${e.user_id}"></span></td>
+                                        </tr>`;
+                                });
+                                $(`table[id="simple_load_student"] tbody`).html(students_list);
+                            } else {
+                                $(`table[id="simple_load_student"] tbody`).html(`<tr><td colspan="6" align="center">No student record found.</td></tr>`);        
+                            }
                         }
+                    } else {
+                        $(`table[id="simple_load_student"] tbody`).html(`<tr><td colspan="6" align="center">No student record found.</td></tr>`);
                     }
                 });
             } else {
+                $(`table[id="simple_load_student"] tbody`).html(`<tr><td colspan="6" align="center">Students data appears here.</td></tr>`);
+                $(`div[id="fees_allocation_wrapper"] input[id="select_all"]`).prop("disabled", true);
                 $(`input[id="contact_number"], input[id="email_address"]`).val("");
             }
         });

@@ -5,7 +5,10 @@ class SMS_CronJOB {
 	private $db;
 	private $sms_sender = "MySchoolGH";
 	private $mailAttachment = array();
-	private $siteName = "MySchoolGH - EmmallexTecnologies.Com";
+	private $sender_email = "app@myschoolgh.com";
+	private $sender_password = "C30C5aamUl";
+	private $sender_client = "mail.supremecluster.com";
+	private $siteName = "MySchoolGH - EmmallexTech.Com";
 	private $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
 
 	public function __construct() {
@@ -186,12 +189,12 @@ class SMS_CronJOB {
 		// configuration settings
 		$config = (Object) array(
 			'subject' => $subject,
-			'headers' => "From: {$this->siteName} - MySchoolGH.Com<app@myschoolgh.com> \r\n Content-type: text/html; charset=utf-8",
+			'headers' => "From: {$this->siteName} - MySchoolGH.Com<{$this->sender_email}> \r\n Content-type: text/html; charset=utf-8",
 			'Smtp' => true,
-			'SmtpHost' => 'mail.supremecluster.com',
+			'SmtpHost' => $this->sender_client,
 			'SmtpPort' => '465',
-			'SmtpUser' => 'app@myschoolgh.com',
-			'SmtpPass' => 'C30C5aamUl',
+			'SmtpUser' => $this->sender_email,
+			'SmtpPass' => $this->sender_password,
 			'SmtpSecure' => 'ssl'
 		);
 

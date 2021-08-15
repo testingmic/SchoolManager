@@ -161,7 +161,9 @@ $response->html = '
                                         <th>#</th>
                                         <th>FULLNAME</th>
                                         <th>CONTACT</th>
-                                        <th align="center"><input disabled style="height:20px;width:20px;" id="select_all" type="checkbox" class="cursor"></th>
+                                        <th align="center">
+                                            <input disabled style="height:20px;width:20px;" id="select_all" type="checkbox" class="cursor">
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody class="receipients_list">

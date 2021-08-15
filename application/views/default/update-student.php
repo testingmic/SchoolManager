@@ -437,7 +437,10 @@ if(!empty($user_id)) {
                                 ).'
                                 '.(
                                     $student_allocation_list["allocated"] ? 
-                                        '<span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-outline-warning"><i class="fa fa-print"></i> Print Bill</a></span>' : null
+                                        '
+                                            <span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-outline-warning"><i class="fa fa-print"></i> Print Bill</a></span>
+                                            <span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?download=1" target="_blank" class="btn mb-2 btn-outline-danger"><i class="fa fa-download"></i> Download Bill</a></span>
+                                        ' : null
                                 ).'
                                 </div>
                             </div>

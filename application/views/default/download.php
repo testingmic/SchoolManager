@@ -416,6 +416,7 @@ elseif(confirm_url_id(2) && confirm_url_id(1, "student_bill")) {
         "academic_term" => $getObject->academic_term ?? null
     ];
 
+    // if the user wants to print it out
     if(isset($getObject->print)) {
         $item_param->print = true;
     }
@@ -426,9 +427,13 @@ elseif(confirm_url_id(2) && confirm_url_id(1, "student_bill")) {
     $orientation = "P";
     $pages_content .= $feesObject->bill($item_param);
 
+    // if the user wants to print it out
+    if(isset($item_param->print)) {
+        die($pages_content);
+    }
 }
-print_r($pages_content);
-exit;
+// print_r($pages_content);
+// exit;
 // load the html content
 $dompdf->loadHtml($pages_content);
 

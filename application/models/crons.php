@@ -8,7 +8,7 @@ class Crons {
 	private $rootUrl;
 	private $clientId;
 	private $limit = 2000;
-	private $siteName = "MySchoolGH - VisamiNetSolutions.Com";
+	private $siteName = "MySchoolGH - EmmallexTech.Com";
 
 	public function __construct() {
 		$this->baseUrl = "https://app.myschoolgh.com/";

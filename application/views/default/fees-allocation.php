@@ -83,7 +83,7 @@ if(!$receivePayment) {
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="allocation_form" role="tabpanel" aria-labelledby="allocation_form-tab2">
                                     
-                                <div class="row">
+                                <div class="row" id="fees_allocation_wrapper">
                                     <div class="col-lg-4 col-md-6">
                                         <div class="card">
                                             <div class="card-header">
@@ -95,7 +95,7 @@ if(!$receivePayment) {
                                             <div class="card-body pt-0 pb-0">
                                                 <div class="py-3 pt-0" id="fees_allocation_form">
                                                 
-                                                    <div class="form-group">
+                                                    <div class="form-group mb-2">
                                                         <label>Allocate To <span class="required">*</span></label>
                                                         <select data-width="100%" disabled class="form-control selectpicker" id="allocate_to" name="allocate_to">
                                                             <option selected value="class">Entire Class</option>
@@ -103,7 +103,7 @@ if(!$receivePayment) {
                                                         </select>
                                                     </div>
                     
-                                                    <div class="form-group">
+                                                    <div class="form-group mb-2">
                                                         <label>Select Class <span class="required">*</span></label>
                                                         <select data-width="100%" class="form-control selectpicker" name="class_id">
                                                             <option value="">Please Select Class</option>';
@@ -114,16 +114,16 @@ if(!$receivePayment) {
                                                         </select>
                                                     </div>
                     
-                                                    <div class="form-group hidden" id="students_list">
+                                                    <div class="form-group mb-2 hidden" id="students_list">
                                                         <label>Select Student <span class="required">*</span></label>
                                                         <select data-width="100%" class="form-control selectpicker" name="student_id">
                                                             <option value="">Please Select Student</option>
                                                         </select>
                                                     </div>
                     
-                                                    <div class="form-group">
+                                                    <div class="form-group mb-2">
                                                         <label>Select Category <span class="required">*</span></label>
-                                                        <select data-width="100%" class="form-control selectpicker" name="category_id">
+                                                        <select disabled data-width="100%" class="form-control selectpicker" name="category_id">
                                                             <option value="">Please Select Category</option>';
                                                             foreach($myClass->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$clientId}'") as $each) {
                                                                 $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";                            
@@ -134,7 +134,7 @@ if(!$receivePayment) {
                     
                                                     <div class="form-group">
                                                         <label>Set Amount <span class="required">*</span></label>
-                                                        <input type="number" name="amount" id="amount" class="form-control">
+                                                        <input type="number" disabled="disabled" name="amount" id="amount" class="form-control">
                                                     </div>
                     
                                                     <div class="form-group text-right mb-0" id="allocate_fees_button">
@@ -146,15 +146,24 @@ if(!$receivePayment) {
                                         </div>
                                     </div>
                                     <div class="col-lg-8 col-md-6">
-                                        <table id="simple_load_student" class="table table-bordered table-striped raw_datatable">
+                                        <table id="simple_load_student" class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
-                                                    <th width="55%">Name</th>
-                                                    <th>Reg. ID</th>
-                                                    <th>Gender</th>
+                                                    <th>#</th>
+                                                    <th width="40%">Name</th>
+                                                    <th>Due</th>
+                                                    <th>Paid</th>
+                                                    <th>Balance</th>
+                                                    <th>
+                                                        <input disabled style="height:20px;width:20px;" id="select_all" type="checkbox" class="cursor">
+                                                    </th>
                                                 </tr>
                                             </thead>
-                                            <tbody></tbody>
+                                            <tbody>
+                                                <tr>
+                                                    <td align="center" colspan="6">Students data appears here.</td>
+                                                </tr>
+                                            </tbody>
                                         </table>
                                     </div>
                                 </div>
