@@ -84,7 +84,7 @@ $response->html = '
                                 <div class="col-md-12">
                                     <div class="form-group">
                                         <label for="code">Code</label>
-                                        <input type="text" maxlength="12" placeholder="Category Code" name="code" id="code" class="form-control">
+                                        <input type="text" maxlength="12" placeholder="Category Code" name="code" id="code" class="form-control text-uppercase">
                                     </div>
                                 </div>
                                 <div class="col-md-12">

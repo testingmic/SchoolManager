@@ -1741,7 +1741,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <div class="form-group">
-                        <label for="unique_id">Student ID (optional) '.(!$isData ? '<small class="text-danger">Leave empty for auto generation</small>' : null).'</label>
+                        <label for="unique_id">Student ID (optional) '.(!$isData ? '<small class="text-danger">Auto generate when empty</small>' : null).'</label>
                         <input type="text" value="'.($userData->unique_id ?? null).'" '.($isData ? "disabled='disabled'" : null).' name="unique_id" id="unique_id" class="form-control">
                     </div>
                 </div>
@@ -3280,10 +3280,11 @@ class Forms extends Myschoolgh {
         $logoUploaded = (bool) ($client_data && $client_data->client_logo);
         $last_date = date("Y-m-d", strtotime("+1 year"));
 
+        // GENERAL FORM
         $general = '
         <form class="ajax-data-form" action="'.$this->baseUrl.'api/account/update" method="POST" id="'.$form_id.'">
         <div class="row">
-            <div class="col-lg-12"><h5>GENERAL SETTINGS</h5></div>
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GENERAL SETTINGS</h5></div>
             '.($logoUploaded ? 
             '<div class="col-lg-2 col-md-4">
                 <div class="form-group">
@@ -3338,107 +3339,7 @@ class Forms extends Myschoolgh {
                     <input type="text" name="general[location]" value="'.($client_data->client_location ?? null).'" class="form-control">
                 </div>
             </div>
-            <div class="col-lg-12"><h5>CURRENT ACADEMIC CALENDAR</h5></div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="academic_year">Academic Year</label>
-                    <select data-width="100%" name="general[academics][academic_year]" class="form-control selectpicker">
-                        <option value="">Select Academic Year</option>';
-                            foreach($this->academic_calendar_years as $year_group) {
-                                $general .= "<option ".(($client_data && $year_group === $prefs->academics->academic_year) ? "selected" : null)." value=\"{$year_group}\">{$year_group}</option>";                            
-                            }
-                        $general .= '</select>
-                    </select>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="term_starts">Academic Year Start</label>
-                    <input type="text" value="'.($prefs->academics->year_starts ?? null).'" name="general[academics][year_starts]" id="year_starts" data-maxdate="'.$last_date.'" class="form-control datepicker">
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="term_ends">Academic Year Ends</label>
-                    <input type="text" value="'.($prefs->academics->year_ends ?? null).'" name="general[academics][year_ends]" id="year_ends" data-maxdate="'.$last_date.'" class="form-control datepicker">
-                </div>
-            </div>
-            <div class="col-lg-12"></div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="academic_term">Academic Term</label>
-                    <select data-width="100%" name="general[academics][academic_term]" class="form-control selectpicker">
-                        <option value="">Select Academic Term</option>';
-                            foreach($this->pushQuery("id, name, description", "academic_terms","1 AND client_id='{$clientId}'") as $each) {
-                                $general .= "<option ".(($client_data && $each->name === $prefs->academics->academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
-                            }
-                        $general .= '</select>
-                    </select>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="term_starts">Academic Term Start</label>
-                    <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[academics][term_starts]" id="term_starts" data-maxdate="'.$last_date.'" class="form-control datepicker">
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="term_ends">Academic Term Ends</label>
-                    <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" data-maxdate="'.$last_date.'" class="form-control datepicker">
-                </div>
-            </div>
-            <div class="col-lg-12"><h5>NEXT ACADEMIC CALENDAR</h5></div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="next_academic_year">Next Academic Year</label>
-                    <select data-width="100%" name="general[academics][next_academic_year]" class="form-control selectpicker">
-                        <option value="">Select Academic Year</option>';
-                            foreach($this->academic_calendar_years as $year_group) {
-                                $general .= "<option ".(($client_data && $year_group === $prefs->academics->next_academic_year) ? "selected" : null)." value=\"{$year_group}\">{$year_group}</option>";                            
-                            }
-                        $general .= '</select>
-                    </select>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="term_starts">Academic Year Start</label>
-                    <input type="text" value="'.($prefs->academics->next_year_starts ?? null).'" name="general[academics][next_year_starts]" id="next_year_starts" data-maxdate="'.$last_date.'" class="form-control datepicker">
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="term_ends">Academic Year Ends</label>
-                    <input type="text" value="'.($prefs->academics->next_year_ends ?? null).'" name="general[academics][next_year_ends]" id="next_year_ends" data-maxdate="'.$last_date.'" class="form-control datepicker">
-                </div>
-            </div>
-            <div class="col-lg-12"></div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="next_academic_term">Next Academic Term</label>
-                    <select data-width="100%" name="general[academics][next_academic_term]" class="form-control selectpicker">
-                        <option value="">Select Academic Term</option>';
-                            foreach($this->pushQuery("id, name, description", "academic_terms","1 AND client_id='{$clientId}'") as $each) {
-                                $general .= "<option ".(($client_data && $each->name === $prefs->academics->next_academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
-                            }
-                        $general .= '</select>
-                    </select>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="next_term_starts">Next Academic Term Start</label>
-                    <input type="text" value="'.($prefs->academics->next_term_starts ?? null).'" name="general[academics][next_term_starts]" data-maxdate="'.$last_date.'" id="next_term_starts" class="form-control datepicker">
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="form-group">
-                    <label for="next_term_ends">Next Academic Term Ends</label>
-                    <input type="text" value="'.($prefs->academics->next_term_ends ?? null).'" name="general[academics][next_term_ends]" data-maxdate="'.$last_date.'" id="next_term_ends" class="form-control datepicker">
-                </div>
-            </div>
-            <div class="col-lg-12"><h5>LABELS</h5></div>';
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 pt-3">LABELS</h5></div>';
             foreach($labels as $label) {
                 $ilabel = "{$label["key"]}_label";
             $general .= '
@@ -3450,7 +3351,7 @@ class Forms extends Myschoolgh {
                 </div>';
             }
         $general .= '
-            <div class="col-lg-12"><h5>FINANCE</h5></div>
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">FINANCE</h5></div>
             <div class="col-lg-4">
                 <div class="form-group">
                     <label for="opening_days">School Opening Days</label>';
@@ -3498,6 +3399,120 @@ class Forms extends Myschoolgh {
             </div>
         </form></div>';
         $forms["general"] = $general;
+
+
+
+        // ACADEMIC CALENDAR FORM
+        $form_id = "_ajax-data-form-content";
+        $calendar = '
+        <form class="_ajax-data-form" action="'.$this->baseUrl.'api/account/calendar" method="POST" id="'.$form_id.'">
+        <div class="row">
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">CURRENT ACADEMIC CALENDAR</h5></div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="academic_year">Academic Year</label>
+                    <select data-width="100%" name="general[academics][academic_year]" class="form-control selectpicker">
+                        <option value="">Select Academic Year</option>';
+                            foreach($this->academic_calendar_years as $year_group) {
+                                $calendar .= "<option ".(($client_data && $year_group === $prefs->academics->academic_year) ? "selected" : null)." value=\"{$year_group}\">{$year_group}</option>";                            
+                            }
+                        $calendar .= '</select>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="term_starts">Academic Year Start</label>
+                    <input type="text" value="'.($prefs->academics->year_starts ?? null).'" name="general[academics][year_starts]" id="year_starts" data-maxdate="'.$last_date.'" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="term_ends">Academic Year Ends</label>
+                    <input type="text" value="'.($prefs->academics->year_ends ?? null).'" name="general[academics][year_ends]" id="year_ends" data-maxdate="'.$last_date.'" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-12"></div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="academic_term">Academic Term</label>
+                    <select data-width="100%" name="general[academics][academic_term]" class="form-control selectpicker">
+                        <option value="">Select Academic Term</option>';
+                            foreach($this->pushQuery("id, name, description", "academic_terms","1 AND client_id='{$clientId}'") as $each) {
+                                $calendar .= "<option ".(($client_data && $each->name === $prefs->academics->academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
+                            }
+                        $calendar .= '</select>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="term_starts">Academic Term Start</label>
+                    <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[academics][term_starts]" id="term_starts" data-maxdate="'.$last_date.'" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="term_ends">Academic Term Ends</label>
+                    <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" data-maxdate="'.$last_date.'" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">NEXT ACADEMIC CALENDAR</h5></div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="next_academic_year">Next Academic Year</label>
+                    <select data-width="100%" name="general[academics][next_academic_year]" class="form-control selectpicker">
+                        <option value="">Select Academic Year</option>';
+                            foreach($this->academic_calendar_years as $year_group) {
+                                $calendar .= "<option ".(($client_data && $year_group === $prefs->academics->next_academic_year) ? "selected" : null)." value=\"{$year_group}\">{$year_group}</option>";                            
+                            }
+                        $calendar .= '</select>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="term_starts">Academic Year Start</label>
+                    <input type="text" value="'.($prefs->academics->next_year_starts ?? null).'" name="general[academics][next_year_starts]" id="next_year_starts" data-maxdate="'.$last_date.'" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="term_ends">Academic Year Ends</label>
+                    <input type="text" value="'.($prefs->academics->next_year_ends ?? null).'" name="general[academics][next_year_ends]" id="next_year_ends" data-maxdate="'.$last_date.'" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-12"></div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="next_academic_term">Next Academic Term</label>
+                    <select data-width="100%" name="general[academics][next_academic_term]" class="form-control selectpicker">
+                        <option value="">Select Academic Term</option>';
+                            foreach($this->pushQuery("id, name, description", "academic_terms","1 AND client_id='{$clientId}'") as $each) {
+                                $calendar .= "<option ".(($client_data && $each->name === $prefs->academics->next_academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
+                            }
+                        $calendar .= '</select>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="next_term_starts">Next Academic Term Start</label>
+                    <input type="text" value="'.($prefs->academics->next_term_starts ?? null).'" name="general[academics][next_term_starts]" data-maxdate="'.$last_date.'" id="next_term_starts" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <label for="next_term_ends">Next Academic Term Ends</label>
+                    <input type="text" value="'.($prefs->academics->next_term_ends ?? null).'" name="general[academics][next_term_ends]" data-maxdate="'.$last_date.'" id="next_term_ends" class="form-control datepicker">
+                </div>
+            </div>
+            <div class="col-md-12 text-right">
+                <button type="button-submit" data-form_id="'.$form_id.'" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+            </div>
+        </form></div>';
+        $forms["calendar"] = $calendar;
+
 
         // create a new account object
         $accountObj = load_class("account", "controllers", (object) ["client_data" => $defaultUser->client]);
@@ -3587,7 +3602,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class='col-lg-1'>
                     <label>&nbsp;</label>
-                    <button type='button' onclick='return remove_grading_mark(1)' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
+                    <button type='button' onclick='return remove_grading_mark(1)' class='btn btn-outline-danger'><i class='fa fa-trash'></i></button>
                 </div>
             </div>";
         } else {
@@ -3609,7 +3624,7 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class='col-lg-1'>
                             <label>&nbsp;</label>
-                            <button type='button' onclick='return remove_grading_mark({$key})' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
+                            <button type='button' onclick='return remove_grading_mark({$key})' class='btn btn-outline-danger'><i class='fa fa-trash'></i></button>
                         </div>
                     </div>";
             }

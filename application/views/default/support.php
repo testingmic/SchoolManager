@@ -267,8 +267,6 @@ $response->html = '
                 <div id="ticket_form" class="mt-4 p-0">
                     <div class="form-group mb-0">
                         <label>Message</label>
-                        <span class="d-inline-block badge badge-primary p-2 text-11"><i class="fas fa-info-circle"></i>
-                        To best assist you, we request that you be specific and detailed</span>
                         <input type="hidden" hidden name="ticket_id" id="ticket_id" value="'.$ticket_id.'">
                         <textarea placeholder="Write here..." name="content" id="content" class="form-control"></textarea>
                     </div>      
@@ -323,8 +321,6 @@ if(empty($item_found)) {
                     </div>
                     <div class="form-group mb-0">
                         <label>Message</label>
-                        <span class="d-inline-block badge badge-primary p-2 text-11"><i class="fas fa-info-circle"></i>
-                        To best assist you, we request that you be specific and detailed</span>
                         <textarea name="content" placeholder="Write here..." id="content" class="form-control"></textarea>
                     </div>      
                 </div>

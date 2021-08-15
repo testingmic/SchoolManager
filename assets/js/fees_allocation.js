@@ -60,7 +60,8 @@ var save_student_bill = (student_id, student_name) => {
         if (proceed) {
             $(`div[id="fees_allocation_table"] div[class="form-content-loader"]`).css("display", "flex");
             let category_id = {},
-                exemptions = {};
+                exemptions = {},
+                is_new_admission = $(`input[name="is_new_admission"]`).val();
             $.each($(`input[data-item='amount']`), function(i, e) {
                 let item = $(this);
                 let category = item.attr(`data-category_id`),
@@ -71,7 +72,7 @@ var save_student_bill = (student_id, student_name) => {
                     exemptions[category] = amount;
                 }
             });
-            $.post(`${baseUrl}api/fees/quick_allocate`, {category_id, student_id, exemptions}).then((response) => {
+            $.post(`${baseUrl}api/fees/quick_allocate`, {category_id, student_id, exemptions, is_new_admission}).then((response) => {
                 swal({
                     text: response.data.result,
                     icon: responseCode(response.code)
@@ -88,3 +89,18 @@ var save_student_bill = (student_id, student_name) => {
         }
     });
 }
+
+var recalculate_total = () => {
+    let total_amount = 0;
+    $.each($(`input[data-item='amount']`), function(i, e) {
+        let item = $(this);
+        let amount = parseFloat(item.val());
+        if(!item.hasClass("removed")) {
+            total_amount += amount;
+        }
+        $(`input[data-input_function="total_amount"]`).val(total_amount);
+    });
+}
+$(`input[data-item="amount"]`).on("input", function() {
+    recalculate_total();
+});

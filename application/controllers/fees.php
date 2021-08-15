@@ -867,7 +867,8 @@ class Fees extends Myschoolgh {
 
                 /** Check if the student id is valid */
                 $student_check = $this->pushQuery(
-                    "a.id, a.name, (SELECT b.name FROM fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", 
+                    "a.id, a.name, 
+                    (SELECT b.name FROM fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", 
                     "users a", 
                     "a.item_id='{$params->student_id}' AND a.client_id='{$params->clientId}' 
                         AND a.status='1' AND a.deleted='0' AND a.academic_year = '{$params->academic_year}' 
@@ -1638,14 +1639,23 @@ class Fees extends Myschoolgh {
             $found = true;
         }
 
+        $params->code = isset($params->code) ? strtoupper($params->code) : null;
+
+        // if the record was not found
         if(!$found) {
-            $stmt = $this->db->prepare("INSERT INTO fees_category SET amount = ?, name = ?, description = ?, code = ?, client_id = ?");
-            $stmt->execute([$params->amount ?? null, $params->name, $params->description ?? null, $params->code ?? null, $params->clientId]);
+            // prepare and execute the statement
+            $stmt = $this->db->prepare("INSERT INTO fees_category SET amount = ?, name = ?, 
+                description = ?, code = ?, client_id = ?, created_by = ?");
+            $stmt->execute([$params->amount ?? null, $params->name, $params->description ?? null, 
+                $params->code, $params->clientId, $params->userId]);
+
             // log the user activity
             $this->userLogs("fees_category", $this->lastRowId("fees_category"), null, "<strong>{$params->userData->name}</strong> added a new category with name: {$params->name}", $params->userId);
         } else {
+            // prepare and execute the statement
             $stmt = $this->db->prepare("UPDATE fees_category SET amount = ?, name = ?, description = ?, code = ? WHERE id = ? AND client_id = ?");
-            $stmt->execute([$params->amount ?? null, $params->name, $params->description ?? null, $params->code ?? null, $params->category_id, $params->clientId]);
+            $stmt->execute([$params->amount ?? null, $params->name, $params->description ?? null, $params->code, $params->category_id, $params->clientId]);
+
             // log the user activity
             $this->userLogs("fees_category", $params->category_id, null, "<strong>{$params->userData->name}</strong> updated the category: {$params->name}", $params->userId);
         }
@@ -1963,18 +1973,23 @@ class Fees extends Myschoolgh {
                             foreach($allocation_list as $key => $fees) {
 
                                 $discount = $fees->exempted ? $fees->amount_due : 0;
+                                $balance = !$fees->exempted ? $fees->balance : 0;
 
                                 $total_discount += $discount;
-                                $total_balance += $fees->balance;
+                                $total_balance += $balance;
                                 $total_due += $fees->amount_due;
                                 $total_paid += $fees->amount_paid;
                                 
-                                if($fees->paid_status === 1) {
-                                    $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0aa038;color: #0aa038;'>Paid</span>";
-                                } elseif($fees->paid_status === 2) {
-                                    $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0b47d2;color: #0b47d2;'>Partly Paid</span>";
+                                if($fees->exempted) {
+                                    $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #000;color: #000;'>Exempted</span>";
                                 } else {
-                                    $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #f13535;color: #f13535;'>Unpaid</span>";
+                                    if($fees->paid_status === 1) {
+                                        $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0aa038;color: #0aa038;'>Paid</span>";
+                                    } elseif($fees->paid_status === 2) {
+                                        $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0b47d2;color: #0b47d2;'>Partly Paid</span>";
+                                    } elseif($fees->paid_status === 0) {
+                                        $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #f13535;color: #f13535;'>Unpaid</span>";
+                                    }
                                 }
 
                                 $student_bill .= "<tr>";
@@ -1984,7 +1999,7 @@ class Fees extends Myschoolgh {
                                 $student_bill .= "<td>{$defaultCurrency} {$fees->amount_due}</td>";
                                 $student_bill .= "<td>{$defaultCurrency} {$discount}</td>";
                                 $student_bill .= "<td>{$defaultCurrency} {$fees->amount_paid}</td>";
-                                $student_bill .= "<td align='right'>{$defaultCurrency} {$fees->balance}</td>";
+                                $student_bill .= "<td align='right'>{$defaultCurrency} {$balance}</td>";
                                 $student_bill .= "</tr>";
                             }
                             $student_bill .= "

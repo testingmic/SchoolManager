@@ -296,9 +296,7 @@ $response->html = '
             <div class="mb-4">
                 <div id="ticket_form" class="mt-4 p-0">
                     <div class="form-group mb-0">
-                        <label>Message</label>
-                        <span class="d-inline-block badge badge-primary p-2 text-11"><i class="fas fa-info-circle"></i>
-                        To best assist you, we request that you be specific and detailed</span>
+                        <label>Comments</label>
                         <input type="hidden" hidden name="knowledge_id" id="knowledge_id" value="'.$knowledge_id.'">
                         <textarea placeholder="Write here..." name="content" id="content" class="form-control"></textarea>
                     </div>      

@@ -24,7 +24,7 @@ $response->scripts = ["assets/js/fees_allocation.js"];
 
 // student id
 $user_id = $SITEURL[1] ?? null;
-$is_new_admission = (bool) (isset($_GET["is_new_admission"]) && !empty($_GET["is_new_admission"]));
+$is_new_admission = (bool) (isset($_GET["is_new_admission"]) && ($_GET["is_new_admission"] == 1));
 
 // if the user id is not empty
 if(!empty($user_id)) {
@@ -61,8 +61,14 @@ if(!empty($user_id)) {
         $feesObject = load_class("fees", "controllers", $feesParam);
 
         // get the class and student fees allocation
-        $dont_show_button = false;
         $allocation_list = "";
+        $existing_category = [];
+        $dont_show_button = false;
+        
+        $total_amount = 0;
+        $total_paid = 0;
+        $total_balance = 0;
+
         $studentAllocation = $feesObject->students_fees_allocation($feesParam)["data"];
         $classAllocation = $feesObject->class_fees_allocation($feesParam)["data"];
 
@@ -97,6 +103,9 @@ if(!empty($user_id)) {
                 $exempt_class = null;
                 $request_buttons = null;
 
+                // append to the existing category list
+                $existing_category[] = $allocation->category_id ?? $allocation["category_id"];
+
                 // set the allocation
                 if(!empty($studentAllocationArray)) {
                     // set variables
@@ -118,7 +127,7 @@ if(!empty($user_id)) {
                 }
 
                 // initial values
-                $amount_paid = 0;
+                $amount_paid = 0.00;
                 $amount_due = $allocation->amount_due ?? $allocation->amount;
                 $balance = $amount_due;
 
@@ -133,6 +142,9 @@ if(!empty($user_id)) {
 
                 // set a new status
                 if(empty($studentAllocationArray)) {
+                    // set the button
+                    $dont_show_button = true;
+
                     // append to the list
                     $save_btn = "&nbsp;<button title='Save this fee allocation.' onclick='return save_category(\"{$allocation->category_id}\",\"{$user_id}\")' data-save_category='{$allocation->category_id}' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i></button>";
                     $status = "<span class='p-1 badge badge-primary'>Not Set</span>";
@@ -159,7 +171,13 @@ if(!empty($user_id)) {
                     }
                     $status = $is_exempted ? "<span class='p-1 badge badge-dark'>Exempted</span>" : $status;
                 }
+
+                // increment the values
+                $total_balance += $balance;
+                $total_paid += $amount_paid;
+                $total_amount += $allocation->amount_due ?? $allocation->amount;
                 
+                // set final varialbes
                 $b = "<div class='request_buttons' data-category_id='{$allocation->category_id}'>";
                 $e = "</div><div data-category_id='{$allocation->category_id}' class='request_loader hidden'><i class='fa fa-spin fa-spinner'></i></div>";
 
@@ -175,6 +193,55 @@ if(!empty($user_id)) {
             }
 
         }
+
+        // loop through the fees category list
+        if($is_new_admission) {
+
+            // fees category list
+            $feesCategoryList = $myClass->pushQuery("id, name, amount", "fees_category", "client_id='{$clientId}' AND status='1'");
+            
+            // if the user is a new student
+            foreach($feesCategoryList as $category) {
+
+                // if the category is not found in the already existing list
+                if(!in_array($category->id, $existing_category)) {
+
+                    // set new variables
+                    $b = "<div class='request_buttons' data-category_id='{$category->id}'>";
+                    $e = "</div><div data-category_id='{$category->id}' class='request_loader hidden'><i class='fa fa-spin fa-spinner'></i></div>";
+
+                    // set additional buttons
+                    $save_btn = "&nbsp;<button title='Save this fee allocation.' onclick='return save_category(\"{$category->id}\",\"{$user_id}\")' data-save_category='{$category->id}' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i></button>";
+                    $delete_btn = "&nbsp;<button title='Remove this item from list' onclick='return remove_category(\"{$category->id}\")' data-remove_category='{$category->id}' class='btn btn-sm btn-outline-danger'><i class='fa fa-ban'></i></button>";
+                    $undo_button = "&nbsp;<button title='Reverse the removal of this category list' onclick='return reverse_action(\"{$category->id}\")' data-reverse_action='{$category->id}' class='btn btn-sm hidden btn-outline-warning'><i class='fa fa-reply-all'></i></button>";
+                    
+                    // set the status
+                    $total_amount += $category->amount;
+                    $total_balance += $category->amount;
+                    $status = "<span class='p-1 badge badge-primary'>Not Set</span>";
+
+                    // append to the list
+                    $allocation_list .= "
+                    <tr data-row_id='{$category->id}'>
+                        <td><span class='font-18'>{$category->name}</span><br>{$status}</td>
+                        <td><input style='min-width:90px' value='{$category->amount}' disabled class='form-control font-weight-bold font-17 text-center'></td>
+                        <td><input style='min-width:90px' value='0' disabled class='form-control font-17 text-center'></td>
+                        <td><input style='min-width:90px' min='0' value='{$category->amount}' data-item='amount' data-category_id='{$category->id}' class='form-control font-weight-bold font-17 p-0 text-center' type='number'></td>
+                        <td align='center'>{$b}{$save_btn}{$delete_btn}{$undo_button}{$e}</td>
+                    </tr>";
+                }
+            }
+        }
+
+        // final table variable
+        $allocation_list .= "
+        <tr>
+            <td><span class='font-18 text-weight-bold'>TOTAL</td>
+            <td><input style='min-width:90px' value='{$total_amount}' readonly class='form-control font-weight-bold font-20 text-center'></td>
+            <td><input style='min-width:90px' value='{$total_paid}' readonly class='form-control font-20 text-center'></td>
+            <td><input style='min-width:90px' min='0' data-input_function='total_amount' max='{$total_balance}' readonly value='{$total_balance}' class='form-control font-weight-bold font-20 p-0 text-center' type='number'></td>
+            <td align='center'>-</td>
+        </tr>";
 
         // append the html content
         $response->html = '
@@ -217,13 +284,15 @@ if(!empty($user_id)) {
                                 </div>
                                 <div class="d-flex justify-content-end">
                                     '.($dont_show_button ? '
-                                        <button onclick="return save_student_bill(\''.$user_id.'\',\''.$data->name.'\')" title="Click to save student bill." class="btn btn-success"><i class="fa fa-save"></i> Save Student Bill</button>&nbsp;
+                                        <button onclick="return save_student_bill(\''.$user_id.'\',\''.$data->name.'\')" title="Click to save student bill." class="btn btn-outline-success"><i class="fa fa-save"></i> Save Student Bill</button>&nbsp;
                                     ' : null).'
-                                    '.($studentAllocationArray ? '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn btn-outline-primary"><i class="fa fa-print"></i> Print Bill</a>' : null).'
+                                    '.($studentAllocationArray ? 
+                                        '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn btn-outline-primary"><i class="fa fa-print"></i> Print Bill</a>' : null
+                                    ).'
                                 </div>
                                 <div class="mt-3 border-top pt-3">
                                     <div class="table-responsive">
-                                        <input type="hidden" id="is_new_admission" name="is_new_admission" value="'.$is_new_admission.'">
+                                        <input type="hidden" disabled id="is_new_admission" name="is_new_admission" value="'.$is_new_admission.'">
                                         <table class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>

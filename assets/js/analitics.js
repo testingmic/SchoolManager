@@ -6,15 +6,6 @@ var filter = $(`[id="reports_insight"] button[id="filter_Fees_Report"]`),
     ],
     to_stream = "";
 
-function format_currency(total) {
-    var neg = false;
-    if (total < 0) {
-        neg = true;
-        total = Math.abs(total);
-    }
-    return (neg ? "-" : '') + parseFloat(total, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString();
-}
-
 var revenueReporting = (revenue) => {
     if ($(`canvas[id="revenue_flow_chart"]`).length) {
 

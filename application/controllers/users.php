@@ -140,7 +140,7 @@ class Users extends Myschoolgh {
 				$params->columns = "
 					a.client_id, a.guardian_id, a.item_id AS user_id, a.name, a.preferences, a.description,	
 					a.unique_id, a.email, a.image, a.phone_number, a.user_type, a.class_id, a.account_balance,
-					a.gender, a.enrollment_date, a.residence, a.religion, a.date_of_birth, a.last_visited_page,
+					a.gender, a.enrollment_date, a.residence, a.religion, a.date_of_birth, a.last_visited_page, a.fees_is_set,
 					(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
 					(SELECT name FROM users WHERE users.item_id = a.created_by LIMIT 1) AS created_by_name,
 					(SELECT name FROM departments WHERE departments.id = a.department LIMIT 1) AS department_name,
@@ -168,7 +168,7 @@ class Users extends Myschoolgh {
 					if(isset($params->user_type) && ($params->user_type == "guardian")) {
 						// make a query for the guardian list
 						$query = $this->pushQuery("a.name, a.item_id AS user_id, a.unique_id, a.image, 
-							a.email, a.phone_number, a.residence, a.relationship,
+							a.email, a.phone_number, a.residence, a.relationship, a.fees_is_set,
 							(SELECT b.country_name FROM country b WHERE b.id = a.country LIMIT 1) AS country_name", 
 							"users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.user_type='parent' AND a.name LIKE '%{$params->q}%'");
 						

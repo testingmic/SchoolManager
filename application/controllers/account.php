@@ -19,7 +19,7 @@ class Account extends Myschoolgh {
             "blood_group" => "Blood Group", "city" => "City", "residence" => "Residence", 
             "country" => "Country Code", "date_of_birth" => "Date of Birth", 
             "enrollment_date" => "Admission Date", "gender" => "Gender", "section" => "Section", 
-            "department" => "Department", "class_id" => "Class Code", "description" => "Description",
+            "department" => "Department", "class_id" => "Class ID", "description" => "Description",
             "religion" => "Religion",  "previous_school" => "Previous School", 
             "previous_school_qualification" => "Previous School Qualification",
             "previous_school_remarks" => "Previous School Remarks"
@@ -226,13 +226,13 @@ initiateCalendar();";
     public function update(stdClass $params) {
 
         // return error
-        if(!isset($params->general["academics"]) || !isset($params->general["labels"])) {
-            return ["code" => 203, "data" => "Sorry! Ensure academics and labels have been parsed."];
+        if(!isset($params->general["labels"])) {
+            return ["code" => 203, "data" => "Sorry! Ensure labels have been parsed."];
         }
 
         // academics and labels must be an array
-        if(!is_array($params->general["academics"]) || !is_array($params->general["labels"])) {
-            return ["code" => 203, "data" => "Sorry! Academics and Labels must be an array."];
+        if(!is_array($params->general["labels"])) {
+            return ["code" => 203, "data" => "Sorry! Labels must be an array."];
         }
 
         // get the client data
@@ -273,10 +273,10 @@ initiateCalendar();";
         }
 
         // put the preferences together
-        $preference["academics"] = $params->general["academics"];
         $preference["labels"] = $params->general["labels"];
         $preference["opening_days"] = $params->general["opening_days"] ?? [];
         $preference["account"] = $client_data->client_preferences->account;
+        $preference["academics"] = $client_data->client_preferences->academics;
 
         // unset the values
         unset($params->general["opening_days"]);
@@ -299,6 +299,51 @@ initiateCalendar();";
             // run the update of the account information
             $stmt = $this->db->prepare("UPDATE clients_accounts 
                 SET {$query} client_preferences	= ? ".(isset($image) ? ", client_logo='{$image}'" : "")." WHERE client_id = ? LIMIT 1");
+            $stmt->execute([json_encode($preference), $params->clientId]);
+
+            // log the user activity
+            $this->userLogs("account", $params->clientId, $client_data, "{$params->userData->name} updated the Account Information", $params->userId);
+
+            return $return;
+
+        } catch(PDOException $e) {}
+
+    }
+
+    /**
+     * Update Academic Calendar Information
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function calendar(stdClass $params) {
+
+        // return error
+        if(!isset($params->general["academics"])) {
+            return ["code" => 203, "data" => "Sorry! Ensure academics have been parsed."];
+        }
+
+        // academics and labels must be an array
+        if(!is_array($params->general["academics"])) {
+            return ["code" => 203, "data" => "Sorry! Academics must be an array."];
+        }
+
+        // get the client data
+        $client_data = $this->iclient;
+
+        $return = ["data" => "Academic Calendar was successfully updated.", "additional" => ["href" => $this->session->user_current_url]];
+
+        // put the preferences together
+        $preference["academics"] = $params->general["academics"];
+        $preference["labels"] = $client_data->client_preferences->labels;
+        $preference["opening_days"] = $client_data->client_preferences->opening_days ?? [];
+        $preference["account"] = $client_data->client_preferences->account;
+
+        try {
+
+            // run the update of the account information
+            $stmt = $this->db->prepare("UPDATE clients_accounts SET client_preferences	= ? WHERE client_id = ? LIMIT 1");
             $stmt->execute([json_encode($preference), $params->clientId]);
 
             // log the user activity
@@ -780,7 +825,8 @@ initiateCalendar();";
                 $step = count($columns)+3;
 
                 $table = [
-                    "department" => ["column" => "name, department_code"]
+                    "department" => ["column" => "name, department_code"],
+                    "classes" => ["column" => "id, name, class_code"]
                 ];
 
                 // set the content of the file to download
@@ -810,11 +856,11 @@ initiateCalendar();";
                     // if the row count is not zero
                     if($dept_stmt->rowCount()) {
                         // append the header
-                        $content .= str_repeat(',', $step)."DEPARTMENT NAME,,,,DEPARTMENT CODE\n";
+                        $content .= str_repeat(',', $step)."DEPARTMENT NAME,,DEPARTMENT CODE\n";
                         // loop through the list of programmes
                         while($result = $dept_stmt->fetch(PDO::FETCH_OBJ)) {
                             // print the course information
-                            $content .= str_repeat(',', $step)."{$result->name},,,,{$result->department_code}\n";
+                            $content .= str_repeat(',', $step)."{$result->name},,{$result->department_code}\n";
                         }
                     }
 
@@ -827,6 +873,21 @@ initiateCalendar();";
                         //append some empty fields
                         $content .= str_repeat(',', $step)."\n";
                         $content .= str_repeat(',', $step)."\n";
+
+                        // general queries
+                        $dept_stmt = $this->db->prepare("SELECT {$table["classes"]["column"]} FROM classes WHERE client_id = '{$params->clientId}' AND status='1'");
+                        $dept_stmt->execute();
+
+                        // if the row count is not zero
+                        if($dept_stmt->rowCount()) {
+                            // append the header
+                            $content .= str_repeat(',', $step)."CLASS ID,CLASS NAME,CLASS CODE\n";
+                            // loop through the list of programmes
+                            while($result = $dept_stmt->fetch(PDO::FETCH_OBJ)) {
+                                // print the course information
+                                $content .= str_repeat(',', $step)."{$result->id},{$result->name},{$result->class_code}\n";
+                            }
+                        }
 
                     }
                 }

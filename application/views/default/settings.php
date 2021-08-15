@@ -38,7 +38,7 @@ if(!$accessObject->hasAccess("manage", "settings")) {
             <div class="section-header">
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'">Dashboard</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>
@@ -50,6 +50,9 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                 <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                     <li class="nav-item">
                                         <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="academic_calendar-tab2" data-toggle="tab" href="#academic_calendar" role="tab" aria-selected="true">Academic Calendar</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Examination Grading</a>
@@ -70,6 +73,9 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                 <div class="tab-content tab-bordered" id="myTab3Content">
                                     <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
                                         '.($the_form["general"] ?? null).'
+                                    </div>
+                                    <div class="tab-pane fade" id="academic_calendar" role="tabpanel" aria-labelledby="academic_calendar-tab2">
+                                        '.($the_form["calendar"] ?? null).'
                                     </div>
                                     <div class="tab-pane fade" id="examination" role="tabpanel" aria-labelledby="examination-tab2">
                                         '.($the_form["examination"] ?? null).'

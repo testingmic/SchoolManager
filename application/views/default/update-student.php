@@ -425,7 +425,7 @@ if(!empty($user_id)) {
                                         '<span class="text-right">
                                             <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}pay/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'"').' class="btn mb-2 btn-outline-success"><i class="fa fa-adjust"></i> Make Fees Payment</a>
                                         </span>
-                                        <button title="Click to Modify Fees Allocated to Student" onclick="return loadPage(\''.$baseUrl.'fees-allocate/'.$user_id.'\')" class="btn mb-2 btn-outline-warning">
+                                        <button title="Click to Modify Fees Allocated to Student" onclick="return loadPage(\''.$baseUrl.'fees-allocate/'.$user_id.'\')" class="btn mb-2 btn-outline-primary">
                                             <i class="fa fa-edit"></i> Modify Bill
                                         </button>'
                                     : ($student_allocation_list["allocated"] ? '<div class="btn mb-2 btn-success">Fees Fully Paid</div>' :
@@ -437,7 +437,7 @@ if(!empty($user_id)) {
                                 ).'
                                 '.(
                                     $student_allocation_list["allocated"] ? 
-                                        '<span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-primary"><i class="fa fa-print"></i> Print Bill</a></span>' : null
+                                        '<span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-outline-warning"><i class="fa fa-print"></i> Print Bill</a></span>' : null
                                 ).'
                                 </div>
                             </div>
