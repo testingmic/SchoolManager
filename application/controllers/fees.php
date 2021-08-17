@@ -2029,13 +2029,17 @@ class Fees extends Myschoolgh {
                                         </table>
                                     </div>
                                     <div class="row">
-                                        <div class="col-lg-8"></div>
-                                        <div class="col-lg-4" align="right">
-                                            <hr style="margin-bottom:20px">
-                                            <div class="invoice-detail-item">
-                                                <div class="invoice-detail-name">Total</div>
-                                                <div class="invoice-detail-value invoice-detail-value-lg"><strong>'.(number_format($amount, 2)).'</strong></div>
-                                            </div>
+                                        <div class="col-lg-12">
+                                            <table border="1" class="border" cellpadding="5px" width="100%">
+                                                <tr>
+                                                    <td align="right" width="70%"><strong>Amount</strong></td>
+                                                    <td align="right">'.number_format($amount, 2).'</td>
+                                                </tr>
+                                                <tr>
+                                                    <td align="right" width="70%"><strong>Amount in Words</strong></td>
+                                                    <td align="right" class="text-uppercase">'.$this->amount_to_words($amount).'</td>
+                                                </tr>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>

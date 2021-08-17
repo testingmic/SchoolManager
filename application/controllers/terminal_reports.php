@@ -284,13 +284,14 @@ class Terminal_reports extends Myschoolgh {
                 $count = 0;
                 foreach($columns->columns as $key => $column) {
                     $count++;
-                    $csv_file .= "{$key},";
+                    $csv_file .= "{$key} - {$column->markscap}%,";
                 }
             }
         }
 
         $csv_file .= "Teacher ID,";
         $csv_file .= "Teacher Remarks\n";
+        $course_name = str_ireplace(", ", "", $course_name);
 
         foreach($students_list as $student) {
             $csv_file .= "{$student->name},{$student->unique_id},{$course_name},{$course_code}\n";
@@ -332,12 +333,12 @@ class Terminal_reports extends Myschoolgh {
 
         // set the global variable
         global $defaultClientData;
-        
+    
         // reading tmp_file name
         $report_file = fopen($params->report_file['tmp_name'], 'r');
 
         // get the content of the file
-        $file_headers = fgetcsv($report_file);
+        $csv_headers = fgetcsv($report_file);
         $complete_csv_data = [];
 
         //using while loop to get the information
@@ -367,15 +368,25 @@ class Terminal_reports extends Myschoolgh {
         $headers[] = "Teacher ID";
         $headers[] = "Teacher Remarks";
 
+        // set a new header
+        $file_headers = [];
+        foreach($csv_headers as $item) {
+            // explode the text
+            $_item = explode("-", $item);
+            $file_headers[] = trim($_item[0]);
+        }
+
         // loop through the headers and ensure that they all match
         foreach($file_headers as $item) {
+            // if not in array
             if(!in_array($item, $headers)) {
                 return ["code" => 203, "data" => "Ensure you have uploaded the sample CSV File with the predefined headers."];
             }
         }
         
         // draw a table with the headers
-        $report_table = "<table class='table table-bordered'>";
+        $report_table = "<div style='max-width:1200px' class='table-responsive trix-slim-scroll'>";
+        $report_table .= "<table width='100%' class='table table-bordered'>";
         $report_table .= "<thead>";
         $report_table .= "<th>#</th>";
         foreach($file_headers as $item) {
@@ -392,9 +403,9 @@ class Terminal_reports extends Myschoolgh {
                 // if the key is in the array list
                 if(in_array($file_headers[$kkey], array_keys($columns["columns"]))) {
                     $column = create_slug($file_headers[$kkey], "_");
-                    $report_table .= "<td><input ".($columns["columns"][$file_headers[$kkey]] == "100" ? "disabled='disabled' data-input_total_id='{$key}'" : "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." class='form-control font-18 text-center' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}'></td>";
+                    $report_table .= "<td><input ".($columns["columns"][$file_headers[$kkey]] == "100" ? "disabled='disabled' data-input_total_id='{$key}'" : "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." class='form-control pl-0 pr-0 font-18 text-center' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}'></td>";
                 } elseif($file_headers[$kkey] == "Teacher Remarks") {
-                    $report_table .= "<td><input type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
+                    $report_table .= "<td><input style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
                 } else {
                     $report_table .= "<td><span ".($file_headers[$kkey] == "Student ID" ? "data-student_row_id='{$key}' data-student_id='{$kvalue}'" : "").">{$kvalue}</span></td>";
                 }
@@ -403,6 +414,7 @@ class Terminal_reports extends Myschoolgh {
         }
         $report_table .= "</tbody>";
         $report_table .= "</table>";
+        $report_table .= "</div>";
 
         $report_table .= "<div class='text-right'>";
         $report_table .= "<button onclick='return save_terminal_report()' class='btn btn-outline-success'>Save Report</button>";
@@ -519,7 +531,7 @@ class Terminal_reports extends Myschoolgh {
             $teacher_ids = $session_array["students"][0][$teacher_key];
 
             // set a new log id
-            $report_id = strtoupper(random_string("alnum", 16));
+            $report_id = random_string("alnum", 16);
             $isFound = false;
 
             // loop through the list and insert the record
@@ -848,11 +860,20 @@ class Terminal_reports extends Myschoolgh {
                 $scores_array[$stu_id]["remarks"] = $score["remarks"];
             }
 
+            // exceeds the total 100% score
+            $exceeds = [];
+
             // get the sum for all scores
             foreach($scores_array as $key => $score) {
                 $total = array_column($score["marks"], "score");
                 $total = !empty($total) ? array_sum($total) : 0;
                 $scores_array[$key]["total_score"] = $total;
+                if($total > 100) { $exceeds[] = $key; }
+            }
+            
+            // if an error was found
+            if(!empty($exceeds)) {
+                return ["code" => 203, "data" => "Sorry! Please ensure the total score of any student does not exceed 100%."];
             }
 
             //set more values
@@ -1125,4 +1146,5 @@ class Terminal_reports extends Myschoolgh {
         } catch(PDOException $e) {}
 
     }
+
 }

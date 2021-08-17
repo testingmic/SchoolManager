@@ -3639,13 +3639,17 @@ class Forms extends Myschoolgh {
                     $count++;
                     $columns_listing .= "
                     <div class='row mb-2 column_item' data-column_id='{$count}'>
-                        <div class='col-lg-7'>
+                        <div class='col-lg-6'>
                             <label>Name</label>
-                            <input type='text' maxlength='20' value='{$key}' name='column_name_{$count}' data-column_id='{$count}' class='form-control'>
+                            <input type='text' maxlength='100' value='{$key}' name='column_name_{$count}' data-column_id='{$count}' class='form-control'>
                         </div>
-                        <div class='col-lg-3'>
+                        <div class='col-lg-2'>
+                            <label>Marks Cap</label>
+                            <input type='number' min='0' value='{$column->markscap}' max='{$column->markscap}' name='column_markscap_{$count}' data-column_id='{$count}' class='form-control'>
+                        </div>
+                        <div class='col-lg-2'>
                             <label>Percentage(%)</label>
-                            <input type='number' min='0' value='{$column}' max='100' name='column_percentage_{$count}' data-column_id='{$count}' class='form-control'>
+                        <input type='number' min='0' value='{$column->percentage}' max='{$column->percentage}' name='column_percentage_{$count}' data-column_id='{$count}' class='form-control'>
                         </div>
                         <div class='col-lg-2'>
                             <label>&nbsp;</label>
@@ -3655,6 +3659,28 @@ class Forms extends Myschoolgh {
                 }
             }
         }
+
+        // examination forms
+        $examination = '
+        <div class="row">
+            <div class="col-lg-9 col-md-12 mb-3">
+                <div class="form-group">
+                    <div class="d-flex pb-3 justify-content-between">
+                        <div><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GRADING SYSTEM</h5></div>
+                        <div><button type="button" title="Add new Grading" onclick="return add_grading_mark()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
+                    </div>
+                    <div id="grading_system_list">'.$grading_list.'</div>
+                </div>
+            </div>
+            <div class="col-lg-9 mb-3 col-md-12">
+                <div class="form-group text-right">
+                    <button type="button" onclick="return save_grading_mark()" id="save_grading_mark" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Grades</button>
+                </div>
+            </div>
+        </div>';
+
+        $forms["examination"] = $examination;
+
 
         // terminal reports columns list
         $default_columns_list[0] = "
@@ -3677,56 +3703,55 @@ class Forms extends Myschoolgh {
         </div>";
 
         // examination forms
-        $examination = '
+        $results_structure = '
         <div class="row">
-            <div class="col-lg-7 col-md-12 mb-3">
+            <div class="col-lg-9 mb-3 col-md-12">
                 <div class="form-group">
-                    <div class="d-flex mb-3 border-bottom pb-3 justify-content-between">
-                        <div><h4>Grading System</h4></div>
-                        <div><button type="button" title="Add new Grading" onclick="return add_grading_mark()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
-                    </div>
-                    <div id="grading_system_list">'.$grading_list.'</div>
-                </div>
-            </div>
-            <div class="col-lg-5 mb-3 col-md-12">
-                <div class="form-group">
-                    <div class="d-flex mb-3 border-bottom pb-3 justify-content-between">
-                        <div><h4>Terminal Report Structure</h4></div>
+                    <div class="d-flex pb-3 justify-content-between">
+                        <div><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">TERMINAL REPORT STRUCTURE</h5></div>
                         <div><button type="button" title="Add new Column" onclick="return add_report_column()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
                     </div>
                     '.$default_columns_list[0].'
                     <div class="font-italic text-success">Add to list</div>
                     <div id="term_report_columns_list">'.$columns_listing.'</div>
                     '.$default_columns_list[1].'
-                    <div class="form-group mb-3 mt-3">
-                        <select class="form-control selectpicker" name="show_position" data-width="100%">
-                            <option '.($client_data->show_position == "true" ? "selected" : "").' value="true">Show position in class</option>
-                            <option '.($client_data->show_position == "false" ? "selected" : "").' value="false">Do not show position</option>
-                        </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6 col-md-12">
+                        <div class="form-group">
+                            <select class="form-control selectpicker" name="show_position" data-width="100%">
+                                <option '.($client_data->show_position == "true" ? "selected" : "").' value="true">Show position in class</option>
+                                <option '.($client_data->show_position == "false" ? "selected" : "").' value="false">Do not show position</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="form-group mb-3">
-                        <select class="form-control selectpicker" name="show_teacher_name" data-width="100%">
-                            <option '.($client_data->show_teacher_name == "true" ? "selected" : "").' value="true">Show teacher\'s name</option>
-                            <option '.($client_data->show_teacher_name == "false" ? "selected" : "").' value="false">Do not show teacher\'s name</option>
-                        </select>
-                    </div>
-                    '.$default_columns_list[2].'
-                    <div class="form-group mt-3">
-                        <select class="form-control selectpicker" name="allow_submission" data-width="100%">
-                            <option '.($client_data->allow_submission == "true" ? "selected" : "").' value="true">Allow teachers to submit report</option>
-                            <option '.($client_data->allow_submission == "false" ? "selected" : "").' value="false">Disallow the submission of reports</option>
-                        </select>
+                    <div class="col-lg-6 col-md-12">
+                        <div class="form-group">
+                            <select class="form-control selectpicker" name="show_teacher_name" data-width="100%">
+                                <option '.($client_data->show_teacher_name == "true" ? "selected" : "").' value="true">Show teacher\'s name</option>
+                                <option '.($client_data->show_teacher_name == "false" ? "selected" : "").' value="false">Do not show teacher\'s name</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
+                '.$default_columns_list[2].'
+                <div class="form-group mt-3">
+                    <select class="form-control selectpicker" name="allow_submission" data-width="100%">
+                        <option '.($client_data->allow_submission == "true" ? "selected" : "").' value="true">Allow teachers to submit report</option>
+                        <option '.($client_data->allow_submission == "false" ? "selected" : "").' value="false">Disallow the submission of reports</option>
+                    </select>
+                </div>
+
             </div>
-            <div class="col-md-12 mb-3">
+            <div class="col-lg-9 mb-3 col-md-12">
                 <div class="form-group text-right">
                     <button type="button" onclick="return save_grading_mark()" id="save_grading_mark" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Grades</button>
                 </div>
             </div>
         </div>';
 
-        $forms["examination"] = $examination;
+        $forms["results_structure"] = $results_structure;
 
         return $forms;
     }
@@ -3758,20 +3783,27 @@ class Forms extends Myschoolgh {
         // if the submission of report is false
         if($client_data->allow_submission === "false") {
             $the_form["general"] = "<div class='text-center alert alert-warning'>Sorry! You are not allowed submit a report at this period of the term.</div>";
-        } else {
-            $the_form["general"] = "
-                <div class='row' id='terminal_reports'>
-                    <div class='col-lg-3 mb-2'>
-                        <select data-width='100%' class='form-control selectpicker' name='class_id' id='class_id'>
-                            <option value='null'>Select the Class</option>";
-                            foreach($classes_list as $class) {
-                                $the_form["general"] .= "<option value='{$class->item_id}'>{$class->name}</option>";
-                            }
-            $the_form["general"] .= "</select>
+            return $the_form;
+        }
+        // if the grading structure columsn is empty then end the query
+        if(!isset($client_data->grading_structure->columns) || empty($client_data->grading_structure->columns)) {
+            $the_form["general"] = "<div class='text-center alert alert-warning'>Sorry! The <strong>Grading Structure</strong> has not yet been set. Please Visit <strong>Settings > Examination Grading > Terminal Report Structure</strong> section to set this up.</div>";
+            return $the_form;
+        }
+        // append the form and display
+        $the_form["general"] = "
+            <div class='row' id='terminal_reports'>
+                <div class='col-lg-3 mb-2'>
+                    <select data-width='100%' class='form-control selectpicker' name='class_id' id='class_id'>
+                        <option value=''>Select the Class</option>";
+                        foreach($classes_list as $class) {
+                            $the_form["general"] .= "<option value='{$class->item_id}'>{$class->name}</option>";
+                        }
+        $the_form["general"] .= "</select>
                     </div>
                     <div class='col-lg-4 mb-2'>
                         <select data-width='100%' class='form-control selectpicker' name='course_id' id='course_id'>
-                            <option value='null'>Select the Course</option>
+                            <option value=''>Select the Course</option>
                         </select>
                     </div>
                     <div class='col-lg-3 mb-2'>
@@ -3796,7 +3828,6 @@ class Forms extends Myschoolgh {
                     </div>
                     <div class='col-lg-12 mt-4' id='summary_report_sheet_content'></div>
                 </div>";
-        }
 
 
         return $the_form;

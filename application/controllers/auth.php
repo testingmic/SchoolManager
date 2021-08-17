@@ -928,7 +928,9 @@ class Auth extends Myschoolgh {
                     "term_starts" => "",
                     "term_ends" => "",
                     "next_academic_year" => "",
-                    "next_academic_term" => ""
+                    "next_academic_term" => "",
+                    "next_term_starts" => "",
+                    "next_term_ends" => ""
                 ],
                 "account" => (object) [
                     "type" => $params->plan ?? "basic",

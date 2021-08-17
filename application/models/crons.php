@@ -33,14 +33,14 @@ class Crons {
 			'hostname' => "localhost",
 			'database' => "mineconr_school",
 			'username' => "mineconr_school",
-			'password' => 'YdwQLVx4vKU_'
+			'password' => "YdwQLVx4vKU_"
 		);
 
 		$connectionArray = array(
 			'hostname' => "localhost",
 			'database' => "myschoolgh",
-			'username' => "root",
-			'password' => ''
+			'username' => "newuser",
+			'password' => "password"
 		);
 		
 		// run the database connection
@@ -438,7 +438,7 @@ class Crons {
 		// get the list of all users that was uploaded
 		$u_stmt = $this->db->prepare("UPDATE grading_terminal_logs a SET 
 			a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
-		WHERE a.report_id='{$report_id}'");
+		WHERE a.report_id='{$report_id}' LIMIT 1");
 		$u_stmt->execute();		
 	}
 	
@@ -1089,7 +1089,7 @@ class Crons {
 
 // create new object
 $jobs = new Crons;
-$jobs->loadEmailRequests();
-$jobs->inApp_Emails();
+// $jobs->loadEmailRequests();
+// $jobs->inApp_Emails();
 $jobs->scheduler();
 ?>

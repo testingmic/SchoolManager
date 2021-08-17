@@ -43,11 +43,15 @@ var add_report_column = () => {
         rows_count = isNaN(columns_list) ? 1 : (parseInt(columns_list) + 1);
     let grade_html = `
         <div class='row mb-2 column_item' data-column_id='${rows_count}'>
-            <div class='col-lg-7'>
+            <div class='col-lg-6'>
                 <label>Name</label>
                 <input type='text' maxlength='20' name='column_name_${rows_count}' data-column_id='${rows_count}' class='form-control'>
             </div>
-            <div class='col-lg-3'>
+            <div class='col-lg-2'>
+                <label>Marks Cap</label>
+                <input type='number' min='0' max='100' name='column_markscap_${rows_count}' data-column_id='${rows_count}' class='form-control'>
+            </div>
+            <div class='col-lg-2'>
                 <label>Percentage(%)</label>
                 <input type='number' min='0' max='100' name='column_percentage_${rows_count}' data-column_id='${rows_count}' class='form-control'>
             </div>
@@ -89,9 +93,10 @@ var save_grading_mark = () => {
         $.each($(`div[id="term_report_columns_list"] div[class~="column_item"]`), function(i, e) {
             let this_id = $(this).attr("data-column_id"),
                 name = $(`input[name="column_name_${this_id}"]`).val(),
-                percentage = $(`input[name="column_percentage_${this_id}"]`).val();
+                percentage = parseInt($(`input[name="column_percentage_${this_id}"]`).val()),
+                markscap = parseInt($(`input[name="column_markscap_${this_id}"]`).val());
             count++;
-            other_columns[name] = percentage;
+            other_columns[name] = {percentage, markscap};
         });
 
         report_columns["columns"] = other_columns;
@@ -224,6 +229,11 @@ var load_report_csv_file_data = (formdata) => {
                 $(`div[id="terminal_reports"] input[name="upload_report_file"]`).val("");
                 $(`div[id='summary_report_sheet_content']`).html(response.data.result);
                 total_score_checker();
+            } else {
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
             }
         },
         complete: function() {
@@ -291,10 +301,16 @@ $(`div[id="terminal_reports"] select[name="course_id"]`).on("change", function()
     let course_id = $(this).val();
     $(`div[id="notification"]`).html(``);
     if (course_id !== "null") {
+        $(`div[id="upload_file"]`).addClass("hidden");
         let class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val();
         $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", false);
         $.get(`${baseUrl}api/terminal_reports/check_existence`, { course_id, class_id }).then((response) => {
             $(`div[id="notification"]`).html(`<span class="text-${response.code == 200 ? "success" : "danger"}">${response.data.result}</span>`);
+            if(response.code !== 200) {
+                $(`button[type="download_csv"]`).prop("disabled", true);
+            } else {
+                $(`button[type="download_csv"]`).prop("disabled", false);
+            }
         });
     } else {
         $(`div[id="terminal_reports"] button[type='download_csv'], div[id="terminal_reports"] button[type='upload_button']`).prop("disabled", true);

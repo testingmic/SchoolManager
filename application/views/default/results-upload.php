@@ -86,7 +86,7 @@ $response->html = '
                                 </div>
                                 <div class="tab-pane fade" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
                                     <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered table-striped datatable">
+                                        <table class="table table-bordered table-striped raw_datatable">
                                             <thead>
                                                 <th></th>
                                                 <th>Class Name</th>

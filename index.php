@@ -105,6 +105,8 @@ if(!empty($session->userId)) {
 	// get the client data
 	$defaultClientData = $myClass->client_data($session->client_id);
 
+	// print_r($defaultClientData);exit;
+
 	// parse the client data
 	$init_param = (object) ["client_data" => $defaultClientData];
 	

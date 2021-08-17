@@ -55,10 +55,10 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                         <a class="nav-link" id="academic_calendar-tab2" data-toggle="tab" href="#academic_calendar" role="tab" aria-selected="true">Academic Calendar</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Examination Grading</a>
+                                        <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Grading System</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Import Courses</a>
+                                        <a class="nav-link" id="results_structure-tab2" data-toggle="tab" href="#results_structure" role="tab" aria-selected="true">Results Structure & Settings</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="import_students-tab2" data-toggle="tab" href="#import_students" role="tab" aria-selected="true">Import Students</a>
@@ -67,7 +67,7 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                         <a class="nav-link" id="staff-tab2" data-toggle="tab" href="#staff" role="tab" aria-selected="true">Import Staff</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="parent-tab2" data-toggle="tab" href="#parent" role="tab" aria-selected="true">Import Guardian / Parent</a>
+                                        <a class="nav-link" id="parent-tab2" data-toggle="tab" href="#parent" role="tab" aria-selected="true">Import Parents</a>
                                     </li>
                                 </ul>
                                 <div class="tab-content tab-bordered" id="myTab3Content">
@@ -79,6 +79,9 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                     </div>
                                     <div class="tab-pane fade" id="examination" role="tabpanel" aria-labelledby="examination-tab2">
                                         '.($the_form["examination"] ?? null).'
+                                    </div>                                    
+                                    <div class="tab-pane fade" id="results_structure" role="tabpanel" aria-labelledby="results_structure-tab2">
+                                        '.($the_form["results_structure"] ?? null).'
                                     </div>
                                     <div class="tab-pane fade" id="import_students" role="tabpanel" aria-labelledby="import_students-tab2">
                                         '.($the_form["student"] ?? null).'
@@ -91,11 +94,6 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                     <div class="tab-pane fade" id="parent" role="tabpanel" aria-labelledby="parenttab2">
                                         <div class="col-lg-12">
                                             '.($the_form["parent"] ?? null).'
-                                        </div>
-                                    </div>
-                                    <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="coursestab2">
-                                        <div class="col-lg-12">
-                                            '.($the_form["course"] ?? null).'
                                         </div>
                                     </div>
                                 </div>

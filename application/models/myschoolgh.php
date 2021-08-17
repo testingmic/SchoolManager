@@ -52,6 +52,37 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * Get the Grading System
+	 * 
+	 * @return Object
+	 */
+	public function grading_system($clientId, $academic_year, $academic_term) {
+
+		// if either the academic term or year are empty
+		if(empty($academic_year) || empty($academic_term)) {
+			return [];
+		}
+		
+		// prepare and execute the statement
+		$stmt = $this->db->prepare("SELECT
+				c.grading AS grading_system, c.structure AS grading_structure, 
+				c.show_position, c.show_teacher_name, c.allow_submission
+			FROM grading_system c
+			WHERE c.client_id = ? AND c.academic_year = ? AND c.academic_term = ? LIMIT 1
+		");
+		$stmt->execute([$clientId, $academic_year, $academic_term]);
+
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+		// return the result if a result was found
+		if(!empty($result)) {
+			return $result;
+		} else {
+			return [];
+		}
+	}
+
+	/**
 	 * client_data
 	 * 
 	 * @param String $clientId
@@ -64,35 +95,50 @@ class Myschoolgh extends Models {
 
 		try {
 
-			$stmt = $this->db->prepare("SELECT a.*, 
-				c.grading AS grading_system, c.structure AS grading_structure, 
-				c.show_position, c.show_teacher_name, c.allow_submission
-			FROM clients_accounts a 
-				LEFT JOIN grading_system c ON c.client_id = a.client_id
-			WHERE a.client_id = ? AND a.client_status = ? LIMIT 1");
+			// prepare and execute the statement
+			$stmt = $this->db->prepare("SELECT * FROM clients_accounts WHERE client_id = ? AND client_status = ? LIMIT 1");
 			$stmt->execute([$clientId, 1]);
 			
-			$data = [];
-
 			// loop through the list
-			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+			$result = $stmt->fetch(PDO::FETCH_OBJ);
+			
+			// loop through the items and convert into an object
+			$result->client_preferences = json_decode($result->client_preferences);
+			
+			// set this value
+			$this->birthday_days_interval = 30;
 
-				// loop through the items and convert into an object
-				foreach(["client_preferences", "grading_system", "grading_structure"] as $value) {
-					$result->{$value} = json_decode($result->{$value});
-				}
+			// set the defaults
+			$academic_year = null;
+			$academic_term = null;
 
-				// set this value
-				$this->birthday_days_interval = 30;
-
-				// academic year logs
-				$result->academic_year_logs = $this->pushQuery("*", "academic_years", "client_id='{$result->client_id}'");
-
-				// append to the data
-				$data[] = $result;
+			// set the academic year
+			if(!empty($result->client_preferences->academics->academic_year)) {
+				$academic_year = $result->client_preferences->academics->academic_year;
 			}
 
-			return !(empty($data)) ? $data[0] : (object) [];
+			// set the academic term
+			if(!empty($result->client_preferences->academics->academic_term)) {
+				$academic_term = $result->client_preferences->academics->academic_term;
+			}
+
+			// get the structure
+			$structure = $this->grading_system($clientId, $academic_year, $academic_term);
+
+			// convert to an array
+			$result = (array) $result;
+
+			// if the structure is not empty
+			if(!empty($structure)) {
+				$result = array_merge($result, $structure);
+				$result["grading_system"] = json_decode($result["grading_system"]);
+				$result["grading_structure"] = json_decode($result["grading_structure"]);
+			}
+
+			// convert to object
+			$result = (object) $result;
+
+			return $result;
 			
 		} catch(PDOException $e) {
 			return (object) $e;
@@ -827,7 +873,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Array
 	 */
-	public function academic_years() {
+	public function academic_years($clientId = null) {
 		/** Set the Parameters */
 		$previous_year = 2017;
 		$next_years = date("Y") + 2;
@@ -839,6 +885,125 @@ class Myschoolgh extends Models {
 
 		return $this;
 	}
+
+	/**
+	 * Convert Amount To Words
+	 * 
+	 * @param $amount
+	 * 
+	 * @return String
+	 */
+	public function amount_to_words($number) {
+
+		$hyphen      = '-';
+		$conjunction = ' and ';
+		$separator   = ', ';
+		$negative    = 'negative ';
+		$decimal     = ' point ';
+		$dictionary  = [
+			0                   	=> 'Zero',
+			1                   	=> 'One',
+			2                   	=> 'Two',
+			3                   	=> 'Three',
+			4                   	=> 'Four',
+			5                   	=> 'Five',
+			6                   	=> 'Six',
+			7                   	=> 'Seven',
+			8                   	=> 'Eight',
+			9                   	=> 'Nine',
+			10                  	=> 'Ten',
+			11                  	=> 'Eleven',
+			12                  	=> 'Twelve',
+			13                  	=> 'Thirteen',
+			14                  	=> 'Fourteen',
+			15                  	=> 'Fifteen',
+			16                  	=> 'Sixteen',
+			17                  	=> 'Seventeen',
+			18                  	=> 'Eighteen',
+			19                  	=> 'Nineteen',
+			20                  	=> 'Twenty',
+			30                  	=> 'Thirty',
+			40                  	=> 'Fourty',
+			50                  	=> 'Fifty',
+			60                  	=> 'Sixty',
+			70                  	=> 'Seventy',
+			80                  	=> 'Eighty',
+			90                  	=> 'Ninety',
+			100                 	=> 'Hundred',
+			1000                	=> 'Thousand',
+			1000000             	=> 'Million',
+			1000000000          	=> 'Billion',
+			1000000000000       	=> 'Trillion',
+			1000000000000000    	=> 'Quadrillion',
+			1000000000000000000 	=> 'Quintillion'
+		];
 	
+		if (!is_numeric($number)) {
+			return false;
+		}
+	
+		if (($number >= 0 && (int) $number < 0) || (int) $number < 0 - PHP_INT_MAX) {
+			// overflow
+			return 'This function only accepts numbers between -' . PHP_INT_MAX . ' and ' . PHP_INT_MAX;
+			return false;
+		}
+	
+		if ($number < 0) {
+			return $negative . $this->amount_to_words(abs($number));
+		}
+	
+		$string = null;
+		$fraction = null;
+	
+		if (strpos($number, '.') !== false) {
+			list($number, $fraction) = explode('.', $number);
+		}
+	
+		switch (true) {
+			case $number < 21:
+				$string = $dictionary[$number];
+				break;
+			case $number < 100:
+				$tens   = ((int) ($number / 10)) * 10;
+				$units  = $number % 10;
+				$string = $dictionary[$tens];
+				if ($units) {
+					$string .= $hyphen . $dictionary[$units];
+				}
+				break;
+			case $number < 1000:
+				$hundreds  = $number / 100;
+				$remainder = $number % 100;
+				$string = $dictionary[$hundreds] . ' ' . $dictionary[100];
+				if ($remainder) {
+					$string .= $conjunction . $this->amount_to_words($remainder);
+				}
+				break;
+			default:
+				$baseUnit = pow(1000, floor(log($number, 1000)));
+				$numBaseUnits = (int) ($number / $baseUnit);
+				$remainder = $number % $baseUnit;
+				$string = $this->amount_to_words($numBaseUnits) . ' ' . $dictionary[$baseUnit];
+				if ($remainder) {
+					$string .= $remainder < 100 ? $conjunction : $separator;
+					$string .= $this->amount_to_words($remainder);
+				}
+				break;
+		}
+		
+		if (null !== $fraction && is_numeric($fraction)) {
+			$tens   = ((int) ($fraction / 10)) * 10;
+			$units  = $fraction % 10;
+			$string .= $dictionary[$tens];
+			if ($units) {
+				$string .= $hyphen . $dictionary[$units];
+			}
+			$string .= " Pesewas";
+		}
+		
+		return $string;
+	
+	}
+
 }
 ?>

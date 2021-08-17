@@ -47,11 +47,11 @@ class Account extends Myschoolgh {
             "occupation" => "Occupation", "position" => "Position"
         ];
 
-        $this->accepted_column["course"] = [
-            "course_code" => "Course Code", "name" => "Title", "credit_hours" => "Credit Hours", 
-            "weekly_meeting" => "Weekly Meetings",  "description" => "Description", 
-            "course_tutor" => "Course Tutor IDs"
-        ];
+        // $this->accepted_column["course"] = [
+        //     "course_code" => "Course Code", "name" => "Title", "credit_hours" => "Credit Hours", 
+        //     "weekly_meeting" => "Weekly Meetings",  "description" => "Description", 
+        //     "course_tutor" => "Course Tutor IDs"
+        // ];
 
 	}
 
@@ -373,25 +373,45 @@ initiateCalendar();";
         global $defaultClientData;
         $client_data = $defaultClientData;
 
+        // check the report grading columns and ensure it does not exceed 100%
+        if(isset($params->report_columns["columns"]) && !empty($params->report_columns["columns"])) {
+            // assign
+            $score = 0;
+            $grading = (array) $params->report_columns["columns"];
+
+            // loop through the grading
+            foreach($grading as $key => $value) {
+                $score += $value["percentage"];
+            }
+
+            // if the score is more than 100 then alert the user
+            if($score > 100 || $score < 100) {
+                return ["code" => 203, "data" => "Sorry! The score must be equal to 100%. The current value is {$score}%."];
+            }
+        }
 
         // insert a new record
         if(empty($client_data->grading_system)) {
-            $stmt = $this->db->prepare("INSERT INTO grading_system SET client_id = ?, grading = ?, structure = ?
+
+            // prepare and execute the statement.
+            $stmt = $this->db->prepare("INSERT INTO grading_system SET client_id = ?, grading = ?, structure = ?, academic_year = ?, academic_term = ?
                 ".(isset($params->report_columns["show_position"]) ? ",show_position='{$params->report_columns["show_position"]}'" : "")."
                 ".(isset($params->report_columns["show_teacher_name"]) ? ",show_teacher_name='{$params->report_columns["show_teacher_name"]}'" : "")."
                 ".(isset($params->report_columns["allow_submission"]) ? ",allow_submission='{$params->report_columns["allow_submission"]}'" : "")."
             ");
-            $stmt->execute([$params->clientId, json_encode($params->grading_values), json_encode($params->report_columns)]);
+            $stmt->execute([$params->clientId, json_encode($params->grading_values), json_encode($params->report_columns), $params->academic_year, $params->academic_term]);
 
             // return a success messsage
             return ["data" => "The grading system have successfully been inserted"];
         } else {
+
+            // update the values if not already set
             $stmt = $this->db->prepare("UPDATE grading_system SET grading = ?, structure = ?
                 ".(isset($params->report_columns["show_position"]) ? ",show_position='{$params->report_columns["show_position"]}'" : "")."
                 ".(isset($params->report_columns["show_teacher_name"]) ? ",show_teacher_name='{$params->report_columns["show_teacher_name"]}'" : "")."
                 ".(isset($params->report_columns["allow_submission"]) ? ",allow_submission='{$params->report_columns["allow_submission"]}'" : "")."
-            WHERE client_id = ? LIMIT 1");
-            $stmt->execute([json_encode($params->grading_values), json_encode($params->report_columns), $params->clientId]);
+            WHERE client_id = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
+            $stmt->execute([json_encode($params->grading_values), json_encode($params->report_columns), $params->clientId, $params->academic_year, $params->academic_term]);
 
             // return a success messsage
             return ["data" => "The grading system have successfully been updated"];

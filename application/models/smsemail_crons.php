@@ -34,14 +34,14 @@ class SMS_CronJOB {
 			'hostname' => "localhost",
 			'database' => "mineconr_school",
 			'username' => "mineconr_school",
-			'password' => 'YdwQLVx4vKU_'
+			'password' => "YdwQLVx4vKU_"
 		);
 
 		$connectionArray = array(
 			'hostname' => "localhost",
 			'database' => "myschoolgh",
-			'username' => "root",
-			'password' => ''
+			'username' => "newuser",
+			'password' => "password"
 		);
 		
 		// run the database connection

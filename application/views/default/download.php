@@ -169,14 +169,14 @@ elseif(confirm_url_id(1, "payslip") && isset($_GET["pay_id"])) {
     // load the table
     $content = load_class("payroll", "controllers", $param)->draw($param);
     $file_name = "Employee_Payslip.pdf";
-    $orientation = "portrait";
+    $orientation = "L";
 
     // end query if no result found
     if(!isset($_GET["dw"])) {
         print $content["data"];
         print '<script>
-                window.onload = (evt) => { window.print(); }
-                window.onafterprint = (evt) => { window.close(); }
+                // window.onload = (evt) => { window.print(); }
+                // window.onafterprint = (evt) => { window.close(); }
             </script>';
         return;
     }

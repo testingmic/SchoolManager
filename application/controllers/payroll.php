@@ -885,7 +885,7 @@ class Payroll extends Myschoolgh {
         }
 
         // set the header content
-        $result .= "<div style=\"width: 90%; margin: auto auto;\">
+        $result .= "<div style=\"width: 95%; margin: auto auto;\">
                     <table width=\"100%\" style=\"background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: open sans; width:100%;margin-bottom:2px\" border=\"0\" cellpadding=\"5px\" cellspacing=\"5px\">
                     <tbody>";
                     $result .= '<tr style="padding: 5px; border-bottom: solid 1px #ccc;">
@@ -983,17 +983,29 @@ class Payroll extends Myschoolgh {
                             </table>
                         </div>
                     </td>
-                </tr>
-                <tr>
+                </tr>";
+                
+                // summation
+                $total_allowance = array_sum(array_column($allowancesQuery, 'amount'));
+                $total_deductions = array_sum(array_column($deductionsQuery, 'amount'));
+                $total_salary = $data->basic_salary + $total_allowance - $total_deductions;
+
+                $result .= "<tr>
                     <td colspan=\"1\"></td>
                     <td align=\"right\">
                         <div class=\"row justify-content-between\">
                             <table width=\"100%\" cellpadding=\"10px\" class=\"table\" {$border}>
                                 <tr>";
                                     $result .= "
-                                    <td  width=\"50%\" style=\"background-color:#6777ef; padding:10px; color:#fff; padding:10px;font-weight:bolder;text-transform:uppercase\"><strong>Net Salary</strong></td>
+                                    <td align=\"right\" width=\"50%\" style=\"background-color:#6777ef; padding:10px; color:#fff; padding:10px;font-weight:bolder;text-transform:uppercase\"><strong>Net Salary</strong></td>
                                     <td align=\"right\" style=\"background-color:#f4f4f4;font-size:20px;padding:10px;font-weight:bolder;text-transform:uppercase\">
-                                        <strong>GH&cent;".number_format((($data->basic_salary + array_sum(array_column($allowancesQuery, 'amount')))-array_sum(array_column($deductionsQuery, 'amount'))), 2)."</strong>
+                                        <strong>GH&cent;".number_format($total_salary, 2)."</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width=\"50%\" style=\"background-color:#ccc;color:#000;\" align=\"right\"><strong>AMOUNT IN WORDS</strong></td>
+                                    <td align=\"right\" style=\"background-color:#f4f4f4;font-size:16px;padding:10px;text-transform:uppercase\">
+                                        ".$this->amount_to_words($total_salary)."
                                     </td>
                                 </tr>
                             </table>

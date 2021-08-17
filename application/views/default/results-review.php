@@ -112,11 +112,16 @@ if(empty($result_id)) {
                 )."
                 </td>";
                 // if the result has not yet been approved
-                if(!$isApproved) {
+                if(!$isApproved && !$is_disabled) {
                     $scores_list .= "
                     <td>
                         ".(!$is_disabled && $modifyResult ? "<span data-input_save_button='{$score->student_item_id}' onclick='return save_result(\"$score->student_item_id\",\"student\");' title='Save Student Marks' class='btn mb-2 hidden btn-sm btn-outline-success'><i class='fa fa-save'></i></span>" : null)."
                         ".(!$is_disabled && $approveResult ? "<span data-input_approve_button='{$score->student_item_id}' onclick='return modify_result(\"approve\",\"{$score->report_id}_{$score->student_item_id}\");' title='Approve this Mark' class='btn btn-sm btn-outline-primary'><i class='fa fa-check-circle'></i></span>" : null)."
+                    </td>";
+                } else {
+                    $scores_list .= "
+                    <td>
+                        <span title='Save Student Marks' class='badge p-1 badge-success'>Approved</span>
                     </td>";
                 }
             $scores_list .= "</tr>";
@@ -225,14 +230,14 @@ if(empty($result_id)) {
                                 </div>
                             </div>
                             <div class="table-responsive trix-slim-scroll">
-                                <table class="table table-bordered datatable">
+                                <table width="100%" class="table table-bordered">
                                     <thead>
                                         <th width="10%"></th>
                                         <th>Student Name / ID</th>
                                         '.$scores_header.'
                                         <th>Total Score</th>
                                         <th>Remarks</th>
-                                        '.(!$isApproved ? "<th></th>" : "").'
+                                        <th></th>
                                     </thead>
                                     <tbody>'.$scores_list.'</tbody>
                                 </table>
