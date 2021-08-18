@@ -429,8 +429,8 @@ class Crons {
 		
 		// set the fullname of the user
 		$u_stmt = $this->db->prepare("UPDATE grading_terminal_scores a SET 
-			a.student_item_id = (SELECT u.item_id FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
-			a.student_name = (SELECT u.name FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+			a.student_item_id = (SELECT u.item_id FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+			a.student_name = (SELECT u.name FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
 			a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
 		WHERE a.report_id='{$report_id}'");
 		$u_stmt->execute();
@@ -439,7 +439,8 @@ class Crons {
 		$u_stmt = $this->db->prepare("UPDATE grading_terminal_logs a SET 
 			a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
 		WHERE a.report_id='{$report_id}' LIMIT 1");
-		$u_stmt->execute();		
+		$u_stmt->execute();
+		
 	}
 	
     /**

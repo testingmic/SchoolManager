@@ -306,7 +306,7 @@ class Terminal_reports extends Myschoolgh {
         }
 
         // set the name
-        $filename = "{$temp_dir}/terminal_report_".create_slug($class_name[0]->name, "_").".csv";
+        $filename = "{$temp_dir}/terminal_report_".create_slug($class_name[0]->name, "_")."_{$course_code}.csv";
 
         try {
 
@@ -361,7 +361,7 @@ class Terminal_reports extends Myschoolgh {
                 $count = 0;
                 foreach($columns["columns"] as $key => $column) {
                     $count++;
-                    $headers[] = $key;
+                    $headers[] = trim($key);
                 }
             }
         }
@@ -398,12 +398,12 @@ class Terminal_reports extends Myschoolgh {
         // set the files
         foreach($complete_csv_data as $key => $result) {
             $report_table .= "<tr>";
-            $report_table .= "<td>".($key+1)."</td>";
+            $report_table .= "<td width='200px'>".($key+1)."</td>";
             foreach($result as $kkey => $kvalue) {
                 // if the key is in the array list
                 if(in_array($file_headers[$kkey], array_keys($columns["columns"]))) {
                     $column = create_slug($file_headers[$kkey], "_");
-                    $report_table .= "<td><input ".($columns["columns"][$file_headers[$kkey]] == "100" ? "disabled='disabled' data-input_total_id='{$key}'" : "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." class='form-control pl-0 pr-0 font-18 text-center' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}'></td>";
+                    $report_table .= "<td><input style='min-width:100px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? "disabled='disabled' data-input_total_id='{$key}'" : "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." class='form-control pl-0 pr-0 font-18 text-center' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}'></td>";
                 } elseif($file_headers[$kkey] == "Teacher Remarks") {
                     $report_table .= "<td><input style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
                 } else {
@@ -423,7 +423,9 @@ class Terminal_reports extends Myschoolgh {
         // save the information in a session
         $this->session->set("terminal_report_{$params->class_id}_{$params->course_id}", ["headers" => $headers, "students" => $complete_csv_data]);
 
-        return ["data" => $report_table];
+        return [
+            "data" => $report_table
+        ];
 
     }
 
@@ -662,7 +664,7 @@ class Terminal_reports extends Myschoolgh {
             }
 
             // get the details of the terminal report
-            $check = $this->pushQuery("a.status, a.course_name, a.class_name, a.course_code, a.course_id,
+            $check = $this->pushQuery("a.status, a.course_name, a.class_name, a.course_code, a.course_id, a.teachers_name,
                 (SELECT COUNT(*) FROM grading_terminal_scores b WHERE b.report_id = a.report_id) AS students_count", 
                 "grading_terminal_logs a", "a.report_id='{$report_id}' LIMIT 1");
 
@@ -734,6 +736,26 @@ class Terminal_reports extends Myschoolgh {
                     $stmt = $this->db->prepare("UPDATE grading_terminal_logs SET status = ? WHERE report_id = ? LIMIT 1");
                     $stmt->execute(["Submitted", $report_id]);
                 }
+
+                // run this section if the teachers_name is empty
+                if(empty($check->teachers_name)) {
+
+                    // set the fullname of the user
+                    $u_stmt = $this->db->prepare("UPDATE grading_terminal_scores a SET 
+                        a.student_item_id = (SELECT u.item_id FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+                        a.student_name = (SELECT u.name FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+                        a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
+                    WHERE a.report_id='{$report_id}'");
+                    $u_stmt->execute();
+
+                    // get the list of all users that was uploaded
+                    $u_stmt = $this->db->prepare("UPDATE grading_terminal_logs a SET 
+                        a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
+                    WHERE a.report_id='{$report_id}' LIMIT 1");
+                    $u_stmt->execute();
+
+                }
+
                 // update the student marks as well
                 $stmt = $this->db->prepare("UPDATE grading_terminal_scores SET date_submitted = now(), status = ? WHERE report_id = ? AND course_id = ? {$where_clause} LIMIT {$students_count}");
                 $stmt->execute(["Submitted", $report_id, $report->course_id]);

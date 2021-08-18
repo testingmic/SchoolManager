@@ -3785,11 +3785,13 @@ class Forms extends Myschoolgh {
             $the_form["general"] = "<div class='text-center alert alert-warning'>Sorry! You are not allowed submit a report at this period of the term.</div>";
             return $the_form;
         }
+
         // if the grading structure columsn is empty then end the query
         if(!isset($client_data->grading_structure->columns) || empty($client_data->grading_structure->columns)) {
             $the_form["general"] = "<div class='text-center alert alert-warning'>Sorry! The <strong>Grading Structure</strong> has not yet been set. Please Visit <strong>Settings > Examination Grading > Terminal Report Structure</strong> section to set this up.</div>";
             return $the_form;
         }
+        
         // append the form and display
         $the_form["general"] = "
             <div class='row' id='terminal_reports'>

@@ -1,10 +1,17 @@
-$(`input[data-input_type_q="marks"]`).on("input", function() {
-    let student_id = $(this).attr("data-input_row_id"),
-        score = 0,
-        total = 100;
+var recalculate_score = (student_id, total) => {
+    let score = 0,
+        total_percentage = 0;
     $.each($(`input[data-input_type_q="marks"][data-input_row_id="${student_id}"]`), function() {
-        let mark = parseInt($(this).val());
-        score += mark;
+        let input = $(this);
+        if(input.val().length && !isNaN(input.val())) {
+            let mark = parseInt(input.val()),
+                raw = parseInt(input.attr("data-max_value")),
+                percentage = parseInt(input.attr("data-raw_percentage"));
+            score += mark;
+
+            let percent = ((mark * percentage) / raw);
+            total_percentage += percent;
+        }
     });
     if (score > total) {
         $(`input[data-input_type_q="marks"][data-input_row_id="${student_id}"]`).addClass("border-red");
@@ -13,6 +20,26 @@ $(`input[data-input_type_q="marks"]`).on("input", function() {
     }
     $(`input[data-input_total_id="${student_id}"]`).val(score);
     $(`span[data-input_save_button="${student_id}"]`).removeClass("hidden");
+    $(`span[data-student_percentage="${student_id}"]`).html(`${total_percentage}%`);
+}
+
+$(`input[data-input_type_q="marks"]`).on("input", function() {
+    let input = $(this);
+    let student_id = input.attr("data-input_row_id"),
+        total = parseInt(input.attr("data-overall_total")),
+        max = parseInt(input.attr("data-max_value"));
+
+    if(input.val() > max) {
+        input.val(max);
+        recalculate_score(student_id, total);
+        return false;
+    }
+    else if(input.val() < 0) {
+        input.val(0);
+        recalculate_score(student_id, total);
+        return false;
+    }
+    recalculate_score(student_id, total);
 });
 
 var modify_result = (action, report_id) => {
