@@ -33,11 +33,9 @@ if(empty($result_id)) {
         "client_data" => $defaultUser->client,
         "clientId" => $clientId,
         "result_id" => $result_id,
-        "show_scores" => true
+        "show_scores" => true,
+        "limit" => 1
     ];
-
-    // scripts to load
-    $response->scripts = ["assets/js/results.js"];
 
     // create new object
     $reportObj = load_class("terminal_reports", "controllers", $report_param);
@@ -49,8 +47,25 @@ if(empty($result_id)) {
     if(empty($reports_list)) {
         $response->html = page_not_found();
     } else {
+
         // get the first item
         $data = $reports_list[0];
+
+        // confirm that the teacher's name is empty
+        if(empty($data->teachers_name)) {
+
+            // run the cron job
+            $reportObj->run_result_cron_job($result_id, $clientId);
+            
+            // load the reports list
+            $reports_list = $reportObj->results_list($report_param)["data"];
+
+            // get the first item
+            $data = $reports_list[0];
+        }
+        
+        // scripts to load
+        $response->scripts = ["assets/js/results.js"];
 
         // scores list
         $headers = [];
@@ -111,10 +126,11 @@ if(empty($result_id)) {
                         : "<span>{$marks}</span>"
                     )."
                 </td>";
+
                 // calculate the percentage
-                $raw = $headers["column"]["{$clean_key}"]["raw_score"];
-                $cap = $headers["column"]["{$clean_key}"]["percentage"];
-                $percent = round((($marks * $cap) / $raw), 2);
+                $raw = $headers["column"]["{$clean_key}"]["raw_score"] ?? 0;
+                $cap = $headers["column"]["{$clean_key}"]["percentage"] ?? 0;
+                $percent = $raw ? round((($marks * $cap) / $raw), 2) : 0;
                 $total_percentage_score += $percent;
             }
             // append to the scores
@@ -145,7 +161,7 @@ if(empty($result_id)) {
                 if(!$isApproved && !$is_disabled) {
                     $scores_list .= "
                     <td width='200px'>
-                        ".(!$is_disabled && $modifyResult ? "<span data-input_save_button='{$score->student_item_id}' onclick='return save_result(\"$score->student_item_id\",\"student\");' title='Save Student Marks' class='btn mb-2 hidden btn-sm btn-outline-success'><i class='fa fa-save'></i></span>" : null)."
+                        ".(!$is_disabled && $modifyResult ? "<span data-input_save_button='{$score->student_item_id}' onclick='return save_result(\"{$score->student_item_id}\",\"student\",\"{$score->report_id}\");' title='Save Student Marks' class='btn mb-2 hidden btn-sm btn-outline-success'><i class='fa fa-save'></i></span>" : null)."
                         ".(!$is_disabled && $approveResult ? "<span data-input_approve_button='{$score->student_item_id}' onclick='return modify_result(\"approve\",\"{$score->report_id}_{$score->student_item_id}\");' title='Approve this Mark' class='btn btn-sm btn-outline-primary'><i class='fa fa-check-circle'></i></span>" : null)."
                     </td>";
                 } else {
@@ -156,6 +172,7 @@ if(empty($result_id)) {
                 }
             $scores_list .= "</tr>";
         }
+
         $scores_array = array_unique($scores_array);
         $scores_header = "";
 

@@ -114,6 +114,9 @@ class Account extends Myschoolgh {
         // log the user activity
         $this->userLogs("end_academic_term", $params->clientId, null, "{$params->userData->name} requested to end this academic term.", $params->userId);
 
+        // reset the client data information
+        $this->client_session_data($params->clientId, true);
+
         // return the success reponse
         return [
             "code" => 200,
@@ -152,6 +155,9 @@ class Account extends Myschoolgh {
             $stmt = $this->db->prepare("UPDATE users SET last_visited_page='{{APPURL}}dashboard' WHERE item_id=? LIMIT 1");
             $stmt->execute([$params->userId]);
         }
+
+        // reset the client data information
+        $this->client_session_data($params->clientId, true);
 
         // return a success message
         return [
@@ -304,6 +310,9 @@ initiateCalendar();";
             // log the user activity
             $this->userLogs("account", $params->clientId, $client_data, "{$params->userData->name} updated the Account Information", $params->userId);
 
+            // reset the client data information
+            $this->client_session_data($params->clientId, true);
+
             return $return;
 
         } catch(PDOException $e) {}
@@ -348,6 +357,9 @@ initiateCalendar();";
 
             // log the user activity
             $this->userLogs("account", $params->clientId, $client_data, "{$params->userData->name} updated the Account Information", $params->userId);
+            
+            // reset the client data information
+            $this->client_session_data($params->clientId, true);
 
             return $return;
 
@@ -401,6 +413,9 @@ initiateCalendar();";
             ");
             $stmt->execute([$params->clientId, json_encode($params->grading_values), json_encode($params->report_columns), $params->academic_year, $params->academic_term]);
 
+            // reset the client data information
+            $this->client_session_data($params->clientId, true);
+
             // return a success messsage
             return ["data" => "The grading system have successfully been inserted"];
         } else {
@@ -412,6 +427,9 @@ initiateCalendar();";
                 ".(isset($params->report_columns["allow_submission"]) ? ",allow_submission='{$params->report_columns["allow_submission"]}'" : "")."
             WHERE client_id = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
             $stmt->execute([json_encode($params->grading_values), json_encode($params->report_columns), $params->clientId, $params->academic_year, $params->academic_term]);
+
+            // reset the client data information
+            $this->client_session_data($params->clientId, true);
 
             // return a success messsage
             return ["data" => "The grading system have successfully been updated"];

@@ -109,7 +109,6 @@ class CI_Session_files_driver extends CI_Session_driver implements SessionHandle
 		}
 		else
 		{
-			log_message('debug', 'Session: "sess_save_path" is empty; using "session.save_path" value from php.ini.');
 			$this->_config['save_path'] = rtrim(ini_get('session.save_path'), '/\\');
 		}
 
@@ -173,13 +172,11 @@ class CI_Session_files_driver extends CI_Session_driver implements SessionHandle
 
 			if (($this->_file_handle = fopen($this->_file_path.$session_id, 'c+b')) === FALSE)
 			{
-				log_message('error', "Session: Unable to open file '".$this->_file_path.$session_id."'.");
 				return $this->_failure;
 			}
 
 			if (flock($this->_file_handle, LOCK_EX) === FALSE)
 			{
-				log_message('error', "Session: Unable to obtain lock for file '".$this->_file_path.$session_id."'.");
 				fclose($this->_file_handle);
 				$this->_file_handle = NULL;
 				return $this->_failure;
@@ -271,7 +268,6 @@ class CI_Session_files_driver extends CI_Session_driver implements SessionHandle
 			if ( ! is_int($result))
 			{
 				$this->_fingerprint = md5(substr($session_data, 0, $written));
-				log_message('error', 'Session: Unable to write data.');
 				return $this->_failure;
 			}
 		}
@@ -357,7 +353,6 @@ class CI_Session_files_driver extends CI_Session_driver implements SessionHandle
 	{
 		if ( ! is_dir($this->_config['save_path']) OR ($directory = opendir($this->_config['save_path'])) === FALSE)
 		{
-			log_message('debug', "Session: Garbage collector couldn't list files under directory '".$this->_config['save_path']."'.");
 			return $this->_failure;
 		}
 

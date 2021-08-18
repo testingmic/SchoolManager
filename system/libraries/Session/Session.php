@@ -57,6 +57,7 @@ class Session {
 		$this->_config['_sid_regexp'] = $this->_sid_regexp;
 
 		$class = new $class($this->_config);
+		
 		if ($class instanceof SessionHandlerInterface)
 		{
 			if (is_php('5.4'))
@@ -65,6 +66,7 @@ class Session {
 			}
 			else
 			{
+				print "gert";
 				session_set_save_handler(
 					array($class, 'open'),
 					array($class, 'close'),
@@ -79,7 +81,7 @@ class Session {
 		}
 		else
 		{
-			log_message('error', "Session: Driver '".$this->_driver."' doesn't implement SessionHandlerInterface. Aborting.");
+			print("Session: Driver '".$this->_driver."' doesn't implement SessionHandlerInterface. Aborting.");
 			return;
 		}
 
@@ -126,8 +128,6 @@ class Session {
 		}
 
 		$this->_ci_init_vars();
-
-		log_message('info', "Session: Class initialized using '".$this->_driver."' driver.");
 	}
 
 	// ------------------------------------------------------------------------
@@ -165,16 +165,6 @@ class Session {
 
 		$class = 'Session_'.$driver.'_driver';
 
-		// Allow custom drivers without the CI_ or MY_ prefix
-		if ( ! class_exists($class, FALSE) && file_exists($file_path = APPPATH.'libraries/Session/drivers/'.$class.'.php'))
-		{
-			require_once($file_path);
-			if (class_exists($class, FALSE))
-			{
-				return $class;
-			}
-		}
-
 		if ( ! class_exists('CI_'.$class, FALSE))
 		{
 			if (file_exists($file_path = APPPATH.'libraries/Session/drivers/'.$class.'.php') OR file_exists($file_path = BASEPATH.'libraries/Session/drivers/'.$class.'.php'))
@@ -186,17 +176,6 @@ class Session {
 			{
 				throw new UnexpectedValueException("Session: Configured driver '".$driver."' was not found. Aborting.");
 			}
-		}
-
-		if ( ! class_exists($prefix.$class, FALSE) && file_exists($file_path = APPPATH.'libraries/Session/drivers/'.$prefix.$class.'.php'))
-		{
-			require_once($file_path);
-			if (class_exists($prefix.$class, FALSE))
-			{
-				return $prefix.$class;
-			}
-
-			log_message('debug', 'Session: '.$prefix.$class.".php found but it doesn't declare class ".$prefix.$class.'.');
 		}
 
 		return 'CI_'.$class;

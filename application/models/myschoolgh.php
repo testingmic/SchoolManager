@@ -52,6 +52,57 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * Run the Query to Load the Client Data
+	 * Save the results in session and refresh after every 2 minutes
+	 * 
+	 * @param String $clientId
+	 * 
+	 * @return Object
+	 */
+	public function client_session_data($clientId, $clear = false) {
+
+		// initial client data
+		$client_data = (object) [];
+
+		// if the clear is true then unset the session variable
+		if($clear) {
+			$this->session->remove("defaultClientData");
+		}
+
+		// if the session variable is empty then set a new session
+		if(empty($this->session->defaultClientData)) {
+
+			// load the client data
+			$client_data = $this->client_data($clientId);
+			
+			// set the session variable
+			$this->session->set("defaultClientData", ["last_timer" => time(), "data" => $client_data]);
+		} else {
+			// check timer
+			$timer = $this->session->defaultClientData["last_timer"];
+
+			// get the time difference
+			$difference = time() - $timer;
+			$checker = round(($difference / 60), 2);
+
+			// get the timer
+			if($checker > 2) {
+				// load the client data
+				$client_data = $this->client_data($clientId);
+				
+				// set the session variable
+				$this->session->set("defaultClientData", ["last_timer" => time(), "data" => $client_data]);
+			} else {
+				// get the client data and push again
+				$client_data = $this->session->defaultClientData["data"];
+			}
+		}
+
+		return $client_data;
+
+	}
+
+	/**
 	 * Get the Grading System
 	 * 
 	 * @return Object

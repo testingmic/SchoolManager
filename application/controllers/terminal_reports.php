@@ -57,10 +57,12 @@ class Terminal_reports extends Myschoolgh {
     public function results_list(stdClass $params) {
         
         // additional variables
-        global $defaultUser;
+        global $defaultUser, $defaultClientData;
 
+        // set some values
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
         $params->query = 1;
+        $grading = $defaultClientData->grading_structure->columns;
         
         // get the teachers id
         if(in_array($defaultUser->user_type, ["teacher", "parent", "student"])) {
@@ -104,6 +106,8 @@ class Terminal_reports extends Myschoolgh {
             $showScores = (bool) isset($params->show_scores);
 
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                $result->grading = !empty($result->grading) ? json_decode($result->grading) : $grading;
                 if($showScores) {
                     $result->scores_list = $this->result_score_list($result->report_id);
                 }
@@ -443,6 +447,8 @@ class Terminal_reports extends Myschoolgh {
             return ["code" => 203, "data" => "Sorry! The report_sheet parameter must be an array."];
         }
 
+        global $defaultClientData;
+
         // set the report
         $report = (object) $params->report_sheet;
         $report->clientId = $params->clientId;
@@ -519,7 +525,7 @@ class Terminal_reports extends Myschoolgh {
             $class_item = $class_item[0];
 
             //set more values
-            $average_score = $overall_score / count($scores_array);
+            $average_score = 0;
             $course_name = ucwords($course_item->name);
             $course_code = strtoupper($course_item->course_code);
             
@@ -605,11 +611,12 @@ class Terminal_reports extends Myschoolgh {
                 // log the information
                 $log_stmt = $this->db->prepare("INSERT INTO grading_terminal_logs SET report_id = ?, client_id = ?, 
                     class_id = ?, class_name = ?, course_id = ?, course_name = ?, academic_year = ?, academic_term = ?,
-                    created_by = ?, course_code = ?");
+                    created_by = ?, course_code = ?, grading = ?");
                 $log_stmt->execute([
                     $report_id, $params->clientId, $report->class_id, $class_item->name, 
                     $report->course_id, $course_name, $params->academic_year, 
-                    $params->academic_term, $params->userId, strtoupper($course_item->course_code)
+                    $params->academic_term, $params->userId, strtoupper($course_item->course_code),
+                    json_encode($defaultClientData->grading_structure->columns)
                 ]);
 
                 // insert the activity into the cron_scheduler
@@ -625,6 +632,31 @@ class Terminal_reports extends Myschoolgh {
         } catch(PDOException $e) {
             return $this->unexpected_error;
         }
+    }
+
+    /**
+     * Run the results cron job
+     * 
+     * @param String    $report_id
+     * @param String    $clientId
+     * 
+     * @return Bool
+     */
+    public function run_result_cron_job($report_id, $clientId) {
+
+        // set the fullname of the user
+        $u_stmt = $this->db->prepare("UPDATE grading_terminal_scores a SET 
+            a.student_item_id = (SELECT u.item_id FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+            a.student_name = (SELECT u.name FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+            a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
+        WHERE a.report_id='{$report_id}' AND a.client_id = '{$clientId}'");
+        $u_stmt->execute();
+
+        // get the list of all users that was uploaded
+        $u_stmt = $this->db->prepare("UPDATE grading_terminal_logs a SET 
+            a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
+        WHERE a.report_id='{$report_id}' AND a.client_id='{$clientId}' LIMIT 1");
+        $u_stmt->execute();
     }
 
     /**
@@ -739,21 +771,8 @@ class Terminal_reports extends Myschoolgh {
 
                 // run this section if the teachers_name is empty
                 if(empty($check->teachers_name)) {
-
-                    // set the fullname of the user
-                    $u_stmt = $this->db->prepare("UPDATE grading_terminal_scores a SET 
-                        a.student_item_id = (SELECT u.item_id FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
-                        a.student_name = (SELECT u.name FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
-                        a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
-                    WHERE a.report_id='{$report_id}'");
-                    $u_stmt->execute();
-
-                    // get the list of all users that was uploaded
-                    $u_stmt = $this->db->prepare("UPDATE grading_terminal_logs a SET 
-                        a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
-                    WHERE a.report_id='{$report_id}' LIMIT 1");
-                    $u_stmt->execute();
-
+                    // run the cron job
+                    $this->run_result_cron_job($report_id, $params->clientId);
                 }
 
                 // update the student marks as well
@@ -793,7 +812,7 @@ class Terminal_reports extends Myschoolgh {
                 "data" => "Congrats! The request was successfully processed.",
                 "additional" => [
                     "disable" => !isset($student_id) ? "record" : "student",
-                    "href" => !isset($student_id) ? "{$this->baseUrl}results-upload/view" : "{$this->baseUrl}results-review/{$report_id}"
+                    "href" => "{$this->baseUrl}results-review/{$report_id}"
                 ]
             ];
 
@@ -828,6 +847,9 @@ class Terminal_reports extends Myschoolgh {
 
         try {
 
+            // global variable
+            global $defaultClientData;
+
             // report id
             $record_id = $params->label["record_id"];
             $record_type = $params->label["record_type"];
@@ -841,9 +863,15 @@ class Terminal_reports extends Myschoolgh {
             }
             // if the student is empty
             elseif($record_type === "student") {
+                // split the record_id
+                $split = explode("_", $record_id);
+                $student_id = $split[1];
+                $report_id = $split[0];
+
                 // get the details of the terminal report
-                $check = $this->pushQuery("a.status, a.student_name, a.report_id, a.course_name, a.class_name, a.course_code, a.course_id", 
-                    "grading_terminal_scores a", "a.student_item_id='{$record_id}' LIMIT 1");
+                $check = $this->pushQuery("
+                    a.status, a.student_name, a.report_id, a.course_name, a.class_name, a.course_code, a.course_id", 
+                    "grading_terminal_scores a", "a.student_item_id='{$student_id}' AND a.report_id='{$report_id}' LIMIT 1");
             }
 
             // confirm if the result is not empty
@@ -863,17 +891,31 @@ class Terminal_reports extends Myschoolgh {
             $scores_array = [];
             $students_list = $params->label["results"];
 
+            // grading structure
+            $grading_column = (array) $defaultClientData->grading_structure->columns;
+
             // group the information in an array
             foreach($students_list as $stu_id => $score) {
+                // if the marks is set and an array
                 if(isset($score["marks"]) && is_array($score["marks"])) {
                     $count = 0;
+                    // loop through the marks list
                     foreach($score["marks"] as $item => $mark) {
-                        if(is_numeric($mark)) {
-                            $scores_array[$stu_id]["marks"][$count]["item"] = $item;
-                            $scores_array[$stu_id]["marks"][$count]["score"] = $mark;
-                            $overall_score += $mark;
-                            $count++;
-                        }
+                        // clean the item key
+                        $key = ucwords(str_ireplace("_", " ", $item));
+                        $percent_cap = $grading_column[$key]->percentage;
+                        $raw_score_cap = $grading_column[$key]->markscap;
+
+                        $percent_value = (($mark * $percent_cap) / $raw_score_cap);
+
+                        // append to the array list
+                        $scores_array[$stu_id]["marks"][$count]["item"] = $item;
+                        $scores_array[$stu_id]["marks"][$count]["score"] = $mark;
+                        $scores_array[$stu_id]["marks"][$count]["percent_value"] = $percent_value;
+                        $scores_array[$stu_id]["marks"][$count]["percent_rawscore_cap"] = $raw_score_cap;
+                        $scores_array[$stu_id]["marks"][$count]["percentage_ratio"] = $percent_cap;
+                        $overall_score += $percent_value;
+                        $count++;
                     }
                 }
                 // // append the teachers remarks to the array
@@ -885,12 +927,19 @@ class Terminal_reports extends Myschoolgh {
 
             // get the sum for all scores
             foreach($scores_array as $key => $score) {
-                $total = array_column($score["marks"], "score");
-                $total = !empty($total) ? array_sum($total) : 0;
-                $scores_array[$key]["total_score"] = $total;
-                if($total > 100) { $exceeds[] = $key; }
+                $raw_total = array_column($score["marks"], "score");
+                $raw_total = !empty($raw_total) ? array_sum($raw_total) : 0;
+
+                $percentage = array_column($score["marks"], "percent_value");
+                $percentage = !empty($percentage) ? array_sum($percentage) : 0;
+
+                $scores_array[$key]["raw_score"] = $raw_total;
+                $scores_array[$key]["percentage"] = $percentage;
+
+                // if the percentage exceeds 100 then log the error
+                if($percentage > 100) { $exceeds[] = $key; }
             }
-            
+
             // if an error was found
             if(!empty($exceeds)) {
                 return ["code" => 203, "data" => "Sorry! Please ensure the total score of any student does not exceed 100%."];
@@ -902,7 +951,7 @@ class Terminal_reports extends Myschoolgh {
             // update query
             $update_stmt = $this->db->prepare("UPDATE grading_terminal_scores SET 
                 scores = ?, total_score = ?, date_modified = now(), average_score = ?, class_teacher_remarks = ?
-                WHERE academic_year = ? AND academic_term = ? AND student_item_id = ? AND report_id = ? AND client_id = ?
+                WHERE academic_year = ? AND academic_term = ? AND student_item_id = ? AND report_id = ? AND client_id = ? LIMIT 1
             ");
             
             // loop through the list and insert the record
@@ -910,7 +959,7 @@ class Terminal_reports extends Myschoolgh {
                 
                 // execute the statement
                 $update_stmt->execute([
-                    json_encode($student["marks"]), $student["total_score"], $average_score, $student["remarks"],
+                    json_encode($student["marks"]), $student["raw_score"], $average_score, $student["remarks"],
                     $params->academic_year, $params->academic_term, $key, $report_id, $params->clientId
                 ]);
                 // log the user activity
@@ -933,6 +982,7 @@ class Terminal_reports extends Myschoolgh {
             }
 
             return [
+                "code" => 200,
                 "data" => "The result marks was successfully updated.",
                 "additional" => $additional
             ];

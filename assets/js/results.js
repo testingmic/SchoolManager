@@ -81,7 +81,7 @@ var modify_result = (action, report_id) => {
     });
 }
 
-var save_result = (record_id, record_type) => {
+var save_result = (record_id, record_type, additional_id = "") => {
     let s_title = (record_type == "approve_results") ? "Approve Results" : "Save Results",
         s_message = (record_type == "approve_results") ? `You have opted to Approve this Results. Please note that you will not be able to update the record once it has been submitted. Do you want to proceed?` : "Do you want to save this updated results?";
 
@@ -129,14 +129,18 @@ var save_result = (record_id, record_type) => {
                 record_type,
                 record_id
             };
+            if(record_type === "student") {
+                label["record_id"] = `${additional_id}_${record_id}`;
+            }
             $.post(`${baseUrl}api/terminal_reports/update_report`, { label }).then((response) => {
-                let s_code = "error";
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
                 if (response.code == 200) {
-                    s_code = "success";
                     if (record_type === "student") {
                         $(`span[data-input_save_button="${record_id}"]`).addClass("hidden");
                     } else {
-                        $(`span[data-input_save_button]`).addClass("hidden");
                         if (response.data.additional.href !== undefined) {
                             setTimeout(() => {
                                 loadPage(response.data.additional.href);
@@ -144,10 +148,6 @@ var save_result = (record_id, record_type) => {
                         }
                     }
                 }
-                swal({
-                    text: response.data.result,
-                    icon: s_code,
-                });
                 $.pageoverlay.hide();
             }).catch(() => {
                 $.pageoverlay.hide();

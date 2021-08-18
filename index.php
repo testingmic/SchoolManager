@@ -103,9 +103,7 @@ GLOBAL $SITEURL, $session;
 if(!empty($session->userId)) {
 
 	// get the client data
-	$defaultClientData = $myClass->client_data($session->client_id);
-
-	// print_r($defaultClientData);exit;
+	$defaultClientData = $myClass->client_session_data($session->clientId);
 
 	// parse the client data
 	$init_param = (object) ["client_data" => $defaultClientData];
