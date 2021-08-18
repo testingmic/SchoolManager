@@ -284,7 +284,7 @@ class Terminal_reports extends Myschoolgh {
                 $count = 0;
                 foreach($columns->columns as $key => $column) {
                     $count++;
-                    $csv_file .= "{$key} - {$column->markscap}%,";
+                    $csv_file .= "{$key} - {$column->markscap} Marks,";
                 }
             }
         }
@@ -423,9 +423,7 @@ class Terminal_reports extends Myschoolgh {
         // save the information in a session
         $this->session->set("terminal_report_{$params->class_id}_{$params->course_id}", ["headers" => $headers, "students" => $complete_csv_data]);
 
-        return [
-            "data" => $report_table
-        ];
+        return ["data" => $report_table];
 
     }
 
@@ -778,7 +776,7 @@ class Terminal_reports extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            return $e->getMessage();
+            return $this->unexpected_error;
         }
 
     }
