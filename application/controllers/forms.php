@@ -3721,16 +3721,16 @@ class Forms extends Myschoolgh {
                     <div class="col-lg-6 col-md-12">
                         <div class="form-group">
                             <select class="form-control selectpicker" name="show_position" data-width="100%">
-                                <option '.($client_data->show_position == "true" ? "selected" : "").' value="true">Show position in class</option>
-                                <option '.($client_data->show_position == "false" ? "selected" : "").' value="false">Do not show position</option>
+                                <option '.(isset($client_data->show_position) && $client_data->show_position == "true" ? "selected" : "").' value="true">Show position in class</option>
+                                <option '.(isset($client_data->show_position) && $client_data->show_position == "false" ? "selected" : "").' value="false">Do not show position</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-12">
                         <div class="form-group">
                             <select class="form-control selectpicker" name="show_teacher_name" data-width="100%">
-                                <option '.($client_data->show_teacher_name == "true" ? "selected" : "").' value="true">Show teacher\'s name</option>
-                                <option '.($client_data->show_teacher_name == "false" ? "selected" : "").' value="false">Do not show teacher\'s name</option>
+                                <option '.(isset($client_data->show_teacher_name) && $client_data->show_teacher_name == "true" ? "selected" : "").' value="true">Show teacher\'s name</option>
+                                <option '.(isset($client_data->show_teacher_name) && $client_data->show_teacher_name == "false" ? "selected" : "").' value="false">Do not show teacher\'s name</option>
                             </select>
                         </div>
                     </div>
@@ -3738,8 +3738,8 @@ class Forms extends Myschoolgh {
                 '.$default_columns_list[2].'
                 <div class="form-group mt-3">
                     <select class="form-control selectpicker" name="allow_submission" data-width="100%">
-                        <option '.($client_data->allow_submission == "true" ? "selected" : "").' value="true">Allow teachers to submit report</option>
-                        <option '.($client_data->allow_submission == "false" ? "selected" : "").' value="false">Disallow the submission of reports</option>
+                        <option '.(isset($client_data->allow_submission) && $client_data->allow_submission == "true" ? "selected" : "").' value="true">Allow teachers to submit report</option>
+                        <option '.(isset($client_data->allow_submission) && $client_data->allow_submission == "false" ? "selected" : "").' value="false">Disallow the submission of reports</option>
                     </select>
                 </div>
 

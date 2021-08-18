@@ -133,6 +133,9 @@ class Myschoolgh extends Models {
 				$result = array_merge($result, $structure);
 				$result["grading_system"] = json_decode($result["grading_system"]);
 				$result["grading_structure"] = json_decode($result["grading_structure"]);
+			} else {
+				$result["grading_system"] = [];
+				$result["grading_structure"] = [];
 			}
 
 			// convert to object

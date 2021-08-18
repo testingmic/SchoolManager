@@ -114,18 +114,19 @@ var save_grading_mark = () => {
             dangerMode: true,
         }).then((proceed) => {
             if (proceed) {
+                $.pageoverlay.show();
                 $.post(`${baseUrl}api/account/update_grading`, { grading_values, report_columns }).then((response) => {
-                    if (response.code == 200) {
-                        swal({
-                            text: response.data.result,
-                            icon: "success",
-                        });
-                    } else {
-                        swal({
-                            text: response.data.result,
-                            icon: "error",
-                        });
-                    }
+                    swal({
+                        text: response.data.result,
+                        icon: responseCode(response.code),
+                    });
+                    $.pageoverlay.hide();
+                }).catch(() => {
+                    $.pageoverlay.hide();
+                    swal({
+                        text: "Sorry! An error was encountered while processing the request.",
+                        icon: "error"
+                    });
                 });
             }
         });
@@ -190,6 +191,10 @@ var save_terminal_report = () => {
                 $.pageoverlay.hide();
             }).catch(() => {
                 $.pageoverlay.hide();
+                swal({
+                    text: "Sorry! An error was encountered while processing the request.",
+                    icon: "error"
+                });
             });
         }
     });

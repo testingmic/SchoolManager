@@ -423,7 +423,7 @@ if(!empty($user_id)) {
                                 '.(
                                     !empty($student_allocation_list["owning"]) ? 
                                         '<span class="text-right">
-                                            <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}pay/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'"').' class="btn mb-2 btn-outline-success"><i class="fa fa-adjust"></i> Make Fees Payment</a>
+                                            <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}pay/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'"').' class="btn mb-2 btn-outline-success"><i class="fa fa-adjust"></i> Fees Payment</a>
                                         </span>
                                         <button title="Click to Modify Fees Allocated to Student" onclick="return loadPage(\''.$baseUrl.'fees-allocate/'.$user_id.'\')" class="btn mb-2 btn-outline-primary">
                                             <i class="fa fa-edit"></i> Modify Bill
@@ -438,8 +438,8 @@ if(!empty($user_id)) {
                                 '.(
                                     $student_allocation_list["allocated"] ? 
                                         '
-                                            <span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-outline-warning"><i class="fa fa-print"></i> Print Bill</a></span>
-                                            <span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?download=1" target="_blank" class="btn mb-2 btn-outline-danger"><i class="fa fa-download"></i> Download Bill</a></span>
+                                            <span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-outline-warning"><i class="fa fa-print"></i> Print</a></span>
+                                            <span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?download=1" target="_blank" class="btn mb-2 btn-outline-danger"><i class="fa fa-download"></i> Download</a></span>
                                         ' : null
                                 ).'
                                 </div>
