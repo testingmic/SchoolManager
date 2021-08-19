@@ -336,14 +336,12 @@ var save_Fees_Allocation = () => {
 
             $(`div[id="fees_allocation_form"] *`).prop("disabled", true);
             $(`div[id="allocate_fees_button"] button`).html(`Processing Request <i class="fa fa-spin fa-spinner"></i>`);
-
+            $.pageoverlay.show();
             $.post(`${baseUrl}api/fees/allocate_fees`, data).then((response) => {
                 $(`div[id="fees_allocation_form"] *`).prop("disabled", false);
                 $(`div[id="allocate_fees_button"] button`).html(`Allocate Fee`);
-
-                let s_icon = "error";
+                $.pageoverlay.hide();
                 if (response.code === 200) {
-                    s_icon = "success";
                     // $(`div[id="fees_allocation_form"] input`).val("");
                     load_Fees_Allocation_Amount();
                     $(`table[id="simple_load_student"] input[type="checkbox"]`).prop('checked', false);
@@ -351,9 +349,10 @@ var save_Fees_Allocation = () => {
                 swal({
                     position: "top",
                     text: response.data.result,
-                    icon: s_icon,
+                    icon: responseCode(response.code),
                 });
             }).catch(() => {
+                $.pageoverlay.hide();
                 $(`div[id="fees_allocation_form"] *`).prop("disabled", false);
                 $(`div[id="allocate_fees_button"] button`).html(`Allocate Fee`);
             });

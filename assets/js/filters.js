@@ -68,7 +68,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                                         <tr>
                                             <td style="height:40px">${i+1}</td>
                                             <td style="height:40px">
-                                                <span class="text-uppercase">${e.name}</span>
+                                                <label for="student_id_${e.user_id}" class="text-uppercase cursor">${e.name}</label>
                                                 <span data-column="status" data-item="${e.user_id}"></span>
                                                 <div class="hidden"><strong>${e.unique_id}</strong></div>
                                             </td>

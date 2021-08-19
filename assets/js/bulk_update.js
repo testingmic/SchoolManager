@@ -14,9 +14,10 @@ $(`div[id="bulk_assign_class"] select[name="class_id"]`).on("change", function()
 });
 
 var save_Class_Allocation = () => {
-    let class_id = $(`div[id="bulk_assign_class"] select[name="class_id"]`);
+    let class_id = $(`div[id="bulk_assign_class"] select[name="class_id"]`),
+        assign_fees = $(`div[id="bulk_assign_class"] select[name="assign_fees"]`).val();
 
-    let data = {"class_id": class_id.val()},
+    let data = {"class_id": class_id.val(), "assign_fees": assign_fees },
         class_name = $(`div[id="bulk_assign_class"] select[name="class_id"] > option:selected`).attr("data-class_name"),
         student_ids = {},
         label = "";
@@ -45,7 +46,31 @@ var save_Class_Allocation = () => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-            $.post()
+            $.pageoverlay.show();
+            $.post(`${baseUrl}api/classes/assign`, {data}).then((response) => {
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code)
+                });
+                if(response.code == 200) {
+                    if(response.data.additional !== undefined) {
+                        $.each(response.data.additional, function(i, e) {
+                            $(`tr[data-row_id="${e}"]`).remove();
+                            $(`div[id="bulk_assign_class"] input[id="select_all"], div[id="bulk_assign_class"] input[class="student_ids"],
+                                div[id="bulk_assign_class"] button[type="submit"]`).prop({"checked": false});
+                        });
+                    }
+                } else {
+
+                }
+                $.pageoverlay.hide();
+            }).catch(() => {
+                $.pageoverlay.hide();
+                swal({
+                    text: "Sorry! An error was encountered while processing the request.",
+                    icon: "error"
+                });
+            });
         }
     });
 

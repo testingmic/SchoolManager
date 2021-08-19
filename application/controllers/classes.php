@@ -311,6 +311,81 @@ class Classes extends Myschoolgh {
     }
 
     /**
+     * Assign Students to a Class
+     * 
+     * @param Array     $params->data
+     * @param Array     $params->data["assign_fees"]
+     * @param Array     $params->data["class_id"]
+     * @param Array     $params->data["student_id"]
+     * 
+     * @return Array
+     */
+    public function assign(stdClass $params) {
+
+        try {
+
+            // confirm that the variable is an array
+            if(empty($params->data) && !is_array($params->data)) {
+                return ["code" => 203, "data" => "Sorry! The data array must be a valid array."];
+            }
+
+            // confirm that the class id was parsed
+            if(!isset($params->data["class_id"])) {
+                return ["code" => 203, "data" => "Sorry! Ensure that the class id was parsed."];
+            }
+
+            // confirm that the class id was parsed
+            if(!isset($params->data["student_id"])) {
+                return ["code" => 203, "data" => "Sorry! Ensure that the student id was parsed."];
+            }
+
+            // confirm that the student id is an array
+            if(!is_array($params->data["student_id"])) {
+                return ["code" => 203, "data" => "Sorry! Ensure that the student id parsed is a valid array."];
+            }
+
+            // confirm that the class is parsed
+            $check = $this->pushQuery("id, name", "classes", "id='{$params->data["class_id"]}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+            if(empty($check)) {
+                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            }
+
+            // confirm if the current class fees must be assign to the students
+            $assignFees = (bool) isset($params->data["assign_fees"]) && ($params->data["assign_fees"] == "assign");
+
+            // update query
+            $update = $this->db->prepare("UPDATE users SET class_id = ? 
+                WHERE item_id = ? AND client_id = ? AND user_type = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
+
+            // loop through the students list
+            foreach($params->data["student_id"] as $student) {
+                // execute the update statement
+                $update->execute([$params->data["class_id"], $student, $params->clientId, "student", $params->academic_year, $params->academic_term]);
+            }
+
+            // if the assign fees was parsed
+            if($assignFees) {
+                // set the unique id
+                $item_id = random_string("alnum", 13);
+
+                // Insert the activity into the cron_scheduler
+                $query = $this->db->prepare("INSERT INTO cron_scheduler SET `client_id` = ?, `item_id` = ?, `user_id` = ?, `cron_type` = ?, `active_date` = now(), `query` = ?, `subject` = ?");
+                $query->execute([$params->clientId, $item_id, $params->userId, "assign_student_fees", json_encode($params->data["student_id"]), $params->data["class_id"]]);
+            }
+
+			// return the output
+            return [
+                "code" => 200, 
+                "data" => count($params->data["student_id"]) ." Students were successfully assigned to {$check[0]->name}.", 
+                "additional" => $params->data["student_id"]
+            ];
+
+        } catch(PDOException $e) {
+            return $e->getMessage();
+        } 
+    }
+
+    /**
 	 * Append Class Rooms
 	 * 
 	 * Loop through the courses that the user has been attached to 

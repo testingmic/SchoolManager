@@ -18,30 +18,36 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) [];
 $response->title = "Assign Student Class : {$appName}";
-$response->scripts = ["assets/js/bulk_update.js"];
 
 // get the class list
 $class_list = $myClass->pushQuery("name, id", "classes", "client_id='{$clientId}' AND status='1'", false, "ASSOC");
 $class_id_list = !empty($class_list) ? array_column($class_list, "id") : [];
 
 // get the students list
-$students_array_list = $myClass->pushQuery("name, unique_id, gender, residence, item_id, class_id", "users", 
+$students_array_list = $myClass->pushQuery("name, unique_id, gender, residence, item_id, class_id, image", "users", 
     "academic_year = '{$defaultAcademics->academic_year}' AND academic_term = '{$defaultAcademics->academic_term}'
     AND client_id='{$clientId}' AND user_type='student' AND class_id NOT IN {$myClass->inList($class_id_list)}");
 
 $students_list = "";
-foreach($students_array_list as $key => $student) {
 
-    $students_list .= "
-    <tr data-row_id='{$student->item_id}'>
-        <td>".($key + 1)."</td>
-        <td><label class='cursor' for='student_id_{$student->item_id}'>".ucwords($student->name)."</label></td>
-        <td>{$student->unique_id}</td>
-        <td>{$student->gender}</td>
-        <td align='center'>
-            <input class='student_ids' data-student_name='{$student->name}' disabled name='student_ids[]' value='{$student->item_id}' id='student_id_{$student->item_id}' style='width:20px;cursor:pointer;height:20px;' type='checkbox'>
-        </td>
-    </tr>";
+// if no student was found
+if(empty($students_array_list)) {
+    // no student found row
+    $students_list .= "<tr><td colspan='5' align='center'>No student found </td></tr>";
+} else {
+    foreach($students_array_list as $key => $student) {
+        $response->scripts = ["assets/js/bulk_update.js"];
+        $students_list .= "
+        <tr data-row_id='{$student->item_id}'>
+            <td>".($key + 1)."</td>
+            <td><label class='cursor' title='Click to select {$student->name}' for='student_id_{$student->item_id}'>".strtoupper($student->name)."</label></td>
+            <td>{$student->unique_id}</td>
+            <td>{$student->gender}</td>
+            <td align='center'>
+                <input class='student_ids' data-student_name='{$student->name}' disabled name='student_ids[]' value='{$student->item_id}' id='student_id_{$student->item_id}' style='width:20px;cursor:pointer;height:20px;' type='checkbox'>
+            </td>
+        </tr>";
+    }
 }
 
 $response->html = '
@@ -63,7 +69,7 @@ $response->html = '
                     <div class="card-body">
                         <div class="form-group">
                             <label>Select Class <span class="required">*</span></label>
-                            <select data-width="100%" class="form-control selectpicker" name="class_id">
+                            <select '.(empty($students_array_list) ? "disabled='disabled'" : 'name="class_id"').' data-width="100%" class="form-control selectpicker">
                                 <option value="">Please Select Class</option>';
                                 foreach($class_list as $each) {
                                     $response->html .= "<option data-class_name='{$each["name"]}' value=\"{$each["id"]}\">{$each["name"]}</option>";
@@ -71,9 +77,16 @@ $response->html = '
                                 $response->html .= '
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label>Assign Class Fees <span class="required">*</span></label>
+                            <select '.(empty($students_array_list) ? "disabled='disabled'" : 'name="assign_fees"').' data-width="100%" class="form-control selectpicker">
+                                <option value="assign">Assign Class Fees</option>
+                                <option value="dont_assign">Do not Assign Class Fees</option>
+                            </select>
+                        </div>
 
                         <div class="form-group" align="right" id="allocate_fees_button">
-                            <button type="submit" disabled="disabled" onclick="return save_Class_Allocation()" class="btn btn-outline-success"><i class="fa fa-save"></i> Assign Class</button>
+                            <button type="submit" disabled="disabled" '.(empty($students_array_list) ? null : 'onclick="return save_Class_Allocation()"').' class="btn btn-outline-success"><i class="fa fa-save"></i> Assign Class</button>
                         </div>
                         
                     </div>
