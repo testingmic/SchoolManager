@@ -380,7 +380,7 @@ class Crons {
 
 				// if a user information have been uploaded
 				elseif($result->cron_type == "users_upload") {
-					$this->users_upload_modification($result->item_id);
+					$this->users_upload_modification($result->item_id, $result->client_id);
 				}
 
 				// if the type is to manage the terminal report functionality
@@ -410,13 +410,18 @@ class Crons {
 	 * 
 	 * @return Bool
 	 */
-	private function users_upload_modification($upload_id) {
+	private function users_upload_modification($upload_id, $clientId) {
 		// set the fullname of the user
-		$u_stmt = $this->db->prepare("UPDATE users SET name = CONCAT(firstname,' ', lastname,' ', othername), client_id = UPPER(client_id) WHERE upload_id='{$upload_id}'");
+		$u_stmt = $this->db->prepare("UPDATE users SET 
+			name = CONCAT(firstname,' ', lastname,' ', othername), 
+			client_id = UPPER(client_id) WHERE upload_id='{$upload_id}' AND client_id='{$clientId}'
+		");
 		$u_stmt->execute();
 
 		// get the list of all users that was uploaded
-		$u_list = $this->db->prepare("UPDATE users a SET a.username = (SELECT SUBSTRING(b.email, 1, LOCATE('@', b.email) - 1) AS the_username FROM users b WHERE b.id = a.id) WHERE LENGTH(a.email) > 5 AND a.upload_id='{$upload_id}'");
+		$u_list = $this->db->prepare("UPDATE users SET username = (SUBSTRING(email, 1, LOCATE('@', email) - 1))
+			WHERE LENGTH(email) > 5 AND upload_id='{$upload_id}' AND client_id='{$clientId}'
+		");
 		$u_list->execute();
 	}	
 

@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject;
+global $myClass, $accessObject, $defaultClientData, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -21,14 +21,16 @@ $response->scripts = [];
 
 $classes_param = (object) [
     "clientId" => $session->clientId,
-    "limit" => 99999
+    "academic_year" => $defaultAcademics->academic_year,
+    "academic_term" => $defaultAcademics->academic_term,
+    "limit" => 200
 ];
-$item_list = load_class("classes", "controllers")->list($classes_param);
+$item_list = load_class("classes", "controllers", $classes_param)->list($classes_param);
 
 $hasDelete = $accessObject->hasAccess("delete", "class");
 $hasUpdate = $accessObject->hasAccess("update", "class");
-
 $classes = "";
+
 foreach($item_list["data"] as $key => $each) {
     
     $action = "<a title='Click to view the class record' href='#' onclick='return loadPage(\"{$baseUrl}update-class/{$each->id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";

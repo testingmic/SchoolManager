@@ -618,7 +618,7 @@ class Fees extends Myschoolgh {
                     <td class='font-weight-bold'>{$fees->balance}</td>";
 
                 // begin the html
-                $owings_list .= "<td>";
+                $owings_list .= "<td class='p-2'>";
 
                 // if the last payment info is not empty
                 if(!empty($last_payment)) {
@@ -641,7 +641,7 @@ class Fees extends Myschoolgh {
                     }
                     
                     // show the paid button
-                    $owings_list .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a href='{$this->baseUrl}receipt/{$last_payment["payment_uid"]}' class='btn btn-sm btn-outline-primary' target='_blank'><i class='fa fa-print'></i> Print Receipt</a></p>";
+                    // $owings_list .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a href='{$this->baseUrl}receipt/{$last_payment["payment_uid"]}' class='btn btn-sm btn-outline-primary' target='_blank'><i class='fa fa-print'></i> Print Receipt</a></p>";
                 }
 
                 // if the student is exempted from paying for this fee
@@ -740,7 +740,8 @@ class Fees extends Myschoolgh {
 
             // set the rows for the last payment id
             $html_form .= "<tr>";
-            $html_form .= "<td width='35%' class='font-weight-bold p-2'>Last Payment Info:</td><td class='p-2'>";
+            $html_form .= "<td width='35%' class='font-weight-bold p-2'>Last Payment Info:</td>
+                <td class='p-2'>";
             
             // payment information
             $html_form .= "<span class='last_payment_id'><strong>Payment ID:</strong> {$data_content->last_payment_uid}</span><br>
@@ -762,7 +763,7 @@ class Fees extends Myschoolgh {
             }
             
             // show the paid button
-            $html_form .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a href='{$this->baseUrl}receipt/{$data_content->last_payment_id}' class='btn btn-sm btn-outline-primary' target='_blank'><i class='fa fa-print'></i> Print Receipt</a></p>";
+            // $html_form .= "<p class='mt-3 mb-0 pb-0' id='print_receipt'><a href='{$this->baseUrl}receipt/{$data_content->last_payment_id}' class='btn btn-sm btn-outline-primary' target='_blank'><i class='fa fa-print'></i> Print Receipt</a></p>";
             $html_form .= "</td></tr>";
             $html_form .= "</table>";
         }
@@ -1210,7 +1211,15 @@ class Fees extends Myschoolgh {
                     WHERE 
                         b.category_id='{$params->category_id}' AND b.class_id='{$params->class_id}' AND a.academic_year = a.academic_year
                         AND a.academic_term=a.academic_term AND b.student_id=a.item_id LIMIT 1
-                ) AS paid_status
+                ) AS paid_status,
+                (
+                    SELECT 
+                        b.id 
+                    FROM fees_payments b
+                    WHERE 
+                        b.category_id='{$params->category_id}' AND b.class_id='{$params->class_id}' AND a.academic_year = a.academic_year
+                        AND a.academic_term=a.academic_term AND b.student_id=a.item_id LIMIT 1
+                ) AS is_found
                 ", 
                 "users a", 
                 "a.class_id='{$params->class_id}' AND a.client_id='{$params->clientId}' AND a.academic_year='{$params->academic_year}' AND a.academic_term='{$params->academic_term}' LIMIT {$this->global_limit}"
@@ -1225,6 +1234,7 @@ class Fees extends Myschoolgh {
                 $student->balance = (float) $student->balance;
                 $student->exempted = (int) $student->exempted;
                 $student->paid_status = (int) $student->paid_status;
+                $student->is_found = (int) $student->is_found;
 
                 $students_allocation[] = $student;
             }

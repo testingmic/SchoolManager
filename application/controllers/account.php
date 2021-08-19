@@ -104,7 +104,7 @@ class Account extends Myschoolgh {
         $data_to_import = isset($params->data_to_import) ? $this->stringToArray($params->data_to_import) : [];
 
         // insert a new cron job scheduler for this activity
-        $stmt = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, subject = ?, active_date = now(), query = ?");
+        $stmt = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = '{$params->clientId}', item_id = ?, user_id = ?, cron_type = ?, subject = ?, active_date = now(), query = ?");
         $stmt->execute([$scheduler_id."_".$params->clientId, $params->userId, "end_academic_term", "End Academic Term for {$defaultUser->appPrefs->academics->academic_year}", json_encode($data_to_import)]);
 
         // update the information in the database table
@@ -498,7 +498,6 @@ initiateCalendar();";
             "data" => [
                 'column'	=> $headers,
                 'sample_csv_data' => $sample_csv_data,
-                'csv_data'	=>  $csv_data,
                 'data_count' => count($csv_data)
             ]
         ];
@@ -611,11 +610,11 @@ initiateCalendar();";
                 $unqData = random_string('alnum', 32);
 
                 // initializing
-                $sqlQuery .= "('{$upload_id}','{$params->userId}','{$unqData}','{$params->clientId}','{$params->academic_year}','{$params->academic_term}',";
+                $sqlQuery .= '("'.$upload_id.'","'.$params->userId.'","'.$unqData.'","'.$params->clientId.'","'.$params->academic_year.'","'.$params->academic_term.'",';
                 $ik = 0;
 
                 if(in_array($params->column, ["student","parent"])) {
-                    $sqlQuery .= "'{$params->column}',";
+                    $sqlQuery .= '"'.$params->column.'",';
                 }
 
                 // loop through each data
@@ -632,8 +631,11 @@ initiateCalendar();";
                             $eachValue = strtoupper($eachValue);
                             $unique_id[$eachValue] = isset($unique_id[$eachValue]) ? ($unique_id[$eachValue]+1) : 1;
                         }
-                        if(($params->csv_keys[$eachKey] === "Contact Number") && !preg_match("/^[0-9+]+$/", $eachValue)) {
-                            $bugs["phone_number"] = "Please ensure the contact number contains only numeric integers: eg. 0244444444 | +23324444444.";
+                        if(($params->csv_keys[$eachKey] === "Contact Number")) {
+                            $eachValue = str_ireplace(" ", "", $eachValue);
+                            if(!preg_match("/^[0-9 +]+$/", $eachValue)) {
+                                $bugs["phone_number"] = "Please ensure the contact number contains only numeric integers: eg. 0244444444 | +23324444444.";
+                            }
                         }
                         if(($params->csv_keys[$eachKey] === "Date of Birth")) {
                             $eachValue = date("Y-m-d", strtotime($eachValue));
@@ -688,11 +690,11 @@ initiateCalendar();";
                     }
 
                     // create sql string for the values
-                    $sqlQuery .= "'".xss_clean($eachValue)."'";
+                    $sqlQuery .= '"'.xss_clean($eachValue).'"';
 
                     if($ik < $keys_count) $sqlQuery .= ",";
                 }
-                $sqlQuery .= "),";
+                $sqlQuery .= '),';
 
                 // if $t_user_type is not empty
                 if($t_user_type) {
@@ -744,8 +746,8 @@ initiateCalendar();";
                 // set a cron job activity for the users_uploaded
                 if($isUser) {
                     // insert the activity into the cron_scheduler
-                    $query = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
-                    $query->execute([$upload_id, $params->userId, "users_upload"]);
+                    $query = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = ?, item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
+                    $query->execute([$params->clientId, $upload_id, $params->userId, "users_upload"]);
                     // set the sesssion value
                     $this->session->last_recordUpload = $params->column;
                 }
@@ -753,11 +755,14 @@ initiateCalendar();";
                 // if the upload was for a course
                 if(in_array($params->column, ["course", "staff"])) {
                     // insert the activity into the cron_scheduler
-                    $query = $this->db->prepare("INSERT INTO cron_scheduler SET item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
-                    $query->execute([$upload_id, $params->userId, "course_tutor"]);
+                    $query = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = ?, item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
+                    $query->execute([$params->clientId, $upload_id, $params->userId, "course_tutor"]);
                     // set the sesssion value
                     $this->session->last_recordUpload = $params->column;
                 }
+
+                // unset all existing sessions
+                $session->remove([$session_key, "last_recordUpload"]);
 
                 // return success
                 return ["data" => "{$import}s data was successfully imported."];

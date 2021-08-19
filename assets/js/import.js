@@ -168,7 +168,7 @@ var load_csv_file_data = (formdata, column) => {
         success: function(response) {
             if (response.code === 200) {
                 current_column = column;
-                populate_select_fields(response.data.result.column, response.data.result.csv_data, column);
+                populate_select_fields(response.data.result.column, response.data.result.sample_csv_data, column);
                 $(`div[data-csv_import_column="${column}"] div[class~="csv-rows-counter"]`).html(`A total of <strong>${response.data.result.data_count} items</strong> will be imported.`);
             }
         },
@@ -286,7 +286,7 @@ var download_sample_csv = (column) => {
     $.get(`${baseUrl}api/account/download_temp`, { file: column }).then((response) => {
         if (response.code === 200) {
             $.each(response.data.result, function(i, e) {
-                window.location.href = `${baseUrl}${e}`;
+                // window.location.href = `${baseUrl}${e}`;
             });
         }
         $(`button[data-download_button="${column}"]`).prop("disabled", false).html(`<i class="fa fa-download"></i> Download Sample CSV File`);

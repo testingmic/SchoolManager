@@ -89,11 +89,11 @@ $response->html = '
                                         <table class="table table-bordered table-striped raw_datatable">
                                             <thead>
                                                 <th></th>
-                                                <th>Class Name</th>
-                                                <th>Course Name / Code</th>
+                                                <th>Class</th>
+                                                <th>Course / Code</th>
                                                 <th>Academic Year</th>
                                                 <th>Academic Term</th>
-                                                <th>Created Details</th>
+                                                <th>Details</th>
                                                 <th>Status</th>
                                                 <th></th>
                                             </thead>

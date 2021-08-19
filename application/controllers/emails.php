@@ -532,7 +532,7 @@ class Emails extends Myschoolgh {
             
             // notify all persons within the selected group
             $query = json_encode($recipient_list);
-            $this->db->query("INSERT INTO cron_scheduler SET notice_code='5', active_date=now(), item_id='{$thread_id}', query='{$query}', user_id='{$params->userId}', cron_type='email', subject = 'Email Message'");
+            $this->db->query("INSERT INTO cron_scheduler SET client_id = '{$params->clientId}', notice_code='5', active_date=now(), item_id='{$thread_id}', query='{$query}', user_id='{$params->userId}', cron_type='email', subject = 'Email Message'");
 
             // log the user activity
             $this->userLogs("messaging_emails", $thread_id, null, "<strong>{$params->userData->name}</strong> sent out a mail to: ".count($recipient_ids)." contacts.", $params->userId);

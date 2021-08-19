@@ -1,4 +1,4 @@
-Student ID,Firstname,Lastname,Othernames,Email,Contact Number,Blood Group,City,Residence,Country Code,Date of Birth,Admission Date,Gender,Section,Department,Class Code,Description,Religion,Previous School,Previous School Qualification,Previous School Remarks
+Student ID,Firstname,Lastname,Othernames,Email,Contact Number,Blood Group,City,Residence,Country Code,Date of Birth,Admission Date,Gender,Section,Department,Class ID,Description,Religion,Previous School,Previous School Qualification,Previous School Remarks
 ,,,,,,,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,DEPARTMENT NAME,,DEPARTMENT CODE
@@ -7,8 +7,8 @@ Student ID,Firstname,Lastname,Othernames,Email,Contact Number,Blood Group,City,R
 ,,,,,,,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,,,,,CLASS ID,CLASS NAME,,CLASS CODE
-,,,,,,,,,,,,,,,,,,,,,,,,1,Class 6,,JE1
-,,,,,,,,,,,,,,,,,,,,,,,,2,JHS 1,,CL00002
-,,,,,,,,,,,,,,,,,,,,,,,,3,JHS 2,,CL03
-,,,,,,,,,,,,,,,,,,,,,,,,4,JHS 3,,CL04
+,,,,,,,,,,,,,,,,,,,,,,,,CLASS ID,CLASS NAME,CLASS CODE
+,,,,,,,,,,,,,,,,,,,,,,,,1,Class 6,JE1
+,,,,,,,,,,,,,,,,,,,,,,,,2,JHS 1,CL00002
+,,,,,,,,,,,,,,,,,,,,,,,,3,JHS 2,CL03
+,,,,,,,,,,,,,,,,,,,,,,,,4,JHS 3,CL04

@@ -53,6 +53,11 @@ if(empty($result_id)) {
 
         // confirm that the teacher's name is empty
         if(empty($data->teachers_name)) {
+            
+            // quick update if the teacher id is empty
+            if(empty($data->teacher_ids)) {
+                $myschoolgh->query("UPDATE grading_terminal_logs SET teacher_ids = '{$defaultUser->unique_id}' WHERE report_id='{$result_id}' LIMIT 1");
+            }
 
             // run the cron job
             $reportObj->run_result_cron_job($result_id, $clientId);
@@ -186,6 +191,10 @@ if(empty($result_id)) {
             $response->scripts = [];
         }
 
+        if($isApproved) {
+            $response->scripts = [];
+        }
+
         // set the report information
         $response->html = '
         <section class="section">
@@ -225,7 +234,7 @@ if(empty($result_id)) {
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-6 col-lg-4">
+                <div class="col-12 col-md-6 col-lg-5">
                     <div class="card">
                         <div class="card-header">
                             <h4>ACADEMIC INFORMATION</h4>
@@ -241,8 +250,8 @@ if(empty($result_id)) {
                                     <span class="float-right text-muted">'.$data->academic_term.'</span>
                                 </p>
                                 <p class="clearfix">
-                                    <span class="float-left">Uploaded By</span>
-                                    <span class="float-right text-muted">'.$data->fullname.'</span>
+                                    <span class="float-left">Teachers Name</span>
+                                    <span class="float-right text-muted text-uppercase">'.$data->fullname.' <i title="Click to change subject teacher." class="fa btn btn-outline-success btn-sm fa-edit"></i></span>
                                 </p>
                                 <p class="clearfix">
                                     <span class="float-left">Date Created</span>
@@ -252,7 +261,7 @@ if(empty($result_id)) {
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-6 col-lg-4">
+                <div class="col-12 col-md-6 col-lg-3">
                     <div class="card">
                         <div class="card-header">
                             <h4>SUMMARY DATA</h4>

@@ -393,7 +393,10 @@ var load_Fees_Allocation_Amount = () => {
                             } else if(e.paid_status == 1) {
                                 status = `<span class="badge p-1 badge-success">Paid</span>`;
                             } else if(e.paid_status == 2) {
-                                status = `<span class="badge p-1 badge-primary">Partly Paid</span>`;
+                                status = `<span class="badge p-1 badge-warning">Partly Paid</span>`;
+                            }
+                            if(!e.is_found) {
+                                status = `<span class="badge p-1 badge-primary">Not Set</span>`;
                             }
                             $(`span[data-column="status"][data-item="${e.item_id}"]`).html(status);
                             $(`span[data-column="due"][data-item="${e.item_id}"]`).html(`<strong>${e.amount_due}</strong>`);

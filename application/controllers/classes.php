@@ -53,24 +53,24 @@ class Classes extends Myschoolgh {
                     (
                         SELECT COUNT(*) FROM users b 
                         WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
-                        AND b.class_id = a.id AND b.client_id = a.client_id 
+                        AND b.class_id = a.id  
                         AND b.academic_term='{$params->academic_term}' AND b.academic_year='{$params->academic_year}'
                     ) AS students_count,
                     (
                         SELECT COUNT(*) FROM users b 
                         WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
-                        AND b.gender='Male' AND b.class_id = a.id AND b.client_id = a.client_id
+                        AND b.gender='Male' AND b.class_id = a.id 
                         AND b.academic_term='{$params->academic_term}' AND b.academic_year='{$params->academic_year}'
                     ) AS students_male_count,
                     (
                         SELECT COUNT(*) FROM users b 
                         WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
-                        AND b.gender='Female' AND b.class_id = a.id AND b.client_id = a.client_id
+                        AND b.gender='Female' AND b.class_id = a.id 
                         AND b.academic_term='{$params->academic_term}' AND b.academic_year='{$params->academic_year}'
                     ) AS students_female_count,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.class_assistant LIMIT 1) AS class_assistant_info,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.class_teacher LIMIT 1) AS class_teacher_info
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.class_assistant LIMIT 1) AS class_assistant_info,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.class_teacher LIMIT 1) AS class_teacher_info
                     ")."
                 FROM classes a
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
@@ -88,9 +88,10 @@ class Classes extends Myschoolgh {
                     // confirm that it is set
                     if(isset($result->{$each})) {
                         // convert the created by string into an object
-                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","user_type"]);
                     }
                 }
+
                 // init
                 $result->class_rooms_list = [];
                 $result->class_courses_list = [];

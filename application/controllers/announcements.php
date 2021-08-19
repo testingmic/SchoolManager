@@ -386,7 +386,7 @@ class Announcements extends Myschoolgh {
 
             // notify all persons within the selected group
             $query = "SELECT item_id AS user_id, name FROM users WHERE (".(($params->recipient_group == "client") ? "user_type=\"user\" OR user_type=\"business\"" : "user_type=\"{$params->recipient_group}\"").") AND deleted=\"0\" AND status=\"1\"";
-            $this->db->query("INSERT INTO cron_scheduler SET notice_code='12', active_date='{$start_date}', item_id='{$params->_item_id}', query='{$query}', user_id='{$params->userId}', cron_type='notification', subject = 'Announcement'");
+            $this->db->query("INSERT INTO cron_scheduler SET client_id = '{$params->clientId}', notice_code='12', active_date='{$start_date}', item_id='{$params->_item_id}', query='{$query}', user_id='{$params->userId}', cron_type='notification', subject = 'Announcement'");
 
             // log the user activity
             $this->userLogs("announcements", $params->_item_id, null, "<strong>{$params->userData->name}</strong> shared an announcement.", $params->userId);

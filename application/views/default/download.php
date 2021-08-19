@@ -432,8 +432,6 @@ elseif(confirm_url_id(2) && confirm_url_id(1, "student_bill")) {
         die($pages_content);
     }
 }
-// print_r($pages_content);
-// exit;
 // load the html content
 $dompdf->loadHtml($pages_content);
 
