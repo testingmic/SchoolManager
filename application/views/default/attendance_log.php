@@ -125,6 +125,7 @@ if($defaultUser->appPrefs->termEnded) {
                                     <div id="attendance_log_list">
                                         <div class="text-center font-italic">Users list is displayed here.</div>
                                     </div>
+                                    <div id="attendance_log_summary"></div>
                                 </div>
                             </div>
                         </div>

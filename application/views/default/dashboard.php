@@ -387,7 +387,7 @@ if($isSupport) {
                             <div class="card-body bg-info text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="font-14 text-uppercase font-weight-bold mb-0">Total Students</h6>
+                                        <h6 class="font-14 text-uppercase font-weight-bold mb-0">Students Count</h6>
                                         <span data-count="total_students_count" class="font-weight-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">

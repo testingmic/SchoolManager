@@ -404,6 +404,13 @@ class Fees extends Myschoolgh {
             $allocated = true;
             $showStudentData = (bool) !isset($params->show_student);
 
+            // init values
+            $count = 1;
+            $total_due = 0;
+            $total_paid = 0;
+            $total_balance = 0;
+            $total_exempted = 0;
+
             // loop through the results list
             foreach($student_allocation_array as $key => $student) {
 
@@ -411,6 +418,11 @@ class Fees extends Myschoolgh {
                 $due = round($student->amount_due);
                 $paid = round($student->amount_paid);
                 $balance = round($student->balance);
+
+                // add up to the values
+                $total_due += $due;
+                $total_paid += $paid;
+                $total_balance += $balance;
 
                 // assign variable
                 $isPaid = (bool) ($student->amount_due < $student->amount_paid) || ($student->amount_due === $student->amount_paid);
@@ -426,11 +438,12 @@ class Fees extends Myschoolgh {
                 }
                 if($student->exempted) {
                     $label = "";
+                    $total_exempted += $due;
                 }
 
                 // append to the url string
                 $student_allocation_list .= "<tr data-row_id=\"{$student->id}\">";
-                $student_allocation_list .= "<td width='8%'>".($key+1)."</td>";
+                $student_allocation_list .= "<td width='8%'>{$count}</td>";
 
                 // if not to show student data was parsed
                 if($showStudentData) {
@@ -483,10 +496,25 @@ class Fees extends Myschoolgh {
                 }
 
                 $student_allocation_list .= "</tr>";
+
+                // increment the row count
+                $count++;
+
             }
 
+            $student_allocation_list .= "
+            <tr class='font-15 font-weight-bold'>
+                <td></td>
+                <td><strong>SUMMATION</strong></td>
+                <td>{$student->currency}".number_format($total_due, 2)."</td>
+                <td>{$student->currency}".number_format($total_paid, 2)."</td>
+                <td>{$student->currency}".number_format($total_balance, 2)."</td>
+                <td></td>
+            </tr>";
         }
+
         $allocated = empty($student_allocation_array) ? false : $allocated;
+        
         if(isset($params->parse_owning)) {
             return [
                 "list" => $student_allocation_list,
@@ -2289,7 +2317,7 @@ class Fees extends Myschoolgh {
             global $defaultUser;
 
             // parse the category id
-            if(!is_array($params->category_id)) {
+            if(isset($params->category_id) && !is_array($params->category_id)) {
                 return ["code" => 203, "data" => "Please the category_id variable must be an array."];
             }
 
@@ -2302,21 +2330,6 @@ class Fees extends Myschoolgh {
             if(empty($studentRecord)) {
                 return ["code" => 203, "data" => "An invalid student id was submitted for processing."];
             }
-            
-            // set a new parameter to be used for the execution
-            $allocation = (object) [
-                "userId" => $params->userId,
-                "clientId" => $params->clientId,
-                "student_id" => $params->student_id,
-                "class_id" => $studentRecord[0]->class_id,
-                "academic_year" => $params->academic_year, 
-                "academic_term" => $params->academic_term,
-            ];
-            $allocation->currency = $defaultUser->client->client_preferences->labels->currency ?? null;
-
-            // set the where clause
-            $where_clause = "a.client_id='{$params->clientId}' AND a.academic_year='{$params->academic_year}' AND 
-            a.academic_term='{$params->academic_term}' AND a.student_id='{$params->student_id}'";
 
             // error bugs
             $error_bugs = [];
@@ -2324,68 +2337,89 @@ class Fees extends Myschoolgh {
 
             // first perform some initial checks
             // loop through the category list
-            foreach($params->category_id as $category_id => $amount) {
+            if(isset($params->category_id)) {
 
-                // confirm fee allocation
-                $confirmAllocation = $this->pushQuery("
-                    a.amount_due, a.amount_paid, (SELECT b.name FROM fees_category b WHERE b.id=a.category_id LIMIT 1) AS category_name", 
-                    "fees_payments a", "{$where_clause} AND a.category_id='{$category_id}' LIMIT 1");
+                // set a new parameter to be used for the execution
+                $allocation = (object) [
+                    "userId" => $params->userId,
+                    "clientId" => $params->clientId,
+                    "student_id" => $params->student_id,
+                    "class_id" => $studentRecord[0]->class_id,
+                    "academic_year" => $params->academic_year, 
+                    "academic_term" => $params->academic_term,
+                ];
+                $allocation->currency = $defaultUser->client->client_preferences->labels->currency ?? null;
 
-                // set the amount
-                $allocation->amount = $amount;
-                $allocation->category_id = $category_id;
+                // set the where clause
+                $where_clause = "a.client_id='{$params->clientId}' AND a.academic_year='{$params->academic_year}' AND 
+                a.academic_term='{$params->academic_term}' AND a.student_id='{$params->student_id}'";
 
-                // update record if already existing
-                if($confirmAllocation) {
-                    // append to the existing record
-                    $existing_record[] = $category_id;
+                // loop through the category list
+                foreach($params->category_id as $category_id => $amount) {
 
-                    // get the payment balance
-                    $amount_due = round(($confirmAllocation[0]->amount_due - $confirmAllocation[0]->amount_paid));
-                    $amount_payable = round($amount);
-                    
-                    // ensure that the amount due is more than the amount paid
-                    if(($amount_due !== $amount_payable) && ($amount_payable > $amount_due)) {
-                        // execute the statement
-                        $error_bugs[] = [
-                            "category" => $confirmAllocation[0]->category_name,
-                            "amount_due" => $amount_due,
-                            "specified" => $amount
-                        ];
+                    // confirm fee allocation
+                    $confirmAllocation = $this->pushQuery("
+                        a.amount_due, a.amount_paid, (SELECT b.name FROM fees_category b WHERE b.id=a.category_id LIMIT 1) AS category_name", 
+                        "fees_payments a", "{$where_clause} AND a.category_id='{$category_id}' LIMIT 1");
+
+                    // set the amount
+                    $allocation->amount = $amount;
+                    $allocation->category_id = $category_id;
+
+                    // update record if already existing
+                    if($confirmAllocation) {
+
+                        // append to the existing record
+                        $existing_record[] = $category_id;
+
+                        // get the payment balance
+                        $amount_due = round(($confirmAllocation[0]->amount_due - $confirmAllocation[0]->amount_paid));
+                        $amount_payable = round($amount);
+                        
+                        // ensure that the amount due is more than the amount paid
+                        if(($amount_due !== $amount_payable) && ($amount_payable > $amount_due)) {
+                            // execute the statement
+                            $error_bugs[] = [
+                                "category" => $confirmAllocation[0]->category_name,
+                                "amount_due" => $amount_due,
+                                "specified" => $amount
+                            ];
+                        }
                     }
                 }
-            }
             
-            // if some errors were found
-            if(!empty($error_bugs)) {
-                // set the inital bug information
-                $data = "The following error".(count($error_bugs) > 1 ? "s were" : " was")." detected:\n";
-                
-                // loop through the bugs list
-                foreach($error_bugs as $key => $bug) {
-                    $data .= ($key + 1).". The {$bug["category"]} balance should be equal to OR less than {$bug["amount_due"]}.\n";
+                // if some errors were found
+                if(!empty($error_bugs)) {
+                    // set the inital bug information
+                    $data = "The following error".(count($error_bugs) > 1 ? "s were" : " was")." detected:\n";
+                    
+                    // loop through the bugs list
+                    foreach($error_bugs as $key => $bug) {
+                        $data .= ($key + 1).". The {$bug["category"]} balance should be equal to OR less than {$bug["amount_due"]}.\n";
+                    }
+                    return ["code" => 203, "data" => $data];
                 }
-                return ["code" => 203, "data" => $data];
-            }
 
-            // execute the statement
-            $update_stmt = $this->db->prepare("UPDATE fees_payments SET balance = ?, exempted = ? WHERE category_id = ? AND student_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND editable = ?");
+                // execute the statement
+                $update_stmt = $this->db->prepare("UPDATE fees_payments SET balance = ?, exempted = ? WHERE category_id = ? AND student_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND editable = ?");
 
-            // loop through the category list
-            foreach($params->category_id as $category_id => $amount) {
+                // loop through the category list
+                foreach($params->category_id as $category_id => $amount) {
 
-                // set the amount
-                $allocation->amount = $amount;
-                $allocation->category_id = $category_id;
+                    // set the amount
+                    $allocation->amount = $amount;
+                    $allocation->category_id = $category_id;
 
-                // Confirm if the record already exist
-                if(in_array($category_id,  $existing_record)) {
-                    // Update the Existing Record
-                    $update_stmt->execute([$amount, 0, $category_id, $allocation->student_id, $params->clientId, $params->academic_year, $params->academic_term, 1]);
-                } else {
-                    // Insert the record
-                    $this->insert_student_fees($allocation);
+                    // Confirm if the record already exist
+                    if(in_array($category_id,  $existing_record)) {
+                        // Update the Existing Record
+                        $update_stmt->execute([$amount, 0, $category_id, $allocation->student_id, $params->clientId, $params->academic_year, $params->academic_term, 1]);
+                    } else {
+                        // Insert the record
+                        $this->insert_student_fees($allocation);
+                    }
                 }
+
             }
 
             // confirm if the exemptions list was parsed

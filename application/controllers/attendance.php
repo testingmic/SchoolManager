@@ -551,6 +551,7 @@ class Attendance extends Myschoolgh {
 
         // append some few query
         $attendance = [];
+        $bottom_data = "";
         
         $user_type = isset($params->user_type) ? $params->user_type : null;
         
@@ -682,7 +683,7 @@ class Attendance extends Myschoolgh {
             // set the table content
             $table_content = (!$final && !empty($attendance["attendance"][0]["record"]["users_list"]) ? "
             <div class='row'>
-                <div class='col-lg-12 text-right mb-2 attendance_control_buttons'>
+                <div class='col-lg-12 pr-4 text-right mb-2 attendance_control_buttons'>
                     <span class='float-right'>
                         <label>Select for Everyone</label>
                         <select class='form-control selectpicker' id='select_for_all'>
@@ -695,13 +696,16 @@ class Attendance extends Myschoolgh {
                     </span>
                 </div>
             </div>" : "")."
-            <table class='table table-bordered mt-2' id='attendance_logger'>
+            <table border='1' class='table table-bordered mt-2' style='width:98%'>
             <thead>
                 <th width='5%'>&#8470;</th>
                 <th width='35%'>Name</th>
                 <th width='15%'>Unique ID</th>
                 <th><span class='float-left'>Status</span></th>
             </thead>
+            </table>
+            <div class='table-responsive slim-scroll' style='max-height:600px;overflow-y:auto;overflow-x:scroll;'>
+            <table border='1' class='table table-bordered mt-2' style='width:98%' id='attendance_logger'>
             <tbody>";
         
         }
@@ -744,13 +748,13 @@ class Attendance extends Myschoolgh {
                         // append to the list
                         $table_content .= "
                         <tr>
-                            <td>{$numb}</td>
-                            <td>
+                            <td width='5%'  >{$numb}</td>
+                            <td width='35%' class='text-uppercase'>
                                 <img src=\"{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\">
                                 {$user->name} ".($user->user_type !== "student" ? 
                                 "<span class='text-uppercase font-9 badge badge-{$color[$user->user_type]}'>{$user->user_type}</span>" : null)."
                             </td>
-                            <td>{$user->unique_id}</td>
+                            <td width='15%'>{$user->unique_id}</td>
                             <td>".$this->attendance_radios($user->user_id, $user_state, $final, "")."</td>
                         </tr>";
                     }
@@ -762,12 +766,27 @@ class Attendance extends Myschoolgh {
         if($isListed) {
 
             // append to this list if students were found for this class
-            if(!empty($attendance["attendance"][0]["record"]["users_list"])) {
+            if(empty($attendance["attendance"][0]["record"]["users_list"])) {
+                $table_content .= "
+                <tr>
+                    <td align='center' colspan='4'>
+                        <div class='font-italic'>Sorry! No user was found under the selected category.</div>
+                    </td>
+                </tr>";
+            }
 
+            $table_content .= "</tbody>";
+            $table_content .= "</table>";
+            $table_content .= "</div>";
+
+            // append to this list if students were found for this class
+            if(!empty($attendance["attendance"][0]["record"]["users_list"])) {
+                $bottom_data .= "<table border='1' width='100%' class='table table-bordered mt-2'>";
+                $bottom_data .= "<tbody>";
                 // show this section if the finalize is empty
                 if(!$final) {
                     // append the buttons to the table
-                    $table_content .= "
+                    $bottom_data .= "
                     <tr class='attendance_control_buttons'>
                         <td colspan='2'>".(
                             !empty($check) ? 
@@ -787,15 +806,15 @@ class Attendance extends Myschoolgh {
                         </td>
                     </tr>";
                 } else {
-                    $table_content .= "
+                    $bottom_data .= "
                     <tr>
                         <td colspan='2'>
                             <div class='text-left'>
                                 <p class='p-0 pt-2 m-0'><label class='p-0 m-0 font-weight-bold'><i class='fa fa-chart-bar'></i> Summary:</label></p>";
                                 foreach($summary as $key => $value) {
-                                    $table_content .= "<div class='p-0 m-0'><strong class='mr-3'>".ucwords($key).":</strong> {$value}</div>";
+                                    $bottom_data .= "<div class='p-0 m-0'><strong class='mr-3'>".ucwords($key).":</strong> {$value}</div>";
                                 }
-                            $table_content .= "
+                            $bottom_data .= "
                             </div>
                             ".(!empty($check) ? "
                                 <div class='pt-2 border-top mt-2'>
@@ -818,20 +837,13 @@ class Attendance extends Myschoolgh {
                         </td>
                     </tr>";    
                 }
-
-            } else {
-                $table_content .= "
-                <tr>
-                    <td align='center' colspan='4'>
-                        <div class='font-italic'>Sorry! No user was found under the selected category.</div>
-                    </td>
-                </tr>";
+                $bottom_data .= "</tbody>";
+                $bottom_data .= "</table>";
+                
             }
-
-            $table_content .= "<tbody>";
-            $table_content .= "</table>";
             
             // append the users list to the results to display
+            $attendance["bottom_data"] = $bottom_data;
             $attendance["table_content"] = $table_content;
             
         }
@@ -946,7 +958,9 @@ class Attendance extends Myschoolgh {
             foreach($users as $user) {
 
                 // run a query for the information
-                $theQuery = $this->pushQuery("user_type, users_list", "users_attendance_log", "log_date='{$day}' AND user_type IN ('{$user}') AND status='1' AND client_id='{$params->clientId}' {$query}");
+                $theQuery = $this->pushQuery("user_type, users_list", "users_attendance_log", 
+                    "log_date='{$day}' AND user_type IN ('{$user}') AND status='1' AND client_id='{$params->clientId}' 
+                    AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' {$query}");
 
                 // set a new variable for the day
                 $the_day = date("Y-m-d", strtotime($day));
@@ -1077,7 +1091,7 @@ class Attendance extends Myschoolgh {
 
         /** If finalized */
         $query = isset($data->is_finalized) ? " AND finalize='1'" : null;
-
+        
         /** Run a query for all classes, append the total logged count as well */
         $classes_list = $this->pushQuery(
             "a.id, a.name, 
