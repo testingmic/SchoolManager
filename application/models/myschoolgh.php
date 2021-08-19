@@ -281,7 +281,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return array
 	 **/
-	final function pushQuery($columns = "*", $tableName, $whereClause = 1, $print = false) {
+	final function pushQuery($columns = "*", $tableName, $whereClause = 1, $print = false, $query_style = "OBJ") {
 
 		try {
 
@@ -292,7 +292,7 @@ class Myschoolgh extends Models {
 				print "SELECT {$columns} FROM {$tableName} WHERE $whereClause";
 			}
 
-			return $stmt->fetchAll(PDO::FETCH_OBJ);
+			return $query_style === "OBJ" ? $stmt->fetchAll(PDO::FETCH_OBJ) : $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		} catch(PDOException $e) {
 			return [];

@@ -75,7 +75,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                                             <td style="height:40px"><span data-column="due" data-item="${e.user_id}"></span></td>
                                             <td style="height:40px"><span data-column="paid" data-item="${e.user_id}"></span></td>
                                             <td style="height:40px"><span data-column="balance" data-item="${e.user_id}"></span></td>
-                                            <td style="height:40px"><span data-column="select" data-item="${e.user_id}"></span></td>
+                                            <td style="height:40px" align="center"><span data-column="select" data-item="${e.user_id}"></span></td>
                                         </tr>`;
                                 });
                                 $(`table[id="simple_load_student"] tbody`).html(students_list);

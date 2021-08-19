@@ -154,7 +154,7 @@ if(!$receivePayment) {
                                                     <th>Due</th>
                                                     <th>Paid</th>
                                                     <th>Balance</th>
-                                                    <th>
+                                                    <td style="background-color: rgba(0,0,0,0.04);" align="center">
                                                         <input disabled style="height:20px;width:20px;" id="select_all" type="checkbox" class="cursor">
                                                     </th>
                                                 </tr>
