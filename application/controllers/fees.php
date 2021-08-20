@@ -291,6 +291,8 @@ class Fees extends Myschoolgh {
             // if the user is a parent
 			$student_id = $this->session->student_id;
         }
+        
+        $groupBy = (isset($params->group_by_student) && ($params->group_by_student == "group_by")) ? "GROUP BY a.student_id" : null;
 
         /** Init the user type */
         $student_id = isset($params->student_id) ? $params->student_id : $student_id;
@@ -307,13 +309,13 @@ class Fees extends Myschoolgh {
         try {
 
             $stmt = $this->db->prepare("
-                SELECT a.*,
+                SELECT a.*, ".($groupBy ? "SUM(a.amount_due) AS total_amount_due, SUM(a.amount_paid) AS total_amount_paid, SUM(a.balance) AS total_balance," : null)."
                     (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
                     (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM fees_payments a
-                WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
+                WHERE {$params->query} AND a.status = ? {$groupBy} ORDER BY a.id LIMIT {$params->limit}
             ");
             $stmt->execute([1]);
 
@@ -403,6 +405,7 @@ class Fees extends Myschoolgh {
             // set the allocation to true
             $allocated = true;
             $showStudentData = (bool) !isset($params->show_student);
+            $groupBy = (isset($params->group_by_student) && ($params->group_by_student == "group_by")) ? "GROUP BY a.student_id" : null;
 
             // init values
             $count = 1;
@@ -429,12 +432,14 @@ class Fees extends Myschoolgh {
 
                 // label
                 $label = "<br><span class='badge p-1 badge-success'>Paid</span>";
-                if($due === $balance) {
+                if((round($due) === round($balance)) || (isset($student->total_amount_due) && ($student->total_amount_due === $student->total_balance))) {
                     $label = "<br><span class='badge p-1 badge-danger'>Not Paid</span>";
-                } elseif($paid > 0 && !$isPaid) {
+                } elseif(($paid > 0 && !$isPaid) && !$groupBy) {
                     $label = "<br><span class='badge p-1 badge-primary'>Part Payment</span>";
-                } else {
-                    $label = "";
+                }  elseif($groupBy && isset($student->total_amount_due) && (
+                    (round($student->total_amount_due) !== round($student->total_amount_paid)) && (round($student->total_balance) !== 0)
+                )) {
+                    $label = "<br><span class='badge p-1 badge-primary'>Part Payment</span>";
                 }
                 if($student->exempted) {
                     $label = "";
@@ -450,24 +455,18 @@ class Fees extends Myschoolgh {
                     // set the student name, image and registration id
                     $student_allocation_list .= "<td>
                         <div class='d-flex justify-content-start'>
-                            ".(!empty($student->student_info->image) ? "
-                            <div class='mr-2'>
-                                <a href='#' onclick='return loadPage(\"{$this->baseUrl}update-student/{$student->student_info->user_id}\");'>
-                                    <img src='{$this->baseUrl}{$student->student_info->image}' width='40px' height='40px'>
-                                </a>
-                            </div>" : "")."
-                            <div>
-                                {$student->student_info->name} <br class='p-0 m-0'>
-                                <a href='#' onclick='return loadPage(\"{$this->baseUrl}update-student/{$student->student_info->user_id}\");'><strong>{$student->student_info->unique_id}</strong></a>
-                                {$label}
+                            <div class='text-uppercase'>
+                                <span onclick='return loadPage(\"{$this->baseUrl}update-student/{$student->student_info->user_id}\");' class='font-weight-bold text-primary cursor'>{$student->student_info->name}</span><br class='p-0 m-0'>
+                                <a class='cursor' onclick='return loadPage(\"{$this->baseUrl}update-student/{$student->student_info->user_id}\");'><strong>{$student->student_info->unique_id}</strong></a>
                             </div>
                         </div>
                     </td>";
                 }
-                $student_allocation_list .= "<td>{$student->category_name} ".(!$showStudentData ? $label : null)."</td>";
-                $student_allocation_list .= "<td>{$student->currency} {$student->amount_due}</td>";
-                $student_allocation_list .= "<td>{$student->currency} {$student->amount_paid}</td>";
-                $student_allocation_list .= "<td>{$student->currency} {$student->balance}</td>";
+
+                $student_allocation_list .= $groupBy ? null : "<td>{$student->category_name} ".(!$showStudentData ? $label : null)."</td>";
+                $student_allocation_list .= "<td width='15%'>{$student->currency} ".($groupBy ? $student->total_amount_due : $student->amount_due)."</td>";
+                $student_allocation_list .= "<td width='15%'>{$student->currency} ".($groupBy ? $student->total_amount_paid : $student->amount_paid)."</td>";
+                $student_allocation_list .= "<td width='15%'>{$student->currency} ".($groupBy ? $student->total_balance : $student->balance)."</td>";
 
                 // confirm if the user has the permission to make payment
                 if(!empty($params->receivePayment)) {
@@ -483,7 +482,7 @@ class Fees extends Myschoolgh {
                             $_class = "class='btn btn-sm btn-outline-success'";
                             $student_allocation_list .= $isParent ? "
                                 <a {$_class} href='{$this->baseUrl}pay/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
-                            " : "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?checkout_url={$student->checkout_url}\");' {$_class}>Pay Fee</button>";
+                            " : "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?".($groupBy ? "student_id={$student->student_id}&class_id={$student->class_id}" : "checkout_url={$student->checkout_url}")."\");' {$_class}>Pay Fee</button>";
                         }
                         // delete the record if possible => that is allowed only if the student has not already made an payment
                         if(!empty($params->canAllocate) && empty($student->amount_paid)) {
@@ -502,15 +501,6 @@ class Fees extends Myschoolgh {
 
             }
 
-            $student_allocation_list .= "
-            <tr class='font-15 font-weight-bold'>
-                <td></td>
-                <td><strong>SUMMATION</strong></td>
-                <td>{$student->currency}".number_format($total_due, 2)."</td>
-                <td>{$student->currency}".number_format($total_paid, 2)."</td>
-                <td>{$student->currency}".number_format($total_balance, 2)."</td>
-                <td></td>
-            </tr>";
         }
 
         $allocated = empty($student_allocation_array) ? false : $allocated;

@@ -44,10 +44,10 @@
     
     <?php if($isAdmin) { ?>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-cog"></i><span>Bulk Update</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-cog"></i><span>Bulk Action</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>assign-class">Assign Class</a></li>
-            <!-- <li><a class="nav-link" href="<?= $baseUrl ?>assign-department">Assign Department</a></li> -->
+            <li><a class="nav-link" href="<?= $baseUrl ?>assign-username_password">Login Credentials</a></li>
             <!-- <li><a class="nav-link" href="<?= $baseUrl ?>assign-section">Assign Section</a></li> -->
         </ul>
     </li>

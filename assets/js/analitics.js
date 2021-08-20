@@ -7,7 +7,8 @@ var filter = $(`[id="reports_insight"] button[id="filter_Fees_Report"]`),
     to_stream = "";
 
 var revenueReporting = (revenue) => {
-    if ($(`canvas[id="revenue_flow_chart"]`).length) {
+    
+    if ($(`div[id="revenue_flow_chart"]`).length) {
 
         let the_value = new Array(),
             the_label = new Array();
@@ -18,102 +19,56 @@ var revenueReporting = (revenue) => {
             the_label.push(e);
         });
 
-        var draw = Chart.controllers.line.prototype.draw;
-        Chart.controllers.lineShadow = Chart.controllers.line.extend({
-            draw: function() {
-                draw.apply(this, arguments);
-                var ctx = this.chart.chart.ctx;
-                var _stroke = ctx.stroke;
-                ctx.stroke = function() {
-                    ctx.save();
-                    ctx.shadowColor = '#00000075';
-                    ctx.shadowBlur = 6;
-                    ctx.shadowOffsetX = 4;
-                    ctx.shadowOffsetY = 4;
-                    _stroke.apply(this, arguments)
-                    ctx.restore();
-                }
-            }
-        });
-
         $(`div[data-chart="revenue_flow_chart"]`).html(``);
-        $(`div[data-chart="revenue_flow_chart"]`).html(`<canvas id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></canvas>`);
+        $(`div[data-chart="revenue_flow_chart"]`).html(`<div id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></div>`);
 
-        var ctx = document.getElementById('revenue_flow_chart').getContext("2d");
-
-        var gradientStroke = ctx.createLinearGradient(500, 0, 0, 0);
-        gradientStroke.addColorStop(0, 'rgba(155, 89, 182, 1)');
-        gradientStroke.addColorStop(1, 'rgba(231, 76, 60, 1)');
-
-
-        var myChart = new Chart(ctx, {
-            type: 'lineShadow',
-            data: {
-                labels: the_label,
-                type: 'line',
-                defaultFontFamily: 'Arial',
-                datasets: [{
-                    label: "Revenue Received",
-                    data: the_value,
-                    borderColor: gradientStroke,
-                    pointBorderColor: gradientStroke,
-                    pointBackgroundColor: gradientStroke,
-                    pointHoverBackgroundColor: gradientStroke,
-                    pointHoverBorderColor: gradientStroke,
-                    pointBorderWidth: 10,
-                    pointHoverRadius: 10,
-                    pointHoverBorderWidth: 1,
-                    pointRadius: 1,
-                    fill: false,
-                    borderWidth: 4,
-                }]
+        var revenue_flow_chart_options = {
+            chart: {
+                height: 400,
+                type: 'area',
             },
-            options: {
-                responsive: true,
-                legend: {
-                    position: "bottom"
-                },
-                tooltips: {
-                    mode: 'index',
-                    titleFontSize: 12,
-                    titleFontColor: '#fff',
-                    bodyFontColor: '#fff',
-                    backgroundColor: '#289cf5',
-                    titleFontFamily: 'Poppins',
-                    bodyFontFamily: 'Poppins',
-                    cornerRadius: 3,
-                    intersect: false,
-                },
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            fontColor: "rgba(0,0,0,0.5)",
-                            fontStyle: "bold",
-                            beginAtZero: true,
-                            maxTicksLimit: 5,
-                            padding: 20
-                        },
-                        gridLines: {
-                            drawTicks: false,
-                            display: false
-                        }
-
-                    }],
-                    xAxes: [{
-                        gridLines: {
-                            zeroLineColor: "transparent"
-                        },
-                        ticks: {
-                            padding: 20,
-                            fontColor: "rgba(0,0,0,0.5)",
-                            fontStyle: "bold"
-                        }
-                    }]
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth'
+            },
+            series: [{
+                name: "Fees Payments",
+                data: the_value
+            }],
+            xaxis: {
+                type: 'datetime',
+                categories: the_label,
+                labels: {
+                    style: {
+                        colors: '#9aa0ac',
+                    }
                 }
+            },
+            yaxis: {
+                labels: {
+                    style: {
+                        color: '#9aa0ac',
+                    }
+                }
+            },
+            tooltip: {
+                x: {
+                    format: 'dd/MM/yyyy'
+                },
             }
-        });
+        }
+
+        var revenue_flow_chart = new ApexCharts(
+            document.querySelector("#revenue_flow_chart"),
+            revenue_flow_chart_options
+        );
+
+        revenue_flow_chart.render();
 
     }
+
     if ($(`canvas[id="revenue_payment_category"]`).length) {
         if (revenue.revenue_received_payment_method_count !== undefined) {
             let the_value = new Array(),
@@ -247,8 +202,8 @@ var summaryReporting = (t_summary, date_range) => {
             revenue_category_counts += `
             <div class="col-lg-4 col-md-6">
                 <div class="card">
-                    <div class="card-header pb-0"><strong>${i}</strong></div>
-                    <div class="card-body pt-2 pb-1">
+                    <div class="card-header pl-2 pr-2 text-uppercase pb-0"><strong>${i}</strong></div>
+                    <div class="card-body pt-2 pl-2 pr-2 pb-1">
                         <p class="mb-0 pb-0">Processed Count: <strong>${e}</strong></p>
                         <p class="mb-0 pb-0">Amount: <strong>${myPrefs.labels.currency}${format_currency(amount)}</strong></p>
                         <p class="mb-0 pb-0">Percentage: <strong>${percentage}%</strong></p>
@@ -427,7 +382,7 @@ var attendanceReport = (_attendance) => {
                 _log_chart_label.push(i);
             });
 
-            $(`div[data-chart_container="attendance_log_chart"]`).html(`<div id="attendance_log_chart" style="min-height:350px;"></div>`);
+            $(`div[data-chart_container="attendance_log_chart"]`).html(`<div id="attendance_log_chart" style="min-height:400px;"></div>`);
 
             $.each(attendance.chart_grouping, function(i, e) {
                 if ($.inArray(e.name, ["Student", "Staff"]) > -1) {
@@ -437,7 +392,7 @@ var attendanceReport = (_attendance) => {
 
             var _attendance_options = {
                 chart: {
-                    height: 350,
+                    height: 400,
                     type: 'area',
                 },
                 dataLabels: {
@@ -465,7 +420,7 @@ var attendanceReport = (_attendance) => {
                 },
                 tooltip: {
                     x: {
-                        format: 'dd/MM/yy'
+                        format: 'dd/MM/yyyy'
                     },
                 }
             }
@@ -707,6 +662,7 @@ var loadDashboardAnalitics = (period) => {
                 salaryReport(response.data.result.salary_report);
             }
             setTimeout(() => {
+                $.pageoverlay.hide();
                 $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
             }, 800);
         }
@@ -760,7 +716,7 @@ if ($(`div[id="data-report_stream"]`).length) {
     filter.on("click", function() {
         let class_id = $(`[id="reports_insight"] select[name="class_id"]`).val(),
             _period = $(`[id="reports_insight"] select[id="filter-dashboard"]`).val();
-
+        $.pageoverlay.show();
         if (class_id !== "null") {
             _period = `${_period}&label[class_id]=${class_id}`;
         }

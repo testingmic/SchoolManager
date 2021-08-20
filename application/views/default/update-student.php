@@ -373,7 +373,7 @@ if(!empty($user_id)) {
                         <a class="nav-link" id="fees-tab2" data-toggle="tab" href="#fees" role="tab" aria-selected="true">Student Bill</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab" aria-selected="true">Fees Payment History</a>
+                        <a class="nav-link" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab" aria-selected="true">Payments History</a>
                     </li>' : '').'
                     <li class="nav-item">
                         <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab" aria-selected="true">Timetable</a>

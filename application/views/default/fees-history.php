@@ -65,7 +65,7 @@ foreach($item_list["data"] as $key => $fees) {
     $fees_history .= "<td>".($key+1)."</td>";
     $fees_history .= "
         <td>
-            <div class='d-flex justify-content-start'>
+            <div class='d-flex text-uppercase justify-content-start'>
                 ".(!empty($fees->student_info->image) ? "
                 <div class='mr-2'><img src='{$baseUrl}{$fees->student_info->image}' width='40px' height='40px'></div>" : "")."
                 <div>

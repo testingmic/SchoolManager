@@ -63,24 +63,18 @@ foreach($student_list["data"] as $key => $each) {
     $students .= "<tr data-row_id=\"{$each->user_id}\">";
     $students .= "<td>".($key+1)."</td>";
     $students .= "<td>
-        <div class='d-flex justify-content-start'>
-            <div class='mr-1'>
-                <img title='Click to view student details' onclick=\"return loadPage('{$baseUrl}update-student/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\">
-            </div>
+        <div title='Click to view student details' class='d-flex font-weight-bold text-uppercase justify-content-start'>
             <div>
-                {$each->name} <br>
-                <a title='Click to view student record' href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$each->user_id}/view\");'>
-                    <strong class='text-primary'>{$each->unique_id}</strong>
-                </a>
+                <a class='font-weight-bold' href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$each->user_id}/view\");'>{$each->name}
+                </a><br>{$each->unique_id}
             </div>
         </div>
     </td>";
     $students .= "<td>{$each->class_name}</td>";
     $students .= "<td>{$each->gender}</td>";
-    $students .= "<td>{$each->date_of_birth}</td>";
     $students .= "<td>{$each->department_name}</td>";
     $students .= "<td>{$defaultCurrency} {$each->debt}</td>";
-    $students .= "<td class='text-center'>{$action}</td>";
+    $students .= "<td align='center'>{$action}</td>";
     $students .= "</tr>";
 }
 
@@ -148,10 +142,9 @@ $response->html = '
                                         <th>Student Name</th>
                                         <th>Class</th>
                                         <th>Gender</th>
-                                        <th>Date of Birth</th>
                                         <th>Department</th>
                                         <th>Debt</th>
-                                        <th align="center" width="13%"></th>
+                                        <th width="13%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$students.'</tbody>

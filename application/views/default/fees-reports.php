@@ -162,7 +162,7 @@ $response->html = '
                                                                 </div>
                                                             </div>
                                                             <div class="card-body" data-chart="revenue_flow_chart">
-                                                                <canvas id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></canvas>
+                                                                <div id="revenue_flow_chart" style="width:100%;max-height:405px;height:405px;"></div>
                                                             </div>
                                                         </div>
                                                     </div>

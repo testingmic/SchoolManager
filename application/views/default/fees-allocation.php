@@ -38,7 +38,7 @@ if(!$receivePayment) {
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
     // load fees allocation list for class
-    $allocation_param = (object) ["clientId" => $clientId, "userData" => $defaultUser, "receivePayment" => $receivePayment, "canAllocate" => $canAllocate];
+    $allocation_param = (object) ["group_by_student" => "group_by", "clientId" => $clientId, "userData" => $defaultUser, "receivePayment" => $receivePayment, "canAllocate" => $canAllocate];
     $allocation_param->client_data = $defaultUser->client;
     
     // create a new object
@@ -80,6 +80,7 @@ if(!$receivePayment) {
                                     <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="false">Student Fees Allocation</a>
                                 </li>
                             </ul>
+
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="allocation_form" role="tabpanel" aria-labelledby="allocation_form-tab2">
                                     
@@ -191,10 +192,9 @@ if(!$receivePayment) {
                                                 <tr>
                                                     <th width="7%" class="text-center">#</th>
                                                     <th>Student Name</th>
-                                                    <th>Category</th>
                                                     <th>Due</th>
                                                     <th>Paid</th>
-                                                    <th>Balance</th>
+                                                    <th width="12%">Balance</th>
                                                     <th align="center"></th>
                                                 </tr>
                                             </thead>
@@ -203,7 +203,6 @@ if(!$receivePayment) {
                                     </div>
                                 </div>
                             </div>
-                            
 
                         </div>
                     </div>

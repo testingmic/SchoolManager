@@ -632,7 +632,7 @@ class Analitics extends Myschoolgh {
                         }
 
                         // if the period is a year
-                        if(in_array($params->period, ["this_year", "last_6months", "last_year"])) {
+                        if(in_array($params->period, ["this_year", "last_6months", "last_year", "this_term"])) {
                             $listing = "year-to-months";
                         }
                         
@@ -650,7 +650,7 @@ class Analitics extends Myschoolgh {
                         if($listing == "list-days") {
                             // change the labels to hours of day
                             foreach($labelArray as $value) {
-                                $labels[] = date("jS M", strtotime($value));
+                                $labels[] = date("Y-m-d", strtotime($value));
                             }
                         } elseif($listing == "hour") {
                             // change the labels to hours of day
@@ -660,7 +660,7 @@ class Analitics extends Myschoolgh {
                         } elseif($listing == "year-to-months") {
                             // change the labels to hours of day
                             foreach($labelArray as $value) {
-                                $labels[] = $this->convertToPeriod("month", $value, "F");
+                                $labels[] = $this->convertToPeriod("month", $value, "Y-m-01");
                             }
                         }
 
@@ -941,7 +941,7 @@ class Analitics extends Myschoolgh {
         // Check Sales Period
         switch ($datePeriod) {
             case 'this_term':
-                $groupBy = "DATE";
+                $groupBy = "MONTH";
                 $format = "jS M Y";
                 $currentTitle = "This Term";
                 $previousTitle = "Last Term";
@@ -1055,7 +1055,7 @@ class Analitics extends Myschoolgh {
                 $format = "jS M Y";
                 $currentTitle = "Today";
                 $previousTitle = "Yesterday";
-                $dateFrom = date("Y-m-d", strtotime("today -1 days"));
+                $dateFrom = date("Y-m-d", strtotime("today"));
                 $dateTo = date("Y-m-d", strtotime("today"));
                 $prevFrom = date("Y-m-d", strtotime("today -2 days"));
                 $prevTo = date("Y-m-d", strtotime("today -1 days"));
@@ -1198,6 +1198,7 @@ class Analitics extends Myschoolgh {
         if(isset($section[1])) {
             $array_list = $array_data[$section[0]][$section[1]] ?? [];
         }
+        
         // set the item
         if(isset($section[2])) {
             $array_list = $array_data[$section[0]][$section[1]][$section[2]] ?? [];
