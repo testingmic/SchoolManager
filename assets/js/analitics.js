@@ -486,8 +486,8 @@ var attendanceReport = (_attendance) => {
                 <div class='card mb-3'>
                     <div class='card-header pb-0'><h5>${day}</h5></div>
                     <div class='card-body pt-2 pb-2'>
-                        <i class="fa ${status === "present" ? "text-success fa-check" : "text-danger fa-times"}"></i> 
-                        <strong class="${status === "present" ? "text-success" : "text-danger"}">${status.toUpperCase()}</strong>
+                        <i class="fa ${status === "present" ? "text-success fa-check" : (status === "absent" ? "text-danger fa-times" : "text-warning fa-adjust")}"></i> 
+                        <strong class="${status === "present" ? "text-success" : (status === "absent" ? "text-danger" : "text-warning")}">${status.toUpperCase()}</strong>
                     </div>
                 </div>
             </div>`;

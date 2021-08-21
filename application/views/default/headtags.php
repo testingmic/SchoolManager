@@ -102,7 +102,8 @@ load_helpers(['menu_helper']);
 </head>
 <body class="<?= $sidebar_pref ?> <?=  $theme_color ?> bg">
 	<div class="loader"></div>
-    <input type="hidden" id="todays_date" disabled value="<?= date("Y-m-d") ?>">
+    <input name="minimum_date" hidden type="hidden" disabled value="<?= date("Y-m-d", strtotime("today -100 years")) ?>">
+    <input type="hidden" hidden id="todays_date" disabled value="<?= date("Y-m-d") ?>">
     <div class="last_visited_page" value="<?= $userData->last_visited_page ?>"></div>
     <?php if(!empty($isAdminAccountant)) { ?>
     <section class="container-parent">

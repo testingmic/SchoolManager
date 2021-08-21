@@ -1208,7 +1208,7 @@ class Auth extends Myschoolgh {
                     $check_2 = $this->pushQuery("id", "users", "username = '{$username}' AND item_id != '{$request_id}' ORDER BY id DESC LIMIT 1");
                     
                     // return error message
-                    if(empty($check_2)) {
+                    if(!empty($check_2)) {
                         return ["code" => 203, "data" => "Sorry! The username parsed is not available for use."];
                     }
                 }

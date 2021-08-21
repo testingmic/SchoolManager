@@ -345,10 +345,10 @@ if($isSupport) {
             $assignment_list = '
             <div class="col-lg-12 col-md-12 col-12 col-sm-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header text-uppercase">
                         <h4>Assignments</h4>
                     </div>
-                    <div class="card-body trix-slim-scroll" style="max-height:435px;height:435px;overflow-y:auto;">
+                    <div class="card-body trix-slim-scroll" style="max-height:565px;height:565px;overflow-y:auto;">
                         <div class="table-responsive">
                             <table data-empty="" class="table table-striped raw_datatable">
                                 <thead>
@@ -504,7 +504,7 @@ if($isSupport) {
                     <div class="card">
                         '.($isTutorStudent ?
                             '<div class="card-header">
-                                <h5 class="pb-0 mb-0">About Me</h5>
+                                <h5 class="pb-0 mb-0 text-uppercase">About Me</h5>
                             </div>
                             <div class="card-body mt-0 pt-0 pb-0">
                                 <div class="py-4">
@@ -581,8 +581,8 @@ if($isSupport) {
                     '.($isParent ? 
                     '<div>
                         <div class="card">
-                            <div class="card-header pl-2">
-                                <h4 class="text-uppercase font-13">Upcoming Events</h4>
+                            <div class="card-header">
+                                <h4 class="text-uppercase">Upcoming Events</h4>
                             </div>
                             <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
@@ -592,47 +592,9 @@ if($isSupport) {
                         </div>
                     </div>' : null).'
                 </div>
-                <div class="col-lg-8 col-md-12">
+                <div class="col-lg-8 p-0 col-md-12">
                     <div class="row">
-                        <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                            <div class="card card-statistic-1">
-                                <i class="fas fa-list-alt card-icon col-blue"></i>
-                                <div class="card-wrap">
-                                <div class="padding-20">
-                                    <div class="text-right">
-                                        <h3 class="font-light mb-0">0</h3>
-                                        <span class="text-muted">Notifications</span>
-                                    </div>
-                                </div>
-                                </div>
-                            </div>
-                        </div>
-                        '.($isTutorStudent ?
-                        '<div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                            <div class="card card-statistic-1">
-                                <i class="fas fa-book-open card-icon col-red"></i>
-                                <div class="card-wrap">
-                                <div class="padding-20">
-                                    <div class="text-right">
-                                        <h3 class="font-light mb-0">0</h3>
-                                        <span class="text-muted">Assignments</span>
-                                    </div>
-                                </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                            <div class="card card-statistic-1">
-                                <i class="fas fa-percentage card-icon col-green"></i>
-                                <div class="card-wrap">
-                                <div class="padding-20">
-                                    <div class="text-right">
-                                        <h3 class="font-light mb-0">0</h3>
-                                        <span class="text-muted">Attendance</span>
-                                    </div>
-                                </div>
-                                </div>
-                            </div>':'
+                        '.($isTutorStudent ? null : '
                             <div class="col-lg-4 col-md-6 col-sm-6 col-12">
                                 <div class="card card-statistic-1">
                                     <i class="fas fa-users card-icon col-red"></i>
@@ -752,8 +714,8 @@ if($isSupport) {
                 '.(!$isParent ? 
                     '<div class="col-lg-4 col-md-6 col-12 col-sm-12">
                         <div class="card">
-                            <div class="card-header pl-2">
-                                <h4 class="text-uppercase font-13">Upcoming Events</h4>
+                            <div class="card-header">
+                                <h4 class="text-uppercase">Upcoming Events</h4>
                             </div>
                             <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
@@ -778,7 +740,7 @@ if($isSupport) {
                     <div class="col-lg-8">
                         '.($data_stream ? 
                             '<div class="row">
-                                <div class="col-lg-3 col-md-4 col-sm-12">
+                                <div class="col-md-6 col-sm-12">
                                     <div class="card card-statistic-1">
                                         <i class="fas fa-user-check card-icon col-green"></i>
                                         <div class="card-wrap">
@@ -791,7 +753,7 @@ if($isSupport) {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-3 col-md-4 col-sm-12">
+                                <div class="col-md-6 col-sm-12">
                                     <div class="card card-statistic-1">
                                         <i class="fas fa-user-alt-slash card-icon col-red"></i>
                                         <div class="card-wrap">
@@ -804,7 +766,7 @@ if($isSupport) {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-3 col-md-4 col-sm-12">
+                                <div class="col-md-6 col-sm-12">
                                     <div class="card card-statistic-1">
                                         <i class="fas fa-user-edit card-icon col-blue"></i>
                                         <div class="card-wrap">
@@ -817,7 +779,7 @@ if($isSupport) {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-3 col-md-4 col-sm-12">
+                                <div class="col-md-6 col-sm-12">
                                     <div class="card card-statistic-1">
                                         <i class="fas fa-list card-icon col-blue"></i>
                                         <div class="card-wrap">
@@ -835,7 +797,7 @@ if($isSupport) {
                     </div>
                     <div class="col-lg-12 col-sm-12">
                         <div class="card">
-                            <div class="card-header">
+                            <div class="card-header text-uppercase">
                                 <h4>'.($isWardParent ? "Today's Timetable": "Today's Lessons to Teach").'</h4>
                             </div>
                             <div class="card-body pt-2 trix-slim-scroll table-responsive">

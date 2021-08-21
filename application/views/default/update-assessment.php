@@ -188,7 +188,7 @@ if(!empty($item_id)) {
                             <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
                             '.(!$isMultipleChoice ? '<button class="btn btn-outline-success" onclick="return save_AssignmentMarks();"><i class="fa fa-save"></i> Save</button>' : '').'
                         </div>' : (
-                            $isAdmin && $isAuto ? '
+                            $isAdmin && $isAuto && !empty($questions_query) ? '
                                 <button class="btn mb-2 btn-outline-danger" onclick="return reopen_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Reopen</button>
                             ' : ''
                         )
@@ -333,6 +333,14 @@ if(!empty($item_id)) {
 
                     // set the scripts to load for this user
                     $response->scripts = ["assets/js/multichoice.js"];
+
+                    // append the load
+                    $grading_info .= '
+                    <div class="form-content-loader" style="display: none; position: absolute">
+                        <div class="offline-content text-center">
+                            <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                        </div>
+                    </div>';
                     
                     // get the questions array list
                     $questions_array_list = load_class("assignments", "controllers")->questions_list($params);
@@ -343,12 +351,12 @@ if(!empty($item_id)) {
                     $session->previousQuestionId = !empty($session->previousQuestionId) ? $session->previousQuestionId : null;
                     $session->currentQuestionId = !empty($session->currentQuestionId) ? $session->currentQuestionId : $questions_ids[0];
 
-                    $grading_info .= $assignmentClass->current_question($questions_array_list, $session->student_id);
+                    $grading_info .= $assignmentClass->current_question($questions_array_list, $session->student_id, $data->assignment_type);
                 
                 } elseif($data->handed_in === "Submitted") {
                     $params->show_correct_answer = true;
                     $params->student_id = $session->student_id;
-                    $grading_info .= $assignmentClass->review_answers($params, "p-3")["data"];
+                    $grading_info .= $assignmentClass->review_answers($params, "p-2")["data"];
 
                 }
 
@@ -365,7 +373,7 @@ if(!empty($item_id)) {
         $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1>'.$pageTitle.'</h1>
+                <h1><i class="fa fa-book-reader"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-assessment">Assessments List</a></div>
@@ -379,7 +387,7 @@ if(!empty($item_id)) {
                 <div class="card-body">
                     <div class="author-box-center">
                         <div class="clearfix"></div>
-                        <div class="author-box-name"><a href="#">'.$data->assignment_title.'</a></div>
+                        <div class="author-box-name text-uppercase font-20"><a href="#">'.$data->assignment_title.'</a></div>
                         <div class="author-box-name">'.$data->class_name.'</div>
                         '.(isset($data->students_assigned) ? '<div class="author-box-job">('.$data->students_assigned.' Students)</div>' : null).'
                     </div>
@@ -461,7 +469,7 @@ if(!empty($item_id)) {
                     '.((!$nothanded_in || $isGraded) ? 
                         '<li class="nav-item">
                             <a class="nav-link" id="comments-tab2" data-toggle="tab" href="#comments" role="tab" aria-selected="true">
-                                Comments
+                                Discussions
                             </a>
                         </li>' : ''
                     ).'
@@ -473,7 +481,7 @@ if(!empty($item_id)) {
                                 <div class="pt-0">
                                     '.(!$isActive ? '
                                     <div class="mb-2 text-right">
-                                        <a href="#" onclick="return publish_AssignmentQuestion(\''.$item_id.'\',\''.count($questions_query).'\');" class="anchor btn btn-outline-success"><i class="fa fa-send"></i> Publish Questions</a>
+                                        '.(!empty($questions_query) ? '<a href="#" onclick="return publish_AssignmentQuestion(\''.$item_id.'\',\''.count($questions_query).'\');" class="anchor btn btn-outline-success"><i class="fa fa-send"></i> Publish Assignment</a>' : null).'
                                         <a href="'.$baseUrl.'add-assessment/add_question?qid='.$item_id.'" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Add Question</a>
                                     </div>' : 
                                     '<div class="mb-2 text-right">
@@ -503,7 +511,7 @@ if(!empty($item_id)) {
                                             </div>' : null
                                         ).'
                                         '.(
-                                            $data->attachment_html ? 
+                                            !empty($data->attachment_html) ? 
                                             '<div class="py-1 pt-0">
                                                 '.$data->attachment_html.'
                                             </div>' : null

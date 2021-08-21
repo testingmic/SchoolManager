@@ -48,7 +48,6 @@ class Answers {
 
 		// ensure that the user has not supplied more than the options preset
 		if(count($explodeUserAnswer) <= count($answerExplode)) {
-
 			// run a loop through the results set
 			foreach($answerExplode as $answerCompare) {
 				foreach($explodeUserAnswer as $uAnswer) {
@@ -74,7 +73,6 @@ class Answers {
 
 		// ensure that the user has not supplied more than the options preset
 		if(count($explodeUserAnswer) <= count($answerExplode)) {
-
 			// run a loop through the results set
 			if($this->answerString == $this->userAnswer) {
 				return "correct";
@@ -92,4 +90,5 @@ class Answers {
 		}
         return "wrong";
 	}
+
 }

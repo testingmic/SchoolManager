@@ -781,12 +781,14 @@ var initPlugins = () => {
         $('.datepicker').each((index, el) => {
             let input = $(el);
             let date_format = input.attr("date-format") == undefined ? "YYYY-MM-DD" : input.attr("date-format"),
-                max_date = input.attr("data-maxdate") == undefined ? $.today : input.attr("data-maxdate");
+                max_date = input.attr("data-maxdate") == undefined ? $.today : input.attr("data-maxdate"),
+                min_date = input.attr("data-mindate") == undefined ? $(`input[name="minimum_date"]`).val() : input.attr("data-mindate");
             input.daterangepicker({
                 locale: { format: date_format },
                 singleDatePicker: true,
                 showDropdowns: true,
-                maxDate: max_date
+                maxDate: max_date,
+                minDate: min_date
             });
         });
     }

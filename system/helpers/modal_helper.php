@@ -218,7 +218,7 @@ function page_not_found($request = "not_found", $string = "The page you were loo
                     </div>
                 </form>
                 <div class="mt-3">
-                    <a href="'.$baseUrl.'"><i class="fa fa-home"></i> Back to Home</a> | 
+                    <a href="'.$baseUrl.'dashboard"><i class="fa fa-home"></i> Back to Home</a> | 
                     <a href="'.$_SERVER["REQUEST_URI"].'"><i class="fa fa-redo-alt"></i>  Reload Page</a> |
                     <a href="javascript:history.back()" class="anchor"><i class="fa fa-arrow-left"></i> Go Back</a>
                 </div>

@@ -121,7 +121,7 @@
         </ul>
     </li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Class Assessment</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Class Assessment</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>add-assessment">Create Assessment</a></li>
@@ -140,7 +140,7 @@
     </li>
     <?php } ?>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Library</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
@@ -265,7 +265,7 @@
     </li>
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Class Assessment</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Class Assessment</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>add-assessment">Create Assessment</a></li>
@@ -273,7 +273,7 @@
         </ul>
     </li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Library</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
@@ -308,13 +308,13 @@
     </li>
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Class Assessment</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Class Assessment</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
         </ul>
     </li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Library</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
@@ -358,13 +358,13 @@
     <?php } ?>
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Class Assessment</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Class Assessment</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
         </ul>
     </li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Library</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
@@ -386,7 +386,7 @@
         </ul>
     </li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Library</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>

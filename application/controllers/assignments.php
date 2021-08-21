@@ -275,6 +275,12 @@ class Assignments extends Myschoolgh {
                 $this->session->assignment_uploadID = $item_id;
             }
 
+            // set the assigned to list
+            if($params->assigned_to === "selected_students") {
+                $assigned_to_list = $this->stringToArray($params->assigned_to_list);
+                $assigned_to_list = json_encode($assigned_to_list);
+            }
+
             /** Insert the record */
             $stmt = $this->db->prepare("
                 INSERT INTO assignments SET client_id = ?, created_by = ?, item_id = '{$item_id}', state = '{$state}'
@@ -289,7 +295,7 @@ class Assignments extends Myschoolgh {
                 ".(isset($params->date_due) ? ", due_date = '{$params->date_due}'" : null)."
                 ".(isset($params->time_due) ? ", due_time = '{$params->time_due}'" : null)."
                 ".(isset($params->assigned_to) ? ", assigned_to = '{$params->assigned_to}'" : null)."
-                ".(isset($params->assigned_to_list) ? ", assigned_to_list = '{$params->assigned_to_list}'" : null)."
+                ".(isset($assigned_to_list) ? ", assigned_to_list = '{$assigned_to_list}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->description) ? ", assignment_description = '".addslashes($params->description)."'" : null)."
@@ -306,7 +312,7 @@ class Assignments extends Myschoolgh {
 			$return["additional"] = ["clear" => true];
 
             // if the request is to add a quiz
-            if($is_attached) {
+            if(!$is_attached) {
                 $return["data"] = "Assignment successfully created. Proceeding to add the questions";
                 $return["additional"]["href"] = "{$this->baseUrl}add-assessment/add_question?qid={$item_id}";
             }
@@ -381,6 +387,12 @@ class Assignments extends Myschoolgh {
         $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? AND resource='assignments' LIMIT 1");
         $files->execute([json_encode($attachments), $attachments["raw_size_mb"], $prevData->item_id]);
 
+        // set the assigned to list
+        if($params->assigned_to === "selected_students") {
+            $assigned_to_list = $this->stringToArray($params->assigned_to_list);
+            $assigned_to_list = json_encode($assigned_to_list);
+        }
+
         try {
             /** Insert the record */
             $stmt = $this->db->prepare("
@@ -395,7 +407,7 @@ class Assignments extends Myschoolgh {
                 ".(isset($params->date_due) ? ", due_date = '{$params->date_due}'" : null)."
                 ".(isset($params->time_due) ? ", due_time = '{$params->time_due}'" : null)."
                 ".(isset($params->assigned_to) ? ", assigned_to = '{$params->assigned_to}'" : null)."
-                ".(isset($params->assigned_to_list) ? ", assigned_to_list = '{$params->assigned_to_list}'" : null)."
+                ".(isset($assigned_to_list) ? ", assigned_to_list = '{$assigned_to_list}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->description) ? ", assignment_description = '".addslashes($params->description)."'" : null)."
@@ -739,7 +751,7 @@ class Assignments extends Myschoolgh {
                 
                 // load the user answers list
                 $answer_info = $this->pushQuery(
-                    "*", "assignments_answers", 
+                    "answers", "assignments_answers", 
                     "assignment_id='{$item_id}' AND student_id = '{$params->userId}' AND client_id='{$params->clientId}' LIMIT 1"
                 );
 
@@ -761,7 +773,7 @@ class Assignments extends Myschoolgh {
 
                     // update the score for the user
                     $this->db->query("UPDATE assignments_answers SET scores = '{$score}' WHERE assignment_id='{$item_id}' AND student_id = '{$params->userId}' LIMIT 1");
-                    $this->db->query("UPDATE assignments SET state = 'Answered' WHERE assignment_id='{$item_id}' AND client_id = '{$params->clientId}' LIMIT 1");
+                    $this->db->query("UPDATE assignments SET state = 'Answered' WHERE item_id='{$item_id}' AND client_id = '{$params->clientId}' LIMIT 1");
                     
                     // insert the record into the assignments_submitted table
                     $stmt = $this->db->prepare("INSERT INTO assignments_submitted SET client_id = ?, assignment_id = ?, student_id = ?, score = ?, graded = ?, handed_in = ?, date_graded = now()");
@@ -775,7 +787,7 @@ class Assignments extends Myschoolgh {
                     $data = "Congrats, your assignment was successfully submitted.";
 
                     // unset all the sessions that are not needed
-                    $this->session->remove(["currentQuestionId","previousQuestionId","showSubmitButton", "attachAssignmentDocs", "nextQuestionId", "questionNumber"]);
+                    $this->session->remove(["currentQuestionId","previousQuestionId","showSubmitButton", "attachAssignmentDocs", "nextQuestionId", "questionNumber", "reviewQuestionsReached"]);
                 }
 
             }
@@ -885,6 +897,11 @@ class Assignments extends Myschoolgh {
 
         try {
 
+            // check the marks for a valid numeric integer
+            if(!preg_match("/^[0-9]+$/", $params->marks)) {
+                return ["code" => 203, "data" => "Sorry! Ensure a valid numeric integer was parsed for the marks field."];
+            }
+
             // get the assignment information
             $the_data = $this->pushQuery("id, grading", "assignments", "client_id='{$params->clientId}' AND item_id='{$params->assignment_id}' LIMIT 1");
 
@@ -924,7 +941,7 @@ class Assignments extends Myschoolgh {
                 $total_mark = isset($params->marks) ? ($params->marks + $the_marks) : $the_marks;
 
                 if($total_mark > $grading) {
-                    return ["code" => 203, "data" => "Sorry! Adding this question with the assign marks would result in a grade of: {$total_mark} which is more than: {$grading}."];
+                    return ["code" => 203, "data" => "Sorry! Adding this question with the assigned mark would result in a grade of: {$total_mark} which is more than the alloted one of: {$grading}."];
                 } elseif($total_mark == $grading) {
                     $append_msg = "This should be your last question. Since the marking scheme matches the grade set.";
                 }
@@ -1108,7 +1125,7 @@ class Assignments extends Myschoolgh {
      * 
      * @return String
      */
-    public function current_question(array $questions_list, $userId = null) {
+    public function current_question(array $questions_list, $userId = null, $assignment_type = 'Assignment') {
         global $session;
 
         $questions_ids = array_column($questions_list, "item_id");
@@ -1195,10 +1212,17 @@ class Assignments extends Myschoolgh {
 
             // process the question data and return the processed information
             $question_html = "
+            <div class='form-content-loader' style='display: none; position: absolute'>
+                <div class='offline-content text-center'>
+                    <p><i class='fa fa-spin fa-spinner fa-3x'></i></p>
+                </div>
+            </div>
             <div class='col-lg-12'>
-                <table class='table table-bordered' id='multichoice_question' data-answer_type='{$answer_type}' data-question_id='{$question_id}'>
+                <table border='1' class='table' id='multichoice_question' data-answer_type='{$answer_type}' data-question_id='{$question_id}'>
                 <tr>
-                    <td colspan='2'><h6 class='mb-0 pb-0'>{$questions_count} Objective test questions was found under this Assignment.</h6></td>
+                    <td colspan='2'>
+                        <h6 class='mb-0 pb-0 text-uppercase'>{$this->amount_to_words($questions_count)} Objective test questions was found under this {$assignment_type}.</h6>
+                    </td>
                 </tr>
                 <tr>
                     <td width='5%'>{$number}</td>
@@ -1241,15 +1265,17 @@ class Assignments extends Myschoolgh {
                 </tr>";
                 $question_html .= "
                 </table>
-                <div class='d-flex justify-content-between'>
-                    <div>
+                <div class='row'>
+                    <div class='col-md-4 mb-2'>
                         ".($session->previousQuestionId && $number !== 1 ? "<button onclick='return loadQuestionInfo(\"{$session->previousQuestionId}\");' class='btn-sm btn-outline-primary btn'><i class='fa fa-fast-backward'></i> Previous Question</button>" : "")."
                     </div>
-                    <div>
+                    <div align='right' class='col-md-8 mb-2'>
                         ".($session->showSubmitButton && $number == $questions_count ? "
-                            <button onclick='return reviewQuizAssignment(\"{$question->assignment_id}\", \"{$session->previousQuestionId}\")' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i> Review Answers</button>
-                            <button onclick='return submitQuizAssignment(\"{$question->assignment_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-save'></i> Sumit Assignment</button>
-                        " : "<button onclick='return loadQuestionInfo();' class='btn-sm btn-outline-primary btn'>Next Question <i class='fa fa-fast-forward'></i></button>")."
+                            <button onclick='return reviewQuizAssignment(\"{$question->assignment_id}\", \"{$session->previousQuestionId}\")' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-eye'></i> Review Answers</button>
+                            <button onclick='return submitQuizAssignment(\"{$question->assignment_id}\")' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-save'></i> Submit {$assignment_type}</button>
+                        " : "
+                        ".($this->session->reviewQuestionsReached ? "<button onclick='return reviewQuizAssignment(\"{$question->assignment_id}\", \"{$session->previousQuestionId}\")' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-eye'></i> Review Answers</button>" : null)."
+                        <button onclick='return loadQuestionInfo();' class='btn-sm mb-1 btn-outline-primary btn'>Next Question <i class='fa fa-fast-forward'></i></button>")."
                     </div>
                 </div>
             </div>";
@@ -1313,6 +1339,14 @@ class Assignments extends Myschoolgh {
             $question_html .= "<tr><td align='center'>Sorry! No result was found for the request.</td></tr>";
         } else {
 
+            // if the user is still in the quiz mode checker
+            $inQuizMode = (bool) (!empty($this->session->currentQuestionId) || !empty($this->session->questionNumber));
+
+            // set a new session
+            if($inQuizMode) {
+                $this->session->reviewQuestionsReached = true;
+            }
+
             // loop through the questions list
             foreach($questions_array_list as $qkey => $question) {
                 
@@ -1324,7 +1358,8 @@ class Assignments extends Myschoolgh {
                 if(isset($answers_list[$qkey])) {
                     $correct = (bool) ($answers_list[$qkey]["status"] === "correct");
                 }
-
+                
+                // set the answer
                 $this_answer = $answers_list[$qkey]["answer"] ?? null;
                 $this_answer = in_array($answer_type, ["multiple", "option"]) ? $this->stringToArray($this_answer) : $this_answer;
                 
@@ -1334,13 +1369,14 @@ class Assignments extends Myschoolgh {
                 }
 
                 // correct answer
-                $correctAnswer = $this->stringToArray($question->correct_answer);
+                $correctAnswer = !$inQuizMode ? $this->stringToArray($question->correct_answer) : [];
+                $button = $inQuizMode ? "<i onclick='return loadQuestionInfo(\"{$answers_list[$qkey]["question_id"]}\")' title='Click to review question {$number}' class='fa text-primary fa-edit cursor'></i>" : null;
 
                 // process the question data and return the processed information
                 $question_html .= "
                     <tr>
                         <td width='5%'>{$number}</td>
-                        <td>{$question->question}</td>
+                        <td>{$question->question} {$button}</td>
                     </tr>
                     <tr>
                         <td></td>
@@ -1451,7 +1487,7 @@ class Assignments extends Myschoolgh {
         
         // get the question data
         $question_info = $this->pushQuery(
-            "a.*", "assignments_questions a", 
+            "a.marks, a.correct_answer, a.assignment_id, a.answer_type", "assignments_questions a", 
             "a.item_id='{$params->question_id}' AND a.client_id='{$params->clientId}' LIMIT 1"
         );
 
@@ -1479,7 +1515,7 @@ class Assignments extends Myschoolgh {
 
             // load the existing user record (if any)
             $answer_info = $this->pushQuery(
-                "*", "assignments_answers", 
+                "scores, answers", "assignments_answers", 
                 "assignment_id='{$data->assignment_id}' AND student_id = '{$params->userId}' AND client_id='{$params->clientId}' LIMIT 1"
             );
 
@@ -1492,7 +1528,7 @@ class Assignments extends Myschoolgh {
 
                 // check the answer
                 $checker = $answerClass->answerMechanism($clean_answer, $data->correct_answer);
-                $score = $checker == "correct" ? $data->marks : 0;
+                $score = ($checker == "correct") ? $data->marks : 0;
 
                 // generate a array of the question
                 $the_answer = [
@@ -1501,7 +1537,7 @@ class Assignments extends Myschoolgh {
                         "answer" => $clean_answer,
                         "date_answered" => date("Y-m-d h:iA"),
                         "assigned_mark" => $data->marks,
-                        "status" => $answerClass->answerMechanism($clean_answer, $data->correct_answer)
+                        "status" => $checker
                     ]
                 ];
 
@@ -1517,7 +1553,7 @@ class Assignments extends Myschoolgh {
                 $checker = $answerClass->answerMechanism($clean_answer, $data->correct_answer);
 
                 // add to the existing scroe
-                $score = $checker == "correct" ? ($answer_info[0]->scores + $data->marks) : $answer_info[0]->scores;
+                $score = ($checker == "correct") ? ($answer_info[0]->scores + $data->marks) : $answer_info[0]->scores;
 
                 // generate a array of the question
                 $the_answer = [
@@ -1525,7 +1561,7 @@ class Assignments extends Myschoolgh {
                     "answer" => $clean_answer,
                     "assigned_mark" => $data->marks,
                     "date_answered" => date("Y-m-d h:iA"),
-                    "status" => $answerClass->answerMechanism($clean_answer, $data->correct_answer)
+                    "status" => $checker
                 ];
 
                 // init

@@ -25,12 +25,20 @@ var loadQuestionInfo = (previous_id = "") => {
     } else if ($(`textarea[name='answer_option']`).length) {
         answers[0] = $(`input[name='answer_option'][type='number']`).val();
     }
-
+    $(`div[id="viewOnlyModal"]`).modal(`hide`);
+    $(`div[id="assignment_question_detail"] div[class="form-content-loader"]`).css("display", "flex");
     $.post(`${baseUrl}api/assignments/save_answer`, { question_id, answers, previous_id }).then((response) => {
         if (response.code == 200) {
             $(`div[id='assignment_question_detail']`).html(response.data.result);
             quiz_answerHandler();
         }
+        $(`div[id="assignment_question_detail"] div[class="form-content-loader"]`).css("display", "none");
+    }).catch(() => {
+        swal({
+            text: "Sorry! An error was encountered while processing the request.",
+            icon: "error",
+        });
+        $(`div[id="assignment_question_detail"] div[class="form-content-loader"]`).css("display", "none");
     });
 }
 
@@ -83,17 +91,17 @@ var submitQuizAssignment = (assignment_id) => {
 
             $.post(`${baseUrl}api/assignments/handin`, { assignment_id, question_id, answers }).then((response) => {
                 if (response.code == 200) {
-                    swal({
-                        text: response.data.result,
-                        icon: "success",
-                    });
                     loadPage(`${baseUrl}update-assessment/${assignment_id}/view`);
-                } else {
-                    swal({
-                        text: response.data.result,
-                        icon: "error",
-                    });
                 }
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
+            }).catch(() => {
+                swal({
+                    text: "Sorry! An error was encountered while processing the request.",
+                    icon: "error",
+                });
             });
         }
     });

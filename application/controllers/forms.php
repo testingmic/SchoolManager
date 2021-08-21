@@ -420,7 +420,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Submission Date <span class='required'>*</span></label>";
-        $html_content .= "<input {$disabled} type='date' class='form-control' value='".($params->data->due_date ?? date("Y-m-d", strtotime("next week")))."' name='date_due' id='date_due'>";
+        $html_content .= "<input {$disabled} type='text' class='form-control datepicker' data-mindate='".date("Y-m-d", strtotime("today"))."' data-maxdate='".date("Y-m-d", strtotime("today +6 months"))."' value='".($params->data->due_date ?? date("Y-m-d", strtotime("today +3 day")))."' name='date_due' id='date_due'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-6'>";
@@ -641,7 +641,7 @@ class Forms extends Myschoolgh {
 
                         $html_content .= '
                         <tr>
-                            <td width="13%"><strong>'.$value.'</strong> '.($i < 3 ? " <span class='required'>*</span>" : "").'</td>
+                            <td width="16%" class="text-uppercase"><strong>'.$value.'</strong> '.($i < 3 ? " <span class='required'>*</span>" : "").'</td>
                             <td><input '.$disabled.' type="text" name="'.$option.'" id="'.$option.'" value="'.($data->{$option} ?? null).'" class="col-lg-12 objective_question form-control"></td>
                             <td width="7%"><input '.$disabled.' type="checkbox" '.((!empty($data->correct_answer) && in_array($option, $answer_array)) ? "checked" : null).' value="'.$option.'" name="answer_option" style="height:20px; width:20px" class="checkbox cursor"></td>
                         </tr>';
