@@ -3163,7 +3163,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
-                        <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control _datepicker">
+                        <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">

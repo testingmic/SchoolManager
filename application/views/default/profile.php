@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser;
+global $myClass, $SITEURL, $defaultUser, $isStudent;
 
 // initial variables
 $appName = config_item("site_name");
@@ -51,17 +51,24 @@ if(!empty($user_id)) {
         // guardian information
         $user_form = load_class("forms", "controllers")->profile_form($baseUrl, $data);
 
-        // if the request is to view the student information
-        $updateItem = confirm_url_id(2, "update") ? true : false;
+        // load fees allocation list for class
+        $allocation_param = (object) [
+            "clientId" => $clientId, "userData" => $defaultUser, 
+            "student_id" => $user_id, "client_data" => $defaultUser->client, 
+            "parse_owning" => true, "show_student" =>  false
+        ];
 
-        // user  permission information
-        $level_data = "<div class='row'>";
+        // create a new object
+        $feesObject = load_class("fees", "controllers", $allocation_param);
+
+        // get the student fees allocation
+        $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
 
         // append the html content
         $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1><i class="fa fa-user-friends"></i> '.$pageTitle.'</h1>
+                <h1><i class="fa fa-user"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
@@ -156,13 +163,35 @@ if(!empty($user_id)) {
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="about" role="tabpanel" aria-labelledby="home-tab2">
                                     '.($data->description ? "
-                                        <div class='mb-3 border-bottom_'>
+                                        <div class='mb-4 border-bottom'>
                                             <div class='card-body p-2 pl-0'>
                                                 <div><h5>DESCRIPTION</h5></div>
                                                 {$data->description}
                                             </div>
                                         </div>
                                     " : "").'
+                                    '.($isStudent ? '
+                                        <div>
+                                            <div class="d-flex mb-2 justify-content-between">
+                                                <div><h4>MY BILL</h4></div>
+                                                <div><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?download=1" target="_blank" class="btn mb-1 btn-outline-danger"><i class="fa fa-file-pdf"></i> Download</a></div>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table data-empty="" class="table table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th width="5%" class="text-center">#</th>
+                                                            <th>Category</th>
+                                                            <th>Due</th>
+                                                            <th>Paid</th>
+                                                            <th>Balance</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>'.$student_allocation_list["list"].'</tbody>
+                                                </table>
+                                            </div>
+                                        </div>' : null
+                                    ).'
                                 </div>
                                 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab2">
                                     '.$user_form.'
@@ -173,6 +202,12 @@ if(!empty($user_id)) {
                                             <h5 class="border-bottom pb-2">Change Password</h5>
                                         </div>
                                         <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="form-group">
+                                                    <label>Username</label>
+                                                    <input type="text" disabled name="username" id="username" value="'.$data->username.'" class="form-control">
+                                                </div>
+                                            </div>
                                             '.(
                                                 !$updatePermission || $updatePermission ? '
                                                 <div class="col-lg-12">

@@ -1,6 +1,6 @@
 <?php
 // global variables
-global $usersClass, $accessObject, $myClass, $isSchool, $defaultClientData, $clientPrefs;
+global $usersClass, $accessObject, $myClass, $isSchool, $defaultClientData, $clientPrefs, $isParent;
 
 // base url
 $baseUrl = config_item("base_url");
@@ -168,7 +168,7 @@ load_helpers(['menu_helper']);
                 </ul>
                 </div>
                 <ul class="navbar-nav navbar-right">
-                <?php if(!empty($session->student_id)) { ?>
+                <?php if(!empty($session->student_id) && $isParent) { ?>
                 <li class="dropdown dropdown-list-toggle"><a href="#" data-toggle="dropdown" title="Wards List" data-toggle="tooltip" class="nav-link nav-link-lg"><i class="fa fa-users"></i></a>
                     <div class="dropdown-menu dropdown-list dropdown-menu-right" style="overflow-y:auto;">
                         <div class="dropdown-header">Wards List</div>
