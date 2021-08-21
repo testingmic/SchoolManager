@@ -61,7 +61,7 @@ foreach($results_list as $key => $report) {
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>'.$pageTitle.'</h1>
+            <h1><i class="fa fa-chart-pie"></i> '.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>

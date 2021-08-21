@@ -348,7 +348,7 @@ class Forms extends Myschoolgh {
             }
 
             // set the type
-            $type = isset($params->data->assignment_type) ? $params->data->assignment_type : null;
+            $type = isset($params->data->questions_type) ? $params->data->questions_type : null;
 
             // run this section for only file attachment assignments
             if($type === "file_attachment") {
@@ -381,10 +381,10 @@ class Forms extends Myschoolgh {
         $html_content .= "<div class='col-md-4'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Category <span class='required'>*</span></label>";
-        $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='assignment_group' id='assignment_group'>";
+        $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='assignment_type' id='assignment_type'>";
         $html_content .= "<option value=''>Select Assignment Category</option>";
         foreach($this->assessment_group as $value) {
-            $html_content .= "<option ".($class_id && $params->data->assignment_group == $value ? "selected" : null)." value='{$value}'>{$value}</option>";
+            $html_content .= "<option ".($class_id && $params->data->assignment_type == $value ? "selected" : null)." value='{$value}'>{$value}</option>";
         }
         $html_content .= "</select>";
         $html_content .= "</div>";
@@ -495,7 +495,7 @@ class Forms extends Myschoolgh {
         
         // readonly state
         $disabled = isset($params->data->state) && (!in_array($params->data->state, ["Pending", "Graded", "Draft"])) ? "disabled='disabled'" : null;
-        $type = isset($params->data->assignment_type) ? $params->data->assignment_type : null;
+        $type = isset($params->data->questions_type) ? $params->data->questions_type : null;
 
         $html_content = "
         <style>
@@ -510,7 +510,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<div class='col-lg-4'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Select Question Type <span class='required'>*</span></label>";
-        $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='assignment_type' id='assignment_type'>";
+        $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='questions_type' id='questions_type'>";
         $html_content .= "<option value=''>Please Select</option>";
         $html_content .= "<option ".($type == "file_attachment" ? "selected" : null)." value='file_attachment'>Upload Question Set</option>";
         $html_content .= "<option ".($type == "multiple_choice" ? "selected" : null)." value='multiple_choice'>Multiple Choice Questions (Quiz)</option>";

@@ -126,7 +126,7 @@ class Assignments extends Myschoolgh {
                     if(!$isMinified) {
 
                         // is an attachment assignment
-                        $isAttachment = (bool) ($result->assignment_type == "file_attachment");
+                        $isAttachment = (bool) ($result->questions_type == "file_attachment");
 
                         // clean the assignment description
                         $result->assignment_description = custom_clean(htmlspecialchars_decode($result->assignment_description));
@@ -215,8 +215,8 @@ class Assignments extends Myschoolgh {
      */
     public function add(stdClass $params) {
 
-        /** Confirm that the assignment_type is valid */
-        if(!in_array($params->assignment_type, ["file_attachment", "multiple_choice"])) {
+        /** Confirm that the questions_type is valid */
+        if(!in_array($params->questions_type, ["file_attachment", "multiple_choice"])) {
             return ["code" => 203, "data" => "Sorry! An invalid assignment type was parsed."];
         }
 
@@ -251,7 +251,7 @@ class Assignments extends Myschoolgh {
 
         /** Confirm that the user is using the file attachment module */
         $item_id = random_string("alnum", 32);
-        $is_attached = (bool) ($params->assignment_type == "file_attachment");
+        $is_attached = (bool) ($params->questions_type == "file_attachment");
 
         try {
             
@@ -278,8 +278,8 @@ class Assignments extends Myschoolgh {
             /** Insert the record */
             $stmt = $this->db->prepare("
                 INSERT INTO assignments SET client_id = ?, created_by = ?, item_id = '{$item_id}', state = '{$state}'
+                ".(isset($params->questions_type) ? ", questions_type = '{$params->questions_type}'" : null)."
                 ".(isset($params->assignment_type) ? ", assignment_type = '{$params->assignment_type}'" : null)."
-                ".(isset($params->assignment_group) ? ", assignment_group = '{$params->assignment_group}'" : null)."
                 ".(isset($params->assignment_title) ? ", assignment_title = '{$params->assignment_title}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
                 ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
@@ -308,7 +308,7 @@ class Assignments extends Myschoolgh {
             // if the request is to add a quiz
             if($is_attached) {
                 $return["data"] = "Assignment successfully created. Proceeding to add the questions";
-                $return["additional"]["href"] = "{$this->baseUrl}add-assignment/add_question?qid={$item_id}";
+                $return["additional"]["href"] = "{$this->baseUrl}add-assessment/add_question?qid={$item_id}";
             }
 
 			// return the output
@@ -385,8 +385,8 @@ class Assignments extends Myschoolgh {
             /** Insert the record */
             $stmt = $this->db->prepare("
                 UPDATE assignments SET date_updated = now()
+                ".(isset($params->questions_type) ? ", questions_type = '{$params->questions_type}'" : null)."
                 ".(isset($params->assignment_type) ? ", assignment_type = '{$params->assignment_type}'" : null)."
-                ".(isset($params->assignment_group) ? ", assignment_group = '{$params->assignment_group}'" : null)."
                 ".(isset($params->assignment_title) ? ", assignment_title = '{$params->assignment_title}'" : null)."
                 ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
                 ".(isset($params->class_id) ? ", class_id = '{$params->class_id}'" : null)."
@@ -456,8 +456,11 @@ class Assignments extends Myschoolgh {
     public function load_course_students(stdClass $params) {
 
         /** Load the Students List */
-        $result["students_list"] = $this->pushQuery("item_id, unique_id, name, email, phone_number, gender", "users", 
-            "client_id='{$params->clientId}' AND class_id='{$params->class_id}' AND user_type='student' AND user_status='Active' AND status='1'");
+        $result["students_list"] = $this->pushQuery("
+            a.item_id, a.unique_id, a.name, a.email, a.phone_number, a.gender", 
+            "users a LEFT JOIN classes c ON c.id = a.class_id", 
+            "a.client_id='{$params->clientId}' AND c.item_id='{$params->class_id}' AND 
+            a.user_type='student' AND a.user_status='Active' AND a.status='1'");
         
         /** Load the courses list */
         $result["courses_list"] = $this->pushQuery("id, item_id, name, course_code", "courses", "class_id LIKE '%{$params->class_id}%' AND status='1'"); 
@@ -1681,14 +1684,14 @@ class Assignments extends Myschoolgh {
 
             // insert the record into the database
             $stmt = $this->db->prepare("INSERT INTO assignments SET
-               item_id = ?, client_id = ?, assignment_group = ?, assigned_to = ?, assigned_to_list = ?, course_tutor = ?,
+               item_id = ?, client_id = ?, questions_type = ?, assignment_type = ?, assigned_to = ?, assigned_to_list = ?, course_tutor = ?,
                course_id = ?, class_id = ?, grading = ?, assignment_title = ?, assignment_description = ?,
                insertion_mode = ?, created_by = ?, due_date = ?, due_time = ?, state = ?, date_published = now(), 
                academic_year = ?, academic_term = ?
             ");
             $stmt->execute([
-                $item_id, $params->clientId, $data["assessment_type"], $assigned_to, 
-                json_encode(array_keys($students_list)),
+                $item_id, $params->clientId, $data["questions_type"], $data["assessment_type"], 
+                $assigned_to, json_encode(array_keys($students_list)),
                 $params->userId, $data["course_id"], $data["class_id"], 
                 $data["overall_score"], $data["assessment_title"], $data["assessment_description"] ?? null, 
                 "Manual", $params->userId, $data["date_due"], $data["time_due"],

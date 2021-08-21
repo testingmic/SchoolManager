@@ -137,7 +137,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
             class_id = $(`select[name="class_id"]`).val(),
             course_id = $(`select[name="course_id"]`).val();
         $.form_data = { department_id, class_id, course_id };
-        loadPage(`${baseUrl}list-assignments`);
+        loadPage(`${baseUrl}list-assessments`);
     });
 
 }

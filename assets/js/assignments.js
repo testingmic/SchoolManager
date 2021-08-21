@@ -1,4 +1,4 @@
-$(`div[id='create_assignment'] select[name='assignment_type']`).on("change", function() {
+$(`div[id='create_assignment'] select[name='questions_type']`).on("change", function() {
     let value = $(this).val();
     if (value === "multiple_choice") {
         $(`button[type="button-submit"]`).html("Add Questions");

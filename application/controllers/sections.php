@@ -92,7 +92,7 @@ class Sections extends Myschoolgh {
         // confirm that a logo was parsed
         if(isset($params->image)) {
             // set the upload directory
-            $uploadDir = "assets/img/posts/";
+            $uploadDir = "assets/img/gallery/";
             // File path config 
             $fileName = basename($params->image["name"]); 
             $targetFilePath = $uploadDir . $fileName; 
@@ -182,7 +182,7 @@ class Sections extends Myschoolgh {
             // confirm that a logo was parsed
             if(isset($params->image)) {
                 // set the upload directory
-                $uploadDir = "assets/img/posts/";
+                $uploadDir = "assets/img/gallery/";
                 // File path config 
                 $fileName = basename($params->image["name"]); 
                 $targetFilePath = $uploadDir . $fileName; 

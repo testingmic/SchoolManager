@@ -43,7 +43,7 @@ var review_AssignmentQuestion = (assignment_id, question_id) => {
             $(`div[id="full_question_detail"]`).html(response.data.result);
             quick_formHandler();
             $(`textarea[name="question"]`).focus();
-            let loc = `${baseUrl}add-assignment/add_question?qid=${assignment_id}&q_id=${question_id}`;
+            let loc = `${baseUrl}add-assessment/add_question?qid=${assignment_id}&q_id=${question_id}`;
             window.history.pushState({ current: loc }, "", loc);
         }
     });
@@ -83,7 +83,7 @@ var clear_questionForm = () => {
     $(`select[name="answer_type"]`).val("option").change();
     $(`input[name="answer_option"]:checkbox`).prop('checked', false);
     $(`input[class~="objective_question"], [name="question"]`).val("");
-    window.history.pushState({ current: `${baseUrl}add-assignment/add_question` }, "", `${baseUrl}add-assignment/add_question`);
+    window.history.pushState({ current: `${baseUrl}add-assessment/add_question` }, "", `${baseUrl}add-assessment/add_question`);
 }
 
 var cancel_AssignmentQuestion = () => {

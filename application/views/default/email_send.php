@@ -148,21 +148,27 @@ $response->html = '
                     <div class="card">
                         <div class="card-header text-uppercase">Recipients List</div>
                         <div class="card-body">
-                            <table border="1" class="table table-bordered table-striped">
+                            <table border="1" width="100%" class="table mb-1 table-bordered table-striped">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>FULLNAME</th>
-                                        <th>EMAIL ADDRESS</th>
-                                        <th align="center"><input disabled style="height:20px;width:20px;" id="select_all" type="checkbox" class="cursor"></th>
+                                        <th width="10%">#</th>
+                                        <th width="40%">FULLNAME</th>
+                                        <th width="35%">EMAIL ADDRESS</th>
+                                        <td style="border:none;background:rgba(0,0,0,0.04)" align="center">
+                                            <input disabled style="height:20px;width:20px;" id="select_all" type="checkbox" class="cursor">
+                                        </td>
                                     </tr>
                                 </thead>
-                                <tbody class="receipients_list">
-                                    <tr>
-                                        <td align="center" colspan="4">No receipient selected at the moment.</td>
-                                    </tr>
-                                </tbody>
                             </table>
+                            <div class="slim-scroll" style="overflow-y:auto;max-height:600px;">
+                                <table border="1" width="100%" class="table pt-0 mt-0 table_list table-bordered table-striped">
+                                    <tbody class="receipients_list">
+                                        <tr>
+                                            <td align="center" colspan="4">No receipient selected at the moment.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Department Details";
+$pageTitle = "Department Information";
 $response->title = "{$pageTitle} : {$appName}";
 
 $response->scripts = [
@@ -26,7 +26,6 @@ $response->scripts = [
 
 // item id
 $item_id = $SITEURL[1] ?? null;
-$pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty
 if(!empty($item_id)) {
@@ -62,18 +61,12 @@ if(!empty($item_id)) {
         // loop through the students list
         foreach($student_list["data"] as $key => $student) {
             // view link
-            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
-            if($studentUpdate) {
-                $action .= "&nbsp;<a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-            }
-
+            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+                        
             $students .= "<tr data-row_id=\"{$student->user_id}\">";
             $students .= "<td>".($key+1)."</td>";
             $students .= "<td>
                 <div class='d-flex justify-content-start'>
-                    <div class='mr-1'>
-                    <img onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}\");' class='cursor author-box-picture' width='40px' src=\"{$baseUrl}{$student->image}\"> &nbsp; 
-                    </div>
                     <div>
                         <a href=\"#\" onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}\");'>
                             <span class='text-uppercase font-weight-bold text-primary'>{$student->name}</span>
@@ -83,7 +76,7 @@ if(!empty($item_id)) {
             </td>";
             $students .= "<td>{$student->class_name}</td>";
             $students .= "<td>{$student->gender}</td>";
-            $students .= "<td>{$action}</td>";
+            $students .= "<td align='center'>{$action}</td>";
             $students .= "</tr>";
         }
 
@@ -97,7 +90,7 @@ if(!empty($item_id)) {
                         <th>Student Name</th>
                         <th>Class</th>
                         <th>Gender</th>
-                        <th width="13%">Action</th>
+                        <th width="10%"></th>
                     </tr>
                 </thead>
                 <tbody>'.$students.'</tbody>
@@ -111,7 +104,7 @@ if(!empty($item_id)) {
         $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1>'.$pageTitle.'</h1>
+                <h1><i class="fa fa-hotel"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-departments">Departments</a></div>
@@ -119,14 +112,14 @@ if(!empty($item_id)) {
                 </div>
             </div>
             <div class="section-body">
-            <div class="row mt-sm-4">
+            <div class="row">
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
                 <div class="card-body">
                     <div class="author-box-center">
-                        <img alt="image" src="'.$baseUrl.''.$data->image.'" class="author-box-picture">
+                        <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                         <div class="clearfix"></div>
-                        <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
+                        <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
                         <div class="author-box-job">'.$data->department_code.'</div>
                         <div class="author-box-job">('.$data->students_count.' Students)</div>
                     </div>

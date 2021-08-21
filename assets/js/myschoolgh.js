@@ -398,8 +398,8 @@ var view_AssessmentMarks = (assessment_id) => {
                             <tr>
                                 <td class="font-weight-bold">Subject:</td>
                                 <td colspan="3">${assessment.assignment_title} 
-                                    <strong class='badge p-1 pr-2 pl-2 badge-${assessment.assignment_group_label}'>
-                                        ${assessment.assignment_group}
+                                    <strong class='badge p-1 pr-2 pl-2 badge-${assessment.assignment_type_label}'>
+                                        ${assessment.assignment_type}
                                     </strong>
                                 </td>
                             </tr>

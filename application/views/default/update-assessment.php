@@ -30,7 +30,6 @@ $hasUpdate = $accessObject->hasAccess("update", "assignments");
 
 // item id
 $item_id = $SITEURL[1] ?? null;
-$pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty
 if(!empty($item_id)) {
@@ -57,7 +56,7 @@ if(!empty($item_id)) {
         // guardian information
         $isGraded = isset($data->awarded_mark) ? true : false;
         $isActive = in_array($data->state, ["Graded", "Pending", "Answered"]);
-        $isMultipleChoice =  (bool) ($data->assignment_type == "multiple_choice");
+        $isMultipleChoice =  (bool) ($data->questions_type == "multiple_choice");
 
         $data->isGraded = $isGraded;
         $data->hasUpdate = $hasUpdate;
@@ -123,7 +122,7 @@ if(!empty($item_id)) {
                             <td>{$question->marks}</td>
                             <td align='center'>";
                                 if(!$isActive) {
-                                    $questions_list .= "<a href='{$baseUrl}add-assignment/add_question?qid={$item_id}&q_id={$question->item_id}' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>&nbsp;";
+                                    $questions_list .= "<a href='{$baseUrl}add-assessment/add_question?qid={$item_id}&q_id={$question->item_id}' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>&nbsp;";
                                 }
                                 $questions_list .= "<button class='btn btn-outline-primary btn-sm' onclick='return view_AssignmentQuestion(\"{$question->item_id}\")'><i class='fa fa-eye'></i></button>&nbsp;";
                                 if(!$isActive) {
@@ -475,10 +474,10 @@ if(!empty($item_id)) {
                                     '.(!$isActive ? '
                                     <div class="mb-2 text-right">
                                         <a href="#" onclick="return publish_AssignmentQuestion(\''.$item_id.'\',\''.count($questions_query).'\');" class="anchor btn btn-outline-success"><i class="fa fa-send"></i> Publish Questions</a>
-                                        <a href="'.$baseUrl.'add-assignment/add_question?qid='.$item_id.'" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Add Question</a>
+                                        <a href="'.$baseUrl.'add-assessment/add_question?qid='.$item_id.'" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Add Question</a>
                                     </div>' : 
                                     '<div class="mb-2 text-right">
-                                        <a href="'.$baseUrl.'add-assignment/add_question?qid='.$item_id.'" class="btn btn-outline-primary"><i class="fa fa-eye"></i> Review Questions</a>
+                                        <a href="'.$baseUrl.'add-assessment/add_question?qid='.$item_id.'" class="btn btn-outline-primary"><i class="fa fa-eye"></i> Review Questions</a>
                                     </div>'
                                     ).'
                                     '.$questions_list.'

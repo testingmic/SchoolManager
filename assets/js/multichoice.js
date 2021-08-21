@@ -87,7 +87,7 @@ var submitQuizAssignment = (assignment_id) => {
                         text: response.data.result,
                         icon: "success",
                     });
-                    loadPage(`${baseUrl}update-assignment/${assignment_id}/view`);
+                    loadPage(`${baseUrl}update-assessment/${assignment_id}/view`);
                 } else {
                     swal({
                         text: response.data.result,

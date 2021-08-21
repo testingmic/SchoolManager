@@ -57,12 +57,12 @@ $assignments = "";
 $assessment_array = [];
 foreach($item_list["data"] as $key => $each) {
     
-    $each->assignment_group_label = $color[$each->assignment_group];
+    $each->assignment_type_label = $color[$each->assignment_type];
     $assessment_array[$each->item_id] = $each;
     $action = "<a title='Click to update assignment record' href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
-    if($hasUpdate && $each->assignment_type == "multiple_choice") {
-        $action .= "&nbsp;<a title='Click to manage questions for this assignment' href='#' onclick='return loadPage(\"{$baseUrl}add-assignment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
+    if($hasUpdate && $each->questions_type == "multiple_choice") {
+        $action .= "&nbsp;<a title='Click to manage questions for this assignment' href='#' onclick='return loadPage(\"{$baseUrl}add-assessment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
     }
 
     // if the state is either closed or graded
@@ -78,7 +78,7 @@ foreach($item_list["data"] as $key => $each) {
     $assignments .= "<td>".($key+1)."</td>";
     $assignments .= "<td>
         <a href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");'>
-            {$each->assignment_title}</a> <strong class='badge p-1 pr-2 pl-2 badge-{$color[$each->assignment_group]}'>{$each->assignment_group}</strong>
+            {$each->assignment_title}</a> <strong class='badge p-1 pr-2 pl-2 badge-{$color[$each->assignment_type]}'>{$each->assignment_type}</strong>
         ".(
         $hasUpdate ? 
             "<br>Class: <strong>{$each->class_name}</strong>
@@ -132,7 +132,7 @@ $response->array_stream["assessment_array"] = $assessment_array;
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Class Assessment List</h1>
+            <h1><i class="fa fa-book-reader"></i> Class Assessment List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">Class Assessment List</div>

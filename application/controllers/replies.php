@@ -328,7 +328,7 @@ class Replies extends Myschoolgh {
         $table_name = [
             "assignments" => [
                 "table" => "assignments",
-                "page" => "update-assignment"
+                "page" => "update-assessment"
             ],"events" => [
                 "table" => "events",
                 "page" => "update-event"

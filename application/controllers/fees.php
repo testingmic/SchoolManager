@@ -292,6 +292,7 @@ class Fees extends Myschoolgh {
 			$student_id = $this->session->student_id;
         }
         
+        // group record by student id
         $groupBy = (isset($params->group_by_student) && ($params->group_by_student == "group_by")) ? "GROUP BY a.student_id" : null;
 
         /** Init the user type */
@@ -405,7 +406,7 @@ class Fees extends Myschoolgh {
             // set the allocation to true
             $allocated = true;
             $showStudentData = (bool) !isset($params->show_student);
-            $groupBy = (isset($params->group_by_student) && ($params->group_by_student == "group_by")) ? "GROUP BY a.student_id" : null;
+            $groupBy = (bool) isset($params->group_by_student) && ($params->group_by_student == "group_by");
 
             // init values
             $count = 1;
@@ -432,18 +433,24 @@ class Fees extends Myschoolgh {
 
                 // label
                 $label = "<br><span class='badge p-1 badge-success'>Paid</span>";
-                if((round($due) === round($balance)) || (isset($student->total_amount_due) && ($student->total_amount_due === $student->total_balance))) {
-                    $label = "<br><span class='badge p-1 badge-danger'>Not Paid</span>";
-                } elseif(($paid > 0 && !$isPaid) && !$groupBy) {
-                    $label = "<br><span class='badge p-1 badge-primary'>Part Payment</span>";
-                }  elseif($groupBy && isset($student->total_amount_due) && (
-                    (round($student->total_amount_due) !== round($student->total_amount_paid)) && (round($student->total_balance) !== 0)
-                )) {
-                    $label = "<br><span class='badge p-1 badge-primary'>Part Payment</span>";
-                }
-                if($student->exempted) {
-                    $label = "";
-                    $total_exempted += $due;
+
+                // set the group by
+                if($groupBy) {
+                    $isPaid = (bool) ($student->total_amount_due < $student->total_amount_paid) || ($student->total_amount_due === $student->total_amount_paid);
+                } else {
+                    if((round($due) === round($balance)) || (isset($student->total_amount_due) && ($student->total_amount_due === $student->total_balance))) {
+                        $label = "<br><span class='badge p-1 badge-danger'>Not Paid</span>";
+                    } elseif(($paid > 0 && !$isPaid) && !$groupBy) {
+                        $label = "<br><span class='badge p-1 badge-primary'>Part Payment</span>";
+                    }  elseif($groupBy && isset($student->total_amount_due) && (
+                        (round($student->total_amount_due) !== round($student->total_amount_paid)) && (round($student->total_balance) !== 0)
+                    )) {
+                        $label = "<br><span class='badge p-1 badge-primary'>Part Payment</span>";
+                    }
+                    if($student->exempted) {
+                        $label = "";
+                        $total_exempted += $due;
+                    }
                 }
 
                 // append to the url string

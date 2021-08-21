@@ -40,10 +40,10 @@ foreach($department_list["data"] as $key => $each) {
 
     $sections .= "<tr data-row_id=\"{$each->id}\">";
     $sections .= "<td>".($key+1)."</td>";
-    $departments .= "<td><a href='#' class='text-uppercase font-weight-bold' onclick='return loadPage(\"{$baseUrl}update-section/{$each->id}\");'>{$each->name}</a></td>";
+    $sections .= "<td><a href='#' class='text-uppercase font-weight-bold' onclick='return loadPage(\"{$baseUrl}update-section/{$each->id}\");'>{$each->name}</a></td>";
     $sections .= "<td>{$each->section_code}</td>";
     $sections .= "<td>{$each->students_count}</td>";
-    $sections .= "<td><span class='underline'>".($each->section_leader_info->name ?? null)."</span></td>";
+    $sections .= "<td><span ".(isset($each->section_leader_info->name) ? "onclick='return loadPage(\"{$baseUrl}update-student/{$each->section_leader_info->user_id}\")'" : null)." class='underline text-primary text-uppercase'>".($each->section_leader_info->name ?? null)."</span></td>";
     $sections .= "<td align='center'>{$action}</td>";
     $sections .= "</tr>";
 }
@@ -51,7 +51,7 @@ foreach($department_list["data"] as $key => $each) {
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Sections List</h1>
+            <h1><i class="fa fa-school"></i> Sections List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">Sections</div>

@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Section Details";
+$pageTitle = "Section Information";
 $response->title = "{$pageTitle} : {$appName}";
 
 $response->scripts = [
@@ -26,7 +26,6 @@ $response->scripts = [
 
 // item id
 $item_id = $SITEURL[1] ?? null;
-$pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty
 if(!empty($item_id)) {
@@ -62,17 +61,14 @@ if(!empty($item_id)) {
         // loop through the students list
         foreach($student_list["data"] as $key => $student) {
             // view link
-            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
-            if($studentUpdate) {
-                $action .= "&nbsp;<a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-            }
-
+            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            
             $students .= "<tr data-row_id=\"{$student->user_id}\">";
             $students .= "<td>".($key+1)."</td>";
             $students .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$student->image}\"> &nbsp; {$student->name}</td>";
             $students .= "<td>{$student->class_name}</td>";
             $students .= "<td>{$student->gender}</td>";
-            $students .= "<td>{$action}</td>";
+            $students .= "<td align='center'>{$action}</td>";
             $students .= "</tr>";
         }
 
@@ -86,7 +82,7 @@ if(!empty($item_id)) {
                         <th>Student Name</th>
                         <th>Class</th>
                         <th>Gender</th>
-                        <th width="13%">Action</th>
+                        <th width="10%"></th>
                     </tr>
                 </thead>
                 <tbody>'.$students.'</tbody>
@@ -100,24 +96,23 @@ if(!empty($item_id)) {
         $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1>'.$pageTitle.'</h1>
+                <h1><i class="fa fa-school"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-sections">Sections</a></div>
-                    <div class="breadcrumb-item">'.$data->section.'</div>
+                    <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>
             <div class="section-body">
-            <div class="row mt-sm-4">
+            <div class="row">
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
                 <div class="card-body">
                     <div class="author-box-center">
-                        <img alt="image" src="'.$baseUrl.''.$data->image.'" class="author-box-picture">
+                        <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                         <div class="clearfix"></div>
-                        <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
-                        <div class="author-box-job">'.$data->section_code.'</div>
-                        <div class="author-box-job">('.$data->students_count.' Students)</div>
+                        <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
+                        <div class="author-box-job font-20">'.$data->section_code.'</div>
                     </div>
                 </div>
                 </div>
@@ -135,7 +130,7 @@ if(!empty($item_id)) {
                 ).'
                 <div class="card">
                     <div class="card-header">
-                        <h4>Personal Details</h4>
+                        <h4>SECTION LEADER DETAILS</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
                         <div class="py-4">
@@ -175,7 +170,6 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
-                            <div class="col-lg-12 pl-0"><h5>SECTION STUDENTS LIST</h5></div>
                             '.$student_listing.'
                         </div>
                         <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';

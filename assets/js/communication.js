@@ -315,10 +315,10 @@ var generate_list = (route) => {
                 let the_value = (route == "sms") ? e.phone_number : e.email;
                 users_receipients_list += `
                 <tr row_id="${e.item_id}">
-                    <td>${count}</td>
-                    <td><label for="recipients_${e.item_id}" class="cursor underline text-uppercase text-info">${e.name}</label></td>
-                    <td>${the_value !== null ? the_value : ""}</td>
-                    <td><input ${the_value !== null ? `class="user_contact" name="recipients[]" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
+                    <td width="10%">${count}</td>
+                    <td width="50%"><label for="recipients_${e.item_id}" class="cursor underline text-uppercase text-info">${e.name}</label></td>
+                    <td width="25%">${the_value !== null ? the_value : ""}</td>
+                    <td align="center"><input ${the_value !== null ? `class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
                 </tr>`;
             }
         });
@@ -330,10 +330,10 @@ var generate_list = (route) => {
                 let the_value = (route == "sms") ? e.phone_number : e.email;
                 users_receipients_list += `
                 <tr row_id="${e.item_id}">
-                    <td>${count}</td>
-                    <td><label for="recipients_${e.item_id}" class="cursor text-uppercase text-info">${e.name}</label></td>
-                    <td>${the_value !== null ? the_value : ""}</td>
-                    <td><input ${the_value !== null ? `class="user_contact" name="recipients[]" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
+                    <td width="10%">${count}</td>
+                    <td width="50%"><label for="recipients_${e.item_id}" class="cursor text-uppercase text-info">${e.name}</label></td>
+                    <td width="25%">${the_value !== null ? the_value : ""}</td>
+                    <td align="center"><input ${the_value !== null ? `class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
                 </tr>`;
             }
         });
@@ -344,10 +344,10 @@ var generate_list = (route) => {
                 let the_value = (route == "sms") ? e.phone_number : e.email;
                 users_receipients_list += `
                 <tr row_id="${e.item_id}">
-                    <td>${count}</td>
-                    <td><label for="recipients_${e.item_id}" class="cursor text-uppercase text-info">${e.name}</label></td>
-                    <td>${the_value !== null ? the_value : ""}</td>
-                    <td><input ${the_value !== null ? `class="user_contact" name="recipients[]" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
+                    <td width="10%">${count}</td>
+                    <td width="50%"><label for="recipients_${e.item_id}" class="cursor text-uppercase text-info">${e.name}</label></td>
+                    <td width="25%">${the_value !== null ? the_value : ""}</td>
+                    <td align="center"><input ${the_value !== null ? `class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
                 </tr>`;
             }
         });
@@ -490,5 +490,5 @@ $(`div[id="message_form"] *`).attr("disabled", true);
 $(`div[class="trix-dialogs"] input[type="url"][name="href"], button[data-trix-attribute="href"]`).remove();
 
 $(`div[class~="send_smsemail"] input[id="select_all"]`).on("click", function () {
-    $(this).parents(`table[class~="table"]`).find(`input[class="user_contact"]:checkbox`).prop('checked', this.checked);
+    $(`table[class~="table_list"]`).find(`input[class="user_contact"]:checkbox`).prop('checked', this.checked);
 });

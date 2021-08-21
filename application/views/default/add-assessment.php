@@ -174,7 +174,7 @@ if(isset($_GET["qid"]) && !empty($_GET["qid"]) || !empty($session->assignment_up
                         </div>
                         <div class="mb-4 border-bottom pb-3 row">
                             <div class="col-lg-12">
-                                <span class="float-left"><a href="'.$baseUrl.'update-assignment/'.$assignment_id.'/view" class="btn btn-outline-success btn-sm"><i class="fa fa-edit"></i> Update</a></span>
+                                <span class="float-left"><a href="'.$baseUrl.'update-assessment/'.$assignment_id.'/view" class="btn btn-outline-success btn-sm"><i class="fa fa-edit"></i> Update</a></span>
                                 '.($isActive ? '<span class="float-right"><button onclick="return clear_questionForm()" class="btn btn-sm btn-outline-primary">New Question</button></span>' : '').'
                             </div>
                         </div>
