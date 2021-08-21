@@ -38,7 +38,145 @@ $userData->the_user_type = $defaultUser->user_type;
 
 // if not booking set
 if($isSupport) {
-    
+
+    // init values
+    $counter = [
+        'Expired' => 0,
+        'Pending' => 0,
+        'Activated' => 0,
+        'Suspended' => 0,
+        'Active' => 0,
+        'Propagation' => 0,
+        'Complete' => 0
+    ];
+    $schools_list = "";
+    $load_schools_list = $myClass->pushQuery("*", "clients_accounts");
+
+    // loop through the list of schools
+    foreach($load_schools_list as $key => $school) {
+        
+        $counter[$school->client_state] += 1;
+
+        $schools_list .= "
+            <tr>
+                <td>".($key + 1)."</td>
+                <td>
+                    <span class='text-primary hover cursor text-uppercase font-bold' onclick='return loadPage(\"{$baseUrl}schools/{$school->client_id}\")'>{$school->client_name}</span>
+                    <br> <strong>{$school->client_id}</strong>
+                    <br> {$myClass->the_status_label($school->client_state)}
+                </td>
+                <td>{$school->client_contact}<br>{$school->client_secondary_contact}</td>
+                <td>{$school->client_address}</td>
+                <td>{$school->client_email}</td>
+                <td>{$school->client_name}</td>
+                <td align='center'><button onclick='return loadPage(\"{$baseUrl}schools/{$school->client_id}\")' class='btn btn-outline-success btn-sm'><i class='fa fa-edit'></i> Manage</button></td>
+            </tr>";
+    }
+
+    // set the html string
+    $response->html = '
+    <section class="section">
+        <div class="d-flex mt-3 justify-content-between"></div>
+        <div class="row">
+            
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card">
+                    <div class="card-body pr-3 pl-3 card-type-3">
+                        <div class="row">
+                            <div class="col">
+                                <h6 class="font-14 text-uppercase font-bold mb-0">REGISTERED SCHOOLS</h6>
+                                <span class="font-bold font-20 mb-0">'.count($load_schools_list).'</span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="card-circle l-bg-orange text-white">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card">
+                    <div class="card-body card-type-3">
+                        <div class="row">
+                            <div class="col">
+                                <h6 class="font-14 text-uppercase font-bold mb-0">ACTIVE SCHOOLS</h6>
+                                <span class="font-bold font-20 mb-0">'.($counter["Active"] + $counter["Propagation"] + $counter["Complete"] + $counter["Activated"]).'</span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="card-circle l-bg-green text-white">
+                                    <i class="fas fa-landmark"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card">
+                    <div class="card-body card-type-3">
+                        <div class="row">
+                            <div class="col">
+                                <h6 class="font-14 text-uppercase font-bold mb-0">INACTIVE SCHOOLS</h6>
+                                <span class="font-bold font-20 mb-0">'.
+                                    ($counter["Expired"] + $counter["Pending"] + $counter["Suspended"])
+                                .'</span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="card-circle l-bg-orange text-white">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6">
+                <div class="card">
+                    <div class="card-body card-type-3">
+                        <div class="row">
+                            <div class="col">
+                                <h6 class="font-14 text-uppercase font-bold mb-0">SUPPORT USERS</h6>
+                                <span class="font-bold font-20 mb-0">0</span>
+                            </div>
+                            <div class="col-auto">
+                                <div class="card-circle l-bg-orange text-white">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header">SCHOOLS LIST</div>
+                    <div class="card-body">
+                        <div class="table-responsive table-student_staff_list">
+                            <table class="table table-bordered table-striped raw_datatable">
+                                <thead>
+                                    <tr>
+                                        <th width="6%" class="text-center">#</th>
+                                        <th>SCHOOL NAME</th>
+                                        <th>CONTACTS</th>
+                                        <th>ADDRESS</th>
+                                        <th>EMAIL ADDRESS</th>
+                                        <th>STATUS</th>
+                                        <th width="10%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>'.$schools_list.'</tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+    </section>';
 } else {
 
     // append more values for loading
@@ -226,23 +364,23 @@ if($isSupport) {
                             <div class='col-lg-9'>
                                 <table width='100%'>
                                     <tr>
-                                        <td class='font-weight-bold p-1' align='right'>Name</td>
+                                        <td class='font-bold p-1' align='right'>Name</td>
                                         <td class='pr-2' align='right'>{$ward->name}</td>
                                     </tr>
                                     <tr>
-                                        <td class='font-weight-bold p-1' align='right'>Gender</td>
+                                        <td class='font-bold p-1' align='right'>Gender</td>
                                         <td class='pr-2' align='right'>{$ward->gender}</td>
                                     </tr>
                                     <tr>
-                                        <td class='font-weight-bold p-1' align='right'>Class</td>
+                                        <td class='font-bold p-1' align='right'>Class</td>
                                         <td class='pr-2' align='right'>{$ward->class_name}</td>
                                     </tr>
                                     <tr>
-                                        <td class='font-weight-bold p-1' align='right'>Admission Id</td>
+                                        <td class='font-bold p-1' align='right'>Admission Id</td>
                                         <td class='pr-2' align='right'>{$ward->unique_id}</td>
                                     </tr>
                                     <tr>
-                                        <td class='font-weight-bold p-1' align='right'>Admission Date</td>
+                                        <td class='font-bold p-1' align='right'>Admission Date</td>
                                         <td class='pr-2' align='right'>{$ward->enrollment_date}</td>
                                     </tr>
                                     <tr>
@@ -387,8 +525,8 @@ if($isSupport) {
                             <div class="card-body bg-info text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="font-14 text-uppercase font-weight-bold mb-0">Students Count</h6>
-                                        <span data-count="total_students_count" class="font-weight-bold mb-0">0</span>
+                                        <h6 class="font-14 text-uppercase font-bold mb-0">Students Count</h6>
+                                        <span  data-count="total_students_count" class="font-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
                                         <div class="card-circle l-bg-orange text-white">
@@ -404,8 +542,8 @@ if($isSupport) {
                             <div class="card-body bg-info text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="font-14 text-uppercase font-weight-bold mb-0">Teaching Stafff</h6>
-                                        <span data-count="total_teachers_count" class="font-weight-bold mb-0">0</span>
+                                        <h6 class="font-14 text-uppercase font-bold mb-0">Teaching Stafff</h6>
+                                        <span data-count="total_teachers_count" class="font-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
                                         <div class="card-circle l-bg-cyan text-white">
@@ -421,8 +559,8 @@ if($isSupport) {
                             <div class="card-body bg-info text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
-                                        <h6 class="font-14 text-uppercase font-weight-bold mb-0">Employees / Users</h6>
-                                        <span data-count="total_employees_count" class="font-weight-bold mb-0">0</span>
+                                        <h6 class="font-14 text-uppercase font-bold mb-0">Employees / Users</h6>
+                                        <span data-count="total_employees_count" class="font-bold mb-0">0</span>
                                     </div>
                                     <div class="col-auto">
                                         <div class="card-circle l-bg-green text-white">
@@ -437,7 +575,7 @@ if($isSupport) {
                         <div class="card bg-info text-white">
                             <div class="card-body pb-1 pt-3">
                                 <div align="center">
-                                    <h6 class="border-bottom font-14 text-uppercase font-weight-bold p-0 pb-2 mb-2 m-0">'.date("l, F d, Y").'</h6>
+                                    <h6 class="border-bottom font-14 text-uppercase font-bold p-0 pb-2 mb-2 m-0">'.date("l, F d, Y").'</h6>
                                     <h3 class="p-0 m-0">'.date("h:i A").'</h3>
                                 </div>
                             </div>
@@ -477,7 +615,7 @@ if($isSupport) {
                                 <div class="card-body pb-2" align="center">
                                     <p class="font-16 p-0 m-0 text-primary">Academic Year</p>
                                     <h5 class="mt-2 pt-0">'.$clientPrefs->academics->academic_year.'</h5>
-                                    <span class="font-16 font-weight-bold">
+                                    <span class="font-16 font-bold">
                                         '.date("F d, Y", strtotime($clientPrefs->academics->year_starts)).' 
                                             &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
                                         '.date("F d, Y", strtotime($clientPrefs->academics->year_ends)).'
@@ -485,7 +623,7 @@ if($isSupport) {
                                     <hr>
                                     <p class="font-16 p-0 m-0 text-primary">Term</p>
                                     <h5 class="mt-0 pt-0 text-uppercase">'.$clientPrefs->academics->academic_term.'</h5>
-                                    <span class="font-16 font-weight-bold">
+                                    <span class="font-16 font-bold">
                                         '.date("F d, Y", strtotime($clientPrefs->academics->term_starts)).' 
                                             &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
                                         '.date("F d, Y", strtotime($clientPrefs->academics->term_ends)).'

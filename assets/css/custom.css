@@ -665,3 +665,11 @@ label {
 .table thead th {
     text-transform: uppercase;
 }
+
+.main-sidebar .sidebar-menu li a {
+    height: 40px;
+}
+
+.hover:hover {
+    text-decoration: underline;
+}

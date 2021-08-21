@@ -125,7 +125,7 @@ if(!empty($session->userId)) {
 
 	// set the client preferences
 	$clientPrefs = $defaultClientData->client_preferences;
-
+	
 	// if the result is not empty
 	if(!empty($defaultUser)) {
 		
@@ -138,7 +138,6 @@ if(!empty($session->userId)) {
 		$accessObject->userPermits = json_decode($defaultUser->user_permissions);
 		$accessObject->appPrefs = $defaultUser->client->client_preferences;
 		$defaultUser->appPrefs = $defaultUser->client->client_preferences;
-		$defaultCurrency = $defaultClientData->client_preferences->labels->currency;
 		
 		// set additional parameters
 		$isSupport = (bool) ($defaultUser->user_type == "support");
@@ -152,12 +151,15 @@ if(!empty($session->userId)) {
 		$isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
 		$isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
 		$isAdmin = (bool) ($defaultUser->user_type == "admin");
-		$isTeacher = $isTutor = (bool) ($defaultUser->user_type == "teacher");
-		$isParent = (bool) ($defaultUser->user_type == "parent");
-		$isStudent = (bool) ($defaultUser->user_type == "student");
 
 		// if the user is not support then run this section
 		if(!$isSupport) {
+
+			// set additional parameters
+			$defaultCurrency = $defaultClientData->client_preferences->labels->currency;
+			$isTeacher = $isTutor = (bool) ($defaultUser->user_type == "teacher");
+			$isParent = (bool) ($defaultUser->user_type == "parent");
+			$isStudent = (bool) ($defaultUser->user_type == "student");
 
 			// set this as init
 			$defaultUser->appPrefs->termEnded = false;
@@ -168,7 +170,9 @@ if(!empty($session->userId)) {
 				$defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
 			}
 		}
+
 	}
+	
 }
 
 // To be used for inserting additional scripts

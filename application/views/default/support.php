@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $isSupport;
 
 // initial variables
 $appName = config_item("site_name");
@@ -26,7 +26,7 @@ $ticket_id = (confirm_url_id(1, "ticket") && confirm_url_id(2)) ? $SITEURL[2] : 
 
 // set the parameters
 $item_param = (object) [
-    "clientId" => $clientId,
+    "clientId" => !$isSupport ? $clientId : null,
     "ticket_id" => $ticket_id,
     "client_data" => $defaultUser->client
 ];
@@ -47,6 +47,8 @@ $support_tickets = "";
 
 // loop through the templates list
 if((count($support_array) > 1) || empty($ticket_id)) {
+
+    // get the list of all support tickets
     foreach($support_array as $key => $ticket) {
         $count++;
 
@@ -58,6 +60,7 @@ if((count($support_array) > 1) || empty($ticket_id)) {
         // if the record is still pending
         $action = "{$baseUrl}support/ticket/{$ticket->id}";
 
+        // list the support tickets
         $support_tickets .= "<tr class=\"cursor clickable-row\" data-href=\"{$action}\" data-row_id=\"{$ticket->id}\">";
         $support_tickets .= "<td>{$ticket->id}</td>";
         $support_tickets .= "<td><a class=\"text-success\" href=\"{$action}\">{$ticket->subject}</a></td>";

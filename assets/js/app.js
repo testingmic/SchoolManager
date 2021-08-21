@@ -875,51 +875,54 @@ var setActiveNavLink = () => {
 }
 
 var initDataTables = () => {
-    if ($('.datatable').length > 0) {
-        $('.datatable').DataTable({
-            search: null,
-            lengthMenu: [
-                [10, 30, 50, 75, 100, 200, -1],
-                [10, 30, 50, 75, 100, 200, "All"]
-            ],
-            language: {
-                sEmptyTable: "Nothing Found",
-                lengthMenu: "Display _MENU_ rows"
-            },
-            dom: '<"row"<"col-lg-12 mb-2">><"row d-flex justify-content-between"<B><"align-left"><f>>rt<"bottom"ip><"clear">',
-            buttons: ['excel', 'pdf', 'print'],
-            initComplete: function() {
-                $('.buttons-excel').html('<i class="fa fa-file-excel"></i>')
-                    .removeClass("btn-success buttons-excel")
-                    .addClass("btn font-18 btn-outline-success")
-                    .attr("title", "Export Table to Excel");
-                $('.buttons-pdf').html('<i class="fa fa-file-pdf"></i>')
-                    .removeClass("buttons-pdf")
-                    .addClass("btn font-18 btn-outline-danger")
-                    .attr("title", "Export Table to PDF");
-                $('.buttons-print').html('<i class="fa fa-print"></i>')
-                    .removeClass("btn-secondary buttons-print")
-                    .addClass("btn font-18 btn-outline-secondary print-buttons")
-                    .attr("title", "Print Table Content");
-            }
-        });
-    }
 
-    if ($(`table[class~="raw_datatable"]`).length > 0) {
-        let t_order = $(`table[class~="raw_datatable"]`).attr("data-order_item") == undefined ? "asc" : $(`table[class~="raw_datatable"]`).attr("data-order_item");
-        $(`table[class~="raw_datatable"]`).DataTable({
-            order: [0, t_order],
-            search: null,
-            lengthMenu: [
-                [10, 30, 50, 75, 100, 200, -1],
-                [10, 30, 50, 75, 100, 200, "All"]
-            ],
-            language: {
-                sEmptyTable: "Nothing Found",
-                lengthMenu: "Display _MENU_ rows"
-            }
-        });
-    }
+    try {
+        if ($('.datatable').length > 0) {
+            $('.datatable').DataTable({
+                search: null,
+                lengthMenu: [
+                    [10, 30, 50, 75, 100, 200, -1],
+                    [10, 30, 50, 75, 100, 200, "All"]
+                ],
+                language: {
+                    sEmptyTable: "Nothing Found",
+                    lengthMenu: "Display _MENU_ rows"
+                },
+                dom: '<"row"<"col-lg-12 mb-2">><"row d-flex justify-content-between"<B><"align-left"><f>>rt<"bottom"ip><"clear">',
+                buttons: ['excel', 'pdf', 'print'],
+                initComplete: function() {
+                    $('.buttons-excel').html('<i class="fa fa-file-excel"></i>')
+                        .removeClass("btn-success buttons-excel")
+                        .addClass("btn font-18 btn-outline-success")
+                        .attr("title", "Export Table to Excel");
+                    $('.buttons-pdf').html('<i class="fa fa-file-pdf"></i>')
+                        .removeClass("buttons-pdf")
+                        .addClass("btn font-18 btn-outline-danger")
+                        .attr("title", "Export Table to PDF");
+                    $('.buttons-print').html('<i class="fa fa-print"></i>')
+                        .removeClass("btn-secondary buttons-print")
+                        .addClass("btn font-18 btn-outline-secondary print-buttons")
+                        .attr("title", "Print Table Content");
+                }
+            });
+        }
+    
+        if ($(`table[class~="raw_datatable"]`).length > 0) {
+            let t_order = $(`table[class~="raw_datatable"]`).attr("data-order_item") == undefined ? "asc" : $(`table[class~="raw_datatable"]`).attr("data-order_item");
+            $(`table[class~="raw_datatable"]`).DataTable({
+                order: [0, t_order],
+                search: null,
+                lengthMenu: [
+                    [10, 30, 50, 75, 100, 200, -1],
+                    [10, 30, 50, 75, 100, 200, "All"]
+                ],
+                language: {
+                    sEmptyTable: "Nothing Found",
+                    lengthMenu: "Display _MENU_ rows"
+                }
+            });
+        }
+    } catch(err) {}
 }
 
 var moneyFormat = (value, decimals) => {

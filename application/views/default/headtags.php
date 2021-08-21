@@ -1,6 +1,6 @@
 <?php
 // global variables
-global $usersClass, $accessObject, $myClass, $isSchool, $defaultClientData, $clientPrefs, $isParent;
+global $usersClass, $accessObject, $myClass, $isSupport, $defaultClientData, $clientPrefs, $isParent;
 
 // base url
 $baseUrl = config_item("base_url");
@@ -162,6 +162,10 @@ load_helpers(['menu_helper']);
                             </strong>
                             <?= ($endPermission && $defaultUser->appPrefs->termEnded ? "<span class='badge badge-danger notification'>Already Ended</span>" : "<span class='badge badge-success'>Active</span>"); ?>
                         </a>
+                        <?php } else { ?>
+                            <a href="#" class="nav-link text-white nav-link-lg">
+                                <strong class="font-20px"><?= $clientName ?> - SUPPORT PANEL</strong>
+                            </a>
                         <?php } ?>
                     </li>
                     <?php } ?>
@@ -250,7 +254,7 @@ load_helpers(['menu_helper']);
                         <span class="d-sm-none d-lg-inline-block"></span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right">
-                    <div class="dropdown-title">Hello <?= !empty($userData->name) ? $userData->name : $clientData->client_name ?></div>
+                    <div class="dropdown-title"><?= !empty($userData->name) ? $userData->name : $clientData->client_name ?></div>
                     <?php if($isActiveAccount) { ?>
                         <a href="<?= $baseUrl ?>profile" class="dropdown-item has-icon">
                             <i class="far fa-user"></i> Profile
@@ -265,7 +269,7 @@ load_helpers(['menu_helper']);
                             <i class="fas fa-lock"></i> Login History
                         </a>
                         <?php } ?>
-                        <?php if($accessObject->hasAccess("manage", "settings") && $isSchool) { ?>
+                        <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
                         <a href="<?= $baseUrl ?>settings" class="dropdown-item has-icon">
                             <i class="fas fa-cog"></i> Settings
                         </a>
@@ -275,7 +279,7 @@ load_helpers(['menu_helper']);
                             <i class="fas fa-key"></i> Password Manager
                         </a>
                         <?php } ?>
-                        <?php if($accessObject->hasAccess("close", "settings") && $isSchool) { ?>
+                        <?php if($accessObject->hasAccess("close", "settings") && !$isSupport) { ?>
                         <a href="<?= $baseUrl ?>manager" class="dropdown-item has-icon">
                             <i class="fas fa-bolt"></i> <span class="mr-3">Manage Calendar</span> <?= $endPermission && $defaultUser->appPrefs->termEnded ? '<span class="notification beep"></span>' : null ?>
                         </a>

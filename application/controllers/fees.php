@@ -25,8 +25,8 @@ class Fees extends Myschoolgh {
         $this->iclient = $client_data;
 
         // run this query
-        $this->academic_term = $client_data->client_preferences->academics->academic_term;
-        $this->academic_year = $client_data->client_preferences->academics->academic_year;
+        $this->academic_term = $client_data->client_preferences->academics->academic_term ?? null;
+        $this->academic_year = $client_data->client_preferences->academics->academic_year ?? null;
 	}
 
 	/**
@@ -1960,9 +1960,11 @@ class Fees extends Myschoolgh {
                                         </div>
                                     </td>
                                     <td align="right">
-                                        '.(!empty($student_data) ? 
+                                        '.(!empty($student_data) && !empty($client->client_preferences) ? 
                                             "<strong>Academic Year & Term:</strong><br>{$student_data->academic_year} :: {$student_data->academic_term}<br>" : 
-                                            "<strong>Academic Year & Term:</strong><br>{$client->client_preferences->academics->academic_year} :: {$client->client_preferences->academics->academic_term}<br>"  
+                                            (
+                                                !empty($client->client_preferences) ? "<strong>Academic Year & Term:</strong><br>{$client->client_preferences->academics->academic_year} :: {$client->client_preferences->academics->academic_term}<br>" : null
+                                            )
                                             ).'
                                         '.(count($data) == 1 && !empty($student_data->receipt_id) ? "Receipt ID: <strong>{$student_data->receipt_id}</strong><br>" : null).'
                                     </td>

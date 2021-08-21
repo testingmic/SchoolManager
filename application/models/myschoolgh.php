@@ -740,16 +740,16 @@ class Myschoolgh extends Models {
 
         $label = $status;
         if(in_array($status, ["Pending", "Due Today"])) {
-            $label = "<span class='badge badge-primary'>{$status}</span>";
+            $label = "<span class='badge p-1 badge-primary'>{$status}</span>";
         }
         elseif(in_array($status, ["Rejected", "Cancelled", "Not Paid", "Unpaid", "Unseen", "Closed", "Overdue"])) {
-            $label = "<span class='badge badge-danger'>{$status}</span>";
+            $label = "<span class='badge p-1 badge-danger'>{$status}</span>";
         }
         elseif(in_array($status, ["Reopen", "Waiting", "Draft", "Processing", "In Review", "Confirmed", "Graded", "Requested"])) {
-            $label = "<span class='badge badge-warning text-white'>{$status}</span>";
+            $label = "<span class='badge p-1 badge-warning text-white'>{$status}</span>";
         }
         elseif(in_array($status, ["Answered", "Solved", "Enrolled", "Active", "Approved", "Paid", "Running", "Seen", "Submitted", "Held", "Issued", "Returned", "Processed"])) {
-            $label = "<span class='badge badge-success'>{$status}</span>";
+            $label = "<span class='badge p-1 badge-success'>{$status}</span>";
         }
 
         return $label;

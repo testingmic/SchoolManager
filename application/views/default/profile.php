@@ -47,22 +47,27 @@ if(!empty($user_id)) {
 
         // set the first key
         $data = $data["data"][0];
+        $student_allocation_list = null;
 
         // guardian information
         $user_form = load_class("forms", "controllers")->profile_form($baseUrl, $data);
 
-        // load fees allocation list for class
-        $allocation_param = (object) [
-            "clientId" => $clientId, "userData" => $defaultUser, 
-            "student_id" => $user_id, "client_data" => $defaultUser->client, 
-            "parse_owning" => true, "show_student" =>  false
-        ];
+        // load this section if a student is logged in
+        if($isStudent) {
+            
+            // load fees allocation list for class
+            $allocation_param = (object) [
+                "clientId" => $clientId, "userData" => $defaultUser, 
+                "student_id" => $user_id, "client_data" => $defaultUser->client, 
+                "parse_owning" => true, "show_student" =>  false
+            ];
 
-        // create a new object
-        $feesObject = load_class("fees", "controllers", $allocation_param);
+            // create a new object
+            $feesObject = load_class("fees", "controllers", $allocation_param);
 
-        // get the student fees allocation
-        $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
+            // get the student fees allocation
+            $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
+        }
 
         // append the html content
         $response->html = '

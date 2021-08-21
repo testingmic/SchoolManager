@@ -348,14 +348,6 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>e-learning">E-Books / Videos</a></li>
         </ul>
     </li>
-    <?php if($accessObject->hasAccess("generate", "results")) { ?>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Reports / Promotion</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
-        </ul>
-    </li>
-    <?php } ?>
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Class Assessment</span></a>
@@ -371,8 +363,17 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>issued-books">Issued Books</a></li>
         </ul>
     </li>
+    <?php if($accessObject->hasAccess("generate", "results")) { ?>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Terminal Reports</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
+        </ul>
+    </li>
+    <?php } ?>
     <li class="menu-header">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
+    <li><a href="<?= $baseUrl ?>fees-bill" class="nav-link"><i class="fas fa-money-bill"></i><span>My Bill</span></a></li>
     
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
@@ -405,10 +406,9 @@
 <?php } ?>
 <?php function support_menu() { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Clients</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Schools</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>clients_list">List All Clients</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>clients_register">Register New Client</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>schools_register">Register New School</a></li>
         </ul>
     </li>
 <?php } ?>
