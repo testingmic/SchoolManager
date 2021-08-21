@@ -3,7 +3,8 @@ var submit_ticket = () => {
         section = $(`div[id="ticket_form"] select[name="section"]`).val(),
         subject = $(`div[id="ticket_form"] input[name="subject"]`).val(),
         content = $(`div[id="ticket_form"] textarea[name="content"]`).val();
-    $.post(`${baseUrl}api/support/create`, {department, subject, content, section}).then((response) => {
+    let string = String(content).replace(/\n/g, '<br>');
+    $.post(`${baseUrl}api/support/create`, {department, subject, "content": htmlEntities(string), section}).then((response) => {
         if(response.code == 200) {
             notify(response.data.result, "success");
             $(`div[id="tickets"]`).modal("hide");
@@ -21,7 +22,8 @@ var submit_ticket = () => {
 
 var reply_ticket = (ticket_id, section) => {
     let content = $(`div[id="ticket_form"] textarea[name="content"]`).val();
-    $.post(`${baseUrl}api/support/reply`, {ticket_id, content, section}).then((response) => {
+    let string = String(content).replace(/\n/g, '<br>');
+    $.post(`${baseUrl}api/support/reply`, {ticket_id, "content": htmlEntities(string), section}).then((response) => {
         if(response.code == 200) {
             notify(response.data.result, "success");
             $(`div[id="ticket_form"] input, div[id="ticket_form"] textarea`).val(``);

@@ -25,6 +25,7 @@ $clientName = $clientData->client_name;
 
 // confirm that the account is active
 $isActiveAccount = (bool) ($clientData->client_state === "Active");
+$isSuspendedAccount = (bool) (in_array($clientData->client_state, ["Suspended", "Expired"]));
 
 // get the variables for the accessobject
 $accessObject->clientId = $clientId;
@@ -231,6 +232,7 @@ load_helpers(['menu_helper']);
                     </div>
                     </div>
                 </li>
+                <?php } ?>
                 <li class="dropdown dropdown-list-toggle"><a title="Notifications List" href="#" data-toggle="dropdown" class="nav-link notification-toggle nav-link-lg"><i class="far fa-bell"></i></a>
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
                         <div class="dropdown-header">Notifications
@@ -245,7 +247,6 @@ load_helpers(['menu_helper']);
                 <li class="dropdown dropdown-list-toggle">
                     <a title="Support Tickets List" href="<?= $baseUrl ?>support" class="nav-link nav-link-lg"><i class="fa fa-phone-volume"></i> Support</a>
                 </li>
-                <?php } ?>
                 <?php } ?>
                 <li class="dropdown">
                     <a href="#" data-toggle="dropdown"
@@ -284,10 +285,10 @@ load_helpers(['menu_helper']);
                             <i class="fas fa-bolt"></i> <span class="mr-3">Manage Calendar</span> <?= $endPermission && $defaultUser->appPrefs->termEnded ? '<span class="notification beep"></span>' : null ?>
                         </a>
                         <?php } ?>
-                        <a title="Knowledge Base" href="<?= $baseUrl ?>knowledgebase" class="dropdown-item has-icon">
-                            <i class="fa fa-book-open"></i> Knowledge Base
-                        </a>
                     <?php } ?>
+                    <a title="Knowledge Base" href="<?= $baseUrl ?>knowledgebase" class="dropdown-item has-icon">
+                        <i class="fa fa-book-open"></i> Knowledge Base
+                    </a>
                     <div class="dropdown-divider"></div>
                     <a href="#" onclick="return logout()" class="dropdown-item anchor has-icon text-danger">
                         <i class="fas fa-sign-out-alt"></i> Logout
@@ -298,7 +299,7 @@ load_helpers(['menu_helper']);
             </nav>
             <div class="main-sidebar sidebar-style-2 sidebar-bg">
                 <aside id="sidebar-wrapper">
-                    
+
                     <div class="sidebar-brand">
                         <a href="<?= $baseUrl ?>dashboard" class="anchor">
                             <img alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" />
@@ -310,7 +311,7 @@ load_helpers(['menu_helper']);
                         <li><a href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
                         <?php 
                         // set the menu function 
-                        $menu_function = $isSupport ? "support_menu" : $userData->user_type."_menu";
+                        $menu_function = $isSupport ? "support_menu" : ($isSuspendedAccount ? "help_menu" : $userData->user_type."_menu");
                         
                         // confirm that the function exists
                         if(function_exists($menu_function)) {
@@ -318,7 +319,7 @@ load_helpers(['menu_helper']);
                             $menu_function();
                         }
                         ?>
-                        <?php if($isSchool) { ?>
+                        <?php if($isSchool && $isActiveAccount) { ?>
                         <li class="mb-5"><a href="<?= $baseUrl ?>chat" class="nav-link"><i class="fas fa-envelope-open-text"></i><span>Live Chat</span></a></li>
                         <?php } ?>
                     </ul>

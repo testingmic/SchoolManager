@@ -52,12 +52,16 @@ class Support extends Myschoolgh {
                     // convert the created by string into an object
                     $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "email", "image","user_type"]);
                 }
+
                 // show the replies
                 if($showReplies && ($result->parent_id == 0)) {
                     $q_param->parent_id = $result->id;
                     $q_param->order = "ASC";
                     $result->replies = $this->list($q_param)["data"];
                 }
+
+                // clean the content
+                $result->content = htmlspecialchars_decode($result->content);
 
                 $data[] = $result;
             }
@@ -87,12 +91,17 @@ class Support extends Myschoolgh {
         try {
 
             // modify the content variable
-            $params->content = nl2br($params->content);
+            $params->content = custom_clean(htmlspecialchars_decode($params->content));
+            $params->content = htmlspecialchars($params->content);
+
+            // set the user type
+            $user_type = ($params->userData->user_type === "support") ? "support" : "user";
 
             // insert the ticket data information
-            $stmt = $this->db->prepare("INSERT INTO support_tickets SET 
-                client_id =?, content = ?, user_id = ?, subject = ?, department = ?, date_created = now(), section = ?");
-            $stmt->execute([$params->clientId, $params->content, $params->userId, $params->subject, $params->department, $params->section ?? null]);
+            $stmt = $this->db->prepare("INSERT INTO support_tickets SET client_id =?, content = ?, 
+                user_id = ?, subject = ?, department = ?, date_created = now(), date_updated = now(), section = ?, user_type = ?");
+            $stmt->execute([$params->clientId, $params->content, $params->userId, $params->subject, 
+                $params->department, $params->section ?? null, $user_type]);
 
             // return success message
             return ["code" => 200, "data" => "Your ticket was successfully created."];
@@ -116,35 +125,43 @@ class Support extends Myschoolgh {
         try {
 
             // global variables
-            global $noticeClass, $accessObject;
+            global $noticeClass, $accessObject, $isSupport;
 
             // set the table
             $params->section = $params->section ?? "ticket";
             $table = ($params->section == "ticket") ? "support_tickets" : "knowledge_base";
-
+            $append = $isSupport ? "" : " AND client_id='{$params->clientId}'";
+            
             // the message to send
             $message = ($params->section == "ticket") ? "Reply was successfully shared." : "Comment was successfully sent.";
 
             // check the query
-            $query = $this->pushQuery("status, user_id, subject", $table, "id='{$params->ticket_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            $query = $this->pushQuery("status, user_id, subject, client_id", $table, "id='{$params->ticket_id}' {$append} LIMIT 1");
 
             // confirm if the ticket exists
             if(empty($query)) {
                 return ["code" => 203, "data" => "Sorry! An invalid ticket id was parsed."];
             }
 
+            // set the client id
+            $the_client = $isSupport ? $query[0]->client_id : $params->clientId;
+
             // if the ticket is closed
             if($query[0]->status == "Closed"){
                 return ["code" => 203, "data" => "Sorry! The ticket has been closed, hence cannot send any message."];
             }
 
+            // modify the content variable
+            $params->content = custom_clean(htmlspecialchars_decode($params->content));
+            $params->content = htmlspecialchars($params->content);
+
             // set the status
-            $params->content = nl2br($params->content);
-            $status = (($query[0]->user_id == $params->userId) || ($params->userData->user_type !== "support")) ? "Waiting" : "Answered";
+            $user_type = ($params->userData->user_type === "support") ? "support" : "user";
+            $status = (($query[0]->user_id == $params->userId) || ($user_type !== "support")) ? "Waiting" : "Answered";
 
             // insert the reply
-            $stmt = $this->db->prepare("INSERT INTO {$table} SET client_id = ?, parent_id = ?, content = ?, user_id = ?");
-            $stmt->execute([$params->clientId, $params->ticket_id, $params->content, $params->userId]);
+            $stmt = $this->db->prepare("INSERT INTO {$table} SET client_id = ?, parent_id = ?, content = ?, user_id = ?, user_type = ?");
+            $stmt->execute([$the_client, $params->ticket_id, $params->content, $params->userId, $user_type]);
 
             // send a notice
             if($status === "Answered") {
@@ -187,6 +204,12 @@ class Support extends Myschoolgh {
 
         try {
 
+            // global variable
+            global $isSupport;
+
+            // append this item
+            $append = $isSupport ? "" : " AND client_id='{$params->clientId}'";
+
             // set the table
             $params->section = $params->section ?? "ticket";
             $table = ($params->section == "ticket") ? "support_tickets" : "knowledge_base";
@@ -195,7 +218,7 @@ class Support extends Myschoolgh {
             $message = ($params->section == "ticket") ? "Ticket successfully closed." : "Article successfully closed.";
 
             // confirm if the ticket exists
-            if(empty($this->pushQuery("id", $table, "id='{$params->ticket_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
+            if(empty($this->pushQuery("id", $table, "id='{$params->ticket_id}' {$append} LIMIT 1"))) {
                 return ["code" => 203, "data" => "Sorry! An invalid ticket id was parsed."];
             }
 
@@ -223,8 +246,14 @@ class Support extends Myschoolgh {
 
         try {
 
+            // global variable
+            global $isSupport;
+
+            // append this item
+            $append = $isSupport ? "" : " AND client_id='{$params->clientId}'";
+
             // confirm if the ticket exists
-            if(empty($this->pushQuery("id", "support_tickets", "id='{$params->ticket_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
+            if(empty($this->pushQuery("id", "support_tickets", "id='{$params->ticket_id}' {$append} LIMIT 1"))) {
                 return ["code" => 203, "data" => "Sorry! An invalid ticket id was parsed."];
             }
 

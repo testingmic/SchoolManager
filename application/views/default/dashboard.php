@@ -179,6 +179,32 @@ if($isSupport) {
     </section>';
 } else {
 
+    // confirm if the account has been suspended or expired
+    if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
+        $response->html = '
+        <div class="card">
+                <div class="card-body">
+                    <h1 class="text-center text-info text-uppercase">'.$defaultClientData->client_name.'</h1>
+                    <section class="section">
+                        <div class="container">
+                            <div class="mt-3 text-center font-18">
+                                <div class="page-inner">
+                                    <div class="page-description">
+                                        <h3>Account '.$defaultClientData->client_state.'</h3>
+                                    </div>
+                                    <div class="text-danger">
+                                        Your Account '.(in_array($defaultClientData->client_state, ["Suspended"]) ? "is Suspended" : "has Expired").'.
+                                        Please contact the <a href="#" onclick="loadPage(\''.$baseUrl.'support\')"><strong>Support Section</strong></a> to rectify the issue.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        ';
+    } else {
+
     // append more values for loading
     $userData->date_range = date("Y-m-d", strtotime("-20 days")).':'.date("Y-m-t", strtotime("+20 days"));
     $userData->events_date_range = date("Y-m-d", strtotime("-120 days")).':'.date("Y-m-t", strtotime("+120 days"));
@@ -946,6 +972,8 @@ if($isSupport) {
                 ).'
             </div>
         </section>';
+
+    }
 
 }
 // print out the response

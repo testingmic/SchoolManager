@@ -156,7 +156,9 @@ var logout = async() => {
 $(() => {
     init();
     linkClickStopper($(document.body));
-    linkHandler(document.location.href, true);
+    if($.pagecontent.length) {
+        linkHandler(document.location.href, true);
+    }
     $(document).on('click', '.card-actions a', (e) => {
         e.preventDefault();
         if ($(this).hasClass('btn-close')) {

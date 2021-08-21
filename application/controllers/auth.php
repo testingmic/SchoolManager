@@ -65,7 +65,7 @@ class Auth extends Myschoolgh {
 
             // count the number of rows found
             if($stmt->rowCount() == 1) {
-                
+
                 #check the number of login attempts 
                 $loginAttempt = $this->confirmAttempt($params->username, "login", 1);
 

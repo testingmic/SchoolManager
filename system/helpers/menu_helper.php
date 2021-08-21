@@ -411,4 +411,7 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>schools_register">Register New School</a></li>
         </ul>
     </li>
+    <li class="dropdown">
+        <a href="<?= $baseUrl ?>support"><i class="fas fa-phone-volume"></i><span>Support Tickets</span></a>
+    </li>
 <?php } ?>

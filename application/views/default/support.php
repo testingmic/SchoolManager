@@ -67,7 +67,7 @@ if((count($support_array) > 1) || empty($ticket_id)) {
         $support_tickets .= "<td>{$ticket->department}</td>";
         $support_tickets .= "<td>{$ticket->section}</td>";
         $support_tickets .= "<td>".$myClass->the_status_label($ticket->status)."</td>";
-        $support_tickets .= "<td>".date("jS M Y h:iA", strtotime($ticket->date_created))."</td>";
+        $support_tickets .= "<td>".date("jS M Y h:iA", strtotime($ticket->date_updated))."</td>";
         $support_tickets .= "</tr>";
     }
 }
@@ -183,8 +183,8 @@ $response->html = '
                 </div>
             </div>
             <div>
-                '.(!$disabled ? '<button class="btn bg-teal"><i></i> Reply to Ticket</button>' : null).'
-                '.(!$disabled ? '<button onclick="return modify_ticket(\'close\',\''.$ticket_id.'\',\'ticket\')" class="btn btn-danger">Close</button>' : null).'
+                <!--'.(!$disabled ? '<button class="btn bg-teal"><i></i> Reply to Ticket</button>' : null).'-->
+                '.(!$disabled ? '<button onclick="return modify_ticket(\'close\',\''.$ticket_id.'\',\'ticket\')" class="btn btn-outline-danger">Close</button>' : null).'
             </div>
             <div class="mt-4">
                 <div class="activities">

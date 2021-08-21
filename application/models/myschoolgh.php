@@ -742,13 +742,13 @@ class Myschoolgh extends Models {
         if(in_array($status, ["Pending", "Due Today"])) {
             $label = "<span class='badge p-1 badge-primary'>{$status}</span>";
         }
-        elseif(in_array($status, ["Rejected", "Cancelled", "Not Paid", "Unpaid", "Unseen", "Closed", "Overdue"])) {
+        elseif(in_array($status, ["Rejected", "Cancelled", "Not Paid", "Unpaid", "Unseen", "Closed", "Overdue", "Expired", "Suspended"])) {
             $label = "<span class='badge p-1 badge-danger'>{$status}</span>";
         }
-        elseif(in_array($status, ["Reopen", "Waiting", "Draft", "Processing", "In Review", "Confirmed", "Graded", "Requested"])) {
+        elseif(in_array($status, ["Reopen", "Waiting", "Draft", "Processing", "In Review", "Confirmed", "Graded", "Requested", "Propagation"])) {
             $label = "<span class='badge p-1 badge-warning text-white'>{$status}</span>";
         }
-        elseif(in_array($status, ["Answered", "Solved", "Enrolled", "Active", "Approved", "Paid", "Running", "Seen", "Submitted", "Held", "Issued", "Returned", "Processed"])) {
+        elseif(in_array($status, ["Complete", "Answered", "Solved", "Enrolled", "Active", "Approved", "Paid", "Running", "Seen", "Submitted", "Held", "Issued", "Returned", "Processed"])) {
             $label = "<span class='badge p-1 badge-success'>{$status}</span>";
         }
 

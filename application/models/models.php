@@ -254,6 +254,9 @@ class Models {
         $this->assessment_group = ["Assignment", "Test", "Quiz", "Group Work"];
 
         $this->support_sections = [
+            "Account" => "Account Setup",
+            "Account_Activation" => "Account Activation",
+            "Account_Suspension" => "Account Suspension",
             "Students" => "Students",
             "Students_Fees_Allocation" => "Student > Fees Allocation",
             "Students_Fees_Payment" => "Student > Fees Payment",

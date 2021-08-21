@@ -127,7 +127,8 @@
     <script src="<?= $baseUrl; ?>assets/js/myschoolgh.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/app.js"></script>
     <?php } else { ?>
-    <script src="<?= $baseUrl; ?>assets/js/setup.js"></script>
+    <script src="<?= $baseUrl; ?>assets/js/app.js"></script>
+    <!-- <script src="<?= $baseUrl; ?>assets/js/setup.js"></script> -->
     <script src="<?= $baseUrl; ?>assets/js/grading.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/import.js"></script>
     <?php } ?>

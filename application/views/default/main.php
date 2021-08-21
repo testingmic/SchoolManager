@@ -12,7 +12,7 @@ global $isActiveAccount, $clientData, $clientId, $isSchool, $isChurch, $isBookin
 <?php if(!$isActiveAccount) { ?>
     <?php
     // if the current state is propagation
-    if(($clientData->client_state === "Propagation") && $isSchool) { ?>
+    if(($clientData->client_state === "Propagation")) { ?>
     <div class="main-content" id="pagecontent">
         <div class="card">
             <div class="card-body">
@@ -21,7 +21,9 @@ global $isActiveAccount, $clientData, $clientId, $isSchool, $isChurch, $isBookin
             </div>
         </div>
     </div>
-    <?php } elseif($isSchool) {
+    <?php } elseif(in_array($clientData->client_state, ["Suspended", "Expired"])) {?>
+        <div class="main-content" id="pagecontent"></div>
+    <?php } else {
         
         // create a new object of the forms class
         $formsObj = load_class("forms", "controllers");

@@ -29,34 +29,8 @@ if(!empty($session->clientId)) {
 
     // create new event class
     $data = (object) [];
-    $eventClass = load_class("events", "controllers");
     $formsClass = load_class("forms", "controllers");
     
-    // set the parameters
-    $params = (object) [
-        "baseUrl" => $baseUrl,
-        "clientId" => $clientId,
-        "userId" => $session->userId
-    ];
-
-    // load the event types
-    $event_types_list = "";
-
-    $hasEventAdd = $accessObject->hasAccess("add", "events");
-    $hasEventDelete = $accessObject->hasAccess("delete", "events");
-    $hasEventUpdate = $accessObject->hasAccess("update", "events");
-
-    // append the permissions to the default user object
-    $defaultUser->hasEventDelete = $hasEventDelete;
-    $defaultUser->hasEventUpdate = $hasEventUpdate;
-
-    // load the scripts
-    $response->scripts = ["assets/js/events.js"];
-
-    if(file_exists("assets/js/scripts/{$client_id}_{$defaultUser->user_type}_events.js")) {
-        $response->scripts[] = "assets/js/scripts/{$client_id}_{$defaultUser->user_type}_events.js";
-    }
-
     $response->html = '
         <div id="fullCalModal" class="modal fade" data-backdrop="static" data-keyboard="false">
             <div class="modal-dialog modal-dialog-top">
@@ -82,7 +56,7 @@ if(!empty($session->clientId)) {
                     <div class="card">
                         <div class="card-body">
                             <div class="fc-overflow">
-                                <div class="table-responsive slim-scroll" id="events_management"></div>
+                                
                             </div>
                         </div>
                     </div>
