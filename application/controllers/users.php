@@ -35,6 +35,55 @@ class Users extends Myschoolgh {
 	public function loggedIn() {
 		return true;
 	}
+
+	/**
+	 * Quick List of Users
+	 * 
+	 * @return Array
+	 */
+	public function quick_list(stdClass $params) {
+		
+		try {
+
+			// look up query
+			$params->query = " 1 ";
+			$params->query .= (isset($params->lookup)) ? " AND ((a.name LIKE '%{$params->lookup}%') OR (a.unique_id LIKE '%{$params->lookup}%'))" : null;
+			$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
+
+			// set the columns to load
+			$params->columns = "a.client_id, a.unique_id, a.item_id AS user_id, a.name, a.academic_year, a.academic_term, a.user_type";
+			
+			// prepare and execute the statement
+			$sql = $this->db->prepare("SELECT {$params->columns} FROM users a
+				WHERE {$params->query} AND a.deleted = ? AND a.status = ? ORDER BY a.name LIMIT {$params->limit}
+			");
+			$sql->execute([0, 1]);
+
+			$data = [];
+			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
+
+				if(!in_array($result->user_type, ["student"]) || 
+					(
+						in_array($result->user_type, ["student"]) && 
+						$result->academic_year == $this->academic_year && 
+						$result->academic_term == $this->academic_term
+					)
+				) {
+					$data[] = $result;
+				}
+			}
+
+			// return the data"Sorry! There was an error while processing the request."
+			return [
+				"data" => $data,
+				"code" => 200
+			];
+
+		} catch(PDOException $e) {
+			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
+		}
+
+	}
 	
 	/**
 	 * Global function to search for item based on the predefined columns and values parsed

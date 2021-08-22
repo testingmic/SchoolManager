@@ -5,9 +5,9 @@ class SMS_CronJOB {
 	private $db;
 	private $sms_sender = "MySchoolGH";
 	private $mailAttachment = array();
-	private $sender_email = "app@myschoolgh.com";
+	private $sender_email = "noreply@myschoolgh.com";
 	private $sender_password = "C30C5aamUl";
-	private $sender_client = "mail.supremecluster.com";
+	private $sender_client = "school.mineconrsl.com";
 	private $siteName = "MySchoolGH - EmmallexTech.Com";
 	private $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
 
@@ -92,7 +92,7 @@ class SMS_CronJOB {
 					
 					// save the  reponse
 					if(!empty($response)) {
-						$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered' WHERE sent_time=now() AND item_id='{$key}' LIMIT 1");
+						$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered', sent_time=now() WHERE item_id='{$key}' LIMIT 1");
 					} else {
 						print "Sorry! The message could not be delivered to the purported users.\n";
 					}
@@ -103,7 +103,7 @@ class SMS_CronJOB {
 					
 					// save the  reponse
 					if(!empty($response)) {
-						$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered' WHERE sent_time=now() AND item_id='{$key}' LIMIT 1");
+						$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered', sent_time=now() WHERE item_id='{$key}' LIMIT 1");
 					} else {
 						print "Sorry! The message could not be delivered to the purported users.\n";
 					}
@@ -189,7 +189,7 @@ class SMS_CronJOB {
 		// configuration settings
 		$config = (Object) array(
 			'subject' => $subject,
-			'headers' => "From: {$this->siteName} - MySchoolGH.Com<{$this->sender_email}> \r\n Content-type: text/html; charset=utf-8",
+			'headers' => "From: {$this->siteName} - MySchoolGH.Com<noreply@myschoolgh.com> \r\n Content-type: text/html; charset=utf-8",
 			'Smtp' => true,
 			'SmtpHost' => $this->sender_client,
 			'SmtpPort' => '465',
@@ -221,7 +221,7 @@ class SMS_CronJOB {
 		}
 
 		// set the user from which the email is been sent
-		$mail->setFrom('app@myschoolgh.com', $this->siteName);
+		$mail->setFrom('noreply@myschoolgh.com', $this->siteName);
 
 		// loop through the list of recipients for this mail
         foreach($recipient_list as $emailRecipient) {

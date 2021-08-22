@@ -118,7 +118,7 @@ $response->html = '
                     <div class="padding-20">
                         <div class="text-center" id="init_data">The students list for gradding will appear here.</div>
                         <div id="award_marks" class="hidden">
-                            <div class="table-responsive">
+                            <div class="mb-4 slim-scroll table-responsive" style="max-height: 800px;">
                                 <table data-empty="" id="student_staff_list" class="table table-bordered table-striped">
                                     <thead>
                                         <tr>

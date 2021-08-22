@@ -59,7 +59,16 @@ var book_quantity_Checker = () => {
             "quantity": value
         };
         if (value) {
-            $.post(`${baseUrl}api/library/issue_request_handler`, { label });
+            $.pageoverlay.show();
+            $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then(() => {
+                $.pageoverlay.hide();
+            }).catch(() => {
+                swal({
+                    text: "Sorry! An error was encountered while processing the request.",
+                    icon: "error"
+                });
+                $.pageoverlay.hide();
+            });
         }
     });
 }
@@ -110,6 +119,9 @@ var issue_Request_Handler = (todo, book_id = "") => {
         "mode": selected_books.attr("data-mode"),
         "book_id": book_id
     };
+    if(todo !== "list") {
+        $.pageoverlay.show();
+    }
     $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
         if (response.code == 200) {
             selected_books.addClass("hidden");
@@ -142,6 +154,12 @@ var issue_Request_Handler = (todo, book_id = "") => {
                 $(`option[data-item_id='${book_id}']`).remove();
             }
         }
+    }).catch(() => {
+        swal({
+            text: "Sorry! An error was encountered while processing the request.",
+            icon: "error"
+        });
+        $.pageoverlay.hide();
     });
 }
 
@@ -267,7 +285,7 @@ var save_Issue_Request = (issue_id, request) => {
             var return_date = $(`div[id='library_form'] input[name="return_date"]`),
                 books_list = {};
 
-            if (request === "issue") {
+            if (request === "issued") {
                 var user_role = $(`div[id='library_form'] select[name="user_role"]`),
                     user_id = $(`div[id='library_form'] select[name="user_id"]`),
                     overdue_rate = $(`div[id='library_form'] input[name="overdue_rate"]`),
@@ -288,7 +306,7 @@ var save_Issue_Request = (issue_id, request) => {
                 "mode": selected_books.attr("data-mode")
             };
 
-            if (request === "issue") {
+            if (request === "issued") {
                 label["data"] = {
                     "books_list": books_list,
                     "user_id": user_id.val(),
@@ -305,25 +323,29 @@ var save_Issue_Request = (issue_id, request) => {
                     "return_date": return_date.val()
                 };
             }
-
+            $.pageoverlay.show();
             $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
-                let s_icon = "error";
+                $.pageoverlay.hide();
                 if (response.code == 200) {
                     selected_books.html("");
                     selected_books_list.html(`<div class="font-italic">No books has been selected yet.</div>`);
                     return_date.val("");
-                    if (request === "issue") {
+                    if (request === "issued") {
                         user_role.val("").change(),
                             user_id.val("").change(),
                             overdue_rate.val("");
                     }
-                    s_icon = "success";
                 }
                 swal({
-                    position: "top",
                     text: response.data.result,
-                    icon: s_icon,
+                    icon: responseCode(response.code),
                 });
+            }).catch(() => {
+                swal({
+                    text: "Sorry! An error was encountered while processing the request.",
+                    icon: "error"
+                });
+                $.pageoverlay.hide();
             });
         }
     });
@@ -347,10 +369,10 @@ var approve_Cancel_Books_Request = (borrowed_id, todo) => {
                     "borrowed_id": borrowed_id
                 }
             };
+            $.pageoverlay.show();
             $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
-                let s_icon = "error";
+                $.pageoverlay.hide();
                 if (response.code == 200) {
-                    s_icon = "success";
                     if (response.data.additional.reload !== undefined) {
                         setTimeout(() => {
                             loadPage(`${baseUrl}update-book-request/${borrowed_id}`);
@@ -358,9 +380,14 @@ var approve_Cancel_Books_Request = (borrowed_id, todo) => {
                     }
                 }
                 swal({
-                    position: "top",
                     text: response.data.result,
-                    icon: s_icon,
+                    icon: responseCode(response.code),
+                });
+            }).catch(() => {
+                $.pageoverlay.hide();
+                swal({
+                    text: "Sorry! An error was encountered while processing the request.",
+                    icon: "error"
                 });
             });
         }
@@ -394,7 +421,7 @@ $(`div[id="library_form"] select[name="user_role"]`).on("change", function() {
     $(`div[id='library_form'] select[name='user_id']`).append(`<option value="null">Please Select</option>`);
 
     if (user_type.length) {
-        $.get(`${baseUrl}api/users/list?minified=simplied_load_with&user_type=${user_type}`).then((response) => {
+        $.get(`${baseUrl}api/users/quick_list?user_type=${user_type}`).then((response) => {
             if (response.code == 200) {
                 $.each(response.data.result, function(i, user) {
                     $(`div[id='library_form'] select[name='user_id']`).append(`<option value='${user.user_id}'>${user.name} (${user.unique_id})</option>'`);

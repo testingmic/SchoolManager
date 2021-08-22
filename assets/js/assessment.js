@@ -43,6 +43,7 @@ var award_marks = (mode) => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            $.pageoverlay.show();
             $(`div[id="award_marks"] *`).attr("disabled", true);
             let students_list = {};
             $.each($(`input[data-item="marks"]`), function(i, e) {
@@ -64,6 +65,7 @@ var award_marks = (mode) => {
                 "students_list": students_list
             }
             $.post(`${baseUrl}api/assignments/save_assessment`, content).then((response) => {
+                $.pageoverlay.hide();
                 swal({
                     text: response.data.result,
                     icon: responseCode(response.code),
@@ -78,6 +80,7 @@ var award_marks = (mode) => {
                     $(`div[id="award_marks"] *`).attr("disabled", false);
                 }
             }).catch(() => {
+                $.pageoverlay.hide();
                 $(`div[id="award_marks"] *`).attr("disabled", false);
                 swal({
                     text: "Sorry! There was an error while processing the request.",
@@ -138,7 +141,6 @@ var prepare_assessment_log = (assessment_log_id = "") => {
         "time_due" : $(`input[name="time_due"]`).val(),
         "overall_score" : overall_score
     };
-
     if(isNaN(overall_score)) {
         swal({
             text: "Sorry! The overall score must be a numeric integer",
@@ -160,16 +162,16 @@ var prepare_assessment_log = (assessment_log_id = "") => {
                         <td>
                             <div class="d-flex justify-content-start">
                                 <div class="mr-2">
-                                    <img alt="image" src="${baseUrl}${e.image}" class="rounded-circle author-box-picture">
+                                    <img width="40px" alt="image" src="${baseUrl}${e.image}" class="rounded-circle author-box-picture">
                                 </div>
                                 <div>
-                                    ${e.name} <br>
+                                    ${e.name.toUpperCase()} <br>
                                     <strong>${e.unique_id}</strong>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <input data-item="marks" data-student_id="${e.item_id}" data-student_name="${e.name}" type="number" min="0" max="100" class="form-control" id="marks[${e.item_id}]" name="marks[${e.item_id}]">
+                            <input data-item="marks" data-student_id="${e.item_id}" data-student_name="${e.name}" type="number" min="0" max="100" class="form-control text-center" id="marks[${e.item_id}]" name="marks[${e.item_id}]">
                         </td>
                     </tr>`;
                 });

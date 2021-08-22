@@ -72,7 +72,7 @@ foreach($guardian_list as $kkey => $each) {
             <div class='mr-1'>
                 <img title='Click to view guardian details' onclick=\"return loadPage('{$baseUrl}update-guardian/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\">
             </div>
-            <div>
+            <div class='text-uppercase'>
                 {$each->name} <br>
                 <a title='Click to view guardian record' href='#' onclick='return loadPage(\"{$baseUrl}update-guardian/{$each->user_id}/view\");'>
                     <strong class='text-primary'>{$each->unique_id}</strong>

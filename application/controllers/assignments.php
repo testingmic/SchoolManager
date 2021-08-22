@@ -533,9 +533,11 @@ class Assignments extends Myschoolgh {
 
         $graded_count = 0;
         $student_marks = [];
+        $total_score = 0;
 
         // now loop through the list again and insert the user record
         foreach($params->student_list as $student) {
+
             // explode each student record
             $exp = explode("|", $student);
             $mark = $exp[1];
@@ -543,8 +545,10 @@ class Assignments extends Myschoolgh {
 
             // insert the data into the database
             if(!empty($mark)) {
+
                 // push into the array list
                 $graded_count += 1;
+                $total_score += $mark;
                 $student_marks[$student_id] = $mark;
 
                 // check if the record exits
@@ -570,14 +574,18 @@ class Assignments extends Myschoolgh {
             }
         }
 
+        // get the class average
+        $class_average = $total_score ? round(($total_score / $graded_count), 2) : 0;
+
         // update the assignment state
-        $this->db->query("UPDATE assignments SET state='Graded' WHERE item_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+        $this->db->query("UPDATE assignments SET state='Graded', class_average = '{$class_average}' WHERE item_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
 
         // return the success response
         return [
             "data" => "Marks were successfully awarded to the list of students specified.",
             "additional" => [
                 "marks" => $student_marks,
+                "class_average" => $class_average,
                 "graded_count" => $graded_count
             ]
         ];
@@ -1047,8 +1055,12 @@ class Assignments extends Myschoolgh {
                     <span class="float-right text-muted"><span class="graded_count">'.$data->students_graded.' Students</span>
                 </p>
                 <p class="clearfix">
-                    <span class="float-left">Grade</span>
+                    <span class="float-left">Grade Scale</span>
                     <span class="float-right text-primary"><span style="font-size:30px">'.($data->grading ?? null).'</span>marks</span>
+                </p>
+                <p class="clearfix">
+                    <span class="float-left">Class Average</span>
+                    <span class="float-right text-success"><span style="font-size:20px" data-item="class_avarage">'.($data->class_average ?? null).'</span>marks</span>
                 </p>
                 ' : null).'
                 <p class="clearfix">
@@ -1718,21 +1730,8 @@ class Assignments extends Myschoolgh {
 
         try {
 
-            // insert the record into the database
-            $stmt = $this->db->prepare("INSERT INTO assignments SET
-               item_id = ?, client_id = ?, questions_type = ?, assignment_type = ?, assigned_to = ?, assigned_to_list = ?, course_tutor = ?,
-               course_id = ?, class_id = ?, grading = ?, assignment_title = ?, assignment_description = ?,
-               insertion_mode = ?, created_by = ?, due_date = ?, due_time = ?, state = ?, date_published = now(), 
-               academic_year = ?, academic_term = ?
-            ");
-            $stmt->execute([
-                $item_id, $params->clientId, $data["questions_type"], $data["assessment_type"], 
-                $assigned_to, json_encode(array_keys($students_list)),
-                $params->userId, $data["course_id"], $data["class_id"], 
-                $data["overall_score"], $data["assessment_title"], $data["assessment_description"] ?? null, 
-                "Manual", $params->userId, $data["date_due"], $data["time_due"],
-                $state, $params->academic_year, $params->academic_term
-            ]);
+            // begin a transaction
+            $this->db->beginTransaction();
 
             // set the query string
             $insert = $this->db->prepare("INSERT INTO assignments_submitted SET client_id = ?, assignment_id = ?,
@@ -1743,14 +1742,42 @@ class Assignments extends Myschoolgh {
                 WHERE client_id = ? AND assignment_id = ? AND student_id = ? LIMIT 1
             ");
 
+            // total score and count
+            $count = 0;
+            $total_score = 0;
+
             // insert the student marks data
             foreach($students_list as $student_id => $student) {
+                // increment
+                $count++;
+                $total_score += $student["score"];
+
+                // update if already existing
                 if($update_log) {
                     $update->execute([$student["score"], 1, "Submitted", $params->clientId, $item_id, $student_id]);
                 } else {
                     $insert->execute([$params->clientId, $item_id, $student_id, $student["score"], 1, "Submitted"]);
                 }
             }
+
+            // get the average score
+            $class_average = round(($total_score / $count), 2);
+
+            // insert the record into the database
+            $stmt = $this->db->prepare("INSERT INTO assignments SET
+               item_id = ?, client_id = ?, questions_type = ?, assignment_type = ?, assigned_to = ?, assigned_to_list = ?, course_tutor = ?,
+               course_id = ?, class_id = ?, grading = ?, assignment_title = ?, assignment_description = ?,
+               insertion_mode = ?, created_by = ?, due_date = ?, due_time = ?, state = ?, date_published = now(), 
+               academic_year = ?, academic_term = ?, class_average = ?
+            ");
+            $stmt->execute([
+                $item_id, $params->clientId, $data["questions_type"] ?? "unassigned", $data["assessment_type"], 
+                $assigned_to, json_encode(array_keys($students_list)),
+                $params->userId, $data["course_id"], $data["class_id"], 
+                $data["overall_score"], $data["assessment_title"], $data["assessment_description"] ?? null, 
+                "Manual", $params->userId, $data["date_due"], $data["time_due"],
+                $state, $params->academic_year, $params->academic_term, $class_average
+            ]);
 
             // set the output to return when successful
             $return = ["code" => 200, "data" => "Assignment successfully created.", "refresh" => 2000];
@@ -1761,10 +1788,15 @@ class Assignments extends Myschoolgh {
             // if the request is to add a quiz
             $return["additional"]["href"] = "{$this->baseUrl}update-assessment/{$item_id}";
 
+            // commit the statement
+            $this->db->commit();
+
 			// return the output
             return $return;
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            $this->db->rollBack();
+        }
 
     }
     

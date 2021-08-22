@@ -88,7 +88,7 @@ if(!empty($user_id)) {
                     <div class="author-box-center">
                         <div class="clearfix"></div>
                         <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
-                        <div class="author-box-job">'.$data->residence.'</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-dark">'.$data->unique_id.'</div>
                     </div>
                     <div class="text-center">
                         <div class="author-box-description">'.$data->description.'</div>

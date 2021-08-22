@@ -55,8 +55,9 @@ if(!empty($item_id)) {
 
         // guardian information
         $isGraded = isset($data->awarded_mark) ? true : false;
+        $isClosed = in_array($data->state, ["Closed"]);
         $isActive = in_array($data->state, ["Graded", "Pending", "Answered"]);
-        $isMultipleChoice =  (bool) ($data->questions_type == "multiple_choice");
+        $isMultipleChoice =  (bool) (($data->questions_type == "multiple_choice") || ($data->questions_type == "unassigned"));
 
         $data->isGraded = $isGraded;
         $data->hasUpdate = $hasUpdate;
@@ -182,7 +183,7 @@ if(!empty($item_id)) {
                 $function = $isMultipleChoice ? "review_QuizAssignment" : "load_singleStudentData";
 
                 $grading_info .= '
-                <div class="col-lg-'.($isAuto ? 7 : 9).'" id="assignment-content">
+                <div class="col-lg-'.($isAuto && !$isMultipleChoice ? 7 : 9).'" id="assignment-content">
                     '.( $isActive ?
                         '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
                             <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
@@ -199,8 +200,8 @@ if(!empty($item_id)) {
                             <th></th>
                         </thead>
                     </table>
-                    <div class="slim-scroll" style="max-height: 500px; overflow-y:auto;">
-                        <table width="100%" class="table-bordered table-stripped table mt-0">
+                    <div class="slim-scroll" style="max-height: 650px; overflow-y:auto;">
+                        <table width="100%" class="table-bordered table-striped table mt-0">
                         <tbody>';
                         // loop through the list of students
                         foreach($result as $student) {
@@ -210,7 +211,7 @@ if(!empty($item_id)) {
 
                             $grading_info .= '
                                 <tr>
-                                    <td width="65%">
+                                    <td width="60%">
                                         <div class="d-flex justify-content-start">
                                             <div class="mr-2">
                                                 '.($isSubmitted ?
@@ -221,7 +222,7 @@ if(!empty($item_id)) {
                                                 ).'
                                             </div>
                                             <div>
-                                                <p class="p-0 m-0">
+                                                <p class="p-0 text-uppercase m-0">
                                                     '.($isSubmitted ? '<a style="text-decoration:none" class="anchor" href="javascript:void(0)" '.($isAuto ? 'onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')"' : null).' data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'"><strong>'.$student->name.'</strong></a>' : "<strong>{$student->name}</strong>").'
                                                 </p>
                                                 <p class="p-0 m-0">'.$myClass->the_status_label($student->handed_in).'</p>
@@ -230,7 +231,7 @@ if(!empty($item_id)) {
                                     </td>
                                     <td>
                                         <div class="input-group">
-                                            <input '.(!$isActive || $isMultipleChoice ? 'disabled="disabled"' : 'name="test_grading" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" class="form-control font-16"> &nbsp; <span class="font-20">/ '.$data->grading.'</span>
+                                            <input '.(!$isActive || $isMultipleChoice ? 'disabled="disabled"' : 'name="test_grading" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" style="max-width:120px" class="form-control text-center font-20"> &nbsp; <span class="font-25">/ '.$data->grading.'</span>
                                         </div>
                                     </td>
                                 </tr>';

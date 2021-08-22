@@ -249,11 +249,11 @@ class Crons {
 		// configuration settings
 		$config = (Object) array(
 			'subject' => $subject,
-			'headers' => "From: {$this->siteName} - MySchoolGH.Com<app@myschoolgh.com> \r\n Content-type: text/html; charset=utf-8",
+			'headers' => "From: {$this->siteName} - MySchoolGH.Com<noreply@myschoolgh.com> \r\n Content-type: text/html; charset=utf-8",
 			'Smtp' => true,
-			'SmtpHost' => 'mail.supremecluster.com',
+			'SmtpHost' => 'school.mineconrsl.com',
 			'SmtpPort' => '465',
-			'SmtpUser' => 'app@myschoolgh.com',
+			'SmtpUser' => 'noreply@myschoolgh.com',
 			'SmtpPass' => 'C30C5aamUl',
 			'SmtpSecure' => 'ssl'
 		);
@@ -281,7 +281,7 @@ class Crons {
 		$mail->Port = $config->SmtpPort;
 
 		// set the user from which the email is been sent
-		$mail->setFrom('app@myschoolgh.com', $this->siteName);
+		$mail->setFrom('noreply@myschoolgh.com', $this->siteName);
 
 		// loop through the list of recipients for this mail
         foreach($recipient_list as $emailRecipient) {
@@ -1095,7 +1095,7 @@ class Crons {
 
 // create new object
 $jobs = new Crons;
-// $jobs->loadEmailRequests();
-// $jobs->inApp_Emails();
+$jobs->loadEmailRequests();
+$jobs->inApp_Emails();
 $jobs->scheduler();
 ?>

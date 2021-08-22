@@ -86,13 +86,15 @@ if(!empty($item_id)) {
             <div class="row mt-sm-4">
             <div class="col-12 col-md-12 col-lg-4">
                 <div class="card author-box">
-                <div class="card-body">
-                    <div><h3>'.$data->title.'</h3></div>
-                    '.(!empty($data->book_image) ? 
-                    '<div>
-                        <div><img width="100%" style="max-height:350px" src="'.$baseUrl.''.$data->book_image.'"></div>
-                    </div>' : '').'
-                </div>
+                    <div class="card-body pr-1 pl-1">
+                        <div class="author-box-center">
+                            '.(!empty($data->book_image) ? 
+                            '<div class="text-center">
+                                <img alt="image" src="'.$baseUrl.''.$data->book_image.'" class="profile-picture">
+                            </div>' : '').'
+                            <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->title.'</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="card">
                     <div class="card-header">
@@ -100,7 +102,7 @@ if(!empty($item_id)) {
                     </div>
                     <div class="card-body pt-0">
                         <div class="py-3 pt-0">
-                            '.$data->description.'
+                            '.($data->description ? $data->description : "-").'
                         </div>
                     </div>
                 </div>

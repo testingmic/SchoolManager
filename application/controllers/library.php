@@ -192,13 +192,13 @@ class Library extends Myschoolgh {
 			$params->show_list = true;
 		}
 
-		$params->query .= (isset($params->issued_date)) ? " AND a.issued_date='{$params->issued_date}'" : null;
-		$params->query .= (isset($params->return_date)) ? " AND a.return_date='{$params->return_date}'" : null;
-		$params->query .= (isset($params->status)) ? " AND a.status='{$params->status}'" : null;
-        $params->query .= (isset($params->user_role)) ? " AND a.user_role='{$params->user_role}'" : null;
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
-		$params->query .= (isset($params->borrowed_id)) ? " AND a.item_id='{$params->borrowed_id}'" : null;
+		$params->query .= (isset($params->issued_date) && !empty($params->issued_date)) ? " AND a.issued_date='{$params->issued_date}'" : null;
+		$params->query .= (isset($params->return_date) && !empty($params->return_date)) ? " AND a.return_date='{$params->return_date}'" : null;
+		$params->query .= (isset($params->status) && !empty($params->status)) ? " AND a.status='{$params->status}'" : null;
+        $params->query .= (isset($params->user_role) && !empty($params->user_role)) ? " AND a.user_role='{$params->user_role}'" : null;
+        $params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= (isset($params->user_id) && !empty($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
+		$params->query .= (isset($params->borrowed_id) && !empty($params->borrowed_id)) ? " AND a.item_id='{$params->borrowed_id}'" : null;
 
         try {
 
@@ -512,7 +512,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** Issue the book out to the user */
-		elseif(in_array($todo, ["issue", "request"])) {
+		elseif(in_array($todo, ["issued", "request"])) {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
@@ -752,8 +752,8 @@ class Library extends Myschoolgh {
 		
 		// convert the data parameter to an object
 		$data = (object) $params;
-		$status = ($data->request === "issue") ? "Issued" : "Requested";
-		$data->issued_date = ($data->request === "issue") ? date("Y-m-d") : null;
+		$status = ($data->request === "issued") ? "Issued" : "Requested";
+		$data->issued_date = ($data->request === "issued") ? date("Y-m-d") : null;
 
 		// confirm that the return date is not empty
 		if(!isset($data->return_date)) {
@@ -777,6 +777,8 @@ class Library extends Myschoolgh {
 		try {
 
 			$item_id = random_string("alnum", 32);
+			$fine = !empty($data->overdue_rate) ? $data->overdue_rate : 0;
+			$eachBookRate = !empty($eachBookRate) ? $eachBookRate : 0;
 
 			$stmt = $this->db->prepare("
 				INSERT INTO 
@@ -787,16 +789,15 @@ class Library extends Myschoolgh {
 			");
 			$stmt->execute([
 				$data->clientId, $item_id, $data->user_id, $data->user_role ?? null, json_encode($books_list), 
-				$data->issued_date, $data->return_date, $data->overdue_rate ?? 0, $userId, $data->request, $status
+				$data->issued_date, $data->return_date, $fine, $userId, $data->request, $status
 			]);
 
+			// loop through the books list.
 			foreach($data->books_list as $key => $value) {
-				$stmt = $this->db->prepare("
-					INSERT INTO 
-						books_borrowed_details
-					SET
-						borrowed_id = ?, book_id = ?, quantity = ?,
-						return_date = ?, fine = ?, issued_by = ?, received_by = ?
+				
+				// prepare and execute the statement
+				$stmt = $this->db->prepare("INSERT INTO books_borrowed_details SET
+					borrowed_id = ?, book_id = ?, quantity = ?,	return_date = ?, fine = ?, issued_by = ?, received_by = ?
 				");
 				$stmt->execute([$item_id, $key, $value, $data->return_date, $eachBookRate, $userId, $data->user_id]);
 
@@ -805,7 +806,7 @@ class Library extends Myschoolgh {
 			}
 
 			/** The Message */
-			$message = $data->request == "issue" ? "Issued Books out to the User." : "Made a request for a list of Books.";
+			$message = $data->request == "issued" ? "Issued Books out to the User." : "Made a request for a list of Books.";
 
 			/** Record the user activity **/
 			$this->userLogs("books_borrowed", $item_id, null, "{$data->fullname} {$message}.", $data->userId);
@@ -817,7 +818,7 @@ class Library extends Myschoolgh {
 			return true;
 		} catch(PDOException $e) {
 			$this->db->rollback();
-			return $this->unexpected_error;
+			return false;
 		}
 
 	}
@@ -1048,7 +1049,7 @@ class Library extends Myschoolgh {
 			/** Get all Books and Their Quanities */
 			foreach($this->pushQuery("quantity, book_id", "books_borrowed_details", "books_borrowed = '{$borrowed_id}' AND status !='Returned'") as $book) {
 				/** increase the books stock quantity */
-				$this->db->query("UPDATE books_stock SET quantity = (quantity - {$book[0]->quantity}) WHERE books_id = '{$book[0]->book_id}' LIMIT 1");
+				$this->db->query("UPDATE books_stock SET quantity = (quantity + {$book[0]->quantity}) WHERE books_id = '{$book[0]->book_id}' LIMIT 1");
 			}
 
 			/** Log the user activity */
@@ -1058,7 +1059,7 @@ class Library extends Myschoolgh {
 			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned=now() WHERE borrowed_id='{$borrowed_id}' AND book_id='{$expl[1]}' LIMIT 1");
 
 			/** increase the books stock quantity */
-			$this->db->query("UPDATE books_stock SET quantity = (quantity - {$data[0]->quantity}) WHERE books_id = '{$expl[1]}' LIMIT 1");
+			$this->db->query("UPDATE books_stock SET quantity = (quantity + {$data[0]->quantity}) WHERE books_id = '{$expl[1]}' LIMIT 1");
 
 			/** Log the user activity */
 			$this->userLogs("books_borrowed", $borrowed_id, null, "{$params->fullname} returned the Book in the list of Books Borrowed.", $params->userId);

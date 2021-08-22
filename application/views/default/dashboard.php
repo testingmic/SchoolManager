@@ -538,7 +538,7 @@ if($isSupport) {
 
     }
 
-    $global_period = $isWardParent ? "this_term" : "last_14days";
+    $global_period = $isWardParent ? "this_term" : "last_30days";
 
     // set the response dataset
     $response->html = '

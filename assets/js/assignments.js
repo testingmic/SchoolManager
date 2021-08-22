@@ -50,17 +50,18 @@ var save_AssignmentMarks = () => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            $.pageoverlay.show();
             $("#assignment-content :input[name='test_grading']").each(function() {
                 let student_id = $(this).attr("data-value"),
                     student_mark = $(this).val();
                 student_list.push(student_id + "|" + student_mark);
             });
             $.post(`${baseUrl}api/assignments/award_marks`, { student_list, assignment_id }).then((response) => {
-                let the_icon = "error";
+                $.pageoverlay.hide();
                 if (response.code == 200) {
-                    the_icon = "success";
                     $(`span[class="graded_count"]`).html(`${response.data.additional.graded_count}`);
                     if (response.data.additional.marks !== undefined) {
+                        $(`span[data-item="class_avarage"]`).html(response.data.additional.class_average);
                         $.each(response.data.additional.marks, function(i, e) {
                             $(`a[data-function="single-view"][data-student_id="${i}"]`).attr("data-score", e);
                             $(`input[name="test_grading"][data-value="${i}"]`).attr("value", e);
@@ -68,11 +69,11 @@ var save_AssignmentMarks = () => {
                     }
                 }
                 swal({
-                    position: 'top',
                     text: response.data.result,
-                    icon: the_icon,
+                    icon: responseCode(response.code),
                 });
             }).catch(() => {
+                $.pageoverlay.hide();
                 swal({
                     text: "Sorry! There was an error while processing the request.",
                     icon: "error",

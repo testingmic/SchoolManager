@@ -56,8 +56,17 @@ if(!empty($item_id)) {
         $isOverdue = (bool) ($data->state === "Overdue");
         $canReturn = (bool) in_array($data->state, ["Approved", "Overdue", "Issued"]);
 
+        // is returned
+        $isAlreadyReturned = true;
+
         // loop through the books list
         foreach($data->books_list as $book) {
+
+            // confirm the already returned state
+            if(($book->status === "Borrowed") && !$isReturned) {
+                $isAlreadyReturned = false;
+            }
+
             // set the permission
             $books_list .= "<tr class='each_book_item' data-request_id='{$item_id}' data-book_id='{$book->book_id}'>";
             $books_list .= "<td>
@@ -90,7 +99,6 @@ if(!empty($item_id)) {
             }
 
             // if the item is not yet overdue
-            // $isPermitted && 
             if($isRequested && !$isOverdue) {
                 $books_list .= "<td align='center'>";
                 $books_list .= "<button onclick=\"return remove_Book('{$item_id}','{$book->book_id}');\" class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>";
@@ -98,6 +106,15 @@ if(!empty($item_id)) {
                 $books_list .= "</td>";
             }
             $books_list .= "</tr>";
+        }
+
+        // if already returned then set the main returned to true
+        if($isAlreadyReturned && !$isReturned) {
+            // set a new status
+            $isEditable = false;
+            $data->state = "Returned";
+            // run the query to return the books
+            $myschoolgh->query("UPDATE books_borrowed SET status='Returned', actual_date_returned=now() WHERE item_id='{$item_id}' LIMIT 1");
         }
 
         // books listing
@@ -230,7 +247,6 @@ if(!empty($item_id)) {
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="books_list" role="tabpanel" aria-labelledby="books_list-tab2">
                                     <div class="d-flex justify-content-between">
-                                        <div><h5 class="text-uppercase">Books Selected List</h5></div>
                                         '.($isEditable ? 
                                             ($hasIssue && $isRequested ? 
                                                 "<div><button onclick='return approve_Cancel_Books_Request(\"{$item_id}\",\"approve_request\");' class='btn btn-outline-success'><i class='fa fa-save'></i> Approve Request</button></div>" : 
