@@ -59,15 +59,11 @@ var book_quantity_Checker = () => {
             "quantity": value
         };
         if (value) {
-            $.pageoverlay.show();
-            $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then(() => {
-                $.pageoverlay.hide();
-            }).catch(() => {
+            $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then(() => {}).catch(() => {
                 swal({
                     text: "Sorry! An error was encountered while processing the request.",
                     icon: "error"
                 });
-                $.pageoverlay.hide();
             });
         }
     });
@@ -119,10 +115,11 @@ var issue_Request_Handler = (todo, book_id = "") => {
         "mode": selected_books.attr("data-mode"),
         "book_id": book_id
     };
-    if(todo !== "list") {
+    if((todo !== "list") && (todo !== "update_quantity")) {
         $.pageoverlay.show();
     }
     $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
+        $.pageoverlay.hide();
         if (response.code == 200) {
             selected_books.addClass("hidden");
             selected_books.html("");
@@ -208,7 +205,7 @@ var save_Request_Fine = (borrowed_id) => {
     });
 }
 
-var return_Requested_Book = (mode, borrowed_id, fine) => {
+var return_Requested_Book = (mode, borrowed_id, fine = 0) => {
     let f_note = fine > 1 ? "\nConfirming this indicates that the user has paid the fine." : "";
     let s_title = (mode === "entire_order") ? "Return Order" : "Return Book",
         s_message = (mode === "entire_order") ? `Are you sure you want to return the entire books? ${f_note}` : `Are you sure you want to return this book from the list? ${f_note}`;
@@ -228,8 +225,9 @@ var return_Requested_Book = (mode, borrowed_id, fine) => {
                     "record_id": borrowed_id
                 }
             };
+            $.pageoverlay.show();
             $.post(`${baseUrl}api/library/issue_request_handler`, { label }).then((response) => {
-                let s_icon = "error";
+                $.pageoverlay.hide();
                 if (response.code == 200) {
                     s_icon = "success";
                     if (mode == "entire_order") {
@@ -240,10 +238,15 @@ var return_Requested_Book = (mode, borrowed_id, fine) => {
                     }
                 }
                 swal({
-                    position: "top",
                     text: response.data.result,
-                    icon: s_icon,
+                    icon: responseCode(response.code)
                 });
+            }).catch(() => {
+                swal({
+                    text: "Sorry! An error was encountered while processing the request.",
+                    icon: "error"
+                });
+                $.pageoverlay.hide();
             });
         }
     });
@@ -341,11 +344,11 @@ var save_Issue_Request = (issue_id, request) => {
                     icon: responseCode(response.code),
                 });
             }).catch(() => {
+                $.pageoverlay.hide();
                 swal({
                     text: "Sorry! An error was encountered while processing the request.",
                     icon: "error"
                 });
-                $.pageoverlay.hide();
             });
         }
     });

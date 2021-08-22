@@ -52,7 +52,7 @@ if(!empty($item_id)) {
         $isPermitted = (bool) ($hasIssue && $data->state === "Requested");
         $isRequested = (bool) ($data->state === "Requested");
         $isReturned = (bool) ($data->state === "Returned");
-        $isEditable = (bool) !in_array($data->state, ["Cancelled", "Overdue", "Approved", "Returned"]);
+        $isEditable = (bool) !in_array($data->state, ["Cancelled", "Approved", "Returned"]);
         $isOverdue = (bool) ($data->state === "Overdue");
         $canReturn = (bool) in_array($data->state, ["Approved", "Overdue", "Issued"]);
 
@@ -63,7 +63,7 @@ if(!empty($item_id)) {
         foreach($data->books_list as $book) {
 
             // confirm the already returned state
-            if(($book->status === "Borrowed") && !$isReturned) {
+            if(in_array($book->status, ["Borrowed"]) && !$isReturned) {
                 $isAlreadyReturned = false;
             }
 
@@ -157,20 +157,20 @@ if(!empty($item_id)) {
                                         <img class="rounded-circle author-box-picture" src="'.$baseUrl.''.$data->user_info->image.'" width="60px">
                                     </div>
                                     <div style="width:100%">
-                                        <p class="clearfix">
-                                            <span class="float-left">Fullname:</span>
+                                        <p class="clearfix mb-0">
+                                            <span class="float-left font-bold">Fullname:</span>
                                             <span class="float-right text-muted">'.($data->user_info->name).'</span>
                                         </p>
-                                        <p class="clearfix">
-                                            <span class="float-left">Unique ID:</span>
-                                            <span class="float-right text-muted">'.($data->user_info->unique_id).'</span>
+                                        <p class="clearfix mb-0">
+                                            <span class="float-left font-bold">Unique ID:</span>
+                                            <span class="float-right text-muted font-bold">'.($data->user_info->unique_id).'</span>
                                         </p>
-                                        <p class="clearfix">
-                                            <span class="float-left">Contact:</span>
+                                        <p class="clearfix mb-0">
+                                            <span class="float-left font-bold">Contact:</span>
                                             <span class="float-right text-muted">'.($data->user_info->phone_number).'</span>
                                         </p>
-                                        <p class="clearfix">
-                                            <span class="float-left">Email:</span>
+                                        <p class="clearfix mb-0">
+                                            <span class="float-left font-bold">Email:</span>
                                             <span class="float-right text-muted">'.($data->user_info->email).'</span>
                                         </p>
                                     </div>
@@ -226,9 +226,16 @@ if(!empty($item_id)) {
                                     <span class="float-right text-muted">'.$myClass->the_status_label($data->state).'</span>
                                 </p>
                                 <p class="clearfix">
-                                    <span class="float-left">Date:</span>
-                                    <span class="float-right text-muted">'.($data->updated_at ?? null).'</span>
+                                    <span class="float-left">Request Created:</span>
+                                    <span class="float-right text-muted">'.($data->created_at ?? null).'</span>
                                 </p>
+                                '.( !empty($data->actual_date_returned) ? '
+                                        <p class="clearfix">
+                                            <span class="float-left">Date Returned:</span>
+                                            <span class="float-right text-muted">'.($data->actual_date_returned ?? null).'</span>
+                                        </p>
+                                    ' : ''
+                                ).'
                             </div>
                         </div>
                     </div>
@@ -254,7 +261,7 @@ if(!empty($item_id)) {
                                                     !$hasIssue && $isRequested ? 
                                                         "<div><button onclick='return approve_Cancel_Books_Request(\"{$item_id}\",\"cancel_request\");' class='btn btn-outline-danger'><i class='fa fa-times'></i> Cancel Request</button></div>" : 
                                                         (
-                                                            $hasIssue ? "<div id='return_all_container'><button onclick='return return_Requested_Book(\"entire_order\",\"{$item_id}\",\"".($isOverdue ? $data->fine : 0)."\");' class='btn btn-outline-success'><i class='fa fa-reply'></i> Return All</button></div>": ""
+                                                            $hasIssue ? "<div></div><div id='return_all_container'><button onclick='return return_Requested_Book(\"entire_order\",\"{$item_id}\",\"".($isOverdue ? $data->fine : 0)."\");' class='btn btn-outline-success'><i class='fa fa-reply'></i> Return All</button></div>": ""
                                                         )
                                                 )
                                             ) : ''

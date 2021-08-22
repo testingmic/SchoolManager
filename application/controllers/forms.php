@@ -3068,7 +3068,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="form-group">
                     <label>Return Date <span class="required">*</span></label>
-                    <input type="text" data-maxdate="'.date("Y-m-d", strtotime("+2 month")).'" name="return_date" id="return_date" value="'.($data->return_date ?? date("Y-m-d", strtotime("+1 week"))).'" class="form-control datepicker">
+                    <input type="text" data-mindate="'.date("Y-m-d").'" data-maxdate="'.date("Y-m-d", strtotime("+3 month")).'" name="return_date" id="return_date" value="'.($data->return_date ?? date("Y-m-d", strtotime("+1 week"))).'" class="form-control datepicker">
                 </div>
                 <div class="form-group">
                     <div class="row">
@@ -3099,7 +3099,7 @@ class Forms extends Myschoolgh {
                 <input type="hidden" readonly name="user_id" id="user_id" value="'.$data->user_id.'">
                 <div class="form-group">
                     <label>Return Date <span class="required">*</span></label>
-                    <input type="text" data-maxdate="'.date("Y-m-d", strtotime("+2 month")).'" value="'.($data->return_date ?? date("Y-m-d", strtotime("+1 week"))).'" name="return_date" id="return_date" class="form-control datepicker">
+                    <input type="text" data-mindate="'.date("Y-m-d").'" data-maxdate="'.date("Y-m-d", strtotime("+3 month")).'" value="'.($data->return_date ?? date("Y-m-d", strtotime("+1 week"))).'" name="return_date" id="return_date" class="form-control datepicker">
                 </div>
                 <div class="text-right">
                     <input type="hidden" value="'.($data->issue_id ?? null).'" name="issue_id" readonly>

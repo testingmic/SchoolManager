@@ -178,8 +178,8 @@ if(!$isSupport) {
         if(!isset($_GET["dw"])) {
             print $content["data"];
             print '<script>
-                    // window.onload = (evt) => { window.print(); }
-                    // window.onafterprint = (evt) => { window.close(); }
+                    window.onload = (evt) => { window.print(); }
+                    window.onafterprint = (evt) => { window.close(); }
                 </script>';
             return;
         }

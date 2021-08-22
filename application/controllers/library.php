@@ -224,10 +224,12 @@ class Library extends Myschoolgh {
 				$result->books_id = json_decode($result->books_id);
 
 				// check the return date and status
-				if(strtotime($result->return_date) < strtotime(date("Y-m-d"))) {
-					$result->state = "Overdue";
-				} else if(strtotime($result->return_date) === strtotime(date("Y-m-d"))) {
-					$result->state = "Due Today";
+				if(!in_array($result->state, ["Returned"])) {
+					if(strtotime($result->return_date) < strtotime(date("Y-m-d"))) {
+						$result->state = "Overdue";
+					} else if(strtotime($result->return_date) === strtotime(date("Y-m-d"))) {
+						$result->state = "Due Today";
+					}
 				}
 
 				// loop through the information
@@ -1042,8 +1044,9 @@ class Library extends Myschoolgh {
 
 		/** Update the returned information */
 		if($isEntire) {
+
 			/** Execute the status */
-			$this->db->query("UPDATE books_borrowed SET status='Returned', actual_date_returned=now() WHERE item_id='{$borrowed_id}' LIMIT 1");
+			$this->db->query("UPDATE books_borrowed SET status='Returned', actual_date_returned=now(), actual_paid = (fine + 0), fine_paid='1' WHERE item_id='{$borrowed_id}' LIMIT 1");
 			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned=now() WHERE borrowed_id='{$borrowed_id}' LIMIT 100");
 			
 			/** Get all Books and Their Quanities */
@@ -1056,7 +1059,7 @@ class Library extends Myschoolgh {
 			$this->userLogs("books_borrowed", $borrowed_id, null, "{$params->fullname} returned the Books Borrowed.", $params->userId);
 		} else {
 			/** Execute the status */
-			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned=now() WHERE borrowed_id='{$borrowed_id}' AND book_id='{$expl[1]}' LIMIT 1");
+			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned=now(), actual_paid = (fine + 0), fine_paid='1' WHERE borrowed_id='{$borrowed_id}' AND book_id='{$expl[1]}' LIMIT 1");
 
 			/** increase the books stock quantity */
 			$this->db->query("UPDATE books_stock SET quantity = (quantity + {$data[0]->quantity}) WHERE books_id = '{$expl[1]}' LIMIT 1");
