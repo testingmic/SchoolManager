@@ -1,6 +1,8 @@
 <?php 
 
 class Payment extends Myschoolgh {
+
+    private $pk_secret_key = "sk_test_3ceb4c33b4b0ea31cb10ef3b41ef05a673758cee";
     
     public function __construct() {
 
@@ -73,6 +75,7 @@ class Payment extends Myschoolgh {
             "data" => $result
         ];
     }
+
     /**
      * Initialize Payment URL
      * 

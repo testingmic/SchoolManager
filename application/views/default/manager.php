@@ -46,7 +46,7 @@ if(empty($accessObject->hasAccess("close", "settings"))) {
             <div class=\"col-lg-4\">
                 <div class=\"form-group\">
                     <label style=\"font-size:13px\" class=\"cursor\" for=\"{$key}_{$count}\">{$value}</label>
-                    <input ".($key === "students" ? "checked disabled" : null)." id=\"{$key}_{$count}\" style=\"height:20px;width:20px;\" class=\"cursor data_to_import\" name=\"data_to_import[]\" value=\"{$key}\" type=\"checkbox\">
+                    <input ".($key === "students" ? "checked disabled='disabled'" : "checked")." id=\"{$key}_{$count}\" style=\"height:20px;width:20px;\" class=\"cursor data_to_import\" name=\"data_to_import[]\" value=\"{$key}\" type=\"checkbox\">
                 </div>
             </div>";
     }

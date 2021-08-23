@@ -17,6 +17,7 @@ var load_Pay_Fees_Form = () => {
         if (response.code === 200) {
             $(`div[id="fees_payment_history"]`).html(response.data.result.form);
             $(`button[id="payment_cancel"]`).removeClass("hidden");
+            $(`div[id="fees_payment_form"] select[id="payment_method"]`).val("cash").change();
             if (response.data.result.query !== undefined) {
                 if (response.data.result.query.paid_status !== undefined) {
                     if (response.data.result.query.paid_status == 1) {
@@ -233,7 +234,8 @@ var receive_Momo_Card_Payment = () => {
     try {
 
         let amount = parseFloat($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
-            email_address = $(`input[name="email_address"]`).val();
+            email_address = $(`input[name="email_address"]`).val(),
+            subaccount = $(`input[name="client_subaccount"]`).val();
 
         if (!$(`div[id="fees_payment_form"] input[name="amount"]`).val().length) {
             swal({
@@ -255,6 +257,7 @@ var receive_Momo_Card_Payment = () => {
             key: pk_payment_key,
             email: email_address,
             amount: amount,
+            subaccount: subaccount,
             currency: myPrefs.labels.currency,
             onClose: function() {
                 $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");

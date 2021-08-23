@@ -1511,14 +1511,16 @@ class Fees extends Myschoolgh {
 
             /* Confirm if the user has any credits */
             $creditBalance = 0;
-            if($outstandingBalance < 0) {
+            if(($outstandingBalance < 0)) {
                 $creditBalance = $outstandingBalance * -1;
                 $outstandingBalance = 0;
             }
 
             // if there is any credit balance then end the query
-            if($creditBalance) {
-                return ["code" => 203, "data" => "Sorry! You cannot pay more than the outstanding balance."];
+            if($params->payment_method !== "MoMo_Card") {
+                if($creditBalance) {
+                    return ["code" => 203, "data" => "Sorry! You cannot pay more than the outstanding balance."];
+                }
             }
 
             // get the currency
@@ -1696,7 +1698,7 @@ class Fees extends Myschoolgh {
             /* Update the student credit balance */
             if(isset($creditBalance)) {
                 // update the user data
-                $this->db->query("UPDATE users SET account_balance = (account_balance + $creditBalance) WHERE item_id = '{$params->student_id}' AND client_id = '{$params->clientId}' LIMIT 1");
+                $this->db->query("UPDATE users SET account_balance = (account_balance + {$creditBalance}) WHERE item_id = '{$params->student_id}' AND client_id = '{$params->clientId}' LIMIT 1");
             }
 
             // Log the transaction information
@@ -2201,7 +2203,7 @@ class Fees extends Myschoolgh {
                             $total_due = 0;
                             foreach($allocation_list as $key => $fees) {
 
-                                $discount = $fees->exempted ? $fees->amount_due : 0;
+                                $discount = $fees->exempted ? $fees->balance : 0;
                                 $balance = !$fees->exempted ? $fees->balance : 0;
 
                                 $total_discount += $discount;

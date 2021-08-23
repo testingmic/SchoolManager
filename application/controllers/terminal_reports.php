@@ -1068,7 +1068,8 @@ class Terminal_reports extends Myschoolgh {
 
             // get the user attendance results
             $attendance_param = (object) [
-                "clientId" => $this->clientId, 
+                "clientId" => $this->clientId, "academic_year" => $params->academic_year,
+                "academic_term" => $params->academic_term,
                 "user_types_list" => ["student"], "the_user_type" => "student",
                 "period" => "this_term", "is_finalized" => 1, "is_present_check" => 1,
                 "start_date" => $this->this_term_starts, "end_date" => $this->this_term_ends,

@@ -9,7 +9,7 @@ class Account extends Myschoolgh {
 		parent::__construct();
 
         // get the client data
-        $client_data = $params->client_data;
+        $client_data = $params->client_data ?? [];
         $this->iclient = $client_data;
 
         // set the columns for the import of csv files
@@ -47,13 +47,143 @@ class Account extends Myschoolgh {
             "occupation" => "Occupation", "position" => "Position"
         ];
 
-        // $this->accepted_column["course"] = [
-        //     "course_code" => "Course Code", "name" => "Title", "credit_hours" => "Credit Hours", 
-        //     "weekly_meeting" => "Weekly Meetings",  "description" => "Description", 
-        //     "course_tutor" => "Course Tutor IDs"
-        // ];
-
 	}
+
+    /**
+     * Client Analitics
+     * This method Loads all The Basic Information of a particular School
+     * It returns an array data of the counts
+     * 
+     * @return Array
+     */
+    public function client(stdClass $params) {
+
+        $result = [];
+        
+        try {
+            $stmt = $this->db->prepare("SELECT 
+                (SELECT COUNT(DISTINCT b.item_id) FROM users b WHERE b.client_id = a.client_id AND b.user_type IN ('admin')) AS admins_count,
+                (SELECT COUNT(DISTINCT b.item_id) FROM users b WHERE b.client_id = a.client_id AND b.user_type='student') AS students_count,
+                (SELECT COUNT(DISTINCT b.item_id) FROM users b WHERE b.client_id = a.client_id AND b.user_type IN ('teacher','employee','accountant')) AS staff_count,
+                (SELECT COUNT(DISTINCT b.item_id) FROM classes b WHERE b.client_id = a.client_id AND b.status='1') AS classes_count,
+                (SELECT COUNT(DISTINCT b.id) FROM departments b WHERE b.client_id = a.client_id AND b.status='1') AS departments_count,
+                (SELECT COUNT(DISTINCT b.id) FROM sections b WHERE b.client_id = a.client_id AND b.status='1') AS sections_count,
+                (SELECT b.sms_balance FROM smsemail_balance b WHERE b.client_id = a.client_id) AS sms_balance
+                FROM clients_accounts a WHERE a.client_id = ? LIMIT 1
+            ");
+            $stmt->execute([$params->clientId]);
+            $result = $stmt->fetch(PDO::FETCH_OBJ);
+
+            return $result;
+
+        } catch(PDOException $e) {
+            return [];
+        }
+
+    }
+
+    /**
+     * Modify Client Data
+     * 
+     * @param Array     $params->data
+     * 
+     * @return Array
+     */
+    public function modify(stdClass $params) {
+
+        try {
+
+            global $accessObject;
+
+            if(!$accessObject->hasAccess("schools", "settings")) {
+                return ["code" => 403, "data" => $this->permission_denied];
+            }
+
+            // set the variable
+            $data = $params->data;
+
+            // if not an array data is parsed
+            if(!is_array($params->data)) {
+                return ["code" => 203, "data" => "Sorry! An array data is expected"];
+            }
+
+            // confirm the client id
+            if(!isset($data["client_id"])) {
+                return ["code" => 203, "data" => "Sorry! A valid client_id must be parsed in the request."];
+            }
+
+            // check the client id if existing
+            $check = $this->pushQuery(
+                "a.client_preferences, a.client_state, a.client_name,
+                (SELECT b.sms_balance FROM smsemail_balance b WHERE b.client_id = a.client_id) AS sms_balance", 
+                "clients_accounts a", "a.client_id='{$data["client_id"]}' LIMIT 1");
+            
+            // if no record was found
+            if(empty($check)) { return ["code" => 203, "data" => "Sorry! A valid client_id must be parsed in the request."]; }
+
+            // set the redirection link
+            $additional["href"] = "{$this->baseUrl}schools/{$data["client_id"]}";
+
+            // if account topup
+            if(isset($params->data["action"], $params->data["topup"])) {
+                
+                // update only if the account has not been suspended or expired
+                if(in_array($check[0]->client_state, ["Expired", "Suspended"])) {
+                    return ["code" => 203, "data" => "Sorry! You cannot modify a {$check[0]->client_state} account. First change the status to continue."];
+                }
+
+                // update the user sms balance
+                $this->db->query("UPDATE smsemail_balance SET 
+                    sms_balance=(sms_balance + {$data["topup"]}),
+                    last_topup_details = '{$data["topup"]} SMS Units was '
+                    WHERE client_id='{$data["client_id"]}' LIMIT 1
+                ");
+                
+                // log the user activity
+                $this->userLogs("sms_topup", $data["client_id"], null,  "{$params->userData->name} added 
+                    <strong>{$data["topup"]} sms units</strong> to the Account of <strong>{$check[0]->client_name}</strong>.
+                    New Balance = ".($check[0]->sms_balance + $data["topup"]), $params->userId);
+
+                // return a success message
+                return ["data" => "SMS Balance Successfully updated.", "additional" => $additional];
+
+            }
+
+            // required parameters
+            $required = ["account_package", "account_expiry", "client_state", "sms_sender", "client_account", "client_id"];
+
+            foreach($data as $key => $value) {
+                if(!in_array($key, $required)) {
+                    return ["code" => 203, "data" => "Sorry! An unexpected parameter was parsed."];
+                }
+            }
+
+            // get teh client data
+            $additional = [];
+            $prefs = json_decode($check[0]->client_preferences);
+            $prefs->account->package = $data["account_package"];
+            $prefs->account->expiry = $data["account_expiry"];
+
+            // if the expiry datetime is greater than the current time the set the client state to active
+            if(strtotime($data["account_expiry"]) > time()) {
+                $data["client_state"] = "Active";
+            } else {
+                // set the client state to have expired
+                $data["client_state"] = "Expired"; 
+            }
+
+            // if the client id was parsed and not empty
+            if(isset($data["client_account"]) && !empty($data["client_account"])) {}
+
+            $stmt = $this->db->prepare("UPDATE clients_accounts SET client_state = ?, sms_sender = ?, client_account = ?, client_preferences = ? WHERE client_id = ? LIMIT 1");
+            $stmt->execute([$data["client_state"], $data["sms_sender"], $data["client_account"], json_encode($prefs), $data["client_id"]]);
+
+            // return a success message
+            return ["data" => "Client information was successfully updated.", "additional" => $additional];
+
+        } catch(PDOException $e) {}
+
+    }
 
     /**
      * End the Academic Term

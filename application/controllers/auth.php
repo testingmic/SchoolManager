@@ -932,14 +932,23 @@ class Auth extends Myschoolgh {
                     "next_term_starts" => "",
                     "next_term_ends" => ""
                 ],
-                "account" => (object) [
-                    "type" => $params->plan ?? "basic",
+                "account" => [
+                    "package" => "trial",
                     "activation_code" => $token,
                     "date_created" => date("Y-m-d h:iA"),
                     "expiry" => date("Y-m-d h:iA", strtotime("+1 months"))
                 ],
                 "opening_days" => $this->default_opening_days,
             ];
+
+            // get the details of the tiral account
+            $package = $this->pushQuery("*", "clients_packages", "package='Trial' LIMIT 1");
+            $package = (array) $package[0];
+            unset($package["id"]);
+
+            // merge the array information
+            $new = array_merge($preference->account, $package);
+            $preference->account = $new;
 
             // check the user password to see if it meets the requirements
             if(!passwordTest($params->password)) {
@@ -951,15 +960,15 @@ class Auth extends Myschoolgh {
             $last_id = $this->lastRowId("clients_accounts") + 1;
             
             // create a client id
-            $client_id = "MSGH".$this->append_zeros($last_id, 6);
+            $client_id = "MSGH".$this->append_zeros($last_id, 8);
 
             // create and insert a new event with the slug public holiday
             $evt_stmt = $this->db->prepare("INSERT INTO events_types SET client_id = ?, item_id = ?");
             $evt_stmt->execute([$client_id, random_string("alnum", 32)]);
 
-            // gift 20 sms messages to the client
+            // gift 10 sms messages to the client
             $sms_stmt = $this->db->prepare("INSERT INTO smsemail_balance SET client_id = ?, sms_balance = ?");
-            $sms_stmt->execute([$client_id, 20]);
+            $sms_stmt->execute([$client_id, 10]);
             
             // insert the client details
             $client_stmt = $this->db->prepare("INSERT INTO clients_accounts SET 

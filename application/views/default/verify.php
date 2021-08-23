@@ -171,6 +171,8 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
                     if(($key == "verify_account") && ($prefs->account->activation_code !== $token)) {
                       print "<div class='alert alert-danger'>Sorry! An invalid verification code was submitted for processing.</div>";
                     } else {
+                      // unset the verification code
+                      $prefs->account->activation_code = null;
      
                       // activate the user account
                       $stmt = $myschoolgh->prepare("UPDATE users SET verify_token = ?, token_expiry = ?, status = ?, user_status = ?, verified_email = ?, verified_date = now() WHERE item_id = ? AND client_id = ? LIMIT 1");

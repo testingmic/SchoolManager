@@ -243,7 +243,6 @@ class Models {
 
 		$this->permission_denied = "Sorry! You do not have the required permission to perform this action.";
         
-        // set the javascript swal notifications
         $this->swal_notification = [
             "ajax_error" => "Sorry! There is an error while processing the request.",
             "cancel_promotion_log" => "Are you sure you want to cancel this promotion log. You can perform the operation again once cancelled.",
@@ -280,6 +279,39 @@ class Models {
             "Payroll_Management" => "Payroll Management",
             "Events_Management" => "Events Management",
             "Simple_Accounting" => "Simple Accounting",
+        ];
+
+        $this->account_packages = [
+            "basic" => [
+                "students" => 200,
+                "staff" => 15,
+                "admins" => 2,
+                "sms" => 200,
+                "payment" => "activated",
+                "parent_portal" => "activated",
+                "student_portal" => "activated",
+                "pricing" => 99
+            ],
+            "standard" => [
+                "students" => 500,
+                "staff" => 50,
+                "admins" => 20,
+                "sms" => 1000,
+                "payment" => "activated",
+                "parent_portal" => "activated",
+                "student_portal" => "activated",
+                "pricing" => 220
+            ],
+            "premium" => [
+                "students" => 10000,
+                "staff" => 500,
+                "admins" => 50,
+                "sms" => 3000,
+                "payment" => "activated",
+                "parent_portal" => "activated",
+                "student_portal" => "activated",
+                "pricing" => 350
+            ]
         ];
 
     }

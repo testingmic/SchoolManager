@@ -27,6 +27,7 @@ var end_Academic_Term = (action = "begin") => {
             dangerMode: true,
         }).then((proceed) => {
             if (proceed) {
+                $.pageoverlay.show();
                 let data_array = new Array();
                 $.each($(`input[type="checkbox"][class~="data_to_import"]`), function() {
                     data_array.push($(this).val());
@@ -34,6 +35,7 @@ var end_Academic_Term = (action = "begin") => {
                 let data = data_array.join(",");
                 $(`button[id="proceed_term_closure"]`).prop("disabled", true).html("Processing Request <i class='fa fa-spin fa-spinner'></i>");
                 $.post(`${baseUrl}api/account/endacademicterm`, { data_to_import: data }).then((response) => {
+                    $.pageoverlay.hide();
                     swal({
                         text: response.data.result,
                         icon: responseCode(response.code),
@@ -50,6 +52,7 @@ var end_Academic_Term = (action = "begin") => {
                         text: swalnotice["ajax_error"],
                         icon: "error",
                     });
+                    $.pageoverlay.hide();
                 });
             }
         });

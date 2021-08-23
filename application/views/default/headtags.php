@@ -25,7 +25,7 @@ $clientName = $clientData->client_name;
 
 // confirm that the account is active
 $isActiveAccount = (bool) ($clientData->client_state === "Active");
-$isSuspendedAccount = (bool) (in_array($clientData->client_state, ["Suspended", "Expired"]));
+$isSuspendedAccount = (bool) (in_array($clientData->client_state, ["Suspended", "Expired", "Propagation"]));
 
 // get the variables for the accessobject
 $accessObject->clientId = $clientId;
@@ -289,6 +289,11 @@ load_helpers(['menu_helper']);
                     <a title="Knowledge Base" href="<?= $baseUrl ?>knowledgebase" class="dropdown-item has-icon">
                         <i class="fa fa-book-open"></i> Knowledge Base
                     </a>
+                    <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
+                        <a href="<?= $baseUrl ?>schools" class="dropdown-item has-icon">
+                            <i class="fas fa-wrench"></i> School Account
+                        </a>
+                    <?php } ?>
                     <div class="dropdown-divider"></div>
                     <a href="#" onclick="return logout()" class="dropdown-item anchor has-icon text-danger">
                         <i class="fas fa-sign-out-alt"></i> Logout

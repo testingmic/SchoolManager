@@ -1,6 +1,6 @@
         <?php
         // load some global variables
-        global $myClass, $baseUrl, $session, $userData, $current_url, $loadedJS, $auto_close_modal, $userPrefs, $announcementNotice;
+        global $myClass, $baseUrl, $session, $isSupport, $userData, $current_url, $loadedJS, $auto_close_modal, $userPrefs, $announcementNotice, $defaultClientData;
         // init indexdb variable
         $idb_init = (bool) (isset($userPrefs->idb_init->init) && (strtotime($userPrefs->idb_init->idb_next_init) < time()));
         // if the force_cold_boot=1 query parameter has been parsed then set the init to true
@@ -127,10 +127,15 @@
     <script src="<?= $baseUrl; ?>assets/js/myschoolgh.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/app.js"></script>
     <?php } else { ?>
-    <script src="<?= $baseUrl; ?>assets/js/app.js"></script>
-    <!-- <script src="<?= $baseUrl; ?>assets/js/setup.js"></script> -->
-    <script src="<?= $baseUrl; ?>assets/js/grading.js"></script>
-    <script src="<?= $baseUrl; ?>assets/js/import.js"></script>
+        <script src="<?= $baseUrl; ?>assets/js/app.js"></script>
+        <?php if(!in_array($defaultClientData->client_state, ["Expired", "Suspended"])) { ?>
+            <script src="<?= $baseUrl; ?>assets/js/setup.js"></script>
+        <?php } ?>
+        <script src="<?= $baseUrl; ?>assets/js/grading.js"></script>
+        <script src="<?= $baseUrl; ?>assets/js/import.js"></script>
+    <?php } ?>
+    <?php if($isSupport) { ?>
+        <script src="<?= $baseUrl; ?>assets/js/schools.js"></script>
     <?php } ?>
     <script src="<?= $baseUrl; ?>assets/js/notification.js"></script>
     <?php if(isset($formToShow)) { ?>

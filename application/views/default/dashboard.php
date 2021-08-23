@@ -57,11 +57,16 @@ if($isSupport) {
         
         $counter[$school->client_state] += 1;
 
+        $action = null;
+        if($school->client_id !== "MSGH0001") {
+            $action = "<button onclick='return loadPage(\"{$baseUrl}schools/{$school->client_id}\")' class='btn btn-outline-success btn-sm'><i class='fa fa-edit'></i> Manage</button>";
+        }
+
         $schools_list .= "
             <tr>
                 <td>".($key + 1)."</td>
                 <td>
-                    <span class='text-primary hover cursor text-uppercase font-bold' onclick='return loadPage(\"{$baseUrl}schools/{$school->client_id}\")'>{$school->client_name}</span>
+                    <span class='text-primary hover cursor text-uppercase font-bold' ".(!empty($action) ? "onclick='return loadPage(\"{$baseUrl}schools/{$school->client_id}\")'" : null).">{$school->client_name}</span>
                     <br> <strong>{$school->client_id}</strong>
                     <br> {$myClass->the_status_label($school->client_state)}
                 </td>
@@ -69,7 +74,7 @@ if($isSupport) {
                 <td>{$school->client_address}</td>
                 <td>{$school->client_email}</td>
                 <td>{$school->client_name}</td>
-                <td align='center'><button onclick='return loadPage(\"{$baseUrl}schools/{$school->client_id}\")' class='btn btn-outline-success btn-sm'><i class='fa fa-edit'></i> Manage</button></td>
+                <td align='center'>{$action}</td>
             </tr>";
     }
 
@@ -181,28 +186,28 @@ if($isSupport) {
 
     // confirm if the account has been suspended or expired
     if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
+        // message to share
         $response->html = '
         <div class="card">
-                <div class="card-body">
-                    <h1 class="text-center text-info text-uppercase">'.$defaultClientData->client_name.'</h1>
-                    <section class="section">
-                        <div class="container">
-                            <div class="mt-3 text-center font-18">
-                                <div class="page-inner">
-                                    <div class="page-description">
-                                        <h3>Account '.$defaultClientData->client_state.'</h3>
-                                    </div>
-                                    <div class="text-danger">
-                                        Your Account '.(in_array($defaultClientData->client_state, ["Suspended"]) ? "is Suspended" : "has Expired").'.
-                                        Please contact the <a href="#" onclick="loadPage(\''.$baseUrl.'support\')"><strong>Support Section</strong></a> to rectify the issue.
-                                    </div>
+            <div class="card-body">
+                <h1 class="text-center text-info text-uppercase">'.$defaultClientData->client_name.'</h1>
+                <section class="section">
+                    <div class="container">
+                        <div class="mt-3 text-center font-18">
+                            <div class="page-inner">
+                                <div class="page-description">
+                                    <h3>Account '.$defaultClientData->client_state.'</h3>
+                                </div>
+                                <div class="text-danger">
+                                    Your Account '.(in_array($defaultClientData->client_state, ["Suspended"]) ? "is Suspended" : "Expired on <strong>{$clientPrefs->account->expiry}</strong>").'.
+                                    Please contact the <a href="#" onclick="loadPage(\''.$baseUrl.'support\')"><strong>Support Section</strong></a> to rectify the issue.
                                 </div>
                             </div>
                         </div>
-                    </section>
-                </div>
+                    </div>
+                </section>
             </div>
-        ';
+        </div>';
     } else {
 
     // append more values for loading

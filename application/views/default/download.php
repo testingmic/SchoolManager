@@ -437,7 +437,8 @@ if(!$isSupport) {
     }
 
 }
-
+// print_r($pages_content);
+// exit;
 // load the html content
 $dompdf->loadHtml($pages_content);
 

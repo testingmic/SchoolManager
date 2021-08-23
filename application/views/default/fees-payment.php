@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultUser, $SITEURL;
+global $myClass, $defaultUser, $SITEURL, $defaultClientData;
 
 // initial variables
 $appName = config_item("site_name");
@@ -97,7 +97,12 @@ if(!$receivePayment) {
     $params->minified = "simplified";
 
     // load the students list
-    $students_list = load_class("users", "controllers")->list($params)["data"];
+    $students_list = [];
+    
+    // if the student id was parsed
+    if(isset($getObject->student_id) || isset($checkout_url)) {
+        $students_list = load_class("users", "controllers")->list($params)["data"];
+    }
 
     // scripts for the page
     $response->scripts = ["assets/js/filters.js", "assets/js/payments.js"];
@@ -243,6 +248,7 @@ if(!$receivePayment) {
                                             <div>
                                                 <button '.$disabled.' id="default_payment_button" onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay Fee</button>
                                                 <button '.$disabled.' id="momocard_payment_button" onclick="return receive_Momo_Card_Payment();" class="btn hidden btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay via MoMo/Card</button>
+                                                <input type="hidden" hidden id="client_subaccount" name="client_subaccount" disabled value="'.$defaultClientData->client_account.'">
                                             </div>
                                         </div>
                                     </div>
