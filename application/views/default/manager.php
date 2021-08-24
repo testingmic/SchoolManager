@@ -31,10 +31,11 @@ if(empty($accessObject->hasAccess("close", "settings"))) {
     // import list
     $import_list = [
         "students" => "Students",
+        "fees_allocation" => "Fees Allocation",
+        "grading_system" => "Grading System",
         "courses" => "Courses / Subjects",
         "courses_plan" => "Course / Lesson Plan",
-        "courses_resource" => "Course Resources",
-        "fees_allocation" => "Fees Allocation"
+        "courses_resource" => "Course Resources"
     ];
     
     // import div

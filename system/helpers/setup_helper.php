@@ -3,14 +3,22 @@
     <div class="card-body">
         <div class="padding-20">
             <ul class="nav nav-tabs" id="myTab2" role="tablist">
+                <?php if(in_array($client_state, ["Activated", "Pending"])) { ?>
                 <li class="nav-item">
                     <a class="nav-link active" id="profile-tab2" data-toggle="tab" href="#profile" role="tab" aria-selected="true">Account Profile Setup</a>
                 </li>
+                <?php } ?>
                 <li class="nav-item">
-                    <a class="nav-link" aria-disabled="true" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General School Setup</a>
+                    <a class="nav-link <?= !in_array($client_state, ["Activated", "Pending"]) ? "active" : null ?>" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Examination</a>
+                    <a class="nav-link" id="academic_calendar-tab2" data-toggle="tab" href="#academic_calendar" role="tab" aria-selected="true">Academic Calendar</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Grading System</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="results_structure-tab2" data-toggle="tab" href="#results_structure" role="tab" aria-selected="true">Results Structure & Settings</a>
                 </li>
                 <?php  if(in_array($client_state, ["Activated", "Pending"])) { ?>
                 <li class="nav-item">
@@ -28,11 +36,16 @@
                 </li>
             </ul>
             <div class="tab-content tab-bordered" id="myTab3Content">
+                <?php  if(in_array($client_state, ["Activated", "Pending"])) { ?>
                 <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab2">
                     <?= $formsObj->profile_form($baseUrl, $userData); ?>
                 </div>
-                <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab2">
+                <?php } ?>
+                <div class="tab-pane fade <?= !in_array($client_state, ["Activated", "Pending"]) ? "show active" : null ?>" id="general" role="tabpanel" aria-labelledby="general-tab2">
                     <?= $the_form["general"] ?? null; ?>
+                </div>
+                <div class="tab-pane fade" id="academic_calendar" role="tabpanel" aria-labelledby="academic_calendar-tab2">
+                    <?= $the_form["calendar"] ?? null; ?>
                 </div>
                 <div class="tab-pane fade" id="examination" role="tabpanel" aria-labelledby="examination-tab2">
                     <?php if($notReady) { ?>
@@ -42,6 +55,9 @@
                     <?php } else { ?>
                         <?= $the_form["examination"] ?? null; ?>
                     <?php } ?>
+                </div>                                    
+                <div class="tab-pane fade" id="results_structure" role="tabpanel" aria-labelledby="results_structure-tab2">
+                    <?= $the_form["results_structure"] ?? null; ?>
                 </div>
                 <?php  if(in_array($client_state, ["Activated", "Pending"])) { ?>
                     <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
@@ -72,6 +88,7 @@
                         <?php } ?>
                     </div>
                 <?php } ?>
+
                 <div class="tab-pane fade" id="complete" role="tabpanel" aria-labelledby="complete-tab2">
                     <?php if($notReady) { ?>
                         <div class="alert alert-warning text-center">
@@ -87,7 +104,7 @@
                             </h3>
                             <div class="text-center pt-3 mt-3 border-top">
                                 <button onclick="return complete_setup_process()" class="btn btn-outline-success">
-                                    <?= in_array($client_state, ["Activated", "Pending"]) ? "Complete Setup Process" : "Begin Academic Year" ?>
+                                    <?= in_array($client_state, ["Activated", "Pending"]) ? "Complete Setup Process" : "Begin Academic Year & Term" ?>
                                 </button>
                             </div>
                         </div>

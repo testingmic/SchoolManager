@@ -81,8 +81,6 @@ class Crons {
 
 				// update the cron status
 				$this->db->query("UPDATE cron_scheduler SET date_processed=now(), status='1' WHERE id='{$result->id}' LIMIT 1");
-
-                print "Cron Activity ended. Proceeding to the next school.\n";
 			}
             
             print "Runing Cron Activity Ended @ ".date("Y-m-d h:i:sA")."\n";
@@ -593,6 +591,63 @@ class Crons {
                 $preferences->academics->next_academic_term = "";
                 $preferences->academics->next_term_starts = "";
                 $preferences->academics->next_term_ends = "";
+                
+                // IMPORT THE GRADING SYSTEM LIST
+                if(in_array("grading_system", $data_to_import)) {
+                    print "Insert the Academic Grading System Structure\n";
+                    // GET THE ACTUAL COURSES LIST
+                    $list_grading_structure = $this->db->prepare("SELECT a.*
+                        FROM 
+                            grading_system a 
+                        WHERE 
+                            a.academic_year = ? AND a.academic_term = ? AND a.client_id = ?
+                        LIMIT 1
+                    ");
+                    $list_grading_structure->execute([$academic_year, $academic_term, $clientId]);
+                    $grading_system = $list_grading_structure->fetchAll(PDO::FETCH_ASSOC);
+
+                    // variables
+                    $grading_system_query_string = "";
+
+                    // loop through the courses list
+                    foreach($grading_system as $ikey => $course) {
+                        
+                        // get the keys
+                        $columns = array_keys($course);
+                        
+                        // append new variables
+                        $course["academic_year"] = $next_academic_year;
+                        $course["academic_term"] = $next_academic_term;
+                        $course["date_created"] = date("Y-m-d H:i:s");
+                        $course["date_updated"] = date("Y-m-d H:i:s");
+
+                        // get the new values
+                        $values = array_values($course);
+                        $last_key = count($values)-1;
+
+                        // begin the student insert string
+                        $query_string = "INSERT INTO grading_system SET ";
+                        
+                        // loop through the columns
+                        foreach($columns as $key => $column) {
+                            // exempt some data from the query
+                            if(!in_array($key, [0, $last_key])) {
+                                $query_string .= ''.$column.'="'.addslashes($values[$key]).'",';
+                            }
+                        }
+                        $grading_system_query_string .= trim($query_string, ",").";";
+                    }
+
+                    // check for empty string
+                    if(strlen($grading_system_query_string) > 20) {
+                        $this->db->query($grading_system_query_string);
+                    }
+                }
+
+                // variables
+                $courses_query_string = "";
+                $courses_plan_query_string = "";
+                $courses_resource_query_string = "";
 
                 // IMPORT THE COURSES LIST
                 if(in_array("courses", $data_to_import)) {
@@ -607,11 +662,6 @@ class Crons {
                     );
                     $list_courses->execute([$academic_year, $academic_term, $clientId, 1]);
                     $courses_list = $list_courses->fetchAll(PDO::FETCH_ASSOC);
-
-                    // variables
-                    $courses_query_string = "";
-                    $courses_plan_query_string = "";
-                    $courses_resource_query_string = "";
 
                     // loop through the courses list
                     foreach($courses_list as $ikey => $course) {
@@ -850,16 +900,19 @@ class Crons {
                     }
                     
                 }
+
                 print "Finally update the client preferences\n";
+
                 // update the clients preferences
                 $stmt = $this->db->prepare("UPDATE clients_accounts SET client_preferences = ?, client_state = ? WHERE client_id = ? LIMIT 1");
                 $stmt->execute([json_encode($preferences), "Complete", $clientId]);
 
-            }''.$column.'="'.$values[$key].'",';
+            }
 
             $this->db->commit();
 
             print "Processing of Academic Term Data was successful.\n";
+            print "Cron Activity ended. Proceeding to the next school.\n\n";
 
 		} catch(PDOException $e) {
 			$this->db->rollBack();

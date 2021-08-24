@@ -11,6 +11,8 @@ global $isActiveAccount, $clientData, $clientId, $isSchool, $isChurch, $isBookin
 <?= pageoverlay(); ?>
 <?php if(!$isActiveAccount) { ?>
     <?php
+    // refresh the client data if the account has not yet been set up fully on every refresh
+    $myClass->client_session_data($session->clientId, true);
     // if the current state is propagation
     if(($clientData->client_state === "Propagation")) { ?>
     <div class="main-content" id="pagecontent">
@@ -24,7 +26,6 @@ global $isActiveAccount, $clientData, $clientId, $isSchool, $isChurch, $isBookin
     <?php } elseif(in_array($clientData->client_state, ["Suspended", "Expired"])) {?>
         <div class="main-content" id="pagecontent"></div>
     <?php } else {
-        
         // create a new object of the forms class
         $formsObj = load_class("forms", "controllers");
 
