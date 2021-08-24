@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass;
+global $myClass, $defaultAcademics;
 
 // initial variables
 $appName = config_item("site_name");
@@ -26,6 +26,9 @@ $data_stream = 'id="data-report_stream" data-report_stream="summary_report,reven
 
 $hasFiltering = $accessObject->hasAccess("filters", "settings");
 
+// run the school academic terms
+$myClass->academic_terms();
+
 // if the class_id is not empty
 $classes_param = (object) [
     "clientId" => $clientId,
@@ -40,6 +43,9 @@ $students_list = [];
 $fees_category_list = "";
 $feesObject = load_class("fees", "controllers", $classes_param);
 $fees_category_array = $feesObject->category_list($classes_param)["data"];
+
+// set the academic year and term
+$academic_year_term = $defaultAcademics->academic_year."_".$defaultAcademics->academic_term;
 
 // fees category
 foreach($fees_category_array as $category) {
@@ -76,10 +82,25 @@ $response->html = '
                                     
                                     <div class="row" id="reports_insight">
 
-                                        <div class="col-md-4 col-12 form-group">
+                                        <div class="col-lg-3 hidden col-md-4 col-12 form-group">
+                                            <label>Academic Year & Term</label>
+                                            <select data-width="100%" class="form-control selectpicker" name="academic_year_term">
+                                                <option value="">Select Academic Year</option>';
+                                                foreach($myClass->academic_calendar_years as $year) {
+                                                    // print the academic year
+                                                    $response->html .= "<option disabled>Academic Year - {$year}</option>";
+                                                    // loop through the academic term
+                                                    foreach($myClass->school_academic_terms as $term) {
+                                                        $response->html .= "<option ".(($academic_year_term === "{$year}_{$term->name}") ? "selected" : null)." value=\"{$year}_{$term->name}\">{$year} - {$term->name}</option>";
+                                                    }
+                                                }
+                                                $response->html .= '
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-12 form-group">
                                             <label>Select Class</label>
                                             <select data-width="100%" class="form-control selectpicker" name="class_id">
-                                                <option value="null">Please Select Class</option>';
+                                                <option value="">Please Select Class</option>';
                                                 foreach($class_list as $each) {
                                                     $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
                                                 }
@@ -87,7 +108,7 @@ $response->html = '
                                             </select>
                                         </div>
 
-                                        <div class="col-md-4 col-12 form-group">
+                                        <div class="col-lg-4 col-md-4 col-12 form-group">
                                             <label>Period Filter</label>
                                             <select data-width="100%" class="form-control selectpicker" id="filter-dashboard" name="period">
                                                 <option value="">Please Select Period</option>';

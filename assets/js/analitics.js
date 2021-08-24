@@ -661,13 +661,14 @@ var loadDashboardAnalitics = (period) => {
             if (response.data.result.salary_report !== undefined) {
                 salaryReport(response.data.result.salary_report);
             }
-            setTimeout(() => {
-                $.pageoverlay.hide();
-                $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
-            }, 800);
         }
+        setTimeout(() => {
+            $.pageoverlay.hide();
+            $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
+        }, 800);
         $(`div[class~="toggle-calculator"]`).addClass("hidden");
     }).catch(() => {
+        $.pageoverlay.hide();
         $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
     });
 }
@@ -714,11 +715,12 @@ if ($(`div[id="data-report_stream"]`).length) {
     loadDashboardAnalitics(d_period);
 
     filter.on("click", function() {
-        let class_id = $(`[id="reports_insight"] select[name="class_id"]`).val(),
+        let _class_id = $(`[id="reports_insight"] select[name="class_id"]`).val(),
+            _academic_year_term = $(`[id="reports_insight"] select[name="academic_year_term"]`).val(),
             _period = $(`[id="reports_insight"] select[id="filter-dashboard"]`).val();
         $.pageoverlay.show();
-        if (class_id !== "null") {
-            _period = `${_period}&label[class_id]=${class_id}`;
+        if (_class_id !== "null") {
+            _period = `${_period}&label[class_id]=${_class_id}&label[academic_year_term]=${_academic_year_term}`;
         }
         loadDashboardAnalitics(_period);
     });

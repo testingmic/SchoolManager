@@ -3264,6 +3264,9 @@ class Forms extends Myschoolgh {
         
         // global
         global $defaultUser, $defaultClientData;
+
+        // run the school academic terms query
+        $this->academic_terms();
         
         // get the client data
         $client_data = !empty($clientId) ? $defaultClientData : (object)[];
@@ -3447,7 +3450,7 @@ class Forms extends Myschoolgh {
                     <label for="academic_term">Academic Term</label>
                     <select data-width="100%" name="general[academics][academic_term]" class="form-control selectpicker">
                         <option value="">Select Academic Term</option>';
-                            foreach($this->pushQuery("id, name, description", "academic_terms","1 AND client_id='{$clientId}'") as $each) {
+                            foreach($this->school_academic_terms as $each) {
                                 $calendar .= "<option ".(($client_data && $each->name === $prefs->academics->academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
                             }
                         $calendar .= '</select>
@@ -3497,7 +3500,7 @@ class Forms extends Myschoolgh {
                     <label for="next_academic_term">Next Academic Term</label>
                     <select data-width="100%" name="general[academics][next_academic_term]" class="form-control selectpicker">
                         <option value="">Select Academic Term</option>';
-                            foreach($this->pushQuery("id, name, description", "academic_terms","1 AND client_id='{$clientId}'") as $each) {
+                            foreach($this->school_academic_terms as $each) {
                                 $calendar .= "<option ".(($client_data && $each->name === $prefs->academics->next_academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
                             }
                         $calendar .= '</select>
@@ -3858,6 +3861,9 @@ class Forms extends Myschoolgh {
         global $defaultUser;
         $client_data = $additional->client_data;
 
+        // run the school academic terms query
+        $this->academic_terms();
+
         // run this query
         $disabled = in_array($additional->user_type, ["student"]) ? "disabled='disabled'" : null;
         $prefs = !empty($client_data) ? $client_data->client_preferences : (object)[];
@@ -3894,7 +3900,7 @@ class Forms extends Myschoolgh {
                 <div class='col-md-4 mb-2'>
                     <select data-width='100%' class='form-control selectpicker' name='academic_term' id='academic_term'>
                         <option value=''>Select Academic Term</option>";
-                            foreach($this->pushQuery("id, name, description", "academic_terms","1 AND client_id='{$clientId}'") as $each) {
+                            foreach($this->school_academic_terms as $each) {
                                 $the_form["general"] .= "<option ".(($client_data && $each->name === $prefs->academics->academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
                             }
                         $the_form["general"] .= "</select>

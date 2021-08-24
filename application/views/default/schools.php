@@ -21,7 +21,7 @@ $loggedUserId = $session->userId;
 
 // filters
 $response = (object) [];
-$response->title = "Manage School : {$appName}";
+$response->title = "Package Account Manager : {$appName}";
 
 // client id
 $client_id = $SITEURL[1] ?? $session->clientId;
@@ -82,10 +82,10 @@ if(!empty($client_id)) {
         $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1><i class="fa fa-landmark"></i> Manage School</h1>
+                <h1><i class="fa fa-landmark"></i> Package Account Manager</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item">Manage School</div>
+                    <div class="breadcrumb-item">Package Account Manager</div>
                 </div>
             </div>
             <div class="row">
@@ -146,10 +146,10 @@ if(!empty($client_id)) {
                                     <li class="nav-item">
                                         <a class="nav-link" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">ACADEMIC CALENDAR</a>
                                     </li>
+                                    '.(!$is_disabled && $isSupport ? '
                                     <li class="nav-item">
                                         <a class="nav-link" id="modify_account-tab2" data-toggle="tab" href="#modify_account" role="tab" aria-selected="true">UPDATE ACCOUNT</a>
                                     </li>
-                                    '.(!$is_disabled ? '
                                     <li class="nav-item">
                                         <a class="nav-link" id="sms-tab2" data-toggle="tab" href="#sms" role="tab" aria-selected="true">SMS</a>
                                     </li>' : null).'
@@ -175,10 +175,11 @@ if(!empty($client_id)) {
                                             </div>
                                         </div>
                                     </div>
+                                    '.($isSupport ? '
                                     <div class="tab-pane fade" id="modify_account" role="tabpanel" aria-labelledby="modify_account-tab2">
                                         <div class="row">
                                             <div class="col-lg-12 table-responsive">
-                                                '.(!$is_disabled ? '<form class="ajax-data-form" action="'.$baseUrl.'api/account/modify" method="POST" id="ajax-data-form-content">' : null).'
+                                                <form class="ajax-data-form" action="'.$baseUrl.'api/account/modify" method="POST" id="ajax-data-form-content">
                                                     <table class="table table-striped table-bordered table-md">
                                                         <tr>
                                                             <th colspan="2">MODIFY ACCOUNT</th>
@@ -236,10 +237,11 @@ if(!empty($client_id)) {
                                                             </td>
                                                         </tr>' : null).'
                                                     </table>
-                                                '.(!$is_disabled ? '</form>' : null).'
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
+                                    ' : null).'
                                     <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab2">
                                         <div class="row">
                                             <div class="col-lg-12 table-responsive">

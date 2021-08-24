@@ -6,9 +6,11 @@ class Analitics extends Myschoolgh {
     public $stream = [];
     public $final_report = [];
     private $iclient;
+    private $iclient_id;
     public $current_title = "Today";
     public $previous_title = "Yesterday";
 
+    private $period_counter;
     private $class_id_query;
     private $class_idm_query;
     private $employee_id_query;
@@ -38,6 +40,7 @@ class Analitics extends Myschoolgh {
         $academics = $client_data->client_preferences->academics;
         
         $this->iclient = $params;
+        $this->iclient_id = $client_data->client_id;
         $this->academic_term = $academics->academic_term;
         $this->academic_year = $academics->academic_year;
 
@@ -59,7 +62,8 @@ class Analitics extends Myschoolgh {
 
         /** set the date period */
         $params->period = $params->period ?? "last_14days";
-
+        $params->period = empty($params->period) ? "academic_term" : $params->period;
+        
         /** Convert the stream into an array list */
         $params->stream = isset($params->label["stream"]) && !empty($params->label["stream"]) ? $this->stringToArray($params->label["stream"]) : $this->default_stream;
         $this->info_to_stream = $params->stream;
@@ -79,14 +83,17 @@ class Analitics extends Myschoolgh {
                         "period" => $params->period
                     ]
                 ]
-            ];
-            // $usersClass->preference($user_pref);            
+            ];          
         } else {
             // bypass the query period
             $bypass = (bool) in_array("attendance_report", $params->stream);
 
             // format the date to use
-            $the_date = $this->preformat_date($params->period, $bypass);
+            if(isset($params->label["academic_year_term"])) {
+                $the_date = $this->preformat_date($params->period, $bypass, $params->label["academic_year_term"]);
+            } else {
+                $the_date = $this->preformat_date($params->period, $bypass);
+            }
         }
 
         /** If invalid date then end the query */
@@ -329,6 +336,8 @@ class Analitics extends Myschoolgh {
          * Load the fees paid count by category and get the amounts paid per category
          * Run a comparison between the current and previous record set
          */
+        $this->iclient->academic_year = $this->academic_year;
+        $this->iclient->academic_term = $this->academic_term;
         $feesClass = load_class("fees", "controllers", $this->iclient);
 
         // get the fees categories
@@ -341,6 +350,8 @@ class Analitics extends Myschoolgh {
             /** Parameter */
             $fees_param = (Object) [
                 "limit" => 100000,
+                "academic_year" => $this->academic_year,
+                "academic_term" => $this->academic_term,
                 "userId" => $params->userId,
                 "userData" => $params->userData,
                 "class_id" => $this->class_id_query,
@@ -632,7 +643,7 @@ class Analitics extends Myschoolgh {
                         }
 
                         // if the period is a year
-                        if(in_array($params->period, ["this_year", "last_6months", "last_year", "this_term"])) {
+                        if(in_array($params->period, ["this_year", "last_6months", "last_year", "this_term"]) || ($this->period_counter > 180)) {
                             $listing = "year-to-months";
                         }
                         
@@ -868,41 +879,70 @@ class Analitics extends Myschoolgh {
      * 
      * @param String $period        This is the date to process
      */
-    public function preformat_date($period, $bypass = false) {
+    public function preformat_date($period, $bypass = false, $academic_year = false) {
 
         /** initial variables */
         $today = date("Y-m-d");
         $explode = explode(":", $period);
         $explode[1] = isset($explode[1]) ? $explode[1] : date("Y-m-d");
 
-        /** Confirm that a valid date was parsed */
-        if(!$this->validDate($explode[0])) {
-            return "invalid-date";
-        }
+        // if the academic year was not parsed
+        if(!$academic_year) {
 
-        /** If the next param was set */
-        if(isset($explode[1]) && !$this->validDate($explode[1])) {
-            return "invalid-range";
-        }
+            /** Confirm that a valid date was parsed */
+            if(!$this->validDate($explode[0])) {
+                return "invalid-date";
+            }
 
-        /** Confirm that the last date is not more than today */
-        if(isset($explode[1]) && strtotime($explode[1]) > strtotime($today) && !$bypass) {
-            return "exceeds-today";
-        }
+            /** If the next param was set */
+            if(isset($explode[1]) && !$this->validDate($explode[1])) {
+                return "invalid-range";
+            }
 
-        /** confirm that the starting date is not greater than the end date */
-        if(isset($explode[1]) && strtotime($explode[0]) > strtotime($explode[1])) {
-            return "invalid-prevdate";
-        }
+            /** Confirm that the last date is not more than today */
+            if(isset($explode[1]) && strtotime($explode[1]) > strtotime($today) && !$bypass) {
+                return "exceeds-today";
+            }
 
-        /** Confirm valid dates */
-        if(!preg_match("/^[0-9-]+$/", $explode[0]) || !preg_match("/^[0-9-]+$/", $explode[1])) {
-            return "invalid-range";
+            /** confirm that the starting date is not greater than the end date */
+            if(isset($explode[1]) && strtotime($explode[0]) > strtotime($explode[1])) {
+                return "invalid-prevdate";
+            }
+
+            /** Confirm valid dates */
+            if(!preg_match("/^[0-9-]+$/", $explode[0]) || !preg_match("/^[0-9-]+$/", $explode[1])) {
+                return "invalid-range";
+            }
+        } else {
+            // if the academic year and date was parsed
+            $c_item = explode("_", $academic_year);
+            $c_year = $c_item[0];
+            $c_term = $c_item[1] ?? null;
+
+            // get the record
+            $c_data = $this->pushQuery("year_starts, year_ends, term_starts, term_ends", "clients_terminal_log", 
+                "academic_year='{$c_year}' ".(!empty($c_term) ? "AND academic_term='{$c_term}'" : null)." 
+                AND client_id='{$this->iclient_id}' LIMIT 1");
+            
+            // if no academic record was found
+            if(empty($c_data)) {
+                return "invalid-date";
+            }
+
+            $explode[0] = empty($c_term) ? $c_data[0]->year_starts : $c_data[0]->term_starts;
+            $explode[1] = empty($c_term) ? $c_data[0]->year_ends : $c_data[0]->term_ends;
+
+            // set the academic year and term
+            $this->academic_year = $c_year;
+            $this->academic_term = $c_term;
         }
 
         /** Check the days difference */
         $days_list = $this->listDays($explode[0], $explode[1]);
         $count = count($days_list);
+
+        // set the period counter
+        $this->period_counter = $count;
 
         /** ensure that the days count does not exceed 90 days */
         if($count > 366) {
@@ -915,6 +955,12 @@ class Analitics extends Myschoolgh {
             $group = "MONTH";
             $format = "F";
         }
+
+        // if the count is more than 180 then group by month
+        if($count > 180) {
+            $group = "MONTH";
+            $format = "F";
+        } 
         
         $this->start_date = $days_list[0];
         $this->end_date = end($days_list);
@@ -936,7 +982,7 @@ class Analitics extends Myschoolgh {
      * 
      * @return This     $this->start_date, $this->end_date;
      */
-    public function format_date($datePeriod = "this_week") {
+    public function format_date($datePeriod = "this_week", $clientId = null) {
 
         // Check Sales Period
         switch ($datePeriod) {

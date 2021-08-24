@@ -334,7 +334,7 @@ class Crons {
 		// load client data
 		$client_data = $this->client_data($clientId);
 		$original_client = $client_data;
-
+        
 		try {
 
             print "Inside the End Academic Term Handler.\n";
@@ -566,14 +566,36 @@ class Crons {
                 }
 
                 // new query string for a school
-                $update_query = $this->db->prepare("UPDATE clients_terminal_log SET fees_log = ?, fees_category_log = ? WHERE client_id = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
-                $insert_query = $this->db->prepare("INSERT INTO clients_terminal_log SET client_id = ?, fees_log = ?, fees_category_log = ?, academic_year = ?, academic_term = ?");
+                $update_query = $this->db->prepare("UPDATE clients_terminal_log SET fees_log = ?, fees_category_log = ?,
+                    year_starts = ?, year_ends = ?, term_starts = ?, term_ends =?, settings = ?
+                    WHERE client_id = ? AND academic_year = ? AND academic_term = ? LIMIT 1
+                ");
+                $insert_query = $this->db->prepare("INSERT INTO clients_terminal_log SET client_id = ?, fees_log = ?, 
+                    fees_category_log = ?, academic_year = ?, academic_term = ?, year_starts = ?, year_ends = ?,
+                    term_starts = ?, term_ends =?, settings = ?
+                ");
 
                 // confirm if the school fees log already exists
                 if($this->client_fees_history_log_exist($clientId, $academic_year, $academic_term)) {
-                    $update_query->execute([json_encode($school_fees_log), json_encode($fees_category_log), $clientId, $academic_year, $academic_term]);
+                    $update_query->execute([
+                        json_encode($school_fees_log), json_encode($fees_category_log), 
+                        $preferences->academics->year_starts,
+                        $preferences->academics->year_ends,
+                        $preferences->academics->term_starts,
+                        $preferences->academics->term_ends, 
+                        json_encode($original_client->client_preferences),
+                        $clientId, $academic_year, $academic_term
+                    ]);
                 } else {
-                    $insert_query->execute([$clientId, json_encode($school_fees_log), json_encode($fees_category_log), $academic_year, $academic_term]);
+                    $insert_query->execute([
+                        $clientId, json_encode($school_fees_log), json_encode($fees_category_log), 
+                        $academic_year, $academic_term,
+                        $preferences->academics->year_starts,
+                        $preferences->academics->year_ends,
+                        $preferences->academics->term_starts,
+                        $preferences->academics->term_ends,
+                        json_encode($original_client->client_preferences)
+                    ]);
                 }
 
                 // set the new term in the clients data table

@@ -21,6 +21,7 @@ class Myschoolgh extends Models {
     public $end_date;
 	public $client_data;
 	public $birthday_days_interval;
+	public $school_academic_terms = [];
 	public $academic_calendar_years = [];
 	public $pk_public_key = "pk_test_0b00163f9532f2e6b27819fa20127b8bd4e2c260";
 	public $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
@@ -922,13 +923,31 @@ class Myschoolgh extends Models {
     }
 
 	/**
+	 * Get the School Academic Terms
+	 * 
+	 * @param String $clientId
+	 * 
+	 * @return Object
+	 */
+	public function academic_terms($clientId = null) {
+
+		// set the client id
+		$clientId = !empty($clientId) ? $clientId : (!empty($this->clientId) ? $this->clientId : $this->session->clientId);
+
+		// get the schools academic years
+		$this->school_academic_terms = $this->pushQuery("id, name, description", "academic_terms","1 AND client_id = '{$clientId}' LIMIT 100");
+
+		return $this;
+	}
+
+	/**
 	 * Construct the Academic Years to Load
 	 * 
 	 * @return Array
 	 */
 	public function academic_years($clientId = null) {
 		/** Set the Parameters */
-		$previous_year = 2017;
+		$previous_year = 2020;
 		$next_years = date("Y") + 2;
 		
 		/** Loop through the list */

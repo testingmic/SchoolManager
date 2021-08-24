@@ -280,7 +280,7 @@ load_helpers(['menu_helper']);
                             <i class="fas fa-key"></i> Password Manager
                         </a>
                         <?php } ?>
-                        <?php if($accessObject->hasAccess("close", "settings") && !$isSupport) { ?>
+                        <?php if($accessObject->hasAccess("close", "settings") && !$isSupport && $defaultUser->appPrefs->termEnded) { ?>
                         <a href="<?= $baseUrl ?>manager" class="dropdown-item has-icon">
                             <i class="fas fa-bolt"></i> <span class="mr-3">Manage Calendar</span> <?= $endPermission && $defaultUser->appPrefs->termEnded ? '<span class="notification beep"></span>' : null ?>
                         </a>
