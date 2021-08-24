@@ -1,6 +1,6 @@
 <?php
 // global variables
-global $usersClass, $accessObject, $myClass, $isSupport, $defaultClientData, $clientPrefs, $isParent;
+global $usersClass, $accessObject, $myClass, $isSupport, $defaultClientData, $clientPrefs, $isParent, $defaultUser;
 
 // base url
 $baseUrl = config_item("base_url");
@@ -32,7 +32,7 @@ $accessObject->clientId = $clientId;
 $accessObject->userId = $loggedUserId;
 $accessObject->userPermits = $userData->user_permissions;
 
-$userPrefs = $userData->preferences;
+$userPrefs = (object) [];
 $userPrefs->userId = $loggedUserId;
 $userPrefs->user_image = $userData->image;
 

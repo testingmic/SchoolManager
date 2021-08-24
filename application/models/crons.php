@@ -478,34 +478,6 @@ class Crons {
 
     }
 
-	/**
-	 * Fees History Log Check
-	 * 
-	 * @param String $studentId
-	 * @param String $academic_year
-	 * @param String $academic_term
-	 * @param String $type		default(student, school)
-	 * 
-	 * @return Bool
-	 */
-	private function fees_history_log_exist($studentId, $academic_year, $academic_term, $type = "student") {
-
-		try {
-
-			// set the field
-			$field = ($type == "student") ? "student_id" : "client_id";
-
-			// prepare and execute the statement
-			$stmt = $this->db->prepare("SELECT id FROM clients_terminal_log WHERE {$field} = ? AND academic_year = ? AND academic_term = ? AND log_type = ? LIMIT 1");
-			$stmt->execute([$studentId, $academic_year, $academic_term, $type]);
-
-			return $stmt->rowCount();
-
-		} catch(PDOException $e) {
-			return false;
-		}
-	}
-
     /**
 	 * Create a "Random" String
 	 *
