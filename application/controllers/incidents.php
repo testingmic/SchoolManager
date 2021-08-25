@@ -134,7 +134,7 @@ class Incidents extends Myschoolgh {
                 ".(isset($params->reported_by) ? ", reported_by = '{$params->reported_by}'" : null)."
                 ".(isset($params->location) ? ", location = '{$params->location}'" : null)."
                 ".(isset($params->user_id) ? ", user_id = '{$params->user_id}'" : null)."
-                ".(isset($user_role) ? ", user_role = '{$params->user_role}'" : null)."
+                ".(isset($user_role) ? ", user_role = '{$user_role}'" : null)."
                 ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
@@ -360,7 +360,7 @@ class Incidents extends Myschoolgh {
             $start++;
 
             // wipe the message
-            $message = isset($incident->description) ? htmlspecialchars_decode($incident->description) : null;
+            $message = isset($incident->description) ? $incident->description : null;
 
             // load the file attachments
             $attachments = "";
@@ -369,7 +369,7 @@ class Incidents extends Myschoolgh {
             if(!empty($incident->attachment)) {
                 $attached = $incident->attachment;
                 if(!empty($attached)) {
-                    $attachments = $formsObj->list_attachments($attached->files, $params->userId, "col-lg-6");
+                    $attachments = $formsObj->list_attachments($attached->files, $params->userId, "width_250 float_left");
                 }
             }
 
@@ -384,6 +384,7 @@ class Incidents extends Myschoolgh {
             // append to the content
             $html_content .= "
             <table style=\"border: 1px solid #dee2e6;\" width=\"100%\" cellpadding=\"5px\">
+            <tbody>
             <tr>
                 <td colspan='2'>
                     <div style='border-bottom:solid #ccc 1px; padding-bottom:10px; margin-bottom:10px;'>
@@ -420,15 +421,17 @@ class Incidents extends Myschoolgh {
                     <div style='border-top:solid #ccc 1px; padding-top:10px; margin-top:10px;'>{$message}</div>
                     ".(isset($attached) && !empty($attached->files) ? "
                         <div style='border-top:solid #ccc 1px; padding-top:10px; margin-top:10px;'><h4>ATTACHMENTS</h4></div>
-                        <div class='col-md-12'>{$attachments}</div>" : ""
-                    )."
-                    ".(!empty($followups) ? "
-                        <div style='border-top:solid #ccc 1px; padding-top:10px; margin-top:10px;'><h4 style=\"margin-top:0px;margin-bottom:10px;\">FOLLOW UPS</h4></div>
-                        <div class='col-md-12'>{$followups}</div>" : ""
+                        <div></div>" : ""
                     )."                        
                 </td>
             </tr>
-            </table>";
+            <tbody>
+            </table>
+            ".(!empty($followups) ? "
+                <div class=\"page_break\"></div>
+                <div style='border-top:solid #ccc 1px; padding-top:10px; margin-top:10px;'><h4 style=\"margin-top:0px;margin-bottom:10px;\">FOLLOW UPS</h4></div>
+                <div>{$followups}</div>\n" : ""
+            )."";
         
             $html_content .= $count !== $start ? "\n<div class=\"page_break\"></div>" : null;
 
@@ -452,7 +455,7 @@ class Incidents extends Myschoolgh {
         
         /** Initializing */
         $prev_date = null;
-        $html_content = "<table style=\"border: 1px solid #dee2e6;\" width=\"100%\" cellpadding=\"5px\">";
+        $html_content = "<table border='1' style=\"border: 1px solid #dee2e6;\" width=\"100%\" cellpadding=\"5px\">";
         $followups_list = "";
 
         /** Loop through the followups */
@@ -464,7 +467,7 @@ class Incidents extends Myschoolgh {
 
             /** If the previous date is not the same as the current date */
             if (!$prev_date || $prev_date !== $raw_date) {
-                $followups_list .= "<tr><td colspan=\"2\">{$clean_date}</td></tr>";
+                $followups_list .= "<tr><td colspan=\"2\">{$clean_date}</td></tr>\n";
             }
             $followups_list .= $this->followup_thread($followup);
 
@@ -474,7 +477,7 @@ class Incidents extends Myschoolgh {
 
         }
 
-        $html_content .= !empty($followups_list) ? $followups_list : "<tr><td>No followup message available.</td></tr>";
+        $html_content .= !empty($followups_list) ? $followups_list : "<tr><td>No followup message available.</td></tr>\n";
         $html_content .= "</table>";
         
         return $html_content;

@@ -30,11 +30,11 @@ class Forms extends Myschoolgh {
         $this->thisUser = $params->userData;
         $this->hasit->userId = $params->userData->user_id;
         $this->hasit->userPermits = $params->userData->user_permissions;
-        $this->userPrefs = $params->userData->preferences;
+        $this->userPrefs = (object) [];
         $this_user_id = $params->userData->user_id;
 
         // set the user's default text edit if not already set
-        $this->userPrefs->text_editor = isset($this->userPrefs->text_editor) ? $this->userPrefs->text_editor : "trix";
+        $this->userPrefs->text_editor = "trix";
 
         /** Test Module Variable */
         if(!isset($params->module)) {
@@ -1489,7 +1489,7 @@ class Forms extends Myschoolgh {
                             <label for=\"assigned_to\">Assigned To</label>
                             <select data-width=\"100%\" name=\"assigned_to\" id=\"assigned_to\" class=\"form-control selectpicker\">
                                 <option value=\"null\">Select User</option>";
-                                foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('employee','teacher') AND status='1' AND client_id='{$params->clientId}'") as $each) {
+                                foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('employee','teacher','admin','accountant') AND status='1' AND client_id='{$params->clientId}'") as $each) {
                                     $html_content .= "<option ".(($title && ($each->item_id == $params->data->assigned_to) || (!$title && ($each->item_id == $params->userId))) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                                 }
                             $html_content .= "</select>
@@ -1563,7 +1563,7 @@ class Forms extends Myschoolgh {
                 <div class=\"card-header pb-0 mb-0\">
                     <div class=\"d-flex align-items-center justify-content-between\">
                         <div class=\"d-flex align-items-center\">
-                            <img class=\"img-xs rounded-circle\" src=\"{$this->baseUrl}{$data->created_by_information->image}\" alt=\"\">
+                            <img width=\"40px\" class=\"img-xs rounded-circle\" src=\"{$this->baseUrl}{$data->created_by_information->image}\" alt=\"\">
                             <div class=\"ml-2\">
                                 <p class=\"cursor underline m-0\" title=\"Click to view summary information about {$data->created_by_information->name}\" onclick=\"return user_basic_information('{$data->created_by}')\" data-id=\"{$data->created_by}\">{$data->created_by_information->name}</p>
                                 <p title=\"{$data->date_created}\" class=\"tx-11 mb-2 replies-timestamp text-muted\">{$data->time_ago}</p>

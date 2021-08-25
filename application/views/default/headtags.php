@@ -291,7 +291,7 @@ load_helpers(['menu_helper']);
                     </a>
                     <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
                         <a href="<?= $baseUrl ?>schools" class="dropdown-item has-icon">
-                            <i class="fas fa-wrench"></i> School Account
+                            <i class="fas fa-wrench"></i> Account Setup
                         </a>
                     <?php } ?>
                     <div class="dropdown-divider"></div>

@@ -91,7 +91,5 @@ removeRow();
 
 $(`input[data-auto_config="email"]`).on("input", function() {
     let value = $(this).val();
-    $(`input[data-auto_config="username"]`)
-        .val(value.split("@")[0]);
-        // .attr("readonly", true);
+    $(`input[data-auto_config="username"]`).val(value.split("@")[0]);
 });

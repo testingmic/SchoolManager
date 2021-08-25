@@ -162,14 +162,12 @@ if(!empty($user_id)) {
                             </div>" : null
                         )."
                         <div class=\"pl-2 mb-1 mt-2\">
-                            <div class=\"d-flex p-2 justify-content-between\">
-                                ".($updateIncident && $isActive ? "
-                                    <div>
-                                        <button onclick=\"return load_quick_form('incident_log_followup_form','{$each->user_id}_{$each->item_id}');\" class=\"btn mb-1 btn-sm btn-outline-warning\" type=\"button\"><i class=\"fa fa-list\"></i> Followups</button>
-                                    </div>" : "<div>&nbsp;</div>"
-                                )."
-                                <div>{$buttons}</div>
-                            </div>
+                            ".($updateIncident && $isActive ? "
+                                <div class=\"text-center border-bottom pb-2 mb-2\">
+                                    <button onclick=\"return load_quick_form('incident_log_followup_form','{$each->user_id}_{$each->item_id}');\" class=\"btn mb-1 btn-sm btn-outline-warning\" type=\"button\"><i class=\"fa fa-list\"></i> Followups</button>
+                                </div>" : "<div>&nbsp;</div>"
+                            )."
+                            <div class=\"text-center\">{$buttons}</div>
                         </div>
                         <div class=\"card-footer pr-2 pb-2 pl-2 m-0 pt-1 border-top\">
                             <div class=\"d-flex justify-content-between\">
@@ -395,16 +393,16 @@ if(!empty($user_id)) {
                 <div class="card">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Other Information</a>
-                    </li>
                     '.($viewAllocation ? 
                     '<li class="nav-item">
-                        <a class="nav-link" id="fees-tab2" data-toggle="tab" href="#fees" role="tab" aria-selected="true">Student Bill</a>
+                        <a class="nav-link active" id="fees-tab2" data-toggle="tab" href="#fees" role="tab" aria-selected="true">Student Bill</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab" aria-selected="true">Payments History</a>
                     </li>' : '').'
+                    <li class="nav-item">
+                        <a class="nav-link '.(!$viewAllocation ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab" aria-selected="true">Other Information</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab" aria-selected="true">Timetable</a>
                     </li>
@@ -415,7 +413,7 @@ if(!empty($user_id)) {
                     $response->html .= '
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
-                        <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
+                        <div class="tab-pane fade '.(!$viewAllocation ? "show active" : null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
                             '.($data->description ? "
                                 <div class='mb-3'>
                                     <div class='card-body p-2 pl-0'>
@@ -446,7 +444,7 @@ if(!empty($user_id)) {
                             '.$guardian.'
                         </div>
                         '.($viewAllocation ? 
-                        '<div class="tab-pane fade" id="fees" role="tabpanel" aria-labelledby="fees-tab2">
+                        '<div class="tab-pane fade show active" id="fees" role="tabpanel" aria-labelledby="fees-tab2">
                             <div class="row mb-3 pb-2 border-bottom">
                                 <div class="col-md-4"><h5>FEES ALLOCATION</h5></div>
                                 <div class="col-md-8 text-right">

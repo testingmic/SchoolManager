@@ -59,6 +59,8 @@ if(!empty($client_id)) {
         $account = "";
         $academics = "";
         $analitics = "";
+        $features_list = "";
+
         if(isset($clientPref->academics)) {
             foreach($clientPref->academics as $key => $value) {
                 $item = ucwords(str_ireplace("_", " ", $key));
@@ -77,6 +79,10 @@ if(!empty($client_id)) {
                 $account .= "<tr><td class='text-uppercase' width='40%'><strong>{$key}:</strong></td><td class='font-17'>".ucwords($value)."</td></tr>";
             }
         }
+
+        // import list
+        $features_list = "";
+        $features_array = $myClass->features_list;
 
         // set the html string
         $response->html = '
@@ -153,6 +159,9 @@ if(!empty($client_id)) {
                                     <li class="nav-item">
                                         <a class="nav-link" id="sms-tab2" data-toggle="tab" href="#sms" role="tab" aria-selected="true">SMS</a>
                                     </li>' : null).'
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="features-tab2" data-toggle="tab" href="#features" role="tab" aria-selected="true">FEATURES</a>
+                                    </li>
                                 </ul>
                                 <div class="tab-content tab-bordered" id="myTab3Content">
                                     <div class="tab-pane fade show active" id="account" role="tabpanel" aria-labelledby="account-tab2">
@@ -280,6 +289,18 @@ if(!empty($client_id)) {
                                             </div>
                                         </div>
                                     </div>' : null).'
+                                    <div class="tab-pane fade" id="features" role="tabpanel" aria-labelledby="features-tab2">
+                                        <div class="row">
+                                            <div class="col-lg-12 table-responsive">
+                                                <table class="table table-striped table-bordered table-md">
+                                                    <tr>
+                                                        <th colspan="2">ACCOUNT FEATURES</th>
+                                                    </tr>
+                                                    '.$features_list.'
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

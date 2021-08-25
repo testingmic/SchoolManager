@@ -281,37 +281,12 @@ class Models {
             "Simple_Accounting" => "Simple Accounting",
         ];
 
-        $this->account_packages = [
-            "basic" => [
-                "students" => 200,
-                "staff" => 15,
-                "admins" => 2,
-                "sms" => 200,
-                "payment" => "activated",
-                "parent_portal" => "activated",
-                "student_portal" => "activated",
-                "pricing" => 99
-            ],
-            "standard" => [
-                "students" => 500,
-                "staff" => 50,
-                "admins" => 20,
-                "sms" => 1000,
-                "payment" => "activated",
-                "parent_portal" => "activated",
-                "student_portal" => "activated",
-                "pricing" => 220
-            ],
-            "premium" => [
-                "students" => 10000,
-                "staff" => 500,
-                "admins" => 50,
-                "sms" => 3000,
-                "payment" => "activated",
-                "parent_portal" => "activated",
-                "student_portal" => "activated",
-                "pricing" => 350
-            ]
+        $this->features_list = [
+            "library" => "Library Management",
+            "e_learning" => "E-Learning",
+            "class_assessment" => "Online Class Assessment",
+            "payroll_manager" => "Payroll Manager",
+            "live_chat" => "Live Chat",
         ];
 
     }

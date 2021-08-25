@@ -59,7 +59,7 @@ foreach($item_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='#' title='Click to delete this record' onclick='return delete_record(\"{$each->item_id}\", \"incident\");' class='btn mb-1 btn-sm btn-outline-danger'><i class='fa fa-trash'></i> </a>";
     }
 
-    $action .= "&nbsp;<a target='_blank' href='{$baseUrl}download/incident?incident_id={$each->item_id}' title='Click to download this incident' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-download'></i> </a>";
+    // $action .= "&nbsp;<a target='_blank' href='{$baseUrl}download/incident?incident_id={$each->item_id}' title='Click to download this incident' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-download'></i> </a>";
     
     $incidents .= "<tr data-row_id=\"{$each->id}\">";
     $incidents .= "<td>".($key+1)."</td>";

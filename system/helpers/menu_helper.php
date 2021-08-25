@@ -41,18 +41,6 @@
         </ul>
     </li>
     <?php } ?>
-    
-    <?php if($isAdmin) { ?>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-cog"></i><span>Bulk Action</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>assign-class">Assign Class</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>assign-username_password">Login Credentials</a></li>
-            <!-- <li><a class="nav-link" href="<?= $baseUrl ?>assign-section">Assign Section</a></li> -->
-        </ul>
-    </li>
-    <?php } ?>
-
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Staff</span></a>
         <ul class="dropdown-menu">
@@ -73,6 +61,16 @@
     </li>
     <?php } ?>
     <?php incidents_menu(); ?>
+    <?php if($isAdmin) { ?>
+    <li class="dropdown">
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-cog"></i><span>Bulk Action</span></a>
+        <ul class="dropdown-menu">
+            <li><a class="nav-link" href="<?= $baseUrl ?>assign-class">Assign Class</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>assign-username_password">Login Credentials</a></li>
+            <!-- <li><a class="nav-link" href="<?= $baseUrl ?>assign-section">Assign Section</a></li> -->
+        </ul>
+    </li>
+    <?php } ?>
     <?php if($accessObject->hasAccess("view", "class")) { ?>
     <li class="menu-header">Academics</li>
     <li class="dropdown">

@@ -179,11 +179,17 @@ if(!$receivePayment) {
                                     $response->html .= '
                                     </select>
                                 </div>
-
-                                <div class="form-group text-right mb-0 '.($category_id || $class_id ? null : 'hidden').'" id="make_payment_button">
-                                    <button '.$search_disabled.' onclick="return load_Pay_Fees_Form()" class="btn btn-outline-success">Load Form</button>
+                                <div class="row">
+                                    <div class="col-sm-6 mb-1">
+                                        <button class="btn btn-dark" onclick="return loadPage(\''.$baseUrl.'update-student/'.(!empty($getObject->student_id) ? $getObject->student_id : $student_id).'\');">
+                                            <i class="fa fa-arrow-circle-left"></i> Go Back</button>
+                                    </div>
+                                    <div class="col-sm-6 text-right mb-1">
+                                        <div class="form-group mb-0 '.($category_id || $class_id ? null : 'hidden').'" id="make_payment_button">
+                                            <button '.$search_disabled.' onclick="return load_Pay_Fees_Form()" class="btn btn-outline-success">Load Form</button>
+                                        </div>
+                                    </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>

@@ -1061,7 +1061,7 @@ var format_followup_thread = (data) => {
             <div class="card-header pb-0 mb-0">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center">
-                        <img class="img-xs rounded-circle" src="${baseUrl}${data.created_by_information.image}" alt="">
+                        <img width="40px" class="img-xs rounded-circle" src="${baseUrl}${data.created_by_information.image}" alt="">
                         <div class="ml-2">
                             <p class="cursor underline m-0" title="Click to view summary information about ${data.created_by_information.name}" onclick="return user_basic_information('${data.created_by}')" data-id="${data.created_by}">${data.created_by_information.name}</p>
                             <p title="${data.date_created}" class="tx-11 mb-2 replies-timestamp text-muted">${data.time_ago}</p>

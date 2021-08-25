@@ -1121,8 +1121,8 @@ class Users extends Myschoolgh {
 				
 				".(isset($params->relationship) ? ", relationship='{$params->relationship}'" : null)."
 
-				".(isset($params->academic_term) ? ", academic_term='{$params->academic_term}'" : null)."
-				".(isset($params->academic_year) ? ", academic_year='{$params->academic_year}'" : null)."
+				".(isset($params->enrolment_academic_year) ? ", enrolment_academic_year='{$params->enrolment_academic_year}'" : null)."
+				".(isset($params->enrolment_academic_term) ? ", enrolment_academic_term='{$params->enrolment_academic_term}'" : null)."
 
 				".(isset($params->status) ? ", status='{$params->status}'" : null)."
 				".(isset($encrypt_password) ? ", password='{$encrypt_password}'" : null)."
@@ -1399,13 +1399,9 @@ class Users extends Myschoolgh {
 				$this->remove_all_user_courses($params);
 			}
 
-			// append academic year and term if a student
-			$append_query = ($params->user_type == "student") ? "AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}'" : null;
-
 			// insert the user information
 			$stmt = $this->db->prepare("
 				UPDATE users SET last_updated = now(), course_ids = ?
-				".(!empty($params->clientId) ? ", client_id='{$params->clientId}'" : null)."
 				".(isset($params->firstname) ? ", firstname='{$params->firstname}'" : null)."
 				".(isset($params->lastname) ? ", lastname='{$params->lastname}'" : null)."
 				".(isset($params->othername) ? ", othername='{$params->othername}'" : null)."
@@ -1446,11 +1442,11 @@ class Users extends Myschoolgh {
 				".(isset($params->city) ? ", city='{$params->city}'" : null)."
 				".(isset($params->date_of_birth) ? ", date_of_birth='{$params->date_of_birth}'" : null)."
 				
-				WHERE item_id = ? {$append_query} LIMIT 1
+				WHERE item_id = ? AND client_id = ? LIMIT 1
 			");
 
 			// execute the insert user data
-			$stmt->execute([json_encode($course_ids), $params->user_id]);
+			$stmt->execute([json_encode($course_ids), $params->user_id, $params->clientId]);
 
 			$guardian_ids = [];
 			$theClientData = !empty($this->iclient) ? $this->iclient : $this->client_data($params->clientId);
