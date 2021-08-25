@@ -643,7 +643,7 @@ if($isSupport) {
                     <div class="row">
                         <div class="col-md-12">
                             <div class="card">
-                                <div class="card-body pb-2" align="center">
+                                <div class="card-body pl-2 pr-2 pb-2" align="center">
                                     <p class="font-16 p-0 m-0 text-primary">Academic Year</p>
                                     <h5 class="mt-2 pt-0">'.$clientPrefs->academics->academic_year.'</h5>
                                     <span class="font-16 font-bold">

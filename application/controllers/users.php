@@ -267,7 +267,10 @@ class Users extends Myschoolgh {
 						SELECT SUM(p.balance) FROM fees_payments p 
 						WHERE p.student_id = a.item_id AND p.exempted = '0' 
 							AND p.academic_year = a.academic_year AND p.academic_term = a.academic_term
-					) AS debt {$leftJoinQuery}
+					) AS debt,
+					(
+						SELECT ar.arrears_total FROM users_arrears ar WHERE ar.student_id = a.item_id LIMIT 1
+					) AS arrears {$leftJoinQuery}
 				FROM users a 
 				LEFT JOIN country c ON c.id = a.country
 				LEFT JOIN classes cl ON cl.id = a.class_id
@@ -349,7 +352,12 @@ class Users extends Myschoolgh {
 					unset($result->user_permissions);
 				}
 
-				$result->debt = number_format($result->debt, 2);
+				// run this section if the user is a student
+				if($result->user_type === "student") {
+					$result->debt_formated = number_format($result->debt, 2);
+					$result->arrears_formated = number_format($result->arrears, 2);
+					$result->total_debt_formated = number_format(($result->debt + $result->arrears), 2);
+				}
 
 				// append the was present
 				if(isset($params->append_waspresent)) {

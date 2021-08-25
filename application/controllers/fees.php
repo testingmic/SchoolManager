@@ -471,9 +471,9 @@ class Fees extends Myschoolgh {
                 }
 
                 $student_allocation_list .= $groupBy ? null : "<td>{$student->category_name} ".(!$showStudentData ? $label : null)."</td>";
-                $student_allocation_list .= "<td width='15%'>{$student->currency} ".($groupBy ? $student->total_amount_due : $student->amount_due)."</td>";
-                $student_allocation_list .= "<td width='15%'>{$student->currency} ".($groupBy ? $student->total_amount_paid : $student->amount_paid)."</td>";
-                $student_allocation_list .= "<td width='15%'>{$student->currency} ".($groupBy ? $student->total_balance : $student->balance)."</td>";
+                $student_allocation_list .= "<td width='17%'>{$student->currency} ".($groupBy ? $student->total_amount_due : $student->amount_due)."</td>";
+                $student_allocation_list .= "<td width='17%'>{$student->currency} ".($groupBy ? $student->total_amount_paid : $student->amount_paid)."</td>";
+                $student_allocation_list .= "<td width='17%'>{$student->currency} ".($groupBy ? $student->total_balance : $student->balance)."</td>";
 
                 // confirm if the user has the permission to make payment
                 if(!empty($params->receivePayment)) {
@@ -506,6 +506,17 @@ class Fees extends Myschoolgh {
                 // increment the row count
                 $count++;
 
+            }
+            
+            if(!$groupBy) {
+                $student_allocation_list .= "<tr class='font-20 font-bold'>";
+                $student_allocation_list .= "<td></td>";
+                $student_allocation_list .= "<td></td>";
+                $student_allocation_list .= "<td>{$student->currency}".number_format($total_due, 2)."</td>";
+                $student_allocation_list .= "<td>{$student->currency}".number_format($total_paid, 2)."</td>";
+                $student_allocation_list .= "<td>{$student->currency}".number_format($total_balance, 2)."</td>";
+                $student_allocation_list .= "<td></td>";
+                $student_allocation_list .= "</tr>";
             }
 
         }
@@ -2427,7 +2438,7 @@ class Fees extends Myschoolgh {
             if(isset($params->exemptions) && is_array($params->exemptions)) {
                 // loop through the exemptions list
                 foreach($params->exemptions as $category_id => $amount) {
-                    $this->db->query("UPDATE fees_payments SET exempted = '1' WHERE category_id='{$category_id}' AND student_id='{$params->student_id}' AND client_id='{$params->clientId}' LIMIT 1");
+                    $this->db->query("UPDATE fees_payments SET exempted = '1' WHERE category_id='{$category_id}' AND student_id='{$params->student_id}' AND client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' LIMIT 1");
                 }
             }
 

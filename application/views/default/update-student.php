@@ -190,6 +190,36 @@ if(!empty($user_id)) {
             $incidents_list = "<div class='text-center font-italic'>No recorded incidents</div>";
         }
 
+        // get the student arrears
+        $student_fees_arrears = "";
+        $arrears_array = $myClass->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", "users_arrears", "student_id='{$data->user_id}' AND client_id='{$clientId}' LIMIT 1");
+
+        // if the fees arrears not empty
+        if(!empty($arrears_array)) {
+            
+            // set a new item for the arrears
+            $arrears = $arrears_array[0];
+
+            // convert the item to array
+            $arrears_details = json_decode($arrears->arrears_details, true);
+            $arrears_category = json_decode($arrears->arrears_category, true);
+            $fees_category_log = json_decode($arrears->fees_category_log, true);
+            
+            // set the arrears_total
+            if(round($arrears->arrears_total) > 0) {
+                // 
+                $student_fees_arrears .= "<table class='table table-md table-bordered'>";
+                foreach($arrears_details as $year_term => $categories) {
+                    $student_fees_arrears .= "<tr><td colspan='2'>{$year_term}</td></tr>";
+                    foreach($categories as $cat => $value) {
+                        $student_fees_arrears .= "<tr><td>{$cat}</td><td>{$value}</td></tr>";
+                    }
+                }
+                $student_fees_arrears .= "</table>";
+            }
+
+        }
+
         // guardian information
         $user_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl, $data);
 
@@ -459,6 +489,8 @@ if(!empty($user_id)) {
                                     <tbody>'.$student_allocation_list["list"].'</tbody>
                                 </table>
                             </div>
+                            <div class="col-md-4"><h5>FEES ARREARS</h5></div>
+                            '.$student_fees_arrears.'
                         </div>
                         <div class="tab-pane fade" id="fees_payments" role="tabpanel" aria-labelledby="fees_payments-tab2">
                             <div class="row mb-3">

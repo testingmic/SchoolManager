@@ -497,7 +497,7 @@ class Crons {
                 }
 
                 // get fees category
-                $fees_category = $this->db->prepare("SELECT * FROM fees_category WHERE client_id = ? AND status = ? LIMIT 30");
+                $fees_category = $this->db->prepare("SELECT `id`, `name`, `amount`, `code`, `created_by` FROM fees_category WHERE client_id = ? AND status = ? LIMIT 30");
                 $fees_category->execute([$clientId, 1]);
                 $fees_category_log = $fees_category->fetchAll(PDO::FETCH_OBJ);
 
@@ -508,15 +508,16 @@ class Crons {
                 }
 
                 // UPDATE THE STUDENTS FEES DATA FOR THE TERM
-                $update_query = $this->db->prepare("UPDATE users_arrears SET arrears_details = ?, arrears_category = ?, arrears_total = ?, last_updated = now() WHERE student_id = ? AND client_id = ? LIMIT 1");
-                $insert_query = $this->db->prepare("INSERT INTO users_arrears SET client_id = ?, student_id = ?, arrears_details = ?, arrears_category = ?, arrears_total = ?, date_created = now(), last_updated = now()");
+                $update_query = $this->db->prepare("UPDATE users_arrears SET arrears_details = ?, arrears_category = ?, arrears_total = ?, last_updated = now(), fees_category_log = ? WHERE student_id = ? AND client_id = ? LIMIT 1");
+                $insert_query = $this->db->prepare("INSERT INTO users_arrears SET client_id = ?, student_id = ?, arrears_details = ?, arrears_category = ?, arrears_total = ?, date_created = now(), last_updated = now(), fees_category_log = ?");
                 
                 $count = 0;
                 
                 print "For each student insert the fees owned by him/her\n";
-                
+
                 // Loop through the Students Fees Log List
                 foreach($students_query_array as $key => $value) {
+
                     // loop through the students fees payments list
                     foreach($value as $ikey => $ivalue) {
                         
@@ -549,7 +550,7 @@ class Crons {
                                 $new_arrears_total = array_sum($arrears_category);
 
                                 // update the existing record
-                                $update_query->execute([json_encode($arrears_details), json_encode($arrears_category), $new_arrears_total, $ikey, $clientId]);
+                                $update_query->execute([json_encode($arrears_details), json_encode($arrears_category), $new_arrears_total, json_encode($fees_category_log), $ikey, $clientId]);
                             } else {
                                 // format the data
                                 $arrears_details = [$academic_key => $owing];
@@ -557,7 +558,7 @@ class Crons {
                                 $new_arrears_total = $arrears_total;
 
                                 // insert the new record
-                                $insert_query->execute([$clientId, $ikey, json_encode($arrears_details), json_encode($arrears_category), $new_arrears_total]);
+                                $insert_query->execute([$clientId, $ikey, json_encode($arrears_details), json_encode($arrears_category), $new_arrears_total, json_encode($fees_category_log)]);
                             }
 
                             $count++;

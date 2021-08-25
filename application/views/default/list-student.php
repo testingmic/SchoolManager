@@ -73,7 +73,8 @@ foreach($student_list["data"] as $key => $each) {
     $students .= "<td>{$each->class_name}</td>";
     $students .= "<td>{$each->gender}</td>";
     $students .= "<td>{$each->department_name}</td>";
-    $students .= "<td>{$defaultCurrency} {$each->debt}</td>";
+    $students .= "<td>{$defaultCurrency} {$each->debt_formated}</td>";
+    $students .= "<td>{$defaultCurrency} {$each->arrears_formated}</td>";
     $students .= "<td align='center'>{$action}</td>";
     $students .= "</tr>";
 }
@@ -143,7 +144,8 @@ $response->html = '
                                         <th>Class</th>
                                         <th>Gender</th>
                                         <th>Department</th>
-                                        <th>Debt</th>
+                                        <th>Bill</th>
+                                        <th>Arrears</th>
                                         <th width="13%"></th>
                                     </tr>
                                 </thead>
