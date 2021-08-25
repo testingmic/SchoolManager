@@ -201,7 +201,7 @@ class Account extends Myschoolgh {
         global $defaultUser;
 
         // create a new scheduler id
-        $scheduler_id = strtoupper(random_string("alnum", 15));
+        $scheduler_id = strtoupper(random_string("alnum", 16));
 
         // assign a new variable
 		$academics = $this->iclient->client_preferences->academics;
@@ -726,7 +726,7 @@ initiateCalendar();";
             // confirm some uniqueness of the ids supplied
             $unique_id = [];
             $userPermission = null;
-            $upload_id = random_string("alnum", 12);
+            $upload_id = random_string("alnum", 16);
 
             $isUser = (bool) in_array($params->column, ["student", "staff", "parent"]);
             

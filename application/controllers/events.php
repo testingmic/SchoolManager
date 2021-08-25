@@ -93,7 +93,7 @@ class Events extends Myschoolgh {
         /** Date mechanism */
         $date = explode(":", $params->date);
         $start_date = $date[0];
-        $item_id = random_string("alnum", 32);
+        $item_id = random_string("alnum", 16);
         $end_date = isset($date[1]) ? $date[1] : $date[0];
 
         // global variables
@@ -319,7 +319,7 @@ class Events extends Myschoolgh {
     public function add_type(stdClass $params) {
 
         /** Push the record into the database */
-        $item_id = random_string("alnum", 32);
+        $item_id = random_string("alnum", 16);
 
         /** Insert */
         $stmt = $this->db->prepare("INSERT INTO events_types SET 

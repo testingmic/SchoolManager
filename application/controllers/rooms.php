@@ -94,7 +94,7 @@ class Rooms extends Myschoolgh {
 
             // init
 			$class_ids = [];
-            $item_id = random_string("alnum", 32);
+            $item_id = random_string("alnum", 16);
 
             // append
             if(isset($params->class_id)) {

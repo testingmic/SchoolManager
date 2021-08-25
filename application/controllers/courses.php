@@ -315,7 +315,7 @@ class Courses extends Myschoolgh {
 			$tutor_ids = [];
             $class_ids = [];
 
-            $item_id = random_string("alnum", 32);
+            $item_id = random_string("alnum", 16);
 
 			// append class to courses list
 			if(isset($params->class_id)) {
@@ -514,7 +514,7 @@ class Courses extends Myschoolgh {
         try {
             // get & set some default variables
             global $defaultClientData;
-            $item_id = random_string("alnum", 32);
+            $item_id = random_string("alnum", 16);
             
             // set the academic_term and the academic_year
             $params->academic_term = isset($params->academic_term) ? $params->academic_term : $defaultClientData->client_preferences->academics->academic_term;
@@ -645,7 +645,7 @@ class Courses extends Myschoolgh {
 
             // get and set some default data
             global $defaultClientData;
-            $item_id = random_string("alnum", 32);
+            $item_id = random_string("alnum", 16);
 
             if(isset($params->unit_id)) {
                 $this->session->set("thisLast_UnitId", $params->unit_id);

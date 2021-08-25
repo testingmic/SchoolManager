@@ -49,7 +49,7 @@ class Resources extends Myschoolgh {
         }
 
         // create an item id
-        $item_id = random_string("alnum", 32);
+        $item_id = random_string("alnum", 16);
 
         // clean the lesson id
         if(isset($upload->lesson_id) && is_array($upload->lesson_id)) {
@@ -486,7 +486,7 @@ class Resources extends Myschoolgh {
             return ["code" => 203, "data" => "Sorry! An invalid course id was supplied."];
         }
 
-        $item_id = random_string("alnum", 32);
+        $item_id = random_string("alnum", 16);
 
         try {
             

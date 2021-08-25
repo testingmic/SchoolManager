@@ -202,7 +202,7 @@ class Replies extends Myschoolgh {
         $params->message = addslashes($params->message);
 
         /** Create a random string */
-        $params->_item_id = random_string("alnum", 32);
+        $params->_item_id = random_string("alnum", 16);
 
         // append the attachments
         $filesObj = load_class("files", "controllers");
@@ -310,7 +310,7 @@ class Replies extends Myschoolgh {
         $params->comment = addslashes(nl2br($params->comment));
         
         /** Create a random string */
-        $params->_item_id = random_string("alnum", 32);
+        $params->_item_id = random_string("alnum", 16);
 
         /** The resource */
         $resource = $params->resource;

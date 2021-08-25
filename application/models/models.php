@@ -10,7 +10,7 @@ class Models {
     public $resource_tables;
     public $resource_parameters;
     public $permission_denied;
-    public $global_limit = 2000;
+    public $global_limit = 5000;
     public $formPreloader;
     public $sms_text_count = 155;
     public $underscores = "____";

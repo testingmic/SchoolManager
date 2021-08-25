@@ -42,13 +42,11 @@ $templates_array = $myClass->pushQuery("name, id, item_id, type, message", "smse
 $class_array_list = $myClass->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'");
         
 // get the list of all other users
-$other_users_list = $myClass->pushQuery("name, user_type, unique_id, item_id, phone_number, class_id", "users", "client_id='{$params->clientId}' AND status='1' AND user_type != 'student'");
+$other_users_list = $myClass->pushQuery("name, user_type, unique_id, item_id, phone_number, class_id", "users", "client_id='{$params->clientId}' AND status='1' AND user_type != 'student' LIMIT {$myClass->global_limit}");
 
 // get the list of only students
 $students_array_list = $myClass->pushQuery("name, user_type, unique_id, item_id, phone_number, class_id", "users", 
-    "client_id='{$params->clientId}' AND status='1' AND academic_year = '{$defaultUser->appPrefs->academics->academic_year}' AND
-    academic_term = '{$defaultUser->appPrefs->academics->academic_term}' AND user_type='student'
-");
+    "client_id='{$params->clientId}' AND status='1' AND user_type='student' LIMIT {$myClass->global_limit}");
 $users_array_list = [];
 
 // get the users list

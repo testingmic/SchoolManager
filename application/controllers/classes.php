@@ -53,20 +53,17 @@ class Classes extends Myschoolgh {
                     (
                         SELECT COUNT(*) FROM users b 
                         WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
-                        AND b.class_id = a.id  
-                        AND b.academic_term='{$params->academic_term}' AND b.academic_year='{$params->academic_year}'
+                        AND b.class_id = a.id AND b.client_id='{$params->clientId}'
                     ) AS students_count,
                     (
                         SELECT COUNT(*) FROM users b 
                         WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
-                        AND b.gender='Male' AND b.class_id = a.id 
-                        AND b.academic_term='{$params->academic_term}' AND b.academic_year='{$params->academic_year}'
+                        AND b.gender='Male' AND b.class_id = a.id AND b.client_id='{$params->clientId}'
                     ) AS students_male_count,
                     (
                         SELECT COUNT(*) FROM users b 
                         WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
-                        AND b.gender='Female' AND b.class_id = a.id 
-                        AND b.academic_term='{$params->academic_term}' AND b.academic_year='{$params->academic_year}'
+                        AND b.gender='Female' AND b.class_id = a.id AND b.client_id='{$params->clientId}'
                     ) AS students_female_count,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.class_assistant LIMIT 1) AS class_assistant_info,
@@ -168,7 +165,7 @@ class Classes extends Myschoolgh {
 
             // init
 			$room_ids = [];
-            $item_id = random_string("alnum", 32);
+            $item_id = random_string("alnum", 16);
 
             // append
 			if(isset($params->room_id)) {
@@ -366,7 +363,7 @@ class Classes extends Myschoolgh {
             // if the assign fees was parsed
             if($assignFees) {
                 // set the unique id
-                $item_id = random_string("alnum", 13);
+                $item_id = random_string("alnum", 16);
 
                 // Insert the activity into the cron_scheduler
                 $query = $this->db->prepare("INSERT INTO cron_scheduler SET `client_id` = ?, `item_id` = ?, `user_id` = ?, `cron_type` = ?, `active_date` = now(), `query` = ?, `subject` = ?");

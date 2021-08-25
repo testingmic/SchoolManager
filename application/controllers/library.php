@@ -325,7 +325,7 @@ class Library extends Myschoolgh {
 		try {
 
 			# create a new unique id
-			$item_id = random_string("alnum", 32);
+			$item_id = random_string("alnum", 16);
 
             # execute the statement
             $stmt = $this->db->prepare("
@@ -778,7 +778,7 @@ class Library extends Myschoolgh {
 		
 		try {
 
-			$item_id = random_string("alnum", 32);
+			$item_id = random_string("alnum", 16);
 			$fine = !empty($data->overdue_rate) ? $data->overdue_rate : 0;
 			$eachBookRate = !empty($eachBookRate) ? $eachBookRate : 0;
 
@@ -1173,7 +1173,7 @@ class Library extends Myschoolgh {
 	public function add_book(stdClass $params) {
 
         // generate a random string for the book
-        $item_id = random_string("alnum", 32);
+        $item_id = random_string("alnum", 16);
 		
 		$counter = $this->append_zeros(($this->itemsCount("books", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
         $code = $this->iclient->client_preferences->labels->book_label.$counter;

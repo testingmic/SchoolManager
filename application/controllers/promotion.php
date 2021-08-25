@@ -151,12 +151,17 @@ class Promotion extends Myschoolgh {
             return ["code" => 201,"data" => $this->is_required("Class")];
         }
 
+        // if the client data is parsed
+        $academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
+        $academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
+
+        // if the client data is parsed
         $params->query = "";
         $params->query .= isset($params->clientId) && !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= !empty($params->class_id) ? " AND c.item_id = '{$params->class_id}'" : null;
         $params->query .= isset($params->student_id) && !empty($params->student_id) ? " AND a.item_id = '{$params->student_id}'" : null;
-        $params->query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
-        $params->query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
+        $params->query .= !empty($academic_year) ? " AND a.academic_year='{$academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
+        $params->query .= !empty($academic_term) ? " AND a.academic_term='{$academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
 
         try {
             
@@ -167,8 +172,7 @@ class Promotion extends Myschoolgh {
                         SELECT b.is_promoted FROM promotions_log b 
                         WHERE 
                             b.student_id = a.item_id AND 
-                            a.academic_term = b.academic_term AND 
-                            a.academic_year = b.academic_year
+                            b.academic_term = '{$academic_year}' AND b.academic_year = '{$academic_term}'
                         LIMIT 1
                     ) AS is_promoted
                 FROM users a

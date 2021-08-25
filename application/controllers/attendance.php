@@ -554,15 +554,7 @@ class Attendance extends Myschoolgh {
         $bottom_data = "";
         
         $user_type = isset($params->user_type) ? $params->user_type : null;
-        
-        // unset the user id if the user type is not teacher
-        if($user_type !== "student") {
-            // set the class id to null
-            $params->class_id = null;
-            $params->academic_year = null;
-            $params->academic_term = null;
-        }
-        
+
         $class_id = isset($params->class_id) && ($params->class_id !== "null") ? $params->class_id : null;
         $the_user_type = $params->user_type == "staff" ? ["teacher","employee","admin","accountant", "staff"] : [$params->user_type];
 
@@ -959,8 +951,7 @@ class Attendance extends Myschoolgh {
 
                 // run a query for the information
                 $theQuery = $this->pushQuery("user_type, users_list", "users_attendance_log", 
-                    "log_date='{$day}' AND user_type IN ('{$user}') AND status='1' AND client_id='{$params->clientId}' 
-                    AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' {$query}");
+                    "log_date='{$day}' AND user_type IN ('{$user}') AND status='1' AND client_id='{$params->clientId}' {$query} LIMIT {$this->global_limit}");
 
                 // set a new variable for the day
                 $the_day = date("Y-m-d", strtotime($day));

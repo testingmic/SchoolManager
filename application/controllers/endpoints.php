@@ -131,7 +131,7 @@ class Endpoints extends Myschoolgh {
             }
 
             // create a new item id of 32 alphanumeric characters
-            $params->_item_id  = strtolower(random_string("alnum", 32));
+            $params->_item_id  = strtolower(random_string("alnum", 16));
 
             // insert the record
             $stmt = $this->db->prepare("

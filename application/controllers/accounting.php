@@ -93,7 +93,7 @@ class Accounting extends Myschoolgh {
             }
 
             // create an item_id
-            $item_id = random_string("alnum", 15);
+            $item_id = random_string("alnum", 16);
 
             // insert the record
             $stmt = $this->db->prepare("INSERT INTO accounts_type_head SET client_id = ?, name = ?, type = ?,
@@ -243,7 +243,7 @@ class Accounting extends Myschoolgh {
         try {
 
             // create an item_id
-            $item_id = random_string("alnum", 15);
+            $item_id = random_string("alnum", 16);
 
             // Verify the account id parsed
             $check = $this->pushQuery("id", "accounts", "client_id='{$params->clientId}' AND status='1'");
@@ -425,7 +425,7 @@ class Accounting extends Myschoolgh {
         try {
 
             // create an item_id
-            $item_id = random_string("alnum", 15);
+            $item_id = random_string("alnum", 16);
 
             // validate the account id
             $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");
@@ -553,7 +553,7 @@ class Accounting extends Myschoolgh {
         try {
 
             // create an item_id
-            $item_id = random_string("alnum", 15);
+            $item_id = random_string("alnum", 16);
 
             // validate the account id
             $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");

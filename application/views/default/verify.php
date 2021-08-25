@@ -198,7 +198,7 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
                         $user_agent = load_class('user_agent', 'libraries');
 
                         // create the reset password token
-                        $random_string = random_string("alnum", 32);
+                        $random_string = random_string("alnum", 16);
                         $request_token = random_string('alnum', mt_rand(60, 75));
 
                         // the agent

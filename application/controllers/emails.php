@@ -489,7 +489,7 @@ class Emails extends Myschoolgh {
         $scheduler = ($labels->mail_content->scheduler == "send_now") ? "send_now" : date("Y-m-d H:i:s", strtotime($labels->mail_content->scheduler));
         
         // continue processing
-        $thread_id = random_string("alnum", 32);
+        $thread_id = random_string("alnum", 16);
 
         $module = "emails";
 

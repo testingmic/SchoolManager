@@ -146,7 +146,7 @@ class Timetable extends Myschoolgh {
                 $isFound = true;
             } else {
                 // create a new timetable_id
-                $item_id = random_string("alnum", 32);
+                $item_id = random_string("alnum", 16);
                 $isFound = false;
 
                 // if the class isset

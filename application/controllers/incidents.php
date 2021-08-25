@@ -114,7 +114,7 @@ class Incidents extends Myschoolgh {
         try {
 
             // generate a unique id
-            $item_id = random_string("alnum", 32);
+            $item_id = random_string("alnum", 16);
 
             // get the user information
             if(isset($params->user_id)) {
@@ -289,7 +289,7 @@ class Incidents extends Myschoolgh {
         try {
 
             // generate a unique id
-            $item_id = random_string("alnum", 32);
+            $item_id = random_string("alnum", 16);
             
             // execute the statement
             $stmt = $this->db->prepare("

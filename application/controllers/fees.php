@@ -64,9 +64,7 @@ class Fees extends Myschoolgh {
         $filters .= isset($params->item_id) && !isset($params->payment_id) && !empty($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";
         $filters .= isset($params->query) && !empty($params->query) ? " AND {$params->query}" : "";
         $filters .= isset($params->programme_id) && !empty($params->programme_id) ? " AND a.programme_id='{$params->programme_id}'" : "";
-        $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id IN {$this->inList($params->category_id)}" : ""; 
-        $filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}' AND u.academic_year='{$params->academic_year}'" : "";
-        $filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}' AND u.academic_term='{$params->academic_term}'" : "";
+        $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id IN {$this->inList($params->category_id)}" : "";
         $filters .= isset($params->date) && !empty($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";
         $filters .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "recorded_date") : null;
 
@@ -835,7 +833,7 @@ class Fees extends Myschoolgh {
         /** Execute the prepared statement */
         return $stmt->execute([
             $params->amount, $params->amount, $params->category_id, $params->student_id, 
-            random_string("alnum", 32), $params->clientId, 
+            random_string("alnum", 16), $params->clientId, 
             $params->academic_year, $params->academic_term, $params->class_id, 
             $params->userId, $params->currency
         ]);
@@ -1356,8 +1354,7 @@ class Fees extends Myschoolgh {
                                 u.name,'|',COALESCE(u.department, 'NULL'),'|',COALESCE(u.account_balance,'0'),'|',COALESCE(u.unique_id,'0')
                             ) 
                         FROM users u 
-                        WHERE 
-                            u.academic_year = '{$academic_year}' AND u.academic_term = '{$academic_term}' AND u.item_id = a.student_id
+                        WHERE u.item_id = a.student_id LIMIT 1
                     ) as student_details,
                     (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
                     (
@@ -1625,7 +1622,7 @@ class Fees extends Myschoolgh {
                 $payment_id = random_string('alnum', 15);
 
                 // get the student name
-                $student = $this->pushQuery("name AS student_name", "users", "item_id = '{$params->student_id}' AND academic_year='{$this->academic_year}' AND academic_term='{$this->academic_term}' LIMIT 1");
+                $student = $this->pushQuery("name AS student_name", "users", "item_id = '{$params->student_id}' AND user_type='student' AND client_id = '{$params->clientId}' LIMIT 1");
                 $student_name = !empty($student) ? $student[0]->student_name : "Unknown";
 
                 // loop through the payment record
@@ -2130,9 +2127,8 @@ class Fees extends Myschoolgh {
             $studentRecord = $this->pushQuery("
                 a.class_id, a.name, a.image, a.unique_id, a.enrollment_date, a.gender, a.email, a.phone_number,
                 (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name",
-                "users a", "a.client_id='{$params->clientId}' AND 
-                a.academic_year='{$this->academic_year}' AND a.academic_term='{$this->academic_term}' 
-                AND a.item_id='{$params->student_id}' LIMIT 1");
+                "users a", "a.client_id='{$params->clientId}'
+                AND a.item_id='{$params->student_id}' AND a.user_type='student' LIMIT 1");
 
             // confirm that student id is valid
             if(empty($studentRecord)) {
@@ -2334,9 +2330,7 @@ class Fees extends Myschoolgh {
             }
 
             // student record
-            $studentRecord = $this->pushQuery("class_id", "users", "client_id='{$params->clientId}' AND 
-                academic_year='{$params->academic_year}' AND 
-                academic_term='{$params->academic_term}' AND item_id='{$params->student_id}' LIMIT 1");
+            $studentRecord = $this->pushQuery("class_id", "users", "client_id='{$params->clientId}' AND item_id='{$params->student_id}' LIMIT 1");
 
             // confirm that student id is valid
             if(empty($studentRecord)) {

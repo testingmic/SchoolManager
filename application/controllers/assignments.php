@@ -250,7 +250,7 @@ class Assignments extends Myschoolgh {
         }
 
         /** Confirm that the user is using the file attachment module */
-        $item_id = random_string("alnum", 32);
+        $item_id = random_string("alnum", 16);
         $is_attached = (bool) ($params->questions_type == "file_attachment");
 
         try {
@@ -969,7 +969,7 @@ class Assignments extends Myschoolgh {
             // insert the record if not existing
             if(!$found) {
                 // create a new unique id
-                $item_id = random_string("alnum", 32);
+                $item_id = random_string("alnum", 16);
 
                 // statement to be executed
                 $stmt = $this->db->prepare("
@@ -1661,8 +1661,7 @@ class Assignments extends Myschoolgh {
 
             // load the students list based on the class id parsed
             $users_list = $this->pushQuery("item_id, name, image, unique_id","users", 
-                "client_id='{$params->clientId}' AND class_id='{$params->class_id}' AND academic_term='{$params->academic_term}' AND
-                academic_year='{$params->academic_year}' AND user_type='student' AND user_status='Active'"
+                "client_id='{$params->clientId}' AND class_id='{$params->class_id}' AND user_type='student' AND user_status='Active' LIMIT {$this->global_limit}"
             );
 
             return [
@@ -1715,7 +1714,7 @@ class Assignments extends Myschoolgh {
         }
 
         // assigned_to
-        $item_id = isset($data["assignment_id"]) ? $data["assignment_id"] : random_string("alnum", 32);
+        $item_id = isset($data["assignment_id"]) ? $data["assignment_id"] : random_string("alnum", 16);
         $assigned_to = "selected_students";
         $students_list = $params->students_list;
         $data = $params->data;

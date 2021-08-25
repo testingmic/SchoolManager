@@ -92,7 +92,7 @@ class Auth extends Myschoolgh {
 
                                     // form the notification parameters
                                     $params = (object) [
-                                        '_item_id' => random_string("alnum", 32),
+                                        '_item_id' => random_string("alnum", 16),
                                         'user_id' => $results->user_id,
                                         'subject' => "Login Failures",
                                         'username' => $params->username,
@@ -528,7 +528,7 @@ class Auth extends Myschoolgh {
 
                         #update the table
                         $ip = $user_agent->ip_address();
-                        $random_string = random_string("alnum", 32);
+                        $random_string = random_string("alnum", 16);
                         $br = $user_agent->browser()." ".$user_agent->platform();
 
                         #deactivate all reset tokens
@@ -911,7 +911,7 @@ class Auth extends Myschoolgh {
 
             // create a token
             $user_id = "{$prefix}U".$this->append_zeros(1, 6);
-            $item_id = random_string("alnum", 32);
+            $item_id = random_string("alnum", 16);
             $token = random_string("alnum", 54);
 
             // the preferences
@@ -964,7 +964,7 @@ class Auth extends Myschoolgh {
 
             // create and insert a new event with the slug public holiday
             $evt_stmt = $this->db->prepare("INSERT INTO events_types SET client_id = ?, item_id = ?");
-            $evt_stmt->execute([$client_id, random_string("alnum", 32)]);
+            $evt_stmt->execute([$client_id, random_string("alnum", 16)]);
 
             // gift 10 sms messages to the client
             $sms_stmt = $this->db->prepare("INSERT INTO smsemail_balance SET client_id = ?, sms_balance = ?");

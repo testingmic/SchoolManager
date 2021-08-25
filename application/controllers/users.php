@@ -51,7 +51,7 @@ class Users extends Myschoolgh {
 			$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 
 			// set the columns to load
-			$params->columns = "a.client_id, a.unique_id, a.item_id AS user_id, a.name, a.academic_year, a.academic_term, a.user_type";
+			$params->columns = "a.client_id, a.unique_id, a.item_id AS user_id, a.name, a.user_type";
 			
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT {$params->columns} FROM users a
@@ -61,16 +61,7 @@ class Users extends Myschoolgh {
 
 			$data = [];
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
-
-				if(!in_array($result->user_type, ["student"]) || 
-					(
-						in_array($result->user_type, ["student"]) && 
-						$result->academic_year == $this->academic_year && 
-						$result->academic_term == $this->academic_term
-					)
-				) {
-					$data[] = $result;
-				}
+				$data[] = $result;
 			}
 
 			// return the data"Sorry! There was an error while processing the request."
@@ -136,11 +127,9 @@ class Users extends Myschoolgh {
 		}
 		
 		// bypass the academic year checker
-		if(empty($params->no_academic_year)) {
-			$params->query .= (isset($params->academic_year) && !empty($params->academic_year)) ? " AND a.academic_year='{$params->academic_year}'" : null;
-			$params->query .= (isset($params->academic_term) && !empty($params->academic_term)) ? " AND a.academic_term='{$params->academic_term}'" : null;
-		}
-
+		$params->query .= (isset($params->enrolment_academic_year) && !empty($params->enrolment_academic_year)) ? " AND a.enrolment_academic_year='{$params->enrolment_academic_year}'" : null;
+		$params->query .= (isset($params->enrolment_academic_term) && !empty($params->enrolment_academic_term)) ? " AND a.enrolment_academic_term='{$params->enrolment_academic_term}'" : null;
+		
 		// if the field is null (dont perform all these checks if minified was parsed)
 		if(!isset($params->minified) || (isset($params->minified) && isset($params->reporting))) {
 
@@ -245,6 +234,10 @@ class Users extends Myschoolgh {
 			$loadWards = isset($params->append_wards) ? true : false;
 			$noKeyLoad = !isset($params->key_data_load) ? true : false;
 			$appendClient = isset($params->append_client) ? true : false;
+
+			// if the client data is parsed
+			$academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
+			$academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
 			
 			$leftJoin = isset($params->user_payroll) ? "LEFT JOIN payslips_employees_payroll up ON up.employee_id = a.item_id" : null;
 			$leftJoinQuery = !empty($leftJoin) ? ", 
@@ -266,7 +259,7 @@ class Users extends Myschoolgh {
 					(
 						SELECT SUM(p.balance) FROM fees_payments p 
 						WHERE p.student_id = a.item_id AND p.exempted = '0' 
-							AND p.academic_year = a.academic_year AND p.academic_term = a.academic_term
+							AND p.academic_year = '{$academic_year}' AND p.academic_term = '{$academic_term}'
 					) AS debt,
 					(
 						SELECT ar.arrears_total FROM users_arrears ar WHERE ar.student_id = a.item_id LIMIT 1
@@ -284,12 +277,6 @@ class Users extends Myschoolgh {
 			$key = 0;
 			$data = [];
 			$users_group = [];
-
-			// if the client data is parsed
-			if(isset($params->client_data)) {
-				$this->academic_year = $params->client_data->client_preferences->academics->academic_year;
-    			$this->academic_term = $params->client_data->client_preferences->academics->academic_term;
-			}
 
 			// loop through the results
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
@@ -377,7 +364,7 @@ class Users extends Myschoolgh {
 				// if the message id was queried but empty then generate a new id
 				if(isset($result->msg_id) && empty($result->msg_id)) {
 					// set the new message id
-					$result->msg_id = strtoupper(random_string("alnum", 32));
+					$result->msg_id = strtoupper(random_string("alnum", 16));
 				}
 
 				if($leftJoin) {
@@ -393,10 +380,9 @@ class Users extends Myschoolgh {
 							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name, a.enrollment_date,
 							(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
 						FROM users a 
-						WHERE a.status='1' AND a.guardian_id LIKE '%{$result->user_id}%' AND 
-							a.user_type='student' AND a.academic_year = ? AND a.academic_term = ?
+						WHERE a.status='1' AND a.guardian_id LIKE '%{$result->user_id}%' AND a.user_type='student' LIMIT 10
 					");
-					$qr->execute([$this->academic_year, $this->academic_term]);
+					$qr->execute();
 					$result->wards_list = $qr->fetchAll(PDO::FETCH_ASSOC);
 					$result->wards_list_ids = array_column($result->wards_list, "student_guid");
 				}
@@ -1084,7 +1070,7 @@ class Users extends Myschoolgh {
 			$this->db->beginTransaction();
 
 			// variables
-			$params->user_id = random_string("alnum", 32);
+			$params->user_id = random_string("alnum", 16);
 
 			#set the token expiry time to 6 hours from the moment of request
 			$token = random_string("alnum", mt_rand(60, 75));
@@ -1199,7 +1185,7 @@ class Users extends Myschoolgh {
 						$othername = isset($expl[2]) ? $expl[2] : null;
 
 						// create a new random string
-						$guardian_id = random_string("alnum", 32);
+						$guardian_id = random_string("alnum", 16);
 
 						// join the names as the fullname
 						$fullname = "{$firstname} {$othername} {$lastname}";
@@ -1242,7 +1228,7 @@ class Users extends Myschoolgh {
 
 				// insert the email content to be processed by the cron job
 				$stmt = $this->db->prepare("INSERT INTO users_messaging_list SET template_type = ?, item_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?, users_id = ?");
-				$stmt->execute(['account-verify', random_string("alnum", 32), json_encode($reciepient),
+				$stmt->execute(['account-verify', random_string("alnum", 16), json_encode($reciepient),
 					$params->created_by, "[".config_item('site_name')."] Account Verification", $message, $params->user_id
 				]);
 
@@ -1490,7 +1476,7 @@ class Users extends Myschoolgh {
 						$unique_id = strtoupper($theClientData->client_preferences->labels->parent_label.$counter.date("Y"));
 
 						// create a new random string
-						$guardian_id = random_string("alnum", 32);
+						$guardian_id = random_string("alnum", 16);
 
 						// join the names as the fullname
 						$fullname = "{$firstname} {$othername} {$lastname}";
@@ -1615,7 +1601,7 @@ class Users extends Myschoolgh {
 				
 				// Notify the user that his/her account has been modified
 				$param = (object) [
-					'_item_id' => random_string("alnum", 32),
+					'_item_id' => random_string("alnum", 16),
 					'user_id' => $params->user_id,
 					'subject' => "Account Update",
 					'message' => "<strong>{$params->userData->name}</strong> updated your account information",
@@ -1700,7 +1686,7 @@ class Users extends Myschoolgh {
 				INSERT INTO users_messaging_list SET template_type = ?, item_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?, users_id = ?
 			");
 			$stmt->execute([
-				'account-verify', random_string("alnum", 32), json_encode($reciepient),
+				'account-verify', random_string("alnum", 16), json_encode($reciepient),
 				$params->user_id, "[".config_item('site_name')."] Account Verification", $message, $params->user_id
 			]);
 
@@ -1962,7 +1948,7 @@ class Users extends Myschoolgh {
 				$this->userLogs("Profile Picture", $params->user_id, $prevData, "<strong>{$params->userData->name}</strong> changed the profile picture of <strong>{$the_user[0]->name}</strong>", $params->userId, "Logged because {$params->userData->name} made the changes.");
 				// Notify the user that his/her account has been modified
 				$param = (object) [
-					'_item_id' => random_string("alnum", 32),
+					'_item_id' => random_string("alnum", 16),
 					'user_id' => $params->user_id,
 					'subject' => "Picture Update",
 					'message' => "<strong>{$params->userData->name}</strong> changed your profile picture",

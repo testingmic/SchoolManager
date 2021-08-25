@@ -617,7 +617,7 @@ class Payroll extends Myschoolgh {
             if(empty($payslip_id)) {
                 
                 /** Create new record id */
-                $item_id = random_string("alnum", 32);
+                $item_id = random_string("alnum", 16);
 
                 /** Insert the Payslip Record */
                 $stmt = $this->db->prepare("INSERT INTO payslips SET item_id = ?, client_id =?, employee_id=?, basic_salary=?, 

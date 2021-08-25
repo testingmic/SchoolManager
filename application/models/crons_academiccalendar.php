@@ -7,7 +7,7 @@ class Crons {
 	private $mailAttachment = array();
 	private $rootUrl;
 	private $clientId;
-	private $limit = 2000;
+	private $limit = 5000;
 	private $siteName = "MySchoolGH - EmmallexTech.Com";
 
 	public function __construct() {
@@ -205,7 +205,7 @@ class Crons {
 					b.name AS category_name, b.amount AS category_default_amount
 				FROM fees_payments a 
 				LEFT JOIN fees_category b ON b.id = a.category_id
-				WHERE a.student_id = ? AND a.status = ? AND a.academic_year = ? AND a.academic_term = ?
+				WHERE a.student_id = ? AND a.status = ? AND a.academic_year = ? AND a.academic_term = ? LIMIT 50
 			");
 			$stmt->execute([$studentId, 1, $academic_year, $academic_term]);
 			$result = $stmt->fetchAll(PDO::FETCH_OBJ);
@@ -377,16 +377,16 @@ class Crons {
                                 promotions_log b 
                             LEFT JOIN promotions_history c ON c.history_log_id = b.history_log_id
                             WHERE 
-                                b.academic_year = a.academic_year AND b.academic_term = a.academic_term AND 
+                                b.academic_year = ? AND b.academic_term = ? AND 
                                 a.item_id = b.student_id AND c.status='Processed'
                         ) AS is_promoted
                     FROM 
                         users a 
                     WHERE 
-                        a.academic_year = ? AND a.academic_term = ? AND a.user_type = ? AND a.user_status = ? AND a.client_id = ?
+                        a.user_type = ? AND a.user_status = ? AND a.client_id = ? AND a.status = ?
                     LIMIT {$this->limit}"
                 );
-                $list_users->execute([$academic_year, $academic_term, "student", "Active", $clientId]);
+                $list_users->execute([$academic_year, $academic_term, "student", "Active", $clientId, 1]);
                 $students_list = $list_users->fetchAll(PDO::FETCH_ASSOC);
 
                 // variables
@@ -400,42 +400,8 @@ class Crons {
                 // loop through the students list
                 foreach($students_list as $ikey => $student) {
                     
-                    // get the keys
-                    $columns = array_keys($student);
-
-                    // format the student promotion information
-                    $is_promoted = !empty($student["is_promoted"]) ? explode("_", $student["is_promoted"]) : null;
-                    
-                    // append new variables
-                    $student["class_id"] = (!empty($is_promoted) && ($is_promoted[0] == 1)) ? $is_promoted[2] : $student["class_id"];
-                    $student["academic_year"] = $next_academic_year;
-                    $student["academic_term"] = $next_academic_term;
-                    $student["enrollment_date"] = empty($student["enrollment_date"]) ? $clientDate_Created : $student["enrollment_date"];
-                    $student["date_created"] = empty($student["date_created"]) ? date("Y-m-d H:i:s") : $student["date_created"];
-                    $student["last_login"] = empty($student["last_login"]) ? date("Y-m-d H:i:s") : $student["last_login"];
-                    $student["last_password_change"] = empty($student["last_password_change"]) ? date("Y-m-d H:i:s") : $student["last_password_change"];
-                    $student["last_updated"] = empty($student["last_updated"]) ? date("Y-m-d H:i:s") : $student["last_updated"];
-                    $student["verified_date"] = !empty($student["verified_date"]) ? $student["verified_date"] : date("Y-m-d H:i:s");
-                    $student["last_visited_page"] = "{{APPURL}}dashboard";
-
-                    // get the new values
-                    $values = array_values($student);
-                    $last_key = count($values)-1;
-
                     // get the finances owed by the user
                     $student_fees = $this->student_fees($student["item_id"], $academic_year, $academic_term);
-
-                    // begin the student insert string
-                    $query_string = "INSERT INTO users SET ";
-                    
-                    // loop through the columns
-                    foreach($columns as $key => $column) {
-                        // exempt some data from the query
-                        if(!in_array($key, [0, $last_key])) {
-                            $query_string .= ''.$column.'="'.$values[$key].'",';
-                        }
-                    }
-                    $students_query_string .= trim($query_string, ",").";";
 
                     $students_query_array[] = $student_fees;
 
@@ -497,15 +463,9 @@ class Crons {
                 }
 
                 // get fees category
-                $fees_category = $this->db->prepare("SELECT `id`, `name`, `amount`, `code`, `created_by` FROM fees_category WHERE client_id = ? AND status = ? LIMIT 30");
+                $fees_category = $this->db->prepare("SELECT `id`, `name`, `amount`, `code` FROM fees_category WHERE client_id = ? AND status = ? LIMIT 30");
                 $fees_category->execute([$clientId, 1]);
                 $fees_category_log = $fees_category->fetchAll(PDO::FETCH_OBJ);
-
-                print "Insert the student records\n";
-                // EXECUTE THE STUDENTS LIST
-                if(in_array("students", $data_to_import)) {
-                    $this->db->query($students_query_string);
-                }
 
                 // UPDATE THE STUDENTS FEES DATA FOR THE TERM
                 $update_query = $this->db->prepare("UPDATE users_arrears SET arrears_details = ?, arrears_category = ?, arrears_total = ?, last_updated = now(), fees_category_log = ? WHERE student_id = ? AND client_id = ? LIMIT 1");
@@ -895,7 +855,7 @@ class Crons {
                         $allocation["last_payment_date"] = NULL;
                         $allocation["balance"] = $allocation["amount_due"];
                         $allocation["date_created"] = date("Y-m-d H:i:s");
-                        $allocation["checkout_url"] = $this->random_string(22);
+                        $allocation["checkout_url"] = $this->random_string(16);
 
                         // get the new values
                         $values = array_values($allocation);

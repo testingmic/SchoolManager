@@ -469,7 +469,7 @@ class Payment extends Myschoolgh {
                     $payment_id = random_string('alnum', 15);
 
                     // get the student name
-                    $student = $this->pushQuery("name AS student_name", "users", "item_id = '{$student_param->student_id}' AND academic_year='{$academic_year}' AND academic_term='{$academic_term}' LIMIT 1");
+                    $student = $this->pushQuery("name AS student_name", "users", "item_id = '{$student_param->student_id}' AND user_type='student' AND client_id = '{$params->clientId}' LIMIT 1");
                     $student_name = !empty($student) ? $student[0]->student_name : "Unknown";
 
                     // loop through the payment record
