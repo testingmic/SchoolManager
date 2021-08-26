@@ -238,17 +238,11 @@ var receive_Momo_Card_Payment = () => {
             subaccount = $(`input[name="client_subaccount"]`).val();
 
         if (!$(`div[id="fees_payment_form"] input[name="amount"]`).val().length) {
-            swal({
-                text: "Sorry! The amount cannot be empty.",
-                icon: "error",
-            });
+            notify("Sorry! The amount cannot be empty.");
             return false;
         }
         if (!email_address.length) {
-            swal({
-                text: "Sorry! The email address section is required.",
-                icon: "error",
-            });
+            notify("Sorry! The email address section is required.");
             return false;
         }
         amount = amount * 100;

@@ -112,7 +112,7 @@ if(!$receivePayment) {
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
     // get the list of banks
-    $banks_list = $myClass->pushQuery("id, bank_name, phone_number", "fees_collection_banks", "1 ORDER BY bank_name");
+    $banks_list = $myClass->pushQuery("id, bank_name, phone_number", "banks_list", "1 ORDER BY bank_name");
 
     // append the html content
     $response->html = '
@@ -136,6 +136,7 @@ if(!$receivePayment) {
                             <div class="py-3 pt-0" id="fees_payment_preload">
                                 <div class="byPass_Null_Value"></div>
                                 <input type="hidden" name="client_email_address" value="'.$defaultUser->client->client_email.'">
+                                
                                 <div class="form-group">
                                     <label>Select Department</label>
                                     <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" id="department_id" name="department_id">

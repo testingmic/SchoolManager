@@ -192,28 +192,64 @@ if(!empty($user_id)) {
         $student_fees_arrears = "";
         $arrears_array = $myClass->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", "users_arrears", "student_id='{$data->user_id}' AND client_id='{$clientId}' LIMIT 1");
 
-        // if the fees arrears not empty
-        if(!empty($arrears_array)) {
-            
-            // set a new item for the arrears
-            $arrears = $arrears_array[0];
+        // if the user has permission to view the fees allocation
+        if($viewAllocation) {
 
-            // convert the item to array
-            $arrears_details = json_decode($arrears->arrears_details, true);
-            $arrears_category = json_decode($arrears->arrears_category, true);
-            $fees_category_log = json_decode($arrears->fees_category_log, true);
-            
-            // set the arrears_total
-            if(round($arrears->arrears_total) > 0) {
-                // 
-                $student_fees_arrears .= "<table class='table table-md table-bordered'>";
-                foreach($arrears_details as $year_term => $categories) {
-                    $student_fees_arrears .= "<tr><td colspan='2'>{$year_term}</td></tr>";
-                    foreach($categories as $cat => $value) {
-                        $student_fees_arrears .= "<tr><td>{$cat}</td><td>{$value}</td></tr>";
+            // if the fees arrears not empty
+            if(!empty($arrears_array)) {
+                
+                // include the array helper
+                load_helpers(['array_helper']);
+                
+                // set a new item for the arrears
+                $arrears = $arrears_array[0];
+
+                // convert the item to array
+                $arrears_details = json_decode($arrears->arrears_details, true);
+                $arrears_category = json_decode($arrears->arrears_category, true);
+                $fees_category_log = json_decode($arrears->fees_category_log, true);
+                
+                // set the arrears_total
+                if(round($arrears->arrears_total) > 0) {
+
+                    // set the table head
+                    $student_fees_arrears .= "<table class='table table-md table-bordered'>";
+                    $students_fees_category_array = filter_fees_category($fees_category_log);
+
+                    // loop through the arrears details
+                    foreach($arrears_details as $year => $categories) {
+                        // clean the year term
+                        $split = explode("...", $year);
+                        
+                        // set the academic year header
+                        $student_fees_arrears .= "<thead>";
+
+                        $student_fees_arrears .= "<tr class='font-20'><td><strong>Academic Year: </strong>".str_ireplace("_", "/", $split[0])."</td>";
+                        $student_fees_arrears .= "<td><strong>Academic Term: </strong> {$split[1]}</td></tr>";
+                        $student_fees_arrears .= "<tr><th>DESCRIPTION</th><th>BALANCE</th></tr>";
+                        $student_fees_arrears .= "</thead>";
+                        $student_fees_arrears .= "<tbody>";
+                        $total = 0;
+                        // loop through the items for each academic year
+                        foreach($categories as $cat => $value) {
+                            // add the sum
+                            $total += $value;
+                            // display the category name and the value
+                            $student_fees_arrears .= "<tr><td>{$students_fees_category_array[$cat]["name"]}</td><td>{$value}</td></tr>";
+                        }
+                        $student_fees_arrears .= "<tr><td></td>
+                                <td class='font-20 font-bold'>
+                                    <div>".number_format($total, 2)."</div>
+                                    <button onclick='return loadPage(\"{$baseUrl}arrears/{$user_id}\")' class='btn btn-sm btn-outline-success'><i class='fa fa-money-bill-alt'></i> Pay Arrears</button>
+                                </td>
+                            </tr>";
+                        $student_fees_arrears .= "</tbody>";
                     }
+                    $student_fees_arrears .= "</table>";
                 }
-                $student_fees_arrears .= "</table>";
+
+            } else {
+                $student_fees_arrears = "<div class='col-md-12 font-20 text-success'><strong>{$data->name}</strong> currently has no fees arrears.</div>";
             }
 
         }
@@ -249,7 +285,7 @@ if(!empty($user_id)) {
                 $guardian .= "</div>";
             }
         } else {
-            $guardian .= "<div class='font-italic'>No guardian has been attached to this Student</div>";
+            $guardian .= "<div class='font-italic'>No guardian has been attached to this Student.</div>";
         }
 
         $guardian .= "</div>";
