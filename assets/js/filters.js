@@ -62,11 +62,14 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                         });
                         if($(`table[id="simple_load_student"]`).length) {
                             if(response.data.result.length) {
-                                let students_list = ``;
+                                let students_list = ``,
+                                    count = 0;
+                                $.array_stream["students_filtered_list"] = response.data.result;
                                 $.each(response.data.result, function(i, e) {
+                                    count++;
                                     students_list += `
                                         <tr>
-                                            <td style="height:40px">${i+1}</td>
+                                            <td style="height:40px">${count}</td>
                                             <td style="height:40px">
                                                 <label for="student_id_${e.user_id}" class="text-uppercase cursor">${e.name}</label>
                                                 <span data-column="status" data-item="${e.user_id}"></span>

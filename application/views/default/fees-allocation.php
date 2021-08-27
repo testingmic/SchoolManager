@@ -147,6 +147,11 @@ if(!$receivePayment) {
                                         </div>
                                     </div>
                                     <div class="col-lg-8 col-md-6">
+                                        <div class="form-content-loader" style="display: none; position: absolute">
+                                            <div class="offline-content text-center">
+                                                <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                            </div>
+                                        </div>
                                         <table id="simple_load_student" class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>

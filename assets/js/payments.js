@@ -384,6 +384,7 @@ var load_Fees_Allocation_Amount = () => {
     };
     $(`div[id="fees_allocation_wrapper"] input[id="select_all"]`).prop("disabled", true);
     if ($category_id.length && $category_id !== "null") {
+        $(`div[class="form-content-loader"]`).css("display", "flex");
         $(`div[id="fees_allocation_form"] input[name="amount"]`).prop("disabled", true);
         $.get(`${baseUrl}api/fees/allocated_fees_amount`, data).then((response) => {
             $(`div[id="fees_allocation_form"] input[name="amount"]`).prop("disabled", false);
@@ -415,7 +416,9 @@ var load_Fees_Allocation_Amount = () => {
                     $(`div[id="fees_allocation_wrapper"] input[id="select_all"]`).prop("disabled", false);
                 }
             }
+            $(`div[class="form-content-loader"]`).css("display", "none");
         }).catch(() => {
+            $(`div[class="form-content-loader"]`).css("display", "none");
             $(`div[id="fees_allocation_wrapper"] input[id="select_all"]`).prop("disabled", true);
             $(`div[id="fees_allocation_form"] input[name="amount"]`).prop("disabled", true);
         });

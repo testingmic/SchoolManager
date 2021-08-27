@@ -1205,49 +1205,16 @@ class Fees extends Myschoolgh {
 
             // get the list of students for the selected class and get how much they have paid
             $students_array = $this->pushQuery(
-                "a.name, a.item_id, a.unique_id, a.image,
-                (
-                    SELECT b.amount_due FROM fees_payments b
-                    WHERE 
-                        b.category_id='{$params->category_id}' AND b.class_id='{$params->class_id}' AND a.academic_year = a.academic_year
-                        AND a.academic_term=a.academic_term AND b.student_id=a.item_id LIMIT 1
-                ) AS amount_due,
-                (
-                    SELECT b.amount_paid FROM fees_payments b
-                    WHERE 
-                        b.category_id='{$params->category_id}' AND b.class_id='{$params->class_id}' AND a.academic_year = a.academic_year
-                        AND a.academic_term=a.academic_term AND b.student_id=a.item_id LIMIT 1
-                ) AS amount_paid,
-                (
-                    SELECT b.balance FROM fees_payments b
-                    WHERE 
-                        b.category_id='{$params->category_id}' AND b.class_id='{$params->class_id}' AND a.academic_year = a.academic_year
-                        AND a.academic_term=a.academic_term AND b.student_id=a.item_id LIMIT 1
-                ) AS balance,
-                (
-                    SELECT b.exempted FROM fees_payments b
-                    WHERE 
-                        b.category_id='{$params->category_id}' AND b.class_id='{$params->class_id}' AND a.academic_year = a.academic_year
-                        AND a.academic_term=a.academic_term AND b.student_id=a.item_id LIMIT 1
-                ) AS exempted,
-                (
-                    SELECT b.paid_status FROM fees_payments b
-                    WHERE 
-                        b.category_id='{$params->category_id}' AND b.class_id='{$params->class_id}' AND a.academic_year = a.academic_year
-                        AND a.academic_term=a.academic_term AND b.student_id=a.item_id LIMIT 1
-                ) AS paid_status,
-                (
-                    SELECT 
-                        b.id 
-                    FROM fees_payments b
-                    WHERE 
-                        b.category_id='{$params->category_id}' AND b.class_id='{$params->class_id}' AND a.academic_year = a.academic_year
-                        AND a.academic_term=a.academic_term AND b.student_id=a.item_id LIMIT 1
-                ) AS is_found
+                "a.name, a.item_id, a.unique_id, a.image, 
+                    b.amount_due, b.amount_paid, b.balance, b.exempted, b.paid_status, b.id
                 ", 
-                "users a", 
-                "a.class_id='{$params->class_id}' AND a.client_id='{$params->clientId}' AND a.academic_year='{$params->academic_year}' AND a.academic_term='{$params->academic_term}' LIMIT {$this->global_limit}"
-            );
+                "users a LEFT JOIN fees_payments b ON b.student_id = a.item_id
+                    AND b.academic_year = '{$params->academic_year}'
+                    AND b.academic_term = '{$params->academic_term}'
+                    AND b.category_id='{$params->category_id}'", 
+                "a.class_id='{$params->class_id}' 
+                    AND a.client_id='{$params->clientId}' 
+                LIMIT {$this->global_limit}");
 
             $students_allocation = [];
             foreach($students_array as $student) {
@@ -1258,13 +1225,11 @@ class Fees extends Myschoolgh {
                 $student->balance = (float) $student->balance;
                 $student->exempted = (int) $student->exempted;
                 $student->paid_status = (int) $student->paid_status;
-                $student->is_found = (int) $student->is_found;
+                $student->is_found = !empty($student->amount_due) ? 1 : 0;
 
                 $students_allocation[] = $student;
             }
-
-
-
+            
             // assign the amount
             $amount = $query[0]->default_amount ?? 0;
 
