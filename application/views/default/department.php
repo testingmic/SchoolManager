@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser;
+global $myClass, $defaultUser;
 
 // initial variables
 $appName = config_item("site_name");
@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Section Information";
+$pageTitle = "Department Information";
 $response->title = "{$pageTitle} : {$appName}";
 
 $response->scripts = [
@@ -32,12 +32,12 @@ if(!empty($item_id)) {
 
     $item_param = (object) [
         "clientId" => $clientId,
-        "section_id" => $item_id,
+        "department_id" => $item_id,
         "limit" => 1
     ];
 
-    $data = load_class("sections", "controllers")->list($item_param);
-   
+    $data = load_class("departments", "controllers")->list($item_param);
+    
     // if no record was found
     if(empty($data["data"])) {
         $response->html = page_not_found();
@@ -47,11 +47,11 @@ if(!empty($item_id)) {
         $data = $data["data"][0];
 
         // guardian information
-        $the_form = load_class("forms", "controllers")->section_form($clientId, $baseUrl, $data);
-        $hasUpdate = $accessObject->hasAccess("update", "section");
+        $the_form = load_class("forms", "controllers")->department_form($clientId, $baseUrl, $data);
+        $hasUpdate = $accessObject->hasAccess("update", "department");
 
         // load the section students list
-        $student_param = (object) ["clientId" => $clientId, "section_id" => $item_id, "user_type" => "student"];
+        $student_param = (object) ["clientId" => $clientId, "department_id" => $item_id, "user_type" => "student"];
         $student_list = load_class("users", "controllers")->quick_list($student_param);
 
         // student update permissions
@@ -61,14 +61,14 @@ if(!empty($item_id)) {
         // loop through the students list
         foreach($student_list["data"] as $key => $student) {
             // view link
-            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
-            
+            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}student/{$student->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+                        
             $students .= "<tr data-row_id=\"{$student->user_id}\">";
             $students .= "<td>".($key+1)."</td>";
             $students .= "<td>
                 <div class='d-flex justify-content-start'>
                     <div>
-                        <a href=\"#\" onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}\");'>
+                        <a href=\"#\" onclick='return loadPage(\"{$baseUrl}student/{$student->user_id}\");'>
                             <span class='text-uppercase font-weight-bold text-primary'>{$student->name}</span>
                         </a>
                     </div>
@@ -104,10 +104,10 @@ if(!empty($item_id)) {
         $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1><i class="fa fa-school"></i> '.$pageTitle.'</h1>
+                <h1><i class="fa fa-hotel"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-sections">Sections</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'departments">Departments</a></div>
                     <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>
@@ -120,7 +120,8 @@ if(!empty($item_id)) {
                         <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
                         <div class="clearfix"></div>
                         <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
-                        <div class="author-box-job font-20">'.$data->section_code.'</div>
+                        <div class="author-box-job">'.$data->department_code.'</div>
+                        <div class="author-box-job">('.$data->students_count.' Students)</div>
                     </div>
                 </div>
                 </div>
@@ -138,22 +139,24 @@ if(!empty($item_id)) {
                 ).'
                 <div class="card">
                     <div class="card-header">
-                        <h4>SECTION LEADER DETAILS</h4>
+                        <h4>Department Head</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
-                        <div class="py-4">
-                            <p class="clearfix">
-                                <span class="float-left">Fullname</span>
-                                <span class="float-right text-muted">'.($data->section_leader_info->name ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Email</span>
-                                <span class="float-right text-muted">'.($data->section_leader_info->email ?? null).'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Contact</span>
-                                <span class="float-right text-muted">'.($data->section_leader_info->phone_number ?? null).'</span>
-                            </p>
+                        <div class="py-3 pt-0">
+                            '.(!empty($data->department_head_info->name) ?
+                                '<p class="clearfix">
+                                    <span class="float-left">Fullname</span>
+                                    <span class="float-right text-muted">'.($data->department_head_info->name ?? null).'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Email</span>
+                                    <span class="float-right text-muted">'.($data->department_head_info->email ?? null).'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Contact</span>
+                                    <span class="float-right text-muted">'.($data->department_head_info->phone_number ?? null).'</span>
+                                </p>' : '<div class="text-center">Department Head Not Set</div>'
+                            ).'
                         </div>
                     </div>
                 </div>
@@ -187,7 +190,7 @@ if(!empty($item_id)) {
                         }
 
                         $response->html .= '
-                            </div>
+                        </div>
                     </div>
                 </div>
                 </div>

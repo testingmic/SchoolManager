@@ -103,7 +103,7 @@ var modifyWardGuardian = (user_id, todo) => {
                             $(`div[id="ward_guardian_information"] div[data-ward_guardian_id="${e}"]`).remove();
                         });
                     } else {
-                        loadPage(`${baseUrl}update-student/${response.data.result.user_id}/view`);
+                        loadPage(`${baseUrl}student/${response.data.result.user_id}/view`);
                     }
                 }
             });

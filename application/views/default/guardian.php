@@ -73,7 +73,7 @@ if(!empty($user_id)) {
                 <h1><i class="fa fa-user-friends"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-guardian">Guardians</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'guardians">Guardians</a></div>
                     <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>

@@ -11,7 +11,7 @@ var load_Pay_Fees_Form = () => {
         "show_history": true
     };
     $(`div[id="make_payment_button"] button`).prop("disabled", true).html(`Loading record <i class="fa fa-spin fa-spinner"></i>`);
-    $(`a[data-link_item="student_go_back"]`).attr("onclick", `return loadPage('${baseUrl}update-student/${$student_id}')`);
+    $(`a[data-link_item="student_go_back"]`).attr("onclick", `return loadPage('${baseUrl}student/${$student_id}')`);
     $.get(`${baseUrl}api/fees/payment_form`, data).then((response) => {
         $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Load Form`);
         if (response.code === 200) {
@@ -382,7 +382,7 @@ var load_Fees_Allocation_Amount = () => {
         "student_id": $student_id,
         "category_id": $category_id
     };
-    $(`div[id="fees_allocation_wrapper"] input[id="select_all"]`).prop("disabled", true);
+    $(`div[id="fees_allocation_wrapper"] input[id="select_all"]`).prop({"disabled": true, "checked": false});
     if ($category_id.length && $category_id !== "null") {
         $(`div[class="form-content-loader"]`).css("display", "flex");
         $(`div[id="fees_allocation_form"] input[name="amount"]`).prop("disabled", true);
@@ -419,7 +419,7 @@ var load_Fees_Allocation_Amount = () => {
             $(`div[class="form-content-loader"]`).css("display", "none");
         }).catch(() => {
             $(`div[class="form-content-loader"]`).css("display", "none");
-            $(`div[id="fees_allocation_wrapper"] input[id="select_all"]`).prop("disabled", true);
+            $(`div[id="fees_allocation_wrapper"] input[id="select_all"]`).prop({"disabled": true, "checked": false});
             $(`div[id="fees_allocation_form"] input[name="amount"]`).prop("disabled", true);
         });
     }

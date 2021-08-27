@@ -32,7 +32,7 @@ $hasUpdate = $accessObject->hasAccess("update", "section");
 $sections = "";
 foreach($department_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view section record' href='#' onclick='return loadPage(\"{$baseUrl}update-section/{$each->id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to view section record' href='#' onclick='return loadPage(\"{$baseUrl}section/{$each->id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Click to delete this Section' onclick='return delete_record(\"{$each->id}\", \"section\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -40,10 +40,10 @@ foreach($department_list["data"] as $key => $each) {
 
     $sections .= "<tr data-row_id=\"{$each->id}\">";
     $sections .= "<td>".($key+1)."</td>";
-    $sections .= "<td><a href='#' class='text-uppercase font-weight-bold' onclick='return loadPage(\"{$baseUrl}update-section/{$each->id}\");'>{$each->name}</a></td>";
+    $sections .= "<td><a href='#' class='text-uppercase font-weight-bold' onclick='return loadPage(\"{$baseUrl}section/{$each->id}\");'>{$each->name}</a></td>";
     $sections .= "<td>{$each->section_code}</td>";
     $sections .= "<td>{$each->students_count}</td>";
-    $sections .= "<td><span ".(isset($each->section_leader_info->name) ? "onclick='return loadPage(\"{$baseUrl}update-student/{$each->section_leader_info->user_id}\")'" : null)." class='underline text-primary text-uppercase'>".($each->section_leader_info->name ?? null)."</span></td>";
+    $sections .= "<td><span ".(isset($each->section_leader_info->name) ? "onclick='return loadPage(\"{$baseUrl}student/{$each->section_leader_info->user_id}\")'" : null)." class='underline text-primary text-uppercase'>".($each->section_leader_info->name ?? null)."</span></td>";
     $sections .= "<td align='center'>{$action}</td>";
     $sections .= "</tr>";
 }

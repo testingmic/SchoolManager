@@ -2003,7 +2003,7 @@ class Forms extends Myschoolgh {
             <div class="row">
                 <div class="col-lg-6">
                     '.($isData ? 
-                        '<button onclick="return loadPage(\''.$baseUrl.'update-student/'.$userData->user_id.'\');" type="button" class="btn btn-dark"><i class="fa fa-ban"></i> Discard Changes</button>': null
+                        '<button onclick="return loadPage(\''.$baseUrl.'student/'.$userData->user_id.'\');" type="button" class="btn btn-dark"><i class="fa fa-ban"></i> Discard Changes</button>': null
                     ).'
                 </div>
                 <div class="col-lg-6 text-right">
@@ -4155,7 +4155,7 @@ class Forms extends Myschoolgh {
 
         $allowance = '
             <div class="row">
-                <div class="col-lg-12"><h5>GROSS SALARY</h5></div>
+                <div class="col-lg-12"><h5>BASIC SALARY</h5></div>
                 <div class="col-lg-6">
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">

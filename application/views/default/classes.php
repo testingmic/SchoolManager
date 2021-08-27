@@ -33,7 +33,7 @@ $classes = "";
 
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view the class record' href='#' onclick='return loadPage(\"{$baseUrl}update-class/{$each->id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to view the class record' href='#' onclick='return loadPage(\"{$baseUrl}class/{$each->id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Click to delete this Class' onclick='return delete_record(\"{$each->id}\", \"class\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -41,7 +41,7 @@ foreach($item_list["data"] as $key => $each) {
 
     $classes .= "<tr data-row_id=\"{$each->id}\">";
     $classes .= "<td>".($key+1)."</td>";
-    $classes .= "<td><span class='text-uppercase font-15 text-info'><a href='#' onclick='return loadPage(\"{$baseUrl}update-class/{$each->id}/view\");'>{$each->name}</a></span></td>";
+    $classes .= "<td><span class='text-uppercase font-15 text-info'><a href='#' onclick='return loadPage(\"{$baseUrl}class/{$each->id}/view\");'>{$each->name}</a></span></td>";
     $classes .= "<td>{$each->class_code}</td>";
     $classes .= "<td>{$each->class_size}</td>";
     $classes .= "<td>{$each->students_count}</td>";

@@ -59,10 +59,10 @@ $hasUpdate = $accessObject->hasAccess("update", "fees");
 $fees_history = "";
 foreach($item_list["data"] as $key => $fees) {
     $action = "";
-    $action = "<a href='#' title='View Receipt' onclick='loadPage(\"{$baseUrl}fees-view/{$fees->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a href='#' title='View Receipt' onclick='loadPage(\"{$baseUrl}fees-view/{$fees->payment_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
     $action .= "&nbsp;<a title='Click to print this receipt' href='#' onclick=\"return print_receipt('{$fees->payment_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
     
-    $fees_history .= "<tr data-row_id=\"{$fees->item_id}\">";
+    $fees_history .= "<tr data-row_id=\"{$fees->payment_id}\">";
     $fees_history .= "<td>".($key+1)."</td>";
     $fees_history .= "
         <td>
@@ -70,7 +70,7 @@ foreach($item_list["data"] as $key => $fees) {
                 ".(!empty($fees->student_info->image) ? "
                 <div class='mr-2'><img src='{$baseUrl}{$fees->student_info->image}' width='40px' height='40px'></div>" : "")."
                 <div>
-                    <a href='#' onclick='loadPage(\"{$baseUrl}update-student/{$fees->student_info->user_id}\");'>{$fees->student_info->name}</a> <br>
+                    <a href='#' onclick='loadPage(\"{$baseUrl}student/{$fees->student_info->user_id}\");'>{$fees->student_info->name}</a> <br>
                 <strong>{$fees->student_info->unique_id}</strong></div>
             </div>
         </td>";

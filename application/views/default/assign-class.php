@@ -56,7 +56,7 @@ $response->html = '
             <h1>Assign Student Class</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item"><a href="'.$baseUrl.'list-student">List Students</a></div>
+                <div class="breadcrumb-item"><a href="'.$baseUrl.'students">List Students</a></div>
                 <div class="breadcrumb-item active">Assign Class to Students</div>
             </div>
         </div>

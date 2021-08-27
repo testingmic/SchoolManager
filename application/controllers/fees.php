@@ -449,8 +449,8 @@ class Fees extends Myschoolgh {
                     $student_allocation_list .= "<td>
                         <div class='d-flex justify-content-start'>
                             <div class='text-uppercase'>
-                                <span onclick='return loadPage(\"{$this->baseUrl}update-student/{$student->student_info->user_id}\");' class='font-weight-bold text-primary cursor'>{$student->student_info->name}</span><br class='p-0 m-0'>
-                                <a class='cursor' onclick='return loadPage(\"{$this->baseUrl}update-student/{$student->student_info->user_id}\");'><strong>{$student->student_info->unique_id}</strong></a>
+                                <span onclick='return loadPage(\"{$this->baseUrl}student/{$student->student_info->user_id}\");' class='font-weight-bold text-primary cursor'>{$student->student_info->name}</span><br class='p-0 m-0'>
+                                <a class='cursor' onclick='return loadPage(\"{$this->baseUrl}student/{$student->student_info->user_id}\");'><strong>{$student->student_info->unique_id}</strong></a>
                             </div>
                         </div>
                     </td>";
@@ -1229,7 +1229,7 @@ class Fees extends Myschoolgh {
 
                 $students_allocation[] = $student;
             }
-            
+
             // assign the amount
             $amount = $query[0]->default_amount ?? 0;
 
@@ -1529,7 +1529,7 @@ class Fees extends Myschoolgh {
                     $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id ?? null, 
                     $paymentRecord->class_id, $paymentRecord->category_id, $params->amount, $params->userId, 
                     $paymentRecord->academic_year, $paymentRecord->academic_term, 
-                    $params->description ?? "Payment of {$paymentRecord->category_name} Fees", $currency, $receiptId, $params->payment_method, $payment_id
+                    $params->description ?? "Payment of {$paymentRecord->category_name}", $currency, $receiptId, $params->payment_method, $payment_id
                 ]);
                 /* Update the user payment record */
                 $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
@@ -1610,7 +1610,7 @@ class Fees extends Myschoolgh {
                             $params->clientId, $uniqueId, $record->student_id, $payment_id,
                             $record->department_id ?? null, $record->class_id, $record->category_id, 
                             $total_paid, $params->userId, $record->academic_year, $record->academic_term, 
-                            $params->description ?? "Payment of {$record->category_name} Fees", $currency, $receiptId, $params->payment_method
+                            $params->description ?? "Payment of {$record->category_name}", $currency, $receiptId, $params->payment_method
                         ]);
 
                         /* Update the user payment record */
@@ -2105,7 +2105,30 @@ class Fees extends Myschoolgh {
                 $logo_data = file_get_contents($client->client_logo);
                 $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
             }
+
+            // get the student fees arrears
+            $arrears_array = $this->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", "users_arrears", "student_id='{$params->student_id}' AND client_id='{$params->clientId}' LIMIT 1");
             
+            // get the class and student fees allocation
+            $student_fees_arrears = "";
+           
+            // if the fees arrears not empty
+            if(!empty($arrears_array)) {
+                    
+                // include the array helper
+                load_helpers(['array_helper']);
+                
+                // set a new item for the arrears
+                $arrears = $arrears_array[0];
+                $outstanding = 0;
+
+                // convert the item to array
+                $arrears_details = json_decode($arrears->arrears_details, true);
+                $arrears_category = json_decode($arrears->arrears_category, true);
+                $fees_category_log = json_decode($arrears->fees_category_log, true);
+                $students_fees_category_array = filter_fees_category($fees_category_log);
+                
+            }
             // set the bill form
             $student_bill = '
             <div style="margin:auto auto; '.($isPDF ? '' : "max-width:1050px;").';background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: \'Calibri Regular\'; width:100%;margin-bottom:2px">
@@ -2230,8 +2253,8 @@ class Fees extends Myschoolgh {
             if(isset($params->print)) {
                 $student_bill .= "
                 <script>
-                    window.onload = (evt) => { window.print(); }
-                    window.onafterprint = (evt) => { window.close(); }
+                    // window.onload = (evt) => { window.print(); }
+                    // window.onafterprint = (evt) => { window.close(); }
                 </script>";
             }
 

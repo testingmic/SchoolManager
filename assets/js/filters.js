@@ -29,7 +29,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
             class_id = $(`select[name="class_id"]`).val(),
             gender = $(`select[name="gender"]`).val();
         $.form_data = { department_id, class_id, gender };
-        loadPage(`${baseUrl}list-student`);
+        loadPage(`${baseUrl}students`);
     });
 
     $(`button[id="filter_Courses_List"]`).on("click", function() {
@@ -37,7 +37,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
             class_id = $(`select[name="class_id"]`).val(),
             course_tutor = $(`select[name="course_tutor"]`).val();
         $.form_data = { department_id, class_id, course_tutor };
-        loadPage(`${baseUrl}list-courses`);
+        loadPage(`${baseUrl}courses`);
     });
 
     if ($(`select[name="student_id"]`).length) {
@@ -197,7 +197,7 @@ $(`button[id="filter_Staff_List"]`).on("click", function() {
         user_type = $(`select[name="user_type"]`).val(),
         gender = $(`select[name="gender"]`).val();
     $.form_data = { department_id, user_type, gender };
-    loadPage(`${baseUrl}list-staff`);
+    loadPage(`${baseUrl}staffs`);
 });
 
 $(`button[id="filter_Staff_Payroll_List"]`).on("click", function() {

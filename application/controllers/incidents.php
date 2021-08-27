@@ -157,7 +157,7 @@ class Incidents extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Incident successfully logged.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}update-student/{$params->user_id}/incidents"];
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}student/{$params->user_id}/incidents"];
 
 			// return the output
             return $return;

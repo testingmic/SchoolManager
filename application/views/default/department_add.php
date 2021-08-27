@@ -16,21 +16,21 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Add Class";
+$pageTitle = "Add Department";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [
     "assets/js/page/index.js"
 ];
 
-$the_form = load_class("forms", "controllers")->class_form($clientId, $baseUrl);
+$the_form = load_class("forms", "controllers")->department_form($clientId, $baseUrl);
 
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1><i class="fa fa-house-damage"></i> '.$pageTitle.'</h1>
+            <h1><i class="fa fa-hotel"></i> '.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-classes">Classes</a></div>
+                <div class="breadcrumb-item active"><a href="'.$baseUrl.'departments">Departments</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>

@@ -26,9 +26,9 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>Students</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-student">Students List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>students">Students List</a></li>
             <?php if($accessObject->hasAccess("add", "student")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>add-student">New Admission</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>student_add">New Admission</a></li>
             <?php } ?>
         </ul>
     </li>
@@ -36,17 +36,17 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-clock"></i><span>Guardians</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-guardian">Guardian List</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>add-guardian">Add Guardian</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>guardians">Guardian List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>guardian_add">Add Guardian</a></li>
         </ul>
     </li>
     <?php } ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Staff</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-staff">Staff List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>staffs">Staff List</a></li>
             <?php if($accessObject->hasAccess("add", "teacher") || $accessObject->hasAccess("add", "accountant") || $accessObject->hasAccess("add", "employee")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>add-staff">Employ Staff</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>staff_add">Employ Staff</a></li>
             <?php } ?>
         </ul>
     </li>   
@@ -76,17 +76,17 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Structures</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-classes">List Classes</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>classes">List Classes</a></li>
             <?php if($isAdmin) { ?>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>add-class">Add Class</a></li>
+            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>class_add">Add Class</a></li>
             <?php } ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-departments">List Departments</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>departments">List Departments</a></li>
             <?php if($isAdmin) { ?>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>add-department">Add Department</a></li>
+            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>department_add">Add Department</a></li>
             <?php } ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-sections">List Sections</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>sections">List Sections</a></li>
             <?php if($isAdmin) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>add-section">Add Section</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>section_add">Add Section</a></li>
             <?php } ?>
         </ul>
     </li>
@@ -95,8 +95,8 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-courses">List Courses</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>add-course">Add Course</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Courses</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>course_add">Add Course</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Course Resources</a></li>
         </ul>
     </li>
@@ -160,7 +160,10 @@
             <?php } ?>
             <?php if($accessObject->hasAccess("allocation", "fees")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
-            <?php } ?>            
+            <?php } ?>
+            <?php if($accessObject->hasAccess("reports", "fees")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Fees Report</a></li>
+            <?php } ?>
         </ul>
     </li>
     <?php } ?>
@@ -171,6 +174,9 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>payroll">Payroll</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>payroll-category">Allowance Category</a></li>
+            <?php if($accessObject->hasAccess("view", "payslip")) { ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">Payroll Reports</a></li>
+            <?php } ?>
         </ul>
     </li>
     <?php } ?>
@@ -186,21 +192,9 @@
             <?php if($accessObject->hasAccess("account_type_head", "accounting")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>account_type">Account Type Head</a></li>
             <?php } ?>
-        </ul>
-    </li>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-chart-line"></i><span>Reports</span></a>
-        <ul class="dropdown-menu">
-            <?php if($accessObject->hasAccess("reports", "fees")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Fees Report</a></li>
-            <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>accounting">Financial Reports</a></li>
-            <?php if($accessObject->hasAccess("view", "payslip")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">HR & Payroll</a></li>
-            <?php } ?>
         </ul>
     </li>
-
     <li class="menu-header">Communication</li>
     <?php if($accessObject->hasAccess("update", "events")) { ?>
     <li class="dropdown">
@@ -225,7 +219,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>My Students</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-student">Students List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>students">Students List</a></li>
         </ul>
     </li>
     <li class="dropdown">
@@ -241,7 +235,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-courses">List Courses</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Courses</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Course Resources</a></li>
         </ul>
     </li>
@@ -301,7 +295,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-courses">List Courses</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Courses</a></li>
         </ul>
     </li>
     <li><a href="<?= $baseUrl ?>timetable-view" class="nav-link"><i class="fas fa-clock"></i><span>Timetable</span></a></li>
@@ -337,7 +331,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-courses">List Courses</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Courses</a></li>
         </ul>
     </li>
     <li class="dropdown">

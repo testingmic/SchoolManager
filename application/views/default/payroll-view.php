@@ -168,7 +168,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                                 '.($data->residence ? '<div class="author-box-job"><i class="fa fa-globe"></i> '.$data->residence.'</div>' : '').'
                             </div>
                             <div class="w-100 mt-2 text-center border-top pt-3">
-                                <a class="btn btn-dark" href="'.$baseUrl.'update-staff/'.$data->user_id.'"><i class="fa fa-arrow-circle-left"></i> VIEW DETAILS</a>
+                                <a class="btn btn-dark" href="'.$baseUrl.'staff/'.$data->user_id.'"><i class="fa fa-arrow-circle-left"></i> VIEW DETAILS</a>
                             </div>
                         </div>
                         </div>

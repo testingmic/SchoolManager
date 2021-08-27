@@ -282,7 +282,7 @@ if(!empty($user_id)) {
                 // if the user has permissions to update the student record
                 if($hasUpdate) {
                     $guardian .= "<div class='col-lg-12 mt-2 text-right'>
-                        <a href=\"{$baseUrl}update-guardian/{$each->user_id}/view\" class=\"btn btn-sm btn-outline-success\" title=\"View guardian full details\"><i class=\"fa fa-eye\"></i> View</a>
+                        <a href=\"{$baseUrl}guardian/{$each->user_id}/view\" class=\"btn btn-sm btn-outline-success\" title=\"View guardian full details\"><i class=\"fa fa-eye\"></i> View</a>
                         <a onclick=\"return modifyWardGuardian('{$each->user_id}_{$data->user_id}','remove');\" href=\"javascript:void(0);\" class=\"btn btn-outline-danger anchor btn-sm\">Remove</a>
                     </div>";
                 }
@@ -307,7 +307,7 @@ if(!empty($user_id)) {
                 <h1><i class="fa fa-user-graduate"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-student">Students</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'students">Students</a></div>
                     <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>

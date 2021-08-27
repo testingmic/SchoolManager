@@ -65,7 +65,7 @@ if(!empty($item_id)) {
         foreach($student_list["data"] as $key => $student) {
 
             // view link
-            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}student/{$student->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
             if($studentUpdate) {
                 $action .= "&nbsp;<a href='#' title='Click to delete this Class' onclick='return delete_record(\"{$student->user_id}\", \"class\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -76,10 +76,10 @@ if(!empty($item_id)) {
             $students .= "<td>
             <div class='d-flex justify-content-start'>
                 <div class='mr-1'>
-                <img onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}\");' class='cursor author-box-picture' width='40px' src=\"{$baseUrl}{$student->image}\"> &nbsp; 
+                <img onclick='return loadPage(\"{$baseUrl}student/{$student->user_id}\");' class='cursor author-box-picture' width='40px' src=\"{$baseUrl}{$student->image}\"> &nbsp; 
                 </div>
                 <div>
-                    <a href=\"#\" onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}\");'>
+                    <a href=\"#\" onclick='return loadPage(\"{$baseUrl}student/{$student->user_id}\");'>
                         <span class='text-uppercase font-weight-bold text-primary'>{$student->name}</span>
                     </a>
                 </div>
@@ -118,7 +118,7 @@ if(!empty($item_id)) {
                 <h1><i class="fa fa-house-damage"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-classes">Classes</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'classes">Classes</a></div>
                     <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>
@@ -301,7 +301,7 @@ if(!empty($item_id)) {
                                                 <div class="pb-2 pt-3 border-bottom">
                                                     <p class="clearfix mb-2">
                                                         <span class="float-left">Name</span>
-                                                        <span class="float-right text-muted"><a href="'.$baseUrl.'update-course/'.$course->id.'/view">'.$course->name.'</a></span>
+                                                        <span class="float-right text-muted"><a href="'.$baseUrl.'course/'.$course->id.'/view">'.$course->name.'</a></span>
                                                     </p>
                                                     <p class="clearfix">
                                                         <span class="float-left">Code</span>

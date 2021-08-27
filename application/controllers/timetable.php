@@ -580,7 +580,7 @@ class Timetable extends Myschoolgh {
                         <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course["lesson_end_time"]}</p>
                     </div>
                     <div class='card-footer p-2 border-top mt-0 text-right'>
-                        <a href='{$this->baseUrl}update-course/{$course["course_id"]}' class='btn btn-outline-primary btn-sm'><i class='fa fa-eye'></i> View Course</a>
+                        <a href='{$this->baseUrl}course/{$course["course_id"]}' class='btn btn-outline-primary btn-sm'><i class='fa fa-eye'></i> View Course</a>
                     </div>
                 </div>
             </div>";

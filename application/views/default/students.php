@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $defaultAcademics;
+global $myClass, $accessObject, $defaultUser, $defaultAcademics, $defaultCurrency;
 
 // initial variables
 $appName = config_item("site_name");
@@ -16,58 +16,62 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 $response = (object) [];
-$response->title = "Courses List : {$appName}";
+$filter = (object) $_POST;
+
+$response->title = "Students List : {$appName}";
 $response->scripts = ["assets/js/filters.js"];
 
 $clientId = $session->clientId;
 
-$filter = (object) $_POST;
-
-$courses_param = (object) [
+$student_param = (object) [
     "clientId" => $clientId,
-    "userId" => $session->userId,
-    "userData" => $defaultUser,
-    "limit" => 99999,
+    "user_type" => "student",
+    "userId" => $session->userId, 
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
-    "course_tutor" => $filter->course_tutor ?? null,
+    "gender" => $filter->gender ?? null,
+    "client_data" => $defaultUser->client,
     "academic_year" => $defaultAcademics->academic_year,
     "academic_term" => $defaultAcademics->academic_term,
 ];
 
-$item_list = load_class("courses", "controllers")->list($courses_param);
+// if the current user is a parent then append this query
+if($defaultUser->user_type === "parent") {
+    $student_param->userId = $defaultUser->unique_id;
+    $student_param->only_wards_list = true;
+}
 
-$hasDelete = $accessObject->hasAccess("delete", "course");
-$hasUpdate = $accessObject->hasAccess("update", "course");
+$student_list = load_class("users", "controllers", $student_param)->quick_list($student_param);
 
+$hasDelete = $accessObject->hasAccess("delete", "student");
+$hasUpdate = $accessObject->hasAccess("update", "student");
 $hasFiltering = $accessObject->hasAccess("filters", "settings");
 
-$courses = "";
-foreach($item_list["data"] as $key => $each) {
+$students = "";
+foreach($student_list["data"] as $key => $each) {
     
-    $action = "<a title='View the course record' href='#' onclick='return loadPage(\"{$baseUrl}update-course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<span title='View Student Record' onclick='loadPage(\"{$baseUrl}student/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
+
+    if($hasUpdate) {
+        $action .= "&nbsp;<span title='Update Student Record' onclick='loadPage(\"{$baseUrl}modify-student/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></span>";
+    }
     if($hasDelete) {
-        $action .= "&nbsp;<a href='#' title='Delete this Course' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<span title='Delete this Student' onclick='delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
     }
 
-    $courses .= "<tr data-row_id=\"{$each->id}\">";
-    $courses .= "<td>".($key+1)."</td>";
-    $courses .= "<td>&nbsp; {$each->name}</td>";
-    $courses .= "<td>{$each->course_code}</td>";
-    $courses .= "<td>{$each->credit_hours}</td><td>";
-    
-    foreach($each->class_list as $class) {
-        $courses .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}update-class/{$class->id}\");'><span class='underline'>".$class->name."</span></a></p>";
-    }
-
-    $courses .= "</td><td>";
-
-    foreach($each->course_tutors as $tutor) {
-        $courses .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}update-staff/{$tutor->item_id}\");'><span class='underline'>".$tutor->name."</span></a></p>";
-    }
-
-    $courses .= "</td><td align='center'>{$action}</td>";
-    $courses .= "</tr>";
+    $students .= "<tr data-row_id=\"{$each->id}\">";
+    $students .= "<td>".($key+1)."</td>";
+    $students .= "
+    <td>
+        <span title='View student details' class='user_name' onclick='loadPage(\"{$baseUrl}student/{$each->user_id}\");'>{$each->name}</span><br>{$each->unique_id}
+    </td>";
+    $students .= "<td>{$each->class_name}</td>";
+    $students .= "<td>{$each->gender}</td>";
+    $students .= "<td>".($each->department_name ?? null)."</td>";
+    $students .= "<td>{$defaultCurrency} {$each->debt_formated}</td>";
+    $students .= "<td>{$defaultCurrency} {$each->arrears_formated}</td>";
+    $students .= "<td align='center'>{$action}</td>";
+    $students .= "</tr>";
 }
 
 // default class_list
@@ -82,10 +86,10 @@ $class_list = load_class("classes", "controllers")->list($classes_param)["data"]
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Courses List</h1>
+            <h1><i class="fa fa-users"></i> Students List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item">Courses List</div>
+                <div class="breadcrumb-item">Students</div>
             </div>
         </div>
         <div class="row" id="filter_Department_Class">
@@ -110,36 +114,37 @@ $response->html = '
                 </select>
             </div>
             <div class="col-xl-3 '.(!$hasFiltering ? 'hidden': '').' col-md-3 col-12 form-group">
-                <label>Select Course Tutor</label>
-                <select data-width="100%" class="form-control selectpicker" name="course_tutor">
-                    <option value="">Please Select Tutor</option>';
-                    foreach($myClass->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND user_status='Active' AND client_id='{$clientId}'") as $each) {
-                        $response->html .= "<option ".(isset($filter->course_tutor) && ($filter->course_tutor == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
+                <label>Select Gender</label>
+                <select data-width="100%" class="form-control selectpicker" name="gender">
+                    <option value="">Please Select Gender</option>';
+                    foreach($myClass->pushQuery("*", "users_gender") as $each) {
+                        $response->html .= "<option ".(isset($filter->gender) && ($filter->gender == $each->name) ? "selected" : "")." value=\"{$each->name}\">{$each->name}</option>";                            
                     }
-                $response->html .= '
+                    $response->html .= '
                 </select>
             </div>
             <div class="col-xl-2 '.(!$hasFiltering ? 'hidden': '').' col-md-2 col-12 form-group">
                 <label for="">&nbsp;</label>
-                <button id="filter_Courses_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+                <button id="filter_Students_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
+                        <div class="table-responsive table-student_staff_list">
+                            <table class="table table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
-                                        <th>Course Title</th>
-                                        <th>Course Code</th>
-                                        <th>Credit Hours</th>
-                                        <th width="15%">Classes</th>
-                                        <th>Course Tutor</th>
-                                        <th align="center" width="12%"></th>
+                                        <th>Student Name</th>
+                                        <th>Class</th>
+                                        <th>Gender</th>
+                                        <th>Department</th>
+                                        <th>Bill</th>
+                                        <th>Arrears</th>
+                                        <th width="13%"></th>
                                     </tr>
                                 </thead>
-                                <tbody>'.$courses.'</tbody>
+                                <tbody>'.$students.'</tbody>
                             </table>
                         </div>
                     </div>
@@ -147,6 +152,7 @@ $response->html = '
             </div>
         </div>
     </section>';
+    
 // print out the response
 echo json_encode($response);
 ?>

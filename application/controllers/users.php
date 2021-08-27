@@ -79,7 +79,7 @@ class Users extends Myschoolgh {
 				LEFT JOIN users_arrears ar ON ar.student_id = a.item_id
 				WHERE {$params->query} AND a.deleted = '0' AND a.status = '1' ORDER BY a.name LIMIT {$params->limit}
 			");
-			$sql->execute([0, 1]);
+			$sql->execute();
 
 			$data = [];
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
@@ -733,7 +733,7 @@ class Users extends Myschoolgh {
 							"<div class=\"border-top p-2\">
 								<div class=\"d-flex justify-content-between\">
 									<div>
-										<a href=\"#\" onclick=\"return loadPage('{$this->baseUrl}update-student/{$ward->student_guid}/view')\" class=\"btn btn-sm btn-outline-success\" title=\"View ward details\"><i class=\"fa fa-eye\"></i> View</a>
+										<a href=\"#\" onclick=\"return loadPage('{$this->baseUrl}student/{$ward->student_guid}/view')\" class=\"btn btn-sm btn-outline-success\" title=\"View ward details\"><i class=\"fa fa-eye\"></i> View</a>
 									</div>
 									<div>
 										<a href=\"#\" onclick='return modifyGuardianWard(\"{$guardian_id}_{$ward->student_guid}\", \"remove\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Remove</a>
@@ -1642,7 +1642,7 @@ class Users extends Myschoolgh {
 			$this->db->commit();
 
 			// set the url
-			$url_link = ($params->user_type == "student") ? "{$this->baseUrl}update-student/{$params->user_id}" : null;
+			$url_link = ($params->user_type == "student") ? "{$this->baseUrl}student/{$params->user_id}" : null;
 
 			// append the redirection url
 			if($url_link) { $additional = ["href" => $url_link]; }

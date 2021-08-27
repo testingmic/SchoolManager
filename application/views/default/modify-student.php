@@ -63,7 +63,7 @@ if(empty($user_id)) {
                     <h1>Edit Student</h1>
                     <div class="section-header-breadcrumb">
                         <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                        <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-student">Students List</a></div>
+                        <div class="breadcrumb-item active"><a href="'.$baseUrl.'students">Students List</a></div>
                         <div class="breadcrumb-item">'.$data->name.'</div>
                     </div>
                 </div>

@@ -218,7 +218,7 @@ if(!empty($item_id)) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-courses">Courses</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'courses">Courses</a></div>
                     <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>
@@ -255,7 +255,7 @@ if(!empty($item_id)) {
                         <div class="pb-2 pt-3 border-bottom">
                             <p class="clearfix mb-2">
                                 <span class="float-left">Fullname</span>
-                                <span class="float-right text-muted"><a href="'.$baseUrl.'update-staff/'.$tutor->item_id.'/view">'.$tutor->name.'</a></span>
+                                <span class="float-right text-muted"><a href="'.$baseUrl.'staff/'.$tutor->item_id.'/view">'.$tutor->name.'</a></span>
                             </p>
                             <p class="clearfix mb-2">
                                 <span class="float-left">Email</span>
@@ -313,7 +313,7 @@ if(!empty($item_id)) {
                                                 <div class="pb-2 pt-3 border-bottom">
                                                     <p class="clearfix mb-2">
                                                         <span class="float-left">Name</span>
-                                                        <span class="float-right text-muted"><a href="'.$baseUrl.'update-class/'.$class->id.'/view">'.$class->name.'</a></span>
+                                                        <span class="float-right text-muted"><a href="'.$baseUrl.'class/'.$class->id.'/view">'.$class->name.'</a></span>
                                                     </p>
                                                     <p class="clearfix">
                                                         <span class="float-left">Code</span>

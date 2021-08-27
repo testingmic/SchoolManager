@@ -218,7 +218,7 @@ class Sections extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Section successfully updated.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["href" => "{$this->baseUrl}update-section/{$params->section_id}/update"];
+			$return["additional"] = ["href" => "{$this->baseUrl}section/{$params->section_id}/update"];
 
 			// return the output
             return $return;

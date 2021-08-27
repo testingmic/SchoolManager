@@ -462,7 +462,7 @@ if($isSupport) {
                                 ".(!empty($each->student_info->image) ? "
                                 <div class='mr-2'><img src='{$baseUrl}{$each->student_info->image}' width='40px' height='40px'></div>" : "")."
                                 <div>
-                                    <a  href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$each->student_info->user_id}\");'>{$each->student_info->name}</a> <br>
+                                    <a  href='#' onclick='return loadPage(\"{$baseUrl}student/{$each->student_info->user_id}\");'>{$each->student_info->name}</a> <br>
                                     <strong>{$each->student_info->unique_id}</strong><br>
                                     {$each->class_name}
                                 </div>

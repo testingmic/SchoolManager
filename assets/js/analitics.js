@@ -590,16 +590,18 @@ var salaryReport = (_salary) => {
         }
     }
 
-    $.each(_salary.grouping.Deduction, function(i, e) {
-        table_html += `<tr>`;
-        table_html += `<td>${e}</td>`;
-        $.each(deductions_list, function(ii, ee) {
-            let amount = (deductions_list[ii][e].amount !== undefined) ? format_currency(deductions_list[ii][e].amount) : 0;
-            table_html += `<td>${myPrefs.labels.currency}${amount}</td>`;
+    if(_salary.grouping.Deduction !== undefined) {
+        $.each(_salary.grouping.Deduction, function(i, e) {
+            table_html += `<tr>`;
+            table_html += `<td>${e}</td>`;
+            $.each(deductions_list, function(ii, ee) {
+                let amount = ((deductions_list[ii][e] !== undefined) && (deductions_list[ii][e].amount !== undefined)) ? format_currency(deductions_list[ii][e].amount) : 0;
+                table_html += `<td>${myPrefs.labels.currency}${amount}</td>`;
+            });
+            table_html += `<td align="center"><strong>${myPrefs.labels.currency}${format_currency(summary_total.list.Deduction[e])}</strong></td>`;
+            table_html += `</tr>`;
         });
-        table_html += `<td align="center"><strong>${myPrefs.labels.currency}${format_currency(summary_total.list.Deduction[e])}</strong></td>`;
-        table_html += `</tr>`;
-    });
+    }
 
     table_html += `<tr style="background-color:#f4f4f4;">`;
     table_html += `<td><strong>TOTAL</strong></td>`;
@@ -619,6 +621,7 @@ var salaryReport = (_salary) => {
     });
     table_html += `<td align="center" style="color:#fff;">TOTAL</td>`;
     table_html += `</tr></thead><tbody>`;
+
     $.each(_salary.grouping.Allowance, function(i, e) {
         table_html += `<tr>`;
         table_html += `<td >${e}</td>`;

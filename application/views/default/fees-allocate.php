@@ -250,7 +250,7 @@ if(!empty($user_id)) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-student">Students</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'students">Students</a></div>
                     <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>
@@ -267,7 +267,7 @@ if(!empty($user_id)) {
                                     <div class="author-box-description font-22 text-success font-weight-bold">'.$data->unique_id.'</div>
                                     <div class="author-box-description font-22 text-info font-weight-bold mt-1">'.$data->class_name.'</div>
                                     <div class="w-100 mt-2 border-top pt-3">
-                                        <a class="btn btn-dark" href="'.$baseUrl.'update-student/'.$user_id.'"><i class="fa fa-arrow-circle-left"></i> Go Back</a>
+                                        <a class="btn btn-dark" href="'.$baseUrl.'student/'.$user_id.'"><i class="fa fa-arrow-circle-left"></i> Go Back</a>
                                     </div>
                                 </div>
                             </div>

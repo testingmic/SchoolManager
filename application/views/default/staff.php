@@ -97,7 +97,7 @@ if(!empty($user_id)) {
                 // loop through the courses that the teacher handles
                 foreach($courses_list["data"] as $key => $each) {
 
-                    $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+                    $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
                     if($courseDelete) {
                         $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -107,7 +107,7 @@ if(!empty($user_id)) {
                     $course_listing .= "<td>{$each->name} {$each->course_code}</td>";
                     $course_listing .= "<td>";
                     foreach($each->class_list as $class) {
-                        $course_listing .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}update-class/{$class->id}\")'>".$class->name."</a></p>";
+                        $course_listing .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}class/{$class->id}\")'>".$class->name."</a></p>";
                     }
                     $course_listing .= "</td><td class='text-center'>{$action}</td>";
                     $course_listing .= "</tr>";
@@ -253,7 +253,7 @@ if(!empty($user_id)) {
                 <h1><i class="fa fa-user-tie"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-staff">Staff</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'staffs">Staff</a></div>
                     <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>
@@ -399,7 +399,7 @@ if(!empty($user_id)) {
                                     <div class="mb-2"><h5>COURSES LIST</h5></div>
                                     '.($addCourse ? '
                                         <div>
-                                            <a href="'.$baseUrl.'add-course" class="btn btn-primary"><i class="fa fa-plus"></i> Add Course</a>
+                                            <a href="'.$baseUrl.'course_add" class="btn btn-primary"><i class="fa fa-plus"></i> Add Course</a>
                                         </div>' 
                                     : null ).'
                                 </div>
