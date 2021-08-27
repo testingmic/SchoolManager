@@ -52,7 +52,7 @@ if(!empty($item_id)) {
 
         // load the section students list
         $student_param = (object) ["clientId" => $clientId, "client_data" => $defaultUser->client, "class_id" => $item_id, "user_type" => "student", "bypass" => true];
-        $student_list = load_class("users", "controllers", $student_param)->list($student_param);
+        $student_list = load_class("users", "controllers", $student_param)->quick_list($student_param);
 
         // student update permissions
         $students = "";

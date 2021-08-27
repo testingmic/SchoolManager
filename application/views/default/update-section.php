@@ -52,7 +52,7 @@ if(!empty($item_id)) {
 
         // load the section students list
         $student_param = (object) ["clientId" => $clientId, "section_id" => $item_id, "user_type" => "student"];
-        $student_list = load_class("users", "controllers")->list($student_param);
+        $student_list = load_class("users", "controllers")->quick_list($student_param);
 
         // student update permissions
         $students = "";
@@ -65,7 +65,15 @@ if(!empty($item_id)) {
             
             $students .= "<tr data-row_id=\"{$student->user_id}\">";
             $students .= "<td>".($key+1)."</td>";
-            $students .= "<td><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$student->image}\"> &nbsp; {$student->name}</td>";
+            $students .= "<td>
+                <div class='d-flex justify-content-start'>
+                    <div>
+                        <a href=\"#\" onclick='return loadPage(\"{$baseUrl}update-student/{$student->user_id}\");'>
+                            <span class='text-uppercase font-weight-bold text-primary'>{$student->name}</span>
+                        </a>
+                    </div>
+                </div>
+            </td>";
             $students .= "<td>{$student->class_name}</td>";
             $students .= "<td>{$student->gender}</td>";
             $students .= "<td align='center'>{$action}</td>";

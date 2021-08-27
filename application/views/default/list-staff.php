@@ -46,10 +46,10 @@ $color = [
 
 foreach($api_staff_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view staff information' href='#' onclick='return loadPage(\"{$baseUrl}update-staff/{$each->user_id}/view\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<span title='View staff record' onclick='return loadPage(\"{$baseUrl}update-staff/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
 
     if($accessObject->hasAccess("delete", $each->user_type)) {
-        $action .= "&nbsp;<a href='#' title='Click to delete Staff Record' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<span title='Delete Staff Record' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
     }
 
     $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
@@ -57,10 +57,9 @@ foreach($api_staff_list["data"] as $key => $each) {
     $staff_list .= "<td>
         <div class='d-flex justify-content-start'>
             <div class='mr-2'><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
-            <div class=' text-uppercase'>
-                <a href='#' onclick='return loadPage(\"{$baseUrl}update-staff/{$each->user_id}\");'>{$each->name}</a>
-                
-                <br><span class='text-uppercase badge badge-{$color[$each->user_type]} p-1'>{$each->user_type}</span>            
+            <div>
+                <span class='user_name' onclick='return loadPage(\"{$baseUrl}update-staff/{$each->user_id}\");'>{$each->name}</span>
+                <br><span class='badge badge-{$color[$each->user_type]} p-1'>".strtoupper($each->user_type)."</span>            
             </div>
         </div></td>";
     $staff_list .= "<td>{$each->position}</td>";
@@ -68,7 +67,7 @@ foreach($api_staff_list["data"] as $key => $each) {
     $staff_list .= "<td>{$each->date_of_birth}</td>";
     $staff_list .= "<td>{$each->enrollment_date}</td>";
     $staff_list .= "<td>{$each->department_name}</td>";
-    $staff_list .= "<td class='text-center'>{$action}</td>";
+    $staff_list .= "<td align='center'>{$action}</td>";
     $staff_list .= "</tr>";
 }
 

@@ -33,13 +33,10 @@ $hasUpdate = $accessObject->hasAccess("update", "library");
 $books_list = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view this book record' href='#' onclick='return loadPage(\"{$baseUrl}update-book/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='View this book record' href='#' onclick='return loadPage(\"{$baseUrl}update-book/{$each->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
-    if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to update book record' href='#' onclick='return loadPage(\"{$baseUrl}update-book/{$each->item_id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-    }
     if($hasDelete) {
-        $action .= "&nbsp;<a href='#' title='Click to delete this Book' onclick='return delete_record(\"{$each->item_id}\", \"book\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a href='#' title='Delete this Book' onclick='return delete_record(\"{$each->item_id}\", \"book\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     $books_list .= "<tr data-row_id=\"{$each->item_id}\">";
@@ -47,8 +44,8 @@ foreach($item_list["data"] as $key => $each) {
     $books_list .= "<td><a href='{$baseUrl}update-book/{$each->item_id}'>".(!empty($each->book_image) ? "<img src='{$baseUrl}{$each->book_image}' width='50px' height='40px'>" : "")." {$each->title}</a></td>";
     $books_list .= "<td>{$each->author}</td>";
     $books_list .= "<td>{$each->books_stock}</td>";
-    $books_list .= "<td><span class='underline'>".($each->category_name ?? null)."</span></td>";
-    $books_list .= "<td><span class='underline'>".($each->isbn ?? null)."</span></td>";
+    $books_list .= "<td>".($each->category_name ?? null)."</td>";
+    $books_list .= "<td>".($each->isbn ?? null)."</td>";
     $books_list .= "<td align='center'>{$action}</td>";
     $books_list .= "</tr>";
 }
@@ -56,7 +53,7 @@ foreach($item_list["data"] as $key => $each) {
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Books List</h1>
+            <h1><i class="fa fa-book-open"></i> Books List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">Books List</div>

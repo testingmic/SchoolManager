@@ -63,6 +63,7 @@ if(!empty($user_id)) {
             
             // set a new item for the arrears
             $arrears = $arrears_array[0];
+            $outstanding = 0;
 
             // convert the item to array
             $arrears_details = json_decode($arrears->arrears_details, true);
@@ -94,6 +95,7 @@ if(!empty($user_id)) {
                     foreach($categories as $cat => $value) {
                         // add the sum
                         $total += $value;
+                        $outstanding += $value;
                         // display the category name and the value
                         $student_fees_arrears .= "<tr><td>{$students_fees_category_array[$cat]["name"]}</td><td>{$value}</td></tr>";
                     }
@@ -103,12 +105,16 @@ if(!empty($user_id)) {
                         </tr>";
                     $student_fees_arrears .= "</tbody>";
                 }
+
                 $student_fees_arrears .= "</table>";
+            } else {
+                $disabled = "disabled";
+                $student_fees_arrears = "<div class='col-md-12 font-20 text-center text-success'><strong>{$data->name}</strong> currently has no fees arrears.</div>";
             }
 
         } else { 
             $disabled = "disabled";
-            $student_fees_arrears = "<div class='col-md-12 font-20 text-success'><strong>{$data->name}</strong> currently has no fees arrears.</div>";
+            $student_fees_arrears = "<div class='col-md-12 font-20 text-center text-success'><strong>{$data->name}</strong> currently has no fees arrears.</div>";
         }
 
         // scripts for the page
@@ -157,10 +163,10 @@ if(!empty($user_id)) {
                                 </div>
                                 <div class="row" id="arrears_payment_form">
 
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-'.($disabled ? 12 : 6).'">
                                         '.$student_fees_arrears.'
                                     </div>
-                                    <div class="col-lg-6">
+                                    <div class="col-lg-6 '.($disabled ? "hidden" : null).'">
                                         <div class="form-group">
                                             <label>Payment Medium</label>
                                             <select '.$disabled.' data-width="100%" class="form-control selectpicker" name="payment_method" id="payment_method">';
@@ -201,10 +207,13 @@ if(!empty($user_id)) {
                                             <input '.$disabled.' class="form-control" name="amount" id="amount" type="number" min="0">
                                         </div>
                                         <div class="text-right">
-                                            <input type="hidden" name="student_id" id="student_id" disabled value="'.$user_id.'">
-                                            <button '.$disabled.' id="default_payment_button" onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-money-check-alt"></i> Make Payment</button>
-                                            <button '.$disabled.' id="momocard_payment_button" onclick="return receive_Momo_Card_Payment();" class="btn hidden btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay via MoMo/Card</button>
-                                            <input type="hidden" hidden id="client_subaccount" name="client_subaccount" disabled value="'.$defaultClientData->client_account.'">
+                                            '.($disabled ? null : '
+                                                <input type="hidden" name="arrears_student_id" id="arrears_student_id" disabled value="'.$user_id.'">
+                                                <input type="hidden" name="outstanding" id="outstanding" disabled value="'.$outstanding.'">
+                                                <button '.$disabled.' id="default_payment_button" onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-money-check-alt"></i> Make Payment</button>
+                                                <button '.$disabled.' id="momocard_payment_button" onclick="return receive_Momo_Card_Payment();" class="btn hidden btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay via MoMo/Card</button>
+                                                <input type="hidden" hidden id="client_subaccount" name="client_subaccount" disabled value="'.$defaultClientData->client_account.'">'
+                                            ).'
                                         </div>
 
                                     </div>

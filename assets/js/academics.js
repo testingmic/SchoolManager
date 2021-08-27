@@ -43,7 +43,7 @@ var end_Academic_Term = (action = "begin") => {
                     if (response.code == 200) {
                         setTimeout(() => {
                             window.location.href = `${baseUrl}dashboard`;
-                        }, 2000);
+                        }, 1000);
                     }
                     $(`button[id="proceed_term_closure"]`).prop("disabled", false).html("PROCEED TO END TERM");
                 }).catch(() => {

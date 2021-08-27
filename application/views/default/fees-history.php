@@ -41,7 +41,8 @@ $params = (object) [
     "student_array_ids" => $defaultUser->wards_list_ids ?? null,
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
-    "category_id" => $filter->category_id ?? null
+    "category_id" => $filter->category_id ?? null,
+    "group_by" => "GROUP BY a.payment_id"
 ];
 
 // if the student id is not empty
@@ -58,8 +59,8 @@ $hasUpdate = $accessObject->hasAccess("update", "fees");
 $fees_history = "";
 foreach($item_list["data"] as $key => $fees) {
     $action = "";
-    $action = "<a href='#' title='View receipt details' onclick='loadPage(\"{$baseUrl}fees-view/{$fees->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
-    $action .= "&nbsp;<a title='Click to print this receipt' href='#' onclick=\"return print_receipt('{$fees->item_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
+    $action = "<a href='#' title='View Receipt' onclick='loadPage(\"{$baseUrl}fees-view/{$fees->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action .= "&nbsp;<a title='Click to print this receipt' href='#' onclick=\"return print_receipt('{$fees->payment_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
     
     $fees_history .= "<tr data-row_id=\"{$fees->item_id}\">";
     $fees_history .= "<td>".($key+1)."</td>";
@@ -74,8 +75,8 @@ foreach($item_list["data"] as $key => $fees) {
             </div>
         </td>";
     $fees_history .= "<td>{$fees->class_name}</td>";
-    $fees_history .= "<td>{$fees->category_name}</td>";
-    $fees_history .= "<td>{$fees->currency} {$fees->amount}</td><td>";
+    $fees_history .= "<td>".($fees->category_name ? $fees->category_name : $fees->category_id)."</td>";
+    $fees_history .= "<td>{$fees->currency} ".number_format($fees->amount_paid, 2)."</td><td>";
     $fees_history .= "<strong>{$fees->payment_method}</strong>";
 
     // if the payment method was a cheque

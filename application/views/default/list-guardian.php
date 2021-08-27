@@ -53,11 +53,11 @@ foreach($guardian_list as $kkey => $each) {
             $wards_list .= "
                 <div class='d-flex justify-content-start".($key+1 !== count($each->wards_list) ? "border-bottom mb-2 pb-2" : "")."'>
                     <div class='mr-2'>
-                        <img onclick=\"return loadPage('{$baseUrl}update-student/{$ward->student_guid}/view')\" src=\"{$baseUrl}{$ward->image}\" class='rounded-circle cursor author-box-picture' width='30px'>
+                        <img src=\"{$baseUrl}{$ward->image}\" class='rounded-circle author-box-picture' width='30px'>
                     </div>
                     <div> 
-                        <a href='{$baseUrl}update-student/{$ward->student_guid}/view' title='Click to view the full details of {$ward->name}'>{$ward->name} </a>
-                        <br>".(!empty($ward->class_name) ? "<span class='font-size:9px!important'><i class='fa fa-home'></i> {$ward->class_name}</span>" : "")."
+                        <a href='{$baseUrl}update-student/{$ward->student_guid}' title='View the details of {$ward->name}'>{$ward->name} </a>
+                        <br>".(!empty($ward->class_name) ? "<i class='fa fa-home'></i> {$ward->class_name}" : "")."
                     </div>
                 </div>
             ";
@@ -70,13 +70,13 @@ foreach($guardian_list as $kkey => $each) {
     $guardians .= "<td>
         <div class='d-flex justify-content-start'>
             <div class='mr-1'>
-                <img title='Click to view guardian details' onclick=\"return loadPage('{$baseUrl}update-guardian/{$each->user_id}/view')\" class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\">
+                <img title='View guardian details' onclick=\"return loadPage('{$baseUrl}update-guardian/{$each->user_id}')\" class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\">
             </div>
-            <div class='text-uppercase'>
+            <div>
+                <span class='user_name' title='View guardian record' onclick='return loadPage(\"{$baseUrl}update-guardian/{$each->user_id}\");'>
                 {$each->name} <br>
-                <a title='Click to view guardian record' href='#' onclick='return loadPage(\"{$baseUrl}update-guardian/{$each->user_id}/view\");'>
-                    <strong class='text-primary'>{$each->unique_id}</strong>
-                </a>
+                </span>
+                <strong>{$each->unique_id}</strong>
             </div>
         </div>
     </td>";

@@ -198,7 +198,7 @@ class Classes extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Class successfully created.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true];
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}update-class/{$item_id}"];
 
 			// return the output
             return $return;

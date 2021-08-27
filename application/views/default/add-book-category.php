@@ -30,7 +30,7 @@ $the_form = load_class("forms", "controllers")->library_category_form($params);
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>'.$pageTitle.'</h1>
+            <h1><i class="fa fa-book"></i> '.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-books-category">Category List</a></div>

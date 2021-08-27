@@ -1,6 +1,4 @@
 <?php
-// ensure this file is being included by a parent file
-if( !defined( 'BASEPATH' ) ) die( 'Restricted access' );
 
 class Files extends Myschoolgh {
     

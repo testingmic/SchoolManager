@@ -1,4 +1,4 @@
-        <?php 
+<?php 
 
 class Incidents extends Myschoolgh {
 

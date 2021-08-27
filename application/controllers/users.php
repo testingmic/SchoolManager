@@ -21,7 +21,7 @@ class Users extends Myschoolgh {
 
 		
 		$this->iclient = $data->client_data ?? [];
-
+		$this->fees_category_count = 20;
 		// run this query
         $this->academic_term = $data->client_data->client_preferences->academics->academic_term ?? null;
         $this->academic_year = $data->client_data->client_preferences->academics->academic_year ?? null;
@@ -45,22 +45,50 @@ class Users extends Myschoolgh {
 		
 		try {
 
+			// the number of rows to limit the query
+			$params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+			// if the client data is parsed
+			$academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
+			$academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
+
 			// look up query
 			$params->query = " 1 ";
+			$params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department='{$params->department_id}'" : null;
 			$params->query .= (isset($params->lookup)) ? " AND ((a.name LIKE '%{$params->lookup}%') OR (a.unique_id LIKE '%{$params->lookup}%'))" : null;
 			$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
+			$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id ='{$params->class_id}'" : null;
+			$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id ='{$params->clientId}'" : null;
+			$params->query .= (isset($params->section_id) && !empty($params->section_id)) ? " AND a.section='{$params->section_id}'" : null;
 
 			// set the columns to load
-			$params->columns = "a.client_id, a.unique_id, a.item_id AS user_id, a.name, a.user_type";
+			$params->columns = "a.id, a.client_id, a.unique_id, a.item_id AS user_id, a.name, a.user_type, a.phone_number, 
+				a.class_id, a.email, a.image, a.gender, cl.name class_name, dp.name AS department_name,
+				(SELECT SUM(p.balance) FROM fees_payments p 
+					WHERE p.student_id = a.item_id AND p.exempted = '0' 
+						AND p.academic_year = '{$academic_year}' 
+						AND p.academic_term = '{$academic_term}'
+					LIMIT {$this->fees_category_count}
+				) AS debt, ar.arrears_total AS arrears";
 			
 			// prepare and execute the statement
-			$sql = $this->db->prepare("SELECT {$params->columns} FROM users a
-				WHERE {$params->query} AND a.deleted = ? AND a.status = ? ORDER BY a.name LIMIT {$params->limit}
+			$sql = $this->db->prepare("SELECT {$params->columns} 
+				FROM users a
+				LEFT JOIN classes cl ON cl.id = a.class_id
+				LEFT JOIN departments dp ON dp.id = a.department
+				LEFT JOIN users_arrears ar ON ar.student_id = a.item_id
+				WHERE {$params->query} AND a.deleted = '0' AND a.status = '1' ORDER BY a.name LIMIT {$params->limit}
 			");
 			$sql->execute([0, 1]);
 
 			$data = [];
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
+				// run this section if the user is a student
+				if($result->user_type === "student") {
+					$result->debt_formated = number_format($result->debt, 2);
+					$result->arrears_formated = number_format($result->arrears, 2);
+					$result->total_debt_formated = number_format(($result->debt + $result->arrears), 2);
+				}
 				$data[] = $result;
 			}
 

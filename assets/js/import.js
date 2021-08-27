@@ -233,6 +233,7 @@ var import_csv_data = (this_column) => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            $.pageoverlay.show();
             $(`div[data-csv_import_column="${this_column}"] div[class="form-content-loader"]`).css("display", "flex");
             $.ajax({
                 type: "POST",
@@ -257,6 +258,7 @@ var import_csv_data = (this_column) => {
                         'disabled': false,
                         'title': ''
                     }).html(`<i class="fa fa-upload"></i> Continue Data Import`);
+                    $.pageoverlay.hide();
                     $(`div[data-csv_import_column="${this_column}"] div[class="form-content-loader"]`).css("display", "none");
                 },
                 error: function(err) {
@@ -264,6 +266,7 @@ var import_csv_data = (this_column) => {
                         text: "Sorry! An unknown file type was uploaded.",
                         icon: "error",
                     });
+                    $.pageoverlay.hide();
                     btnClick.prop({
                         'disabled': false,
                         'title': ''
@@ -286,7 +289,7 @@ var download_sample_csv = (column) => {
     $.get(`${baseUrl}api/account/download_temp`, { file: column }).then((response) => {
         if (response.code === 200) {
             $.each(response.data.result, function(i, e) {
-                // window.location.href = `${baseUrl}${e}`;
+                window.location.href = `${baseUrl}${e}`;
             });
         }
         $(`button[data-download_button="${column}"]`).prop("disabled", false).html(`<i class="fa fa-download"></i> Download Sample CSV File`);

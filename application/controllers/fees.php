@@ -1,18 +1,5 @@
 <?php
-// ensure this file is being included by a parent file
-if( !defined( 'SITE_URL' ) && !defined( 'SITE_DATE_FORMAT' ) ) die( 'Restricted access' );
 
-/**
- * Fees class extends Myschoolgh Model
- *
- * Loads the base classes and executes the request.
- *
- * @package		MySchoolGH
- * @subpackage	Students super class
- * @category	Fees Controller
- * @author		Emmallen Networks
- * @link		https://www.myschoolgh.com/
- */
 class Fees extends Myschoolgh {
 
     private $iclient = [];
@@ -45,6 +32,7 @@ class Fees extends Myschoolgh {
 
         /** Init the user type */
         $student_id = $params->student_id ?? $params->userData->user_id;
+        $group_by = $params->group_by ?? null;
         
         /** The user id algorithm */
         if(!isset($params->student_id) && in_array($params->userData->user_type, ["accountant", "admin"])) {
@@ -82,7 +70,7 @@ class Fees extends Myschoolgh {
 		try {
 
 			$stmt = $this->db->prepare("
-				SELECT a.*, fc.name AS category_name,
+				SELECT a.*, fc.name AS category_name, ".($group_by ? "SUM(a.amount) AS amount_paid," : null)."
                     (SELECT b.name FROM departments b WHERE b.id = a.department_id LIMIT 1) AS department_name,
                     (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type,'|',COALESCE(b.phone_number,'NULL'),'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
@@ -90,7 +78,7 @@ class Fees extends Myschoolgh {
                 FROM fees_collection a
                 LEFT JOIN users u ON u.item_id = a.student_id
                 LEFT JOIN fees_category fc ON fc.id = a.category_id
-				WHERE {$filters} AND a.client_id = ? ORDER BY a.id DESC LIMIT {$params->limit}
+				WHERE {$filters} AND a.client_id = ? {$group_by} ORDER BY a.id DESC LIMIT {$params->limit}
             ");
 			$stmt->execute([$params->clientId]);
             
@@ -557,9 +545,11 @@ class Fees extends Myschoolgh {
         
         // response to return
         $response = [];
+
+        global $clientPrefs;
         
         /** Quick CSS */
-        $currency = $params->client->client_preferences->labels->currency ?? null;
+        $currency = $clientPrefs->labels->currency ?? null;
 
         // if the item is not an array
         if(!is_array($allocation)) {
@@ -882,9 +872,9 @@ class Fees extends Myschoolgh {
      */
     public function allocate_fees_old(stdClass $params) {
 
-        global $defaultUser;
+        global $defaultUser, $clientPrefs;
 
-        $params->currency = $defaultUser->client->client_preferences->labels->currency ?? null;
+        $params->currency = $clientPrefs->labels->currency ?? null;
 
         try {
 
@@ -1425,7 +1415,7 @@ class Fees extends Myschoolgh {
 
         try {
 
-            global $defaultUser;
+            global $defaultUser, $clientPrefs;
             
             // get the preference of the client
             $preference = $this->iclient->client_preferences->labels;
@@ -1533,7 +1523,7 @@ class Fees extends Myschoolgh {
 
             // get the currency
             $params->payment_method = isset($params->payment_method) ? ucfirst($params->payment_method) : "Cash";
-            $currency = $defaultUser->client->client_preferences->labels->currency ?? null;
+            $currency = $clientPrefs->labels->currency ?? null;
 
             // set this to boolean
             $append_sql = (bool) ($params->payment_method === "Cheque");
@@ -1574,7 +1564,7 @@ class Fees extends Myschoolgh {
                     $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id ?? null, 
                     $paymentRecord->class_id, $paymentRecord->category_id, $params->amount, $params->userId, 
                     $paymentRecord->academic_year, $paymentRecord->academic_term, 
-                    $params->description ?? null, $currency, $receiptId, $params->payment_method, $payment_id
+                    $params->description ?? "Payment of {$paymentRecord->category_name} Fees", $currency, $receiptId, $params->payment_method, $payment_id
                 ]);
                 /* Update the user payment record */
                 $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
@@ -1619,7 +1609,7 @@ class Fees extends Myschoolgh {
             } else {
 
                 // generate a new payment_id
-                $payment_id = random_string('alnum', 15);
+                $payment_id = random_string('alnum', 16);
 
                 // get the student name
                 $student = $this->pushQuery("name AS student_name", "users", "item_id = '{$params->student_id}' AND user_type='student' AND client_id = '{$params->clientId}' LIMIT 1");
@@ -1642,7 +1632,7 @@ class Fees extends Myschoolgh {
                         // generate a unique id for the payment record
                         $uniqueId = random_string('alnum', 15);
                         $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
-                        $receiptId = $this->iclient->client_preferences->labels->receipt_label.$counter;
+                        $receiptId = $clientPrefs->labels->receipt_label.$counter;
                         $receiptId = strtoupper($receiptId);
 
                         // insert the new record into the database
@@ -1655,7 +1645,7 @@ class Fees extends Myschoolgh {
                             $params->clientId, $uniqueId, $record->student_id, $payment_id,
                             $record->department_id ?? null, $record->class_id, $record->category_id, 
                             $total_paid, $params->userId, $record->academic_year, $record->academic_term, 
-                            $params->description ?? null, $currency, $receiptId, $params->payment_method
+                            $params->description ?? "Payment of {$record->category_name} Fees", $currency, $receiptId, $params->payment_method
                         ]);
 
                         /* Update the user payment record */
@@ -1689,8 +1679,8 @@ class Fees extends Myschoolgh {
                                 $record->academic_year, $record->academic_term, ($check_account[0]->balance - $total_paid)
                             ]);
 
-                            // add up to the expense
-                            $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$total_paid}), balance = (balance + {$total_paid}) WHERE item_id = '{$account_id}' LIMIT 1");
+                            // add up to the deposits
+                            $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$total_paid}), balance = (balance + {$total_paid}) WHERE item_id = '{$account_id}' AND client_id='{$params->clientId}' LIMIT 1");
 
                         }
 
@@ -2054,7 +2044,7 @@ class Fees extends Myschoolgh {
                                                         '.(empty($student_data) ? '<td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
                                                             '.$record->student_info->name.'
                                                         </td>' : '').'
-                                                        <td width="15%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.$record->category_name.'</td>
+                                                        <td width="15%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.($record->category_name ? $record->category_name : $record->category_id).'</td>
                                                         <td width="15%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
                                                             <strong>'.$record->payment_method.'</strong>
                                                             '.(
@@ -2322,7 +2312,7 @@ class Fees extends Myschoolgh {
         try {
 
             // get the global variable
-            global $defaultUser;
+            global $defaultUser, $clientPrefs;
 
             // parse the category id
             if(isset($params->category_id) && !is_array($params->category_id)) {
@@ -2354,7 +2344,7 @@ class Fees extends Myschoolgh {
                     "academic_year" => $params->academic_year, 
                     "academic_term" => $params->academic_term,
                 ];
-                $allocation->currency = $defaultUser->client->client_preferences->labels->currency ?? null;
+                $allocation->currency = $clientPrefs->labels->currency ?? null;
 
                 // set the where clause
                 $where_clause = "a.client_id='{$params->clientId}' AND a.academic_year='{$params->academic_year}' AND 

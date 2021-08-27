@@ -69,7 +69,8 @@ if(!empty($user_id)) {
         $allocation_param = (object) [
             "clientId" => $clientId, "userData" => $defaultUser, 
             "student_id" => $user_id, "receivePayment" => $receivePayment, 
-            "client_data" => $defaultUser->client, "parse_owning" => true, "show_student" =>  false
+            "client_data" => $defaultUser->client, "parse_owning" => true, 
+            "show_student" =>  false, "group_by" => "GROUP BY a.payment_id"
         ];
         
         // load the class timetable
@@ -106,12 +107,12 @@ if(!empty($user_id)) {
                 $student_fees_payments .='
                 <tr>
                     <td>'.($key+1).'</td>
-                    <td>'.$record->category_name.'</td>
+                    <td>'.($record->category_name ? $record->category_name : $record->category_id).'</td>
                     <td>'.$record->payment_method.'</td>
-                    <td>'.(!$record->description ? $record->description : null).'</td>
+                    <td>'.($record->description ? $record->description : null).'</td>
                     <td>'.$record->recorded_date.'</td>
-                    <td align="right">'.$record->amount.'</td>
-                    <td><a href="'.$myClass->baseUrl.'receipt/'.$record->item_id.'" target="_blank" title="Click to print Receipt" class="btn btn-sm btn-outline-warning"><i class="fa fa-print"></i></a></td>
+                    <td>'.number_format($record->amount_paid, 2).'</td>
+                    <td><a href="'.$myClass->baseUrl.'receipt/'.$record->payment_id.'" target="_blank" title="Click to print Receipt" class="btn btn-sm btn-outline-warning"><i class="fa fa-print"></i></a></td>
                 </tr>';
             }
         }
@@ -246,6 +247,9 @@ if(!empty($user_id)) {
                         $student_fees_arrears .= "</tbody>";
                     }
                     $student_fees_arrears .= "</table>";
+                } else {
+                    $disabled = "disabled";
+                    $student_fees_arrears = "<div class='col-md-12 font-20 text-success'><strong>{$data->name}</strong> currently has no fees arrears.</div>";
                 }
 
             } else {

@@ -449,7 +449,7 @@ $(`form[class="form_send_message"]`).on("submit", function(evt) {
                         $(`form[class="form_send_message"] input, form[class="form_send_message"] textarea`).val("");
                         setTimeout(() => {
                             loadPage(`${baseUrl}smsemail_report?msg_id=${response.data.additional.item_id}`);
-                        }, 2000);
+                        }, 1000);
                     }
                 },
                 complete: function() {

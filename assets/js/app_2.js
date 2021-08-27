@@ -656,7 +656,7 @@ var processAppLock = () => {
 var initMainMenu = () => {
     if ($(".notifications-button").length) {
         if ($(".notifications-button").hasClass("hasnotification")) {
-            setTimeout(_swingBell(), 2000);
+            setTimeout(_swingBell(), 1000);
         }
     }
     // Dropdown Menu
@@ -1303,7 +1303,7 @@ $(`div[id="ajaxFormSubmitModal"] button[class~="btn-outline-success"]`).on("clic
                     if (response.data.additional.href !== undefined) {
                         setTimeout(() => {
                             loadPage(response.data.additional.href);
-                        }, 2000);
+                        }, 1000);
                     }
                     if (response.data.additional.data !== undefined) {
                         preload_AjaxData(response.data.additional.data);

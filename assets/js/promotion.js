@@ -66,7 +66,7 @@ var promote_Students = () => {
                 } else {
                     setTimeout(() => {
                         loadPage($.current_page);
-                    }, 2000);
+                    }, 1000);
                 }
             }).catch(() => {
                 $(`button[id="promote_students_button"]`).prop({ "disabled": false }).html(`<i class="fa fa-assistive-listening-systems"></i> Promote Students`);
@@ -133,7 +133,7 @@ var cancel_Promotion_Log = (history_log_id) => {
                 if (response.code == 200) {
                     setTimeout(() => {
                         loadPage($.current_page);
-                    }, 2000);
+                    }, 1000);
                 }
             }).catch(() => {
                 swal({
@@ -162,7 +162,7 @@ var validate_Promotion_Log = (history_log_id) => {
                 if (response.code == 200) {
                     setTimeout(() => {
                         loadPage($.current_page);
-                    }, 2000);
+                    }, 1000);
                 }
             }).catch(() => {
                 swal({

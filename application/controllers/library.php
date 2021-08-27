@@ -1,15 +1,5 @@
 <?php
-/**
- * Library class extends Myschoolgh Model
- *
- * Loads the base classes and executes the request.
- *
- * @package		MySchoolGH
- * @subpackage	Students super class
- * @category	Library Controller
- * @author		Emmallen Networks
- * @link		https://www.myschoolgh.com/
- */
+
 class Library extends Myschoolgh {
 
 	private $iclient = [];

@@ -299,7 +299,7 @@ class Api {
             }
 
             // log the user request
-            $this->update_onlineStatus($this->userId);
+            // $this->update_onlineStatus($this->userId);
             $params->remote ? $this->logRequest($this->default_params, $code) : null;
         }
 

@@ -11,7 +11,7 @@ var load_Pay_Fees_Form = () => {
         "show_history": true
     };
     $(`div[id="make_payment_button"] button`).prop("disabled", true).html(`Loading record <i class="fa fa-spin fa-spinner"></i>`);
-
+    $(`a[data-link_item="student_go_back"]`).attr("onclick", `return loadPage('${baseUrl}update-student/${$student_id}')`);
     $.get(`${baseUrl}api/fees/payment_form`, data).then((response) => {
         $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Load Form`);
         if (response.code === 200) {
@@ -132,17 +132,18 @@ var save_Receive_Payment = () => {
         t_message = "";
 
     if (!$(`div[id="fees_payment_form"] input[name="amount"]`).val().length) {
-        swal({
-            text: "Sorry! The amount cannot be empty.",
-            icon: "error",
-        });
+        notify("Sorry! The amount cannot be empty.");
+        $(`div[id="fees_payment_form"] input[name="amount"]`).focus();
         return false;
     }
 
     if ($amount > $balance) {
-        t_message = `Are you sure you want to save this payment. 
-            An amount of ${$amount} is been paid which is more than the required of ${$balance}`;
-    } else if ($amount < $balance) {
+        notify(`Sorry! You cannot pay more than the outstanding balance of ${balance}`);
+        $(`div[id="fees_payment_form"] input[name="amount"]`).focus();
+        return false;
+    }
+
+    if ($amount < $balance) {
         t_message = `Are you sure you want to save this payment. 
             An amount of ${$amount} is been paid which will leave a balance of ${$balance-$amount}.`;
     }
@@ -550,3 +551,4 @@ $(`select[name="payment_method"]`).on("change", function() {
         $(`button[id="default_payment_button"], div[id="cheque_payment_filter"]`).addClass("hidden");
     }
 });
+$(`div[id="fees_payment_form"] input[name="amount"]`).focus();

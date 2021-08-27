@@ -355,8 +355,6 @@ class Resources extends Myschoolgh {
                 ];
             }
         }
-
-        // return $resources_array;
         
         $total_count = count($resources_array);
 
@@ -626,7 +624,7 @@ class Resources extends Myschoolgh {
                 $attachments = $filesObj->prep_attachments($module, $params->userId, $item_id, $initial_attachment);
                 
                 // reload the page if the user uploaded a file
-                $return = ["href" => "{$this->baseUrl}e-learning_update/{$item_id}"];
+                $return = ["href" => "{$this->baseUrl}e-learning_view/{$item_id}"];
 
                 // insert the record if not already existing
                 $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? LIMIT 1");

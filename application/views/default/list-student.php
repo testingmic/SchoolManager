@@ -41,7 +41,7 @@ if($defaultUser->user_type === "parent") {
     $student_param->only_wards_list = true;
 }
 
-$student_list = load_class("users", "controllers", $student_param)->list($student_param);
+$student_list = load_class("users", "controllers", $student_param)->quick_list($student_param);
 
 $hasDelete = $accessObject->hasAccess("delete", "student");
 $hasUpdate = $accessObject->hasAccess("update", "student");
@@ -51,24 +51,20 @@ $hasFiltering = $accessObject->hasAccess("filters", "settings");
 $students = "";
 foreach($student_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view student record' href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$each->user_id}/view\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<span title='View Student Record' onclick='loadPage(\"{$baseUrl}update-student/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
 
     if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to update student record' href='#' onclick='return loadPage(\"{$baseUrl}modify-student/{$each->user_id}/update\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<span title='Update Student Record' onclick='loadPage(\"{$baseUrl}modify-student/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></span>";
     }
     if($hasDelete) {
-        $action .= "&nbsp;<a href='#' title='Click to delete this Student' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<span title='Delete this Student' onclick='delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
     }
 
-    $students .= "<tr data-row_id=\"{$each->user_id}\">";
+    $students .= "<tr data-row_id=\"{$each->id}\">";
     $students .= "<td>".($key+1)."</td>";
-    $students .= "<td>
-        <div title='Click to view student details' class='d-flex font-weight-bold text-uppercase justify-content-start'>
-            <div>
-                <a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$each->user_id}/view\");'>{$each->name}
-                </a><br>{$each->unique_id}
-            </div>
-        </div>
+    $students .= "
+    <td>
+        <span title='View student details' class='user_name' onclick='loadPage(\"{$baseUrl}update-student/{$each->user_id}\");'>{$each->name}</span><br>{$each->unique_id}
     </td>";
     $students .= "<td>{$each->class_name}</td>";
     $students .= "<td>{$each->gender}</td>";

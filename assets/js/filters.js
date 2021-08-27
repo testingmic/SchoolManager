@@ -11,8 +11,8 @@ if ($(`div[id="filter_Department_Class"]`).length) {
         $(`div[id="fees_payment_preload"] select[name='category_id']`).prop("disabled", true);
         $(`div[id="promote_Student_Display"]`).addClass(`hidden`);
         if ((value.length && value !== "null") || $(`div[class~="byPass_Null_Value"]`).length) {
-            $(`select[name='class_id']`).find('option').remove().end();
-            $(`select[name='class_id']`).append(`<option value="">Please Select Class</option>`);
+            $(`select[name='class_id'], select[name='course_id']`).find('option').remove().end();
+            $(`select[name='class_id'], select[name='course_id']`).append(`<option value="">Please Select</option>`);
             $.get(`${baseUrl}api/classes/list?columns=id,name,slug,item_id`, { department_id: value }).then((response) => {
                 if (response.code == 200) {
                     $.each(response.data.result, function(i, e) {
@@ -55,7 +55,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
             if (value.length && value !== "null") {
                 $(`table[id="simple_load_student"] tbody`).html(`<tr><td colspan="6" align="center">Loading Students Data <i class="fa fa-spin fa-spinner"></i></td></tr>`);
                 $(`div[id="fees_allocation_form"] select[name="category_id"],div[id="fees_allocation_form"] input[name="amount"]`).attr("disabled", false);
-                $.get(`${baseUrl}api/users/list?class_id=${value}&minified=simplified&user_type=student`).then((response) => {
+                $.get(`${baseUrl}api/users/quick_list?class_id=${value}&minified=simplified&user_type=student`).then((response) => {
                     if (response.code == 200) {
                         $.each(response.data.result, function(i, e) {
                             $(`select[name='student_id']`).append(`<option data-phone_number="${e.phone_number}" data-email="${e.email}" value='${e.user_id}'>${e.name}</option>`);
@@ -124,7 +124,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                 $.get(`${baseUrl}api/courses/list?class_id=${value}&minified=true`).then((response) => {
                     if (response.code == 200) {
                         $.each(response.data.result, function(i, e) {
-                            $(`select[name='course_id']`).append(`<option value='${e.id}'>${e.name}</option>`);
+                            $(`select[name='course_id']`).append(`<option value='${e.item_id}'>${e.name}</option>`);
                         });
                     }
                 });
@@ -137,7 +137,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
             class_id = $(`select[name="class_id"]`).val(),
             course_id = $(`select[name="course_id"]`).val();
         $.form_data = { department_id, class_id, course_id };
-        loadPage(`${baseUrl}list-assessments`);
+        loadPage(`${baseUrl}list-assessment`);
     });
 
 }

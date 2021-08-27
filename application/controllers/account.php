@@ -37,7 +37,7 @@ class Account extends Myschoolgh {
         ];
     
         $this->accepted_column["parent"] = [
-            "unique_id" => "Employee ID", "firstname" => "Firstname", "lastname" => "Lastname", 
+            "unique_id" => "Guardian ID", "firstname" => "Firstname", "lastname" => "Lastname", 
             "othername" => "Othernames", "email" => "Email", "phone_number" => "Primary Contact",
             "phone_number_2" => "Secondary Contact", "blood_group" => "Blood Group", 
             "city" => "City", "residence" => "Residence", "country" => "Country Code", 
@@ -643,6 +643,8 @@ initiateCalendar();";
      */
     public function import(stdClass $params) {
 
+        global $clientPrefs;
+
         // columns to use for the query
         $accepted_column = $this->accepted_column[$params->column] ?? [];
 
@@ -689,7 +691,8 @@ initiateCalendar();";
         $sqlQuery = "INSERT INTO {$table[$params->column]} (`upload_id`,`created_by`,`item_id`,`client_id`,`academic_year`,`academic_term`,";
         
         // if the user type is student
-        if(in_array($params->column, ["student", "parent"])) {
+        if(in_array($params->column, ["student", "parent", "staff"])) {
+            $sqlQuery = "INSERT INTO {$table[$params->column]} (`upload_id`,`created_by`,`item_id`,`client_id`,";
             $sqlQuery .= "`user_type`,";
         }
 
@@ -729,6 +732,23 @@ initiateCalendar();";
             $upload_id = random_string("alnum", 16);
 
             $isUser = (bool) in_array($params->column, ["student", "staff", "parent"]);
+
+            // generate  new key
+            if($isUser) {
+                $items_last_row["student"] = $this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='student' LIMIT {$this->global_limit}");
+                $items_last_row["guardian"] = $this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='parent' LIMIT {$this->global_limit}");
+                $items_last_row["staff"] = $this->itemsCount("users", "client_id = '{$params->clientId}' AND user_type='student' LIMIT {$this->global_limit}");
+            }
+
+            $not_yet_set = true;
+
+            // set a new variable
+            if(in_array($params->column, ["student","parent"]) && $not_yet_set) {
+                $fresh_unique_id = $items_last_row[$params->column];
+                $label = $params->column.'_label';
+            } else {
+                $label = "staff_label";
+            }
             
             // loop through each array dataset
             foreach($newCSVArray as $eachData) {
@@ -737,10 +757,11 @@ initiateCalendar();";
                 $t_user_type = "";
 
                 // append the customer_id column and value
-                $unqData = random_string('alnum', 32);
+                $unqData = random_string('alnum', 16);
 
                 // initializing
-                $sqlQuery .= '("'.$upload_id.'","'.$params->userId.'","'.$unqData.'","'.$params->clientId.'","'.$params->academic_year.'","'.$params->academic_term.'",';
+                // $sqlQuery .= '("'.$upload_id.'","'.$params->userId.'","'.$unqData.'","'.$params->clientId.'","'.$params->academic_year.'","'.$params->academic_term.'",';
+                $sqlQuery .= '("'.$upload_id.'","'.$params->userId.'","'.$unqData.'","'.$params->clientId.'",';
                 $ik = 0;
 
                 if(in_array($params->column, ["student","parent"])) {
@@ -754,10 +775,22 @@ initiateCalendar();";
                     // perform these checks for the arrayed list
                     if($isUser) {
                         // if email then validate it
-                        if(($params->csv_keys[$eachKey] === "Email") && !filter_var($eachValue, FILTER_VALIDATE_EMAIL)) {
+                        if(($params->csv_keys[$eachKey] === "Email") && !empty($eachValue) && !filter_var($eachValue, FILTER_VALIDATE_EMAIL)) {
                             $bugs["email"] = "Please ensure the email section contains only valid email addresses.";
                         }
-                        if(($params->csv_keys[$eachKey] === "Employee ID") || ($params->csv_keys[$eachKey] === "Student ID")) {
+                        if(($params->csv_keys[$eachKey] === "Employee ID") || ($params->csv_keys[$eachKey] === "Student ID") || ($params->csv_keys[$eachKey] === "Guardian ID")) {
+
+                            // increment the counter
+                            $counter = $this->append_zeros(($fresh_unique_id + 1), $this->append_zeros);
+                            $user_unique_id = $clientPrefs->labels->{$label}.$counter.date("Y");
+
+                            // set the new id if empty
+                            if(empty($eachValue)) {
+                                $not_yet_set = false;
+                                $fresh_unique_id += 1;
+                                $eachValue = $user_unique_id;
+                            }
+                            // set the new user id
                             $eachValue = strtoupper($eachValue);
                             $unique_id[$eachValue] = isset($unique_id[$eachValue]) ? ($unique_id[$eachValue]+1) : 1;
                         }
@@ -802,6 +835,7 @@ initiateCalendar();";
                         }
                         if(($params->csv_keys[$eachKey] == "User Type")) {
                             $type = strtolower($eachValue);
+                            $fresh_unique_id = $items_last_row[$type] ?? NULL;
                             if(!in_array($type, $user_type)) {
                                 $bugs["user_type"] = "Please ensure the user type is one of the following: teacher, employee, accountant, admin";
                             } else {
@@ -892,7 +926,7 @@ initiateCalendar();";
                 }
 
                 // unset all existing sessions
-                $session->remove([$session_key, "last_recordUpload"]);
+                $this->session->remove([$session_key, "last_recordUpload"]);
 
                 // return success
                 return ["data" => "{$import}s data was successfully imported."];

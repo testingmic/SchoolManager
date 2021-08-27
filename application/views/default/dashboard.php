@@ -426,20 +426,21 @@ if($isSupport) {
                 }
                 
                 // begin the request parameter
-                $params = (object) [
+                $fees_params = (object) [
                     "clientId" => $clientId,
                     "userData" => $defaultUser,
                     "client_data" => $defaultUser->client,
-                    "student_array_ids" => $defaultUser->wards_list_ids
+                    "student_array_ids" => $defaultUser->wards_list_ids,
+                    "group_by" => "GROUP BY a.payment_id"
                 ];
 
                 // if the student id is not empty
                 if(!empty($session->student_id)) {
-                    $params->student_id = $session->student_id;
+                    $fees_params->student_id = $session->student_id;
                 }
                 
                 // load the student fees payment
-                $item_list = load_class("fees", "controllers", $params)->list($params)["data"];
+                $item_list = load_class("fees", "controllers", $fees_params)->list($fees_params)["data"];
                 
                 // initials
                 $fees_history = "";
@@ -467,7 +468,7 @@ if($isSupport) {
                                 </div>
                             </div>
                         </td>";
-                    $fees_history .= "<td>{$each->amount}</td>";
+                    $fees_history .= "<td>".number_format($each->amount_paid, 2)."</td>";
                     $fees_history .= "<td>{$each->category_name}</td>";
                     $fees_history .= "<td>{$each->recorded_date}</td>";
                     $fees_history .= "<td width='10%' align='center'>{$action}</td>";

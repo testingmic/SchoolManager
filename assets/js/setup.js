@@ -106,7 +106,7 @@ var trigger_form_submit = () => {
                                     } else {
                                         setTimeout(() => {
                                             window.location.href = `${response.data.additional.href}`;
-                                        }, 2000);
+                                        }, 1000);
                                     }
                                 }
                             }
@@ -221,7 +221,7 @@ var complete_setup_process = () => {
                 if (response.code === 200) {
                     setTimeout(() => {
                         window.location.href = `${baseUrl}`;
-                    }, 2000);
+                    }, 1000);
                 }
             });
         }

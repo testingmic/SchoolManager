@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $defaultClientData;
 
 // initial variables
 $appName = config_item("site_name");
@@ -28,6 +28,7 @@ $assignments_param = (object) [
     "show_marks" => true,
     "clientId" => $clientId,
     "userData" => $defaultUser,
+    "client_data" => $defaultClientData,
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
     "course_id" => $filter->course_id ?? null
@@ -110,7 +111,7 @@ $courses_list = [];
 // default class_list
 $classes_param = (object) [
     "clientId" => $clientId,
-    "columns" => "id, name"
+    "columns" => "id, name, item_id"
 ];
 // if the class_id is not empty
 $classes_param->department_id = !empty($filter->department_id) ? $filter->department_id : null;
@@ -122,16 +123,17 @@ if(!empty($filter->class_id)) {
         "clientId" => $clientId,
         "minified" => true,
         "userData" => $defaultUser,
-        "class_id" => $filter->class_id
+        "class_id" => $filter->class_id,
+        "client_data" => $defaultClientData,
     ];
-    $courses_list = load_class("courses", "controllers")->list($courses_param)["data"];
+    $courses_list = load_class("courses", "controllers", $courses_param)->list($courses_param)["data"];
 }
 
 $response->array_stream["assessment_array"] = $assessment_array;
 
 $response->html = '
     <section class="section">
-        <div class="section-header">
+        <div class="section-header byPass_Null_Value">
             <h1><i class="fa fa-book-reader"></i> Class Assessment List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
@@ -154,7 +156,7 @@ $response->html = '
                 <select class="form-control selectpicker" data-width="100%" name="class_id">
                     <option value="">Please Select Class</option>';
                     foreach($class_list as $each) {
-                        $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                        $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";
                     }
                     $response->html .= '
                 </select>
@@ -164,7 +166,7 @@ $response->html = '
                 <select class="form-control selectpicker" data-width="100%" name="course_id">
                     <option value="">Please Select Course</option>';
                     foreach($courses_list as $each) {
-                        $response->html .= "<option ".(isset($filter->course_id) && ($filter->course_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                        $response->html .= "<option ".(isset($filter->course_id) && ($filter->course_id == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";
                     }
                     $response->html .= '
                 </select>

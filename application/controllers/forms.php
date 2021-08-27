@@ -446,11 +446,15 @@ class Forms extends Myschoolgh {
             </div>";
         }
         
+        $html_content .= "<div class='col-md-12'>";
         $html_content .= "<div class='form-group text-center mb-1'>{$preloaded_attachments}</div>";
+        $html_content .= "</div>";
 
+        $html_content .= "<div class='col-md-12'>";
+        $html_content .= "<div class='row'>";
         $html_content .= "<div class='col-md-6'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Grade <span class='required'>*</span></label>";
+        $html_content .= "<label>Grade Scale<span class='required'>*</span></label>";
         $html_content .= "<input {$disabled} type='number' value='".($params->data->grading ?? null)."' min='1' max='100' class='form-control' name='grade' id='grade'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
@@ -461,6 +465,8 @@ class Forms extends Myschoolgh {
         $html_content .= "<option ".($assigned_to == "all_students" ? "selected" : null)." value='all_students'>All Students</option>";
         $html_content .= "<option ".($assigned_to == "selected_students" ? "selected" : null)." value='selected_students'>Selected Students</option>";
         $html_content .= "</select>";
+        $html_content .= "</div>";
+        $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "</div>";
 
@@ -773,13 +779,13 @@ class Forms extends Myschoolgh {
                             <br><strong class=\"mt-2\"><i class=\"fa fa-calendar\"></i> ".date("jS F Y", strtotime($eachFile->datetime))."</strong>
                         </div>";
 
-                        $view_option = $show_view ? "<a href=\"#\" onclick=\"return loadPage('{$this->baseUrl}{$show_view}/{$record_id}_{$eachFile->unique_id}');\" title=\"Click to view details of file\" class=\"btn btn-sm btn-primary\"><i class=\"fa fa-eye\"></i></a>" : "";
+                        $view_option = $show_view ? "<button onclick=\"return loadPage('{$this->baseUrl}{$show_view}/{$record_id}_{$eachFile->unique_id}');\" title=\"Click to view details of file\" class=\"btn btn-sm btn-primary\"><i class=\"fa fa-eye\"></i></button>" : "";
                         $image_desc = "";
                         $delete_btn = "";
 
                         // show the view of the item
                         if(isset($eachFile->is_editable)) {
-                            $view_option .= "&nbsp;<a href=\"#\" onclick=\"return loadPage('{$this->baseUrl}{$eachFile->is_editable}/{$record_id}');\" title=\"Click to edit the material\" class=\"btn btn-sm btn-warning\"><i class=\"fa fa-edit\"></i></a>";
+                            $view_option .= "&nbsp;<button onclick=\"return loadPage('{$this->baseUrl}{$eachFile->is_editable}/{$record_id}');\" title=\"Click to edit the material\" class=\"btn btn-sm btn-warning\"><i class=\"fa fa-edit\"></i></button>";
                         }
 
                         // display this if the object is deletable.

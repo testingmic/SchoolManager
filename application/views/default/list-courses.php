@@ -45,13 +45,9 @@ $hasFiltering = $accessObject->hasAccess("filters", "settings");
 $courses = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view the course record' href='#' onclick='return loadPage(\"{$baseUrl}update-course/{$each->id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
-
-    if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to update course record' href='#' onclick='return loadPage(\"{$baseUrl}update-course/{$each->id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
-    }
+    $action = "<a title='View the course record' href='#' onclick='return loadPage(\"{$baseUrl}update-course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
     if($hasDelete) {
-        $action .= "&nbsp;<a href='#' title='Click to delete this Course' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+        $action .= "&nbsp;<a href='#' title='Delete this Course' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     $courses .= "<tr data-row_id=\"{$each->id}\">";
@@ -61,16 +57,16 @@ foreach($item_list["data"] as $key => $each) {
     $courses .= "<td>{$each->credit_hours}</td><td>";
     
     foreach($each->class_list as $class) {
-        $courses .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}update-class/{$class->id}/view\");'><span class='underline'>".$class->name."</span></a></p>";
+        $courses .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}update-class/{$class->id}\");'><span class='underline'>".$class->name."</span></a></p>";
     }
 
     $courses .= "</td><td>";
 
     foreach($each->course_tutors as $tutor) {
-        $courses .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}update-staff/{$tutor->item_id}/view\");'><span class='underline'>".$tutor->name."</span></a></p>";
+        $courses .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}update-staff/{$tutor->item_id}\");'><span class='underline'>".$tutor->name."</span></a></p>";
     }
 
-    $courses .= "</td><td class='text-center'>{$action}</td>";
+    $courses .= "</td><td align='center'>{$action}</td>";
     $courses .= "</tr>";
 }
 

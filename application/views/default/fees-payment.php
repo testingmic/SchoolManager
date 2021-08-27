@@ -182,7 +182,7 @@ if(!$receivePayment) {
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 mb-1">
-                                        <a class="btn btn-dark" href="#" onclick="return loadPage(\''.$baseUrl.'update-student/'.(!empty($getObject->student_id) ? $getObject->student_id : $student_id).'\');">
+                                        <a class="btn btn-dark" data-link_item="student_go_back" href="#" onclick="return loadPage(\''.$baseUrl.'update-student/'.(!empty($getObject->student_id) ? $getObject->student_id : $student_id).'\');">
                                             <i class="fa fa-arrow-circle-left"></i> Go Back
                                         </a>
                                     </div>

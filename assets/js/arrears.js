@@ -1,28 +1,30 @@
 var save_Receive_Payment = () => {
 
-    let $balance = parseInt($(`span[class~="outstanding"]`).attr("data-amount_payable")),
-        $amount = parseFloat($(`div[id="arrears_payment_form"] input[name="amount"]`).val()),
+    let balance = parseFloat($(`div[id="arrears_payment_form"] input[name="outstanding"]`).val()),
+        amount = parseFloat($(`div[id="arrears_payment_form"] input[name="amount"]`).val()),
         payment_method = $(`div[id="arrears_payment_form"] select[name="payment_method"]`).val(),
         checkout_url = $(`span[class~="outstanding"]`).attr("data-checkout_url"),
-        student_id = $(`input[name='fees_payment_student_id']`).val(),
+        student_id = $(`div[id="arrears_payment_form"] input[name='arrears_student_id']`).val(),
         email_address = $(`input[name="email_address"]`).val(),
         t_message = "";
-
+    
     if (!$(`div[id="arrears_payment_form"] input[name="amount"]`).val().length) {
-        swal({
-            text: "Sorry! The amount cannot be empty.",
-            icon: "error",
-        });
+        notify("Sorry! The amount cannot be empty.");
+        $(`div[id="arrears_payment_form"] input[name="amount"]`).focus();
         return false;
     }
 
-    if ($amount > $balance) {
-        t_message = `Are you sure you want to save this payment. 
-            An amount of ${$amount} is been paid which is more than the required of ${$balance}`;
-    } else if ($amount < $balance) {
-        t_message = `Are you sure you want to save this payment. 
-            An amount of ${$amount} is been paid which will leave a balance of ${$balance-$amount}.`;
+    if (amount > balance) {
+        notify(`Sorry! You cannot pay more than the outstanding balance of ${balance}`);
+        $(`div[id="arrears_payment_form"] input[name="amount"]`).focus();
+        return false;
     }
+
+    if (amount < balance) {
+        t_message = `Are you sure you want to save this payment. 
+            An amount of ${amount} is been paid which will leave a balance of ${balance-amount}.`;
+    }
+
     swal({
         title: "Make Payment",
         text: `${t_message}\nDo you want to proceed to make the payment?`,
@@ -33,28 +35,29 @@ var save_Receive_Payment = () => {
         if (proceed) {
             $(`div[id="arrears_payment_form"] div[class="form-content-loader"]`).css("display", "flex");
             let data = {
-                "amount": $amount,
+                "amount": amount,
                 "student_id": student_id,
                 "checkout_url": checkout_url,
                 "payment_method": payment_method,
                 "email_address": email_address,
                 "contact_number": $(`input[name="contact_number"]`).val()
             };
+
             if ($(`select[name="payment_method"]`).val() === "cheque") {
                 data["bank_id"] = $(`select[name="bank_id"]`).val();
                 data["cheque_number"] = $(`input[name="cheque_number"]`).val();
             }
 
             $.post(`${baseUrl}api/arrears/make_payment`, data).then((response) => {
-                let s_icon = "error";
-                if (response.code === 200) {
-                    finalize_payment(response, checkout_url);
-                    s_icon = "success";
-                }
                 swal({
                     text: response.data.result,
-                    icon: s_icon,
+                    icon: responseCode(response.code),
                 });
+                if (response.code === 200) {
+                    setTimeout(() => {
+                        loadPage(`${baseUrl}arrears/${student_id}`);
+                    }, 1000);
+                }
                 $(`div[id="arrears_payment_form"] div[class="form-content-loader"]`).css("display", "none");
             }).catch(() => {
                 $(`div[id="arrears_payment_form"] div[class="form-content-loader"]`).css("display", "none");
@@ -102,9 +105,9 @@ var receive_Momo_Card_Payment = () => {
     try {
 
         let amount = parseFloat($(`div[id="arrears_payment_form"] input[name="amount"]`).val()),
-            email_address = $(`input[name="email_address"]`).val(),
-            subaccount = $(`input[name="client_subaccount"]`).val(),
-            balance = parseFloat($(`span[class~="outstanding"]`).attr("data-amount_payable"));
+            email_address = $(`div[id="arrears_payment_form"] input[name="email_address"]`).val(),
+            subaccount = $(`div[id="arrears_payment_form"] input[name="client_subaccount"]`).val(),
+            balance = parseFloat($(`div[id="arrears_payment_form"] input[name="outstanding"]`).val());
 
         if (amount > balance) {
             notify(`Sorry! You cannot pay more than the outstanding balance of ${balance}`);
@@ -184,5 +187,4 @@ $(`div[id="arrears_payment_form"] select[name="payment_method"]`).on("change", f
         $(`div[id="arrears_payment_form"] button[id="default_payment_button"], div[id="cheque_payment_filter"]`).addClass("hidden");
     }
 });
-
 $(`div[id="arrears_payment_form"] input[name="amount"]`).focus();

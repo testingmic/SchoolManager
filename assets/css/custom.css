@@ -681,3 +681,23 @@ label {
 .nav-tabs .nav-item {
     text-transform: uppercase;
 }
+
+.user_name {
+    color: #6777ef;
+    -webkit-transition: all .5s;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.user_name:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.capitalize {
+    text-transform:capitalize;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}

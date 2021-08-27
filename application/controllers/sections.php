@@ -30,7 +30,7 @@ class Sections extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT COUNT(*) FROM users b WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' AND b.department = a.id AND b.client_id = a.client_id) AS students_count,
+                    (SELECT COUNT(*) FROM users b WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' AND b.section = a.id AND b.client_id = a.client_id) AS students_count,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.section_leader LIMIT 1) AS section_leader_info
                 FROM sections a
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}

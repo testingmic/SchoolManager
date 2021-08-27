@@ -536,7 +536,7 @@ var modify_report_result = (action, report_id) => {
                 if (response.data.additional.href !== undefined) {
                     setTimeout(() => {
                         loadPage(response.data.additional.href);
-                    }, 2000);
+                    }, 1000);
                 }
                 $.pageoverlay.hide();
             }).catch(() => {
