@@ -65,6 +65,7 @@ if(!empty($user_id)) {
         $addCourse = $accessObject->hasAccess("add", "course");
         $updateIncident = $accessObject->hasAccess("update", "incident");
         $deleteIncident = $accessObject->hasAccess("delete", "incident");
+        $modifySalaryStructure = $accessObject->hasAccess("modify_payroll", "payslip");
 
         // has the right to update the user permissions
         $updatePermission = $accessObject->hasAccess("update", "permissions");
@@ -270,7 +271,7 @@ if(!empty($user_id)) {
                 <div class="card">
                     <div class="card-body text-center bg-info">
                         <div class="font-18 text-dark">POSITION</div>
-                        <div class="font-22 font-weight-bold text-uppercase text-dark">'.$data->position.'</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-dark">'.($data->position ? $data->position : '-' ).'</div>
                     </div>
                 </div>
             </div>
@@ -294,6 +295,9 @@ if(!empty($user_id)) {
                             <div class="clearfix"></div>
                             <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
                             <div class="author-box-job"><strong>'.strtoupper($data->user_type).'</strong></div>
+                        </div>
+                        <div class="text-center mt-3">
+                        '.($modifySalaryStructure ? '<a class="btn mb-1 btn-primary" href="'.$baseUrl.'payroll-view/'.$user_id.'"><i class="fa fa-edit"></i> Salary Structure</a>' : null).'
                         </div>
                     </div>
                 </div>

@@ -65,7 +65,7 @@ foreach($student_list["data"] as $key => $each) {
     $students .= "<td>
         <div title='Click to view student details' class='d-flex font-weight-bold text-uppercase justify-content-start'>
             <div>
-                <a class='font-weight-bold' href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$each->user_id}/view\");'>{$each->name}
+                <a href='#' onclick='return loadPage(\"{$baseUrl}update-student/{$each->user_id}/view\");'>{$each->name}
                 </a><br>{$each->unique_id}
             </div>
         </div>

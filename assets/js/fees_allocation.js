@@ -5,6 +5,7 @@ var remove_category = (category_id) => {
         .addClass("hidden");
     $(`tr[data-row_id="${category_id}"] button[data-reverse_action="${category_id}"]`)
         .removeClass("hidden");
+    recalculate_total();
 }
 
 var reverse_action = (category_id) => {
@@ -14,6 +15,7 @@ var reverse_action = (category_id) => {
     ).removeClass("hidden");
     $(`tr[data-row_id="${category_id}"] button[data-reverse_action="${category_id}"]`)
         .addClass("hidden");
+    recalculate_total();
 }
 
 var save_category = (category, student_id) => {

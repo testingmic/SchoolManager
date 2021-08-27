@@ -1749,13 +1749,14 @@ class Assignments extends Myschoolgh {
             foreach($students_list as $student_id => $student) {
                 // increment
                 $count++;
-                $total_score += $student["score"];
+                $student_score = !empty($student["score"]) && preg_match("/^[0-9]+$/", $student["score"]) ?  $student["score"] : 0;
+                $total_score += $student_score;
 
                 // update if already existing
                 if($update_log) {
-                    $update->execute([$student["score"], 1, "Submitted", $params->clientId, $item_id, $student_id]);
+                    $update->execute([$student_score, 1, "Submitted", $params->clientId, $item_id, $student_id]);
                 } else {
-                    $insert->execute([$params->clientId, $item_id, $student_id, $student["score"], 1, "Submitted"]);
+                    $insert->execute([$params->clientId, $item_id, $student_id, $student_score, 1, "Submitted"]);
                 }
             }
 

@@ -673,3 +673,11 @@ label {
 .hover:hover {
     text-decoration: underline;
 }
+
+.height-90px {
+    max-height: 90px!important;
+}
+
+.nav-tabs .nav-item {
+    text-transform: uppercase;
+}

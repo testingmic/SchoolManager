@@ -2,12 +2,10 @@ var save_Receive_Payment = () => {
 
     let $balance = parseInt($(`span[class~="outstanding"]`).attr("data-amount_payable")),
         $amount = parseFloat($(`div[id="arrears_payment_form"] input[name="amount"]`).val()),
-        description = $(`div[id="arrears_payment_form"] textarea[name="description"]`).val(),
         payment_method = $(`div[id="arrears_payment_form"] select[name="payment_method"]`).val(),
         checkout_url = $(`span[class~="outstanding"]`).attr("data-checkout_url"),
         student_id = $(`input[name='fees_payment_student_id']`).val(),
         email_address = $(`input[name="email_address"]`).val(),
-        category_id = $(`input[name="fees_payment_category_id"]`).val(),
         t_message = "";
 
     if (!$(`div[id="arrears_payment_form"] input[name="amount"]`).val().length) {
@@ -36,9 +34,7 @@ var save_Receive_Payment = () => {
             $(`div[id="arrears_payment_form"] div[class="form-content-loader"]`).css("display", "flex");
             let data = {
                 "amount": $amount,
-                "category_id": category_id,
                 "student_id": student_id,
-                "description": description,
                 "checkout_url": checkout_url,
                 "payment_method": payment_method,
                 "email_address": email_address,
@@ -49,7 +45,7 @@ var save_Receive_Payment = () => {
                 data["cheque_number"] = $(`input[name="cheque_number"]`).val();
             }
 
-            $.post(`${baseUrl}api/fees/make_payment`, data).then((response) => {
+            $.post(`${baseUrl}api/arrears/make_payment`, data).then((response) => {
                 let s_icon = "error";
                 if (response.code === 200) {
                     finalize_payment(response, checkout_url);
@@ -74,10 +70,8 @@ var save_Receive_Payment = () => {
 var log_Momo_Card_Payment = (reference_id, transaction_id) => {
 
     let amount = parseFloat($(`div[id="arrears_payment_form"] input[name="amount"]`).val()),
-        description = $(`div[id="arrears_payment_form"] textarea[name="description"]`).val(),
         student_id = $(`input[name='fees_payment_student_id']`).val(),
-        email_address = $(`input[name="email_address"]`).val(),
-        category_id = $(`input[name="fees_payment_category_id"]`).val();
+        email_address = $(`input[name="email_address"]`).val();
 
     let data = {
         "amount": amount,
@@ -88,7 +82,7 @@ var log_Momo_Card_Payment = (reference_id, transaction_id) => {
         "contact_number": $(`input[name="contact_number"]`).val()
     };
 
-    $.post(`${baseUrl}api/fees/momocard_payment`, data).then((response) => {
+    $.post(`${baseUrl}api/arrears/momocard_payment`, data).then((response) => {
         if (response.code == 200) {
             $(`button[id="payment_cancel"]`).addClass("hidden");
             $(`div[id="arrears_payment_form"] *`).prop("disabled", true);
@@ -110,11 +104,10 @@ var receive_Momo_Card_Payment = () => {
         let amount = parseFloat($(`div[id="arrears_payment_form"] input[name="amount"]`).val()),
             email_address = $(`input[name="email_address"]`).val(),
             subaccount = $(`input[name="client_subaccount"]`).val(),
-            balance = parseInt($(`span[class~="outstanding"]`).attr("data-amount_payable"));
+            balance = parseFloat($(`span[class~="outstanding"]`).attr("data-amount_payable"));
 
         if (amount > balance) {
-            notify(`Are you sure you want to save this payment. 
-                An amount of ${amount} is been paid which is more than the required of ${balance}`);
+            notify(`Sorry! You cannot pay more than the outstanding balance of ${balance}`);
             return false;
         }
 
@@ -173,18 +166,23 @@ var generate_payment_report = (student_id) => {
     window.open(`${baseUrl}receipt?category_id=${category_id}&start_date=${start_date}&end_date=${end_date}`);
 }
 
-$(`select[name="payment_method"]`).on("change", function() {
+$(`div[id="arrears_payment_form"] select[name="payment_method"]`).on("change", function() {
     let mode = $(this).val();
-    $(`label[class="email_label"]`).html(`Email Address`);
-    $(`button[id="momocard_payment_button"]`).addClass("hidden");
-    $(`button[id="default_payment_button"]`).removeClass("hidden");
+    $(`div[id="arrears_payment_form"] label[class="email_label"]`).html(`Email Address`);
+    $(`div[id="arrears_payment_form"] button[id="momocard_payment_button"]`).addClass("hidden");
+    $(`div[id="arrears_payment_form"] button[id="default_payment_button"]`).removeClass("hidden");
     if (mode === "cash") {
         $(`div[id="cheque_payment_filter"]`).addClass("hidden");
+        $(`div[id="arrears_payment_form"] input[name="amount"]`).focus();
     } else if (mode === "cheque") {
+        $(`div[id="arrears_payment_form"] input[name="cheque_number"]`).focus();
         $(`div[id="cheque_payment_filter"]`).removeClass("hidden");
     } else if (mode === "momo_card") {
-        $(`button[id="momocard_payment_button"]`).removeClass("hidden");
-        $(`label[class="email_label"]`).html(`Email Address <span class="required">*</span>`);
-        $(`button[id="default_payment_button"], div[id="cheque_payment_filter"]`).addClass("hidden");
+        $(`div[id="arrears_payment_form"] input[name="amount"]`).focus();
+        $(`div[id="arrears_payment_form"] button[id="momocard_payment_button"]`).removeClass("hidden");
+        $(`div[id="arrears_payment_form"] label[class="email_label"]`).html(`Email Address <span class="required">*</span>`);
+        $(`div[id="arrears_payment_form"] button[id="default_payment_button"], div[id="cheque_payment_filter"]`).addClass("hidden");
     }
 });
+
+$(`div[id="arrears_payment_form"] input[name="amount"]`).focus();

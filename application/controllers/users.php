@@ -161,7 +161,7 @@ class Users extends Myschoolgh {
 		$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
 
 		// if a search parameter was parsed in the request
-		$order_by = "ORDER BY a.id ASC";
+		$order_by = "ORDER BY a.name ASC";
 		$params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
 		$params->query .= (isset($params->lookup)) ? " AND a.name LIKE '%{$params->lookup}%'" : null;
 

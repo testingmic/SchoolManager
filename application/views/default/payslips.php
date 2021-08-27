@@ -89,7 +89,7 @@ foreach($payslips_array["data"] as $key => $each) {
                     <!--".(!$validated ? "<input name='selected' type='checkbox' value='{$each->id}' class='form-control cursor' style='height:20px'>" : "")."-->
                     <img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->employee_info->image}\"></div>
                 <div>
-                    <a title='Click to view the details of this employee' href='#' onclick='return loadPage(\"{$baseUrl}payroll-view/{$each->employee_id}\");'>{$each->employee_info->name}</a> 
+                    <a class='text-uppercase' title='Click to view the details of this employee' href='#' onclick='return loadPage(\"{$baseUrl}payroll-view/{$each->employee_id}\");'>{$each->employee_info->name}</a> 
                     <span class='text-uppercase badge badge-{$color[$each->employee_info->user_type]} p-1'>{$each->employee_info->user_type}</span>
                     <br><span class='p-2'><i class='fa fa-phone'></i> {$each->employee_info->phone_number}</span>
                     <br><span class='p-2'><i class='fa fa-envelope'></i> {$each->employee_info->email}</span>

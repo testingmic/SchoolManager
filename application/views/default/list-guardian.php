@@ -80,7 +80,6 @@ foreach($guardian_list as $kkey => $each) {
             </div>
         </div>
     </td>";
-    $guardians .= "<td>{$each->relationship}</td>";
     $guardians .= "<td>{$each->email}</td>";
     $guardians .= "<td>{$each->phone_number}</td>";
     $guardians .= "<td>{$wards_list}</td>";
@@ -107,7 +106,6 @@ $response->html = '
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
                                         <th>Guardian Name</th>
-                                        <th>Relationship</th>
                                         <th>Email</th>
                                         <th>Contact</th>
                                         <th width="25%">Wards</th>

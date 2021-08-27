@@ -94,7 +94,7 @@ $response->html = '
                             <div class="col-lg-2 col-md-3">
                                 <div class="form-group">
                                     <label>&nbsp;</label>
-                                    <button onclick="return load_attendance_log()" class="btn btn-outline-success btn-block"><i class="fa fa-filter"></i> Filter</button>
+                                    <button onclick="return load_attendance_log()" class="btn btn-outline-success btn-block"><i class="fa fa-filter"></i> Generate Report</button>
                                 </div>
                             </div>
                         </div>

@@ -182,8 +182,9 @@ if(!$receivePayment) {
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 mb-1">
-                                        <button class="btn btn-dark" onclick="return loadPage(\''.$baseUrl.'update-student/'.(!empty($getObject->student_id) ? $getObject->student_id : $student_id).'\');">
-                                            <i class="fa fa-arrow-circle-left"></i> Go Back</button>
+                                        <a class="btn btn-dark" href="#" onclick="return loadPage(\''.$baseUrl.'update-student/'.(!empty($getObject->student_id) ? $getObject->student_id : $student_id).'\');">
+                                            <i class="fa fa-arrow-circle-left"></i> Go Back
+                                        </a>
                                     </div>
                                     <div class="col-sm-6 text-right mb-1">
                                         <div class="form-group mb-0 '.($category_id || $class_id ? null : 'hidden').'" id="make_payment_button">
@@ -234,7 +235,7 @@ if(!$receivePayment) {
                                     </div>
                                     <div class="col-md-6 form-group">
                                         <label>Amount <span class="required">*</span></label>
-                                        <input '.$disabled.' class="form-control" name="amount" id="amount" type="number" min="0">
+                                        <input '.$disabled.' value="'.($data->balance ?? null).'" class="form-control" name="amount" id="amount" type="number" min="0">
                                     </div>
                                     <div class="col-md-12 mt-0 mb-0 form-group"></div>
                                     <div class="col-md-6 form-group">
@@ -253,7 +254,7 @@ if(!$receivePayment) {
                                         <div class="d-flex justify-content-between">
                                             <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form();" class="btn '.($category_id ? null : 'hidden').' btn-outline-danger">Cancel</button></div>
                                             <div>
-                                                <button '.$disabled.' id="default_payment_button" onclick="return save_Receive_Payment();" class="btn btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay Fee</button>
+                                                <button '.$disabled.' id="default_payment_button" onclick="return save_Receive_Payment();" class="btn text-uppercase btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay Fee</button>
                                                 <button '.$disabled.' id="momocard_payment_button" onclick="return receive_Momo_Card_Payment();" class="btn hidden btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay via MoMo/Card</button>
                                                 <input type="hidden" hidden id="client_subaccount" name="client_subaccount" disabled value="'.$defaultClientData->client_account.'">
                                             </div>

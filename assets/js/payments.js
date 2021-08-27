@@ -235,16 +235,24 @@ var receive_Momo_Card_Payment = () => {
 
         let amount = parseFloat($(`div[id="fees_payment_form"] input[name="amount"]`).val()),
             email_address = $(`input[name="email_address"]`).val(),
-            subaccount = $(`input[name="client_subaccount"]`).val();
+            subaccount = $(`input[name="client_subaccount"]`).val(),
+            balance = parseInt($(`span[class~="outstanding"]`).attr("data-amount_payable"));
 
+        if (amount > balance) {
+            notify(`Sorry! You cannot pay more than the outstanding balance of ${balance}`);
+            return false;
+        }
+            
         if (!$(`div[id="fees_payment_form"] input[name="amount"]`).val().length) {
             notify("Sorry! The amount cannot be empty.");
             return false;
         }
+
         if (!email_address.length) {
             notify("Sorry! The email address section is required.");
             return false;
         }
+        
         amount = amount * 100;
 
         var popup = PaystackPop.setup({

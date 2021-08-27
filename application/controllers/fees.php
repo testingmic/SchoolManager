@@ -484,7 +484,7 @@ class Fees extends Myschoolgh {
                         } else {
                             // if the student is still owing
                             $owning = true;
-                            $_class = "class='btn btn-sm btn-outline-success'";
+                            $_class = "class='btn btn-sm text-uppercase btn-outline-success'";
                             $student_allocation_list .= $isParent ? "
                                 <a {$_class} href='{$this->baseUrl}pay/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
                             " : "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?".($groupBy ? "student_id={$student->student_id}&class_id={$student->class_id}" : "checkout_url={$student->checkout_url}")."\");' {$_class}>Pay Fee</button>";

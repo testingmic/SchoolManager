@@ -57,7 +57,7 @@ if(!empty($item_id)) {
         $isGraded = isset($data->awarded_mark) ? true : false;
         $isClosed = in_array($data->state, ["Closed"]);
         $isActive = in_array($data->state, ["Graded", "Pending", "Answered"]);
-        $isMultipleChoice =  (bool) (($data->questions_type == "multiple_choice") || ($data->questions_type == "unassigned"));
+        $isMultipleChoice =  (bool) (($data->questions_type == "multiple_choice")); // || ($data->questions_type == "unassigned")
 
         $data->isGraded = $isGraded;
         $data->hasUpdate = $hasUpdate;
@@ -171,7 +171,7 @@ if(!empty($item_id)) {
                 (SELECT b.handed_in FROM assignments_submitted b WHERE b.assignment_id = '{$data->item_id}' AND b.student_id = users.item_id) AS handed_in
                 FROM users WHERE 
                 client_id='{$clientId}' AND user_type='student' 
-                AND user_status='Active' AND status='1' AND item_id IN ('".implode("', '", $students_list)."')
+                AND user_status='Active' AND status='1' AND item_id IN ('".implode("', '", $students_list)."') ORDER BY name ASC
 			");
 			$the_students_list->execute();
             $result = $the_students_list->fetchAll(PDO::FETCH_OBJ);
@@ -200,7 +200,7 @@ if(!empty($item_id)) {
                             <th></th>
                         </thead>
                     </table>
-                    <div class="slim-scroll" style="max-height: 650px; overflow-y:auto;">
+                    <div class="table-responsive">
                         <table width="100%" class="table-bordered table-striped table mt-0">
                         <tbody>';
                         // loop through the list of students
@@ -240,6 +240,16 @@ if(!empty($item_id)) {
                             </tbody>
                         </table>
                     </div>
+                    '.( $isActive ?
+                        '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
+                            <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
+                            '.(!$isMultipleChoice ? '<button class="btn btn-outline-success" onclick="return save_AssignmentMarks();"><i class="fa fa-save"></i> Save</button>' : '').'
+                        </div>' : (
+                            $isAdmin && $isAuto && !empty($questions_query) ? '
+                                <button class="btn mb-2 btn-outline-danger" onclick="return reopen_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Reopen</button>
+                            ' : ''
+                        )
+                    ).'
                 </div>
                 '.($isAuto ?
                     '<div class="col-lg-5">

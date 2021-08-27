@@ -9,6 +9,17 @@ var checkAllState = () => {
     });
 }
 
+var fullname_search = () => {
+    $.expr[':'].Contains = function(a,i,m){
+        return $(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0;
+    };
+    $(`div[id="attendance_search_input"] input[name="attendance_fullname"]`).on("input", function(event) {
+        let input = $(this).val();
+        $(`tr[data-row_search='name']`).addClass('hidden');
+        $(`tr[data-row_search='name'][data-attandance_fullname]:Contains(${input}), tr[data-row_search='name'][data-attendance_unique_id]:Contains(${input})`).removeClass('hidden');
+    });
+}
+
 var list_userAttendance = (query = "") => {
     let attendance_content = $(`div[id="attendance_log_list"]`),
         attendance_log_summary = $(`div[id="attendance_log_summary"]`),
@@ -22,6 +33,7 @@ var list_userAttendance = (query = "") => {
         }
         $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "none" });
         $(`button[class~="refresh"]`).html(`<i class='fa fa-notch'></i> Refresh`).prop("disabled", false);
+        fullname_search();
     }).catch(() => {
         $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "none" });
     });
@@ -208,5 +220,16 @@ var load_attendance_log = () => {
             $.pageoverlay.hide();
             swal({ text: swalnotice.ajax_error, icon: "error", });
         });
+    }
+}
+
+function checkForEmptyTable(table){
+    let tableCols = table.find("thead tr th").length;
+    let tableRows = table.find("tbody tr:visible, div[class~='product-title-cell']:visible").length;
+    if(!tableRows) {
+      table.find("tbody").append(`<tr class='temp-row'><td colspan='4' class='text-center'>No Item Found</td></tr>`);
+    } else if(tableRows == 1) {
+      let searchItem = $(`input[id="products-search-input"]`).val();
+      $(`td[data-product-code="${searchItem}"] div[class~="checkbox-single"] input[type="checkbox"], div[data-product-code="${searchItem}"] div[class~="checkbox-single"] input[type="checkbox"]`).prop('checked', true).trigger('change');
     }
 }

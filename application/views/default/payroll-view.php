@@ -139,7 +139,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                         <div class="card">
                             <div class="card-body text-center bg-info">
                                 <div class="font-18 text-dark">POSITION</div>
-                                <div class="font-22 font-weight-bold text-uppercase text-dark">'.$data->position.'</div>
+                                <div class="font-22 font-weight-bold text-uppercase text-dark">'.($data->position ? $data->position : '-' ).'</div>
                             </div>
                         </div>
                     </div>
@@ -157,13 +157,18 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                         <div class="card author-box">
                         <div class="card-body">
                             <div class="author-box-center">
-                                <img alt="image" src="'.$baseUrl.''.$data->image.'" class="rounded-circle author-box-picture">
+                                <div class="author-box-center m-0 p-0">
+                                    <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
+                                </div>
                                 <div class="clearfix"></div>
-                                <div class="author-box-name text-uppercase text-primary font-weight-bold font-22">'.$data->name.'</div>
+                                <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
                                 '.($data->class_name ? '<div class="author-box-job">'.$data->class_name.'</div>' : '').'
                                 '.($data->phone_number ? '<div class="author-box-job"><i class="fa fa-phone"></i> '.$data->phone_number.'</div>' : '').'
                                 '.($data->email ? '<div class="author-box-job"><i class="fa fa-envelope"></i> '.$data->email.'</div>' : '').'
                                 '.($data->residence ? '<div class="author-box-job"><i class="fa fa-globe"></i> '.$data->residence.'</div>' : '').'
+                            </div>
+                            <div class="w-100 mt-2 text-center border-top pt-3">
+                                <a class="btn btn-dark" href="'.$baseUrl.'update-staff/'.$data->user_id.'"><i class="fa fa-arrow-circle-left"></i> VIEW DETAILS</a>
                             </div>
                         </div>
                         </div>

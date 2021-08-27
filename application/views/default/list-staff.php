@@ -57,10 +57,10 @@ foreach($api_staff_list["data"] as $key => $each) {
     $staff_list .= "<td>
         <div class='d-flex justify-content-start'>
             <div class='mr-2'><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
-            <div>
+            <div class=' text-uppercase'>
                 <a href='#' onclick='return loadPage(\"{$baseUrl}update-staff/{$each->user_id}\");'>{$each->name}</a>
                 
-                <br><span class='text-uppercase badge badge-{$color[$each->user_type]} p-2'>{$each->user_type}</span>            
+                <br><span class='text-uppercase badge badge-{$color[$each->user_type]} p-1'>{$each->user_type}</span>            
             </div>
         </div></td>";
     $staff_list .= "<td>{$each->position}</td>";

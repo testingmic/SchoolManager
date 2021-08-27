@@ -79,6 +79,7 @@ class Attendance extends Myschoolgh {
                 if($value == "present") {
                     $present_list[] = $key;
                 }
+                
                 // load the user data using the key
                 $data = $this->pushQuery("item_id, unique_id, name, image, phone_number, user_type", "users", "item_id = '{$key}' AND user_type IN {$this->inList($the_user_type)} AND status='1' LIMIT 1");
                 
@@ -201,7 +202,7 @@ class Attendance extends Myschoolgh {
             $html .= "
             <span class='mr-2'>
                 <input {$disabled} type='radio' ".($user_state == $the_key ? "checked" : "")." class='cursor' value='{$the_key}' id='{$userId}_{$the_key}'>
-                <label class='cursor' for='{$userId}_{$the_key}'>".($user_state == $the_key ? "<strong class='text-{$color}'>{$label}</strong>" : "{$label}")."</label>
+                <label class='cursor' title='Click to Select {$label}' for='{$userId}_{$the_key}'>".($user_state == $the_key ? "<strong class='text-{$color}'>{$label}</strong>" : "{$label}")."</label>
             </span>
             ";
         }
@@ -273,7 +274,7 @@ class Attendance extends Myschoolgh {
 
         // begin the table content
         $information = "";
-        $table_content = "<div class=\"table-responsive slim-scroll\">\n";
+        $table_content = "<div class=\"table-responsive\">\n";
 
         // width for each column
         $width = number_format((90/count($array_list["days_range_list"])), 2);
@@ -284,7 +285,7 @@ class Attendance extends Myschoolgh {
             // get the class info
             if(!empty($params->class_id)) {
                 // get the class information
-                $class_info = $this->pushQuery("*", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}'");
+                $class_info = $this->pushQuery("name, class_size, class_code", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' LIMIT 1");
 
                 // if the class info is empty
                 if(empty($class_info)) {
@@ -411,7 +412,6 @@ class Attendance extends Myschoolgh {
         $user_type = $the_user_type == "staff" ? "('teacher','employee','admin','accountant')" : "('{$the_user_type}')";
 
         $query = " AND (user_type IN {$user_type})";
-        $query .= $the_user_type == "student" ? " AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}'" : null;
         $query .= !empty($class_id) ? " AND class_id='{$params->class_id}'" : null;
         
         // get the list of students
@@ -675,20 +675,24 @@ class Attendance extends Myschoolgh {
             // set the table content
             $table_content = (!$final && !empty($attendance["attendance"][0]["record"]["users_list"]) ? "
             <div class='row'>
-                <div class='col-lg-12 pr-4 text-right mb-2 attendance_control_buttons'>
-                    <span class='float-right'>
+                <div class='col-md-8' id='attendance_search_input'>
+                    <label>Filter by Name</label>
+                    <input type='text' placeholder='Search by fullname' name='attendance_fullname' class='form-control'>
+                </div>
+                <div class='col-md-4 pr-4 text-right attendance_control_buttons'>
+                    <div class='form-group'>
                         <label>Select for Everyone</label>
-                        <select class='form-control selectpicker' id='select_for_all'>
+                        <select data-width='100%' class='form-control cursor selectpicker' id='select_for_all'>
                             <option value='null'>Not Selected</option>
                             <option value='present'>Present</option>
                             <option value='absent'>Absent</option>
                             <option value='holiday'>Holiday</option>
                             <option value='late'>Late</option>
                         </select>
-                    </span>
+                    </div>
                 </div>
             </div>" : "")."
-            <table border='1' class='table table-bordered mt-2' style='width:98%'>
+            <table border='1' class='table table-bordered mt-0' style='width:98%'>
             <thead>
                 <th width='5%'>&#8470;</th>
                 <th width='35%'>Name</th>
@@ -696,7 +700,7 @@ class Attendance extends Myschoolgh {
                 <th><span class='float-left'>Status</span></th>
             </thead>
             </table>
-            <div class='table-responsive slim-scroll' style='max-height:600px;overflow-y:auto;overflow-x:scroll;'>
+            <div class='table-responsive'>
             <table border='1' class='table table-bordered mt-2' style='width:98%' id='attendance_logger'>
             <tbody>";
         
@@ -739,8 +743,8 @@ class Attendance extends Myschoolgh {
 
                         // append to the list
                         $table_content .= "
-                        <tr>
-                            <td width='5%'  >{$numb}</td>
+                        <tr data-row_search='name' data-attandance_fullname='{$user->name}' data-attendance_unique_id='{$user->unique_id}'>
+                            <td width='5%'>{$numb}</td>
                             <td width='35%' class='text-uppercase'>
                                 <img src=\"{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\">
                                 {$user->name} ".($user->user_type !== "student" ? 

@@ -1723,9 +1723,9 @@ class Forms extends Myschoolgh {
 
         $response = '
         <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
-            <div class="row mb-4 border-bottom pb-3">
+            <div class="row mb-4">
                 <div class="col-lg-12">
-                    <h5>BIO INFORMATION</h5>
+                    <h5 class="text-primary border-bottom pb-2 mb-3">BIO INFORMATION</h5>
                 </div>
                 '.($logoUploaded ? 
                 '<div class="col-lg-3 col-md-4">
@@ -1836,20 +1836,83 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="religion">Religion</label>
-                        <input type="text" value="'.($userData->religion ?? null).'" name="religion" id="religion" class="form-control">
+                        <select data-width="100%" name="religion" id="religion" class="form-control selectpicker">
+                            <option value="">Select Region</option>';
+                            foreach($this->pushQuery("id, name", "religions") as $each) {
+                                $response .= "<option ".($isData && ($each->name == $userData->religion) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
+                            }
+                        $response .= '
+                        </select>
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
                         <label for="description">Description</label>
-                        <textarea type="text" name="description" id="description" class="form-control">'.($userData->description ?? null).'</textarea>
+                        <textarea type="text" name="description" id="description" class="form-control height-90px">'.($userData->description ?? null).'</textarea>
                     </div>
                 </div>
             </div>
             <div class="row mb-3 pb-4">
+                <div class="col-lg-12">
+                    <div class="row mb-4">
+                        <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">ACADEMICS</h5></div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="form-group">
+                                <label for="department_id">Department</label>
+                                <select data-width="100%" name="department_id" id="department_id" class="form-control selectpicker">
+                                    <option value="">Select Student Department</option>';
+                                    foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
+                                        $response .= "<option ".($isData && ($each->id == $userData->department) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                                    }
+                                $response .= '</select>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="form-group">
+                                <label for="class_id">Class</label>
+                                <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
+                                    <option value="null">Select Student Class</option>';
+                                    foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
+                                        $response .= "<option ".($isData && ($each->id == $userData->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                                    }
+                                $response .= '</select>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="form-group">
+                                <label for="section">Section</label>
+                                <select data-width="100%" name="section" id="section" class="form-control selectpicker">
+                                    <option value="null">Select Student Section</option>';
+                                    foreach($this->pushQuery("id, name", "sections", "status='1' AND client_id='{$clientId}'") as $each) {
+                                        $response .= "<option ".($isData && ($each->id == $userData->section) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
+                                    }
+                                $response .= '</select>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 mt-3"><h5 class="text-primary border-bottom pb-2 mb-3">PREVIOUS SCHOOL DETAILS</h5></div>
+                        <div class="col-lg-6 col-md-6">
+                            <div class="form-group">
+                                <label for="previous_school">Previous School</label>
+                                <input type="text" value="'.($userData->previous_school ?? null).'" name="previous_school" id="previous_school" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6">
+                            <div class="form-group">
+                                <label for="previous_school_qualification">Qualification</label>
+                                <input type="text" value="'.($userData->previous_school_qualification ?? null).'" name="previous_school_qualification" id="previous_school_qualification" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12">
+                            <div class="form-group">
+                                <label for="previous_school_remarks">Remarks</label>
+                                <textarea type="text" name="previous_school_remarks" id="previous_school_remarks" class="form-control height-90px">'.($userData->previous_school_remarks ?? null).'</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-lg-12 mb-4 border-bottom pb-3">
                     <div class="row">
-                        <div class="col-lg-9 col-md-8"><h5>GUARDIAN INFORMATION</h5></div>
+                        <div class="col-lg-9 col-md-8"><h5 class="text-primary mb-0">GUARDIAN INFORMATION</h5></div>
                         '.(
                             !$isData ? '
                             <div class="col-lg-3 col-md-4">
@@ -1929,61 +1992,6 @@ class Forms extends Myschoolgh {
                     $response .= '</div>';
                 }
                 $response .= '
-            </div>
-            <div class="row mb-4 border-bottom pb-4">
-                <div class="col-lg-12"><h5>ACADEMICS</h5></div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="department_id">Department</label>
-                        <select data-width="100%" name="department_id" id="department_id" class="form-control selectpicker">
-                            <option value="">Select Student Department</option>';
-                            foreach($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->id == $userData->department) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
-                            }
-                        $response .= '</select>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="class_id">Class</label>
-                        <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
-                            <option value="null">Select Student Class</option>';
-                            foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->id == $userData->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
-                            }
-                        $response .= '</select>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="section">Section</label>
-                        <select data-width="100%" name="section" id="section" class="form-control selectpicker">
-                            <option value="null">Select Student Section</option>';
-                            foreach($this->pushQuery("id, name", "sections", "status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->id == $userData->section) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
-                            }
-                        $response .= '</select>
-                    </div>
-                </div>
-                <div class="col-lg-12 mt-3"><h5>PREVIOUS SCHOOL DETAILS</h5></div>
-                <div class="col-lg-6 col-md-6">
-                    <div class="form-group">
-                        <label for="previous_school">Previous School</label>
-                        <input type="text" value="'.($userData->previous_school ?? null).'" name="previous_school" id="previous_school" class="form-control">
-                    </div>
-                </div>
-                <div class="col-lg-6 col-md-6">
-                    <div class="form-group">
-                        <label for="previous_school_qualification">Qualification</label>
-                        <input type="text" value="'.($userData->previous_school_qualification ?? null).'" name="previous_school_qualification" id="previous_school_qualification" class="form-control">
-                    </div>
-                </div>
-                <div class="col-lg-12 col-md-12">
-                    <div class="form-group">
-                        <label for="previous_school_remarks">Remarks</label>
-                        <textarea type="text" name="previous_school_remarks" id="previous_school_remarks" class="form-control">'.($userData->previous_school_remarks ?? null).'</textarea>
-                    </div>
-                </div>
             </div>
             <input type="hidden" id="user_id" value="'.($userData->user_id ?? null).'" name="user_id">
             <div class="row">

@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Fees Arrears";
+$pageTitle = "Student Fees Arrears";
 $response->title = "{$pageTitle} : {$appName}";
 
 $response->scripts = ["assets/js/fees_allocation.js"];
@@ -188,13 +188,13 @@ if(!empty($user_id)) {
                                             <label>Cheque Security Code <span class="required">*</span></label>
                                             <input '.$disabled.' class="form-control text-uppercase" name="cheque_security" id="cheque_security" type="text" min="0">
                                         </div>
-                                        <div class="col-md-6 form-group">
+                                        <div class="form-group">
                                             <label>Contact Number</label>
-                                            <input '.$disabled.' class="form-control" name="contact_number" id="contact_number" type="text">
+                                            <input '.$disabled.' value="'.$data->phone_number.'" class="form-control" name="contact_number" id="contact_number" type="text">
                                         </div>
-                                        <div class="col-md-6 form-group">
+                                        <div class="form-group">
                                             <label class="email_label">Email Address</label>
-                                            <input '.$disabled.' class="form-control" name="email_address" id="email_address" type="email">
+                                            <input '.$disabled.' value="'.$data->email.'" class="form-control" name="email_address" id="email_address" type="email">
                                         </div>
                                         <div class="form-group">
                                             <label>Amount <span class="required">*</span></label>
