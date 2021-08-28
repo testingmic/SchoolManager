@@ -718,19 +718,9 @@ class Forms extends Myschoolgh {
 
         // create directories if none existent
         if(!is_dir("assets/uploads/{$user_id}")) {
-            mkdir("assets/uploads/{$user_id}");
-            mkdir("assets/uploads/{$user_id}/tmp/");
-            mkdir("assets/uploads/{$user_id}/tmp/thumbnail/");
+            mkdir("assets/uploads/{$user_id}/tmp/thumbnail/", 0777, true);
         }
-        // create the tmp directory if non existent
-        if(!is_dir("assets/uploads/{$user_id}/tmp/")) {
-            mkdir("assets/uploads/{$user_id}/tmp/");
-        }
-        // create the thumbnail directory
-        if(!is_dir("assets/uploads/{$user_id}/tmp/thumbnail/")) {
-            mkdir("assets/uploads/{$user_id}/tmp/thumbnail/");
-        }
-
+        
         // confirm if the variable is not empty and an array
         if(!empty($attachment_list) && is_array($attachment_list)) {
 

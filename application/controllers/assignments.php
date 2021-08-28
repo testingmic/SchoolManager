@@ -749,7 +749,7 @@ class Assignments extends Myschoolgh {
                     $result = $stmt->fetch(PDO::FETCH_OBJ);
 
                     $the_files = json_decode($result->description);
-                    $files = isset($the_files->files) ? load_class("forms", "controllers")->list_attachments($the_files->files, $result->created_by, "col-lg-6", false, false) : null;
+                    $files = isset($the_files->files) ? load_class("forms", "controllers")->list_attachments($the_files->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
                 }
 
                 // remove the session variable

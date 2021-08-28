@@ -72,6 +72,9 @@ class Files extends Myschoolgh {
      */
     public function attachments(stdClass $params) {
 
+        // global variable
+        global $session;
+
         /** Initialize for processing */
         $root_dir = "assets/uploads";
         
@@ -79,6 +82,9 @@ class Files extends Myschoolgh {
         if((!isset($params->userData->user_id) || !isset($params->module) || (!isset($params->label)) && !isset($params->attachments_list))) {
             return "error";
         }
+
+        // set the current user id
+        $currentUser_Id = !empty($session->student_id) ? $session->student_id : $userData->user_id;
         
         // perform all this checks if the attachmments list was not parsed
         if(!isset($params->attachments_list)) {
@@ -97,22 +103,17 @@ class Files extends Myschoolgh {
             }
 
             // if no directory has been created for the user then create one
-            if(!is_dir("{$root_dir}/{$userData->user_id}")) {
+            if(!is_dir("{$root_dir}/{$currentUser_Id}")) {
                 // create additional directories for user
-                mkdir("{$root_dir}/{$userData->user_id}/docs/{$module}", 0777, true);
-                mkdir("{$root_dir}/{$userData->user_id}/tmp/download", 0777, true);
-                mkdir("{$root_dir}/{$userData->user_id}/tmp/thumbnail");
-                mkdir("{$root_dir}/{$userData->user_id}/tmp/{$module}");
-            }
-
-            // create replies directory if not existent
-            if(!is_dir("{$root_dir}/{$userData->user_id}/tmp/{$module}")) {
-                mkdir("{$root_dir}/{$userData->user_id}/tmp/{$module}");
+                mkdir("{$root_dir}/{$currentUser_Id}/docs/{$module}", 0777, true);
+                mkdir("{$root_dir}/{$currentUser_Id}/tmp/download", 0777, true);
+                mkdir("{$root_dir}/{$currentUser_Id}/tmp/thumbnail");
+                mkdir("{$root_dir}/{$currentUser_Id}/tmp/{$module}");
             }
 
             // set the user's directory
-            $tmp_dir = "{$root_dir}/{$userData->user_id}/tmp/{$module}/";
-            $dwn_dir = "{$root_dir}/{$userData->user_id}/tmp/download/";
+            $tmp_dir = "{$root_dir}/{$currentUser_Id}/tmp/{$module}/";
+            $dwn_dir = "{$root_dir}/{$currentUser_Id}/tmp/download/";
         
             /** Get the data for processing */
             if($params->label == "upload") {
@@ -267,7 +268,7 @@ class Files extends Myschoolgh {
             
             // calculate the file size
             $totalFileSize = 0;
-            $tmp_dir = "{$root_dir}/{$params->userData->user_id}/docs/{$module}/";
+            $tmp_dir = "{$root_dir}/{$currentUser_Id}/docs/{$module}/";
 
             // html string
             $attachments = "<div class='row'>";
@@ -507,7 +508,7 @@ class Files extends Myschoolgh {
 
             // create the directory
             if(!is_dir("assets/uploads/{$user_id}/docs/{$resource}")) {
-                mkdir("assets/uploads/{$user_id}/docs/{$resource}", 777, true);
+                mkdir("assets/uploads/{$user_id}/docs/{$resource}", 0777, true);
             }
 
             // set the list to the existing record... 
