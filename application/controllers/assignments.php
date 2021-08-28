@@ -43,8 +43,8 @@ class Assignments extends Myschoolgh {
             $the_user_id = $isParent ? $this->session->student_id : $params->userData->user_id;
 
             // run the query
-            $query = ",(SELECT handed_in FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$the_user_id}') AS handed_in,
-                (SELECT score FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$the_user_id}') AS awarded_mark, 
+            $query = ",(SELECT handed_in FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$the_user_id}' LIMIT 1) AS handed_in,
+                (SELECT score FROM assignments_submitted c WHERE c.assignment_id=a.item_id AND c.student_id='{$the_user_id}' LIMIT 1) AS awarded_mark, 
                 (SELECT b.description FROM files_attachment b WHERE b.resource='assignment_doc' AND b.record_id = a.item_id AND b.created_by = '{$the_user_id}' ORDER BY b.id DESC LIMIT 1) AS attached_document";
         }
 
@@ -85,12 +85,14 @@ class Assignments extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                cl.name AS class_name,
-                (SELECT name FROM courses WHERE courses.item_id = a.course_id LIMIT 1) AS course_name,
+                cl.name AS class_name, cs.name AS course_name,
                 (SELECT b.description FROM files_attachment b WHERE b.resource='assignments' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
-                (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 {$query} FROM assignments a
                 LEFT JOIN classes cl ON cl.item_id = a.class_id
+                LEFT JOIN courses cs ON cs.item_id = a.course_id AND 
+                    cs.academic_year='{$params->academic_year}' AND 
+                    cs.academic_term='{$params->academic_term}' 
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
             $stmt->execute([1]);
@@ -164,7 +166,7 @@ class Assignments extends Myschoolgh {
                         // loop through the information
                         foreach(["created_by_info"] as $each) {
                             // convert the created by string into an object
-                            $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                            $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","user_type"]);
                         }
                     }
 
@@ -199,11 +201,11 @@ class Assignments extends Myschoolgh {
             "a.student_id, u.name AS student_name, u.image AS student_image, u.unique_id,
                 a.score, a.handed_in, a.graded, a.date_submitted", 
             "assignments_submitted a LEFT JOIN users u ON u.item_id = a.student_id", 
-            "a.assignment_id='{$assignment_id}'"
+            "a.assignment_id='{$assignment_id}' LIMIT 1",
         );
 
         return $marks_list;
-
+        
     }
 
     /**
@@ -443,7 +445,7 @@ class Assignments extends Myschoolgh {
             }
 
             // set the value
-			$additional = ["href" => "{$this->baseUrl}update-assessment/{$params->assignment_id}/view"];
+			$additional = ["href" => "{$this->baseUrl}assessment/{$params->assignment_id}/view"];
 
             # set the output to return when successful
             $return = ["code" => 200, "data" => "Assignment successfully updated.", "refresh" => 2000, "additional" => $additional];
@@ -683,6 +685,9 @@ class Assignments extends Myschoolgh {
      */
     public function handin(stdClass $params) {
 
+        // global variable
+        global $isParent;
+
         // get the assignment information
         $the_data = $this->pushQuery("id, grading", "assignments", "client_id='{$params->clientId}' AND item_id='{$params->assignment_id}' LIMIT 1");
 
@@ -695,23 +700,28 @@ class Assignments extends Myschoolgh {
         $files = "";
         $item_id = $params->assignment_id;
         $module = "assignments_handin_{$item_id}";
+
+        // check if the user has already handed over the assignment
         $data = "Sorry! You have already handed in your assignment.";
 
         // catch all errors
         try {
 
+            // use the student id for everything
+            $studentId = $isParent ? $this->session->student_id : $params->userId;
+
             // run this section if the session is not empty
             if(!empty($this->session->{$module})) {
-            
+
                 // prepare the user documents
-                $attachments = load_class("files", "controllers")->prep_attachments($module, $params->userId, $item_id);
+                $attachments = load_class("files", "controllers")->prep_attachments($module, $studentId, $item_id);
                 
                 // insert the record if not already existing
                 $stmt = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
-                $stmt->execute(["assignment_doc", "{$item_id}_{$params->userId}", json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
+                $stmt->execute(["assignment_doc", "{$item_id}_{$studentId}", json_encode($attachments), "{$item_id}", $studentId, $attachments["raw_size_mb"]]);
 
                 // change the user information detail
-                $check = $this->confirm_student_marked($params->assignment_id, $params->userId);
+                $check = $this->confirm_student_marked($params->assignment_id, $studentId);
                 
                 // insert a record if empty
                 if(empty($check) || (isset($check->handed_in) && ($check->handed_in === "Pending"))) {
@@ -719,15 +729,15 @@ class Assignments extends Myschoolgh {
                     // insert the new record since it does not exist
                     if(empty($check)) {
                         $stmt = $this->db->prepare("INSERT INTO assignments_submitted SET client_id = ?, student_id=?, assignment_id = ?, handed_in = ?");
-                        $stmt->execute([$params->clientId, $params->userId, $item_id, "Submitted"]);
+                        $stmt->execute([$params->clientId, $studentId, $item_id, "Submitted"]);
                     }
                     // update the record if the handed in is still pending
                     else {
-                        $this->db->query("UPDATE assignments_submitted SET handed_in = 'Submitted' WHERE student_id='{$params->userId}' AND assignment_id = '{$item_id}' LIMIT 1");
+                        $this->db->query("UPDATE assignments_submitted SET handed_in = 'Submitted' WHERE student_id='{$studentId}' AND assignment_id = '{$item_id}' LIMIT 1");
                     }
 
                     // Record the user activity
-                    $this->userLogs("assignment", "{$item_id}_{$params->userId}", null, "{$params->userData->name} handed in the assignment for grading.", $params->userId);
+                    $this->userLogs("assignment", "{$item_id}_{$studentId}", null, "{$params->userData->name} handed in the assignment for grading.", $studentId);
 
                     // load the attachments
                     $code = 200;
@@ -735,7 +745,7 @@ class Assignments extends Myschoolgh {
 
                     // load the file attachments
                     $stmt = $this->db->prepare("SELECT description, created_by FROM files_attachment WHERE resource='assignment_doc' AND record_id = ? AND created_by = ? ORDER BY id DESC LIMIT 1");
-                    $stmt->execute([$item_id, $params->userId]);
+                    $stmt->execute([$item_id, $studentId]);
                     $result = $stmt->fetch(PDO::FETCH_OBJ);
 
                     $the_files = json_decode($result->description);
@@ -760,7 +770,7 @@ class Assignments extends Myschoolgh {
                 // load the user answers list
                 $answer_info = $this->pushQuery(
                     "answers", "assignments_answers", 
-                    "assignment_id='{$item_id}' AND student_id = '{$params->userId}' AND client_id='{$params->clientId}' LIMIT 1"
+                    "assignment_id='{$item_id}' AND student_id = '{$studentId}' AND client_id='{$params->clientId}' LIMIT 1"
                 );
 
                 // check if the answers list is empty
@@ -780,15 +790,15 @@ class Assignments extends Myschoolgh {
                     }
 
                     // update the score for the user
-                    $this->db->query("UPDATE assignments_answers SET scores = '{$score}' WHERE assignment_id='{$item_id}' AND student_id = '{$params->userId}' LIMIT 1");
+                    $this->db->query("UPDATE assignments_answers SET scores = '{$score}' WHERE assignment_id='{$item_id}' AND student_id = '{$studentId}' LIMIT 1");
                     $this->db->query("UPDATE assignments SET state = 'Answered' WHERE item_id='{$item_id}' AND client_id = '{$params->clientId}' LIMIT 1");
                     
                     // insert the record into the assignments_submitted table
                     $stmt = $this->db->prepare("INSERT INTO assignments_submitted SET client_id = ?, assignment_id = ?, student_id = ?, score = ?, graded = ?, handed_in = ?, date_graded = now()");
-                    $stmt->execute([$params->clientId, $item_id, $params->userId, $score, 1, "Submitted"]);
+                    $stmt->execute([$params->clientId, $item_id, $studentId, $score, 1, "Submitted"]);
 
                     // Record the user activity
-                    $this->userLogs("assignment", "{$item_id}_{$params->userId}", null, "{$params->userData->name} handed in the assignment for auto grading by the system.", $params->userId);
+                    $this->userLogs("assignment", "{$item_id}_{$studentId}", null, "{$params->userData->name} handed in the assignment for auto grading by the system.", $params->userId);
 
                     // set the success message
                     $code = 200;
@@ -1786,7 +1796,7 @@ class Assignments extends Myschoolgh {
 			$return["additional"] = ["clear" => true];
 
             // if the request is to add a quiz
-            $return["additional"]["href"] = "{$this->baseUrl}update-assessment/{$item_id}";
+            $return["additional"]["href"] = "{$this->baseUrl}assessment/{$item_id}";
 
             // commit the statement
             $this->db->commit();

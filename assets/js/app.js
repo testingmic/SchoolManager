@@ -880,11 +880,12 @@ var initDataTables = () => {
 
     try {
         if ($('.datatable').length > 0) {
+            let rows_count = $(`table[class~="datatable"]`).attr("data-rows_count") == undefined ? 10 : $(`table[class~="datatable"]`).attr("data-rows_count");
             $('.datatable').DataTable({
                 search: null,
                 lengthMenu: [
-                    [10, 30, 50, 75, 100, 200, -1],
-                    [10, 30, 50, 75, 100, 200, "All"]
+                    [rows_count, 30, 50, 75, 100, 200, -1],
+                    [rows_count, 30, 50, 75, 100, 200, "All"]
                 ],
                 language: {
                     sEmptyTable: "Nothing Found",

@@ -181,6 +181,11 @@ var remove_Book = (borrowed_id, book_id) => {
                 if (response.code == 200) {
                     $(`tr[class~="each_book_item"][data-request_id="${borrowed_id}"][data-book_id="${book_id}"]`).remove();
                 }
+            }).catch(() => {
+                swal({
+                    text: "Sorry! An error was encountered while processing the request.",
+                    icon: "error"
+                });
             });
         }
     });

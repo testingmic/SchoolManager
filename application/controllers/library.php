@@ -195,7 +195,7 @@ class Library extends Myschoolgh {
             $stmt = $this->db->prepare("
                 SELECT a.*,
                     (SELECT COUNT(*) FROM books_borrowed_details b WHERE b.borrowed_id = a.item_id LIMIT 1) AS books_count,
-					(SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type,'|',b.unique_id) FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_info
+					(SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.user_type,'|',b.unique_id) FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_info
                 FROM books_borrowed a
                 WHERE {$params->query} AND a.deleted = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
@@ -227,7 +227,7 @@ class Library extends Myschoolgh {
                     // confirm that it is set
                     if(isset($result->{$each})) {
                         // convert the created by string into an object
-                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type","unique_id"]);
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","user_type","unique_id"]);
                     }
                 }
 
@@ -825,21 +825,31 @@ class Library extends Myschoolgh {
 	 */
 	public function remove_book_from_list($params) {
 
-		$params = (object) $params;
-		
-		$data = $this->pushQuery("id", "books_borrowed_details", "borrowed_id='{$params->borrowed_id}' AND book_id='{$params->book_id}' AND deleted='0'");
+		try {
 
-		if(empty($data)) {
-			return ["code" => 203, "data" => "Sorry! An invalid ids were submitted."];
+			// convert the item into an object
+			$params = (object) $params;
+			
+			$data = $this->pushQuery("id, quantity", "books_borrowed_details", "borrowed_id='{$params->borrowed_id}' AND book_id='{$params->book_id}' AND deleted='0'");
+
+			if(empty($data)) {
+				return ["code" => 203, "data" => "Sorry! An invalid ids were submitted."];
+			}
+
+			/** Remove the file from the list */
+			$this->db->query("UPDATE books_borrowed_details SET  deleted='1' WHERE borrowed_id='{$params->borrowed_id}' AND book_id='{$params->book_id}' LIMIT 1");
+			
+			// increase the book's stock quantity
+			$this->db->query("UPDATE books_stock SET quantity = (quantity + {$data[0]->quantity}) WHERE books_id = '{$params->book_id}' LIMIT 1");
+
+			/** Log the user activity */
+			$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} deleted a book from the List.", $params->userId);
+
+			return true;
+
+		} catch(PDOException $e) {
+			return $this->unexpected_error;
 		}
-
-		/** Remove the file from the list */
-		$this->db->query("UPDATE books_borrowed_details SET  deleleted='1' WHERE borrowed_id='{$params->borrowed_id}' AND book_id='{$params->book_id}' LIMIT 1");
-
-		/** Log the user activity */
-		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} deleted a book from the List.", $params->userId);
-
-		return true;
 	}
 
 	/**
@@ -972,6 +982,14 @@ class Library extends Myschoolgh {
 
 		/** Remove the file from the list */
 		$this->db->query("UPDATE books_borrowed SET status='Cancelled' WHERE item_id='{$params->borrowed_id}' LIMIT 1");
+
+		/** Get the books under this request list */
+		$books_list = $this->pushQuery("quantity, book_id", "books_borrowed_details", "borrowed_id='{$params->borrowed_id}' AND deleted='0' AND status='Borrowed'");
+
+		/** Loop through the books list */
+		foreach($books_list as $book) {
+			$this->db->query("UPDATE books_stock SET quantity = (quantity + {$book->quantity}) WHERE books_id = '{$book->book_id}' LIMIT 1");
+		}
 
 		/** Log the user activity */
 		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} Cancelled the request for the books.", $params->userId);

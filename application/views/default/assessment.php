@@ -66,7 +66,7 @@ if(!empty($item_id)) {
         $isAuto = (bool) ($data->insertion_mode === "Auto");
 
         // get the assignment form
-        $the_form = load_class("forms", "controllers")->create_assignment($item_param, "update_assignment");
+        $the_form = $hasUpdate ? load_class("forms", "controllers")->create_assignment($item_param, "update_assignment") : null;
 
         // student update permissions
         $grading_info = "<div class='row' id='assignment_question_detail'>";
@@ -167,8 +167,8 @@ if(!empty($item_id)) {
              */
             $the_students_list = $myschoolgh->prepare("
 				SELECT item_id, unique_id, name, email, phone_number, gender, image,
-                (SELECT score FROM assignments_submitted WHERE assignment_id = '{$data->item_id}' AND student_id = users.item_id) AS score,
-                (SELECT b.handed_in FROM assignments_submitted b WHERE b.assignment_id = '{$data->item_id}' AND b.student_id = users.item_id) AS handed_in
+                (SELECT score FROM assignments_submitted WHERE assignment_id = '{$data->item_id}' AND student_id = users.item_id LIMIT 1) AS score,
+                (SELECT b.handed_in FROM assignments_submitted b WHERE b.assignment_id = '{$data->item_id}' AND b.student_id = users.item_id LIMIT 1) AS handed_in
                 FROM users WHERE 
                 client_id='{$clientId}' AND user_type='student' 
                 AND user_status='Active' AND status='1' AND item_id IN ('".implode("', '", $students_list)."') ORDER BY name ASC
@@ -254,19 +254,19 @@ if(!empty($item_id)) {
                 '.($isAuto ?
                     '<div class="col-lg-5">
                         <div class="details-content-save"></div>
-                        <div class="grading-history-div" style="display:none">
+                        <div class="grading-history-div_" style="display:none">
                             <table class="table">
                                 <tbody>
                                     <tr>
                                         <td align="right">
-                                            <span data-function="grading-history" class="text-primary cursor" title="View Grading History">Grading History</span>
+                                            <!--<span data-function="grading-history" class="text-primary cursor" title="View Grading History">Grading History</span>-->
                                             <input data-grading="'.$data->grading.'" data-assignment_id="'.$data->item_id.'" type="hidden" name="data-student-id" class="data-student-id">
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                        <div class="card card-default student-assignment-details"></div>
+                        <div class="student-assignment-details"></div>
                     </div>' : 
                     '<input data-grading="'.$data->grading.'" data-assignment_id="'.$data->item_id.'" type="hidden" name="data-student-id" class="data-student-id">'
                 );
@@ -303,7 +303,7 @@ if(!empty($item_id)) {
             }
             
             // display the content if the assignment type is a file_attachment
-            if(!$isMultipleChoice && $isActive) {
+            if(!$isMultipleChoice && $isActive && $isAuto) {
                 
                 // display the file upload option
                 $grading_info .= 
@@ -323,7 +323,7 @@ if(!empty($item_id)) {
                     </div>' : ''
                 ).'
                 <div class="col-lg-'.($nothanded_in ? 4 : 12).'" id="handin_documents">
-                    '.$data->attached_attachment_html.'
+                    '.($data->attached_attachment_html ?? null).'
                 </div>';
             }
 
@@ -387,7 +387,7 @@ if(!empty($item_id)) {
                 <h1><i class="fa fa-book-reader"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-assessment">Assessments List</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'assessments">Assessments List</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>
@@ -533,7 +533,12 @@ if(!empty($item_id)) {
                             )
                         ).'
                         <div class="tab-pane fade '.(!$isAuto ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
-                            <div class="trix-slim-scroll">
+                            <div id="handin_assignment_container">
+                                <div class="form-content-loader" style="display: none; position: absolute">
+                                    <div class="offline-content text-center">
+                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                    </div>
+                                </div>
                             '.(
                                 !$isAuto && !empty($data->assignment_description) ?
                                 '<div class="cardd">

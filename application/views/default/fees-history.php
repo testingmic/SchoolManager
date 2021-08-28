@@ -59,7 +59,7 @@ $hasUpdate = $accessObject->hasAccess("update", "fees");
 $fees_history = "";
 foreach($item_list["data"] as $key => $fees) {
     $action = "";
-    $action = "<a href='#' title='View Receipt' onclick='loadPage(\"{$baseUrl}fees-view/{$fees->payment_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a href='#' title='View Receipt' onclick='loadPage(\"{$baseUrl}fees_view/{$fees->payment_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
     $action .= "&nbsp;<a title='Click to print this receipt' href='#' onclick=\"return print_receipt('{$fees->payment_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
     
     $fees_history .= "<tr data-row_id=\"{$fees->payment_id}\">";

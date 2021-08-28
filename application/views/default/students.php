@@ -37,7 +37,7 @@ $student_param = (object) [
 
 // if the current user is a parent then append this query
 if($defaultUser->user_type === "parent") {
-    $student_param->userId = $defaultUser->unique_id;
+    $student_param->userId = $defaultUser->user_id;
     $student_param->only_wards_list = true;
 }
 

@@ -215,7 +215,7 @@ var publish_AssignmentQuestion = (assignment_id, questions_count) => {
                         text: "Congrats! The assignment was successfully published.",
                         icon: "success",
                     });
-                    loadPage(`${baseUrl}update-assessment/${assignment_id}/view`);
+                    loadPage(`${baseUrl}assessment/${assignment_id}/view`);
                 }
             }).catch(() => {
                 swal({
@@ -335,23 +335,20 @@ var submit_Answers = (assignment_id) => {
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
+            $(`div[id="handin_assignment_container"] div[class="form-content-loader"]`).css("display", "flex");
             $.post(`${baseUrl}api/assignments/handin`, { assignment_id }).then((response) => {
+                $(`div[id="handin_assignment_container"] div[class="form-content-loader"]`).css("display", "none");
                 if (response.code == 200) {
                     $(`div[id="handin_upload"]`).remove();
                     $(`div[id="handin_documents"]`).removeClass("col-lg-4").addClass("col-lg-12");
-                    $(`div[id="handin_documents"]`).html(response.data.additional);
-
-                    swal({
-                        text: response.data.result,
-                        icon: "success",
-                    });
-                } else {
-                    swal({
-                        text: response.data.result,
-                        icon: "error",
-                    });
+                    $(`div[id="handin_documents"]`).html(response.data.additional);                    
                 }
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code)
+                });
             }).catch(() => {
+                $(`div[id="handin_assignment_container"] div[class="form-content-loader"]`).css("display", "none");
                 swal({
                     text: "Sorry! There was an error while processing the request.",
                     icon: "error",

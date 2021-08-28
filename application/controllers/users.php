@@ -60,7 +60,12 @@ class Users extends Myschoolgh {
 			$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id ='{$params->class_id}'" : null;
 			$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id ='{$params->clientId}'" : null;
 			$params->query .= (isset($params->section_id) && !empty($params->section_id)) ? " AND a.section='{$params->section_id}'" : null;
-
+			
+			// if the user is a parent
+			if(isset($params->only_wards_list)) {
+				$params->query .= " AND a.guardian_id LIKE '%{$params->userId}%'";
+			}
+			
 			// set the columns to load
 			$params->columns = "a.id, a.client_id, a.unique_id, a.item_id AS user_id, a.name, a.user_type, a.phone_number, 
 				a.class_id, a.email, a.image, a.gender, cl.name class_name, dp.name AS department_name,
@@ -69,7 +74,8 @@ class Users extends Myschoolgh {
 						AND p.academic_year = '{$academic_year}' 
 						AND p.academic_term = '{$academic_term}'
 					LIMIT {$this->fees_category_count}
-				) AS debt, ar.arrears_total AS arrears";
+			) AS debt, ar.arrears_total AS arrears";
+			
 			
 			// prepare and execute the statement
 			$sql = $this->db->prepare("SELECT {$params->columns} 
@@ -496,7 +502,7 @@ class Users extends Myschoolgh {
 			// set the columns to load
 			$params->columns = "
 				a.client_id, a.guardian_id, a.item_id AS user_id, a.name, a.preferences,	
-				cl.name AS class_name, a.academic_year, a.academic_term, a.username, a.last_password_change,
+				cl.name AS class_name, a.username, a.last_password_change,
 				a.unique_id, a.email, a.image, a.phone_number, a.user_type, a.class_id, a.account_balance,
 				a.gender, a.enrollment_date, a.residence, a.religion, a.date_of_birth, a.last_visited_page,
 				(SELECT b.description FROM users_types b WHERE b.id = a.access_level) AS user_type_description, c.country_name,
@@ -515,16 +521,7 @@ class Users extends Myschoolgh {
 
 			$data = [];
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
-
-				if(!in_array($result->user_type, ["student"]) || 
-					(
-						in_array($result->user_type, ["student"]) && 
-						$result->academic_year == $this->academic_year && 
-						$result->academic_term == $this->academic_term
-					)
-				) {
-					$data[] = $result;
-				}
+				$data[] = $result;
 			}
 
 			// return the data"Sorry! There was an error while processing the request."
@@ -677,9 +674,11 @@ class Users extends Myschoolgh {
 						SELECT 
 							a.item_id AS student_guid, a.unique_id, a.firstname, a.lastname, a.othername,
 							a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
-							(SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
-							(SELECT b.name FROM departments b WHERE b.id = a.department LIMIT 1) AS department_name
-						FROM users a WHERE a.status='1' AND a.user_type = 'student' AND a.guardian_id LIKE '%{$value->unique_id}%'
+							b.name AS class_name, c.name AS department_name
+						FROM users a 
+						LEFT JOIN classes b ON b.id = a.class_id
+						LEFT JOIN departments b ON b.id = a.department
+						WHERE a.status='1' AND a.user_type = 'student' AND a.guardian_id LIKE '%{$value->unique_id}%'
 					");
 					$qr->execute();
 					$value->wards_list = $qr->fetchAll(PDO::FETCH_OBJ);

@@ -20,15 +20,14 @@ $response = (object) [];
 $pageTitle = "Fees Allocation";
 $response->title = "{$pageTitle} : {$appName}";
 
+// fees allocation mandate
+$canAllocate = $accessObject->hasAccess("allocation", "fees");
 $receivePayment = $accessObject->hasAccess("receive", "fees");
 
 /** confirm that the user has the permission to receive payment */
-if(!$receivePayment) {
+if(!$canAllocate) {
     $response->html = page_not_found("permission_denied");
 } else {
-
-    // the allocation fees
-    $canAllocate = $accessObject->hasAccess("allocation", "fees");
 
     // scripts for the page
     $response->scripts = ["assets/js/filters.js", "assets/js/payments.js"];

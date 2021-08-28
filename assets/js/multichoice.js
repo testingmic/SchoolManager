@@ -91,7 +91,7 @@ var submitQuizAssignment = (assignment_id) => {
 
             $.post(`${baseUrl}api/assignments/handin`, { assignment_id, question_id, answers }).then((response) => {
                 if (response.code == 200) {
-                    loadPage(`${baseUrl}update-assessment/${assignment_id}/view`);
+                    loadPage(`${baseUrl}assessment/${assignment_id}/view`);
                 }
                 swal({
                     text: response.data.result,

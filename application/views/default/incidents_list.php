@@ -69,7 +69,7 @@ foreach($item_list["data"] as $key => $each) {
                 <img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->user_information->image}\">
             </div>
             <div>
-                <a href='{$baseUrl}student/{$each->user_information->user_id}'>{$each->user_information->name}</a><br>
+                <a class='user_name' href='{$baseUrl}student/{$each->user_information->user_id}'>{$each->user_information->name}</a><br>
                 <span class='text-uppercase badge badge-{$color[$each->user_information->user_type]} p-1'>
                     {$each->user_information->user_type}
                 </span>

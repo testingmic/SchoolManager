@@ -98,13 +98,9 @@ class Files extends Myschoolgh {
 
             // if no directory has been created for the user then create one
             if(!is_dir("{$root_dir}/{$userData->user_id}")) {
-                // create root directory for user
-                mkdir("{$root_dir}/{$userData->user_id}");
                 // create additional directories for user
-                mkdir("{$root_dir}/{$userData->user_id}/docs");
-                mkdir("{$root_dir}/{$userData->user_id}/docs/{$module}");
-                mkdir("{$root_dir}/{$userData->user_id}/tmp");
-                mkdir("{$root_dir}/{$userData->user_id}/tmp/download");
+                mkdir("{$root_dir}/{$userData->user_id}/docs/{$module}", 0777, true);
+                mkdir("{$root_dir}/{$userData->user_id}/tmp/download", 0777, true);
                 mkdir("{$root_dir}/{$userData->user_id}/tmp/thumbnail");
                 mkdir("{$root_dir}/{$userData->user_id}/tmp/{$module}");
             }
@@ -509,14 +505,9 @@ class Files extends Myschoolgh {
             // the document resource directory
             $docs_dir = "assets/uploads/{$user_id}/docs/{$resource}/";
 
-            // create the docs directory for the user if not already existent
-            if(!is_dir("assets/uploads/{$user_id}/docs")) {
-                mkdir("assets/uploads/{$user_id}/docs/");
-            }
-
             // create the directory
             if(!is_dir("assets/uploads/{$user_id}/docs/{$resource}")) {
-                mkdir("assets/uploads/{$user_id}/docs/{$resource}");
+                mkdir("assets/uploads/{$user_id}/docs/{$resource}", 777, true);
             }
 
             // set the list to the existing record... 
@@ -545,8 +536,6 @@ class Files extends Myschoolgh {
 
                     // set the filename
                     $file_name = $each_file["second"];
-                    $file_name = preg_replace("/[^a-z0-9_\s-]/", "", $file_name);
-                    $file_name = (preg_replace("/[\s]/", "_", $file_name));
                     $file_to_download = "{$docs_dir}{$file_name}.{$each_file["fifth"]}";
 
                     // confirm that there is no existing file with the name.

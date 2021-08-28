@@ -297,11 +297,11 @@ if($isSupport) {
         // unset the sessions if $session->currentQuestionId is not empty
         foreach($assignments_array_list["data"] as $key => $each) {
             
-            $action = "<a  href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a  href='#' onclick='return loadPage(\"{$baseUrl}assessment/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
             $assigments_list .= "<tr data-row_id=\"{$each->id}\">";
             $assigments_list .= "<td>".($key+1)."</td>";
-            $assigments_list .= "<td><a  href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
+            $assigments_list .= "<td><a  href='#' onclick='return loadPage(\"{$baseUrl}assessment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
                 $can_Update_Assign ? 
                     "<br>Class: <strong>{$each->class_name}</strong>
                     <br>Course: <strong>{$each->course_name}</strong>" : 
@@ -453,8 +453,8 @@ if($isSupport) {
 
                     // list the items
                     $action = "";
-                    $action .= "&nbsp;<a title='Click to print this receipt' href='#' onclick=\"return print_receipt('{$each->item_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
-                    $fees_history .= "<tr data-row_id=\"{$each->item_id}\">";
+                    $action .= "&nbsp;<a title='Click to print this receipt' href='#' onclick=\"return print_receipt('{$each->payment_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
+                    $fees_history .= "<tr data-row_id=\"{$each->payment_id}\">";
                     $fees_history .= "<td>".($key+1)."</td>";
                     $fees_history .= "
                         <td>
@@ -463,13 +463,13 @@ if($isSupport) {
                                 <div class='mr-2'><img src='{$baseUrl}{$each->student_info->image}' width='40px' height='40px'></div>" : "")."
                                 <div>
                                     <a  href='#' onclick='return loadPage(\"{$baseUrl}student/{$each->student_info->user_id}\");'>{$each->student_info->name}</a> <br>
-                                    <strong>{$each->student_info->unique_id}</strong><br>
+                                    
                                     {$each->class_name}
                                 </div>
                             </div>
                         </td>";
-                    $fees_history .= "<td>".number_format($each->amount_paid, 2)."</td>";
                     $fees_history .= "<td>{$each->category_name}</td>";
+                    $fees_history .= "<td>".number_format($each->amount_paid, 2)."</td>";
                     $fees_history .= "<td>{$each->recorded_date}</td>";
                     $fees_history .= "<td width='10%' align='center'>{$action}</td>";
                     $fees_history .= "</tr>";
@@ -480,11 +480,11 @@ if($isSupport) {
                 <div class="col-lg-12 col-md-12 col-12 col-sm-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>All Expenses</h4>
+                            <h4>Fees Payments History</h4>
                         </div>
                         <div class="card-body trix-slim-scroll">
                             <div class="table-responsive">
-                                <table data-empty="" class="table table-striped datatable">
+                                <table data-rows_count="8" class="table table-striped datatable">
                                     <thead>
                                         <tr>
                                             <th width="5%" class="text-center">#</th>
@@ -785,7 +785,7 @@ if($isSupport) {
                                     <div class="padding-20">
                                         <div class="text-right">
                                             <h3 class="font-light mb-0">'.number_format($total_expenditure, 2).'</h3>
-                                            <span class="text-muted">Total Expenditure</span>
+                                            <span class="text-muted">Total Payments</span>
                                         </div>
                                     </div>
                                     </div>
@@ -907,10 +907,10 @@ if($isSupport) {
                             </div>
                         </div>
                     </div>' : '
-                    <div class="col-lg-8">
+                    <div class="col-lg-12">
                         '.($data_stream ? 
                             '<div class="row">
-                                <div class="col-md-6 col-sm-12">
+                                <div class="col-md-3 col-sm-12">
                                     <div class="card card-statistic-1">
                                         <i class="fas fa-user-check card-icon col-green"></i>
                                         <div class="card-wrap">
@@ -923,7 +923,7 @@ if($isSupport) {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6 col-sm-12">
+                                <div class="col-md-3 col-sm-12">
                                     <div class="card card-statistic-1">
                                         <i class="fas fa-user-alt-slash card-icon col-red"></i>
                                         <div class="card-wrap">
@@ -936,7 +936,7 @@ if($isSupport) {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6 col-sm-12">
+                                <div class="col-md-3 col-sm-12">
                                     <div class="card card-statistic-1">
                                         <i class="fas fa-user-edit card-icon col-blue"></i>
                                         <div class="card-wrap">
@@ -949,7 +949,7 @@ if($isSupport) {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6 col-sm-12">
+                                <div class="col-md-3 col-sm-12">
                                     <div class="card card-statistic-1">
                                         <i class="fas fa-list card-icon col-blue"></i>
                                         <div class="card-wrap">

@@ -26,8 +26,15 @@ $response->scripts = ["assets/js/fees_allocation.js"];
 $user_id = $SITEURL[1] ?? null;
 $is_new_admission = (bool) (isset($_GET["is_new_admission"]) && ($_GET["is_new_admission"] == 1));
 
-// if the user id is not empty
-if(!empty($user_id)) {
+// if the user has the permission to allocate fees
+$canAllocate = $accessObject->hasAccess("allocation", "fees");
+
+/** confirm that the user has the permission to receive payment */
+if(!$canAllocate) {
+    $response->html = page_not_found("permission_denied");
+} 
+// continue if the user has the permission
+elseif(!empty($user_id)) {
 
     // set the student parameter
     $student_param = (object) [
@@ -318,6 +325,7 @@ if(!empty($user_id)) {
     }
 
 }
+
 // print out the response
 echo json_encode($response);
 ?>

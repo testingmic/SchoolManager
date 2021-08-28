@@ -480,7 +480,7 @@ var search_Payment_Log = () => {
                                 <tr>
                                     <td></td>
                                     <td>
-                                        <a href="${baseUrl}fees-view/${data.item_id}?redir=${term}" class="btn btn-sm btn-outline-success" title="Click to view full details"><i class="fa fa-eye"></i> View</a>
+                                        <a href="${baseUrl}fees_view/${data.item_id}?redir=${term}" class="btn btn-sm btn-outline-success" title="Click to view full details"><i class="fa fa-eye"></i> View</a>
                                         <a href="${baseUrl}receipt/${data.item_id}" target="_blank" class="btn btn-sm btn-outline-warning" title="Click to print receipt"><i class="fa fa-print"></i> Print</a>
                                     </td>
                                 </tr>

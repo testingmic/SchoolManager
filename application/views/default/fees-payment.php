@@ -21,6 +21,7 @@ $getObject = (object) $_GET;
 $pageTitle = "Pay Fees";
 $response->title = "{$pageTitle} : {$appName}";
 
+// if the user has the permission to allocate fees
 $receivePayment = $accessObject->hasAccess("receive", "fees");
 
 /** confirm that the user has the permission to receive payment */

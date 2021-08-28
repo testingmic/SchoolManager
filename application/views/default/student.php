@@ -60,6 +60,7 @@ if(!empty($user_id)) {
 
         // can recieve
         $canReceive = $accessObject->hasAccess("receive", "fees");
+        $canAllocate = $accessObject->hasAccess("allocation", "fees");
         $viewAllocation = $accessObject->hasAccess("view_allocation", "fees");
 
         // receive fees payment 
@@ -493,9 +494,11 @@ if(!empty($user_id)) {
                                         '<span class="text-right">
                                             <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}pay/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'"').' class="btn mb-2 btn-outline-success"><i class="fa fa-adjust"></i> MAKE PAYMENT</a>
                                         </span>
+                                        '.($canAllocate ? '
                                         <button title="Click to Modify Fees Allocated to Student" onclick="return loadPage(\''.$baseUrl.'fees-allocate/'.$user_id.'\')" class="btn text-uppercase mb-2 btn-outline-primary">
                                             <i class="fa fa-edit"></i> Modify Bill
-                                        </button>'
+                                        </button>' : null).'
+                                        '
                                     : ($student_allocation_list["allocated"] ? '<div class="btn mb-2 btn-success text-uppercase">Fees Fully Paid</div>' :
                                         '<span>
                                             <button title="Click to Allocate Fees to Student" onclick="return loadPage(\''.$baseUrl.'fees-allocate/'.$user_id.'\')" class="btn text-uppercase mb-2 btn-primary">

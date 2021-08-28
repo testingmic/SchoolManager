@@ -174,37 +174,6 @@ load_helpers(['menu_helper']);
                 </ul>
                 </div>
                 <ul class="navbar-nav navbar-right">
-                <?php if(!empty($session->student_id) && $isParent) { ?>
-                <li class="dropdown dropdown-list-toggle"><a href="#" data-toggle="dropdown" title="Wards List" data-toggle="tooltip" class="nav-link nav-link-lg"><i class="fa fa-users"></i></a>
-                    <div class="dropdown-menu dropdown-list dropdown-menu-right" style="overflow-y:auto;">
-                        <div class="dropdown-header">Wards List</div>
-                        <div class="dropdown-list-content dropdown-list-message">
-                            <?php if(!empty($userData->wards_list)) { ?>
-                                <?php foreach($userData->wards_list as $ward) {
-                                    $ward = (object) $ward;
-                                    $isThis = (bool) ($session->student_id === $ward->student_guid);
-                                    ?>
-                                    <a href="javacript:void(0);" onclick="return set_default_Student('<?= $ward->student_guid ?>')"; class="<?= $isThis ? "bg-success text-white" : ""; ?> dropdown-item anchor">
-                                        <span class="dropdown-item-avatar text-white">
-                                            <img alt="image" src="<?= $baseUrl ?><?= $ward->image ?>" class="rounded-circle">
-                                        </span>
-                                        <span class="dropdown-item-desc">
-                                            <span style="font-size: 14px;" class="message-user <?= $isThis ? "text-white" : ""; ?>"><?= $ward->name ?></span>
-                                            <span style="font-size: 14px;" class="time  <?= $isThis ? "text-white" : ""; ?>"><strong><?= $ward->unique_id ?></strong></span>
-                                            <span style="font-size: 14px;" class="time text-primary"><?= $ward->class_name ?></span>
-                                        </span>
-                                    </a>
-                                <?php } ?>
-                            <?php } else { ?>
-                            <a href="#" class="anchor dropdown-item">
-                                <span class="font-italic">Sorry! You currently do not have any ward in the school.</span>
-                            </a>
-                            <?php } ?>
-
-                        </div>
-                    </div>
-                </li>
-                <?php } ?>
                 <?php if($isActiveAccount) { ?>
                 <li class="dropdown dropdown-list-toggle">
                     <a href="#" data-toggle="dropdown" title="Email Messages" class="nav-link nav-link-lg message-toggle" data-notification="message"><i class="far fa-envelope"></i></a>

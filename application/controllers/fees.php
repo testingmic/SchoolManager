@@ -2273,8 +2273,8 @@ class Fees extends Myschoolgh {
             if(isset($params->print)) {
                 $student_bill .= "
                 <script>
-                    // window.onload = (evt) => { window.print(); }
-                    // window.onafterprint = (evt) => { window.close(); }
+                    window.onload = (evt) => { window.print(); }
+                    window.onafterprint = (evt) => { window.close(); }
                 </script>";
             }
 

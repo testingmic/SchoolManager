@@ -60,15 +60,15 @@ foreach($item_list["data"] as $key => $each) {
     
     $each->assignment_type_label = $color[$each->assignment_type];
     $assessment_array[$each->item_id] = $each;
-    $action = "<a title='Click to update assignment record' href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to update assignment record' href='#' onclick='return loadPage(\"{$baseUrl}assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate && $each->questions_type == "multiple_choice") {
-        $action .= "&nbsp;<a title='Click to manage questions for this assignment' href='#' onclick='return loadPage(\"{$baseUrl}add-assessment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
+        $action .= "&nbsp;<a title='Manage questions for this assignment' href='#' onclick='return loadPage(\"{$baseUrl}add-assessment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
     }
 
     // if the state is either closed or graded
-    if(in_array($each->state, ["Closed", "Graded"])) {
-        $action .= "&nbsp;<a href='#' title='Click to view student marks this Assignment' onclick='return view_AssessmentMarks(\"{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-list'></i></a>";
+    if(in_array($each->state, ["Closed", "Graded"]) && $hasUpdate) {
+        $action .= "&nbsp;<a href='#' title='View student marks this Assignment' onclick='return view_AssessmentMarks(\"{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-list'></i></a>";
     }
 
     if($hasDelete && in_array($each->state, ["Pending", "Draft"])) {
@@ -78,8 +78,10 @@ foreach($item_list["data"] as $key => $each) {
     $assignments .= "<tr data-row_id=\"{$each->id}\">";
     $assignments .= "<td>".($key+1)."</td>";
     $assignments .= "<td>
-        <a href='#' onclick='return loadPage(\"{$baseUrl}update-assessment/{$each->item_id}/view\");'>
-            {$each->assignment_title}</a> <strong class='badge p-1 pr-2 pl-2 badge-{$color[$each->assignment_type]}'>{$each->assignment_type}</strong>
+        <a href='#' onclick='return loadPage(\"{$baseUrl}assessment/{$each->item_id}\");'>
+            {$each->assignment_title}
+        </a> 
+        <strong class='badge p-1 pr-2 pl-2 badge-{$color[$each->assignment_type]}'>{$each->assignment_type}</strong>
         ".(
         $hasUpdate ? 
             "<br>Class: <strong>{$each->class_name}</strong>

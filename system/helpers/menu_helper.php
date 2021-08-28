@@ -121,7 +121,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Class Assessment</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>assessments">List Assessments</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>add-assessment">Create Assessment</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>log-assessment">Log Assessment</a></li>
         </ul>
@@ -259,7 +259,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Class Assessment</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>assessments">List Assessments</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>add-assessment">Create Assessment</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>log-assessment">Log Assessment</a></li>
         </ul>
@@ -302,7 +302,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Class Assessment</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>assessments">List Assessments</a></li>
         </ul>
     </li>
     <li class="dropdown">
@@ -344,7 +344,7 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Class Assessment</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-assessment">List Assessments</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>assessments">List Assessments</a></li>
         </ul>
     </li>
     <li class="dropdown">
