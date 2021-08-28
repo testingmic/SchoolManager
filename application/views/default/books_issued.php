@@ -29,7 +29,7 @@ $item_list = load_class("library", "controllers", $params)->issued_request_list(
 $books_list = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a title='Click to view details of this request' href='{$baseUrl}update-book-request/{$each->item_id}' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to view details of this request' href='{$baseUrl}book_request/{$each->item_id}' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasIssue && in_array($each->status, ["Issued", "Requested"]) && ($each->state !== "Overdue")) {
         $action .= "&nbsp;<a title='Click to delete this issued book record' href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-stop'></i></a>";
@@ -46,7 +46,7 @@ foreach($item_list["data"] as $key => $each) {
     if($hasIssue) {
         // if the books list is parsed
         $books_list .= "<td>
-            <span class='text-uppercase'><a title='Click to view details of this request' href='{$baseUrl}update-book-request/{$each->item_id}'>{$each->user_info->name}</a></span>
+            <span class='text-uppercase'><a title='Click to view details of this request' href='{$baseUrl}book_request/{$each->item_id}'>{$each->user_info->name}</a></span>
             <span class='badge badge-primary p-1'>{$each->user_role}</span><br>
             <strong>{$each->user_info->unique_id}</strong>
         </td>";
@@ -79,7 +79,7 @@ $response->html = '
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="text-right mb-2">
-                '.($hasIssue ? '<a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'issue-book"><i class="fa fa-arrow-circle-right"></i> Issue Book</a>' 
+                '.($hasIssue ? '<a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'books_issue"><i class="fa fa-arrow-circle-right"></i> Issue Book</a>' 
                     : '<a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'request-book"><i class="fa fa-american-sign-language-interpreting"></i> Request Book</a>'
                 ).'
                 </div>

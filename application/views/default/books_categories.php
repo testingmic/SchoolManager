@@ -34,7 +34,7 @@ $hasUpdate = $accessObject->hasAccess("update", "library");
 $category_list = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<span title='View the book category record' onclick='return loadPage(\"{$baseUrl}update-book-category/{$each->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
+    $action = "<span title='View the book category record' onclick='return loadPage(\"{$baseUrl}book_category/{$each->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
 
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Delete this Book Category' onclick='return delete_record(\"{$each->item_id}\", \"book_category\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -42,7 +42,7 @@ foreach($item_list["data"] as $key => $each) {
 
     $category_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $category_list .= "<td>".($key+1)."</td>";
-    $category_list .= "<td><span class='user_name' onclick='return loadPage(\"{$baseUrl}update-book-category/{$each->item_id}\");'>{$each->name}</span></td>";
+    $category_list .= "<td><span class='user_name' onclick='return loadPage(\"{$baseUrl}book_category/{$each->item_id}\");'>{$each->name}</span></td>";
     $category_list .= "<td>{$each->description}</td>";
     $category_list .= "<td>{$each->books_count}</td>";
     $category_list .= "<td align='center'>{$action}</td>";
@@ -62,7 +62,7 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 '.($hasAdd ? '
                     <div class="text-right mb-2">
-                        <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'add-book-category"><i class="fa fa-plus"></i> Add Category</a>
+                        <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'add-book_category"><i class="fa fa-plus"></i> Add Category</a>
                     </div>' : ''
                 ).'
                 <div class="card">

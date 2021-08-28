@@ -65,7 +65,7 @@ $response->html = '
                                         </select>
                                     </div>
                                     <div class="col-md-5 form-group">
-                                        <label>Total Marks <span class="required">*</span></label>
+                                        <label>Grade Scale <span class="required">*</span></label>
                                         <input type="number" min="0" max="100" name="overall_score" id="overall_score" class="form-control">
                                     </div>
                                 </div>

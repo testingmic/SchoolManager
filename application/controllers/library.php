@@ -379,7 +379,7 @@ class Library extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Book Category successfully updated."];
 			
 			# append to the response
-			$return["additional"] = ["href" => "{$this->baseUrl}update-book-category/{$params->category_id}/update"];
+			$return["additional"] = ["href" => "{$this->baseUrl}book_category/{$params->category_id}/update"];
 
 			# return the output
             return $return;
@@ -1136,7 +1136,7 @@ class Library extends Myschoolgh {
 			$this->userLogs("library_book", $params->book_id, null, "{$params->userData->name} updated the Book: {$params->title}", $params->userId);
 
 			$return = ["code" => 200, "data" => "Library Book successfully updated.", "refresh" => 2000];
-			$return["additional"] = ["href" => "{$this->baseUrl}update-book/{$params->book_id}/update"];
+			$return["additional"] = ["href" => "{$this->baseUrl}book/{$params->book_id}/update"];
 
 			return $return;
 		}
@@ -1212,7 +1212,7 @@ class Library extends Myschoolgh {
 			$this->userLogs("library_book", $item_id, null, "{$params->userData->name} added the Book: {$params->title}", $params->userId);
 
 			$return = ["code" => 200, "data" => "Library Book successfully added.", "refresh" => 2000];
-			$return["additional"] = ["href" => "{$this->baseUrl}update-book/{$item_id}/view", "clear" => true];
+			$return["additional"] = ["href" => "{$this->baseUrl}book/{$item_id}/view", "clear" => true];
 
 			return $return;
 		}

@@ -72,7 +72,7 @@ if(!empty($item_id)) {
             $books_list .= "<td>
                 <div class='d-flex justify-content-start'>
                     <div class='mr-2'>".(!empty($book->book_image) ? "<img class='rounded-circle author-box-picture' src='{$baseUrl}{$book->book_image}' width='40px' height='40px'>" : "")."</div>
-                    <div><a href='#' onclick='return loadPage(\"{$baseUrl}update-book/{$book->book_id}\");'>{$book->title}</a> <br> <strong>{$book->isbn}</strong></div>
+                    <div><a href='#' onclick='return loadPage(\"{$baseUrl}book/{$book->book_id}\");'>{$book->title}</a> <br> <strong>{$book->isbn}</strong></div>
                 </div>
             </td>";
             $books_list .= "<td>{$book->author}</td>";
@@ -140,7 +140,7 @@ if(!empty($item_id)) {
                 <h1><i class="fa fa-book-reader"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'issued-books">'.$tTitle.'</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'books_issued">'.$tTitle.'</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>
@@ -163,15 +163,15 @@ if(!empty($item_id)) {
                                         </p>
                                         <p class="clearfix mb-0">
                                             <span class="float-left font-bold">Unique ID:</span>
-                                            <span class="float-right text-muted font-bold">'.($data->user_info->unique_id).'</span>
+                                            <span class="float-right text-muted font-bold">'.($data->user_info->unique_id ?? null).'</span>
                                         </p>
                                         <p class="clearfix mb-0">
                                             <span class="float-left font-bold">Contact:</span>
-                                            <span class="float-right text-muted">'.($data->user_info->phone_number).'</span>
+                                            <span class="float-right text-muted">'.($data->user_info->phone_number ?? null).'</span>
                                         </p>
                                         <p class="clearfix mb-0">
                                             <span class="float-left font-bold">Email:</span>
-                                            <span class="float-right text-muted">'.($data->user_info->email).'</span>
+                                            <span class="float-right text-muted">'.($data->user_info->email ?? null).'</span>
                                         </p>
                                     </div>
                                 </div>

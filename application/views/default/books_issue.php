@@ -42,7 +42,7 @@ if(!$hasIssue) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'issued-books">Issued Books List</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'books_issued">Issued Books List</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>

@@ -2111,6 +2111,8 @@ class Fees extends Myschoolgh {
             
             // get the class and student fees allocation
             $student_fees_arrears = "";
+            $fees_arrears = [];
+            $arrears_total = 0;
            
             // if the fees arrears not empty
             if(!empty($arrears_array)) {
@@ -2124,10 +2126,18 @@ class Fees extends Myschoolgh {
 
                 // convert the item to array
                 $arrears_details = json_decode($arrears->arrears_details, true);
-                $arrears_category = json_decode($arrears->arrears_category, true);
-                $fees_category_log = json_decode($arrears->fees_category_log, true);
-                $students_fees_category_array = filter_fees_category($fees_category_log);
-                
+
+                foreach($arrears_details as $item => $amount) {
+                    // get the academic year and term
+                    $split = explode("...", $item);
+                    $year = $split[1] . " Term Of " . str_ireplace("_", "/", $split[0]);
+                    
+                    $total = array_sum($amount);
+                    $arrears_total += $total;
+
+                    // push it into the array
+                    $fees_arrears[$year] = $total;
+                }
             }
             // set the bill form
             $student_bill = '
@@ -2212,16 +2222,26 @@ class Fees extends Myschoolgh {
                                 $student_bill .= "<td width='8%'>".($key+1)."</td>";
                                 $student_bill .= "<td>{$fees->category_name}</td>";
                                 $student_bill .= "<td>{$status}</td>";
-                                $student_bill .= "<td>{$defaultCurrency} {$fees->amount_due}</td>";
-                                $student_bill .= "<td>{$defaultCurrency} {$discount}</td>";
-                                $student_bill .= "<td>{$defaultCurrency} {$fees->amount_paid}</td>";
-                                $student_bill .= "<td align='right'>{$defaultCurrency} {$balance}</td>";
+                                $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_due, 2)."</td>";
+                                $student_bill .= "<td>{$defaultCurrency} ".number_format($discount, 2)."</td>";
+                                $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_paid, 2)."</td>";
+                                $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($balance, 2)."</td>";
+                                $student_bill .= "</tr>";
+                            }
+                            foreach($fees_arrears as $item => $value) {
+                                $student_bill .= "<tr>";
+                                $student_bill .= "<td>".($key+2)."</td>";
+                                $student_bill .= "<td colspan='2'>Arrears for {$item} Academic Year</td>";
+                                $student_bill .= "<td>{$defaultCurrency} ".number_format($value, 2)."</td>";
+                                $student_bill .= "<td></td>";
+                                $student_bill .= "<td>{$defaultCurrency} ".number_format(0, 2)."</td>";
+                                $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($value, 2)."</td>";
                                 $student_bill .= "</tr>";
                             }
                             $student_bill .= "
                             <tr>
                                 <td colspan='6' align='right'><strong>Grand Total:</strong></td>
-                                <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_due, 2)."</td>
+                                <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_due + $arrears_total), 2)."</td>
                             </tr>
                             <tr>
                                 <td colspan='6' align='right'><strong>Paid:</strong></td>
@@ -2233,7 +2253,7 @@ class Fees extends Myschoolgh {
                             </tr>
                             <tr>
                                 <td colspan='6' align='right'><strong>Balance:</strong></td>
-                                <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_balance, 2)."</td>
+                                <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_balance + $arrears_total), 2)."</td>
                             </tr>
                             <tr>
                                 <td colspan='7' align='center'>

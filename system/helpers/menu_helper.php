@@ -140,9 +140,9 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books List</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>issued-books">Issued Books</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
         </ul>
     </li>
     <?php if($accessObject->hasAccess("view", "fees")) { ?>
@@ -267,9 +267,9 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books List</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>issued-books">Issued Books</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
         </ul>
     </li>
     <li class="menu-header">HR / Finance</li>
@@ -308,9 +308,9 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books List</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>issued-books">Issued Books</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
         </ul>
     </li>
     <?php } ?>
@@ -350,9 +350,9 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books List</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>issued-books">Issued Books</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
         </ul>
     </li>
     <?php if($accessObject->hasAccess("generate", "results")) { ?>
@@ -381,9 +381,9 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-landmark"></i><span>Library</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-books">Books List</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-books-category">Books Category</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>issued-books">Issued Books</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
         </ul>
     </li>
     <li class="menu-header">HR / Finance</li>

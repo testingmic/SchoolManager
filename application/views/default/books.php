@@ -33,7 +33,7 @@ $hasUpdate = $accessObject->hasAccess("update", "library");
 $books_list = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a title='View this book record' href='#' onclick='return loadPage(\"{$baseUrl}update-book/{$each->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='View this book record' href='#' onclick='return loadPage(\"{$baseUrl}book/{$each->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Delete this Book' onclick='return delete_record(\"{$each->item_id}\", \"book\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -41,7 +41,7 @@ foreach($item_list["data"] as $key => $each) {
 
     $books_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $books_list .= "<td>".($key+1)."</td>";
-    $books_list .= "<td><a href='{$baseUrl}update-book/{$each->item_id}'>".(!empty($each->book_image) ? "<img src='{$baseUrl}{$each->book_image}' width='50px' height='40px'>" : "")." {$each->title}</a></td>";
+    $books_list .= "<td><a href='{$baseUrl}book/{$each->item_id}'>".(!empty($each->book_image) ? "<img src='{$baseUrl}{$each->book_image}' width='50px' height='40px'>" : "")." {$each->title}</a></td>";
     $books_list .= "<td>{$each->author}</td>";
     $books_list .= "<td>{$each->books_stock}</td>";
     $books_list .= "<td>".($each->category_name ?? null)."</td>";

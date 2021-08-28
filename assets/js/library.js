@@ -25,7 +25,7 @@ var upload_EBook_Resource = (book_id) => {
                         icon: "success",
                     });
                     setTimeout(() => {
-                        loadPage(`${baseUrl}update-book/${book_id}/view`);
+                        loadPage(`${baseUrl}book/${book_id}/view`);
                     }, 500);
                 } else {
                     swal({
@@ -378,7 +378,7 @@ var approve_Cancel_Books_Request = (borrowed_id, todo) => {
                 if (response.code == 200) {
                     if (response.data.additional.reload !== undefined) {
                         setTimeout(() => {
-                            loadPage(`${baseUrl}update-book-request/${borrowed_id}`);
+                            loadPage(`${baseUrl}book_request/${borrowed_id}`);
                         }, 700);
                     }
                 }

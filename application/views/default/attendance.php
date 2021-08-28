@@ -128,7 +128,9 @@ if(!empty($clientId)) {
                 <div class="col-lg-12 col-md-12 col-12 col-sm-12" id="data-report_stream" data-report_stream="'.$data_stream.'">
                     <div class="card">
                         <div class="row p-2">
-                            <div class="col-lg-7 col-md-5"><h4>Attendance Record</h4></div>
+                            <div class="col-lg-7 col-md-5">
+                                <h4 class="text-uppercase font-20">Attendance Record</h4>
+                            </div>
                             <div class="col-lg-5 col-md-7 text-right">
                                 <div class="input-group mb-3">
                                     <div class="input-group-prepend">
@@ -156,12 +158,28 @@ if(!empty($clientId)) {
                         </div>
                     </div>
                 </div>
+                '.($isAdminAccountant ? '
+                    <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="text-uppercase font-20">Attendance Logs</h4>
+                            </div>
+                            <div class="card-body pb-0">
+                                <div data-chart_container="attendance_log_chart">
+                                    <div id="attendance_log_chart" style="min-height:350px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ' : null).'
                 '.(
                     $isAdminAccountant ? '
                     <div class="col-lg-12 col-md-12 col-12 col-sm-12">
                         <div class="card">
                             <div class="row p-2">
-                                <div class="col-lg-8 col-md-6"><h4>Class Attendance</h4></div>
+                                <div class="col-lg-8 col-md-6">
+                                    <h4 class="text-uppercase font-20">Attendance Logs</h4>
+                                </div>
                                 <div class="col-lg-4 col-md-6 text-right">
                                     <div class="input-group mb-3">
                                         <div class="input-group-prepend">

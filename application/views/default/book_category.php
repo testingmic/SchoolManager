@@ -63,11 +63,11 @@ if(!empty($item_id)) {
         foreach($books_list["data"] as $key => $book) {
             
             // view link
-            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}update-book/{$book->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}book/{$book->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
             $category_books_list .= "<tr data-row_id=\"{$book->item_id}\">";
             $category_books_list .= "<td>".($key+1)."</td>";
-            $category_books_list .= "<td><a href='#' onclick='return loadPage(\"{$baseUrl}update-book/{$book->item_id}\");'>{$book->title}</a></td>";
+            $category_books_list .= "<td><a href='#' onclick='return loadPage(\"{$baseUrl}book/{$book->item_id}\");'>{$book->title}</a></td>";
             $category_books_list .= "<td>{$book->author}</td>";
             $category_books_list .= "<td>{$book->quantity}</td>";
             $category_books_list .= "<td><span class='underline'>".($book->isbn ?? null)."</span></td>";
@@ -92,8 +92,8 @@ if(!empty($item_id)) {
                 <h1><i class="fa fa-book"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-books">Books List</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-books-category">Books Category List</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'books">Books List</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'books_categories">Books Category List</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>
