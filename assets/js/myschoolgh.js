@@ -410,6 +410,8 @@ var view_AssessmentMarks = (assessment_id) => {
                                 <td>${assessment.course_name}</td>
                             </tr>
                             <tr>
+                                <td class="font-weight-bold">Average Score:</td>
+                                <td>${assessment.class_average}</td>
                                 <td class="font-weight-bold">Date Published:</td>
                                 <td>${assessment.date_published}</td>
                             </tr>
@@ -451,6 +453,7 @@ var view_AssessmentMarks = (assessment_id) => {
         </div>`;
 
         $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html(students_list);
+        $(`div[id="viewOnlyModal"] h5[class~="modal-title"]`).html(`CLASS GRADE`);
         $(`div[id="viewOnlyModal"]`).modal("show");
     }
 }

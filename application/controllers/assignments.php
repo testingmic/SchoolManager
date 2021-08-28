@@ -201,7 +201,7 @@ class Assignments extends Myschoolgh {
             "a.student_id, u.name AS student_name, u.image AS student_image, u.unique_id,
                 a.score, a.handed_in, a.graded, a.date_submitted", 
             "assignments_submitted a LEFT JOIN users u ON u.item_id = a.student_id", 
-            "a.assignment_id='{$assignment_id}' LIMIT 1",
+            "a.assignment_id='{$assignment_id}' ORDER BY student_name",
         );
 
         return $marks_list;

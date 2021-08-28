@@ -511,7 +511,7 @@ class Replies extends Myschoolgh {
                 $params->video_id = $params->record_id;
                 
                 // save the time for this video 
-                //$resourceObj->save_time($params);
+                $resourceObj->save_time($params);
             }
 
             // add comments

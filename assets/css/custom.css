@@ -136,13 +136,13 @@
 }
 
 .ajax-data-form trix-editor {
-    min-height: 250px;
-    max-height: 250px;
+    min-height: 200px;
+    max-height: 200px;
 }
 
 .leave-comment-wrapper trix-editor {
-    min-height: 250px;
-    max-height: 250px;
+    min-height: 200px;
+    max-height: 200px;
 }
 
 .form-data-unavailable {

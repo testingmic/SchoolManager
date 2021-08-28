@@ -409,8 +409,8 @@ class Resources extends Myschoolgh {
         $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
 
         $params->query .= (isset($params->rq)) ? " AND a.subject LIKE '%{$params->rq}%'" : null;
-        $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}' AND cs.academic_year='{$params->academic_year}'" : "";
-        $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}' AND cs.academic_term='{$params->academic_term}'" : "";
+        $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
+        $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
         $params->query .= isset($params->state) ? " AND a.state='{$params->state}'" : "";
         $params->query .= (isset($params->resource_id) && !empty($params->resource_id)) ? " AND a.item_id='{$params->resource_id}'" : null;
         $params->query .= (isset($params->course_tutor) && !empty($params->course_tutor)) ? " AND a.course_tutors LIKE '%{$params->course_tutor}%'" : null;
@@ -435,6 +435,8 @@ class Resources extends Myschoolgh {
                     LEFT JOIN users u ON u.item_id = a.created_by
                     LEFT JOIN classes cl ON cl.item_id = a.class_id
                     LEFT JOIN courses cs ON cs.item_id = a.course_id
+                        AND cs.academic_year='{$params->academic_year}'
+                        AND cs.academic_term='{$params->academic_term}'
                     LEFT JOIN courses_plan cp ON cp.item_id = a.unit_id
                 WHERE
                     {$params->query} AND a.client_id = ? AND a.status = ? ORDER BY a.id DESC LIMIT {$params->limit}
@@ -461,6 +463,73 @@ class Resources extends Myschoolgh {
 
         } catch(PDOException $e) {
             return [];
+        }
+
+    }
+
+    /**
+     * E-Resources List
+     * 
+     * @return Array
+     */
+    public function similar_videos(stdClass $params) {
+
+        $params->query = "1";
+
+        // set the limit for the records to load
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+        // append the class_id if the user type is student
+        if(($params->userData->user_type === "student")) {
+            $params->class_id = $params->userData->class_guid;
+            $params->state = "Published";
+        } elseif(($params->userData->user_type === "teacher")) {
+            $params->course_tutor = $params->userData->user_id;
+        } else {
+            $params->created_by = $params->userData->user_id;
+        }
+
+        // set the academic year and terms
+        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
+        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
+
+        $params->query .= (isset($params->rq)) ? " AND a.subject LIKE '%{$params->rq}%'" : null;
+        $params->query .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
+        $params->query .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
+        $params->query .= (isset($params->resource_id) && !empty($params->resource_id)) ? " AND a.item_id != '{$params->resource_id}'" : null;
+        $params->query .= (isset($params->course_tutor) && !empty($params->course_tutor)) ? " AND a.course_tutors LIKE '%{$params->course_tutor}%'" : null;
+        $params->query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND a.course_id = '{$params->course_id}'" : null;
+        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id = '{$params->class_id}'" : null;
+
+        try {
+            
+            $stmt = $this->db->prepare("SELECT a.subject, a.description, a.date_created,
+                    u.name AS fullname, u.email, u.image,
+                    (
+                        SELECT b.description FROM files_attachment b 
+                        WHERE b.resource='e_learning' AND b.record_id = a.item_id 
+                        ORDER BY b.id DESC LIMIT 1
+                    ) AS attachment
+                FROM e_learning a
+                    LEFT JOIN users u ON u.item_id = a.created_by
+                WHERE
+                    {$params->query} AND a.client_id = '{$params->clientId}' AND a.status = '1' ORDER BY a.id DESC LIMIT {$params->limit}
+            ");
+            $stmt->execute();
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // clean the description data
+                $result->description = custom_clean(htmlspecialchars_decode($result->description));
+                $files_only = json_decode($result->attachment, true)["files"];
+                $data["files"][] = $files_only;
+                $data["data"][] = $result;
+            }
+
+            return $data;
+
+        } catch(PDOException $e) {
+            print $e->getMessage();
         }
 
     }
@@ -529,7 +598,7 @@ class Resources extends Myschoolgh {
                 "data" => "E-Learning Material was successfully uploaded.", 
                 "additional" => [
                     "clear" => true, 
-                    "href" => "{$this->baseUrl}e-learning"
+                    "href" => "{$this->baseUrl}e-learning_view?resource_id={$item_id}"
                 ]
             ];
 
@@ -551,7 +620,7 @@ class Resources extends Myschoolgh {
             return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
         }
 
-        $course = $this->pushQuery("id, item_id, course_tutor", "courses", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        $course = $this->pushQuery("id, item_id, course_tutor", "courses", "id='{$params->course_id}' AND client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' AND status='1' LIMIT 1");
         if(empty($course)) {
             return ["code" => 203, "data" => "Sorry! An invalid course id was supplied."];
         }
@@ -622,9 +691,6 @@ class Resources extends Myschoolgh {
                 
                 // prepare the file to upload
                 $attachments = $filesObj->prep_attachments($module, $params->userId, $item_id, $initial_attachment);
-                
-                // reload the page if the user uploaded a file
-                $return = ["href" => "{$this->baseUrl}e-learning_view/{$item_id}"];
 
                 // insert the record if not already existing
                 $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? LIMIT 1");
@@ -643,6 +709,9 @@ class Resources extends Myschoolgh {
                 }
 
             }
+
+            // reload the page if the user uploaded a file
+            $return = ["href" => "{$this->baseUrl}e-learning_view/{$item_id}"];
             
             // log the user activity
             $this->userLogs("e_learning", $item_id, null, "{$params->userData->name} updated a new e-learning resource material.", $params->userId);

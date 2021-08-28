@@ -52,8 +52,9 @@ var save_AssignmentMarks = () => {
         if (proceed) {
             $.pageoverlay.show();
             $("#assignment-content :input[name='test_grading']").each(function() {
-                let student_id = $(this).attr("data-value"),
-                    student_mark = $(this).val();
+                let item = $(this);
+                let student_id = item.attr("data-value"),
+                    student_mark = (isNaN(item.val()) || !item.val().length) ? "" : item.val();
                 student_list.push(student_id + "|" + student_mark);
             });
             $.post(`${baseUrl}api/assignments/award_marks`, { student_list, assignment_id }).then((response) => {
@@ -324,6 +325,7 @@ var load_singleStudentData = async(student_id, grading) => {
     htmlData += the_n_data.data.result;
     results_page.html(htmlData).css('display', 'block');
     $(".grading-history-div").css('display', 'block');
+    init_image_popup();
 }
 
 var submit_Answers = (assignment_id) => {

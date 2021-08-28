@@ -811,7 +811,7 @@ class Forms extends Myschoolgh {
                             $filename = "{$eachFile->path}";
                             $padding = "style='padding:0px'";
                             // set the video file
-                            $thumbnail = "<video ".($show_controls ? "controls='true'" : null)." style='display: block; cursor:pointer; width:100%;' src='{$this->baseUrl}{$filename}#t=1'></video>";
+                            $thumbnail = "<video onclick=\"return loadPage('{$this->baseUrl}{$show_view}/{$record_id}_{$eachFile->unique_id}');\" ".($show_controls ? "controls='true'" : null)." style='display: block; cursor:pointer; width:100%;' src='{$this->baseUrl}{$filename}#t=5'></video>";
                         }
                         
 

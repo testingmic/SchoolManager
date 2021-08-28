@@ -23,7 +23,7 @@ class Models {
     public $allowed_delete_range = 3;
 
     /** The allowed maximum attachment size in megabytes */
-	public $max_attachment_size = 25;
+	public $max_attachment_size = 100;
     public $accepted_attachment_file_types;
 
     // instantiate the class

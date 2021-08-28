@@ -27,7 +27,7 @@ $item_id = $SITEURL[1] ?? null;
 $item = explode("_", $item_id);
 
 // if the user id is not empty
-if(empty($item_id) || !isset($item[1])) {
+if(empty($item_id)) {
     $response->html = page_not_found();
 } else {
 
@@ -40,7 +40,6 @@ if(empty($item_id) || !isset($item[1])) {
         // conver the item into an object
         $params = (object) array_map("xss_clean", $_POST);
         $params->userId = $defaultUser->user_id;
-
         // save the time for this video 
         $resourceObj->save_time($params);
     }
@@ -64,14 +63,38 @@ if(empty($item_id) || !isset($item[1])) {
         echo json_encode($response);
         exit;
     }
+
+    // set additional parameters
+    $params->limit = 5;
+    
+    // $params->class_id = $resource_list["data"][0]->class_id;
+    $params->course_id = $resource_list["data"][0]->course_id;
+
+    // load the similar videos within the same category
+    $other_videos = $resourceObj->similar_videos($params);
+
     // continue if all is set
     $video = null;
-    $other_videos = [];
+
+    // set the resource id
+    if(!isset($item[1])) {
+        $item[1] = $resource_list["files"][0]->unique_id;
+    }
+
+    // append videos to the list first
+    if(count($resource_list["files"]) > 1) {
+        foreach($resource_list["files"] as $key => $resource) {
+            if($key !== 0) {
+                $other_videos["files"][0][] = (object) $resource;
+            }
+        }    
+    }
+
+    // set the initial video to show
     foreach($resource_list["files"] as $resource) {
         if($resource->unique_id == $item[1]) {
             $video = $resource;
-        } else {
-            $other_videos[] = $resource;
+            break;
         }
     }
 
@@ -135,31 +158,43 @@ if(empty($item_id) || !isset($item[1])) {
             </div>
         ";
 
+        // begin the variable
+        $related_videos = "";
+
         // if the other related videos arent empty
         if(!empty($other_videos)) {
-            
-            // begin the variable
-            $related_videos = "";
 
             // loop through the other attached videos
-            foreach($other_videos as $video) {
-                $time = time_diff($video->datetime);
-                // set a new unique id
-                $video_param->video_id = "{$video->record_id}_{$video->unique_id}";
+            foreach($other_videos["files"] as $item) {
+                
+                // loop through the video information
+                foreach($item as $key => $video) {
 
-                // get the video timer
-                $timer = $resourceObj->video_time($video_param);
+                    // convert the item to an object
+                    // $video = (object) $video;
 
-                $related_videos .= "
-                <div class='mb-2 p-0' style='border-radius:0px 0px 10px 10px'>
-                    <div class='card-body p-0 m-0' id='related_video'>
-                        <video width='100%' data-href='{$baseUrl}e-learning_view/{$video->record_id}_{$video->unique_id}?autoplay=true' data-src='{$baseUrl}{$video->path}#t={$timer}' title='Click to watch the video: {$video->name}' height='100%' class='cursor' src='{$baseUrl}{$video->path}#t={$timer}'></video>
-                    </div>
-                    <div class='card-footer pl-2 pr-2 pt-0 pb-0 m-0'>
-                        <h6 class='p-0 m-0'>{$elearning->subject}</h6>
-                        <p style='line-height:13px' class='font-italic'>{$time}</p>
-                    </div>
-                </div>";
+                    // get the video last time
+                    $time = time_diff($video->datetime);
+
+                    // set a new unique id
+                    $video_param->video_id = "{$video->record_id}_{$video->unique_id}";
+
+                    // get the video timer
+                    $timer = $resourceObj->video_time($video_param);
+
+                    $related_videos .= "
+                    <div class='mb-4 p-0' style='border-radius:0px 0px 10px 10px'>
+                        <div class='card-body p-0 m-0' id='related_video'>
+                            <video width='100%' data-href='{$baseUrl}e-learning_view/{$video->record_id}_{$video->unique_id}?autoplay=true' data-src='{$baseUrl}{$video->path}#t={$timer}' title='Click to watch the video: {$video->name}' height='100%' class='cursor' src='{$baseUrl}{$video->path}#t={$timer}'></video>
+                        </div>
+                        <div class='card-footer pl-2 pr-2 pt-0 pb-0 m-0'>
+                            <h6 class='p-0 m-0'>{$video->name}</h6>
+                            <p style='line-height:13px' class='font-italic'>{$time}</p>
+                        </div>
+                    </div>";
+                    
+                }
+
             }
         }
 

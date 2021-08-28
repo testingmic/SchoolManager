@@ -84,7 +84,7 @@ class Files extends Myschoolgh {
         }
 
         // set the current user id
-        $currentUser_Id = !empty($session->student_id) ? $session->student_id : $userData->user_id;
+        $currentUser_Id = !empty($session->student_id) ? $session->student_id : $params->userData->user_id;
         
         // perform all this checks if the attachmments list was not parsed
         if(!isset($params->attachments_list)) {
