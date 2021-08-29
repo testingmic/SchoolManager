@@ -209,7 +209,7 @@ class TestOk
 {
     destroy()
     {
-        setTimeout(a, 1000);
+        setTimeout(a, refresh_seconds);
 
         if (typeof self.callbackOnClose === "function") {
             self.callbackOnClose();
@@ -223,7 +223,7 @@ class TestBad
     {
         setTimeout(function () {
             return;
-        }, 1000);
+        }, refresh_seconds);
 
         if (typeof self.callbackOnClose === "function") {
             self.callbackOnClose();

@@ -74,7 +74,7 @@ var award_marks = (mode) => {
                     if(response.data.additional !== undefined) {
                         setTimeout(() => {
                             loadPage(response.data.additional.href);
-                        }, 1000);
+                        }, refresh_seconds);
                     }
                 } else {
                     $(`div[id="award_marks"] *`).attr("disabled", false);

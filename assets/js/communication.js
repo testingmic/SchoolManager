@@ -181,7 +181,7 @@ var buy_sms_package = (amount, package_id) => {
         });
         setTimeout(() => {
             $(`div[id="buy_sms_package"] div[class="form-content-loader"]`).css("display", "none");
-        }, 1000);
+        }, refresh_seconds);
     }
     
 }
@@ -449,7 +449,7 @@ $(`form[class="form_send_message"]`).on("submit", function(evt) {
                         $(`form[class="form_send_message"] input, form[class="form_send_message"] textarea`).val("");
                         setTimeout(() => {
                             loadPage(`${baseUrl}smsemail_report?msg_id=${response.data.additional.item_id}`);
-                        }, 1000);
+                        }, refresh_seconds);
                     }
                 },
                 complete: function() {

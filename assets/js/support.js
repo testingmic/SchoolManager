@@ -11,7 +11,7 @@ var submit_ticket = () => {
             $(`div[id="ticket_form"] input, div[id="ticket_form"] textarea`).val(``);
             setTimeout(() => {
                 loadPage(`${baseUrl}support`);
-            }, 1000);
+            }, refresh_seconds);
         } else {
             notify(response.data.result);
         }
@@ -30,7 +30,7 @@ var reply_ticket = (ticket_id, section) => {
             setTimeout(() => {
                 let url_link = (section == "ticket") ? `${baseUrl}support/${section}/${ticket_id}` : `${baseUrl}${section}/item/${ticket_id}`;
                 loadPage(url_link);
-            }, 1000);
+            }, refresh_seconds);
         } else {
             notify(response.data.result);
         }
@@ -54,7 +54,7 @@ var modify_ticket = (todo, ticket_id, section) => {
                     setTimeout(() => {
                         let url_link = (section == "ticket") ? `${baseUrl}support/${section}/${ticket_id}` : `${baseUrl}${section}/item/${ticket_id}`;
                         loadPage(url_link);
-                    }, 1000);
+                    }, refresh_seconds);
                 } else {
                     notify(response.data.result);
                 }

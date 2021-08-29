@@ -411,6 +411,7 @@ initiateCalendar();";
         // put the preferences together
         $preference["labels"] = $params->general["labels"];
         $preference["opening_days"] = $params->general["opening_days"] ?? [];
+        $preference["features"] = $client_data->client_preferences->features_list ?? [];
         $preference["account"] = $client_data->client_preferences->account;
         $preference["academics"] = $client_data->client_preferences->academics;
 
@@ -447,6 +448,52 @@ initiateCalendar();";
 
         } catch(PDOException $e) {}
 
+    }
+
+    /**
+     * Update Account Features Information
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function features(stdClass $params) {
+
+        // get the client data
+        $client_data = $this->iclient;
+        $preference = $client_data->client_preferences;
+        
+        // ensure an array was parsed
+        if(!empty($params->features) && !is_array($params->features)) {
+            return ["code" => 203, "data" => "Sorry! Features must be an array."];
+        }
+
+        // get the features list
+        $accepted_features = array_keys($this->features_list);
+        $features_list = !empty($params->features) ? array_values($params->features) : [];
+
+        // loop through the list to ensure a valid item was parsed
+        foreach($features_list as $item) {
+            if(!in_array($item, $accepted_features)) {
+                return ["code" => 203, "data" => "Sorry! An invalid feature was parsed."];
+            }
+        }
+
+        // set the features list
+        $client_data->client_preferences->features_list = $features_list;
+
+        // run the update of the account information
+        $stmt = $this->db->prepare("UPDATE clients_accounts SET client_preferences	= ? WHERE client_id = ? LIMIT 1");
+        $stmt->execute([json_encode($client_data->client_preferences), $params->client_id ?? $params->clientId]);
+
+        // log the user activity
+        $this->userLogs("setup_preference", $params->client_id ?? $params->clientId, $preference, "{$params->userData->name} updated the Account Preferences", $params->userId);
+
+        // reset the client data information
+        $this->client_session_data($params->client_id ?? $params->clientId, true);
+
+        // parse success message
+        return ["code" => 200, "data" => "Account preference was successfully updated."];
     }
 
     /**

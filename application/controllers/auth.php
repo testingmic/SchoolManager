@@ -939,6 +939,7 @@ class Auth extends Myschoolgh {
                     "expiry" => date("Y-m-d h:iA", strtotime("+1 months"))
                 ],
                 "opening_days" => $this->default_opening_days,
+                "features_list" => array_keys($this->features_list)
             ];
 
             // get the details of the tiral account

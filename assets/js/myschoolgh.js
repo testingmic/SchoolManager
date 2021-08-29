@@ -327,7 +327,7 @@ var set_default_Student = (student_id) => {
             });
             setTimeout(() => {
                 window.location.href= `${baseUrl}main`;
-            }, 1000);
+            }, refresh_seconds);
         }
     });
 }
@@ -539,7 +539,7 @@ var modify_report_result = (action, report_id) => {
                 if (response.data.additional.href !== undefined) {
                     setTimeout(() => {
                         loadPage(response.data.additional.href);
-                    }, 1000);
+                    }, refresh_seconds);
                 }
                 $.pageoverlay.hide();
             }).catch(() => {

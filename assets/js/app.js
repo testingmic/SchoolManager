@@ -365,11 +365,11 @@ var trigger_form_submit = () => {
                                     if (theButton.attr("href") !== undefined) {
                                         setTimeout(() => {
                                             loadPage(theButton.attr("href"));
-                                        }, 1000);
+                                        }, refresh_seconds);
                                     } else {
                                         setTimeout(() => {
                                             loadPage(response.data.additional.href);
-                                        }, 1000);
+                                        }, refresh_seconds);
                                     }
                                 }
                                 if (response.data.additional.data !== undefined) {
@@ -509,11 +509,11 @@ var ajax_trigger_form_submit = () => {
                                     if (theButton.attr("href") !== undefined) {
                                         setTimeout(() => {
                                             loadPage(theButton.attr("href"));
-                                        }, 1000);
+                                        }, refresh_seconds);
                                     } else {
                                         setTimeout(() => {
                                             loadPage(response.data.additional.href);
-                                        }, 1000);
+                                        }, refresh_seconds);
                                     }
                                 }
                                 if (response.data.additional.data !== undefined) {
@@ -1188,7 +1188,7 @@ var load_form_action = (form) => {
                             if (result.data.additional.href !== undefined) {
                                 setTimeout(() => {
                                     loadPage(result.data.additional.href);
-                                }, 1000);
+                                }, refresh_seconds);
                             }
                         }
                     } else {

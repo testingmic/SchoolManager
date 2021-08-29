@@ -285,8 +285,12 @@ class Models {
             "library" => "Library Management",
             "e_learning" => "E-Learning",
             "class_assessment" => "Online Class Assessment",
-            "payroll_manager" => "Payroll Manager",
-            "live_chat" => "Live Chat",
+            "attendance" => "Attendance Manager",
+            "timetable" => "Timetable",
+            "payroll" => "Payroll Manager",
+            "inventory" => "Inventory Manager",
+            "bulk_action" => "Bulk Action",
+            "live_chat" => "Live Chat"            
         ];
 
     }

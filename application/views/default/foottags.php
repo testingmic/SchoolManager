@@ -86,7 +86,7 @@
     <?= $announcementNotice->content ?>
     <?php } ?>
     <script>
-    var fieldDefault = {}, thisRowId = 1, thisSelectRow = 1, userAgent = "<?= $myClass->agent."||".$myClass->platform."||".$myClass->browser."||".ip_address(); ?>",
+    var fieldDefault = {}, refresh_seconds = 1000, thisRowId = 1, thisSelectRow = 1, userAgent = "<?= $myClass->agent."||".$myClass->platform."||".$myClass->browser."||".ip_address(); ?>",
         baseUrl = "<?= $baseUrl ?>",current_url="<?= $user_current_url ?>", sms_text_count = <?= $myClass->sms_text_count; ?>,
         viewedAs = "<?= (bool) isset($_GET["viewas"]) ?>", pk_payment_key = "<?= $myClass->pk_public_key ?>",
         this_user_unique_key = "persist:msgh-client-<?= $session->userId; ?>",

@@ -39,7 +39,7 @@ var save_category = (category, student_id) => {
                 if(response.code == 200) {
                     setTimeout(() => {
                         loadPage(`${baseUrl}fees-allocate/${student_id}`);
-                    }, 1000);
+                    }, refresh_seconds);
                 }
                 $(`div[class~='request_buttons'][data-category_id="${category}"]`).removeClass("hidden");
                 $(`div[class~='request_loader'][data-category_id="${category}"]`).addClass("hidden");
@@ -82,7 +82,7 @@ var save_student_bill = (student_id, student_name) => {
                 if(response.code == 200) {
                     setTimeout(() => {
                         loadPage(`${baseUrl}fees-allocate/${student_id}`);
-                    }, 1000);
+                    }, refresh_seconds);
                 }
                 $(`div[id="fees_allocation_table"] div[class="form-content-loader"]`).css("display", "none");
             }).catch(() => {

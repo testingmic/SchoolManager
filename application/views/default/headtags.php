@@ -1,6 +1,6 @@
 <?php
 // global variables
-global $usersClass, $accessObject, $myClass, $isSupport, $defaultClientData, $clientPrefs, $isParent, $defaultUser;
+global $usersClass, $accessObject, $myClass, $isSupport, $defaultClientData, $clientPrefs, $isParent, $defaultUser, $clientFeatures;
 
 // base url
 $baseUrl = config_item("base_url");
@@ -281,7 +281,7 @@ load_helpers(['menu_helper']);
                             <span class="logo-name"><?= $appName ?></span>
                         </a>
                     </div>
-                    <ul class="sidebar-menu">
+                    <ul class="sidebar-menu mb-5">
                         <li class="menu-header">Main</li>
                         <li><a href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
                         <?php 
@@ -294,7 +294,7 @@ load_helpers(['menu_helper']);
                             $menu_function();
                         }
                         ?>
-                        <?php if($isSchool && $isActiveAccount) { ?>
+                        <?php if($isSchool && $isActiveAccount && in_array("live_chat", $clientFeatures)) { ?>
                         <li class="mb-5"><a href="<?= $baseUrl ?>chat" class="nav-link"><i class="fas fa-envelope-open-text"></i><span>Live Chat</span></a></li>
                         <?php } ?>
                     </ul>

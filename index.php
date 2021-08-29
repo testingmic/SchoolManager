@@ -152,6 +152,9 @@ if(!empty($session->userId)) {
 		$isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
 		$isAdmin = (bool) ($defaultUser->user_type == "admin");
 
+		// set the features
+        $clientFeatures = !empty($clientPrefs->features_list) ? (array) $clientPrefs->features_list : [];
+
 		// if the user is not support then run this section
 		if(!$isSupport) {
 

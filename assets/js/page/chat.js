@@ -31,7 +31,7 @@ $.chatCtrl = function(element, chat) {
     }
 
     setTimeout(function() {
-        $(`div[class~="chat-content"]`).animate({ scrollTop: $(`div[class~="chat-content"]`).prop("scrollHeight") }, 1000);
+        $(`div[class~="chat-content"]`).animate({ scrollTop: $(`div[class~="chat-content"]`).prop("scrollHeight") }, refresh_seconds);
     }, 100);
     chat.onShow.call(this, append_element);
 }
@@ -134,7 +134,7 @@ var display_messages = async(message_id, user_id, name, image, last_seen = "Onli
         setTimeout(function() {
             $(`div[class~="chat-box"] div[class~="chat-content"] div[class~="chat-item"]`).fadeIn();
             $(`div[class~="chat-content"]`).animate({ scrollTop: $(`div[class~="chat-content"]`).prop("scrollHeight") }, 0);
-        }, 1000);
+        }, refresh_seconds);
     }
 
 }

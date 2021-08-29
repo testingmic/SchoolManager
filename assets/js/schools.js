@@ -28,7 +28,7 @@ var topup_sms_balance = () => {
                 if (response.data.additional.href !== undefined) {
                     setTimeout(() => {
                         loadPage(response.data.additional.href);
-                    }, 1000);
+                    }, refresh_seconds);
                 }
             }).catch(() => {});
         }

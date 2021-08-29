@@ -687,7 +687,7 @@ var filter_Class_Attendance = () => {
             }
             setTimeout(() => {
                 $(`div[id="class_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
-            }, 1000);
+            }, refresh_seconds);
         }
     }).catch(() => {
         $(`div[id="class_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
@@ -706,7 +706,7 @@ var filter_UserGroup_Attendance = () => {
             }
             setTimeout(() => {
                 $(`div[id="users_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
-            }, 1000);
+            }, refresh_seconds);
         }
     }).catch(() => {
         $(`div[id="users_attendance_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });

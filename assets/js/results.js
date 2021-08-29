@@ -144,7 +144,7 @@ var save_result = (record_id, record_type, additional_id = "") => {
                         if (response.data.additional.href !== undefined) {
                             setTimeout(() => {
                                 loadPage(response.data.additional.href);
-                            }, 1000);
+                            }, refresh_seconds);
                         }
                     }
                 }

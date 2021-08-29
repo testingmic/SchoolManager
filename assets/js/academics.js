@@ -43,7 +43,7 @@ var end_Academic_Term = (action = "begin") => {
                     if (response.code == 200) {
                         setTimeout(() => {
                             window.location.href = `${baseUrl}dashboard`;
-                        }, 1000);
+                        }, refresh_seconds);
                     }
                     $(`button[id="proceed_term_closure"]`).prop("disabled", false).html("PROCEED TO END TERM");
                 }).catch(() => {
@@ -57,4 +57,41 @@ var end_Academic_Term = (action = "begin") => {
             }
         });
     }
+}
+
+var save_client_features = (client_id) => {
+    swal({
+        title: "Save Account Features",
+        text: "Are you sure you want to save these settings?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if (proceed) {
+            let features = {};
+            $.each($(`div[id="account_features"] input:checked`), function(i, e) {
+                let key = $(this).attr("data-menu_item");
+                features[i] = key;
+            });
+            $.pageoverlay.show();
+            $.post(`${baseUrl}api/account/features`, { features, client_id }).then((response) => {
+                $.pageoverlay.hide();
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
+                if (response.code == 200) {
+                    setTimeout(() => {
+                        window.location.href = `${current_url}`;
+                    }, refresh_seconds);
+                }
+            }).catch(() => {
+                swal({
+                    text: swalnotice["ajax_error"],
+                    icon: "error",
+                });
+                $.pageoverlay.hide();
+            });
+        }
+    });
 }

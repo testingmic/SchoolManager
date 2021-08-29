@@ -42,6 +42,8 @@ if(!empty($client_id)) {
     if(empty($load_schools_list)) {
         $response->html = page_not_found("access_denied");
     } else {
+        // include scripts
+        $response->scripts = ["assets/js/academics.js"];
 
         // reset the client id
         $client_id = !$isSupport ? $session->clientId : $client_id;
@@ -50,8 +52,11 @@ if(!empty($client_id)) {
         $data = $load_schools_list[0];
         $data->client_preferences = json_decode($data->client_preferences);
         $data->analitics = load_class("account", "controllers")->client($params);
-        $clientPref = $data->client_preferences;
+        $thisClientPref = $data->client_preferences;
 
+        // set the features
+        $schoolFeatures = !empty($thisClientPref->features_list) ? (array) $thisClientPref->features_list : [];
+        
         // set is disabled
         $is_disabled = $isSupport ? null : "disabled='disabled'";
 
@@ -61,8 +66,8 @@ if(!empty($client_id)) {
         $analitics = "";
         $features_list = "";
 
-        if(isset($clientPref->academics)) {
-            foreach($clientPref->academics as $key => $value) {
+        if(isset($thisClientPref->academics)) {
+            foreach($thisClientPref->academics as $key => $value) {
                 $item = ucwords(str_ireplace("_", " ", $key));
                 $academics .= "<tr><td class='text-uppercase' width='40%'><strong>{$item}:</strong></td><td class='font-17'>{$value}</td></tr>";
             }
@@ -73,16 +78,31 @@ if(!empty($client_id)) {
             $analitics .= "<tr><td class='text-uppercase' width='40%'><strong>{$item}:</strong></td><td class='font-17'>{$value}</td></tr>";
         }
 
-        if(isset($clientPref->account)) {
-            foreach($clientPref->account as $key => $value) {
+        if(isset($thisClientPref->account)) {
+            foreach($thisClientPref->account as $key => $value) {
                 $key = ucwords(str_ireplace("_", " ", $key));
                 $account .= "<tr><td class='text-uppercase' width='40%'><strong>{$key}:</strong></td><td class='font-17'>".ucwords($value)."</td></tr>";
             }
         }
 
         // import list
-        $features_list = "";
-        $features_array = $myClass->features_list;
+        $features_list = "<table class='table table-bordered table-md table-striped'>";
+        // list the features to show
+        foreach($myClass->features_list as $key => $feature) {
+            $features_list .= "<tr>";
+            $features_list .= "<td width='50%' class='text-uppercase'><label class='cursor' title='Click to select this feature' for='features[$key]'>{$feature}</label></td>";
+            $features_list .= "<td><input ".(in_array($key, $schoolFeatures) ? "checked" : null)." style='width:20px;height:20px' title='Click to select this feature' data-menu_item='{$key}' class='cursor' id='features[$key]' type='checkbox' name='features[$key]' ></td>";
+            $features_list .= "</tr>";
+        }
+        $features_list .= '
+            <tr>
+                <td width="50%"></td>
+                <td align="left">
+                    <button onclick="return save_client_features(\''.$client_id.'\')" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Record</button>
+                </td>
+            </tr>';
+
+        $features_list .= "</table>";
 
         // set the html string
         $response->html = '
@@ -99,8 +119,6 @@ if(!empty($client_id)) {
                 <div class="col-md-4">
                     <div class="card author-box pt-2">
                         <div class="card-body">
-
-
                             <div class="author-box-center m-0 p-0">
                                 <img alt="image" src="'.$baseUrl.''.$data->client_logo.'" class="profile-picture">
                             </div>
@@ -159,9 +177,10 @@ if(!empty($client_id)) {
                                     <li class="nav-item">
                                         <a class="nav-link" id="sms-tab2" data-toggle="tab" href="#sms" role="tab" aria-selected="true">SMS</a>
                                     </li>' : null).'
-                                    <li class="nav-item">
+                                    '.($is_disabled  ? 
+                                    '<li class="nav-item">
                                         <a class="nav-link" id="features-tab2" data-toggle="tab" href="#features" role="tab" aria-selected="true">FEATURES</a>
-                                    </li>
+                                    </li>' : null).'
                                 </ul>
                                 <div class="tab-content tab-bordered" id="myTab3Content">
                                     <div class="tab-pane fade show active" id="account" role="tabpanel" aria-labelledby="account-tab2">
@@ -197,17 +216,17 @@ if(!empty($client_id)) {
                                                             <td width="35%"><strong>PACKAGE</strong></td>
                                                             <td>
                                                                 <select '.$is_disabled.' data-width="100%" name="data[account_package]" class="form-control selectpicker">
-                                                                    <option '.($clientPref->account->package == "trial" ? "selected" : null).' value="basic">Trial Package</option>
-                                                                    <option '.($clientPref->account->package == "basic" ? "selected" : null).' value="basic">Basic Package</option>
-                                                                    <option '.($clientPref->account->package == "standard" ? "selected" : null).' value="standard">Standard Package</option>
-                                                                    <option '.($clientPref->account->package == "premium" ? "selected" : null).' value="premium">Premium Package</option>
+                                                                    <option '.($thisClientPref->account->package == "trial" ? "selected" : null).' value="basic">Trial Package</option>
+                                                                    <option '.($thisClientPref->account->package == "basic" ? "selected" : null).' value="basic">Basic Package</option>
+                                                                    <option '.($thisClientPref->account->package == "standard" ? "selected" : null).' value="standard">Standard Package</option>
+                                                                    <option '.($thisClientPref->account->package == "premium" ? "selected" : null).' value="premium">Premium Package</option>
                                                                 </select>
                                                             </td>
                                                         </tr>
                                                         <tr>
                                                             <td width="35%"><strong>EXPIRY</strong></td>
                                                             <td>
-                                                                <input '.$is_disabled.' data-maxdate="'.date("Y-m-d", strtotime("+5 years")).'" value="'.date("Y-m-d", strtotime($clientPref->account->expiry)).'" name="data[account_expiry]" id="account_expiry" class="form-control datepicker">
+                                                                <input '.$is_disabled.' data-maxdate="'.date("Y-m-d", strtotime("+5 years")).'" value="'.date("Y-m-d", strtotime($thisClientPref->account->expiry)).'" name="data[account_expiry]" id="account_expiry" class="form-control datepicker">
                                                             </td>
                                                         </tr>
                                                         <tr>
@@ -291,10 +310,10 @@ if(!empty($client_id)) {
                                     </div>' : null).'
                                     <div class="tab-pane fade" id="features" role="tabpanel" aria-labelledby="features-tab2">
                                         <div class="row">
-                                            <div class="col-lg-12 table-responsive">
+                                            <div class="col-lg-12 table-responsive" id="account_features">
                                                 <table class="table table-striped table-bordered table-md">
                                                     <tr>
-                                                        <th colspan="2">ACCOUNT FEATURES</th>
+                                                        <th colspan="2">ACCOUNT FEATURES PREFERENCE</th>
                                                     </tr>
                                                     '.$features_list.'
                                                 </table>

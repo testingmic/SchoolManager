@@ -56,7 +56,7 @@ var save_Receive_Payment = () => {
                 if (response.code === 200) {
                     setTimeout(() => {
                         loadPage(`${baseUrl}arrears/${student_id}`);
-                    }, 1000);
+                    }, refresh_seconds);
                 }
                 $(`div[id="arrears_payment_form"] div[class="form-content-loader"]`).css("display", "none");
             }).catch(() => {

@@ -102,11 +102,11 @@ var trigger_form_submit = () => {
                                     if (theButton.attr("href") !== undefined) {
                                         setTimeout(() => {
                                             window.location.href = `${theButton.attr("href")}`;
-                                        }, 1000);
+                                        }, refresh_seconds);
                                     } else {
                                         setTimeout(() => {
                                             window.location.href = `${response.data.additional.href}`;
-                                        }, 1000);
+                                        }, refresh_seconds);
                                     }
                                 }
                             }
@@ -221,7 +221,7 @@ var complete_setup_process = () => {
                 if (response.code === 200) {
                     setTimeout(() => {
                         window.location.href = `${baseUrl}`;
-                    }, 1000);
+                    }, refresh_seconds);
                 }
             });
         }

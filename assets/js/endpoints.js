@@ -73,7 +73,7 @@ $(`form[class="endpoint-form"]`).on("submit", function(evt) {
                 reset_form();
                 setTimeout(() => {
                     window.location.href = `${baseUrl}endpoints?end_id=${response.record_id}`;
-                }, 1000);
+                }, refresh_seconds);
             }
 
         } else {

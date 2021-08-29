@@ -75,7 +75,7 @@ var save_Event_Type = () => {
                     $.array_stream["event_types_array"] = response.data.additional.event_types;
                     setTimeout(() => {
                         initiateCalendar();
-                    }, 1000);
+                    }, refresh_seconds);
                 }
                 swal({
                     position: "top",
