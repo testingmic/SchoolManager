@@ -69,12 +69,7 @@ class Users extends Myschoolgh {
 			// set the columns to load
 			$params->columns = "a.id, a.client_id, a.unique_id, a.item_id AS user_id, a.name, a.user_type, a.phone_number, 
 				a.class_id, a.email, a.image, a.gender, cl.name class_name, dp.name AS department_name,
-				(SELECT SUM(p.balance) FROM fees_payments p 
-					WHERE p.student_id = a.item_id AND p.exempted = '0' 
-						AND p.academic_year = '{$academic_year}' 
-						AND p.academic_term = '{$academic_term}'
-					LIMIT {$this->fees_category_count}
-			) AS debt, ar.arrears_total AS arrears";
+				a.debt, ar.arrears_total AS arrears";
 			
 			
 			// prepare and execute the statement
@@ -674,9 +669,9 @@ class Users extends Myschoolgh {
 						SELECT 
 							a.item_id AS student_guid, a.unique_id, a.firstname, a.lastname, a.othername,
 							a.name, a.image, a.guardian_id, a.date_of_birth, a.blood_group, a.gender, a.email,
-							b.name AS class_name, c.name AS department_name
+							c.name AS class_name, b.name AS department_name
 						FROM users a 
-						LEFT JOIN classes b ON b.id = a.class_id
+						LEFT JOIN classes c ON c.id = a.class_id
 						LEFT JOIN departments b ON b.id = a.department
 						WHERE a.status='1' AND a.user_type = 'student' AND a.guardian_id LIKE '%{$value->unique_id}%'
 					");

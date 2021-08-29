@@ -103,7 +103,7 @@ GLOBAL $SITEURL, $session;
 if(!empty($session->userId)) {
 
 	// get the client data
-	$defaultClientData = $myClass->client_session_data($session->clientId, true);
+	$defaultClientData = $myClass->client_session_data($session->clientId, false);
 	
 	// parse the client data
 	$init_param = (object) ["client_data" => $defaultClientData];
@@ -156,7 +156,7 @@ if(!empty($session->userId)) {
 		if(!$isSupport) {
 
 			// set additional parameters
-			$defaultCurrency = $defaultClientData->client_preferences->labels->currency;
+			$defaultCurrency = $defaultClientData->client_preferences->labels->currency ?? null;
 			$isTeacher = $isTutor = (bool) ($defaultUser->user_type == "teacher");
 			$isParent = (bool) ($defaultUser->user_type == "parent");
 			$isStudent = (bool) ($defaultUser->user_type == "student");

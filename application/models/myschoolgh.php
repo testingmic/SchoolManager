@@ -12,6 +12,7 @@ class Myschoolgh extends Models {
 	public $permitPage;
 
 	/* This is the global value for the browser and platform to use by all methods */
+	public $session;
 	public $browser;
 	public $platform;
 	public $userId;
@@ -59,19 +60,18 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Object
 	 */
-	public function client_session_data($clientId, $clear = false) {
+	public function client_session_data($clientId, $clear = true) {
 
 		// initial client data
 		$client_data = (object) [];
 
 		// if the clear is true then unset the session variable
-		if($clear) {
+		if($clear === true) {
 			$this->session->remove("defaultClientData");
 		}
 
 		// if the session variable is empty then set a new session
 		if(empty($this->session->defaultClientData)) {
-
 			// load the client data
 			$client_data = $this->client_data($clientId);
 			

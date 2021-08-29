@@ -226,6 +226,9 @@ class Api {
      * @return  
      */
     final function requestHandler(stdClass $params) {
+        // global variable
+        global $defaultClientData;
+
         // preset the response
         $result = [];
         $code = 203;
@@ -233,7 +236,7 @@ class Api {
         $this->requestPayload = $params;
         
         // get the client data
-        $client_data = $this->myClass->client_data($this->clientId);
+        $client_data = empty($defaultClientData->client_name) ? $this->myClass->client_data($this->clientId) : $defaultClientData;
         
         // reassign the variable data
         $academics = $client_data->client_preferences->academics ?? null;
