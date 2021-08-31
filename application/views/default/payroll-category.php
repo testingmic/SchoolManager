@@ -115,7 +115,7 @@ $response->html = '
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="text-right mb-2">
-                    <a class="btn btn-sm btn-outline-primary" onclick="return add_allowance();" href="#"><i class="fa fa-plus"></i> Add New</a>
+                    <a class="btn btn-outline-primary" onclick="return add_allowance();" href="#"><i class="fa fa-plus"></i> Add New</a>
                 </div>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">

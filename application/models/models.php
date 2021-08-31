@@ -284,7 +284,9 @@ class Models {
         $this->features_list = [
             "library" => "Library Management",
             "e_learning" => "E-Learning",
+            // "lesson_planner" => "Lesson Planner",
             "class_assessment" => "Online Class Assessment",
+            "reports_promotion" => "Terminal Reports / Promotion",
             "attendance" => "Attendance Manager",
             "timetable" => "Timetable",
             "payroll" => "Payroll Manager",

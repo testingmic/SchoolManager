@@ -262,6 +262,9 @@ if(!$isSupport) {
 
     /** Download Timetables */
     elseif(confirm_url_id(1, "attendance")) {
+        // set no memory limit
+        error_reporting(0);
+        ini_set("memory_limit", "-1");
         
         /** Start processing */
         $getObject = (array) $_GET;

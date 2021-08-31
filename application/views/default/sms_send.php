@@ -42,18 +42,13 @@ $templates_array = $myClass->pushQuery("name, id, item_id, type, message", "smse
 $class_array_list = $myClass->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'");
         
 // get the list of all other users
-$other_users_list = $myClass->pushQuery("name, user_type, unique_id, item_id, phone_number, class_id", "users", "client_id='{$params->clientId}' AND status='1' AND user_type != 'student' LIMIT {$myClass->global_limit}");
+$other_users_list = $myClass->pushQuery("name, user_type, unique_id, item_id, phone_number, class_id", "users", "client_id='{$params->clientId}' AND user_status='Active' AND status='1' ORDER BY name LIMIT {$myClass->global_limit}");
 
 // get the list of only students
-$students_array_list = $myClass->pushQuery("name, user_type, unique_id, item_id, phone_number, class_id", "users", 
-    "client_id='{$params->clientId}' AND status='1' AND user_type='student' LIMIT {$myClass->global_limit}");
 $users_array_list = [];
 
 // get the users list
 foreach($other_users_list as $user) {
-    $users_array_list[] = $user;
-}
-foreach($students_array_list as $user) {
     $users_array_list[] = $user;
 }
 
@@ -110,8 +105,9 @@ $response->html = '
                                         <select data-selectors="'.$route.'" data-route="'.$route.'" name="role_group[]" class="form-control selectpicker" multiple="true" data-width="100%">
                                             <option value="">Select</option>
                                             <option value="admin">Admin</option>
-                                            <option value="teacher">Teacher</option>
-                                            <option value="accountant">Accountant</option>
+                                            <option value="teacher">Teachers</option>
+                                            <option value="student">Students</option>
+                                            <option value="accountant">Accountants</option>
                                             <option value="employee">Employees</option>
                                         </select>
                                     </div>
@@ -121,9 +117,10 @@ $response->html = '
                                         <label>Role <span class="required">*</span></label>
                                         <select data-selectors="'.$route.'" data-route="'.$route.'" name="role_id" class="form-control selectpicker" data-width="100%">
                                             <option value="">Select</option>
-                                            <option value="admin">Admin</option>
-                                            <option value="teacher">Teacher</option>
-                                            <option value="accountant">Accountant</option>
+                                            <option value="admin">Admins</option>
+                                            <option value="teacher">Teachers</option>
+                                            <option value="student">Students</option>
+                                            <option value="accountant">Accountants</option>
                                             <option value="employee">Employees</option>
                                         </select>
                                     </div>
@@ -165,7 +162,7 @@ $response->html = '
                                     </tr>
                                 </thead>
                             </table>
-                            <div class="slim-scroll" style="overflow-y:auto;max-height:500px;">
+                            <div style="overflow-y:auto;max-height:500px;">
                                 <table border="1" width="100%" class="table pt-0 mt-0 table_list table-bordered table-striped">
                                     <tbody class="receipients_list">
                                         <tr>

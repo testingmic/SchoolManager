@@ -203,8 +203,8 @@ var load_attendance_log = () => {
                     $('.datatable').dataTable({
                         search: null,
                         lengthMenu: [
-                            [10, 30, 50, 75, 100, 200, -1],
-                            [10, 30, 50, 75, 100, 200, "All"]
+                            [20, 50, 75, 100, 200, -1],
+                            [20, 50, 75, 100, 200, "All"]
                         ],
                         language: {
                             sEmptyTable: "Nothing Found",

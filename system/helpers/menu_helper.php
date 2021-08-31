@@ -136,6 +136,7 @@
                 </ul>
             </li>
         <?php } ?>
+        <?php if(in_array("reports_promotion", $clientFeatures)) { ?>
         <li class="dropdown">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Reports / Promotion</span></a>
             <ul class="dropdown-menu">
@@ -146,6 +147,7 @@
                 <?php } ?>
             </ul>
         </li>
+        <?php } ?>
     <?php } ?>
     <?php if(in_array("library", $clientFeatures)) { ?>
         <li class="dropdown">
@@ -255,6 +257,7 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Course Resources</a></li>
         </ul>
     </li>
+    <?php if(in_array("reports_promotion", $clientFeatures)) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Reports / Promotion</span></a>
         <ul class="dropdown-menu">
@@ -265,6 +268,7 @@
             <?php } ?>
         </ul>
     </li>
+    <?php } ?>
     <?php if(in_array("e_learning", $clientFeatures)) { ?>
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-open"></i><span>E-Learning</span></a>
@@ -397,13 +401,15 @@
             </ul>
         </li>
     <?php } ?>
-    <?php if($accessObject->hasAccess("generate", "results")) { ?>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Terminal Reports</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
-        </ul>
-    </li>
+    <?php if(in_array("class_assessment", $clientFeatures)) { ?>
+        <?php if($accessObject->hasAccess("generate", "results")) { ?>
+        <li class="dropdown">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-project-diagram"></i><span>Terminal Reports</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>results-generate">Generate Report</a></li>
+            </ul>
+        </li>
+        <?php } ?>
     <?php } ?>
     <li class="menu-header">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>

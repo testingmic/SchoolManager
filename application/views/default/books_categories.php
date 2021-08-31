@@ -62,7 +62,7 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 '.($hasAdd ? '
                     <div class="text-right mb-2">
-                        <a class="btn btn-sm btn-outline-primary" href="'.$baseUrl.'add-book_category"><i class="fa fa-plus"></i> Add Category</a>
+                        <a class="btn btn-outline-primary" href="'.$baseUrl.'book_category_add"><i class="fa fa-plus"></i> Add Category</a>
                     </div>' : ''
                 ).'
                 <div class="card">

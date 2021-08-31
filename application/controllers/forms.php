@@ -1505,7 +1505,7 @@ class Forms extends Myschoolgh {
                             <div class="form-group">
                                 <label for="status">Status</label>
                                 <select data-width="100%" name="status" id="status" class="form-control cursor">
-                                    <option value="null">Select Status</option>
+                                    <option value="">Select Status</option>
                                     <option '.($params->data->status == "Pending" ? "selected" : null).' value="Pending">Pending</option>
                                     <option '.($params->data->status == "Processing" ? "selected" : null).' value="Processing">Processing</option>
                                     <option '.($params->data->status == "Cancelled" ? "selected" : null).' value="Cancelled">Cancelled</option>
@@ -1751,7 +1751,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="gender">Gender</label>
                         <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
-                            <option value="null">Select Gender</option>';
+                            <option value="">Select Gender</option>';
                             foreach($this->pushQuery("*", "users_gender") as $each) {
                                 $response .= "<option ".($isData && ($each->name == $userData->gender) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
@@ -1867,7 +1867,7 @@ class Forms extends Myschoolgh {
                             <div class="form-group">
                                 <label for="class_id">Class</label>
                                 <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
-                                    <option value="null">Select Student Class</option>';
+                                    <option value="">Select Student Class</option>';
                                     foreach($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
                                         $response .= "<option ".($isData && ($each->id == $userData->class_id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
                                     }
@@ -1878,7 +1878,7 @@ class Forms extends Myschoolgh {
                             <div class="form-group">
                                 <label for="section">Section</label>
                                 <select data-width="100%" name="section" id="section" class="form-control selectpicker">
-                                    <option value="null">Select Student Section</option>';
+                                    <option value="">Select Student Section</option>';
                                     foreach($this->pushQuery("id, name", "sections", "status='1' AND client_id='{$clientId}'") as $each) {
                                         $response .= "<option ".($isData && ($each->id == $userData->section) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
                                     }
@@ -2041,7 +2041,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="gender">Gender</label>
                         <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
-                            <option value="null">Select Gender</option>';
+                            <option value="">Select Gender</option>';
                             foreach($this->pushQuery("*", "users_gender") as $each) {
                                 $response .= "<option ".($isData && ($each->name == $userData->gender) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
@@ -2200,7 +2200,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="department_head">Department Head</label>
                         <select data-width="100%" name="department_head" id="department_head" class="form-control selectpicker">
-                            <option value="null">Select Department Head</option>';
+                            <option value="">Select Department Head</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('employee','teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->item_id == $itemData->department_head) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
@@ -2266,7 +2266,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="section_leader">Section Leader</label>
                         <select data-width="100%" name="section_leader" id="section_leader" class="form-control selectpicker">
-                            <option value="null">Select Section Leader</option>';
+                            <option value="">Select Section Leader</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('student','teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->item_id == $itemData->section_leader) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
@@ -2516,7 +2516,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="gender">Gender</label>
                         <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
-                            <option value="null">Select Gender</option>';
+                            <option value="">Select Gender</option>';
                             foreach($this->pushQuery("*", "users_gender") as $each) {
                                 $response .= "<option ".($isData && ($each->name == $userData->gender) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
@@ -2635,7 +2635,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="section">Section</label>
                         <select data-width="100%" name="section" id="section" class="form-control selectpicker">
-                            <option value="null">Select Section</option>';
+                            <option value="">Select Section</option>';
                             foreach($this->pushQuery("id, name", "sections", "status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && ($each->id == $userData->section) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";                            
                             }
@@ -2665,8 +2665,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="status">Status</label>
-                        <select data-width="100%" name="status" id="status" class="form-control selectpicker">
-                            <option value="null">Select Employee Status</option>';
+                        <select data-width="100%" name="status" id="status" class="form-control selectpicker">';
                             foreach($this->user_status_list as $key => $value) {
                                 $response .= "<option ".($isData && ($key == $userData->user_status) ? "selected" : null)." value=\"{$key}\">{$value}</option>";                            
                             }
@@ -2709,7 +2708,7 @@ class Forms extends Myschoolgh {
                         <div class="form-group">
                             <label>Type<span class="required">*</span></label>
                             <select '.$disabled.' data-width="100%" name="type" id="type" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
-                                <option value="null">Select</option>';
+                                <option value="">Select</option>';
                                 if(isset($data->event_types)) {
                                     foreach($data->event_types as $key => $value) {
                                         $html_content .= "<option ".(isset($data->item_id) && ($data->event_type == $value->item_id) ? "selected='selected'" : "")." data-row_id='{$value->item_id}' value='{$value->item_id}'>{$value->name}</option>";
@@ -2723,7 +2722,7 @@ class Forms extends Myschoolgh {
                         <div class="form-group">
                             <label>Audience<span class="required">*</span></label>
                             <select '.$disabled.' data-width="100%" name="audience" id="audience" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
-                                <option value="null">Select</option>';
+                                <option value="">Select</option>';
                                 foreach($this->event_audience as $key => $value) {
                                     $html_content .= "<option ".(isset($data->item_id) && ($data->audience == $key) ? "selected='selected'" : "")." value='{$key}'>{$value}</option>";
                                 }
@@ -3148,7 +3147,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="gender">Gender</label>
                         <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
-                            <option value="null">Select Gender</option>';
+                            <option value="">Select Gender</option>';
                             foreach($this->pushQuery("*", "users_gender") as $each) {
                                 $response .= "<option ".($isData && ($each->name == $userData->gender) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
                             }
@@ -3574,7 +3573,7 @@ class Forms extends Myschoolgh {
                     <div class="col-md-4" style="display: none;" data-row="1">
                         <div class="form-row">
                             <select class="form-control">
-                                <option value="null">Please Select</option>';
+                                <option value="">Please Select</option>';
                                 foreach($import as $value) {
                                     $form .= "<option value='{$value}'>{$value}</option>";
                                 }
@@ -4047,7 +4046,7 @@ class Forms extends Myschoolgh {
                     <div class="row">
                         <div class="col-lg-'.(($ii == 1) ? 7 : 6).' mb-2 col-md-'.(($ii == 1) ? 7 : 6).'">
                             <select data-width="100%" name="allowance[]" id="allowance_'.$ii.'" class="form-control selectpicker">
-                                <option value="null">Please Select</option>';
+                                <option value="">Please Select</option>';
                                 foreach($allowances as $each) {
                                     $allowances_list .= "<option data-default_value='{$each->default_amount}' ".(($eachAllowance->allowance_id == $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
                                 }
@@ -4072,7 +4071,7 @@ class Forms extends Myschoolgh {
                 <div class="row">
                     <div class="col-lg-7 mb-2 col-md-7">
                         <select data-width="100%" name="allowance" id="allowance_1" class="form-control selectpicker">
-                            <option value="null">Please Select</option>';
+                            <option value="">Please Select</option>';
                             foreach($allowances as $each) {
                                 $allowances_list .= "<option data-default_value='{$each->default_amount}' value=\"{$each->id}\">{$each->name}</option>";
                             }
@@ -4100,7 +4099,7 @@ class Forms extends Myschoolgh {
                     <div class="row">
                         <div class="col-lg-'.(($ii == 1) ? 7 : 6).' mb-2 col-md-'.(($ii == 1) ? 7 : 6).'">
                             <select data-width="100%" name="deductions[]" id="deductions_'.$ii.'" class="form-control selectpicker">
-                                <option value="null">Please Select</option>';
+                                <option value="">Please Select</option>';
                                 // using foreach loop
                                 foreach($deductions as $each) {
                                     // print the list of countries
@@ -4127,7 +4126,7 @@ class Forms extends Myschoolgh {
                 <div class="row">
                     <div class="col-lg-7 mb-2 col-md-7">
                         <select data-width="100%" name="deductions" id="deductions_1" class="form-control selectpicker">
-                            <option value="null">Please Select</option>';
+                            <option value="">Please Select</option>';
                             // using foreach loop
                             foreach($deductions as $each) {
                                 // print the list of countries
@@ -4277,7 +4276,6 @@ class Forms extends Myschoolgh {
                                     <div class="col-lg-8">
                                         <div class="input-group mb-3">
                                             <select name="payment_mode" id="payment_mode" class="form-control selectpicker">
-                                                <option value="null">Select</option>
                                                 <option value="Bank">Bank</option>
                                                 <option value="Cash">Cash</option>
                                                 <option value="Other">Other</option>
@@ -4410,7 +4408,7 @@ class Forms extends Myschoolgh {
                         <div class="col-xl-4 col-md-4 col-12 form-group">
                             <label>Select Class <span class="required">*</span></label>
                             <select class="form-control selectpicker" data-width="100%" name="class_id">
-                                <option value="null">Please Select Class</option>';
+                                <option value="">Please Select Class</option>';
                                 foreach($classes_list as $each) {
                                     $html_content .= "<option ".($class === $each->item_id ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
                                 }
@@ -4420,7 +4418,7 @@ class Forms extends Myschoolgh {
                         <div class="col-xl-4 col-md-4 col-12 form-group">
                             <label>Select Course <span class="required">*</span></label>
                             <select class="form-control selectpicker" data-width="100%" name="course_id">
-                                <option value="null">Please Select Course</option>';
+                                <option value="">Please Select Course</option>';
                                 foreach($courses_list as $each) {
                                     $html_content .= "<option ".($course === $each->item_id ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
                                 }
@@ -4430,7 +4428,7 @@ class Forms extends Myschoolgh {
                         <div class="col-xl-4 col-md-4 col-12 form-group">
                             <label>Select Course Unit</label>
                             <select class="form-control selectpicker" data-width="100%" name="unit_id">
-                                <option value="null">Please Select Unit</option>';
+                                <option value="">Please Select Unit</option>';
                                 foreach($units_list as $each) {
                                     $html_content .= "<option ".($unit === $each->item_id ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";
                                 }

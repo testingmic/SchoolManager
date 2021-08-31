@@ -41,24 +41,19 @@ $params = (object) ["clientId" => $clientId, "preferences" => $defaultUser->appP
 // get the data
 $templates_array = $myClass->pushQuery("name, id, item_id, type, message", "smsemail_templates", "client_id='{$clientId}' AND status='1'");
 $class_array_list = $myClass->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'");
-        
+   
 // get the list of all other users
-$other_users_list = $myClass->pushQuery("name, user_type, unique_id, item_id, email, class_id", "users", "client_id='{$params->clientId}' AND status='1' AND user_type != 'student'");
+$other_users_list = $myClass->pushQuery("name, user_type, unique_id, item_id, email, class_id", "users", "client_id='{$params->clientId}' AND user_status='Active' AND status='1' ORDER BY name LIMIT {$myClass->global_limit}");
 
 // get the list of only students
-$students_array_list = $myClass->pushQuery("name, user_type, unique_id, item_id, email, class_id", "users", 
-    "client_id='{$params->clientId}' AND status='1' AND academic_year = '{$defaultUser->appPrefs->academics->academic_year}' AND
-    academic_term = '{$defaultUser->appPrefs->academics->academic_term}' AND user_type='student'
-");
 $users_array_list = [];
 
 // get the users list
 foreach($other_users_list as $user) {
+    // $user->email = strtolower($user->email);
     $users_array_list[] = $user;
 }
-foreach($students_array_list as $user) {
-    $users_array_list[] = $user;
-}
+
 
 // append to the array list
 $response->array_stream["templates_array"] = $templates_array;
@@ -105,8 +100,9 @@ $response->html = '
                                         <select data-selectors="'.$route.'" data-route="'.$route.'" name="role_group[]" class="form-control selectpicker" multiple="true" data-width="100%">
                                             <option value="">Select</option>
                                             <option value="admin">Admin</option>
-                                            <option value="teacher">Teacher</option>
-                                            <option value="accountant">Accountant</option>
+                                            <option value="teacher">Teachers</option>
+                                            <option value="student">Students</option>
+                                            <option value="accountant">Accountants</option>
                                             <option value="employee">Employees</option>
                                         </select>
                                     </div>
@@ -116,9 +112,10 @@ $response->html = '
                                         <label>Role <span class="required">*</span></label>
                                         <select data-selectors="'.$route.'" data-route="'.$route.'" name="role_id" class="form-control selectpicker" data-width="100%">
                                             <option value="">Select</option>
-                                            <option value="admin">Admin</option>
-                                            <option value="teacher">Teacher</option>
-                                            <option value="accountant">Accountant</option>
+                                            <option value="admin">Admins</option>
+                                            <option value="teacher">Teachers</option>
+                                            <option value="student">Students</option>
+                                            <option value="accountant">Accountants</option>
                                             <option value="employee">Employees</option>
                                         </select>
                                     </div>
@@ -160,7 +157,7 @@ $response->html = '
                                     </tr>
                                 </thead>
                             </table>
-                            <div class="slim-scroll" style="overflow-y:auto;max-height:600px;">
+                            <div style="overflow-y:auto;max-height:600px;">
                                 <table border="1" width="100%" class="table pt-0 mt-0 table_list table-bordered table-striped">
                                     <tbody class="receipients_list">
                                         <tr>

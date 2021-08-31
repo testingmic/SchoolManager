@@ -317,8 +317,8 @@ var generate_list = (route) => {
                 <tr row_id="${e.item_id}">
                     <td width="10%">${count}</td>
                     <td width="50%"><label for="recipients_${e.item_id}" class="cursor underline text-uppercase text-info">${e.name}</label></td>
-                    <td width="25%">${the_value !== null ? the_value : ""}</td>
-                    <td align="center"><input ${the_value !== null ? `class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
+                    <td width="25%"><label class="cursor" for="recipients_${e.item_id}">${((the_value !== null) && (the_value.length)) ? the_value : ""}</label></td>
+                    <td align="center"><input ${((the_value !== null) && (the_value.length)) ? `class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
                 </tr>`;
             }
         });
@@ -332,8 +332,8 @@ var generate_list = (route) => {
                 <tr row_id="${e.item_id}">
                     <td width="10%">${count}</td>
                     <td width="50%"><label for="recipients_${e.item_id}" class="cursor text-uppercase text-info">${e.name}</label></td>
-                    <td width="25%">${the_value !== null ? the_value : ""}</td>
-                    <td align="center"><input ${the_value !== null ? `class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
+                    <td width="25%"><label class="cursor" for="recipients_${e.item_id}">${((the_value !== null) && (the_value.length)) ? the_value : ""}</label></td>
+                    <td align="center"><input ${((the_value !== null) && (the_value.length)) ? `class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
                 </tr>`;
             }
         });
@@ -346,8 +346,8 @@ var generate_list = (route) => {
                 <tr row_id="${e.item_id}">
                     <td width="10%">${count}</td>
                     <td width="50%"><label for="recipients_${e.item_id}" class="cursor text-uppercase text-info">${e.name}</label></td>
-                    <td width="25%">${the_value !== null ? the_value : ""}</td>
-                    <td align="center"><input ${the_value !== null ? `class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
+                    <td width="25%"><label class="cursor" for="recipients_${e.item_id}">${((the_value !== null) && (the_value.length)) ? the_value : ""}</label></td>
+                    <td align="center"><input ${((the_value !== null) && (the_value.length)) ? `class="user_contact" name="recipients[]" data-recipient_name="${e.name}" value="${e.item_id}" id="recipients_${e.item_id}"` : "disabled"} style="width:20px;cursor:pointer;height:20px;" type="checkbox"></td>
                 </tr>`;
             }
         });

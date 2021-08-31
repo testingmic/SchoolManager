@@ -209,6 +209,7 @@ class Analitics extends Myschoolgh {
             $client_param = (Object) [
                 "reporting" => true,
                 "user_type" => $role,
+                "clientId" => $params->clientId,
                 "remove_user_data" => true,
                 "userId" => $params->userId,
                 "return_where_clause" => true,

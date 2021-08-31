@@ -281,7 +281,7 @@ load_helpers(['menu_helper']);
                             <span class="logo-name"><?= $appName ?></span>
                         </a>
                     </div>
-                    <ul class="sidebar-menu mb-5">
+                    <ul class="sidebar-menu <?= !in_array("live_chat", $clientFeatures) ? "mb-5" : null; ?>">
                         <li class="menu-header">Main</li>
                         <li><a href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
                         <?php 

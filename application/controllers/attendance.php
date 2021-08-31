@@ -352,7 +352,7 @@ class Attendance extends Myschoolgh {
         }
 
         // populate the information
-        $table_content .= "<table width=\"100%\" cellpadding=\"2px\" style=\"border: 1px solid #dee2e6;\" class=\"table table-striped table-bordered datatable\">\n";
+        $table_content .= "<table width=\"100%\" data-rows_count=\"20\" cellpadding=\"2px\" style=\"border: 1px solid #dee2e6;\" class=\"table table-striped table-bordered datatable\">\n";
 
         // rearrange the users list
         function rearrange_list($users_list) {
@@ -385,7 +385,8 @@ class Attendance extends Myschoolgh {
         // status variables
         $statuses = [
             "nothing" => [
-                "icon" => ""
+                "icon" => "",
+                "title" => "N"
             ],
             "present" => [
                 "icon" => "<i class=\"far fa-check-circle text-success\"></i>",
@@ -437,6 +438,10 @@ class Attendance extends Myschoolgh {
             "H" => [
                 "color" => "#3abaf4",
                 "title" => "Holiday"
+            ],
+            "N" => [
+                "color" => "#000",
+                "title" => "None"
             ]
         ];
 
