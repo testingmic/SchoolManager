@@ -79,7 +79,7 @@ class Auth extends Myschoolgh {
                         if(password_verify($params->password, $results->password)) {
 
                             // last login trial
-                            $lastLogin = $this->pushQuery("attempts", "users_access_attempt", "username='{$params->username}' AND attempt_type='login'");
+                            $lastLogin = $this->pushQuery("attempts", "users_access_attempt", "username='{$results->username}' AND attempt_type='login'");
                             
                             // if the last login information is not empty
                             if(!empty($lastLogin)) {
@@ -88,17 +88,19 @@ class Auth extends Myschoolgh {
                                 $last_attempt = $lastLogin[0]->attempts;
 
                                 // if the attempt is 4 or more then lodge a notification to the user
-                                if($last_attempt >= 4) {
+                                if($last_attempt >= 3) {
 
                                     // form the notification parameters
                                     $params = (object) [
                                         '_item_id' => random_string("alnum", 16),
                                         'user_id' => $results->user_id,
                                         'subject' => "Login Failures",
-                                        'username' => $params->username,
+                                        'username' => $results->username,
                                         'remote' => false, 
-                                        'message' => "An attempt count of <strong>{$last_attempt}</strong> was made to access your Account. We recommend that you change your password to help secure it. <a href=\"{{APPURL}}profile\">Visit your profile</a> to effect the changes.",
+                                        'message' => "An attempt count of <strong>{$last_attempt}</strong> was made to access your Account. 
+                                            We recommend that you change your password to help secure it. Visit the profile section to effect the change.",
                                         'notice_type' => 3,
+                                        'clientId' => $results->client_id,
                                         'userId' => $results->user_id,
                                         'initiated_by' => 'system'
                                     ];

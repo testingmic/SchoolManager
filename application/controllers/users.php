@@ -69,7 +69,7 @@ class Users extends Myschoolgh {
 			// set the columns to load
 			$params->columns = "a.id, a.client_id, a.unique_id, a.item_id AS user_id, a.name, a.user_type, a.phone_number, 
 				a.class_id, a.email, a.image, a.gender, cl.name class_name, dp.name AS department_name,
-				a.debt, ar.arrears_total AS arrears";
+				(SELECT sum(b.balance) FROM fees_payments b WHERE b.student_id=a.item_id) AS debt, ar.arrears_total AS arrears";
 			
 			
 			// prepare and execute the statement
