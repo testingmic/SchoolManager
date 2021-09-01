@@ -216,6 +216,15 @@ var log_Momo_Card_Payment = (reference_id, transaction_id) => {
 
     $.post(`${baseUrl}api/fees/momocard_payment`, data).then((response) => {
         if (response.code == 200) {
+
+            if(response.data.additional !== undefined) {
+                if(myPrefs.labels.print_receipt !== undefined) {
+                    window.open(
+                        `${baseUrl}receipt/${response.data.additional.uniqueId}`, `Payment Receipt`,
+                        `width=850,height=750,left=200,resizable,scrollbars=yes,status=1,left=${($(window).width())*0.25}`
+                    );
+                }
+            }
             $(`button[id="payment_cancel"]`).addClass("hidden");
             $(`div[id="fees_payment_form"] *`).prop("disabled", true);
             $(`button[id="momocard_payment_button"]`).addClass("hidden");

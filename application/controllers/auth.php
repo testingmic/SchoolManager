@@ -838,9 +838,9 @@ class Auth extends Myschoolgh {
     public function logout(stdClass $params = null) {
         // unset the sessions
         $this->session->remove([
-            "userLoggedIn", "userName", "current_url",
-            "userId", "userRole", "activated",
-            "complaints", "claims", "policies"
+            "userLoggedIn", "userName", "current_url", "clientId",
+            "userId", "userRole", "activated", "client_subaccount",
+            "student_csv_file", "course_csv_file", "staff_csv_file", "last_recordUpload"
         ]);
         // update the user online status
         $this->db->query("UPDATE users SET online='0' WHERE item_id='{$params->userId}' LIMIT 1 ");

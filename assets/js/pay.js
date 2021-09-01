@@ -7,9 +7,9 @@ var close_payment_window = () => {
     window.location.href='';
 }
 
-var validate_payment = (reference_id, transaction_id) => {
+var validate_payment = (reference_id, transaction_id, subaccount) => {
     let param = JSON.parse($(`div[id="make_fee_payment"] input[name="payment_param"]`).val()),
-        data = { "reference_id": reference_id, "transaction_id": transaction_id, "param": param };
+        data = { "reference_id": reference_id, "transaction_id": transaction_id, "param": param, "subaccount": subaccount };
     
     $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "flex");
     
@@ -64,7 +64,7 @@ var make_fee_payment = () => {
                             code = "error";
                         if (data.message == "Approved") {
                             code = "success";
-                            validate_payment(data.reference, data.transaction);
+                            validate_payment(data.reference, data.transaction, ajax.subaccount);
                         } else {
                             notify(message, code);
                             $(`div[id="make_fee_payment"] div[id="loader"]`).css("display", "none");

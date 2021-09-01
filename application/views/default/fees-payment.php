@@ -115,6 +115,9 @@ if(!$receivePayment) {
     // get the list of banks
     $banks_list = $myClass->pushQuery("id, bank_name, phone_number", "banks_list", "1 ORDER BY bank_name");
 
+    // set the client subaccount in a session
+    $session->client_subaccount = $defaultClientData->client_account;
+
     // append the html content
     $response->html = '
     <section class="section">

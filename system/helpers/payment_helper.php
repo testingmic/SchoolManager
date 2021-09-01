@@ -69,7 +69,8 @@ function pay_student_fees_checkout() {
     $payment_form = "";
     $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Student Name:</strong> {$payInit->student_details["student_name"]}</div>";
     $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Student ID:</strong> {$payInit->student_details["unique_id"]}</div>";
-    $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Outstanding Balance: </strong>{$clientPref->labels->currency} {$balance}</div>";
+    $payment_form .= "<div class='font-15 mb-0 text-uppercase'><strong>Student Class:</strong> {$payInit->class_name}</div>";
+    $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Outstanding Balance: </strong><span class='font-20'>{$clientPref->labels->currency}{$balance}</span></div>";
     
     // if the item was specified
     if($getObject->item_specified) {
@@ -82,12 +83,12 @@ function pay_student_fees_checkout() {
 
     if($balance > 0) {
         $payment_form .= "<label>Email Address <span class='required'>*</span></label>";
-        $payment_form .= "<input maxlength='60' type='email' placeholder='Please enter your email address' class='form-control' id='email' name='email'>";
+        $payment_form .= "<input value='".($payInit->student_details["email"] ?? null)."' maxlength='60' type='email' placeholder='Please enter your email address' class='form-control' id='email' name='email'>";
         $payment_form .= "</div>";
         $payment_form .= "<div class='form-group mb-1'>\n";
         $payment_form .= "<input class='form-control' disabled hidden type='hidden' name='payment_param' value='".json_encode($getObject)."'>\n";
         $payment_form .= "<label>Phone Number</label>";
-        $payment_form .= "<input maxlength='15' type='text' placeholder='Please phone number (optional)' class='form-control' id='contact' name='contact'>";
+        $payment_form .= "<input value='".($payInit->student_details["phone_number"] ?? null)."' maxlength='15' type='text' placeholder='Please phone number (optional)' class='form-control' id='contact' name='contact'>";
         $payment_form .= "</div>";
         $payment_form .= "<div class='form-group mb-1'>";
         $payment_form .= "<div class='row'>";
@@ -101,6 +102,7 @@ function pay_student_fees_checkout() {
         $payment_form .= "<button onclick='return make_fee_payment()' class='btn btn-block btn-primary'>Pay</button>";
         $payment_form .= "</div>";
         $payment_form .= "</div>";
+        $payment_form .= "<input type='hidden' hidden id='client_subaccount' name='client_subaccount' disabled value='{$client->client_account}'>";
     } else {
         $payment_form .= "<div class='text-center font-18 text-success'>Current Outstanding Balance is 0. Hence there is no fee to pay for.</div>";
     }

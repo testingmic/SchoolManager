@@ -225,6 +225,9 @@ class Payment extends Myschoolgh {
             $session->reference_id = "MT".random_string("numeric", 16);
             $session->user_contact = $params->contact ?? null;
 
+            // set the client subaccount in a session
+            $session->subaccount = $client->client_account;
+
             // set the data to return if request was successful
             $data = [
                 "data" => [
@@ -258,6 +261,9 @@ class Payment extends Myschoolgh {
     public function verify(stdClass $params) {
 
         try {
+
+            // begin transaction
+            $this->db->beginTransaction();
             
             // global variable
             global $session;
@@ -555,7 +561,7 @@ class Payment extends Myschoolgh {
                     ]);
 
                     // add up to the expense
-                    $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$amount}), balance = (balance + {$params->amount}) WHERE item_id = '{$account_id}' LIMIT 1");
+                    $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$amount}), balance = (balance + {$amount}) WHERE item_id = '{$account_id}' LIMIT 1");
 
                 }
 
@@ -627,6 +633,10 @@ class Payment extends Myschoolgh {
                 // unset the reference id
                 $session->remove(["reference_id", "user_contact", "payment"]);
 
+                // commit the statment
+                $this->db->commit();
+
+                // return the success message
                 return [
                     "code" => 200,
                     "data" => "Fees payment successful."
@@ -637,6 +647,7 @@ class Payment extends Myschoolgh {
             }
 
         } catch(PDOException $e) {
+            $this->db->rollBack();
             return ["code" => 203, "data" => "Sorry! An unexpected error occurred while processing the request."];
         }
 

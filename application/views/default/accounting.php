@@ -25,7 +25,7 @@ $response->scripts = ["assets/js/filters.js"];
 // load fees allocation list for the students
 $accounts_list = "";
 $stmt = $myClass->db->prepare("
-    SELECT *
+    SELECT item_id, account_name, account_bank
     FROM accounts
     WHERE client_id = ? AND status = ?
 ");
@@ -34,7 +34,7 @@ $accounts_array_list = $stmt->fetchAll(PDO::FETCH_OBJ);
 
 // fees category
 foreach($accounts_array_list as $category) {
-    $accounts_list .= "<option value=\"{$category->item_id}\">{$category->account_name}</option>";
+    $accounts_list .= "<option value=\"{$category->item_id}\">{$category->account_name} ($category->account_bank)</option>";
 }
 
 $response->html = '

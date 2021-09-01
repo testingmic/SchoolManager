@@ -153,45 +153,49 @@ class Myschoolgh extends Models {
 			// loop through the list
 			$result = $stmt->fetch(PDO::FETCH_OBJ);
 			
-			// loop through the items and convert into an object
-			$result->client_preferences = json_decode($result->client_preferences);
+			// if the record was found
+			if(!empty($result)) {
+
+				// loop through the items and convert into an object
+				$result->client_preferences = json_decode($result->client_preferences);
+				
+				// set this value
+				$this->birthday_days_interval = 30;
+
+				// set the defaults
+				$academic_year = null;
+				$academic_term = null;
+
+				// set the academic year
+				if(!empty($result->client_preferences->academics->academic_year)) {
+					$academic_year = $result->client_preferences->academics->academic_year;
+				}
+
+				// set the academic term
+				if(!empty($result->client_preferences->academics->academic_term)) {
+					$academic_term = $result->client_preferences->academics->academic_term;
+				}
+
+				// get the structure
+				$structure = $this->grading_system($clientId, $academic_year, $academic_term);
+
+				// convert to an array
+				$result = (array) $result;
+
+				// if the structure is not empty
+				if(!empty($structure)) {
+					$result = array_merge($result, $structure);
+					$result["grading_system"] = json_decode($result["grading_system"]);
+					$result["grading_structure"] = json_decode($result["grading_structure"]);
+				} else {
+					$result["grading_system"] = [];
+					$result["grading_structure"] = [];
+				}
+
+				// convert to object
+				$result = (object) $result;
+			}
 			
-			// set this value
-			$this->birthday_days_interval = 30;
-
-			// set the defaults
-			$academic_year = null;
-			$academic_term = null;
-
-			// set the academic year
-			if(!empty($result->client_preferences->academics->academic_year)) {
-				$academic_year = $result->client_preferences->academics->academic_year;
-			}
-
-			// set the academic term
-			if(!empty($result->client_preferences->academics->academic_term)) {
-				$academic_term = $result->client_preferences->academics->academic_term;
-			}
-
-			// get the structure
-			$structure = $this->grading_system($clientId, $academic_year, $academic_term);
-
-			// convert to an array
-			$result = (array) $result;
-
-			// if the structure is not empty
-			if(!empty($structure)) {
-				$result = array_merge($result, $structure);
-				$result["grading_system"] = json_decode($result["grading_system"]);
-				$result["grading_structure"] = json_decode($result["grading_structure"]);
-			} else {
-				$result["grading_system"] = [];
-				$result["grading_structure"] = [];
-			}
-
-			// convert to object
-			$result = (object) $result;
-
 			return $result;
 			
 		} catch(PDOException $e) {

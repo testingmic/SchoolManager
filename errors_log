@@ -1,0 +1,1 @@
+[01-Sep-2021 11:43:26 Africa/Accra] PHP Notice:  Undefined property: stdClass::$amount in /var/www/html/myschool_gh/application/controllers/payment.php on line 561

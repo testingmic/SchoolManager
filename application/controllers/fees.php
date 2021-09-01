@@ -1299,11 +1299,13 @@ class Fees extends Myschoolgh {
 				SELECT 
                     a.checkout_url, a.student_id, a.class_id, a.category_id, a.amount_due, a.amount_paid, 
                     a.balance, a.paid_status, a.last_payment_id, a.academic_year, a.academic_term, a.date_created, 
-                    a.last_payment_date, a.currency, a.exempted,
+                    a.last_payment_date, a.currency, a.exempted, c.name AS class_name,
                     (
                         SELECT 
                             CONCAT(
-                                u.name,'|',COALESCE(u.department, 'NULL'),'|',COALESCE(u.account_balance,'0'),'|',COALESCE(u.unique_id,'0')
+                                u.name,'|',COALESCE(u.department, 'NULL'),'|',
+                                COALESCE(u.account_balance,'0'),'|',COALESCE(u.unique_id,'0'),'|',
+                                COALESCE(u.phone_number,'NULL'),'|',COALESCE(u.email,'NULL')
                             ) 
                         FROM users u 
                         WHERE u.item_id = a.student_id LIMIT 1
@@ -1322,6 +1324,7 @@ class Fees extends Myschoolgh {
                         WHERE b.item_id = a.last_payment_id LIMIT 1
                     ) AS last_payment_info
 				FROM fees_payments a
+                LEFT JOIN classes c ON c.id = a.class_id
 				WHERE 
                     ".(isset($params->checkout_url) && ($params->checkout_url != "general") ? "checkout_url='{$params->checkout_url}'" : 
                     " a.student_id = '{$params->student_id}'
@@ -1340,7 +1343,7 @@ class Fees extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 
                 // payment information
-                $result->student_details = $this->stringToArray($result->student_details, "|", ["student_name", "department_id", "account_balance", "unique_id"], true);
+                $result->student_details = $this->stringToArray($result->student_details, "|", ["student_name", "department_id", "account_balance", "unique_id", "phone_number", "email"], true);
 
                 // set the account balance
                 $result->account_balance = isset($result->student_details["account_balance"]) ? (float) $result->student_details["account_balance"] : 0;
