@@ -332,11 +332,11 @@ if($isSupport) {
     $response->array_stream["events_array_list"] = $events_list;
 
     // the default data to stream
-    $data_stream = 'id="data-report_stream" data-report_stream="attendance_report,library_report,departments_report"';
+    $data_stream = 'id="data-report_stream" data-report_stream="attendance_report"';
 
     // set the data to stream for an admin user
     if($isAdminAccountant) {
-        $data_stream = 'id="data-report_stream" data-report_stream="attendance_report,summary_report,revenue_flow,library_report,departments_report"';
+        $data_stream = 'id="data-report_stream" data-report_stream="attendance_report,summary_report"';
     }
 
     // append the scripts to the page
@@ -544,7 +544,7 @@ if($isSupport) {
 
     }
 
-    $global_period = $isWardParent ? "this_term" : "last_30days";
+    $global_period = $isWardParent ? "this_term" : "this_week";
 
     // set the response dataset
     $response->html = '
@@ -607,7 +607,7 @@ if($isSupport) {
                         <div class="card bg-info text-white">
                             <div class="card-body pb-1 pt-3">
                                 <div align="center">
-                                    <h6 class="border-bottom font-14 text-uppercase font-bold p-0 pb-2 mb-2 m-0">'.date("l, F d, Y").'</h6>
+                                    <h6 class="border-bottom font-13 text-uppercase font-bold p-0 pb-2 mb-2 m-0">'.date("l, F d, Y").'</h6>
                                     <h3 class="p-0 m-0">'.date("h:i A").'</h3>
                                 </div>
                             </div>
@@ -619,10 +619,10 @@ if($isSupport) {
             '<div class="row">
                 <div class="col-lg-8 col-md-12">
                     <div class="card">
-                        <div class="card-body">
+                        <div class="card-body" style="min-height:235px">
                             <div class="row">
                                 <div align="center" class="col-sm-3">
-                                    <img width="160px" src="'.$baseUrl.''.$defaultClientData->client_logo.'">
+                                    <img width="180px" src="'.$baseUrl.''.$defaultClientData->client_logo.'">
                                 </div>
                                 <div align="center" class="p-1 col-sm-9">
                                     <div style="align-items:center;">
@@ -831,7 +831,7 @@ if($isSupport) {
                                     <div style="width:60%">
                                         <div class="d-flex justify-content-between">
                                             <div class="col-6">
-                                                <h5>&nbsp;</h5>
+                                                <p>&nbsp;</p>
                                             </div>
                                             <div class="col-6">
                                                 <p class="text-muted text-truncate m-b-5">Revenue <span data-filter="period">Last Week</span></p>

@@ -701,3 +701,8 @@ label {
 .uppercase {
     text-transform: uppercase;
 }
+
+.bold_cursor {
+    font-weight: bold;
+    cursor: pointer;
+}

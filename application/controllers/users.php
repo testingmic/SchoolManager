@@ -141,7 +141,6 @@ class Users extends Myschoolgh {
 		// get the id equivalent of the class id
 		if(isset($params->class_id) && !preg_match("/^[0-9]+$/", $params->class_id)) {
 			$params->minified = "simplified";
-			$params->no_academic_year = true;
 			$params->class_id = $this->pushQuery("id", "classes", "item_id='{$params->class_id}' LIMIT 1")[0]->id ?? null;
 		}
 

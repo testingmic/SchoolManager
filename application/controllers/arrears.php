@@ -8,13 +8,71 @@ class Arrears extends Myschoolgh {
 		parent::__construct();
 
         // get the client data
-        $client_data = $params->client_data;
+        $client_data = $params->client_data ?? [];
         $this->iclient = $client_data;
 
         // run this query
         $this->academic_term = $client_data->client_preferences->academics->academic_term ?? null;
         $this->academic_year = $client_data->client_preferences->academics->academic_year ?? null;
 	}
+    
+    /**
+     * List the fees arrears
+     * 
+     * @param String        $params->clientId
+     * @param String        $params->student_id
+     * 
+     * @return Array
+     */
+    public function list(stdClass $params) {
+
+        try {
+
+            $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
+
+            $filters = 1;
+            $filters .= !empty($params->student_id) ? " AND a.student_id IN {$this->inList($params->student_id)}" : "";
+            $filters .= !empty($params->clientId) ? " AND a.client_id IN {$this->inList($params->clientId)}" : "";
+            
+            // prepare and execute the statement
+            $stmt = $this->db->prepare("SELECT 
+                    a.student_id, a.arrears_details, a.arrears_category, a.fees_category_log, a.arrears_total, c.name AS class_name,
+                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.guardian_id,'NULL')) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info
+                FROM users_arrears a
+                LEFT JOIN users u ON u.item_id = a.student_id
+                LEFT JOIN classes c ON c.id = u.class_id
+                WHERE {$filters} ORDER BY a.id DESC LIMIT {$params->limit}
+            ");
+            $stmt->execute();
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // clean the student id
+                $result->student_info = (object) $this->stringToArray($result->student_info, "|", ["unique_id", "user_id", "name", "image", "phone_number", "guardian_id"]);
+
+                // convert the created by string into an object
+                $result->arrears_details = json_decode($result->arrears_details, true);
+                $result->arrears_category = json_decode($result->arrears_category, true);
+                $result->fees_category_log = json_decode($result->fees_category_log, true);
+
+                // clean the category
+                $result->students_fees_category_array = filter_fees_category($result->fees_category_log);
+
+                // append to the array lis
+                $data[] = $result;
+            }
+            
+			return [
+                "code" => 200,
+                "data" => $data
+            ];
+
+        } catch(PDOException $e) {
+            // return an unexpected error notice
+            return $this->unexpected_error;
+        }
+    }
 
 
     /**
@@ -192,9 +250,9 @@ class Arrears extends Myschoolgh {
                     description = ?, academic_year = ?, academic_term = ?, balance = ?, state = 'Approved', validated_date = now()
                 ");
                 $stmt->execute([
-                    $payment_id, $params->clientId, $account_id, "fees", "Deposit", null, $params->amount, $params->userId, 
+                    $payment_id, $params->clientId, $account_id, "fees", "Deposit", "Arrears Payment", $params->amount, $params->userId, 
                     date("Y-m-d"), $params->payment_method, "Fees Arrears Payment - for <strong>{$arrearsRecord->student_name}</strong>",
-                    $params->academic_year, $params->academic_term, ($check_account[0]->balance - $params->amount)
+                    $params->academic_year, $params->academic_term, ($check_account[0]->balance + $params->amount)
                 ]);
 
                 // add up to the deposits

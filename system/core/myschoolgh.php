@@ -29,6 +29,7 @@ $session = load_class('Session', 'libraries/Session');
 
 load_helpers(
 	ARRAY(
+		'array_helper',
 		'string_helper',
 		'email_helper',
 		'url_helper',

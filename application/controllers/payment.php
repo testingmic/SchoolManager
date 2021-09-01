@@ -222,7 +222,7 @@ class Payment extends Myschoolgh {
             $client = $params->client_data;
 
             // set a new payment reference
-            $session->reference_id = "MT".random_string("numeric", 12);
+            $session->reference_id = "MT".random_string("numeric", 16);
             $session->user_contact = $params->contact ?? null;
 
             // set the data to return if request was successful
@@ -435,20 +435,21 @@ class Payment extends Myschoolgh {
                 if(!is_array($paymentRecord)) {
 
                     // generate a unique id for the payment record
-                    $uniqueId = random_string('alnum', 15);
+                    $payment_id = $uniqueId = random_string('alnum', 15);
                     $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
                     $receiptId = $params->client_data->client_preferences->labels->receipt_label.$counter;
                     $receiptId = strtoupper($receiptId);
                     
                     // log the payment record
                     $stmt = $this->db->prepare("INSERT INTO fees_collection
-                        SET client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
+                        SET payment_id = ?, client_id = ?, item_id = ?, student_id = ?, department_id = ?, class_id = ?, 
                         category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
                         description = ?, currency = ?, receipt_id = ?, payment_method = ? {$append_sql}
                     ");
                     $stmt->execute([
-                        $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id ?? null, 
-                        $paymentRecord->class_id, $paymentRecord->category_id, $amount, $paymentRecord->student_id, 
+                        $payment_id, $params->clientId, $uniqueId, $paymentRecord->student_id, 
+                        $paymentRecord->department_id ?? null, $paymentRecord->class_id, $paymentRecord->category_id, 
+                        $amount, $paymentRecord->student_id, 
                         $paymentRecord->academic_year, $paymentRecord->academic_term, 
                         "Self Service Fees Payment", $currency, $receiptId, $payment_method
                     ]);
@@ -464,6 +465,7 @@ class Payment extends Myschoolgh {
                     
                     // set the student name
                     $student_name = $paymentRecord->student_details["student_name"];
+                    $student_id = $paymentRecord->student_id;
 
                 } else {
 
@@ -473,6 +475,7 @@ class Payment extends Myschoolgh {
                     // get the student name
                     $student = $this->pushQuery("name AS student_name", "users", "item_id = '{$student_param->student_id}' AND user_type='student' AND client_id = '{$params->clientId}' LIMIT 1");
                     $student_name = !empty($student) ? $student[0]->student_name : "Unknown";
+                    $student_id = $student_param->student_id;
 
                     // loop through the payment record
                     foreach($paymentRecord as $record) {
@@ -530,6 +533,32 @@ class Payment extends Myschoolgh {
                     $this->db->query("UPDATE users SET account_balance = (account_balance + $creditBalance) WHERE item_id = '{$params->student_id}' AND client_id = '{$params->clientId}' LIMIT 1");
                 }
 
+                // log the data in the statement account
+                $check_account = $this->pushQuery("item_id, balance", "accounts", "client_id='{$student_param->clientId}' AND status='1' AND default_account='1' LIMIT 1");
+
+                // if the account is not empty
+                if(!empty($check_account)) {
+
+                    // get the account unique id
+                    $account_id = $check_account[0]->item_id;
+                    
+                    // log the transaction record
+                    $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                        item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                        reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                        description = ?, academic_year = ?, academic_term = ?, balance = ?, state = 'Approved', validated_date = now()
+                    ");
+                    $stmt->execute([
+                        $payment_id, $student_param->clientId, $account_id, "fees", "Deposit", $params->reference_id, 
+                        $amount, $student_id, date("Y-m-d"), $payment_method, "Fees Payment - for <strong>{$student_name}</strong>",
+                        $academic_year, $academic_term, ($check_account[0]->balance + $amount)
+                    ]);
+
+                    // add up to the expense
+                    $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$amount}), balance = (balance + {$params->amount}) WHERE item_id = '{$account_id}' LIMIT 1");
+
+                }
+
                 // if the contact number is not empty
                 if(preg_match("/^[0-9+]+$/", $session->user_contact)) {
                     
@@ -541,7 +570,7 @@ class Payment extends Myschoolgh {
                     $message_count = ceil($chars / $this->sms_text_count);
                     
                     // get the sms balance
-                    $balance = $this->pushQuery("sms_balance", "smsemail_balance", "client_id='{$params->clientId}' LIMIT 1");
+                    $balance = $this->pushQuery("sms_balance", "smsemail_balance", "client_id='{$student_param->clientId}' LIMIT 1");
                     $balance = $balance[0]->sms_balance ?? 0;
 
                     // return error if the balance is less than the message to send
@@ -584,14 +613,14 @@ class Payment extends Myschoolgh {
                         // if the sms was successful
                         if(!empty($result)) {
                             // reduce the SMS balance
-                            $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$message_count}), sms_sent = (sms_sent + {$message_count}) WHERE client_id = '{$params->clientId}' LIMIT 1");
+                            $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$message_count}), sms_sent = (sms_sent + {$message_count}) WHERE client_id = '{$student_param->clientId}' LIMIT 1");
                         }
                     }
 
                 }
 
                 // log the transaction information
-                $this->db->query("INSERT INTO transaction_logs SET client_id = '{$params->clientId}', transaction_id = '{$params->transaction_id}', 
+                $this->db->query("INSERT INTO transaction_logs SET client_id = '{$student_param->clientId}', transaction_id = '{$params->transaction_id}', 
                     endpoint = 'fees', reference_id = '{$params->reference_id}', amount='{$amount}', metadata='{$meta_data}'"
                 );
 

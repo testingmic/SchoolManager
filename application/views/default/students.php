@@ -50,20 +50,20 @@ $hasFiltering = $accessObject->hasAccess("filters", "settings");
 $students = "";
 foreach($student_list["data"] as $key => $each) {
     
-    $action = "<span title='View Student Record' onclick='loadPage(\"{$baseUrl}student/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
+    $action = "<span title='View Record' onclick='load(\"student/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
 
     if($hasUpdate) {
-        $action .= "&nbsp;<span title='Update Student Record' onclick='loadPage(\"{$baseUrl}modify-student/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></span>";
+        $action .= "&nbsp;<span title='Update Record' onclick='load(\"modify-student/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></span>";
     }
     if($hasDelete) {
-        $action .= "&nbsp;<span title='Delete this Student' onclick='delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
+        $action .= "&nbsp;<span title='Delete Student' onclick='delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
     }
 
     $students .= "<tr data-row_id=\"{$each->id}\">";
     $students .= "<td>".($key+1)."</td>";
     $students .= "
     <td>
-        <span title='View student details' class='user_name' onclick='loadPage(\"{$baseUrl}student/{$each->user_id}\");'>{$each->name}</span><br>{$each->unique_id}
+        <span title='View Details' class='user_name' onclick='load(\"student/{$each->user_id}\");'>{$each->name}</span><br>{$each->unique_id}
     </td>";
     $students .= "<td>{$each->class_name}</td>";
     $students .= "<td>{$each->gender}</td>";

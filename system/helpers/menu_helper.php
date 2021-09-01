@@ -175,6 +175,7 @@
             <?php if($accessObject->hasAccess("allocation", "fees")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
             <?php } ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>arrears">Fees Arrears Debtors</a></li>
             <?php if($accessObject->hasAccess("reports", "fees")) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Fees Report</a></li>
             <?php } ?>

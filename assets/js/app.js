@@ -110,6 +110,10 @@ var serializeSelect = (select) => {
     return array;
 }
 
+var load = (page_url) => {
+    loadPage(`${baseUrl}${page_url}`);
+}
+
 $("#history-reload").on("click", function() {
     linkHandler(document.location.href, false)
 })

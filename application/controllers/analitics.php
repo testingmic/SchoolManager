@@ -20,9 +20,9 @@ class Analitics extends Myschoolgh {
         parent::__construct();
 
         $this->default_stream = [
-            "summary_report", "students_report", "revenue_flow", "library_report", 
+            "summary_report", "students_report", "fees_revenue_flow", "library_report", 
             "departments_report", "attendance_report", "class_attendance_report",
-            "salary_report"
+            "salary_report", "transaction_revenue_flow"
         ];
 
         $this->error_codes = [
@@ -140,9 +140,9 @@ class Analitics extends Myschoolgh {
         }
 
         // get the revenue information if not parsed in the stream
-        if(in_array("revenue_flow", $params->stream)) {
+        if(in_array("fees_revenue_flow", $params->stream)) {
             // query the revenue data
-            $this->final_report["revenue_flow"] = $this->revenue_flow($params);
+            $this->final_report["fees_revenue_flow"] = $this->fees_revenue_flow($params);
         }
 
         // get the salary information if not parsed in the stream
@@ -213,15 +213,9 @@ class Analitics extends Myschoolgh {
                 "remove_user_data" => true,
                 "userId" => $params->userId,
                 "return_where_clause" => true,
-                "user_status" => $this->user_status,
-                "academic_term" => $this->academic_term,
-                "academic_year" => $this->academic_year,
+                "user_status" => $this->user_status
             ];
-            if($role === "parent") {
-                $client_param->no_academic_year = true;
-            } else {
-                $client_param->no_academic_year = false;
-            }
+            
             $where_clause = $usersClass->list($client_param);
 
             // value_name
@@ -332,18 +326,22 @@ class Analitics extends Myschoolgh {
         }
         
         /**
-         * Processing the Request for Fees
+         * Processing the Request for all Transactions
          * 
          * Load the fees paid count by category and get the amounts paid per category
          * Run a comparison between the current and previous record set
          */
-        $this->iclient->academic_year = $this->academic_year;
-        $this->iclient->academic_term = $this->academic_term;
         $feesClass = load_class("fees", "controllers", $this->iclient);
 
         // get the fees categories
         $fees_category_list = $this->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$params->clientId}'");
         $result["fees_record_count"]["total_count"] = count($fees_category_list);
+
+        // get the fees categories
+        $summation = $this->pushQuery("SUM(amount_due) AS amount_due, SUM(amount_paid) AS amount_paid, SUM(balance) AS balance", 
+            "fees_payments", "status='1' AND client_id='{$params->clientId}' AND 
+                academic_year='{$this->academic_year}' AND academic_term='{$this->academic_term}'");
+        $result["fees_record_count"]["summation"] = $summation;
 
         // load the fees records
         foreach($fees_category_list as $key => $value) {
@@ -351,8 +349,6 @@ class Analitics extends Myschoolgh {
             /** Parameter */
             $fees_param = (Object) [
                 "limit" => 100000,
-                "academic_year" => $this->academic_year,
-                "academic_term" => $this->academic_term,
                 "userId" => $params->userId,
                 "userData" => $params->userData,
                 "class_id" => $this->class_id_query,
@@ -414,7 +410,95 @@ class Analitics extends Myschoolgh {
 
         }
 
-        return $result;
+        /**
+         * Processing of Transaction Data
+         */
+        $transactionClass = load_class("fees", "controllers", $this->iclient);
+
+        // get the fees categories
+        $transaction_type_head = $this->pushQuery("id, name, item_id", "accounts_type_head", "status='1' AND client_id='{$params->clientId}'");
+        $n_result["transaction_revenue_flow"]["typehead_count"] = count($transaction_type_head);
+
+        // loop through the record type
+        foreach(["Deposit", "Expense"] as $category) {
+            // get the fees categories
+            $category_total = $this->pushQuery(
+                "SUM(a.amount) AS total_amount", "accounts_transaction a", 
+                "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_type='{$category}'
+                AND (
+                    DATE(a.date_created) >= '{$range_value["start"]}' AND DATE(a.date_created) <= '{$range_value["end"]}'
+                )"
+            );
+            $n_result["transaction_revenue_flow"]["category_total"][$category] = $category_total[0]->total_amount ?? 0;
+        }
+        // load the fees records
+        // foreach($transaction_type_head as $key => $value) {
+            
+        //     /** Parameter */
+        //     $fees_param = (Object) [
+        //         "limit" => 100000,
+        //         "userId" => $params->userId,
+        //         "userData" => $params->userData,
+        //         "class_id" => $this->class_id_query,
+        //         "category_id" => $value->id,
+        //         "date_range" => "{$this->start_date}:{$this->end_date}",
+        //         "return_where_clause" => true
+        //     ];
+        //     $where_clause = $transactionClass->list($fees_param);
+
+        //     // value_name
+        //     $raw_name = create_slug($value->name, "_");
+        //     $amount_paid = $raw_name;
+        //     $value_count = "{$raw_name}_count";
+
+        //     $query = $this->db->prepare("SELECT 
+        //             COUNT(*) AS {$value_count},
+        //             SUM(amount) AS {$amount_paid}
+        //         FROM fees_collection a
+        //         LEFT JOIN users u ON u.item_id = a.student_id
+        //         WHERE {$where_clause}
+        //     ");
+        //     $query->execute([$this->user_status]);
+        //     $q_result = $query->fetch(PDO::FETCH_OBJ);
+            
+        //     // append the result values
+        //     $n_result["fees_record_count"]["count"][$value->name] = $q_result->{$value_count} ?? 0;
+        //     $n_result["fees_record_count"]["amount"][$value->name] = $q_result->{$amount_paid} ?? 0;
+            
+        //     // loop through the date ranges for the current and previous
+        //     foreach($this->date_range as $range_key => $range_value) {
+                  
+        //         // set the date range
+        //         $fees_param->date_range = "{$range_value["start"]}:{$range_value["end"]}";
+                
+        //         // set a where clause
+        //         $_where_clause = $transactionClass->list($fees_param);
+
+        //         // run a query for the user count
+        //         $_query = $this->db->prepare("SELECT 
+        //                 COUNT(*) AS {$value_count}, 
+        //                 SUM(amount) AS {$amount_paid}
+        //             FROM fees_collection a 
+        //             LEFT JOIN users u ON u.item_id = a.student_id
+        //             WHERE {$_where_clause}
+        //         ");
+        //         $_query->execute([$this->user_status]);
+        //         $_q_result = $_query->fetch(PDO::FETCH_OBJ);
+                
+        //         // append to the result array
+        //         $n_result["fees_record_count"]["comparison"]["count"][$range_key][$value->name] = [
+        //             "value" => $_q_result->{$value_count} ?? 0,
+        //             "name" => $value->name
+        //         ];
+        //         $n_result["fees_record_count"]["comparison"]["amount"][$range_key][$value->name] = [
+        //             "value" => $_q_result->{$amount_paid} ?? 0,
+        //             "name" => $value->name
+        //         ];
+        //     }
+
+        // }
+
+        return $n_result;
     }
 
     /**
@@ -565,7 +649,7 @@ class Analitics extends Myschoolgh {
      * 
      * @return Array
      */
-    public function revenue_flow(stdClass $params) {
+    public function fees_revenue_flow(stdClass $params) {
 
         try {
 
@@ -584,7 +668,6 @@ class Analitics extends Myschoolgh {
                             COUNT(*) AS value, {$this->group_by}(a.recorded_date) AS value_date, SUM(a.amount) AS amount_value
                         FROM fees_collection a 
                         WHERE 
-                            a.academic_year='{$this->academic_year}' AND a.academic_term='{$this->academic_term}' AND
                             a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
                             AND (
                                 DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
@@ -611,8 +694,7 @@ class Analitics extends Myschoolgh {
                         SELECT {$this->group_by}(a.recorded_date) AS value_date, SUM(a.amount) AS value 
                         FROM fees_collection a
                         WHERE 
-                        a.academic_year='{$this->academic_year}' AND a.academic_term='{$this->academic_term}' AND
-                        a.status = '1' AND a.reversed = '0' {$this->student_id_query} {$this->fees_category_id}
+                            a.status = '1' AND a.reversed = '0' {$this->student_id_query} {$this->fees_category_id}
                         AND (
                             DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
                         ) {$this->class_idm_query}
@@ -1034,8 +1116,8 @@ class Analitics extends Myschoolgh {
                 $previousTitle = "Last 2 Months";
                 $dateFrom = date("Y-m-01", strtotime("last month"));
                 $dateTo = date("Y-m-t", strtotime("last month"));
-                $prevFrom = date("Y-m-01", strtotime("last 2 month"));
-                $prevTo = date("Y-m-t", strtotime("last 2 month"));
+                $prevFrom = date("Y-m-01", strtotime("-2 month"));
+                $prevTo = date("Y-m-t", strtotime("-2 month"));
                 break;
             case 'last_14days':
                 $groupBy = "DATE";
@@ -1256,7 +1338,7 @@ class Analitics extends Myschoolgh {
 
         foreach($array_list as $key => $value) {
             $percentage = $value["value"] > 0 ? (($value["value"] / $total_value) * 100) : 0;
-            $array_data[$section[0]][$section[1]][$section[2]][$key]["percentage"] = $percentage;
+            $array_data[$section[0]][$section[1]][$section[2]][$key]["percentage"] = round($percentage, 2);
         }
 
         $this->final_report = $array_data;

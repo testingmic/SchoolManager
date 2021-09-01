@@ -42,9 +42,6 @@ class Fees extends Myschoolgh {
 			$student_id = isset($params->student_array_ids) ? $params->student_array_ids : $this->session->student_id;
         }
 
-        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
-        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
-
         $filters = "1";
 		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id IN {$this->inList($params->class_id)}" : "";
         $filters .= isset($params->department_id) && !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : "";
@@ -449,8 +446,8 @@ class Fees extends Myschoolgh {
                     $student_allocation_list .= "<td>
                         <div class='d-flex justify-content-start'>
                             <div class='text-uppercase'>
-                                <span onclick='return loadPage(\"{$this->baseUrl}student/{$student->student_info->user_id}\");' class='font-weight-bold text-primary cursor'>{$student->student_info->name}</span><br class='p-0 m-0'>
-                                <a class='cursor' onclick='return loadPage(\"{$this->baseUrl}student/{$student->student_info->user_id}\");'><strong>{$student->student_info->unique_id}</strong></a>
+                                <span onclick='return load(\"student/{$student->student_info->user_id}\");' class='bold_cursor text-primary'>{$student->student_info->name}</span><br>
+                                <a class='bold_cursor' onclick='return load(\"student/{$student->student_info->user_id}\");'>{$student->student_info->unique_id}</a>
                             </div>
                         </div>
                     </td>";
@@ -458,8 +455,8 @@ class Fees extends Myschoolgh {
 
                 $student_allocation_list .= $groupBy ? null : "<td>{$student->category_name} ".(!$showStudentData ? $label : null)."</td>";
                 $student_allocation_list .= "<td width='17%'>{$student->currency} ".($groupBy ? $student->total_amount_due : $student->amount_due)."</td>";
-                $student_allocation_list .= "<td width='17%'>{$student->currency} ".($groupBy ? $student->total_amount_paid : $student->amount_paid)."</td>";
-                $student_allocation_list .= "<td width='17%'>{$student->currency} ".($groupBy ? $student->total_balance : $student->balance)."</td>";
+                $student_allocation_list .= "<td>{$student->currency} ".($groupBy ? $student->total_amount_paid : $student->amount_paid)."</td>";
+                $student_allocation_list .= "<td>{$student->currency} ".($groupBy ? $student->total_balance : $student->balance)."</td>";
 
                 // confirm if the user has the permission to make payment
                 if(!empty($params->receivePayment)) {
@@ -475,7 +472,7 @@ class Fees extends Myschoolgh {
                             $_class = "class='btn btn-sm text-uppercase btn-outline-success'";
                             $student_allocation_list .= $isParent ? "
                                 <a {$_class} href='{$this->baseUrl}pay/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
-                            " : "<button onclick='return loadPage(\"{$this->baseUrl}fees-payment?".($groupBy ? "student_id={$student->student_id}&class_id={$student->class_id}" : "checkout_url={$student->checkout_url}")."\");' {$_class}>Pay Fee</button>";
+                            " : "<button onclick='return load(\"fees-payment?".($groupBy ? "student_id={$student->student_id}&class_id={$student->class_id}" : "checkout_url={$student->checkout_url}")."\");' {$_class}>Pay Fee</button>";
                         }
                         // delete the record if possible => that is allowed only if the student has not already made an payment
                         if(!empty($params->canAllocate) && empty($student->amount_paid)) {
@@ -1331,7 +1328,7 @@ class Fees extends Myschoolgh {
                     ".(!empty($category_id) ? " AND a.category_id = '{$params->category_id}'" : null)."")." AND 
                     a.academic_year = '{$academic_year}' AND a.academic_term = '{$academic_term}'
                     ".($removeExemptions ? " AND exempted = '0'" : null)."
-                    AND a.client_id = '{$params->clientId}' AND a.status = '1' LIMIT ".(!empty($category_id) ? 1 : 100)."
+                    AND a.client_id = '{$params->clientId}' AND a.status = '1' LIMIT ".(!empty($category_id) ? 1 : 30)."
 			");
 			$stmt->execute();
 
@@ -1541,35 +1538,12 @@ class Fees extends Myschoolgh {
                 /* Record the user activity log */
                 $this->userLogs("fees_payment", $params->checkout_url, null, "{$params->userData->name} received an amount of <strong>{$params->amount}</strong> as Payment for <strong>{$paymentRecord->category_name}</strong> from <strong>{$paymentRecord->student_details["student_name"]}</strong>. Outstanding Balance is <strong>{$outstandingBalance}</strong>", $params->userId);
                 
-                // additional data
-                $additional["payment"] = $this->confirm_student_payment_record($params);
-                $additional["uniqueId"] = $uniqueId;
-
                 // set the student name
                 $student_name = $paymentRecord->student_details["student_name"];
 
-                // if the account is not empty
-                if(!empty($check_account)) {
-
-                    // get the account unique id
-                    $account_id = $check_account[0]->item_id;
-                    
-                    // log the transaction record
-                    $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
-                        item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
-                        reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
-                        description = ?, academic_year = ?, academic_term = ?, balance = ?, state = 'Approved', validated_date = now()
-                    ");
-                    $stmt->execute([
-                        $payment_id, $params->clientId, $account_id, "fees", "Deposit", null, $params->amount, $params->userId, 
-                        date("Y-m-d"), $params->payment_method, "Fees Payment - for <strong>{$student_name}</strong>",
-                        $paymentRecord->academic_year, $paymentRecord->academic_term, ($check_account[0]->balance - $params->amount)
-                    ]);
-
-                    // add up to the expense
-                    $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$params->amount}), balance = (balance + {$params->amount}) WHERE item_id = '{$account_id}' LIMIT 1");
-
-                }
+                // additional data
+                $additional["payment"] = $this->confirm_student_payment_record($params);
+                $additional["uniqueId"] = $uniqueId;
 
             } else {
 
@@ -1626,35 +1600,36 @@ class Fees extends Myschoolgh {
                         // set a new parameter for the checkout and category id
                         $params->checkout_url = $record->checkout_url;
 
-                        // if the account is not empty
-                        if(!empty($check_account)) {
-
-                            // get the account unique id
-                            $account_id = $check_account[0]->item_id;
-                            
-                            // log the transaction record
-                            $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
-                                item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
-                                reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
-                                description = ?, academic_year = ?, academic_term = ?, balance = ?, state = 'Approved', validated_date = now()
-                            ");
-                            $stmt->execute([
-                                $payment_id, $params->clientId, $account_id, "fees", "Deposit", null, $total_paid, $params->userId, 
-                                date("Y-m-d"), $params->payment_method, "Fees Payment - for <strong>{$student_name}</strong>",
-                                $record->academic_year, $record->academic_term, ($check_account[0]->balance - $total_paid)
-                            ]);
-
-                            // add up to the deposits
-                            $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$total_paid}), balance = (balance + {$total_paid}) WHERE item_id = '{$account_id}' AND client_id='{$params->clientId}' LIMIT 1");
-
-                        }
-
                     }
+
                 }
 
                 $last_info = $this->confirm_student_payment_record($params);
                 $additional["payment"] = $last_info[count($last_info)-1];
                 $additional["uniqueId"] = $payment_id;
+
+            }
+
+            // if the account is not empty
+            if(!empty($check_account)) {
+
+                // get the account unique id
+                $account_id = $check_account[0]->item_id;
+                
+                // log the transaction record
+                $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                    item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                    reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                    description = ?, academic_year = ?, academic_term = ?, balance = ?, state = 'Approved', validated_date = now()
+                ");
+                $stmt->execute([
+                    $payment_id, $params->clientId, $account_id, "fees", "Deposit", "Fees Payment of <strong>{$student_name}</strong>", $params->amount, $params->userId, 
+                    date("Y-m-d"), $params->payment_method, "Fees Payment - for <strong>{$student_name}</strong>",
+                    $this->academic_year, $this->academic_term, ($check_account[0]->balance + $params->amount)
+                ]);
+
+                // add up to the expense
+                $this->db->query("UPDATE accounts SET total_credit = (total_credit + {$params->amount}), balance = (balance + {$params->amount}) WHERE item_id = '{$account_id}' LIMIT 1");
 
             }
 

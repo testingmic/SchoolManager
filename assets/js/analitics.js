@@ -655,8 +655,8 @@ var loadDashboardAnalitics = (period) => {
             if (response.data.result.summary_report !== undefined) {
                 summaryReporting(response.data.result, response.data.result.date_range);
             }
-            if (response.data.result.revenue_flow !== undefined) {
-                revenueReporting(response.data.result.revenue_flow, response.data.result.date_range);
+            if (response.data.result.fees_revenue_flow !== undefined) {
+                revenueReporting(response.data.result.fees_revenue_flow, response.data.result.date_range);
             }
             if (response.data.result.attendance_report !== undefined) {
                 attendanceReport(response.data.result.attendance_report);

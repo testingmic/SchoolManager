@@ -86,7 +86,7 @@ $response->html = '
                                             <thead>
                                                 <th></th>
                                                 <th>Account Name</th>
-                                                <th>Account Type Head</th>
+                                                <th>Type Head</th>
                                                 <th>Ref No.</th>
                                                 <th>Pay Via</th>
                                                 <th>Debit</th>

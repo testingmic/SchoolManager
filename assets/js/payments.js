@@ -463,7 +463,7 @@ var search_Payment_Log = () => {
                                 </tr>
                                 <tr>
                                     <td><strong>Fee Payment Category: </strong></td>
-                                    <td>${data.category_name}</td>
+                                    <td>${data.category_name !== null ? data.category_name : data.category_id}</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Amount Paid: </strong></td>

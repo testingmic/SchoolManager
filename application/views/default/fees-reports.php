@@ -22,7 +22,7 @@ $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = ["assets/js/analitics.js", "assets/js/filters.js"];
 
 // the default data to stream
-$data_stream = 'id="data-report_stream" data-report_stream="summary_report,revenue_flow"';
+$data_stream = 'id="data-report_stream" data-report_stream="summary_report,fees_revenue_flow"';
 
 $hasFiltering = $accessObject->hasAccess("filters", "settings");
 
