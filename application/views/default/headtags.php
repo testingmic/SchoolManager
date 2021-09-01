@@ -175,33 +175,35 @@ load_helpers(['menu_helper']);
                 </div>
                 <ul class="navbar-nav navbar-right">
                 <?php if($isActiveAccount) { ?>
-                <li class="dropdown dropdown-list-toggle">
-                    <a href="#" data-toggle="dropdown" title="Email Messages" class="nav-link nav-link-lg message-toggle" data-notification="message"><i class="far fa-envelope"></i></a>
-                    <div class="dropdown-menu dropdown-list dropdown-menu-right">
-                    <div class="dropdown-header">Messages
-                        <div class="float-right">
-                        <a href="#" data-function="mark_as_read" data-item="messages">Mark All As Read</a>
-                        </div>
-                    </div>
-                    <div id="messages_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-message">
-                        
-                        <!-- <a href="#" class="dropdown-item">
-                            <span class="dropdown-item-avatar text-white">
-                                <img alt="image" src="assets/img/users/user-5.png" class="rounded-circle">
-                            </span>
-                            <span class="dropdown-item-desc">
-                                <span class="message-user">Jacob Ryan</span>
-                                <span class="time messege-text">Your payment invoice is generated.</span>
-                                <span class="time text-primary">12 Min Ago</span>
-                            </span>
-                        </a> -->
+                    <?php if($isSchool && $isActiveAccount && in_array("live_chat", $clientFeatures)) { ?>
+                        <li class="dropdown dropdown-list-toggle">
+                            <a href="#" data-toggle="dropdown" title="Email Messages" class="nav-link nav-link-lg message-toggle" data-notification="message"><i class="far fa-envelope"></i></a>
+                            <div class="dropdown-menu dropdown-list dropdown-menu-right">
+                            <div class="dropdown-header">Messages
+                                <div class="float-right">
+                                <a href="#" data-function="mark_as_read" data-item="messages">Mark All As Read</a>
+                                </div>
+                            </div>
+                            <div id="messages_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-message">
+                                
+                                <!-- <a href="#" class="dropdown-item">
+                                    <span class="dropdown-item-avatar text-white">
+                                        <img alt="image" src="assets/img/users/user-5.png" class="rounded-circle">
+                                    </span>
+                                    <span class="dropdown-item-desc">
+                                        <span class="message-user">Jacob Ryan</span>
+                                        <span class="time messege-text">Your payment invoice is generated.</span>
+                                        <span class="time text-primary">12 Min Ago</span>
+                                    </span>
+                                </a> -->
 
-                    </div>
-                    <div class="dropdown-footer text-center">
-                        <a href="<?= $baseUrl ?>chat">View All <i class="fas fa-chevron-right"></i></a>
-                    </div>
-                    </div>
-                </li>
+                            </div>
+                            <div class="dropdown-footer text-center">
+                                <a href="<?= $baseUrl ?>chat">View All <i class="fas fa-chevron-right"></i></a>
+                            </div>
+                            </div>
+                        </li>
+                    <?php } ?>
                 <?php } ?>
                 <li class="dropdown dropdown-list-toggle"><a title="Notifications List" href="#" data-toggle="dropdown" class="nav-link notification-toggle nav-link-lg"><i class="far fa-bell"></i></a>
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
