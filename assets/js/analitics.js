@@ -201,12 +201,16 @@ var summaryReporting = (t_summary, date_range) => {
             let percentage = (amount > 0) ? ((amount / total_revenue) * 100).toFixed(2) : 0;
             revenue_category_counts += `
             <div class="col-lg-4 col-md-6">
-                <div class="card">
-                    <div class="card-header pl-2 pr-2 text-uppercase pb-0"><strong>${i}</strong></div>
-                    <div class="card-body pt-2 pl-2 pr-2 pb-1">
-                        <p class="mb-0 pb-0">Processed Count: <strong>${e}</strong></p>
-                        <p class="mb-0 pb-0">Amount: <strong>${myPrefs.labels.currency}${format_currency(amount)}</strong></p>
-                        <p class="mb-0 pb-0">Percentage: <strong>${percentage}%</strong></p>
+                <div class="card text-center">
+                    <div class="card-header bg-primary text-white font-15 pl-2 pr-2 pt-1 text-uppercase pb-0"><strong>${i}</strong></div>
+                    <div class="card-body pt-2 pl-2 font-14 text-uppercase pr-2 pb-1">
+                        <!--<p class="mb-0 pb-0">Processed Count: <strong>${e}</strong></p>-->
+                        <p class="mb-0 pb-0">Amount:</p>
+                        <p class="mb-0 pb-0 border-bottom pb-1">
+                            <strong class="text-success font-20">${myPrefs.labels.currency} ${format_currency(amount)}</strong>
+                        </p>
+                        <p class="mb-0 pb-0">Percentage:</p>
+                        <p class="mb-0 pb-0"><strong class="text-primary font-20">${percentage}%</strong></p>
                     </div>
                 </div>
             </div>`;
@@ -249,10 +253,10 @@ var summaryReporting = (t_summary, date_range) => {
                     colors: ['transparent']
                 },
                 series: [{
-                    name: 'Previous Revenue',
+                    name: 'Previous Fees Recieved',
                     data: previousValues
                 }, {
-                    name: 'Current Revenue',
+                    name: 'Current Fees Recieved',
                     data: currentValues
                 }],
                 xaxis: {
@@ -284,6 +288,16 @@ var summaryReporting = (t_summary, date_range) => {
             chart.render();
         }
 
+        if (fees.summation !== undefined) {
+            $(`span[data-count="total_balance"]`).html(format_currency(fees.summation.balance));
+            $(`span[data-count="arrears_total"]`).html(format_currency(fees.summation.arrears_total));
+        }
+
+        if(summary.transaction_revenue_flow !== undefined) {
+            let transaction = summary.transaction_revenue_flow;
+            $(`span[data-count="total_income_received"]`).html(format_currency(transaction.category_total.current.Deposit));
+            $(`span[data-count="total_expenditure"]`).html(format_currency(transaction.category_total.current.Expense));
+        }
 
         if ($(`canvas[id="revenue_category_group"]`).length) {
             $(`div[data-chart="revenue_category_group"]`).html(`<canvas style="max-height:420px;height:420px;" id="revenue_category_group"></canvas>`);

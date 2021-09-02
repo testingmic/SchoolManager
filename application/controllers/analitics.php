@@ -338,10 +338,11 @@ class Analitics extends Myschoolgh {
         $result["fees_record_count"]["total_count"] = count($fees_category_list);
 
         // get the fees categories
-        $summation = $this->pushQuery("SUM(amount_due) AS amount_due, SUM(amount_paid) AS amount_paid, SUM(balance) AS balance", 
+        $summation = $this->pushQuery("SUM(amount_due) AS amount_due, SUM(amount_paid) AS amount_paid, 
+            SUM(balance) AS balance, (SELECT SUM(arrears_total) FROM users_arrears WHERE client_id='{$params->clientId}') AS arrears_total", 
             "fees_payments", "status='1' AND client_id='{$params->clientId}' AND 
                 academic_year='{$this->academic_year}' AND academic_term='{$this->academic_term}'");
-        $result["fees_record_count"]["summation"] = $summation;
+        $result["fees_record_count"]["summation"] = $summation[0] ?? [];
 
         // load the fees records
         foreach($fees_category_list as $key => $value) {
@@ -413,92 +414,95 @@ class Analitics extends Myschoolgh {
         /**
          * Processing of Transaction Data
          */
-        $transactionClass = load_class("fees", "controllers", $this->iclient);
+        $transactionClass = load_class("accounting", "controllers", $this->iclient);
 
         // get the fees categories
         $transaction_type_head = $this->pushQuery("id, name, item_id", "accounts_type_head", "status='1' AND client_id='{$params->clientId}'");
-        $n_result["transaction_revenue_flow"]["typehead_count"] = count($transaction_type_head);
+        $result["transaction_revenue_flow"]["typehead_count"] = count($transaction_type_head);
 
-        // loop through the record type
-        foreach(["Deposit", "Expense"] as $category) {
-            // get the fees categories
-            $category_total = $this->pushQuery(
-                "SUM(a.amount) AS total_amount", "accounts_transaction a", 
-                "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_type='{$category}'
-                AND (
-                    DATE(a.date_created) >= '{$range_value["start"]}' AND DATE(a.date_created) <= '{$range_value["end"]}'
-                )"
-            );
-            $n_result["transaction_revenue_flow"]["category_total"][$category] = $category_total[0]->total_amount ?? 0;
+        // loop through the date ranges for the current and previous
+        foreach($this->date_range as $range_key => $range_value) {
+
+            // loop through the record type
+            foreach(["Deposit", "Expense"] as $category) {
+                // get the fees categories
+                $category_total = $this->pushQuery(
+                    "SUM(a.amount) AS total_amount", "accounts_transaction a", 
+                    "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_type='{$category}'
+                    AND (
+                        DATE(a.date_created) >= '{$range_value["start"]}' AND DATE(a.date_created) <= '{$range_value["end"]}'
+                    )"
+                );
+                $result["transaction_revenue_flow"]["category_total"][$range_key][$category] = $category_total[0]->total_amount ?? 0;
+            }
+
+
         }
+
         // load the fees records
-        // foreach($transaction_type_head as $key => $value) {
+        foreach($transaction_type_head as $key => $value) {
             
-        //     /** Parameter */
-        //     $fees_param = (Object) [
-        //         "limit" => 100000,
-        //         "userId" => $params->userId,
-        //         "userData" => $params->userData,
-        //         "class_id" => $this->class_id_query,
-        //         "category_id" => $value->id,
-        //         "date_range" => "{$this->start_date}:{$this->end_date}",
-        //         "return_where_clause" => true
-        //     ];
-        //     $where_clause = $transactionClass->list($fees_param);
+            /** Parameter */
+            $fees_param = (Object) [
+                "limit" => 100000,
+                "userId" => $params->userId,
+                "account_type" => $value->item_id,
+                "date_range" => "{$this->start_date}:{$this->end_date}",
+                "return_where_clause" => true
+            ];
+            $where_clause = $transactionClass->list_transactions($fees_param, "date_created");
 
-        //     // value_name
-        //     $raw_name = create_slug($value->name, "_");
-        //     $amount_paid = $raw_name;
-        //     $value_count = "{$raw_name}_count";
+            // value_name
+            $raw_name = create_slug($value->name, "_");
+            $amount_paid = $raw_name;
+            $value_count = "{$raw_name}_count";
 
-        //     $query = $this->db->prepare("SELECT 
-        //             COUNT(*) AS {$value_count},
-        //             SUM(amount) AS {$amount_paid}
-        //         FROM fees_collection a
-        //         LEFT JOIN users u ON u.item_id = a.student_id
-        //         WHERE {$where_clause}
-        //     ");
-        //     $query->execute([$this->user_status]);
-        //     $q_result = $query->fetch(PDO::FETCH_OBJ);
+            $query = $this->db->prepare("SELECT 
+                    COUNT(*) AS {$value_count},
+                    SUM(amount) AS {$amount_paid}
+                FROM accounts_transaction a
+                WHERE {$where_clause}
+            ");
+            $query->execute();
+            $q_result = $query->fetch(PDO::FETCH_OBJ);
             
-        //     // append the result values
-        //     $n_result["fees_record_count"]["count"][$value->name] = $q_result->{$value_count} ?? 0;
-        //     $n_result["fees_record_count"]["amount"][$value->name] = $q_result->{$amount_paid} ?? 0;
+            // // append the result values
+            $result["transaction_revenue_flow"]["count"][$value->name] = $q_result->{$value_count} ?? 0;
+            $result["transaction_revenue_flow"]["amount"][$value->name] = $q_result->{$amount_paid} ?? 0;
             
-        //     // loop through the date ranges for the current and previous
-        //     foreach($this->date_range as $range_key => $range_value) {
+            // // loop through the date ranges for the current and previous
+            foreach($this->date_range as $range_key => $range_value) {
                   
-        //         // set the date range
-        //         $fees_param->date_range = "{$range_value["start"]}:{$range_value["end"]}";
+                // set the date range
+                $fees_param->date_range = "{$range_value["start"]}:{$range_value["end"]}";
                 
-        //         // set a where clause
-        //         $_where_clause = $transactionClass->list($fees_param);
+                // set a where clause
+                $_where_clause = $transactionClass->list_transactions($fees_param);
 
-        //         // run a query for the user count
-        //         $_query = $this->db->prepare("SELECT 
-        //                 COUNT(*) AS {$value_count}, 
-        //                 SUM(amount) AS {$amount_paid}
-        //             FROM fees_collection a 
-        //             LEFT JOIN users u ON u.item_id = a.student_id
-        //             WHERE {$_where_clause}
-        //         ");
-        //         $_query->execute([$this->user_status]);
-        //         $_q_result = $_query->fetch(PDO::FETCH_OBJ);
+                // run a query for the user count
+                $_query = $this->db->prepare("SELECT 
+                        COUNT(*) AS {$value_count}, 
+                        SUM(amount) AS {$amount_paid}
+                    FROM accounts_transaction a 
+                    WHERE {$_where_clause}
+                ");
+                $_query->execute([$this->user_status]);
+                $_q_result = $_query->fetch(PDO::FETCH_OBJ);
                 
-        //         // append to the result array
-        //         $n_result["fees_record_count"]["comparison"]["count"][$range_key][$value->name] = [
-        //             "value" => $_q_result->{$value_count} ?? 0,
-        //             "name" => $value->name
-        //         ];
-        //         $n_result["fees_record_count"]["comparison"]["amount"][$range_key][$value->name] = [
-        //             "value" => $_q_result->{$amount_paid} ?? 0,
-        //             "name" => $value->name
-        //         ];
-        //     }
+                // append to the result array
+                $result["transaction_revenue_flow"]["comparison"]["count"][$range_key][$value->name] = [
+                    "value" => $_q_result->{$value_count} ?? 0,
+                    "name" => $value->name
+                ];
+                $result["transaction_revenue_flow"]["comparison"]["amount"][$range_key][$value->name] = [
+                    "value" => $_q_result->{$amount_paid} ?? 0,
+                    "name" => $value->name
+                ];
+            }
 
-        // }
+        }
 
-        return $n_result;
+        return $result;
     }
 
     /**

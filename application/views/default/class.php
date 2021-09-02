@@ -65,7 +65,7 @@ if(!empty($item_id)) {
         foreach($student_list["data"] as $key => $student) {
 
             // view link
-            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}student/{$student->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a href='#' onclick='return load(\"student/{$student->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
             if($studentUpdate) {
                 $action .= "&nbsp;<a href='#' title='Click to delete this Class' onclick='return delete_record(\"{$student->user_id}\", \"class\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -76,17 +76,17 @@ if(!empty($item_id)) {
             $students .= "<td>
             <div class='d-flex justify-content-start'>
                 <div class='mr-1'>
-                <img onclick='return loadPage(\"{$baseUrl}student/{$student->user_id}\");' class='cursor author-box-picture' width='40px' src=\"{$baseUrl}{$student->image}\"> &nbsp; 
+                <img onclick='return load(\"student/{$student->user_id}\");' class='cursor author-box-picture' width='40px' src=\"{$baseUrl}{$student->image}\"> &nbsp; 
                 </div>
-                <div>
-                    <a href=\"#\" onclick='return loadPage(\"{$baseUrl}student/{$student->user_id}\");'>
-                        <span class='text-uppercase font-weight-bold text-primary'>{$student->name}</span>
-                    </a>
+                <div class='font-bold'>
+                    <a href=\"#\" onclick='return load(\"student/{$student->user_id}\");'>
+                        <span class='text-uppercase text-primary'>{$student->name}</span>
+                    </a><br>{$student->unique_id}
                 </div>
             </div>
             </td>";
-            $students .= "<td>{$student->unique_id}</td>";
             $students .= "<td>{$student->gender}</td>";
+            $students .= "<td>{$student->arrears_formated}</td>";
             $students .= "<td>{$action}</td>";
             $students .= "</tr>";
         }
@@ -99,8 +99,8 @@ if(!empty($item_id)) {
                     <tr>
                         <th width="5%" class="text-center">#</th>
                         <th>NAME</th>
-                        <th>REG. ID</th>
                         <th>GENDER</th>
+                        <th>ARREARS</th>
                         <th width="14%"></th>
                     </tr>
                 </thead>

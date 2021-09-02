@@ -801,8 +801,15 @@ if($isSupport) {
                 '.($isAdminAccountant ? 
                     '<div class="col-lg-4 col-md-12 col-12 col-sm-12">
                         <div class="card">
-                            <div class="card-header">
-                            <h4 class="text-uppercase font-13">Class Count</h4>
+                            <div class="card-header pr-2">
+                                <div class="row width-per-100">
+                                    <div class="col-md-9">
+                                        <h4 class="text-uppercase font-13">Students Per Class Count</h4>
+                                    </div>
+                                    <div class="col-md-3 text-success text-right p-0">
+                                        Total: <span data-count="total_students_count" class="font-bold mb-0">0</span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-body trix-slim-scroll quick_loader" id="class_count_list" style="max-height:465px;height:465px;overflow-y:auto;">
                                 <div class="form-content-loader" style="display: flex; position: absolute">
@@ -824,23 +831,33 @@ if($isSupport) {
                                         <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                     </div>
                                 </div>
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <h3 class="card-title"><span>'.$defaultCurrency.'</span> <span data-count="total_revenue_received">0.00</span></h3>
+                                <div class="row border-bottom pb-2">
+                                    <div class="col-lg-3 col-md-6 mb-1 text-center">
+                                        <h4 class="text-primary">
+                                            <span data-count="total_balance">0.00</span>
+                                        </h4>
+                                        <label>Fees Balance</label>
                                     </div>
-                                    <div style="width:60%">
-                                        <div class="d-flex justify-content-between">
-                                            <div class="col-6">
-                                                <p>&nbsp;</p>
-                                            </div>
-                                            <div class="col-6">
-                                                <p class="text-muted text-truncate m-b-5">Revenue <span data-filter="period">Last Week</span></p>
-                                                <h5><i class="fas fa-arrow-circle-up col-green m-r-5"></i><span data-count="previous_amount_received">0.00</span></h5>
-                                            </div>
-                                        </div>
+                                    <div class="col-lg-3 col-md-6 mb-1 text-center">
+                                        <h4 class="text-success">
+                                            <span data-count="total_income_received">0.00</span>
+                                        </h4>
+                                        <label>Income</label>  <small class="text-info font-bold">(This Week)</small>
                                     </div>
+                                    <div class="col-lg-3 col-md-6 mb-1 text-center">
+                                        <h4 class="text-danger">
+                                            <span data-count="total_expenditure">0.00</span>
+                                        </h4>
+                                        <label>Expenses</label> <small class="text-info font-bold">(This Week)</small>
+                                    </div>
+                                    <div class="col-lg-3 col-md-6 mb-1 text-center">
+                                        <h4 class="text-warning">
+                                            <span data-count="arrears_total">0.00</span>
+                                        </h4>
+                                        <label>Arrears Total</label>
+                                    </div>                                    
                                 </div>
-                                <div class="card-body" data-chart="revenue_category_chart">
+                                <div class="card-body mt-0 pt-2" data-chart="revenue_category_chart">
                                     <div id="revenue_category_chart"></div>
                                 </div>
                             </div>

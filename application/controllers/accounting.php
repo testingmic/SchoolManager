@@ -341,7 +341,7 @@ class Accounting extends Myschoolgh {
      * 
      * @return Array
      */
-    public function list_transactions(stdClass $params) {
+    public function list_transactions(stdClass $params, $column = "record_date") {
 
         $params->query = "1";
 
@@ -353,10 +353,17 @@ class Accounting extends Myschoolgh {
         $params->query .= (isset($params->account_id) && !empty($params->account_id)) ? " AND a.account_id='{$params->account_id}'" : null;
         $params->query .= (isset($params->account_type) && !empty($params->account_type)) ? " AND a.account_type='{$params->account_type}'" : null;
         $params->query .= (isset($params->transaction_id) && !empty($params->transaction_id)) ? " AND a.item_id='{$params->transaction_id}'" : null;
+        $params->query .= isset($params->date) && !empty($params->date) ? " AND DATE(a.record_date) ='{$params->date}'" : "";
+        $params->query .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", $column) : null;
+
+        // return the where clause
+        if(isset($params->return_where_clause)){
+            return $params->query;
+        }
+
+        // append the academic year and term
         $params->query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
         $params->query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
-        $params->query .= isset($params->date) && !empty($params->date) ? " AND DATE(a.record_date) ='{$params->date}'" : "";
-        $params->query .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "record_date") : null;
 
         try {
 
