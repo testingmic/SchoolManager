@@ -211,7 +211,7 @@ $response->html = '
                                     <div class="form-group">
                                         <label class="control-label">Date</label>
                                         <div class="input-group">
-                                            <input data-route="'.$route.'" disabled data-maxdate="'.date("Y-m-d", strtotime("+3 months")).'" type="text" class="form-control datepicker" name="schedule_date">
+                                            <input data-route="'.$route.'" disabled data-mindate="'.date("Y-m-d").'" data-maxdate="'.date("Y-m-d", strtotime("+3 months")).'" type="text" class="form-control datepicker" name="schedule_date">
                                         </div>
                                     </div>
                                 </div>

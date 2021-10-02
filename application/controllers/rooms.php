@@ -167,7 +167,7 @@ class Rooms extends Myschoolgh {
             // init
 			$class_ids = [];
 
-            // append tutor to courses list
+            // append tutor to Subjects List
 			if(isset($params->class_id)) {
 
                 // convert the course tutor into an array

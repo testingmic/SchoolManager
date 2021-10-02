@@ -16,7 +16,7 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 $response = (object) [];
-$response->title = "Courses List : {$appName}";
+$response->title = "Subjects List : {$appName}";
 $response->scripts = ["assets/js/filters.js"];
 
 $clientId = $session->clientId;
@@ -45,7 +45,7 @@ $hasFiltering = $accessObject->hasAccess("filters", "settings");
 $courses = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a title='View the course record' href='#' onclick='return loadPage(\"{$baseUrl}course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='View the course record' href='#' onclick='return load(\"course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Delete this Course' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
@@ -57,13 +57,13 @@ foreach($item_list["data"] as $key => $each) {
     $courses .= "<td>{$each->credit_hours}</td><td>";
     
     foreach($each->class_list as $class) {
-        $courses .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}class/{$class->id}\");'><span class='underline'>".$class->name."</span></a></p>";
+        $courses .= "<p class='mb-0 pb-0'><a href='#' onclick='return load(\"class/{$class->id}\");'><span class='underline'>".strtoupper($class->name)."</span></a></p>";
     }
 
     $courses .= "</td><td>";
 
     foreach($each->course_tutors as $tutor) {
-        $courses .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}staff/{$tutor->item_id}\");'><span class='underline'>".$tutor->name."</span></a></p>";
+        $courses .= "<p class='mb-0 pb-0'><a href='#' onclick='return load(\"staff/{$tutor->item_id}\");'><span class='underline'>".$tutor->name."</span></a></p>";
     }
 
     $courses .= "</td><td align='center'>{$action}</td>";
@@ -82,10 +82,10 @@ $class_list = load_class("classes", "controllers")->list($classes_param)["data"]
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>Courses List</h1>
+            <h1><i class="fa fa-book-open"></i> Subjects List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item">Courses List</div>
+                <div class="breadcrumb-item">Subjects List</div>
             </div>
         </div>
         <div class="row" id="filter_Department_Class">
@@ -120,7 +120,7 @@ $response->html = '
                 </select>
             </div>
             <div class="col-xl-2 '.(!$hasFiltering ? 'hidden': '').' col-md-2 col-12 form-group">
-                <label for="">&nbsp;</label>
+                <label class="d-sm-none d-md-block" for="">&nbsp;</label>
                 <button id="filter_Courses_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">
@@ -131,8 +131,8 @@ $response->html = '
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
-                                        <th>Course Title</th>
-                                        <th>Course Code</th>
+                                        <th>Subject Title</th>
+                                        <th>Subject Code</th>
                                         <th>Credit Hours</th>
                                         <th width="15%">Classes</th>
                                         <th>Course Tutor</th>

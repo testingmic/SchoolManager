@@ -681,7 +681,7 @@ class Attendance extends Myschoolgh {
             $table_content = (!$final && !empty($attendance["attendance"][0]["record"]["users_list"]) ? "
             <div class='row'>
                 <div class='col-md-8' id='attendance_search_input'>
-                    <label>Filter by Name</label>
+                    <label>Filter by Name or Registration ID</label>
                     <input type='text' placeholder='Search by fullname' name='attendance_fullname' class='form-control'>
                 </div>
                 <div class='col-md-4 pr-4 text-right attendance_control_buttons'>
@@ -938,6 +938,9 @@ class Attendance extends Myschoolgh {
      */
     public function range_summary(stdClass $params) {
 
+        // global variable
+        global $defaultAcademics;
+
         // get the attendance log for the day
         $days = $this->listDays($params->start_date, $params->end_date, 'Y-m-d');
 
@@ -1036,7 +1039,13 @@ class Attendance extends Myschoolgh {
                     // append to the array
                     $summary_set[$key] = isset($summary_set[$key]) ? ($summary_set[$key]+1) : 1;
                 }
-                $summary_set["Term"] = $logged_count + ($summary_set["Not Logged"] ?? 0);
+
+                // get days in the academic year and term
+                $days = $this->listDays($defaultAcademics->term_starts, $defaultAcademics->term_ends);
+
+                // set the summary information
+                $summary_set["Term"] = count($days);
+                $summary_set["Term_Period"] = $logged_count + ($summary_set["Not Logged"] ?? 0);
                 $users_count["summary"] = $summary_set;
             } else {
                 $users_count["summary"] = ["present" => 0, "absent" => 0];

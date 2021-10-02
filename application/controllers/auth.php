@@ -183,6 +183,12 @@ class Auth extends Myschoolgh {
                             $stmt = $this->db->prepare("UPDATE users SET last_login=now(), last_visited_page='{{APPURL}}dashboard', last_seen = now() WHERE item_id=? LIMIT 10");
                             $stmt->execute([$results->user_id]);
 
+                            // if the user is an admin or accountant
+                            if(in_array($results->user_type, ["admin", "accountant"])) {
+                                // run simple cron activity
+                                $this->execute_cron($results->client_id);
+                            }
+
                             // commit all transactions
                             $this->db->commit();
 
@@ -231,6 +237,19 @@ class Auth extends Myschoolgh {
     }
 
     /**
+     * Execute a Simple Cron Activity
+     * 
+     * @return Bool
+     */
+    public function execute_cron($clientId) {
+        // fees payment reversal disallowed after 30 HOURS
+        // $this->db->query("UPDATE fees_collection SET has_reversal='0' WHERE recorded_date < (NOW() + INTERVAL - 30 HOUR) AND has_reversal='1' AND client_id='{$clientId}' LIMIT 1000");
+        
+        // do same to transactions recorded - auto set it to approved after 30 hours
+        // $this->db->query("UPDATE accounts_transaction SET state='Approved' WHERE date_created < (NOW() + INTERVAL - 30 HOUR) AND state='Pending' AND status='1' AND client_id='{$clientId}' LIMIT 500");
+    }
+
+    /**
      * Clear all user temporary files
      * 
      * @param String $user_id
@@ -243,7 +262,7 @@ class Auth extends Myschoolgh {
             // file travessing
             foreach(get_dir_file_info("assets/uploads/{$user_id}/tmp/", false, true) as $eachFile) {
                 // format the output
-                if($eachFile["relative_path"] !== "assets/uploads/{$user_id}/tmp/thumbnail\\") {
+                if($eachFile["relative_path"] !== "assets/uploads/{$user_id}/tmp/thumbnail") {
                     unlink($eachFile["server_path"]);
                 }
             }

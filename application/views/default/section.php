@@ -21,7 +21,7 @@ $pageTitle = "Section Information";
 $response->title = "{$pageTitle} : {$appName}";
 
 $response->scripts = [
-    "assets/js/page/index.js"
+    "assets/js/index.js"
 ];
 
 // item id

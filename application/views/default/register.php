@@ -69,7 +69,7 @@ if(loggedIn()) {
                     </div>
                     <div class="col-lg-6">
                       <div class="form-group">
-                        <label for="school_contact">Primary Contact</label>
+                        <label for="school_contact">Primary Contact <span class="required">*</span></label>
                         <input id="school_contact" type="text" class="form-control" name="school_contact" tabindex="1" required>
                       </div>
                     </div>

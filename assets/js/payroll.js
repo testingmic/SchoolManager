@@ -23,7 +23,7 @@ var addDeductions = () => {
                         <select name="deductions[]" id="deductions_${dlastRow}" class="form-control selectpicker">${htmlData}</select>
                     </div>
                     <div class="col-lg-5 mb-2 col-md-5">
-                        <input placeholder="Amount" min="0" max="20000" class="form-control" type="text" name="deductions_amount[]" id="deductions_amount_${dlastRow}">
+                        <input placeholder="Amount" onkeyup="this.value = this.value.replace(/[^\d]+/g, '');" min="0" max="20000" class="form-control" type="text" name="deductions_amount[]" id="deductions_amount_${dlastRow}">
                     </div>
                     <div class="text-center">
                         <span class="remove-row cursor btn btn-outline-danger" onclick="return removeRow('deductions','${dlastRow}');"><i class="fa fa-trash"></i></span>
@@ -57,7 +57,7 @@ var addAllowance = () => {
                         <select name="allowance[]" id="allowance_${lastRowId}" class="form-control selectpicker">${htmlData}</select>
                     </div>
                     <div class="col-lg-5 mb-2 col-md-5">
-                        <input placeholder="Amount" min="0" max="20000" class="form-control" type="text" name="allowance_amount[]" id="allowance_amount_${lastRowId}">
+                        <input placeholder="Amount" onkeyup="this.value = this.value.replace(/[^\d]+/g, '');" min="0" max="20000" class="form-control" type="text" name="allowance_amount[]" id="allowance_amount_${lastRowId}">
                     </div>
                     <div class="text-center">
                         <span class="remove-row cursor btn btn-outline-danger" onclick="return removeRow('allowance','${lastRowId}');"><i class="fa fa-trash"></i></span>

@@ -578,7 +578,7 @@ class Crons {
                 // IMPORT THE GRADING SYSTEM LIST
                 if(in_array("grading_system", $data_to_import)) {
                     print "Insert the Academic Grading System Structure\n";
-                    // GET THE ACTUAL COURSES LIST
+                    // GET THE ACTUAL Subjects List
                     $list_grading_structure = $this->db->prepare("SELECT a.*
                         FROM 
                             grading_system a 
@@ -592,7 +592,7 @@ class Crons {
                     // variables
                     $grading_system_query_string = "";
 
-                    // loop through the courses list
+                    // loop through the Subjects List
                     foreach($grading_system as $ikey => $course) {
                         
                         // get the keys
@@ -632,10 +632,10 @@ class Crons {
                 $courses_plan_query_string = "";
                 $courses_resource_query_string = "";
 
-                // IMPORT THE COURSES LIST
+                // IMPORT THE Subjects List
                 if(in_array("courses", $data_to_import)) {
-                    print "Insert the courses list\n";
-                    // GET THE ACTUAL COURSES LIST
+                    print "Insert the Subjects List\n";
+                    // GET THE ACTUAL Subjects List
                     $list_courses = $this->db->prepare("SELECT a.*
                         FROM 
                             courses a 
@@ -646,7 +646,7 @@ class Crons {
                     $list_courses->execute([$academic_year, $academic_term, $clientId, 1]);
                     $courses_list = $list_courses->fetchAll(PDO::FETCH_ASSOC);
 
-                    // loop through the courses list
+                    // loop through the Subjects List
                     foreach($courses_list as $ikey => $course) {
                         
                         // get the keys
@@ -681,7 +681,7 @@ class Crons {
                     }
                 }
                 
-                // IMPORT THE COURSES LIST
+                // IMPORT THE Subjects List
                 if(in_array("courses_plan", $data_to_import)) {
                     print "Insert the courses plan\n";
                     // GET THE LIST OF COURSE PLAN
@@ -733,7 +733,7 @@ class Crons {
 
                 }
 
-                // IMPORT THE COURSES LIST
+                // IMPORT THE Subjects List
                 if(in_array("courses_resource", $data_to_import)) {
                     print "Insert the course resources\n";
                     // LOAD THE COURSE RESOURCES LIST

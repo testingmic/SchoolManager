@@ -54,7 +54,7 @@ class Records extends Myschoolgh {
                 "query" => "SELECT id FROM courses WHERE id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
             ],
             "fees_category" => [
-                "table" => "courses",
+                "table" => "fees_category",
                 "update" => "status='0'",
                 "where" => "id='{$record_id}'",
                 "query" => "SELECT id FROM fees_category WHERE id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"

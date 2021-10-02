@@ -37,7 +37,7 @@ if(!$canAllocate) {
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
     // load fees allocation list for class
-    $allocation_param = (object) ["group_by_student" => "group_by", "clientId" => $clientId, "userData" => $defaultUser, "receivePayment" => $receivePayment, "canAllocate" => $canAllocate];
+    $allocation_param = (object) ["group_by_student" => "group_by", "clientId" => $clientId, "userData" => $defaultUser, "receivePayment" => $receivePayment, "canAllocate" => $canAllocate, "showPrintButton" => true];
     $allocation_param->client_data = $defaultUser->client;
     
     // create a new object
@@ -95,7 +95,7 @@ if(!$canAllocate) {
                                             <div class="card-body pt-0 pb-0">
                                                 <div class="py-3 pt-0" id="fees_allocation_form">
                                                 
-                                                    <div class="form-group mb-2">
+                                                    <div class="form-group hidden mb-2">
                                                         <label>Allocate To <span class="required">*</span></label>
                                                         <select data-width="100%" disabled class="form-control selectpicker" id="allocate_to" name="allocate_to">
                                                             <option selected value="class">Entire Class</option>

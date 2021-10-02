@@ -108,12 +108,21 @@ class Files extends Myschoolgh {
                 mkdir("{$root_dir}/{$currentUser_Id}/docs/{$module}", 0777, true);
                 mkdir("{$root_dir}/{$currentUser_Id}/tmp/download", 0777, true);
                 mkdir("{$root_dir}/{$currentUser_Id}/tmp/thumbnail");
-                mkdir("{$root_dir}/{$currentUser_Id}/tmp/{$module}");
             }
 
             // set the user's directory
             $tmp_dir = "{$root_dir}/{$currentUser_Id}/tmp/{$module}/";
             $dwn_dir = "{$root_dir}/{$currentUser_Id}/tmp/download/";
+
+            // create the temporary file directory
+            if(!is_dir($tmp_dir)) {
+                mkdir("{$tmp_dir}", 0777, true);
+            }
+
+            // create the download file directory
+            if(!is_dir($dwn_dir)) {
+                mkdir("{$dwn_dir}", 0777, true);
+            }
         
             /** Get the data for processing */
             if($params->label == "upload") {
@@ -507,8 +516,8 @@ class Files extends Myschoolgh {
             $docs_dir = "assets/uploads/{$user_id}/docs/{$resource}/";
 
             // create the directory
-            if(!is_dir("assets/uploads/{$user_id}/docs/{$resource}")) {
-                mkdir("assets/uploads/{$user_id}/docs/{$resource}", 0777, true);
+            if(!is_dir($docs_dir)) {
+                mkdir($docs_dir, 0777, true);
             }
 
             // set the list to the existing record... 

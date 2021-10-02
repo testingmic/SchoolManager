@@ -32,7 +32,7 @@ class Models {
         $this->payment_methods = [
             "cash" => "Cash",
             "cheque" => "Cheque",
-            "momo_card" => "Mobile Money / Card Payment",
+            "bankers_draft" => "Bankers Draft"
         ];
 
         $this->form_modules = [
@@ -63,6 +63,13 @@ class Models {
                 "alt" => [
                     "key" => "last_term",
                     "value" => "Last Term"
+                ]
+            ],
+            "yesterday" => [
+                "title" => "Yesterday",
+                "alt" => [
+                    "key" => "last_2days",
+                    "value" => "Last 2 Days"
                 ]
             ],
             "today" => [
@@ -148,7 +155,8 @@ class Models {
             "all" => "All Users",
             "student" => "Students",
             "teacher" => "Teaching Staff",
-            "parent" => "Parents"
+            "parent" => "Parents",
+            "admin" => "Administrators & Accountants",
         ];
 
 		$this->favicon_array = [
@@ -284,7 +292,6 @@ class Models {
         $this->features_list = [
             "library" => "Library Management",
             "e_learning" => "E-Learning",
-            // "lesson_planner" => "Lesson Planner",
             "class_assessment" => "Online Class Assessment",
             "reports_promotion" => "Terminal Reports / Promotion",
             "attendance" => "Attendance Manager",

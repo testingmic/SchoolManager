@@ -37,7 +37,9 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-clock"></i><span>Guardians</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>guardians">Guardian List</a></li>
+            <?php if($accessObject->hasAccess("add", "guardian")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>guardian_add">Add Guardian</a></li>
+            <?php } ?>
         </ul>
     </li>
     <?php } ?>
@@ -51,29 +53,31 @@
         </ul>
     </li>   
     <?php if($isAdmin) { ?>
-    <?php if(in_array("attendance", $clientFeatures)) { ?>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
-        </ul>
-    </li>
-    <?php } ?>
+        <?php if(in_array("attendance", $clientFeatures)) { ?>
+            <?php if($accessObject->hasAccess("view", "attendance")) { ?>
+            <li class="dropdown">
+                <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
+                    <?php if($accessObject->hasAccess("log", "attendance")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
+                    <?php } ?>
+                    <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
+                </ul>
+            </li>
+            <?php } ?>
+        <?php } ?>
     <?php } ?>
     <?php incidents_menu(); ?>
     <?php if($isAdmin) { ?>
-        <?php if(in_array("bulk_action", $clientFeatures)) { ?>
-            <li class="dropdown">
-                <a href="#" class="nav-link has-dropdown"><i class="fas fa-cog"></i><span>Bulk Action</span></a>
-                <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="<?= $baseUrl ?>assign-class">Assign Class</a></li>
-                    <!-- <li><a class="nav-link" href="<?= $baseUrl ?>assign-username_password">Login Credentials</a></li> -->
-                    <!-- <li><a class="nav-link" href="<?= $baseUrl ?>assign-section">Assign Section</a></li> -->
-                </ul>
-            </li>
-        <?php } ?>
+        <li class="dropdown">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-cog"></i><span>Bulk Action</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>assign_class">Assign Class</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>assign_department">Assign Departments</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>assign_modify_student">Modify Student Record</a></li>
+            </ul>
+        </li>
     <?php } ?>
     <?php if($accessObject->hasAccess("view", "class")) { ?>
     <li class="menu-header">Academics</li>
@@ -81,15 +85,15 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-graduation-cap"></i><span>Structures</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>classes">List Classes</a></li>
-            <?php if($isAdmin) { ?>
+            <?php if($accessObject->hasAccess("add", "class")) { ?>
             <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>class_add">Add Class</a></li>
             <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>departments">List Departments</a></li>
-            <?php if($isAdmin) { ?>
+            <?php if($accessObject->hasAccess("add", "department")) { ?>
             <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>department_add">Add Department</a></li>
             <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>sections">List Sections</a></li>
-            <?php if($isAdmin) { ?>
+            <?php if($accessObject->hasAccess("add", "section")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>section_add">Add Section</a></li>
             <?php } ?>
         </ul>
@@ -97,11 +101,11 @@
     <?php } ?>
     <?php if($isAdmin) { ?>
         <li class="dropdown">
-            <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Subjects Manager</span></a>
             <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Courses</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>course_add">Add Course</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Course Resources</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Subjects</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>course_add">Add Subject</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Subject Resources</a></li>
             </ul>
         </li>
         <?php if(in_array("e_learning", $clientFeatures)) { ?>
@@ -162,10 +166,9 @@
     <?php if($accessObject->hasAccess("view", "fees")) { ?>
     <li class="menu-header">HR / Finance</li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>School Fees</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-dolly-flatbed"></i><span>Fees</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-history">List History</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>fees-search">Search Log / Generate</a></li>
             <?php if($accessObject->hasAccess("receive", "fees")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-payment">Receive Payment</a></li>
             <?php } ?>
@@ -175,7 +178,7 @@
             <?php if($accessObject->hasAccess("allocation", "fees")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>fees-allocation">Fees Allocation</a></li>
             <?php } ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>arrears">Fees Arrears Debtors</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>arrears">Debtors List</a></li>
             <?php if($accessObject->hasAccess("reports", "fees")) { ?>
                 <li><a class="nav-link" href="<?= $baseUrl ?>fees-reports">Fees Report</a></li>
             <?php } ?>
@@ -190,7 +193,7 @@
                     <li><a class="nav-link" href="<?= $baseUrl ?>payroll">Payroll</a></li>
                     <li><a class="nav-link" href="<?= $baseUrl ?>payslips">Payslip List</a></li>
                     <li><a class="nav-link" href="<?= $baseUrl ?>payroll-category">Allowance Category</a></li>
-                    <?php if($accessObject->hasAccess("view", "payslip")) { ?>
+                    <?php if($accessObject->hasAccess("reports", "payslip")) { ?>
                     <li><a class="nav-link" href="<?= $baseUrl ?>payroll-reports">Payroll Reports</a></li>
                     <?php } ?>
                 </ul>
@@ -198,18 +201,24 @@
         <?php } ?>
     <?php } ?>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-archway"></i><span>Simple Accounting</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-archway"></i><span>Accounting</span></a>
         <ul class="dropdown-menu">
             <?php if($accessObject->hasAccess("accounts", "accounting")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>accounts">Accounts</a></li>
             <?php } ?>
+            <?php if($accessObject->hasAccess("deposits", "accounting")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>deposits">Deposits</a></li>
+            <?php } ?>
+            <?php if($accessObject->hasAccess("expenditure", "accounting")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>expenses">Expenses</a></li>
+            <?php } ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>transactions">All Transactions</a></li>
             <?php if($accessObject->hasAccess("account_type_head", "accounting")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>account_type">Account Type Head</a></li>
             <?php } ?>
+            <?php if($accessObject->hasAccess("reports", "accounting")) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>accounting">Financial Reports</a></li>
+            <?php } ?>
         </ul>
     </li>
     <li class="menu-header">Communication</li>
@@ -217,12 +226,12 @@
     <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-calendar-check"></i><span> Events Management</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-events">List Events</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-events-category">Events Category</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>events">List Events</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>events_category">Events Category</a></li>
         </ul>
     </li>
     <?php } else { ?>
-    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
@@ -240,22 +249,26 @@
         </ul>
     </li>
     <?php if(in_array("attendance", $clientFeatures)) { ?>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
-            <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
-        </ul>
-    </li>
+        <?php if($accessObject->hasAccess("view", "attendance")) { ?>
+        <li class="dropdown">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-ticket-alt"></i><span>Attendance</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>attendance">Attendance Summary</a></li>
+                <?php if($accessObject->hasAccess("log", "attendance")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>attendance_log">Log Attendance</a></li>
+                <?php } ?>
+                <li><a class="nav-link border-bottom" href="<?= $baseUrl ?>attendance_report">Attendance Report</a></li>
+            </ul>
+        </li>
+        <?php } ?>
     <?php } ?>
     <?php incidents_menu(); ?> 
     <li class="menu-header">Academics</li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Subjects Manager</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Courses</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Course Resources</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Subjects</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Subject Resources</a></li>
         </ul>
     </li>
     <?php if(in_array("reports_promotion", $clientFeatures)) { ?>
@@ -311,7 +324,7 @@
     </li>
     <?php } ?>
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?= communication_menu() ?>
 <?php } ?>
 <?php function parent_menu() { global $baseUrl, $accessObject, $session, $clientFeatures; ?>
@@ -326,9 +339,9 @@
         <?php } ?>
         <li class="menu-header">Academics</li>
         <li class="dropdown">
-            <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Subjects Manager</span></a>
             <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Courses</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Subjects</a></li>
             </ul>
         </li>
         <?php if(in_array("timetable", $clientFeatures)) { ?>
@@ -356,7 +369,7 @@
     <li class="menu-header">Finance</li>
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?= communication_menu() ?>
 <?php } ?>
 <?php function student_menu() { global $baseUrl, $accessObject, $clientFeatures; ?>
@@ -368,9 +381,9 @@
     </li>                        
     <li class="menu-header">Academics</li>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Lesson Planner</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Subjects Manager</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Courses</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Subjects</a></li>
         </ul>
     </li>
     <?php if(in_array("e_learning", $clientFeatures)) { ?>
@@ -417,7 +430,7 @@
     <li><a href="<?= $baseUrl ?>fees_bill" class="nav-link"><i class="fas fa-money-bill"></i><span>My Bill</span></a></li>
     
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
     <?= communication_menu() ?>
 <?php } ?>
 <?php function employee_menu() { global $baseUrl, $accessObject, $clientFeatures; ?>
@@ -449,7 +462,7 @@
     </li>
     <?php } ?>
     <li class="menu-header">Communication</li>
-    <li><a href="<?= $baseUrl ?>list-events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
 <?php } ?>
 <?php function support_menu() { global $baseUrl, $accessObject, $clientFeatures; ?>
     <li class="dropdown">

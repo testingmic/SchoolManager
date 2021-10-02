@@ -46,7 +46,9 @@ $student_list = load_class("users", "controllers", $student_param)->quick_list($
 $hasDelete = $accessObject->hasAccess("delete", "student");
 $hasUpdate = $accessObject->hasAccess("update", "student");
 $hasFiltering = $accessObject->hasAccess("filters", "settings");
+$viewAllocation = $accessObject->hasAccess("view_allocation", "fees");
 
+$count = 0;
 $students = "";
 foreach($student_list["data"] as $key => $each) {
     
@@ -55,21 +57,27 @@ foreach($student_list["data"] as $key => $each) {
     if($hasUpdate) {
         $action .= "&nbsp;<span title='Update Record' onclick='load(\"modify-student/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-success'><i class='fa fa-edit'></i></span>";
     }
+    if($viewAllocation) {
+        $action .= "&nbsp;<a href='{$baseUrl}download/student_bill/{$each->user_id}' target='_blank' title='Print Bill' class='btn btn-sm mb-1 btn-outline-warning'><i class='fa fa-print'></i></a>";
+    }
     if($hasDelete) {
         $action .= "&nbsp;<span title='Delete Student' onclick='delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
     }
-
-    $students .= "<tr data-row_id=\"{$each->id}\">";
-    $students .= "<td>".($key+1)."</td>";
+    
+    $count++;
+    $students .= "<tr data-row_id=\"{$each->user_id}\">";
+    $students .= "<td>{$count}</td>";
     $students .= "
     <td>
-        <span title='View Details' class='user_name' onclick='load(\"student/{$each->user_id}\");'>{$each->name}</span><br>{$each->unique_id}
+        <span title='View Details' class='user_name' onclick='load(\"student/{$each->user_id}\");'>{$each->name}</span><br>
+        <strong>{$each->unique_id}</strong>
     </td>";
-    $students .= "<td>{$each->class_name}</td>";
-    $students .= "<td>{$each->gender}</td>";
+    $students .= "<td>".strtoupper($each->class_name)."</td>";
+    $students .= "<td>".strtoupper($each->gender)."</td>";
     $students .= "<td>".($each->department_name ?? null)."</td>";
-    $students .= "<td>{$defaultCurrency} {$each->debt_formated}</td>";
-    $students .= "<td>{$defaultCurrency} {$each->arrears_formated}</td>";
+    $students .= "<td>{$defaultCurrency}{$each->debt_formated}</td>";
+    $students .= "<td>{$defaultCurrency}{$each->arrears_formated}</td>";
+    $students .= "<td>{$defaultCurrency}{$each->total_debt_formated}</td>";
     $students .= "<td align='center'>{$action}</td>";
     $students .= "</tr>";
 }
@@ -124,7 +132,7 @@ $response->html = '
                 </select>
             </div>
             <div class="col-xl-2 '.(!$hasFiltering ? 'hidden': '').' col-md-2 col-12 form-group">
-                <label for="">&nbsp;</label>
+                <label class="d-sm-none d-md-block" for="">&nbsp;</label>
                 <button id="filter_Students_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">
@@ -139,9 +147,10 @@ $response->html = '
                                         <th>Class</th>
                                         <th>Gender</th>
                                         <th>Department</th>
-                                        <th>Bill</th>
+                                        <th>Term Bill</th>
                                         <th>Arrears</th>
-                                        <th width="13%"></th>
+                                        <th>Total</th>
+                                        <th width="14%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$students.'</tbody>

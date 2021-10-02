@@ -8,6 +8,10 @@ $pages_content = "<style>@page { margin: 5px; } body { margin: 5px; } .page_brea
 // set the site root
 $site_root = config_item("site_root");
 
+// set no memory limit
+error_reporting(0);
+ini_set("memory_limit", "-1");
+
 // require the autoload file
 require "{$site_root}system/libraries/dompdf/vendor/autoload.php";
 
@@ -177,10 +181,14 @@ if(!$isSupport) {
         // end query if no result found
         if(!isset($_GET["dw"])) {
             print $content["data"];
-            print '<script>
-                    window.onload = (evt) => { window.print(); }
+            print "<script>
+                function print_payslip() {
+                    window.print();
+                    window.onfocus = (evt) => {window.close();}
                     window.onafterprint = (evt) => { window.close(); }
-                </script>';
+                }
+                print_payslip();
+                </script>";
             return;
         }
         $pages_content .= $content["data"];
@@ -262,10 +270,6 @@ if(!$isSupport) {
 
     /** Download Timetables */
     elseif(confirm_url_id(1, "attendance")) {
-        // set no memory limit
-        error_reporting(0);
-        ini_set("memory_limit", "-1");
-        
         /** Start processing */
         $getObject = (array) $_GET;
         $getObject = (object) array_map("xss_clean", $getObject);
@@ -355,6 +359,7 @@ if(!$isSupport) {
 
         // set the parameters
         $item_param = (object) [
+            "order_by" => "ORDER BY a.id ASC",
             "category_id" => $getObject->category_id ?? null,
             "student_id" => $getObject->student_id ?? null,
             "item_id" => $getObject->receipt_id ?? null,
@@ -378,8 +383,12 @@ if(!$isSupport) {
             $param = (object) [
                 "getObject" => $getObject,
                 "data" => $data,
+                "end_date" => $getObject->end_date,
+                "start_date" => $getObject->start_date,
                 "client" => $defaultUser->client,
                 "download" => true,
+                "class_id" => $getObject->class_id ?? null,
+                "category_id" => $getObject->category_id ?? null,
                 "isPDF" => true,
                 "receipt_id" => $getObject->receipt_id ?? null,
                 "clientId" => $defaultUser->client_id
@@ -406,7 +415,7 @@ if(!$isSupport) {
     }
 
     /** Print Student Bill */
-    elseif(confirm_url_id(2) && confirm_url_id(1, "student_bill")) {
+    elseif(confirm_url_id(1, "student_bill")) {
 
         // get the parameters
         $getObject = (array) $_GET;
@@ -415,9 +424,11 @@ if(!$isSupport) {
         // set the parameters
         $item_param = (object) [
             "userData" => $defaultUser,
-            "student_id" => $SITEURL[2],
+            "student_id" => $SITEURL[2] ?? null,
             "clientId" => $defaultUser->client_id,
             "client_data" => $defaultUser->client,
+            "class_id" => $getObject->class_id ?? null,
+            "student_ids" => $getObject->student_ids ?? null,
             "academic_year" => $getObject->academic_year ?? null,
             "academic_term" => $getObject->academic_term ?? null
         ];
@@ -425,6 +436,8 @@ if(!$isSupport) {
         // if the user wants to print it out
         if(isset($getObject->print)) {
             $item_param->print = true;
+        } else {
+            $item_param->isPDF = true;
         }
 
         // create a new object
@@ -440,8 +453,6 @@ if(!$isSupport) {
     }
 
 }
-// print_r($pages_content);
-// exit;
 // load the html content
 $dompdf->loadHtml($pages_content);
 

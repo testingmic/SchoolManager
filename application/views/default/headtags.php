@@ -101,7 +101,7 @@ load_helpers(['menu_helper']);
             myPrefs = <?= json_encode($userData->client->client_preferences) ?>;
     </script>
 </head>
-<body class="<?= $sidebar_pref ?> <?=  $theme_color ?> bg">
+<body class="bg">
 	<div class="loader"></div>
     <input name="minimum_date" hidden type="hidden" disabled value="<?= date("Y-m-d", strtotime("today -100 years")) ?>">
     <input type="hidden" hidden id="todays_date" disabled value="<?= date("Y-m-d") ?>">
@@ -155,8 +155,7 @@ load_helpers(['menu_helper']);
                     <?php if($isActiveAccount) { ?>
                     <li class="border-left text-white d-none d-md-block">
                         <?php if(!$isSupport) { ?>
-                        <a href="#" class="nav-link text-white nav-link-lg">
-                            Academic Year/Term:
+                        <a class="nav-link text-white nav-link-lg">
                             <strong class="font-18px">
                                 <span><?= $clientPrefs->academics->academic_year ?></span> 
                                 <span>|</span>
@@ -174,37 +173,6 @@ load_helpers(['menu_helper']);
                 </ul>
                 </div>
                 <ul class="navbar-nav navbar-right">
-                <?php if($isActiveAccount) { ?>
-                    <?php if($isSchool && $isActiveAccount && in_array("live_chat", $clientFeatures)) { ?>
-                        <li class="dropdown dropdown-list-toggle">
-                            <a href="#" data-toggle="dropdown" title="Email Messages" class="nav-link nav-link-lg message-toggle" data-notification="message"><i class="far fa-envelope"></i></a>
-                            <div class="dropdown-menu dropdown-list dropdown-menu-right">
-                            <div class="dropdown-header">Messages
-                                <div class="float-right">
-                                <a href="#" data-function="mark_as_read" data-item="messages">Mark All As Read</a>
-                                </div>
-                            </div>
-                            <div id="messages_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-message">
-                                
-                                <!-- <a href="#" class="dropdown-item">
-                                    <span class="dropdown-item-avatar text-white">
-                                        <img alt="image" src="assets/img/users/user-5.png" class="rounded-circle">
-                                    </span>
-                                    <span class="dropdown-item-desc">
-                                        <span class="message-user">Jacob Ryan</span>
-                                        <span class="time messege-text">Your payment invoice is generated.</span>
-                                        <span class="time text-primary">12 Min Ago</span>
-                                    </span>
-                                </a> -->
-
-                            </div>
-                            <div class="dropdown-footer text-center">
-                                <a href="<?= $baseUrl ?>chat">View All <i class="fas fa-chevron-right"></i></a>
-                            </div>
-                            </div>
-                        </li>
-                    <?php } ?>
-                <?php } ?>
                 <li class="dropdown dropdown-list-toggle"><a title="Notifications List" href="#" data-toggle="dropdown" class="nav-link notification-toggle nav-link-lg"><i class="far fa-bell"></i></a>
                     <div class="dropdown-menu dropdown-list dropdown-menu-right">
                         <div class="dropdown-header">Notifications
@@ -215,11 +183,6 @@ load_helpers(['menu_helper']);
                         <div id="notifications_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-icons"></div>
                     </div>
                 </li>
-                <?php if($accessObject->hasAccess("support", "settings")) { ?>
-                <li class="dropdown dropdown-list-toggle">
-                    <a title="Support Tickets List" href="<?= $baseUrl ?>support" class="nav-link nav-link-lg"><i class="fa fa-phone-volume"></i> Support</a>
-                </li>
-                <?php } ?>
                 <li class="dropdown">
                     <a href="#" data-toggle="dropdown"
                         class="nav-link dropdown-toggle nav-link-lg nav-link-user">

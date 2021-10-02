@@ -125,7 +125,7 @@ if(!empty($session->userId)) {
 
 	// set the client preferences
 	$clientPrefs = $defaultClientData->client_preferences;
-	
+
 	// if the result is not empty
 	if(!empty($defaultUser)) {
 		
@@ -133,6 +133,7 @@ if(!empty($session->userId)) {
 		$defaultUser = $defaultUser[0];
 		
 		// set the parameters for the access object
+		$defaultClientId = $defaultUser->client_id;
 		$accessObject->userId = $defaultUser->user_id;
 		$accessObject->clientId = $defaultUser->client_id;
 		$accessObject->userPermits = json_decode($defaultUser->user_permissions);
@@ -145,11 +146,13 @@ if(!empty($session->userId)) {
 
 		// set new variables
 		$isEmployee = (bool) ($defaultUser->user_type == "employee");
+		$isTutor = (bool) in_array($defaultUser->user_type, ["teacher"]);
 		$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
 		$isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
 		$isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
 		$isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
 		$isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
+		$isAccountant = (bool) in_array($defaultUser->user_type, ["accountant"]);
 		$isAdmin = (bool) ($defaultUser->user_type == "admin");
 
 		// set the features

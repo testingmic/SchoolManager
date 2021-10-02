@@ -34,7 +34,7 @@ $hasUpdate = $accessObject->hasAccess("update", "guardian");
 $guardians = "";
 foreach($guardian_list as $kkey => $each) {
 
-    $action = "<a title='Click to view guardian information' href='#' onclick='return loadPage(\"{$baseUrl}guardian/{$each->user_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to view guardian information' href='#' onclick='return load(\"guardian/{$each->user_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
     
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Click to delete guardian record' onclick='return delete_record(\"{$each->user_id}\", \"guardian\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -53,10 +53,10 @@ foreach($guardian_list as $kkey => $each) {
             $wards_list .= "
                 <div class='d-flex justify-content-start".($key+1 !== count($each->wards_list) ? "border-bottom mb-2 pb-2" : "")."'>
                     <div class='mr-2'>
-                        <img src=\"{$baseUrl}{$ward->image}\" class='rounded-circle author-box-picture' width='30px'>
+                        <img src=\"{$baseUrl}{$ward->image}\" class='author-box-picture' width='40px' height='40px'>
                     </div>
                     <div> 
-                        <a href='{$baseUrl}student/{$ward->student_guid}' title='View the details of {$ward->name}'>{$ward->name} </a>
+                        <a href='{$baseUrl}student/{$ward->student_guid}' title='View the details of {$ward->name}'>".strtoupper($ward->name)."</a>
                         <br>".(!empty($ward->class_name) ? "<i class='fa fa-home'></i> {$ward->class_name}" : "")."
                     </div>
                 </div>
@@ -70,10 +70,10 @@ foreach($guardian_list as $kkey => $each) {
     $guardians .= "<td>
         <div class='d-flex justify-content-start'>
             <div class='mr-1'>
-                <img title='View guardian details' onclick=\"return loadPage('{$baseUrl}guardian/{$each->user_id}')\" class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\">
+                <img title='View guardian details' onclick=\"return load('guardian/{$each->user_id}')\" class='author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\">
             </div>
             <div>
-                <span class='user_name' title='View guardian record' onclick='return loadPage(\"{$baseUrl}guardian/{$each->user_id}\");'>
+                <span class='user_name' title='View guardian record' onclick='return load(\"guardian/{$each->user_id}\");'>
                 {$each->name} <br>
                 </span>
                 <strong>{$each->unique_id}</strong>

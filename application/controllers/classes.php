@@ -43,7 +43,7 @@ class Classes extends Myschoolgh {
         $params->query .= (isset($params->class_assistant) && !empty($params->class_assistant)) ? " AND a.class_assistant='{$params->class_assistant}'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
-        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.id='{$params->class_id}'" : null;
+        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND (a.id='{$params->class_id}' OR a.item_id='{$params->class_id}')" : null;
 
         try {
 
@@ -251,7 +251,7 @@ class Classes extends Myschoolgh {
             // init
 			$room_ids = [];
 
-            // append tutor to courses list
+            // append tutor to Subjects List
 			if(isset($params->room_id)) {
 
                 // convert the course tutor into an array
@@ -351,13 +351,12 @@ class Classes extends Myschoolgh {
             $assignFees = (bool) isset($params->data["assign_fees"]) && ($params->data["assign_fees"] == "assign");
 
             // update query
-            $update = $this->db->prepare("UPDATE users SET class_id = ? 
-                WHERE item_id = ? AND client_id = ? AND user_type = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
+            $update = $this->db->prepare("UPDATE users SET class_id = ? WHERE id = ? AND client_id = ? AND user_type = ? LIMIT 1");
 
             // loop through the students list
             foreach($params->data["student_id"] as $student) {
                 // execute the update statement
-                $update->execute([$params->data["class_id"], $student, $params->clientId, "student", $params->academic_year, $params->academic_term]);
+                $update->execute([$params->data["class_id"], $student, $params->clientId, "student"]);
             }
 
             // if the assign fees was parsed
@@ -366,8 +365,12 @@ class Classes extends Myschoolgh {
                 $item_id = random_string("alnum", 16);
 
                 // Insert the activity into the cron_scheduler
-                $query = $this->db->prepare("INSERT INTO cron_scheduler SET `client_id` = ?, `item_id` = ?, `user_id` = ?, `cron_type` = ?, `active_date` = now(), `query` = ?, `subject` = ?");
-                $query->execute([$params->clientId, $item_id, $params->userId, "assign_student_fees", json_encode($params->data["student_id"]), $params->data["class_id"]]);
+                $query = $this->db->prepare("INSERT INTO cron_scheduler SET `client_id` = ?, `item_id` = ?, `user_id` = ?, 
+                    `cron_type` = ?, `active_date` = now(), `query` = ?, `subject` = ?, academic_year = ?, academic_term = ?");
+                $query->execute([$params->clientId, $item_id, $params->userId, "assign_student_fees", 
+                    json_encode($params->data["student_id"]), $params->data["class_id"],
+                    $params->academic_year, $params->academic_term
+                ]);
             }
 
 			// return the output

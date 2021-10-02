@@ -407,7 +407,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='course_id' id='course_id'>";
         $html_content .= "<option value=''>Select Course</option>";
         
-        // display the courses list
+        // display the Subjects List
         if(isset($ass_data)) {
             foreach($ass_data["courses_list"] as $course) {
                 $html_content .= "<option ".($course_id == $course->item_id ? "selected" : null)." value='{$course->item_id}'>{$course->name}</option>";
@@ -476,7 +476,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<select {$disabled} data-width='100%' multiple class='selectpicker form-control' name='assigned_to_list' id='assigned_to_list'>";
         $html_content .= "<option value=''>Select Students</option>";
 
-        // display the courses list
+        // display the Subjects List
         if(isset($ass_data)) {
             foreach($ass_data["students_list"] as $student) {
                 $html_content .= "<option ".(in_array($student->item_id, $assigned_list) ? "selected" : null)." value='{$student->item_id}'>{$student->name}</option>";
@@ -769,13 +769,13 @@ class Forms extends Myschoolgh {
                             <br><strong class=\"mt-2\"><i class=\"fa fa-calendar\"></i> ".date("jS F Y", strtotime($eachFile->datetime))."</strong>
                         </div>";
 
-                        $view_option = $show_view ? "<button onclick=\"return loadPage('{$this->baseUrl}{$show_view}/{$record_id}_{$eachFile->unique_id}');\" title=\"Click to view details of file\" class=\"btn btn-sm btn-primary\"><i class=\"fa fa-eye\"></i></button>" : "";
+                        $view_option = $show_view ? "<button onclick=\"return load('{$show_view}/{$record_id}_{$eachFile->unique_id}');\" title=\"Click to view details of file\" class=\"btn btn-sm btn-primary\"><i class=\"fa fa-eye\"></i></button>" : "";
                         $image_desc = "";
                         $delete_btn = "";
 
                         // show the view of the item
                         if(isset($eachFile->is_editable)) {
-                            $view_option .= "&nbsp;<button onclick=\"return loadPage('{$this->baseUrl}{$eachFile->is_editable}/{$record_id}');\" title=\"Click to edit the material\" class=\"btn btn-sm btn-warning\"><i class=\"fa fa-edit\"></i></button>";
+                            $view_option .= "&nbsp;<button onclick=\"return load('{$eachFile->is_editable}/{$record_id}');\" title=\"Click to edit the material\" class=\"btn btn-sm btn-warning\"><i class=\"fa fa-edit\"></i></button>";
                         }
 
                         // display this if the object is deletable.
@@ -811,7 +811,7 @@ class Forms extends Myschoolgh {
                             $filename = "{$eachFile->path}";
                             $padding = "style='padding:0px'";
                             // set the video file
-                            $thumbnail = "<video onclick=\"return loadPage('{$this->baseUrl}{$show_view}/{$record_id}_{$eachFile->unique_id}');\" ".($show_controls ? "controls='true'" : null)." style='display: block; cursor:pointer; width:100%;' src='{$this->baseUrl}{$filename}#t=5'></video>";
+                            $thumbnail = "<video onclick=\"return load('{$show_view}/{$record_id}_{$eachFile->unique_id}');\" ".($show_controls ? "controls='true'" : null)." style='display: block; cursor:pointer; width:100%;' src='{$this->baseUrl}{$filename}#t=5'></video>";
                         }
                         
 
@@ -1723,65 +1723,80 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-12">
                     <h5 class="text-primary border-bottom pb-2 mb-3">BIO INFORMATION</h5>
                 </div>
-                '.($logoUploaded ? 
-                '<div class="col-lg-3 col-md-4">
-                    <div class="form-group text-center">
-                        <img width="100px" src="'.$this->baseUrl.''.$userData->image.'">
+                <div class="col-md-9">
+                    <div class="row mb-4">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="form-group">
+                                <label for="unique_id">Student ID (optional) '.(!$isData ? '<small class="text-danger">Auto generate when empty</small>' : null).'</label>
+                                <input type="text" readonly value="'.($userData->unique_id ?? null).'" '.($isData ? "disabled='disabled'" : null).' name="unique_id" id="unique_id" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="form-group">
+                                <label for="enrollment_date">Enrollment Date <span class="required">*</span></label>
+                                <input type="text" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control datepicker">
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-5">
+                            <div class="form-group">
+                                <label for="gender">Gender</label>
+                                <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
+                                    <option value="">Select Gender</option>';
+                                    foreach($this->pushQuery("*", "users_gender") as $each) {
+                                        $response .= "<option ".($isData && ($each->name == $userData->gender) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
+                                    }
+                            $response .= '</select>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 col-md-6">
+                            <div class="form-group">
+                                <label for="firstname">Firstname <span class="required">*</span></label>
+                                <input type="text" value="'.($userData->firstname ?? null).'" name="firstname" id="firstname" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6">
+                            <div class="form-group">
+                                <label for="lastname">Lastname <span class="required">*</span></label>
+                                <input type="text" value="'.($userData->lastname ?? null).'" name="lastname" id="lastname" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12">
+                            <div class="form-group">
+                                <label for="othername">Othernames</label>
+                                <input type="text" value="'.($userData->othername ?? null).'" name="othername" id="othername" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="form-group">
+                                <label for="date_of_birth">Date of Birth</label>
+                                <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
+                            </div>
+                        </div>
+                        <div class="col-lg-8 col-md-8">
+                            <div class="form-group">
+                                <label for="alergy">Alergies</label>
+                                <input type="text" value="'.($userData->alergy ?? null).'" name="alergy" id="alergy" class="form-control">
+                            </div>
+                        </div>
+
                     </div>
-                </div>' : '').'
-                <div class="col-lg-3 col-md-6">
+                </div>
+                <div class="col-md-3">
+                    '.($logoUploaded ? 
+                        '<div class="form-group">
+                            <img width="100%" src="'.$this->baseUrl.''.$userData->image.'">
+                        </div>' : '
+                        <div class="form-group">
+                            <img width="100%" src="'.$this->baseUrl.'assets/img/avatar.png">
+                        </div>'
+                    ).'
                     <div class="form-group">
                         <label for="image">Student Image</label>
-                        <input type="file" name="image" id="image" class="form-control">
+                        <input accept="image/*" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="form-group">
-                        <label for="unique_id">Student ID (optional) '.(!$isData ? '<small class="text-danger">Auto generate when empty</small>' : null).'</label>
-                        <input type="text" value="'.($userData->unique_id ?? null).'" '.($isData ? "disabled='disabled'" : null).' name="unique_id" id="unique_id" class="form-control">
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="form-group">
-                        <label for="enrollment_date">Enrollment Date <span class="required">*</span></label>
-                        <input type="text" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control datepicker">
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="gender">Gender</label>
-                        <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
-                            <option value="">Select Gender</option>';
-                            foreach($this->pushQuery("*", "users_gender") as $each) {
-                                $response .= "<option ".($isData && ($each->name == $userData->gender) ? "selected" : null)." value=\"{$each->name}\">{$each->name}</option>";                            
-                            }
-                    $response .= '</select>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="firstname">Firstname <span class="required">*</span></label>
-                        <input type="text" value="'.($userData->firstname ?? null).'" name="firstname" id="firstname" class="form-control">
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="lastname">Lastname <span class="required">*</span></label>
-                        <input type="text" value="'.($userData->lastname ?? null).'" name="lastname" id="lastname" class="form-control">
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="othername">Othernames</label>
-                        <input type="text" value="'.($userData->othername ?? null).'" name="othername" id="othername" class="form-control">
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
-                        <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
-                    </div>
-                </div>
+                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">CONTACT INFORMATION</h5></div> 
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="email">Email Address</label>
@@ -1800,6 +1815,7 @@ class Forms extends Myschoolgh {
                         <input type="text" name="phone_2" value="'.($userData->phone_number_2 ?? null).'" id="phone_2" class="form-control">
                     </div>
                 </div>
+                <div class="col-lg-12 mt-3"><h5 class="text-primary border-bottom pb-2 mb-3">LOCATION & OTHERS</h5></div>  
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="country">Country</label>
@@ -1815,6 +1831,18 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="residence">Place of Residence <span class="required">*</span></label>
                         <input type="text" value="'.($userData->residence ?? null).'" name="residence" id="residence" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="place_of_birth">Place of Birth</label>
+                        <input type="text" value="'.($userData->place_of_birth ?? null).'" name="place_of_birth" id="place_of_birth" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
+                        <label for="hometown">Hometown</label>
+                        <input type="text" value="'.($userData->hometown ?? null).'" name="hometown" id="hometown" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -1885,7 +1913,7 @@ class Forms extends Myschoolgh {
                                 $response .= '</select>
                             </div>
                         </div>
-                        <div class="col-lg-12 mt-3"><h5 class="text-primary border-bottom pb-2 mb-3">PREVIOUS SCHOOL DETAILS</h5></div>
+                        <div class="col-lg-12 mt-3"><h5 class="text-primary border-bottom pb-2 mb-3">PREVIOUS SCHOOL INFORMATION</h5></div>
                         <div class="col-lg-6 col-md-6">
                             <div class="form-group">
                                 <label for="previous_school">Previous School</label>
@@ -1894,7 +1922,7 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class="col-lg-6 col-md-6">
                             <div class="form-group">
-                                <label for="previous_school_qualification">Qualification</label>
+                                <label for="previous_school_qualification">Previous School Class</label>
                                 <input type="text" value="'.($userData->previous_school_qualification ?? null).'" name="previous_school_qualification" id="previous_school_qualification" class="form-control">
                             </div>
                         </div>
@@ -1942,11 +1970,9 @@ class Forms extends Myschoolgh {
                             <input type="text" name="guardian_info[guardian_email][1]" id="guardian_info[guardian_email][1]" class="form-control">
                         </div>
                         <div class="col-lg-1 col-md-1 text-right">
-                            <div class="d-flex justify-content-end">
-                                <div class="mr-1">
-                                    <br>
-                                    <button data-row="1" class="btn append-row btn-primary" type="button">Add</button>
-                                </div>
+                            <div class="form-group">
+                                <div>&nbsp;</div>
+                                <button data-row="1" class="btn pr-1 pl-1 append-row btn-primary" type="button"><i class="fa fa-user"></i> Add</button>
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-4 mt-2">
@@ -1993,7 +2019,7 @@ class Forms extends Myschoolgh {
             <div class="row">
                 <div class="col-lg-6">
                     '.($isData ? 
-                        '<button onclick="return loadPage(\''.$baseUrl.'student/'.$userData->user_id.'\');" type="button" class="btn btn-dark"><i class="fa fa-ban"></i> Discard Changes</button>': null
+                        '<button onclick="return load(\'student/'.$userData->user_id.'\');" type="button" class="btn btn-dark"><i class="fa fa-ban"></i> Discard Changes</button>': null
                     ).'
                 </div>
                 <div class="col-lg-6 text-right">
@@ -2027,7 +2053,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Guardian Image</label>
-                        <input type="file" name="image" id="image" class="form-control">
+                        <input accept="image/*" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-'.(!empty($userData) ? 4 : 4 ).' col-md-6">
@@ -2181,7 +2207,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Department Image</label>
-                        <input type="file" name="image" id="image" class="form-control">
+                        <input accept="image/*" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2247,7 +2273,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Section Image</label>
-                        <input type="file" name="image" id="image" class="form-control">
+                        <input accept="image/*" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2345,7 +2371,7 @@ class Forms extends Myschoolgh {
                         <select data-width="100%" name="class_teacher" id="class_teacher" class="form-control selectpicker">
                             <option value="">Select Class Teacher</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND status='1' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && ($each->item_id == $itemData->class_teacher) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
+                                $response .= "<option ".($isData && ($each->item_id == $itemData->class_teacher) ? "selected" : null)." value=\"{$each->item_id}\">".strtoupper($each->name)." ({$each->unique_id})</option>";                            
                             }
                         $response .= '</select>
                     </div>
@@ -2356,7 +2382,7 @@ class Forms extends Myschoolgh {
                         <select data-width="100%" name="class_assistant" id="class_assistant" class="form-control selectpicker">
                             <option value="">Select Class Assistant</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('student') AND status='1' AND client_id='{$clientId}' ".($isData ? " AND class_id='{$itemData->id}'" : "")."") as $each) {
-                                $response .= "<option ".($isData && ($each->item_id == $itemData->class_assistant) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
+                                $response .= "<option ".($isData && ($each->item_id == $itemData->class_assistant) ? "selected" : null)." value=\"{$each->item_id}\">".strtoupper($each->name)." ({$each->unique_id})</option>";                            
                             }
                         $response .= '</select>
                     </div>
@@ -2407,9 +2433,6 @@ class Forms extends Myschoolgh {
         $response = '
         <form class="ajax-data-form" id="ajax-data-form-content" action="'.$baseUrl.'api/courses/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
-                <div class="col-lg-12">
-                    <h5>COURSE DETAILS</h5>
-                </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="course_code">Course Code <span class="required">*</span></label>
@@ -2490,20 +2513,20 @@ class Forms extends Myschoolgh {
 
         $response = '
         <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
-            <div class="row mb-4 border-bottom pb-3">
+            <div class="row mb-3">
                 <div class="col-lg-12">
-                    <h5>BIO INFORMATION</h5>
+                    <h5 class="text-primary border-bottom pb-2 mb-3">BIO INFORMATION</h5>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Staff Image</label>
-                        <input type="file" name="image" id="image" class="form-control">
+                        <input accept="image/*" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="unique_id">Staff ID (optional)</label>
-                        <input type="text" value="'.($userData->unique_id ?? null).'" name="unique_id" id="unique_id" class="form-control">
+                        <input type="text" readonly value="'.($userData->unique_id ?? null).'" name="unique_id" id="unique_id" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2549,6 +2572,14 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
+                        <label for="position">Position / Role <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->position ?? null).'" name="position" id="position" class="form-control">
+                        <input type="hidden" hidden value="'.($userData->user_id ?? null).'" name="user_id" id="user_id" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mt-3 mb-3">CONTACT INFORMATION</h5></div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
                         <label for="email">Email Address</label>
                         <input type="email" data-auto_config="email" value="'.($userData->email ?? null).'" name="email" id="email" class="form-control">
                     </div>
@@ -2567,6 +2598,12 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
+                        <label for="residence">Place of Residence <span class="required">*</span></label>
+                        <input type="text" value="'.($userData->residence ?? null).'" name="residence" id="residence" class="form-control">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="form-group">
                         <label for="country">Country</label>
                         <select data-width="100%" name="country" id="country" class="form-control selectpicker">
                             <option value="">Select Country</option>';
@@ -2574,12 +2611,6 @@ class Forms extends Myschoolgh {
                                 $response .= "<option ".($isData && ($each->id == $userData->country) ? "selected" : null)." value=\"{$each->id}\">{$each->country_name}</option>";                            
                             }
                     $response .= '</select>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="residence">Place of Residence <span class="required">*</span></label>
-                        <input type="text" value="'.($userData->residence ?? null).'" name="residence" id="residence" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2593,13 +2624,6 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="form-group">
-                        <label for="position">Position / Role <span class="required">*</span></label>
-                        <input type="text" value="'.($userData->position ?? null).'" name="position" id="position" class="form-control">
-                        <input type="hidden" hidden value="'.($userData->user_id ?? null).'" name="user_id" id="user_id" class="form-control">
-                    </div>
-                </div>
                 <div class="col-lg-12 col-md-12">
                     <div class="form-group">
                         <label for="description">Description</label>
@@ -2607,8 +2631,8 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>
-            <div class="row mb-4 border-bottom pb-4">
-                <div class="col-lg-12"><h5>ACADEMICS</h5></div>
+            <div class="row mb-3">
+                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">ACADEMICS</h5></div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="user_type">Designation <span class="required">*</span></label>
@@ -2644,7 +2668,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-12 col-md-6 '.($isData && $userData->user_type !== "teacher" ? "hidden" : "").'" id="course_ids_container">
                     <div class="form-group">
-                        <label for="courses_ids">Courses <span class="text-danger">(Select if designation is a teacher)</span></label>
+                        <label for="courses_ids">Subjects <span class="text-danger">(Select if designation is a teacher)</span></label>
                         <select multiple data-width="100%" name="courses_ids[]" id="courses_ids" class="form-control selectpicker">
                             <option value="">Select Course</option>';
                             foreach($this->pushQuery("id, name, course_code", "courses", "status='1' AND client_id='{$clientId}' AND academic_year='{$clientPrefs->academics->academic_year}' AND academic_term='{$clientPrefs->academics->academic_term}'") as $each) {
@@ -2654,12 +2678,12 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
             </div>
-            <div class="row mb-4 border-bottom pb-4">
-                <div class="col-lg-12"><h5>LOGIN INFORMATION</h5></div>
+            <div class="row mb-4 pb-4">
+                <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">LOGIN INFORMATION</h5></div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" data-auto_config="username" value="'.($userData->username ?? null).'" name="username" id="username" class="form-control">
+                        <input type="text" readonly data-auto_config="username" value="'.($userData->username ?? null).'" name="username" id="username" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2740,7 +2764,7 @@ class Forms extends Myschoolgh {
                             <label>Description</label>
                             '.(!$disabled ? '
                                 <input type="hidden" hidden id="trix-editor-input" value="'.($data->description ?? null).'">
-                                <trix-editor '.$disabled.' name="faketext" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
+                                <trix-editor '.$disabled.' name="faketext" data-predefined_name="description" input="trix-editor-input" class="trix-slim-scroll" id="ajax-form-content"></trix-editor>
                             ' : "<div>{$data->description}</div>").'
                         </div>
                     </div>
@@ -2748,7 +2772,7 @@ class Forms extends Myschoolgh {
                         <div class="form-group">
                             <label>Event Image</label>
                             <input type="hidden" hidden name="event_id" class="form-control" value="'.($data->item_id ?? null).'">
-                            <input '.$disabled.' type="file" name="event_image" class="form-control" id="event_image">
+                            <input '.$disabled.' accept="image/*" type="file" name="event_image" class="form-control" id="event_image">
                         </div>';
                     // confirm that the event cover image was parsed and file is found
                     if(isset($data->event_image) && file_exists($data->event_image)) {
@@ -2813,7 +2837,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-5 col-md-5">
                     <div class="form-group">
                         <label for="book_image">Cover Image</label>
-                        <input type="file" name="book_image" id="book_image" class="form-control">
+                        <input accept="image/*" type="file" name="book_image" id="book_image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-7 col-md-7"></div>
@@ -3134,7 +3158,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Image</label>
-                        <input type="file" accept=".png,.jpeg,.jpg" name="image" id="image" class="form-control">
+                        <input type="file" accept="image/*" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -3309,7 +3333,7 @@ class Forms extends Myschoolgh {
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="logo">Logo</label>
-                    <input type="file" name="logo" id="logo" accept=".png,.jpeg,.jpg" class="form-control">
+                    <input type="file" name="logo" id="logo" accept="image/*" class="form-control">
                 </div>
             </div>
             <div class="col-lg-'.($logoUploaded ? 7 : 9).' col-md-12">
@@ -4054,7 +4078,7 @@ class Forms extends Myschoolgh {
                             </select>
                         </div>
                         <div class="col-lg-5 mb-2 col-md-5">
-                            <input value="'.$eachAllowance->amount.'" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="allowance_amount[]" id="allowance_amount_'.$ii.'">
+                            <input onkeyup="this.value = this.value.replace(/[^\d]+/g, \'\');" value="'.$eachAllowance->amount.'" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="allowance_amount[]" id="allowance_amount_'.$ii.'">
                         </div>';
                         if($ii > 1) {
                             $allowances_list .= '
@@ -4079,7 +4103,7 @@ class Forms extends Myschoolgh {
                         </select>
                     </div>
                     <div class="col-lg-5 mb-2 col-md-5">
-                        <input placeholder="Amount" min="0" max="20000" class="form-control" type="number" name="allowance_amount_1" id="allowance_amount_1">
+                        <input placeholder="Amount" onkeyup="this.value = this.value.replace(/[^\d]+/g, \'\');" min="0" max="20000" class="form-control" type="number" name="allowance_amount_1" id="allowance_amount_1">
                     </div>
                 </div>
             </div>';
@@ -4109,7 +4133,7 @@ class Forms extends Myschoolgh {
                             </select>
                         </div>
                         <div class="col-lg-5 mb-2">
-                            <input value="'.$eachDeduction->amount.'" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="deductions_amount[]" id="deductions_amount_'.$ii.'">
+                            <input value="'.$eachDeduction->amount.'" onkeyup="this.value = this.value.replace(/[^\d]+/g, \'\');" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="deductions_amount[]" id="deductions_amount_'.$ii.'">
                         </div>';
                         if($ii > 1) {
                             $deductions_list .= '
@@ -4136,7 +4160,7 @@ class Forms extends Myschoolgh {
                         </select>
                     </div>
                     <div class="col-lg-5 mb-2 col-md-5">
-                        <input placeholder="Amount" min="0" max="20000" class="form-control" type="number" name="deductions_amount_1" id="deductions_amount_1">
+                        <input placeholder="Amount" min="0" onkeyup="this.value = this.value.replace(/[^\d]+/g, \'\');" max="20000" class="form-control" type="number" name="deductions_amount_1" id="deductions_amount_1">
                     </div>
                 </div>
             </div>';
@@ -5333,7 +5357,7 @@ class Forms extends Myschoolgh {
             </div>
             <div class='row'>
                 <div class=\"col-md-6 text-left\">
-                    <button ".(empty($item_id) ? "onclick=\"return clear_input()\" type=\"button\"" : "type=\"button\" onclick=\"return loadPage('{$this->baseUrl}booking_log/{$item_id}')\"")." class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                    <button ".(empty($item_id) ? "onclick=\"return clear_input()\" type=\"button\"" : "type=\"button\" onclick=\"return load('booking_log/{$item_id}')\"")." class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
                 </div>
                 <div class=\"col-md-6 text-right\">
                     <input type=\"hidden\" name=\"booking_id\" id=\"booking_id\" value=\"{$item_id}\" hidden class=\"form-control\">

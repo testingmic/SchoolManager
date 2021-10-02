@@ -44,6 +44,7 @@ $bank_accounts_array = [];
 
 // if the user has the required permissions
 $hasUpdate = $accessObject->hasAccess("accounts", "accounting");
+$hasModify = $accessObject->hasAccess("modify", "accounting");
 
 // loop through the list of account type heads
 foreach($list_data as $key => $account) {
@@ -115,7 +116,7 @@ if(empty($list_data)) {
 }
 
 // load the form
-$the_form = $hasUpdate ? load_class("forms", "controllers")->bank_accounts_form($params) : null;
+$the_form = $hasModify ? load_class("forms", "controllers")->bank_accounts_form($params) : null;
 $response->array_stream["bank_accounts_array"] = $bank_accounts_array;
 
 $response->html = '
@@ -129,7 +130,7 @@ $response->html = '
         </div>
         <div class="row">
             '.$the_form.'
-            <div class="col-12 '.($hasUpdate ? "col-md-7 col-lg-8" : "col-md-12").'">
+            <div class="col-12 '.($hasModify ? "col-md-7 col-lg-8" : "col-md-12").'">
                 <div class="card">
                     <div class="card-header"><i class="fa fa-list"></i> &nbsp; Accounts List</div>
                     <div class="card-body">

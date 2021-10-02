@@ -21,7 +21,8 @@ $response->scripts = ["assets/js/fees.js"];
 
 $category_param = (object) [
     "client_data" => $defaultUser->client,
-    "clientId" => $session->clientId
+    "clientId" => $session->clientId,
+    "limit" => 100
 ];
 $fees_category_array_list = load_class("fees", "controllers", $category_param)->category_list($category_param);
 

@@ -60,7 +60,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
             // set the found variable to true
             $timetable_found = true;
             
-            // load the class courses list
+            // load the class Subjects List
             $params->minified = true;
             $params->userData = $defaultUser;
             $params->class_id = $data->class_id;
@@ -161,14 +161,14 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                             </div>
                                         </div>
                                         <div class="col-lg-3 timetable" id="rightpane">
-                                            <h5>Courses List</h5>
+                                            <h5>Subjects List</h5>
                                             <div class="form-group text-center trix-slim-scroll" id="courseScroll">';
                                                 if(!empty($courses_list)) {
                                                     foreach($courses_list as $key => $value) {
                                                         $response->html .= "<div class='course p-2' id='{$value->item_id}'>{$value->name} ({$value->course_code})</div>";
                                                     }
                                                 } else {
-                                                    $response->html .= '<div class="text-warning">You have not started offering any courses.<br>Visit the <b>Lesson Planner</b> section to add courses</div>';
+                                                    $response->html .= '<div class="text-warning">You have not started offering any courses.<br>Visit the <b>Lesson Planner</b> section to Add Subjects</div>';
                                                 }
                                                 $response->html .= '
                                             </div>

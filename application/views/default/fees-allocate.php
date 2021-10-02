@@ -68,6 +68,7 @@ elseif(!empty($user_id)) {
         $feesObject = load_class("fees", "controllers", $feesParam);
 
         // get the class and student fees allocation
+        $pay_button = true;
         $allocation_list = "";
         $existing_category = [];
         $dont_show_button = false;
@@ -150,6 +151,7 @@ elseif(!empty($user_id)) {
                 // set a new status
                 if(empty($studentAllocationArray)) {
                     // set the button
+                    $pay_button = false;
                     $dont_show_button = true;
 
                     // append to the list
@@ -274,7 +276,8 @@ elseif(!empty($user_id)) {
                                     <div class="author-box-description font-22 text-success font-weight-bold">'.$data->unique_id.'</div>
                                     <div class="author-box-description font-22 text-info font-weight-bold mt-1">'.$data->class_name.'</div>
                                     <div class="w-100 mt-2 border-top pt-3">
-                                        <a class="btn btn-dark" href="'.$baseUrl.'student/'.$user_id.'"><i class="fa fa-arrow-circle-left"></i> Go Back</a>
+                                        <a class="btn mb-2 btn-dark" href="'.$baseUrl.'student/'.$user_id.'"><i class="fa fa-arrow-circle-left"></i> Go Back</a>
+                                        '.($pay_button ? '&nbsp;<a href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'" class="btn mb-2 btn-outline-success"><i class="fa fa-adjust"></i> PAY FEES</a>' : null).'
                                     </div>
                                 </div>
                             </div>
@@ -291,10 +294,10 @@ elseif(!empty($user_id)) {
                                 </div>
                                 <div class="d-flex justify-content-end">
                                     '.($dont_show_button ? '
-                                        <button onclick="return save_student_bill(\''.$user_id.'\',\''.$data->name.'\')" title="Click to save student bill." class="btn btn-outline-success"><i class="fa fa-save"></i> Save Student Bill</button>&nbsp;
+                                        <button onclick="return save_student_bill(\''.$user_id.'\',\''.$data->name.'\')" title="Click to save student bill." class="btn mb-2 btn-outline-primary"><i class="fa fa-save"></i> SAVE BILL</button>&nbsp;
                                     ' : null).'
                                     '.($studentAllocationArray ? 
-                                        '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn btn-outline-primary"><i class="fa fa-print"></i> Print Bill</a>' : null
+                                        '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-outline-warning"><i class="fa fa-print"></i> PRINT BILL</a>' : null
                                     ).'
                                 </div>
                                 <div class="mt-3 border-top pt-3">

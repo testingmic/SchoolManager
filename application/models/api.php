@@ -227,7 +227,7 @@ class Api {
      */
     final function requestHandler(stdClass $params) {
         // global variable
-        global $defaultClientData;
+        global $defaultClientData, $isSupport;
 
         // preset the response
         $result = [];
@@ -265,7 +265,7 @@ class Api {
             $params->limit = isset($params->limit) ? (int) $params->limit : $this->myClass->global_limit;
 
             // developer access permission check
-            $params->devAccess = $this->accessCheck->hasAccess('developer', 'control') ? true : false;
+            $params->devAccess = $isSupport ? true : false;
             
             // if the client id is empty and yet the user is not selecting which account to manage
             if(empty($this->userId) && (!in_array($this->outer_url, ["select", "pay", "verify"]) && !in_array($this->inner_url, ["account", "payment"]))) {
@@ -302,7 +302,7 @@ class Api {
             }
 
             // log the user request
-            // $this->update_onlineStatus($this->userId);
+            $this->update_onlineStatus($this->userId);
             $params->remote ? $this->logRequest($this->default_params, $code) : null;
         }
 

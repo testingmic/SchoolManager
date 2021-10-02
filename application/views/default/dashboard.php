@@ -13,7 +13,9 @@ $baseUrl = $config->base_url();
 jump_to_main($baseUrl);
 
 // initial variables
-global $accessObject, $defaultUser, $defaultCurrency, $isAdminAccountant, $isTutorStudent, $isParent, $isStudent, $isSupport, $defaultClientData, $clientPrefs;
+global $accessObject, $defaultUser, $defaultCurrency, $isAccountant, $isAdminAccountant, $isTutor,
+    $isTutorStudent, $isParent, $isStudent, $isSupport, $clientFeatures, $defaultClientData, $clientPrefs;
+    
 $appName = config_item("site_name");
 
 // confirm that user id has been parsed
@@ -31,7 +33,7 @@ $eventClass = load_class("events", "controllers");
 
 // set the parameters
 $userData = $defaultUser;
-$userData->do_no_encode = true;
+$userData->do_not_encode = true;
 $userData->client_id = $clientId;
 $userData->mini_description = true;
 $userData->the_user_type = $defaultUser->user_type;
@@ -182,6 +184,7 @@ if($isSupport) {
 
 
     </section>';
+
 } else {
 
     // confirm if the account has been suspended or expired
@@ -336,7 +339,7 @@ if($isSupport) {
 
     // set the data to stream for an admin user
     if($isAdminAccountant) {
-        $data_stream = 'id="data-report_stream" data-report_stream="attendance_report,summary_report"';
+        $data_stream = 'id="data-report_stream" data-report_stream="summary_report,transaction_revenue_flow"';
     }
 
     // append the scripts to the page
@@ -546,6 +549,10 @@ if($isSupport) {
 
     $global_period = $isWardParent ? "this_term" : "this_week";
 
+    // set the date
+    $start_date = date("Y-m-d", strtotime("monday this week"));
+    $end_date = date("Y-m-d", strtotime("sunday this week"));
+
     // set the response dataset
     $response->html = '
         <section class="section">
@@ -626,10 +633,11 @@ if($isSupport) {
                                 </div>
                                 <div align="center" class="p-1 col-sm-9">
                                     <div style="align-items:center;">
-                                        <h3 class="text-uppercase">'.$defaultClientData->client_name.'</h3>
-                                        <div class="'.(!empty($defaultClientData->client_slogan) ? "mb-1" : null).' text-uppercase font-15">'.$defaultClientData->client_slogan.'</div>
+                                        <h1 class="text-uppercase client_name text-info">'.$defaultClientData->client_name.'</h1>
+                                        <div class="'.(!empty($defaultClientData->client_slogan) ? "mb-1" : null).' text-uppercase text-primary font-15">'.$defaultClientData->client_slogan.'</div>
                                         <div class="font-15">'.$defaultClientData->client_email.'</div>
-                                        <div class="text-uppercase mt-2 font-17">'.$defaultClientData->client_location.'</div>
+                                        <div class="mt-2 font-13">'.($defaultClientData->client_website ?  $defaultClientData->client_website : "-").'</div>
+                                        <div class="text-uppercase mt-2 font-17">'.($defaultClientData->client_location ?  $defaultClientData->client_location : "-").'</div>
                                         <div class="text-uppercase mt-2 font-17">
                                             '.$defaultClientData->client_contact.'
                                             '.(!empty($defaultClientData->client_secondary_contact) ? " / {$defaultClientData->client_secondary_contact}" : null).'
@@ -669,6 +677,69 @@ if($isSupport) {
             ' : 
             null).'
             <div class="row default_period" data-current_period="'.$global_period.'">
+
+                '.(
+                    $isTutorStudent ?
+                    '<div class="col-lg-12">
+                        '.($data_stream ? 
+                            '<div class="row">
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="card card-statistic-1">
+                                        <i class="fas fa-user-check card-icon col-green"></i>
+                                        <div class="card-wrap">
+                                            <div class="padding-20">
+                                                <div class="text-right">
+                                                    <h3 data-attendance_count="Present" class="font-light mb-0">0</h3>
+                                                    <span class="text-muted">Days Present</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="card card-statistic-1">
+                                        <i class="fas fa-user-alt-slash card-icon col-red"></i>
+                                        <div class="card-wrap">
+                                            <div class="padding-20">
+                                                <div class="text-right">
+                                                    <h3 data-attendance_count="Absent" class="font-light mb-0">0</h3>
+                                                    <span class="text-muted">Days Absent</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="card card-statistic-1">
+                                        <i class="fas fa-user-edit card-icon col-blue"></i>
+                                        <div class="card-wrap">
+                                            <div class="padding-20">
+                                                <div class="text-right">
+                                                    <h3 data-attendance_count="logs_count" class="font-light mb-0">0</h3>
+                                                    <span class="text-muted">Logs Counter</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-sm-12">
+                                    <div class="card card-statistic-1">
+                                        <i class="fas fa-list card-icon col-blue"></i>
+                                        <div class="card-wrap">
+                                            <div class="padding-20">
+                                                <div class="text-right">
+                                                    <h3 data-attendance_count="Term" class="font-light mb-0">0</h3>
+                                                    <span class="text-muted">Term Days</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>' : ''
+                        ).'
+                    </div>' : null
+                ).'
+
                 '.($isWardTutorParent ?
                 '<div class="col-lg-4 col-md-12">
                     <div class="card">
@@ -799,82 +870,104 @@ if($isSupport) {
             </div>
             <div class="row">
                 '.($isAdminAccountant ? 
-                    '<div class="col-lg-4 col-md-12 col-12 col-sm-12">
+                    '<div class="col-lg-12 col-md-12 col-12 col-sm-12">
                         <div class="card">
-                            <div class="card-header pr-2">
-                                <div class="row width-per-100">
-                                    <div class="col-md-9">
-                                        <h4 class="text-uppercase font-13">Students Per Class Count</h4>
+                            <div class="card-header pr-0">
+                                <div class="row width-100">
+                                    <div class="col-lg-2 col-md-2">
+                                        <h4 class="text-uppercase font-13">Revenue</h4>
                                     </div>
-                                    <div class="col-md-3 text-success text-right p-0">
-                                        Total: <span data-count="total_students_count" class="font-bold mb-0">0</span>
+                                    <div align="right" class="col-lg-10 col-md-10">
+                                        <div class="btn-group mb-2" data-filter="quick_summary_filter" role="group" aria-label="Filter Revenue">
+                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="yesterday" class="btn sm-hide btn-info">Yesterday</button>
+                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="today" class="btn btn-info">Today</button>
+                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="last_week" class="btn btn-info">Last Week</button>
+                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_week" class="btn active btn-info">This Week</button>
+                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_month" class="btn btn-info">This Month</button>
+                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_term" class="btn btn-info">This Term</button>
+                                            
+                                            <input value="'.$start_date.'" style="max-width:110px;" type="text" class="form-control sm-hide text-center ml-2 mr-2 datepicker" name="d_start" id="d_start">
+                                            <input value="'.$end_date.'" type="text" style="max-width:110px;" class="form-control sm-hide text-center ml-2 mr-2 datepicker" name="d_end" id="d_end">
+                                            <button onclick="return filter_Transaction_Summary(\'summary_report,transaction_revenue_flow\');" type="filter" class="btn sm-hide btn-success"><i class="fa fa-filter"></i> Filter</button>
+                                            <a data-href="summary_link" target="_blank" href="'.$baseUrl.'download/accounting?display=notes&item=summary&start_date='.$start_date.'&end_date='.$end_date.'&group_by=day&breakdown=true" class="btn btn-outline-primary ml-2"><i class="fa fa-print"></i> Print</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-body trix-slim-scroll quick_loader" id="class_count_list" style="max-height:465px;height:465px;overflow-y:auto;">
-                                <div class="form-content-loader" style="display: flex; position: absolute">
-                                    <div class="offline-content text-center">
-                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                            <div class="card-body quick_loader dashboard_revenue" style="min-height:465px;">
+                                <div class="table-responsive">
+                                    <div class="form-content-loader" style="display: flex; position: absolute">
+                                        <div class="offline-content text-center">
+                                            <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between border-bottom pb-2">
+                                        <div class="mb-1 amount text-center">
+                                            <h4 class="text-primary">
+                                                <span data-count="total_balance">0.00</span>
+                                            </h4>
+                                            <label>Current Fees Balance</label>
+                                        </div>
+                                        <div class="mb-1 amount text-center">
+                                            <h4 class="text-success">
+                                                <span data-summary="amount_paid">0.00</span>
+                                            </h4>
+                                            <label>Fees Paid</label>  <small data-filter="current_period" class="text-info font-bold">(This Week)</small>
+                                        </div>
+                                        <div class="mb-1 amount text-center">
+                                            <h4 class="text-info">
+                                                <span data-count="total_income_received">0.00</span>
+                                            </h4>
+                                            <label>Overall Income</label>  <small data-filter="current_period" class="text-info font-bold">(This Week)</small>
+                                        </div>
+                                        <div class="mb-1 amount text-center">
+                                            <h4 class="text-danger">
+                                                <span data-count="total_expenditure">0.00</span>
+                                            </h4>
+                                            <label>Total Expenses</label> <small data-filter="current_period" class="text-info font-bold">(This Week)</small>
+                                        </div>
+                                        <div class="mb-1 amount text-center">
+                                            <h4 class="text-success">
+                                                <span data-summary="arrears_paid">0.00</span>
+                                            </h4>
+                                            <label>Arrears Paid</label>  <small data-filter="current_period" class="text-info font-bold">(This Week)</small>
+                                        </div>
+                                        <div class="mb-1 amount text-center">
+                                            <h4 class="text-warning">
+                                                <span data-count="arrears_total">0.00</span>
+                                            </h4>
+                                            <label>Arrears Balance</label>
+                                        </div>
+                                    </div>
+                                    <div class="card-body mt-0 pt-2" data-chart="revenue_category_chart">
+                                        <div id="revenue_category_chart"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-8 col-md-12 col-12 col-sm-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="text-uppercase font-13">Revenue</h4>
-                            </div>
-                            <div class="card-body quick_loader" style="max-height:465px;height:465px;">
-                                <div class="form-content-loader" style="display: flex; position: absolute">
-                                    <div class="offline-content text-center">
-                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
-                                    </div>
-                                </div>
-                                <div class="row border-bottom pb-2">
-                                    <div class="col-lg-3 col-md-6 mb-1 text-center">
-                                        <h4 class="text-primary">
-                                            <span data-count="total_balance">0.00</span>
-                                        </h4>
-                                        <label>Fees Balance</label>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6 mb-1 text-center">
-                                        <h4 class="text-success">
-                                            <span data-count="total_income_received">0.00</span>
-                                        </h4>
-                                        <label>Income</label>  <small class="text-info font-bold">(This Week)</small>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6 mb-1 text-center">
-                                        <h4 class="text-danger">
-                                            <span data-count="total_expenditure">0.00</span>
-                                        </h4>
-                                        <label>Expenses</label> <small class="text-info font-bold">(This Week)</small>
-                                    </div>
-                                    <div class="col-lg-3 col-md-6 mb-1 text-center">
-                                        <h4 class="text-warning">
-                                            <span data-count="arrears_total">0.00</span>
-                                        </h4>
-                                        <label>Arrears Total</label>
-                                    </div>                                    
-                                </div>
-                                <div class="card-body mt-0 pt-2" data-chart="revenue_category_chart">
-                                    <div id="revenue_category_chart"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                     <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+
                         <div class="card">
-                            <div class="card-header">
-                                <h4 class="text-uppercase font-13">Attendance Logs</h4>
-                            </div>
-                            <div class="card-body pb-0">
-                                <div data-chart_container="attendance_log_chart">
-                                    <div id="attendance_log_chart" style="min-height:350px;"></div>
+                            <div class="card-header pr-0">
+                                <div class="row width-100">
+                                    <div class="col-md-5">
+                                        <h4 class="text-uppercase font-13">Income & Expenditure Summary</h4>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                            <div class="card-body mb-0 p-0 pb-3" style="min-height:250px" id="trasaction_container">
+                                <div class="form-content-loader" style="display: none; position: absolute">
+                                    <div class="offline-content text-center">
+                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                    </div>
+                                </div>
+                                <table class="table table-bordered table-md" id="transaction_summary" width="100"></table>
+                            </div>
+                        </div>                            
                     </div>
+
                     <div class="col-lg-4 col-md-6 col-12 col-sm-12">
                         <div class="card">
                             <div class="card-header">
@@ -898,7 +991,7 @@ if($isSupport) {
                         </div>
                     </div>' : ''
                 ).'
-                '.(!$isParent ? 
+                '.(!$isParent && !$isTutor ? 
                     '<div class="col-lg-4 col-md-6 col-12 col-sm-12">
                         <div class="card">
                             <div class="card-header">
@@ -924,64 +1017,6 @@ if($isSupport) {
                             </div>
                         </div>
                     </div>' : '
-                    <div class="col-lg-12">
-                        '.($data_stream ? 
-                            '<div class="row">
-                                <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1">
-                                        <i class="fas fa-user-check card-icon col-green"></i>
-                                        <div class="card-wrap">
-                                            <div class="padding-20">
-                                                <div class="text-right">
-                                                    <h3 data-attendance_count="Present" class="font-light mb-0">0</h3>
-                                                    <span class="text-muted">Days Present</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1">
-                                        <i class="fas fa-user-alt-slash card-icon col-red"></i>
-                                        <div class="card-wrap">
-                                            <div class="padding-20">
-                                                <div class="text-right">
-                                                    <h3 data-attendance_count="Absent" class="font-light mb-0">0</h3>
-                                                    <span class="text-muted">Days Absent</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1">
-                                        <i class="fas fa-user-edit card-icon col-blue"></i>
-                                        <div class="card-wrap">
-                                            <div class="padding-20">
-                                                <div class="text-right">
-                                                    <h3 data-attendance_count="logs_count" class="font-light mb-0">0</h3>
-                                                    <span class="text-muted">Logs Counter</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1">
-                                        <i class="fas fa-list card-icon col-blue"></i>
-                                        <div class="card-wrap">
-                                            <div class="padding-20">
-                                                <div class="text-right">
-                                                    <h3 data-attendance_count="Term" class="font-light mb-0">0</h3>
-                                                    <span class="text-muted">Term Days</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>' : ''
-                        ).'
-                    </div>
                     <div class="col-lg-12 col-sm-12">
                         <div class="card">
                             <div class="card-header text-uppercase">

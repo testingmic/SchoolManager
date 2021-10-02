@@ -25,7 +25,7 @@ var save_Event_Type = () => {
         type_id = $(`div[id="createEventTypeModal"] input[name="type_id"]`).val(),
         color_code = $(`div[id="createEventTypeModal"] input[name="color_code"]`).val(),
         description = $(`div[id="createEventTypeModal"] textarea[name="description"]`).val();
-    if (type_id.length > 30) {
+    if (type_id.length > 10) {
         url = `${baseUrl}api/events/update_type`;
     } else {
         url = `${baseUrl}api/events/add_type`;
@@ -55,10 +55,11 @@ var save_Event_Type = () => {
 
                         $(`div[id='createEventModal'] select[name='type']`).append(`<option data-row_id='${type.item_id}' value='${type.item_id}'>${type.name}</option>'`);
 
-                        type_buttons = (type.slug == "public-holiday") ? "" : `<div class="d-flex justify-content-between">
-                                        <div><button onclick="return update_Event_Type('${type.item_id}')" class="btn btn-sm btn-outline-success"><i class="fa fa-edit"></i> Edit</button></div>
-                                        <div><button href="" onclick="return delete_record('${type.item_id}', 'event_type');" class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button></div>
-                                    </div>`;
+                        type_buttons = (type.slug == "public-holiday") ? "" : `
+                            <div class="d-flex justify-content-between">
+                                <div><button onclick="return update_Event_Type('${type.item_id}')" class="btn btn-sm btn-outline-success"><i class="fa fa-edit"></i> Edit</button></div>
+                                <div><button href="" onclick="return delete_record('${type.item_id}', 'event_type');" class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button></div>
+                            </div>`;
 
                         event_type_list += `
                         <div data-row_id='${type.item_id}' class='col-lg-4 col-md-6'>

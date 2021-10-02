@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser;
+global $myClass, $SITEURL, $defaultUser, $defaultCurrency;
 
 // initial variables
 $appName = config_item("site_name");
@@ -43,12 +43,18 @@ if(!empty($item_id)) {
     } else {
 
         // set the first key
+        $amount_paid = 0;
+        $amount_due = 0;
+        $balance = 0;
+        $arrears = 0;
+
         $timetable = "";
         $data = $data["data"][0];
 
         // guardian information
         $the_form = load_class("forms", "controllers")->class_form($clientId, $baseUrl, $data);
         $hasUpdate = $accessObject->hasAccess("update", "class");
+        $viewAllocation = $accessObject->hasAccess("view_allocation", "fees");
 
         // load the section students list
         $student_param = (object) ["clientId" => $clientId, "client_data" => $defaultUser->client, "class_id" => $item_id, "user_type" => "student", "bypass" => true];
@@ -60,47 +66,50 @@ if(!empty($item_id)) {
 
         // load the class timetable
         $timetable = load_class("timetable", "controllers", $item_param)->class_timetable($data->item_id, $clientId);
-
+        $count = 0;
         // loop through the students list
         foreach($student_list["data"] as $key => $student) {
 
+            $amount_due += $student->debt + $student->amount_paid;
+            $amount_paid += $student->amount_paid;
+            $arrears += $student->arrears;
+            $balance += $student->debt;
+
             // view link
-            $action = "<a href='#' onclick='return load(\"student/{$student->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $count++;
+            $action = "<button onclick='return load(\"student/{$student->user_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-edit'></i></button>";
 
             if($studentUpdate) {
-                $action .= "&nbsp;<a href='#' title='Click to delete this Class' onclick='return delete_record(\"{$student->user_id}\", \"class\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+                $action .= "&nbsp;<button title='Delete this Class' onclick='return delete_record(\"{$student->user_id}\", \"class\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>";
             }
 
             $students .= "<tr data-row_id=\"{$student->user_id}\">";
-            $students .= "<td>".($key+1)."</td>";
+            $students .= "<td>".($count)."</td>";
             $students .= "<td>
-            <div class='d-flex justify-content-start'>
-                <div class='mr-1'>
-                <img onclick='return load(\"student/{$student->user_id}\");' class='cursor author-box-picture' width='40px' src=\"{$baseUrl}{$student->image}\"> &nbsp; 
+                <div class='d-flex justify-content-start'>
+                    <div class='font-bold'>
+                        <span onclick='return load(\"student/{$student->user_id}\");' class='user_name'>{$student->name}</span>
+                    </div>
                 </div>
-                <div class='font-bold'>
-                    <a href=\"#\" onclick='return load(\"student/{$student->user_id}\");'>
-                        <span class='text-uppercase text-primary'>{$student->name}</span>
-                    </a><br>{$student->unique_id}
-                </div>
-            </div>
             </td>";
+            $students .= "<td>{$student->unique_id}</td>";
             $students .= "<td>{$student->gender}</td>";
-            $students .= "<td>{$student->arrears_formated}</td>";
-            $students .= "<td>{$action}</td>";
+            $students .= $viewAllocation ? "<td>{$defaultCurrency} {$student->total_debt_formated}</td>" : null;
+            $students .= "<td align='center'>{$action}</td>";
             $students .= "</tr>";
         }
 
         // student listing
         $student_listing = '
         <div class="table-responsive table-student_staff_list">
-            <table data-empty="" class="table table-bordered table-striped raw_datatable">
+            <table data-empty="" class="table table-sm table-bordered table-striped raw_datatable">
                 <thead>
                     <tr>
                         <th width="5%" class="text-center">#</th>
                         <th>NAME</th>
+                        <th>REG. ID</th>
                         <th>GENDER</th>
-                        <th>ARREARS</th>
+                        '.($viewAllocation ? "<th>DEBT</th>" : null).'
                         <th width="14%"></th>
                     </tr>
                 </thead>
@@ -227,13 +236,13 @@ if(!empty($item_id)) {
                         </div>' ).'
                     </div>
                 </div>
-                <div class="card">
+                <div class="card pb-0">
                     <div class="card-header">
                         <h4>CLASS PREFECT</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
                     '.(empty($data->class_assistant_info) ? '<div class="py-4 pt-0 text-center">No Class Prefect Set</div>' : 
-                        '<div class="py-3 pt-0">
+                        '<div class="pt-3">
                             <p class="clearfix">
                                 <span class="float-left">Fullname</span>
                                 <span class="float-right text-muted">'.($data->class_assistant_info->name ?? null).'</span>
@@ -249,7 +258,45 @@ if(!empty($item_id)) {
                         </div>
                         ' ).' 
                     </div>
-                </div>               
+                </div>
+                <div class="card">
+                    <div class="card-header pr-3">
+                        <div class="d-flex width-per-100 justify-content-between">
+                            <div><h4>FINANCES</h4></div>
+                            <div><a title="Print entire Class Bill" target="_blank" class="btn btn-outline-primary" href="'.$baseUrl.'download/student_bill?class_id='.$item_id.'&isPDF=true"><i class="fa fa-print"></i> Print Class Bill</a></div>
+                        </div>
+                    </div>
+                    <div class="card-body pb-0">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3 border-bottom pb-3">
+                                    <div class="col">
+                                        <h6 class="font-14 text-uppercase font-bold mb-0">TOTAL FEES DUE</h6>
+                                        <span class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($amount_due, 2).'</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 border-bottom pb-3">
+                                    <div class="col">
+                                        <h6 class="font-14 text-uppercase font-bold mb-0">TOTAL FEES PAID</h6>
+                                        <span class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($amount_paid, 2).'</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 border-bottom pb-3">
+                                    <div class="col">
+                                        <h6 class="font-14 text-uppercase font-bold mb-0">TOTAL BALANCE</h6>
+                                        <span class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($balance, 2).'</span>
+                                    </div>
+                                </div>
+                                <div class="mb-3 pb-0">
+                                    <div class="col">
+                                        <h6 class="font-14 text-uppercase font-bold mb-0">OUTSTANDING FEES ARREARS</h6>
+                                        <span class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($arrears, 2).'</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="col-12 col-md-12 col-lg-8">
                 <div class="card">
@@ -259,7 +306,7 @@ if(!empty($item_id)) {
                         <a class="nav-link '.(!$updateItem ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Student List</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Courses List</a>
+                        <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Subjects List</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab"
@@ -286,7 +333,7 @@ if(!empty($item_id)) {
                             </div>
                         </div>
                         <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="courses-tab2">
-                            <div class="col-lg-12 pl-0"><h5>Class Courses List</h5></div>
+                            <div class="col-lg-12 pl-0"><h5>Class Subjects List</h5></div>
                                 <div class="row">';
 
                             // if the class list is not empty

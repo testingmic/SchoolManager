@@ -19,7 +19,7 @@ $response = (object) [];
 $pageTitle = "Update Class Room";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [
-    "assets/js/page/index.js"
+    "assets/js/index.js"
 ];
 
 $item_id = $SITEURL[1] ?? null;

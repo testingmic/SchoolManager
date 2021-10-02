@@ -19,7 +19,7 @@ $response = (object) [];
 $pageTitle = "Add Staff";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [
-    "assets/js/page/index.js"
+    "assets/js/index.js"
 ];
 
 $the_form = load_class("forms", "controllers")->staff_form($clientId, $baseUrl);

@@ -58,8 +58,8 @@ class Payroll extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT CONCAT(c.item_id,'|',c.name,'|',c.phone_number,'|',c.email,'|',c.image,'|',c.unique_id,'|',c.last_seen,'|',c.online,'|',c.user_type) FROM users c WHERE c.item_id = a.employee_id LIMIT 1) AS employee_info,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.unique_id,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                    (SELECT CONCAT(c.item_id,'|',c.name,'|',COALESCE(c.phone_number,'NULL'),'|',COALESCE(c.email,'NULL'),'|',c.image,'|',c.unique_id,'|',c.user_type) FROM users c WHERE c.item_id = a.employee_id LIMIT 1) AS employee_info,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.unique_id,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM payslips a
                 WHERE {$params->query} AND a.deleted = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
@@ -71,7 +71,7 @@ class Payroll extends Myschoolgh {
                 // loop through the information
                 foreach(["employee_info", "created_by_info"] as $each) {
                     // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","unique_id","last_seen","online","user_type"]);
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","unique_id","user_type"]);
                 }
 
                 if($payslipDetails) {
@@ -580,7 +580,7 @@ class Payroll extends Myschoolgh {
                             'allowance_amount' => $value,
                             'allowance_type' => 'Allowance'
                         ];
-                        $t_allowances += $value;
+                        $t_allowances += !empty($value) && preg_match("/^[0-9]+$/", $value) ? $value : 0;
                     }
                 }
             }
@@ -597,7 +597,7 @@ class Payroll extends Myschoolgh {
                             'allowance_amount' => $value,
                             'allowance_type' => 'Deduction'
                         ];
-                        $t_deductions += $value;
+                        $t_allowances += !empty($value) && preg_match("/^[0-9]+$/", $value) ? $value : 0;
                     }
                 }
             }
@@ -997,14 +997,14 @@ class Payroll extends Myschoolgh {
                             <table width=\"100%\" cellpadding=\"10px\" class=\"table\" {$border}>
                                 <tr>";
                                     $result .= "
-                                    <td align=\"right\" width=\"50%\" style=\"background-color:#6777ef; padding:10px; color:#fff; padding:10px;font-weight:bolder;text-transform:uppercase\"><strong>Net Salary</strong></td>
-                                    <td align=\"right\" style=\"background-color:#f4f4f4;font-size:20px;padding:10px;font-weight:bolder;text-transform:uppercase\">
+                                    <td align=\"right\" width=\"50%\" style=\"background-color:#6777ef; padding:10px; color:#fff; padding:10px;font-weight:bolder;\"><strong>Net Salary</strong></td>
+                                    <td align=\"right\" style=\"background-color:#f4f4f4;font-size:20px;padding:10px;font-weight:bolder;\">
                                         <strong>GH&cent;".number_format($total_salary, 2)."</strong>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td width=\"50%\" style=\"background-color:#ccc;color:#000;\" align=\"right\"><strong>AMOUNT IN WORDS</strong></td>
-                                    <td align=\"right\" style=\"background-color:#f4f4f4;font-size:16px;padding:10px;text-transform:uppercase\">
+                                    <td width=\"50%\" style=\"background-color:#ccc;color:#000;\" align=\"right\"><strong>Amount in Words</strong></td>
+                                    <td align=\"right\" style=\"background-color:#f4f4f4;font-size:16px;padding:10px;\">
                                         ".$this->amount_to_words($total_salary)."
                                     </td>
                                 </tr>

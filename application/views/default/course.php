@@ -18,7 +18,7 @@ jump_to_main($baseUrl);
 $userId = $session->userId;
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Course Details";
+$pageTitle = "Subject Details";
 $response->title = "{$pageTitle} : {$appName}";
 
 // item id
@@ -59,7 +59,7 @@ if(!empty($item_id)) {
         // set the first key
         $data = $data["data"][0];
 
-        $response->scripts = ["assets/js/page/index.js"];
+        $response->scripts = ["assets/js/index.js"];
 
         // append is admin to the query string
         $isAdmin = (bool) ($defaultUser->user_type == "admin");

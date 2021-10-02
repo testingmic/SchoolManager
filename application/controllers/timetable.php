@@ -521,7 +521,7 @@ class Timetable extends Myschoolgh {
 
         }
         
-        // courses list
+        // Subjects List
         $courses_list = [];
         $t_course_ids = [];
 

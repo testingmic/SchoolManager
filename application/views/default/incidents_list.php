@@ -49,6 +49,8 @@ foreach($item_list["data"] as $key => $each) {
                 
     // is not active
     $isActive = !in_array($each->status, ["Solved", "Cancelled"]);
+    $link = $each->user_role == "student" ? "student" : "staff";
+    $t_color = $color[$each->user_information->user_type] ?? null;
 
     // set the update button
     if($updateIncident && $isActive) {
@@ -59,7 +61,7 @@ foreach($item_list["data"] as $key => $each) {
         $action .= "&nbsp;<a href='#' title='Click to delete this record' onclick='return delete_record(\"{$each->item_id}\", \"incident\");' class='btn mb-1 btn-sm btn-outline-danger'><i class='fa fa-trash'></i> </a>";
     }
 
-    // $action .= "&nbsp;<a target='_blank' href='{$baseUrl}download/incident?incident_id={$each->item_id}' title='Click to download this incident' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-download'></i> </a>";
+    $action .= "&nbsp;<a target='_blank' href='{$baseUrl}download/incident?incident_id={$each->item_id}' title='Click to download this incident' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-download'></i> </a>";
     
     $incidents .= "<tr data-row_id=\"{$each->id}\">";
     $incidents .= "<td>".($key+1)."</td>";
@@ -69,8 +71,8 @@ foreach($item_list["data"] as $key => $each) {
                 <img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->user_information->image}\">
             </div>
             <div>
-                <a class='user_name' href='{$baseUrl}student/{$each->user_information->user_id}'>{$each->user_information->name}</a><br>
-                <span class='text-uppercase badge badge-{$color[$each->user_information->user_type]} p-1'>
+                <a class='user_name' href='{$baseUrl}{$link}/{$each->user_information->user_id}'>{$each->user_information->name}</a><br>
+                <span class='text-uppercase badge badge-{$t_color} p-1'>
                     {$each->user_information->user_type}
                 </span>
             </div>
@@ -125,7 +127,7 @@ $response->html = '
                                         <th>Reported By</th>
                                         <th>Incident Date</th>
                                         <th>Status</th>
-                                        <th align="center" width="12%"></th>
+                                        <th align="center" width="15%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$incidents.'</tbody>

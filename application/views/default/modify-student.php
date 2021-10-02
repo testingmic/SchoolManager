@@ -51,6 +51,7 @@ if(empty($user_id)) {
 
         // set the first key
         $data = $data["data"][0];
+        $response->scripts = ["assets/js/index.js"];
 
         // guardian information
         $user_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl, $data);

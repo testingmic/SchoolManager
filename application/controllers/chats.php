@@ -223,6 +223,26 @@ class Chats extends Myschoolgh {
     }
 
     /**
+     * Unread Messages List
+     * 
+     * @return Array
+     */
+    public function unread_list($userId, $senderId) {
+
+        $list = $this->pushQuery(
+            "a.id, a.sender_id, c.last_seen, c.image, c.name, a.message_unique_id, a.message, a.date_created",
+            "users_chat a LEFT JOIN users c ON c.item_id = a.sender_id", 
+            "a.receiver_id='{$userId}' AND a.sender_id = '{$senderId}' AND a.seen_status='0' LIMIT 20"
+        );
+        $chats = [];
+        foreach($list as $chat) {
+            $chat->sent_time = date("h:i A", strtotime($chat->date_created));
+            $chats[] = $chat;
+        }
+        return $chats;
+    }
+
+    /**
      * Chat Alerts
      * 
      * Get the list of messages from various users
@@ -230,13 +250,15 @@ class Chats extends Myschoolgh {
      * @return Array
      */
     public function alerts(stdClass $params) {
-        return [];
+        
         try {
 
-            $stmt = $this->db->prepare("SELECT COUNT(*) AS chats_count, a.sender_id, c.last_seen
+            $stmt = $this->db->prepare("SELECT 
+                    COUNT(*) AS chats_count, a.sender_id, 
+                    c.last_seen, c.image, c.name, a.message_unique_id
                 FROM users_chat a
                 LEFT JOIN users c ON c.item_id = a.sender_id
-                WHERE a.receiver_id=? AND a.seen_status = ? GROUP BY a.sender_id
+                WHERE a.receiver_id=? AND a.seen_status = ? GROUP BY a.sender_id LIMIT 20   
             ");
             $stmt->execute([$params->userId, 0]);
 
@@ -246,12 +268,31 @@ class Chats extends Myschoolgh {
                 // set some more parameters
                 $result->online = $this->user_is_online($result->last_seen);
                 $result->offline_ago = time_diff($result->last_seen);
-                $data[] = $result;
+                $data[$result->sender_id]["count"] = $result;
+                $data[$result->sender_id]["message_id"] = $result->message_unique_id;
+                $data[$result->sender_id]["messages_list"] = $this->unread_list($params->userId, $result->sender_id);
             }
+
 
             return $data;
 
         } catch(PDOException $e) {}
+    }
+
+    /**
+     * Update Chat Seen Status
+     * 
+     * @param String    $params->message_id
+     * 
+     * @return Bool
+     */
+    public function read(stdClass $params) {
+
+        $stmt = $this->db->prepare("UPDATE users_chat SET seen_status = ?, seen_date = now()
+            WHERE receiver_id = ? AND message_unique_id = ? ORDER BY id DESC LIMIT 10
+        ");
+        return $stmt->execute([1, $params->userId, $params->message_id]);
+
     }
 
     /**
@@ -339,27 +380,48 @@ class Chats extends Myschoolgh {
     }
 
     /**
+     * Load the Recent Read Messages
+     * 
+     * @param String    $userId
+     * 
+     * @return Array
+     */
+    public function recent_read($userId) {
+
+        // get the list of read messages
+        $list = $this->pushQuery(
+            "message_unique_id, seen_date", "users_chat", 
+            "sender_id='{$userId}' AND seen_status='1' ORDER BY id DESC LIMIT 10"
+        );
+        $chats = [];
+        // loop through the results list
+        foreach($list as $chat) {
+            $chats[$chat->message_unique_id] = date("h:iA", strtotime($chat->seen_date));
+        }
+        return $chats;
+
+    }
+
+    /**
      * Send a Message to the User
      * 
      * @param
      */
     public function send(stdClass $params) {
 
-        // GET THE USER INFORMATION
-		$reciepient_info = isset($params->receiver_id) ? $this->userInfo($params->receiver_id) : null;
-        
         /** Generate a new id if the message id is empty */
 		$params->message_id = (empty($params->message_id) || $params->message_id == "null") ? strtoupper(random_string("alnum", 24)) : $params->message_id;
 		$this->message_id = $params->message_id;
 
         // initiate a connection and append the messages
-        $this->save_message($params);
+        $last_insert_id = $this->save_message($params);
 
         return [
             "code" => 200,
             "data" => [
                 "message_id" => $this->message_id,
-                "reciepient_info" => $reciepient_info,
+                "last_insert_id" => $last_insert_id,
+                "recent_read" => $this->recent_read($params->userId)
             ]
         ];
 

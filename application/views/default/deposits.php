@@ -20,13 +20,14 @@ $pageTitle = "Simple Accounting";
 $response->title = "{$pageTitle} : {$appName}";
 
 // add the scripts to load
-$response->scripts = ["assets/js/accounting.js", "assets/js/upload.js"];
+$response->scripts = ["assets/js/accounting.js", "assets/js/reversals.js", "assets/js/upload.js"];
 
 // get the list of all classes
 $params = (object)[
     "route" => "deposit",
     "clientId" => $clientId,
     "item_type" => "Deposit",
+    "order_by" => "DESC",
     "userData" => $defaultUser,
     "client_data" => $defaultUser->client,
     "transaction_id" => $filter->transaction_id ?? null
@@ -41,6 +42,7 @@ $the_form = load_class("forms", "controllers")->transaction_form($params);
 // permission to modify and validate
 $hasValidate = $accessObject->hasAccess("validate", "accounting");
 $hasModify = $accessObject->hasAccess("modify", "accounting");
+$canDeposit = $accessObject->hasAccess("deposits", "accounting");
 
 $count = 0;
 $list_transactions = "";
@@ -56,27 +58,25 @@ foreach($transactions_list as $key => $transaction) {
     // if the record is still pending
     if($transaction->state === "Pending") {
         // validate the transaction
-        $action .= "&nbsp;<button onclick='return validate_transaction(\"{$transaction->item_id}\",\"{$baseUrl}deposits\")' class=\"btn btn-sm btn-outline-primary mb-1\" title=\"Validate Transaction\"><i class='fa fa-check'></i></button>";
+        if($hasValidate) {
+            $action .= "&nbsp;<button onclick='return validate_transaction(\"{$transaction->item_id}\",\"{$baseUrl}deposits\")' class=\"btn btn-sm btn-outline-primary mb-1\" title=\"Validate Transaction\"><i class='fa fa-check'></i></button>";
+        }
 
         // if the user has permission to modify record
         if($hasModify) {
-            // $checkbox = "<input class='cursor' style='height:15px' id='check_{$transaction->item_id}' type='checkbox'> &nbsp;";
-            $action .= "&nbsp;<button onclick='return reverse_transaction(\"{$transaction->item_id}\");' title='Click to reverse this transaction' class='btn btn-outline-danger mb-1 btn-sm'><i class='fa fa-recycle'></i></button>";
+            $action .= "&nbsp;<button onclick='return reverse_transaction(\"{$transaction->item_id}\",\"{$transaction->account_type_name}\",\"{$transaction->amount}\");' title='Click to reverse this transaction' class='btn btn-outline-danger mb-1 btn-sm'><i class='fa fa-recycle'></i></button>";
         }
     }
 
     $list_transactions .= "<tr data-row_id=\"{$transaction->item_id}\">";
     $list_transactions .= "<td>{$count}</td>";
-    $list_transactions .= "<td>{$checkbox}
-    <label class='cursor' for='check_{$transaction->item_id}'>
-        {$transaction->account_name}
-    </label></td>";
+    $list_transactions .= "<td>{$transaction->account_name}</td>";
     $list_transactions .= "<td>{$transaction->account_type_name}</td>";
     $list_transactions .= "<td>{$transaction->reference}</td>";
-    $list_transactions .= "<td>".ucfirst($transaction->payment_medium)."</td>";
     $list_transactions .= "<td>".number_format($transaction->amount, 2)."</td>";
     $list_transactions .= "<td>".date("jS M Y", strtotime($transaction->record_date))."</td>";
-    $list_transactions .= "<td align='center'>{$action}</td>";
+    $list_transactions .= "<td>{$transaction->state_label}</td>";
+    $list_transactions .= "<td align='center'><span data-action_id='{$transaction->item_id}'>{$action}</span></td>";
     $list_transactions .= "</tr>";
 }
 $response->array_stream["transactions_array_list"] = $transactions_array_list;
@@ -99,9 +99,10 @@ $response->html = '
                                 <li class="nav-item">
                                     <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true"><i class="fa fa-list"></i> Deposit List</a>
                                 </li>
+                                '.($canDeposit ? '
                                 <li class="nav-item">
                                     <a class="nav-link" id="upload_reports-tab2" data-toggle="tab" href="#upload_reports" role="tab" aria-selected="true"><i class="fa fa-edit"></i> Add Deposit</a>
-                                </li>
+                                </li> ': null).'
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
@@ -111,22 +112,26 @@ $response->html = '
                                     <div class="table-responsive trix-slim-scroll">
                                         <table class="table table-bordered table-striped datatable">
                                             <thead>
-                                                <th></th>
-                                                <th>Account Name</th>
-                                                <th>Account Type Head</th>
-                                                <th>Ref No.</th>
-                                                <th>Pay Via</th>
-                                                <th>Amount</th>
-                                                <th>Date</th>
-                                                <th></th>
+                                                <tr>
+                                                    <th></th>
+                                                    <th width="16%">Account Name</th>
+                                                    <th width="19%">Account Type Head</th>
+                                                    <th>Ref No.</th>
+                                                    <th>Amount</th>
+                                                    <th width="12%">Date</th>
+                                                    <th>Status</th>
+                                                    <th width="13%"></th>
+                                                </tr>
                                             </thead>
                                             <tbody>'.$list_transactions.'</tbody>
                                         </table>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
-                                    '.$the_form.'
-                                </div>
+                                '.($canDeposit ? '
+                                    <div class="tab-pane fade" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
+                                        '.$the_form.'
+                                    </div>': null
+                                ).'
                             </div>
                         </div>
                     </div>

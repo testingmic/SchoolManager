@@ -173,6 +173,12 @@ class Analitics extends Myschoolgh {
             $params->load_summary_info = true;
             // query the department data
             $this->final_report["departments_report"] = $this->departments_report($params);
+        }   
+
+        // get the transactions information if not parsed in the stream
+        if(in_array("transaction_revenue_flow", $params->stream)) {
+            // query the department data
+            $this->final_report["transaction_revenue_flow"] = $this->transaction_revenue_flow($params);
         }
 
         // get the class attendance information if not parsed in the stream
@@ -298,6 +304,7 @@ class Analitics extends Myschoolgh {
             $_q_result = $query->fetch(PDO::FETCH_OBJ);
 
             $result["students_class_record_count"]["count"][$value_count] = [
+                "class_id" => $value->id,
                 "value" => $_q_result->{$value_count} ?? 0,
                 "name" => $value->name
             ];
@@ -338,10 +345,26 @@ class Analitics extends Myschoolgh {
         $result["fees_record_count"]["total_count"] = count($fees_category_list);
 
         // get the fees categories
-        $summation = $this->pushQuery("SUM(amount_due) AS amount_due, SUM(amount_paid) AS amount_paid, 
-            SUM(balance) AS balance, (SELECT SUM(arrears_total) FROM users_arrears WHERE client_id='{$params->clientId}') AS arrears_total", 
-            "fees_payments", "status='1' AND client_id='{$params->clientId}' AND 
-                academic_year='{$this->academic_year}' AND academic_term='{$this->academic_term}'");
+        $summation = $this->pushQuery("SUM(a.amount_due) AS amount_due,
+            (
+                SELECT SUM(b.amount) FROM fees_collection b WHERE b.client_id='{$params->clientId}'
+                AND (
+                    DATE(b.recorded_date) >= '{$this->start_date}' AND DATE(b.recorded_date) <= '{$this->end_date}'
+                ) AND b.category_id != 'Arrears' AND b.reversed = '0' AND status = '1'
+            ) AS amount_paid,
+            (
+                SELECT SUM(b.amount) FROM fees_collection b WHERE b.client_id='{$params->clientId}'
+                AND (
+                    DATE(b.recorded_date) >= '{$this->start_date}' AND DATE(b.recorded_date) <= '{$this->end_date}'
+                ) AND b.category_id = 'Arrears' AND b.reversed = '0' AND status = '1'
+            ) AS arrears_paid,
+            SUM(a.balance) AS balance, 
+            (
+                SELECT SUM(arrears_total) FROM users_arrears WHERE client_id='{$params->clientId}'
+            ) AS arrears_total", 
+            "fees_payments a", "a.status='1' AND a.client_id='{$params->clientId}' AND 
+            a.academic_year='{$this->academic_year}' AND a.academic_term='{$this->academic_term}'
+        ");
         $result["fees_record_count"]["summation"] = $summation[0] ?? [];
 
         // load the fees records
@@ -349,11 +372,12 @@ class Analitics extends Myschoolgh {
             
             /** Parameter */
             $fees_param = (Object) [
-                "limit" => 100000,
+                "limit" => $this->global_limit,
                 "userId" => $params->userId,
                 "userData" => $params->userData,
                 "class_id" => $this->class_id_query,
                 "category_id" => $value->id,
+                "reversed" => 0,
                 "date_range" => "{$this->start_date}:{$this->end_date}",
                 "return_where_clause" => true
             ];
@@ -429,7 +453,7 @@ class Analitics extends Myschoolgh {
                 $category_total = $this->pushQuery(
                     "SUM(a.amount) AS total_amount", "accounts_transaction a", 
                     "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_type='{$category}'
-                    AND (
+                    AND a.reversed = '0' AND (
                         DATE(a.date_created) >= '{$range_value["start"]}' AND DATE(a.date_created) <= '{$range_value["end"]}'
                     )"
                 );
@@ -444,7 +468,7 @@ class Analitics extends Myschoolgh {
             
             /** Parameter */
             $fees_param = (Object) [
-                "limit" => 100000,
+                "limit" => $this->global_limit,
                 "userId" => $params->userId,
                 "account_type" => $value->item_id,
                 "date_range" => "{$this->start_date}:{$this->end_date}",
@@ -846,6 +870,76 @@ class Analitics extends Myschoolgh {
         }
 
     }
+    
+    /**
+     * Transaction Revenue Analysis
+     * 
+     * @return Array
+     */
+    public function transaction_revenue_flow(stdClass $params) {
+
+        // initial value
+        $result = [];
+
+        // loop through the date ranges for the current and previous
+        foreach($this->date_range as $range_key => $range_value) {
+
+            // loop through the record type
+            foreach(["Deposit", "Expense"] as $category) {
+                // get the fees categories
+                $revenue_type = $this->pushQuery(
+                    "SUM(a.amount) AS total_amount", "accounts_transaction a", 
+                    "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_type='{$category}'
+                    AND a.reversed = '0' AND (
+                        DATE(a.date_created) >= '{$range_value["start"]}' AND DATE(a.date_created) <= '{$range_value["end"]}'
+                    )"
+                );
+                $result["revenue_types"][$range_key][$category] = $revenue_type[0]->total_amount ?? 0;
+                
+                // get the group by category type
+                $category_total = $this->pushQuery(
+                    "b.name, a.account_type, SUM(a.amount) AS total_amount", 
+                    "accounts_transaction a LEFT JOIN accounts_type_head b ON b.item_id = a.account_type", 
+                    "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_type='{$category}'
+                    AND a.reversed = '0' AND (
+                        DATE(a.date_created) >= '{$range_value["start"]}' AND DATE(a.date_created) <= '{$range_value["end"]}'
+                    ) GROUP BY a.account_type
+                ");
+
+                $result["category_total"][$range_key][$category] = $category_total;
+            
+            }
+
+        }
+
+        /** Get the list of category items */
+        
+
+        /** Check the days difference */
+        $days_list = $this->listDays($this->date_range["current"]["start"], $this->date_range["current"]["end"]);
+
+        /** Loop through the dates */
+        foreach($days_list as $day) {
+
+            // loop through the record type
+            foreach(["Deposit", "Expense"] as $category) {
+
+                // get the group by category type
+                $dates_total = $this->pushQuery(
+                    "b.name, a.account_type, SUM(a.amount) AS total_amount", 
+                    "accounts_transaction a LEFT JOIN accounts_type_head b ON b.item_id = a.account_type", 
+                    "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_type='{$category}'
+                    AND a.reversed = '0' AND DATE(a.date_created) = '{$day}' GROUP BY a.account_type
+                ");
+
+                $result["dates_summary"][$day][$category] = $dates_total;
+            }
+
+        }
+
+        return $result;
+
+    }
 
     /**
      * Generate report on the salary payment flow
@@ -987,9 +1081,9 @@ class Analitics extends Myschoolgh {
             }
 
             /** Confirm that the last date is not more than today */
-            if(isset($explode[1]) && strtotime($explode[1]) > strtotime($today) && !$bypass) {
-                return "exceeds-today";
-            }
+            // if(isset($explode[1]) && strtotime($explode[1]) > strtotime($today) && !$bypass) {
+            //     return "exceeds-today";
+            // }
 
             /** confirm that the starting date is not greater than the end date */
             if(isset($explode[1]) && strtotime($explode[0]) > strtotime($explode[1])) {
@@ -1088,20 +1182,20 @@ class Analitics extends Myschoolgh {
                 $format = "jS M Y";
                 $currentTitle = "This Week";
                 $previousTitle = "Last Week";
-                $dateFrom = date("Y-m-d", strtotime("today -1 weeks"));
-                $dateTo = date("Y-m-d", strtotime("today"));
-                $prevFrom = date("Y-m-d", strtotime("today -2 weeks"));
-                $prevTo = date("Y-m-d", strtotime("today -1 weeks"));
+                $dateFrom = date("Y-m-d", strtotime("monday this week"));
+                $dateTo = date("Y-m-d", strtotime("sunday this week"));
+                $prevFrom = date("Y-m-d", strtotime("monday last week"));
+                $prevTo = date("Y-m-d", strtotime("sunday last week"));
                 break;
             case 'last_week':
                 $groupBy = "DATE";
                 $format = "jS M Y";
                 $currentTitle = "Last Weeks";
                 $previousTitle = "Last 2 Weeks";
-                $dateFrom = date("Y-m-d", strtotime("-2 weeks"));
-                $dateTo = date("Y-m-d", strtotime("-1 weeks"));
-                $prevFrom = date("Y-m-d", strtotime("today -3 weeks"));
-                $prevTo = date("Y-m-d", strtotime("today -2 weeks"));
+                $dateFrom = date("Y-m-d", strtotime("monday last week"));
+                $dateTo = date("Y-m-d", strtotime("sunday last week"));
+                $prevFrom = date("Y-m-d", strtotime("monday last week -1 week"));
+                $prevTo = date("Y-m-d", strtotime("sunday last week -1 week"));
                 break;
             case 'this_month':
                 $groupBy = "DATE";
@@ -1182,6 +1276,16 @@ class Analitics extends Myschoolgh {
                 $dateTo = date('Y-12-31', strtotime("last year"));
                 $prevFrom = date('Y-01-01', strtotime("-2 years"));
                 $prevTo = date('Y-12-31', strtotime("-2 years"));
+                break;
+            case 'yesterday':
+                $groupBy = "HOUR";
+                $format = "jS M Y";
+                $currentTitle = "Yesterday";
+                $previousTitle = "Last 2 Days";
+                $dateFrom = date("Y-m-d", strtotime("yesterday"));
+                $dateTo = date("Y-m-d", strtotime("yesterday"));
+                $prevFrom = date("Y-m-d", strtotime("today -3 days"));
+                $prevTo = date("Y-m-d", strtotime("today -2 days"));
                 break;
             default:
 				$groupBy = "HOUR";

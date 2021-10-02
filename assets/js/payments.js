@@ -1,29 +1,22 @@
 var load_Pay_Fees_Form = () => {
-    let $dept_id = $(`select[name="department_id"]`).val(),
-        $class_id = $(`select[name="class_id"]`).val(),
-        $student_id = $(`select[name="student_id"]`).val(),
-        $category_id = $(`select[name="category_id"]`).val();
+    $class_id = $(`select[name="class_id"]`).val(),
+    $student_id = $(`select[name="student_id"]`).val(),
+    $category_id = $(`select[name="category_id"]`).val();
     let data = {
-        "department_id": $dept_id,
         "class_id": $class_id,
         "student_id": $student_id,
         "category_id": $category_id,
         "show_history": true
     };
     $(`div[id="make_payment_button"] button`).prop("disabled", true).html(`Loading record <i class="fa fa-spin fa-spinner"></i>`);
-    $(`a[data-link_item="student_go_back"]`).attr("onclick", `return loadPage('${baseUrl}student/${$student_id}')`);
     $.get(`${baseUrl}api/fees/payment_form`, data).then((response) => {
-        $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Load Form`);
+        $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`<i class="fa fa-filter"></i> Load Form`);
         if (response.code === 200) {
-            $(`div[id="fees_payment_history"]`).html(response.data.result.form);
-            $(`button[id="payment_cancel"]`).removeClass("hidden");
-            $(`div[id="fees_payment_form"] select[id="payment_method"]`).val("cash").change();
             if (response.data.result.query !== undefined) {
                 if (response.data.result.query.paid_status !== undefined) {
                     if (response.data.result.query.paid_status == 1) {
                         $(`div[id="fees_payment_form"] *`).prop("disabled", true);
                     } else {
-                        $(`div[id="fees_payment_preload"] *`).prop("disabled", true);
                         $(`div[id="fees_payment_form"] *`).prop("disabled", false);
                     }
                 }
@@ -31,11 +24,18 @@ var load_Pay_Fees_Form = () => {
                 if (response.data.result.paid_status == 1) {
                     $(`div[id="fees_payment_form"] *`).prop("disabled", true);
                 } else {
-                    $(`div[id="fees_payment_preload"] *`).prop("disabled", true);
+                    $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
                     $(`div[id="fees_payment_form"] *`).prop("disabled", false);
                 }
             }
-            $(`div[id="fees_payment_form"] input[id="amount"]`).focus();
+            
+            $(`div[id="fees_payment_history"]`).html(response.data.result.form);
+            $(`button[id="payment_cancel"]`).removeClass("hidden");
+            $(`div[id="fees_payment_form"] select[id="payment_method"]`).val("cash").change();
+            $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
+            let nlocation = `${baseUrl}fees-payment?student_id=${$student_id}&class_id=${$class_id}`;
+            window.history.pushState({ current: nlocation }, "", nlocation);
+
         } else {
             swal({
                 text: response.data.result,
@@ -43,7 +43,7 @@ var load_Pay_Fees_Form = () => {
             });
         }
     }).catch(() => {
-        $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`Load Form`);
+        $(`div[id="make_payment_button"] button`).prop("disabled", false).html(`<i class="fa fa-filter"></i> Load Form`);
     });
 }
 
@@ -56,6 +56,7 @@ var finalize_payment = (response, checkout_url) => {
         payment_id = response.data.additional.uniqueId;
 
     // reset the form
+    $(`input[id='auto_load_form']`).remove();
     $(`button[id="payment_cancel"]`).addClass("hidden");
     $(`div[id="fees_payment_form"] *`).prop("disabled", true);
     $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
@@ -138,7 +139,7 @@ var save_Receive_Payment = () => {
     }
 
     if ($amount > $balance) {
-        notify(`Sorry! You cannot pay more than the outstanding balance of ${balance}`);
+        notify(`Sorry! You cannot pay more than the outstanding balance of ${$balance}`);
         $(`div[id="fees_payment_form"] input[name="amount"]`).focus();
         return false;
     }
@@ -215,24 +216,24 @@ var log_Momo_Card_Payment = (reference_id, transaction_id) => {
     };
 
     $.post(`${baseUrl}api/fees/momocard_payment`, data).then((response) => {
-        if (response.code == 200) {
+    if (response.code == 200) {
 
-            if(response.data.additional !== undefined) {
-                if(myPrefs.labels.print_receipt !== undefined) {
-                    window.open(
-                        `${baseUrl}receipt/${response.data.additional.uniqueId}`, `Payment Receipt`,
-                        `width=850,height=750,left=200,resizable,scrollbars=yes,status=1,left=${($(window).width())*0.25}`
-                    );
-                }
+        if(response.data.additional !== undefined) {
+            if(myPrefs.labels.print_receipt !== undefined) {
+                window.open(
+                    `${baseUrl}receipt/${response.data.additional.uniqueId}`, `Payment Receipt`,
+                    `width=850,height=750,left=200,resizable,scrollbars=yes,status=1,left=${($(window).width())*0.25}`
+                );
             }
-            $(`button[id="payment_cancel"]`).addClass("hidden");
-            $(`div[id="fees_payment_form"] *`).prop("disabled", true);
-            $(`button[id="momocard_payment_button"]`).addClass("hidden");
-            $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
-            $(`div[id="fees_payment_form"] input, div[id="fees_payment_form"] textarea`).val("");
-            load_Pay_Fees_Form();
         }
-        $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
+        $(`button[id="payment_cancel"]`).addClass("hidden");
+        $(`div[id="fees_payment_form"] *`).prop("disabled", true);
+        $(`button[id="momocard_payment_button"]`).addClass("hidden");
+        $(`div[id="fees_payment_preload"] *`).prop("disabled", false);
+        $(`div[id="fees_payment_form"] input, div[id="fees_payment_form"] textarea`).val("");
+        load_Pay_Fees_Form();
+    }
+    $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
     }).catch(() => {
         $(`div[id="fees_payment_form"] div[class="form-content-loader"]`).css("display", "none");
     });
@@ -256,6 +257,10 @@ var receive_Momo_Card_Payment = () => {
         if (!$(`div[id="fees_payment_form"] input[name="amount"]`).val().length) {
             notify("Sorry! The amount cannot be empty.");
             return false;
+        }
+
+        if(!email_address.length) {
+            email_address = $(`input[name="client_email_address"]`).val();
         }
 
         if (!email_address.length) {
@@ -357,7 +362,6 @@ var save_Fees_Allocation = () => {
                 $(`div[id="allocate_fees_button"] button`).html(`Allocate Fee`);
                 $.pageoverlay.hide();
                 if (response.code === 200) {
-                    // $(`div[id="fees_allocation_form"] input`).val("");
                     load_Fees_Allocation_Amount();
                     $(`table[id="simple_load_student"] input[type="checkbox"]`).prop('checked', false);
                 }
@@ -420,6 +424,7 @@ var load_Fees_Allocation_Amount = () => {
                             $(`span[data-column="select"][data-item="${e.item_id}"]`).html(`
                                 <input ${(e.exempted == 1 || e.paid_status == 1) ? "disabled" : `class="student_ids" name="student_ids[]" value="${e.item_id}" id="student_id_${e.item_id}"`} style="width:20px;cursor:pointer;height:20px;" type="checkbox">
                             `);
+                            $(`label[data-item="student_name"]`).attr("title", `Click to Select Student`).addClass("user_name");
                         });
                     }
                     $(`div[id="fees_allocation_wrapper"] input[id="select_all"]`).prop("disabled", false);
@@ -471,7 +476,7 @@ var search_Payment_Log = () => {
                                     <td>${data.class_name}</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Fee Payment Category: </strong></td>
+                                    <td><strong>Fees Category: </strong></td>
                                     <td>${data.category_name !== null ? data.category_name : data.category_id}</td>
                                 </tr>
                                 <tr>
@@ -564,3 +569,7 @@ $(`select[name="payment_method"]`).on("change", function() {
     }
 });
 $(`div[id="fees_payment_form"] input[name="amount"]`).focus();
+
+if($(`input[id='auto_load_form']`).length) {
+    load_Pay_Fees_Form();
+}

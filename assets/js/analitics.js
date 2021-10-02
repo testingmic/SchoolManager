@@ -102,9 +102,55 @@ var revenueReporting = (revenue) => {
     }
 }
 
+var transactionReport = (transaction, date_range) => {
+
+    if(transaction.category_total !== undefined) {
+        let transaction_data = transaction.category_total.current,
+            transaction_list = "";
+        
+        $.each(transaction_data, function(i, e) {
+            transaction_list += `<thead>`;
+            transaction_list += `<tr class="bg-info">`;
+            transaction_list += `<th align="center" class="text-white font-18">${i == "Deposit" ? "Income" : i}</th>`;
+            transaction_list += `<th align="center" class="text-white">Description</th>`;
+            transaction_list += `<th align="center" class="text-white">Amount</th>`;
+            transaction_list += `</tr>`;
+            transaction_list += `</thead>`;
+            transaction_list += `<tbody>`;
+
+            if(!e.length) {
+                transaction_list += `<tr>`;
+                transaction_list += `<td align="center" colspan="3">No record found for the selected period.</td>`;
+                transaction_list += `</tr>`;
+            } else {
+                let total = 0;
+                $.each(e, function(ii, ee) {
+                    total += parseFloat(ee.total_amount);
+                    transaction_list += `<tr>`;
+                    transaction_list += `<td>${ii+1}</td>`;
+                    transaction_list += `<td>${ee.name !== null ? ee.name.toUpperCase() : ee.account_type.toUpperCase()}</td>`;
+                    transaction_list += `<td class="font-15">${myPrefs.labels.currency} ${format_currency(ee.total_amount)}</td>`;
+                    transaction_list += `</tr>`;
+                });
+                transaction_list += `
+                <tr class="bg-secondary">
+                    <td></td>
+                    <td class="font-bold">TOTAL</td>
+                    <td class="font-18 font-bold">${myPrefs.labels.currency} ${format_currency(total)}</td>
+                </tr>`;
+            }
+            transaction_list += `</tbody>`;
+        });
+        $(`table[id="transaction_summary"]`).html(transaction_list);
+    }
+
+}
+
 var summaryReporting = (t_summary, date_range) => {
 
     var summary = t_summary.summary_report;
+    $(`[data-filter="current_period"]`).html(date_range.current.title);
+    $(`span[data-filter="period"]`).html(date_range.previous.title);
 
     if (summary.users_record_count !== undefined) {
         let user = summary.users_record_count;
@@ -168,8 +214,8 @@ var summaryReporting = (t_summary, date_range) => {
             key++;
             class_count_list += `
                 <div class="m-b-20">
-                    <div class="text-small float-right font-weight-bold text-muted">${e.value}</div>
-                    <div class="font-weight-bold">${e.name}</div>
+                    <div class="text-small float-right font-weight-bold font-17 text-muted">${e.value}</div>
+                    <div class="font-weight-bold"><span onclick="return load('class/${e.class_id}');" class="user_name">${e.name}</span></div>
                     <div class="progress" data-height="5" style="height: 5px;">
                     <div class="progress-bar ${bg_colors[key]}" role="progressbar" data-width="${e.percentage}%" aria-valuenow="${e.percentage}" aria-valuemin="0" aria-valuemax="100" style="width: ${e.percentage}%;"></div>
                     </div>
@@ -200,17 +246,13 @@ var summaryReporting = (t_summary, date_range) => {
             let amount = fees.amount[i];
             let percentage = (amount > 0) ? ((amount / total_revenue) * 100).toFixed(2) : 0;
             revenue_category_counts += `
-            <div class="col-lg-4 col-md-6">
+            <div class="col-md-4 col-lg-2 col-sm-6">
                 <div class="card text-center">
-                    <div class="card-header bg-primary text-white font-15 pl-2 pr-2 pt-1 text-uppercase pb-0"><strong>${i}</strong></div>
+                    <div class="pt-1 pb-1 bg-primary text-center text-white font-15 pl-2 pr-2 pt-1 text-uppercase pb-0"><strong>${i}</strong></div>
                     <div class="card-body pt-2 pl-2 font-14 text-uppercase pr-2 pb-1">
-                        <!--<p class="mb-0 pb-0">Processed Count: <strong>${e}</strong></p>-->
-                        <p class="mb-0 pb-0">Amount:</p>
-                        <p class="mb-0 pb-0 border-bottom pb-1">
+                        <p class="mb-0 pb-0 pb-1">
                             <strong class="text-success font-20">${myPrefs.labels.currency} ${format_currency(amount)}</strong>
                         </p>
-                        <p class="mb-0 pb-0">Percentage:</p>
-                        <p class="mb-0 pb-0"><strong class="text-primary font-20">${percentage}%</strong></p>
                     </div>
                 </div>
             </div>`;
@@ -219,79 +261,83 @@ var summaryReporting = (t_summary, date_range) => {
         $(`div[id="revenue_category_counts"]`).html(revenue_category_counts);
 
         if (summary.fees_record_count.comparison !== undefined) {
-            
-            $(`div[data-chart="revenue_category_chart"]`).html(`<div id="revenue_category_chart"></div>`);
-            
-            $.each(summary.fees_record_count.comparison.amount.previous, function(i, e) {
-                chartKeys.push(e.name);
-                previousValues.push(parseFloat(e.value));
-                previous_amount += parseFloat(e.value);
-                currentValues.push(parseFloat(summary.fees_record_count.comparison.amount.current[i].value));
-            });
+            if($(`div[data-chart="revenue_category_chart"]`).length) {
+                $(`div[data-chart="revenue_category_chart"]`).html(`<div id="revenue_category_chart"></div>`);
+                $.each(summary.fees_record_count.comparison.amount.previous, function(i, e) {
+                    chartKeys.push(e.name);
+                    previousValues.push(parseFloat(e.value));
+                    previous_amount += parseFloat(e.value);
+                    currentValues.push(parseFloat(summary.fees_record_count.comparison.amount.current[i].value));
+                });
 
-            $(`span[data-count="total_revenue_received"]`).html(format_currency(total_revenue));
-            $(`span[data-count="previous_amount_received"]`).html(format_currency(previous_amount));
+                $(`span[data-count="total_revenue_received"]`).html(format_currency(total_revenue));
+                $(`span[data-count="previous_amount_received"]`).html(format_currency(previous_amount));
 
-            var options = {
-                chart: {
-                    height: 350,
-                    type: 'bar',
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: false,
-                        endingShape: 'rounded',
-                        columnWidth: '25%',
+                var options = {
+                    chart: {
+                        height: 350,
+                        type: 'bar',
                     },
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                stroke: {
-                    show: true,
-                    width: 2,
-                    colors: ['transparent']
-                },
-                series: [{
-                    name: 'Previous Fees Recieved',
-                    data: previousValues
-                }, {
-                    name: 'Current Fees Recieved',
-                    data: currentValues
-                }],
-                xaxis: {
-                    categories: chartKeys,
-                },
-                yaxis: {
-                    title: {
-                        text: '$ (thousands)'
-                    }
-                },
-                fill: {
-                    opacity: 1
+                    plotOptions: {
+                        bar: {
+                            horizontal: false,
+                            endingShape: 'rounded',
+                            columnWidth: '25%',
+                        },
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ['transparent']
+                    },
+                    series: [{
+                        name: 'Amount',
+                        data: currentValues
+                    }],
+                    xaxis: {
+                        categories: chartKeys,
+                    },
+                    yaxis: {
+                        title: {
+                            text: '$ (thousands)'
+                        }
+                    },
+                    fill: {
+                        opacity: 1
 
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(val) {
-                            return myPrefs.labels.currency + format_currency(val)
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function(val) {
+                                return myPrefs.labels.currency + format_currency(val)
+                            }
                         }
                     }
                 }
+
+                var chart = new ApexCharts(
+                    document.querySelector("#revenue_category_chart"),
+                    options
+                );
+
+                chart.render();
             }
-
-            var chart = new ApexCharts(
-                document.querySelector("#revenue_category_chart"),
-                options
-            );
-
-            chart.render();
         }
 
         if (fees.summation !== undefined) {
-            $(`span[data-count="total_balance"]`).html(format_currency(fees.summation.balance));
-            $(`span[data-count="arrears_total"]`).html(format_currency(fees.summation.arrears_total));
+            let t_balance = fees.summation.balance !== null ? fees.summation.balance : 0;
+            let t_arrears_total = fees.summation.arrears_total !== null ? fees.summation.arrears_total : 0;
+            $(`span[data-count="total_balance"]`).html(format_currency(t_balance));
+            $(`span[data-count="arrears_total"]`).html(format_currency(t_arrears_total));
         }
+
+        $.each(summary.fees_record_count.summation, function(i, e) {
+            let amount = e !== null ? format_currency(e) : "0.00";
+            $(`span[data-summary="${i}"]`).html(`${amount}`);
+        });
 
         if(summary.transaction_revenue_flow !== undefined) {
             let transaction = summary.transaction_revenue_flow;
@@ -328,7 +374,6 @@ var summaryReporting = (t_summary, date_range) => {
 
     }
 
-    $(`span[data-filter="period"]`).html(date_range.previous.title);
     $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
 }
 
@@ -396,7 +441,7 @@ var attendanceReport = (_attendance) => {
                 _log_chart_label.push(i);
             });
 
-            $(`div[data-chart_container="attendance_log_chart"]`).html(`<div id="attendance_log_chart" style="min-height:400px;"></div>`);
+            $(`div[data-chart_container="attendance_log_chart"]`).html(`<div id="attendance_log_chart" style="min-height:450px;"></div>`);
 
             $.each(attendance.chart_grouping, function(i, e) {
                 if ($.inArray(e.name, ["Student", "Staff"]) > -1) {
@@ -406,7 +451,7 @@ var attendanceReport = (_attendance) => {
 
             var _attendance_options = {
                 chart: {
-                    height: 400,
+                    height: 450,
                     type: 'area',
                 },
                 dataLabels: {
@@ -661,16 +706,25 @@ var salaryReport = (_salary) => {
     break_down.html(table_html);
 }
 
-
 var loadDashboardAnalitics = (period) => {
     let to_stream = $(`div[id="data-report_stream"]`).attr(`data-report_stream`);
     $.get(`${baseUrl}api/analitics/generate?period=${period}&label[stream]=${to_stream}`).then((response) => {
         if (response.code === 200) {
+            let range = response.data.result.date_range;
+
+            $(`input[id="d_start"]`).val(range.current.start);
+            $(`input[id="d_end"]`).val(range.current.end);
+
+            $(`a[data-href="summary_link"]`).attr({"href": `${baseUrl}download/accounting?display=notes&item=summary&start_date=${range.current.start}&end_date=${range.current.end}&group_by=day&breakdown=true`});
+
             if (response.data.result.summary_report !== undefined) {
-                summaryReporting(response.data.result, response.data.result.date_range);
+                summaryReporting(response.data.result, range);
+            }
+            if (response.data.result.transaction_revenue_flow !== undefined) {
+                transactionReport(response.data.result.transaction_revenue_flow, range);
             }
             if (response.data.result.fees_revenue_flow !== undefined) {
-                revenueReporting(response.data.result.fees_revenue_flow, response.data.result.date_range);
+                revenueReporting(response.data.result.fees_revenue_flow, range);
             }
             if (response.data.result.attendance_report !== undefined) {
                 attendanceReport(response.data.result.attendance_report);
@@ -681,12 +735,12 @@ var loadDashboardAnalitics = (period) => {
         }
         setTimeout(() => {
             $.pageoverlay.hide();
-            $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
+            $(`div[class~="form-content-loader"]`).css({ "display": "none" });
         }, 800);
         $(`div[class~="toggle-calculator"]`).addClass("hidden");
     }).catch(() => {
         $.pageoverlay.hide();
-        $(`div[class~="quick_loader"] div[class~="form-content-loader"]`).css({ "display": "none" });
+        $(`div[class~="form-content-loader"]`).css({ "display": "none" });
     });
 }
 
@@ -727,6 +781,22 @@ var filter_UserGroup_Attendance = () => {
     });
 }
 
+var filter_Transaction_Summary = (stream) => {
+    let _start_date = $(`input[id="d_start"]`).val(),
+        _end_date = $(`input[id="d_end"]`).val(),
+        _t_period = "";
+    $(`div[id="data-report_stream"]`).attr("data-report_stream", stream);
+    $(`div[id="trasaction_container"] div[class~="form-content-loader"]`).css({ "display": "flex" });
+    if(_start_date.length) {
+        _t_period += `${_start_date}`;
+    }
+    if(_end_date.length) {
+        _t_period += `:${_end_date}`;
+    }
+    $(`div[data-filter="quick_summary_filter"] button[type="button"]`).removeClass("active");
+    loadDashboardAnalitics(`${_t_period}`);
+}
+
 if ($(`div[id="data-report_stream"]`).length) {
     let d_period = $(`div[class~="default_period"]`).attr("data-current_period");
     loadDashboardAnalitics(d_period);
@@ -741,4 +811,37 @@ if ($(`div[id="data-report_stream"]`).length) {
         }
         loadDashboardAnalitics(_period);
     });
+
+    $(`div[data-filter="quick_revenue_filter"] button`).on("click", function() {
+        let item = $(this);
+        $(`div[data-filter="quick_revenue_filter"] button`).removeClass("active");
+        item.addClass("active");
+        let period = item.attr("data-period"),
+            stream = item.attr("data-stream");
+        $(`select[name="period"]`).val(period).change();
+        $(`div[id="data-report_stream"]`).attr("data-report_stream", stream);
+        loadDashboardAnalitics(period);
+    });
+
+    $(`div[data-filter="quick_summary_filter"] button[type="button"]`).on("click", function() {
+        let item = $(this);
+        $(`div[data-filter="quick_summary_filter"] button[type="button"]`).removeClass("active");
+        item.addClass("active");
+        let period = item.attr("data-period"),
+            stream = item.attr("data-stream");
+        $(`select[name="period"]`).val(period).change();
+        $(`div[id="data-report_stream"]`).attr("data-report_stream", stream);
+        loadDashboardAnalitics(period);
+    });
+
+    $(`div[data-filter="quick_attendance_filter"] button`).on("click", function() {
+        let _item = $(this);
+        $(`div[data-filter="quick_attendance_filter"] button`).removeClass("active");
+        _item.addClass("active");
+        let _tperiod = _item.attr("data-period"),
+            _tstream = _item.attr("data-stream");
+        $(`div[id="data-report_stream"]`).attr("data-report_stream", _tstream);
+        loadDashboardAnalitics(_tperiod);
+    });
+
 }

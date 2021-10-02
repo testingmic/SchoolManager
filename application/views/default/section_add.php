@@ -19,7 +19,7 @@ $response = (object) [];
 $pageTitle = "Add Section";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [
-    "assets/js/page/index.js"
+    "assets/js/index.js"
 ];
 
 $the_form = load_class("forms", "controllers")->section_form($clientId, $baseUrl);

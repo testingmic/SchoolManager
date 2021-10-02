@@ -30,7 +30,9 @@ $params = (object) [
 // get the list of all the templates
 $count["sms"] = 0;
 $count["email"] = 0;
+$count["reminder"] = 0;
 $messages_list["email"] = "";
+$messages_list["reminder"] = "";
 $messages_list["sms"] = "";
 $messages_array_list = [];
 $array_list = load_class("communication", "controllers", $params)->list_messages($params)["data"];

@@ -60,6 +60,7 @@
     <?= general_modal(); ?>
     <?= save_form_data(); ?>
     <?= ajax_form_button(); ?>
+    <?= quick_add_student(); ?>
 
     <div class="modal fade" id="viewOnlyModal" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog modal-dialog-top modal-lg" style="width:100%;" role="document">
@@ -118,7 +119,6 @@
     <script src="<?= $baseUrl; ?>assets/bundles/fullcalendar/fullcalendar.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
     <?php if($isActiveAccount) { ?>
-    <script src="https://js.paystack.co/v2/inline.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/ui.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/ui-touch-punch.min.js"></script>
     <script src="<?= $baseUrl; ?>assets/vendors/timetable/chosen.js"></script>

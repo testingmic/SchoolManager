@@ -63,7 +63,7 @@ if(!empty($timetable_list)) {
         // set the found variable to true
         $timetable_found = true;
         
-        // load the class courses list
+        // load the class Subjects List
         $params->class_id = $data->class_id;
 
         // load the allocations

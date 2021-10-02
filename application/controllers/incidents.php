@@ -155,9 +155,12 @@ class Incidents extends Myschoolgh {
 
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Incident successfully logged.", "refresh" => 2000];
-			
+            
+            // set the link
+            $link = isset($user_role) && ($user_role == "student") ? "student" : "staff";
+
 			# append to the response
-			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}student/{$params->user_id}/incidents"];
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}{$link}/{$params->user_id}/incidents"];
 
 			// return the output
             return $return;

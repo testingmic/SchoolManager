@@ -62,7 +62,7 @@ $response->html = '
                             <button class="btn btn-outline-primary" onclick="return search_Payment_Log()"><i class="fa fa-filter"></i> Search</button>
                         </div>
                         <div class="mt-0 mb-2 border-bottom"></div>
-                        <div id="log_search_term_list" class="slim-scroll custom-600px"></div>
+                        <div id="log_search_term_list" style="overflow-x:hidden" class="custom-600px"></div>
                     </div>
                 </div>
             </div>

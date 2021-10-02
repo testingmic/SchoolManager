@@ -330,7 +330,7 @@ function initiateCalendar() {
             center: 'title',
             right: 'month,agendaWeek,agendaDay,listMonth'
         },
-        editable: false,
+        editable: true,
         droppable: false,
         draggable: false,
         dragRevertDuration: 0,
@@ -411,7 +411,7 @@ initiateCalendar();";
         // put the preferences together
         $preference["labels"] = $params->general["labels"];
         $preference["opening_days"] = $params->general["opening_days"] ?? [];
-        $preference["features"] = $client_data->client_preferences->features_list ?? [];
+        $preference["features_list"] = $client_data->client_preferences->features_list ?? [];
         $preference["account"] = $client_data->client_preferences->account;
         $preference["academics"] = $client_data->client_preferences->academics;
 
@@ -525,6 +525,7 @@ initiateCalendar();";
         $preference["labels"] = $client_data->client_preferences->labels;
         $preference["opening_days"] = $client_data->client_preferences->opening_days ?? [];
         $preference["account"] = $client_data->client_preferences->account;
+        $preference["features_list"] = $client_data->client_preferences->features_list ?? [];
 
         try {
 

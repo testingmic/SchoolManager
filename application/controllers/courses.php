@@ -9,7 +9,7 @@ class Courses extends Myschoolgh {
         parent::__construct();
 
         // get the client data
-        $client_data = $params->client_data ?? null;
+        $client_data = $params->client_data ?? [];
         $this->iclient = $client_data;
 
         // run this query
@@ -317,12 +317,12 @@ class Courses extends Myschoolgh {
 
             $item_id = random_string("alnum", 16);
 
-			// append class to courses list
+			// append class to Subjects List
 			if(isset($params->class_id)) {
 				$class_ids = $this->append_class_courses($params->class_id, $item_id, $params->clientId);
 			}
 
-            // append tutor to courses list
+            // append tutor to Subjects List
 			if(isset($params->course_tutor)) {
 				$tutor_ids = $this->append_course_tutors($params->course_tutor, $item_id, $params->clientId);
 			}
@@ -406,7 +406,7 @@ class Courses extends Myschoolgh {
 			$tutor_ids = [];
             $class_ids = [];
 
-			// append tutor to courses list
+			// append tutor to Subjects List
 			if(isset($params->course_tutor)) {
 
                 // convert the course tutor into an array
@@ -427,7 +427,7 @@ class Courses extends Myschoolgh {
 				$this->remove_all_course_tutors($params);
 			}
 
-            // append tutor to courses list
+            // append tutor to Subjects List
 			if(isset($params->class_id)) {
 
                 // convert the course tutor into an array

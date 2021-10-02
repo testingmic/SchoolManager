@@ -28,19 +28,19 @@ $item_list = load_class("departments", "controllers")->list($department_param);
 
 $hasDelete = $accessObject->hasAccess("delete", "department");
 $hasUpdate = $accessObject->hasAccess("update", "department");
-
+$count = 0;
 $departments = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "&nbsp;<a title='Click to update department record' href='#' onclick='return loadPage(\"{$baseUrl}department/{$each->id}\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
-    
+    $action = "&nbsp;<a title='Click to update department record' href='#' onclick='return load(\"department/{$each->id}\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $count++;
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Click to delete this Department' onclick='return delete_record(\"{$each->id}\", \"department\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
 
     $departments .= "<tr data-row_id=\"{$each->id}\">";
-    $departments .= "<td>".($key+1)."</td>";
-    $departments .= "<td><a href='#' class='text-uppercase font-weight-bold' onclick='return loadPage(\"{$baseUrl}department/{$each->id}\");'>{$each->name}</a></td>";
+    $departments .= "<td>".($count)."</td>";
+    $departments .= "<td><a href='#' class='text-uppercase font-weight-bold' onclick='return load(\"department/{$each->id}\");'>{$each->name}</a></td>";
     $departments .= "<td>{$each->department_code}</td>";
     $departments .= "<td>{$each->students_count}</td>";
     $departments .= "<td><span class='underline'>".($each->department_head_info->name ?? null)."</span></td>";
@@ -62,7 +62,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
+                            <table data-empty="" data-rows_count="20" class="table table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>

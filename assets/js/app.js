@@ -115,7 +115,7 @@ var load = (page_url) => {
 }
 
 $("#history-reload").on("click", function() {
-    linkHandler(document.location.href, false)
+    loadPage(document.location.href);
 })
 
 $("#history-back").on("click", function() {
@@ -284,6 +284,7 @@ var apply_comment_click_handlers = () => {
 }
 
 var trigger_form_submit = () => {
+    $(`form[class="ajax-data-form"]`).attr("autocomplete", "Off");
     $(`form[class="ajax-data-form"] button[type="button-submit"]`).on("click", async function(evt) {
 
         evt.preventDefault();
@@ -672,8 +673,42 @@ var new_message_alert = () => {
                 if (response.code === 200) {
                     let counter = 0;
                     $.each(response.data.result, function(i, e) {
-                        counter += e.chats_count
-                        $(`span[data-user_id="${e.sender_id}"]`).html(`<i class="fa text-warning fa-comments"></i> ${e.chats_count}`);
+                        counter += e.count.chats_count
+                        if($(`span[data-user_id="${e.count.sender_id}"]`).length) {
+                            $(`span[data-user_id="${e.count.sender_id}"]`).html(`<i class="fa text-warning fa-comments"></i> ${e.count.chats_count}`);
+                        } else {
+                            let online_text = e.count.online ? "online" : "offline",
+                            online_msg = e.count.online ? "Online" : `Left ${e.offline_ago}`;
+                            $(`div[id="chat-scroll"] ul[class~="chat-list"]`).append(`
+                                <li id="default_list" style="width:100%" data-message_id="${e.count.message_unique_id}" onclick="return display_messages('${e.count.message_unique_id}','${e.count.sender_id}','${e.count.name}','${baseUrl}${e.count.image}','${e.count.offline_ago}')" class="clearfix d-flex">
+                                    <img src="${baseUrl}${e.count.image}" alt="avatar">
+                                    <div class="about" style="width:100%">
+                                        <div class="name">${e.count.name}</div>
+                                        <div class="status">
+                                            <i class="material-icons ${online_text}">fiber_manual_record</i>
+                                            ${online_msg}
+                                            <span data-user_id="${e.count.sender_id}" class="float-right"></span>
+                                        </div>
+                                    </div>
+                                </li>
+                            `);
+                        }
+                        if(e.count.sender_id === current_focused_user_id) {
+                            $.each(e.messages_list, function(ii, chat) {
+                                $(`div[class~="chat-box"] div[class~="chat-content"]`).append(
+                                    `<div class="chat-item chat-left" style="display:block">
+                                        <img src="${baseUrl}${chat.image}">
+                                        <div class="chat-details">
+                                        <div class="chat-text">${chat.message}</div>
+                                        <div class="chat-time">${chat.sent_time}</div>
+                                        </div>
+                                    </div>`
+                                );
+                            });
+                            $(`div[class~="chat-content"]`).animate({ scrollTop: $(`div[class~="chat-content"]`).prop("scrollHeight") }, 0);
+                            $(`span[data-user_id="${e.count.sender_id}"]`).html(``);
+                            $.post(`${baseUrl}api/chats/read`, {message_id: e.message_id});
+                        }
                     });
                     if (counter !== 0) {
                         $(`a[data-notification="message"]`).addClass("beep");
@@ -686,7 +721,6 @@ var new_message_alert = () => {
     }
     setTimeout(() => { new_message_alert() }, $.chatinterval);
 }
-new_message_alert();
 
 var loadFormAction = (form) => {
 
@@ -769,20 +803,11 @@ var initMainMenu = () => {
     });
 }
 
-var initPlugins = () => {
+var the_date_picker = () => {
+
     if ($('._datepicker').length > 0) {
         $('._datepicker').datepicker();
     }
-
-    if ($('.monthyear').length > 0) {
-        $('.monthyear').daterangepicker({
-            locale: { format: 'YYYY-MM' },
-            singleDatePicker: true,
-            maxDate: $.today,
-            drops: 'down'
-        });
-    }
-
     if ($('.datepicker').length > 0) {
         $('.datepicker').each((index, el) => {
             let input = $(el);
@@ -798,7 +823,6 @@ var initPlugins = () => {
             });
         });
     }
-
     if ($('.att_datepicker').length > 0) {
         $('.att_datepicker').daterangepicker({
             locale: { format: 'YYYY-MM-DD' },
@@ -807,6 +831,20 @@ var initPlugins = () => {
             maxDate: $.today
         });
     }
+}
+
+var initPlugins = () => {
+    
+    if ($('.monthyear').length > 0) {
+        $('.monthyear').daterangepicker({
+            locale: { format: 'YYYY-MM' },
+            singleDatePicker: true,
+            maxDate: $.today,
+            drops: 'down'
+        });
+    }
+
+    the_date_picker();
 
     if (('.daterange').length > 0) {
         $('.daterange').daterangepicker({
@@ -884,7 +922,7 @@ var initDataTables = () => {
 
     try {
         if ($('.datatable').length > 0) {
-            let rows_count = $(`table[class~="datatable"]`).attr("data-rows_count") == undefined ? 10 : $(`table[class~="datatable"]`).attr("data-rows_count");
+            let rows_count = $(`table[class~="datatable"]`).attr("data-rows_count") == undefined ? 15 : $(`table[class~="datatable"]`).attr("data-rows_count");
             $('.datatable').DataTable({
                 search: null,
                 lengthMenu: [
@@ -916,12 +954,13 @@ var initDataTables = () => {
     
         if ($(`table[class~="raw_datatable"]`).length > 0) {
             let t_order = $(`table[class~="raw_datatable"]`).attr("data-order_item") == undefined ? "asc" : $(`table[class~="raw_datatable"]`).attr("data-order_item");
+            let rows_count = $(`table[class~="raw_datatable"]`).attr("data-rows_count") == undefined ? 15 : $(`table[class~="raw_datatable"]`).attr("data-rows_count");
             $(`table[class~="raw_datatable"]`).DataTable({
                 order: [0, t_order],
                 search: null,
                 lengthMenu: [
-                    [10, 30, 50, 75, 100, 200, -1],
-                    [10, 30, 50, 75, 100, 200, "All"]
+                    [rows_count, 30, 50, 75, 100, 200, -1],
+                    [rows_count, 30, 50, 75, 100, 200, "All"]
                 ],
                 language: {
                     sEmptyTable: "Nothing Found",

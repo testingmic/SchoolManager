@@ -28,7 +28,7 @@ class Events extends Myschoolgh {
         // append the audience
         if(($params->userData->user_type == "admin")) {
             // list all events
-            $params->audience = "all,student,teacher,parent";
+            $params->audience = "all,student,teacher,parent,admin";
         }
 
         $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
@@ -43,13 +43,13 @@ class Events extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT ".(isset($params->columns) ? $params->columns : "
-                    a.*, (SELECT b.name FROM events_types b WHERE b.item_id = a.event_type LIMIT 1) AS type_name,
-                    (SELECT b.color_code FROM events_types b WHERE b.item_id = a.event_type LIMIT 1) AS color_code,
+                    a.*, et.name AS type_name, et.color_code AS color_code,
                     (SELECT 
-                        CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) 
+                        CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email, 'NULL'),'|',b.image,'|',b.user_type) 
                         FROM users b WHERE b.item_id = a.created_by LIMIT 1
                     ) AS created_by_info")."
                 FROM  events a
+                LEFT JOIN events_types et ON et.item_id = a.event_type
                 WHERE {$params->query} AND a.client_id = '{$params->clientId}' AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
             ");
             $stmt->execute([1]);
@@ -65,7 +65,7 @@ class Events extends Myschoolgh {
                     // loop through the information
                     foreach(["created_by_info"] as $each) {
                         // convert the created by string into an object
-                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","last_seen","online","user_type"]);
+                        $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","user_type"]);
                     }
                 }
 
@@ -78,6 +78,7 @@ class Events extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
+            print $e->getMessage();
             return $this->unexpected_error;
         } 
 
@@ -106,8 +107,8 @@ class Events extends Myschoolgh {
         $params->hasEventUpdate = $accessObject->hasAccess("update", "events");
 
         /** Audience check */
-        if(!in_array($params->audience, ["all", "teacher", "student", "parent"])) {
-            return ["code" => 203, "Sorry! Invalid audience was parsed."];
+        if(!in_array($params->audience, array_keys($this->event_audience))) {
+            return ["code" => 203, "data" => "Sorry! Invalid audience was parsed."];
         }
         
         // confirm that a logo was parsed
@@ -134,7 +135,7 @@ class Events extends Myschoolgh {
                 // Upload file to the server 
                 if(move_uploaded_file($params->event_image["tmp_name"], $image)){}
             } else {
-                return ["code" => 203, "Sorry! The event file must be a valid image."];
+                return ["code" => 203, "data" => "Sorry! The event file must be a valid image."];
             }
         }
 
@@ -203,8 +204,8 @@ class Events extends Myschoolgh {
         }
 
         /** Audience check */
-        if(!in_array($params->audience, ["all", "teacher", "student", "parent"])) {
-            return ["code" => 203, "Sorry! Invalid audience was parsed."];
+        if(!in_array($params->audience, array_keys($this->event_audience))) {
+            return ["code" => 203, "data" => "Sorry! Invalid audience was parsed."];
         }
         
         // confirm that a logo was parsed
@@ -231,7 +232,7 @@ class Events extends Myschoolgh {
                 // Upload file to the server 
                 if(move_uploaded_file($params->event_image["tmp_name"], $image)){}
             } else {
-                return ["code" => 203, "Sorry! The event file must be a valid image."];
+                return ["code" => 203, "data" => "Sorry! The event file must be a valid image."];
             }
         }
 
@@ -295,7 +296,7 @@ class Events extends Myschoolgh {
         $query = isset($params->type_id) && !empty($params->type_id) ? " AND item_id='{$params->type_id}'" : "";
 
         // make the request
-        $events_types = $this->pushQuery("*", "events_types", "client_id = '{$params->clientId}' AND status='1' {$query}");
+        $events_types = $this->pushQuery("*", "events_types", "client_id = '{$params->clientId}' AND status='1' {$query} LIMIT 100");
 
         $data = [];
 
@@ -376,7 +377,7 @@ class Events extends Myschoolgh {
             ".(isset($params->description) ? ",description = '{$params->description}'" : "")."
             ".(isset($params->color_code) ? ",color_code = '{$params->color_code}'" : "")."
             ".(isset($params->icon) ? ",icon = '{$params->icon}'" : "")."
-            WHERE client_id = ? AND item_id = ?
+            WHERE client_id = ? AND item_id = ? LIMIT 1
         ");
         $stmt->execute([$params->name, create_slug($params->name), $params->clientId, $item_id]);
 
@@ -414,7 +415,7 @@ class Events extends Myschoolgh {
 
         // minified description
         $minified = (bool) isset($data->mini_description);
-        $do_no_encode = (bool) isset($data->do_no_encode);
+        $do_not_encode = (bool) isset($data->do_not_encode);
 
         // show birthday information if the user type is a teacher or admin
         if(in_array($data->the_user_type, ["admin", "accountant"])) {
@@ -446,7 +447,7 @@ class Events extends Myschoolgh {
                             <div class='col-md-10'>
                                 <div>
                                     This is the birthday of <strong>{$user->name}</strong>. 
-                                    <a href='javascript:void(0)' class='anchor' onclick='loadPage(\"{$this->baseUrl}compose?user_id={$user->item_id}&name={$user->name}\")'>Click Here</a> 
+                                    <a href='javascript:void(0)' class='anchor' onclick='load(\"email_send?user_id={$user->item_id}&name={$user->name}\")'>Click Here</a> 
                                     to send a Email or SMS message to the user.
                                 </div>
                                 <div class='mt-3'>
@@ -479,12 +480,11 @@ class Events extends Myschoolgh {
         $result = (object) [];
 
         // append the birthday_list 
-        $result->birthday_list =  !$do_no_encode ? json_encode($birthday_list) : $birthday_list;
+        $result->birthday_list =  !$do_not_encode ? json_encode($birthday_list) : $birthday_list;
 
         // append the holidays list
         $array_list = [
-            "holidays_list" => ["holiday" => "on"], 
-            "calendar_events_list" => ["holiday" => "not"]
+            "holidays_list" => ["holiday" => "on"], "calendar_events_list" => ["holiday" => "not"]
         ];  
 
         // init the parameters for the events (holidays and other events)
@@ -562,7 +562,7 @@ class Events extends Myschoolgh {
                 }
             }
 
-            $result->{$key} = !$do_no_encode ? json_encode($query_array) : $query_array;
+            $result->{$key} = !$do_not_encode ? json_encode($query_array) : $query_array;
 
         }
 
@@ -582,6 +582,7 @@ class Events extends Myschoolgh {
         // append the the parameters
         $params->userData->hasEventDelete = $params->hasEventDelete;
         $params->userData->hasEventUpdate = $params->hasEventUpdate;
+        $scriptsClass = load_class("scripts", "controllers");
 
         // loop through the various user types
         foreach(["admin", "accountant", "teacher", "parent", "student", "employee"] as $user_type) {
@@ -598,7 +599,7 @@ class Events extends Myschoolgh {
 
             // generate a new script for this client
             $filename = "assets/js/scripts/{$params->clientId}_{$user_type}_events.js";
-            $data = load_class("scripts", "controllers")->attendance($param);
+            $data = $scriptsClass->attendance($param);
             $file = fopen($filename, "w");
             fwrite($file, $data);
             fclose($file);

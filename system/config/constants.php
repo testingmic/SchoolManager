@@ -9,7 +9,7 @@ date_default_timezone_set('Africa/Accra');
 defined('DB_HOST')  OR define('DB_HOST', "localhost");
 defined('DB_USER')  OR define('DB_USER', "newuser");
 defined('DB_PASS')  OR define('DB_PASS', "password");
-defined('DB_NAME')  OR define('DB_NAME', "myschoolgh");
+defined('DB_NAME')  OR define('DB_NAME', "myschoolgh_2");
 
 define('TIME_PERIOD', 60);
 define('ATTEMPTS_NUMBER', 7);

@@ -364,6 +364,7 @@ class Accounting extends Myschoolgh {
         // append the academic year and term
         $params->query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
         $params->query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
+        $order_by = $params->order_by ?? "ASC";
 
         try {
 
@@ -371,11 +372,11 @@ class Accounting extends Myschoolgh {
                 SELECT a.*,
                     (SELECT c.name FROM accounts_type_head c WHERE c.item_id = a.account_type LIMIT 1) AS account_type_name,
                     c.account_name, c.account_bank, c.account_number,
-                    (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info,
+                    (SELECT CONCAT(b.name,'|',COALESCE(b.phone_number, 'NULL'),'|',COALESCE(b.email, 'NULL'),'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info,
                     (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment
                 FROM accounts_transaction a
                 LEFT JOIN accounts c ON c.item_id = a.account_id
-                WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
+                WHERE {$params->query} AND a.status = ? ORDER BY a.id {$order_by} LIMIT {$params->limit}
             ");
             $stmt->execute([1]);
 
@@ -393,7 +394,7 @@ class Accounting extends Myschoolgh {
                 $result->state_label = $this->the_status_label($result->state);
 
                 // set the new name if the account type is payroll or fees
-                if(empty($result->account_type_name) && in_array($result->account_type, ["payroll", "fees"])) {
+                if(empty($result->account_type_name) && in_array($result->account_type, ["payroll", "fees", "arrears"])) {
                     $result->account_type_name = ucfirst($result->account_type);
                 }
 
@@ -682,6 +683,9 @@ class Accounting extends Myschoolgh {
         // get the accounts list
         $accounts_list = $this->list_accounts($params)["data"];
 
+        if(!isset($params->clientId)) {
+            return page_not_found();
+        }
         // confirm that the account is not empty
         if(!empty($accounts_list)) {
 
@@ -883,7 +887,6 @@ class Accounting extends Myschoolgh {
         return $html_content;
     }
 
-
     /**
      * Account Statement Notes
      * 
@@ -910,31 +913,78 @@ class Accounting extends Myschoolgh {
             // confirm that the account is not empty
             if(!empty($accounts_list)) {
 
+                // get the group by
+                $group_by = isset($params->group_by) && !empty($params->group_by) ? strtoupper($params->group_by) : "MONTH";
+                
+                // set the font size
+                $default_font = "15px";
+
+                if($group_by === "MONTH") {
+                    $default_font .= ";text-transform:uppercase";
+                }
+                // days 
+                if($group_by === "DAY") {
+
+                    // get the days lists
+                    $days_list = $this->listDays($params->start_date, $params->end_date);
+                    $days_count = count($days_list);
+
+                    if($days_count > 31 && $days_count < 60) {
+                        return "<table width='100%'>
+                            <tr>
+                                <td>Sorry! The days difference must not exceed 31 days.</td>
+                            </tr>
+                        </table>";
+                    }
+
+                    // if the number of days exceed 20 days
+                    if($days_count > 2 && $days_count < 15) {
+                        $default_font = "15px";
+                    } 
+                    elseif($days_count >= 15 && $days_count <= 21) {
+                        $default_font = "12px";
+                    }
+                    elseif($days_count >= 21 && $days_count <= 25) {
+                        $default_font = "10px";
+                    }
+                    elseif($days_count >= 25 && $days_count <= 60) {
+                        $default_font = "9px";
+                    } elseif($days_count > 70) {
+                        $default_font = "15px;text-transform:uppercase";
+                        $group_by = "MONTH";
+                    }
+                }
+
+                $breakdown = (bool) (isset($params->breakdown) && !empty($params->breakdown));
+
+                // get the fees category list
+                $fees_category_list = $this->pushQuery("id, name", "fees_category", "client_id='{$params->clientId}' AND status='1'");
+                
+                $query = "1";
+                $query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+                $query .= (isset($params->q) && !empty($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
+                $query .= (isset($params->item_type) && !empty($params->item_type)) ? " AND a.item_type='{$params->item_type}'" : null;
+                $query .= (isset($params->account_id) && !empty($params->account_id)) ? " AND a.account_id='{$params->account_id}'" : null;
+                $query .= (isset($params->account_type) && !empty($params->account_type)) ? " AND a.account_type='{$params->account_type}'" : null;
+                $query .= (isset($params->transaction_id) && !empty($params->transaction_id)) ? " AND a.item_id='{$params->transaction_id}'" : null;
+                $query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
+                $query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
+                $query .= isset($params->date) && !empty($params->date) ? " AND DATE(a.date_created) ='{$params->date}'" : "";
+                $query .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "date_created") : null;
+                
                 // loop through the accounts
                 foreach($accounts_list as $account_key => $account) {
 
-                    $query = "1";
-                    $query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-                    $query .= (isset($params->q) && !empty($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
-                    $query .= (isset($params->item_type) && !empty($params->item_type)) ? " AND a.item_type='{$params->item_type}'" : null;
-                    $query .= (isset($params->account_id) && !empty($params->account_id)) ? " AND a.account_id='{$params->account_id}'" : null;
-                    $query .= (isset($params->account_type) && !empty($params->account_type)) ? " AND a.account_type='{$params->account_type}'" : null;
-                    $query .= (isset($params->transaction_id) && !empty($params->transaction_id)) ? " AND a.item_id='{$params->transaction_id}'" : null;
-                    $query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
-                    $query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
-                    $query .= isset($params->date) && !empty($params->date) ? " AND DATE(a.record_date) ='{$params->date}'" : "";
-                    $query .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "record_date") : null;
-                    
                     // get the transactions
                     $stmt = $this->db->prepare("
                         SELECT 
-                            SUM(a.amount) AS total_sum, MONTH(a.record_date) AS record_month, a.account_type, a.item_type,
+                            SUM(a.amount) AS total_sum, DATE(a.date_created) AS record_date, MONTH(a.date_created) AS record_month, a.account_type, a.item_type,
                             (SELECT c.name FROM accounts_type_head c WHERE c.item_id = a.account_type LIMIT 1) AS account_type_name,
                             (SELECT b.account_name FROM accounts b WHERE b.item_id = a.account_id LIMIT 1) AS account_name
                         FROM accounts_transaction a
-                        WHERE {$query} AND a.client_id = ? AND a.account_id = ? GROUP BY a.account_type, MONTH(a.record_date)
+                        WHERE {$query} AND a.client_id = ? AND a.account_id = ? AND a.reversed = ? GROUP BY a.account_type, {$group_by}(a.date_created)
                     ");
-                    $stmt->execute([$params->clientId, $account->item_id]);
+                    $stmt->execute([$params->clientId, $account->item_id, 0]);
                     $result = $stmt->fetchAll(PDO::FETCH_OBJ);
                     
                     // group the item types
@@ -951,12 +1001,9 @@ class Accounting extends Myschoolgh {
                         // loop through the item types
                         foreach($record as $i_key => $i_value) {
                             // loop through the months
-                            for($i = 0; $i < 12; $i++) {
-                                // change the month
-                                $month = date("F", strtotime("January + ".($i_value->record_month -1)." month"));
-                                // append to the record month
-                                $months_data[$item][$month][$i_value->account_type] = $i_value;
-                            }
+                            $month = $group_by == "MONTH" ? date("M", strtotime("January + ".($i_value->record_month -1)." month")) : $i_value->record_date;
+                            // append to the record month
+                            $months_data[$item][$month][$i_value->account_type] = $i_value;
                         }
                     }
 
@@ -970,9 +1017,14 @@ class Accounting extends Myschoolgh {
 
                     // add the fees and payroll to the list
                     $income_heads["Deposit"][] = (object) [
-                        "item_id" => "fees_payment",
+                        "item_id" => "fees",
                         "name" => "Fees",
                         "description" => "This is the general category for the fees."
+                    ];
+                    $income_heads["Deposit"][] = (object) [
+                        "item_id" => "arrears",
+                        "name" => "Arrears",
+                        "description" => "This is the general category for the fees arrears payment."
                     ];
                     $income_heads["Expense"][] = (object) [
                         "item_id" => "payslip",
@@ -1010,69 +1062,108 @@ class Accounting extends Myschoolgh {
 
                     // loop through the items
                     foreach(["Deposit", "Expense"] as $item) {
+                        // set the item name
+                        $item_name = $item == "Deposit" ? "Income" : $item;
 
                         // create the table
                         $item_content .= "
                         <div style='margin-bottom:20px'>
-                            <div><strong>{$item} Line</strong></div>
+                            <div><strong>{$item_name} Line</strong></div>
                             <table width='100%' cellpadding='5px;' style='border:solid 1px #dee2e6;'>
                                 <thead>
                                     <tr>
-                                        <th width='15%' style='background:#2196F3;color:#fff;'></th>";
-                                        for($i = 0; $i < date("m"); $i++) {
-                                            $month = date("M", strtotime("January + {$i} month"));
-                                            $item_content .= "<th style='color:#fff;text-transform:uppercase;background:#2196F3' align='right'>{$month}</th>\n";
+                                        <th width='15%' align='left' style='font-size:{$default_font};background:#2196F3;color:#fff;'>ITEM</th>";
+
+                                        // list the months of the year if the group by is month
+                                        if($group_by === "MONTH") {
+                                            for($i = 0; $i < 12; $i++) {
+                                                $month = date("M", strtotime("January + {$i} month"));
+                                                $item_content .= "<th align='center' style='color:#fff;font-size:{$default_font};background:#2196F3' align='right'>{$month}</th>\n";
+                                            }
+                                        }
+                                        // list the days within the range
+                                        else {
+                                            foreach($days_list as $day) {
+                                                $day = date("jS M", strtotime($day));
+                                                $item_content .= "<th align='center' style='color:#fff;font-size:{$default_font};background:#2196F3' align='right'>{$day}</th>\n";
+                                            }
                                         }
                             $item_content .= "
-                                        <th align='right' style='background:#2196F3;color:#fff;'>TOTAL</th>
+                                        <th align='right' style='background:#2196F3;color:#fff;font-size:{$default_font};'>TOTAL</th>
                                     </tr>
                                 </thead>
                                 <tbody>";
                                     foreach($income_heads[$item] as $type) {
                                         $item_content .= "<tr>\n";
-                                        $item_content .= "<td><span style='font-size:13px;'>{$type->name}</span></td>\n";
+                                        $item_content .= "<td><span style='font-size:{$default_font};'>{$type->name}</span></td>\n";
 
-                                        // loop through the months
-                                        for($i = 0; $i < date("m"); $i++) {
+                                        // list the months of the year if the group by is month
+                                        if($group_by === "MONTH") {
 
-                                            $month = date("F", strtotime("January + {$i} month"));
+                                            // loop through the months
+                                            for($i = 0; $i < 12; $i++) {
 
-                                            // get the name 
-                                            $item_amount = isset($months_data[$item][$month][$type->item_id]) ? $months_data[$item][$month][$type->item_id]->total_sum : 0;
-                                            // print_r($months_data[$item]["July"][$type->item_id]);
-
-                                            if(isset($months_data[$item][$month][$type->item_id])) {
-                                                if($months_data[$item][$month][$type->item_id]->account_type === $type->item_id) {
-                                                    $item_content .= "<td style='border:solid 1px #dee2e6;font-size:13px;' align='right'>".number_format($item_amount, 2)."</td>\n";
+                                                $month = date("M", strtotime("January + {$i} month"));
+                                                
+                                                // get the name 
+                                                $item_amount = isset($months_data[$item][$month][$type->item_id]) ? $months_data[$item][$month][$type->item_id]->total_sum : 0;
+                                                
+                                                if(isset($months_data[$item][$month][$type->item_id])) {
+                                                    if($months_data[$item][$month][$type->item_id]->account_type === $type->item_id) {
+                                                        $item_content .= "<td style='border:solid 1px #dee2e6;font-size:{$default_font};' align='right'>".number_format($item_amount, 2)."</td>\n";
+                                                    } else {
+                                                        $item_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+                                                    }
                                                 } else {
                                                     $item_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
                                                 }
-                                            } else {
-                                                $item_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+
+                                                // get the line total
+                                                $line_total[$item][$type->item_id][] = $item_amount;
+
+                                                // set the month total
+                                                $months_group[$item][$month][] = $item_amount;
+
                                             }
 
-                                            // get the line total
-                                            $line_total[$item][$type->item_id][] = $item_amount;
+                                        }
+                                        // list the days within the range
+                                        else {
+                                            foreach($days_list as $day) {
+                                                // get the name 
+                                                $item_amount = isset($months_data[$item][$day][$type->item_id]) ? $months_data[$item][$day][$type->item_id]->total_sum : 0;
+                                                
+                                                if(isset($months_data[$item][$day][$type->item_id])) {
+                                                    if($months_data[$item][$day][$type->item_id]->account_type === $type->item_id) {
+                                                        $item_content .= "<td style='border:solid 1px #dee2e6;font-size:{$default_font};' align='right'>".number_format($item_amount, 2)."</td>\n";
+                                                    } else {
+                                                        $item_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+                                                    }
+                                                } else {
+                                                    $item_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+                                                }
 
-                                            // set the month total
-                                            $months_group[$item][$month][] = $item_amount;
+                                                // get the line total
+                                                $line_total[$item][$type->item_id][] = $item_amount;
 
+                                                // set the month total
+                                                $months_group[$item][$day][] = $item_amount;
+                                            }
                                         }
 
-                                        $item_content .= "<td style='border:solid 1px #dee2e6;' align='right'><strong>".number_format(array_sum($line_total[$item][$type->item_id]), 2)."</strong></td>";
-
+                                        $item_content .= "<td style='font-size:{$default_font};border:solid 1px #dee2e6;' align='right'><strong>".number_format(array_sum($line_total[$item][$type->item_id]), 2)."</strong></td>";
                                         $item_content .= "</tr>\n";
-
                                     }
                                     $item_content .= "<tr style='border:solid 1px #dee2e6; background:#555758; color: #fff'>";
-                                    $item_content .= "<td><strong>TOTAL</strong></td>";
+                                    $item_content .= "<td><strong style='font-size:{$default_font};'>TOTAL</strong></td>";
 
                                     $summary_total = 0;
 
                                     if(isset($months_group[$item])) {
                                         foreach($months_group[$item] as $_this => $_that) {
-                                            $item_content .= "<td align='right'>
-                                                <strong>".number_format(array_sum($_that), 2)."</strong>
+                                            $item_content .= "
+                                            <td align='right'>
+                                                <strong style='font-size:{$default_font};'>".number_format(array_sum($_that), 2)."</strong>
                                             </td>";
                                         }
 
@@ -1081,10 +1172,11 @@ class Accounting extends Myschoolgh {
                                         }
                                     }
                         $item_content .= "
-                                        <td align='right'>
-                                            <strong>".number_format($summary_total, 2)."</strong>
-                                        </td>
-                                    </tr>
+                                    <td align='right'>
+                                        <strong style='font-size:{$default_font};'>".number_format($summary_total, 2)."</strong>
+                                    </td>
+                                </tr>";
+                        $item_content .= "
                                 <tbody>
                             </table>
                         </div>";
@@ -1126,6 +1218,171 @@ class Accounting extends Myschoolgh {
 
                     // append the data stream
                     $html_content .= $item_content;
+
+                    // if the show breakdown parameter was parsed
+                    if($breakdown) {
+
+                        // header for the breakdown
+                        // $html_content .= "<div class=\"page_break\"></div>";
+                        $html_content .= "<br>";
+                        $html_content .= "<div><strong>Breakdown of Fees Receipt</strong></div>";
+                        $filters = "1";
+                        $filters .= isset($params->date) && !empty($params->date) ? " AND DATE(a.recorded_date) ='{$params->date}'" : "";
+                        $filters .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "recorded_date") : null;
+                        $filters .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
+                        $filters .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
+
+                        // load the fees payent from the fees collection table grouped by the category id and the date recorded
+                        $stmt = $this->db->prepare("
+                            SELECT 
+                                SUM(a.amount) AS amount_paid, a.category_id,
+                                fc.name AS category_name, DATE(a.recorded_date) AS recorded_date, {$group_by}(a.recorded_date) AS group_period
+                            FROM fees_collection a
+                            LEFT JOIN fees_category fc ON fc.id = a.category_id
+                            WHERE {$filters} AND a.client_id = ? AND a.reversed = ? AND a.category_id != ?
+                            GROUP BY a.category_id, {$group_by}(a.recorded_date)
+                        ");
+                        $stmt->execute([$params->clientId, 0, "Arrears"]);
+                        
+                        $fees_payment = [];
+                        while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                            $fees_payment[$result->category_name][] = $result;
+                        }
+
+                        // group by period set
+                        $period_data = [];
+
+                        // loop through the months of the year
+                        foreach($fees_payment as $item => $record) {
+                            // loop through the item types
+                            foreach($record as $i_value) {
+                                // loop through the months
+                                $month = $group_by == "MONTH" ? date("F", strtotime("January + ".($i_value->group_period -1)." month")) : $i_value->recorded_date;
+                                // append to the record month
+                                $period_data[$month][$i_value->category_id] = $i_value;
+                            }
+                        }
+
+                        // a new variable for the breakdown
+                        $line_total = [];
+                        $breakdown_group = [];
+
+                        $html_content .= "
+                        <table width='100%' cellpadding='5px;' style='border:solid 1px #dee2e6;'>
+                            <thead>
+                                <tr>
+                                    <th width='15%' align='left' style='font-size:{$default_font};background:#2196F3;color:#fff;'>ITEM</th>";
+
+                                    // list the months of the year if the group by is month
+                                    if($group_by === "MONTH") {
+                                        for($i = 0; $i < 12; $i++) {
+                                            $month = date("M", strtotime("January + {$i} month"));
+                                            $html_content .= "<th align='center' style='color:#fff;font-size:{$default_font};background:#2196F3' align='right'>{$month}</th>\n";
+                                        }
+                                    }
+                                    // list the days within the range
+                                    else {
+                                        foreach($days_list as $day) {
+                                            $day = date("jS M", strtotime($day));
+                                            $html_content .= "<th style='color:#fff;font-size:{$default_font};background:#2196F3' align='right'>{$day}</th>\n";
+                                        }
+                                    }
+                        $html_content .= "
+                                    <th align='right' style='background:#2196F3;font-size:{$default_font};color:#fff;'>TOTAL</th>
+                                </tr>";
+    
+                                // list through the category list
+                                foreach($fees_category_list as $category) {
+                                    $html_content .= "<tr>";
+                                    $html_content .= "<td><span style='font-size:{$default_font};'>{$category->name}</span></td>\n";
+
+                                    if($group_by === "MONTH") {
+
+                                        // loop through the months
+                                        for($i = 0; $i < 12; $i++) {
+
+                                            $month = date("F", strtotime("January + {$i} month"));
+                                            
+                                            // get the name 
+                                            $item_amount = isset($period_data[$month][$category->id]) ? $period_data[$month][$category->id]->amount_paid : 0;
+                                            
+                                            if(isset($period_data[$month][$category->id])) {
+                                                if($period_data[$month][$category->id]->category_id === $category->id) {
+                                                    $html_content .= "<td style='border:solid 1px #dee2e6;font-size:{$default_font};' align='right'>".number_format($item_amount, 2)."</td>\n";
+                                                } else {
+                                                    $html_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+                                                }
+                                            } else {
+                                                $html_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+                                            }
+
+                                            // get the line total
+                                            $line_total[$category->id][] = $item_amount;
+
+                                            // set the month total
+                                            $breakdown_group[$month][] = $item_amount;
+
+                                        }
+
+                                    }
+                                    // list the days within the range
+                                    else {
+                                        foreach($days_list as $day) {
+                                            // get the name 
+                                            $item_amount = isset($period_data[$day][$category->id]) ? $period_data[$day][$category->id]->amount_paid : 0;
+                                            
+                                            if(isset($period_data[$day][$category->id])) {
+                                                if($period_data[$day][$category->id]->category_id === $category->id) {
+                                                    $html_content .= "<td style='border:solid 1px #dee2e6;font-size:{$default_font};' align='right'>".number_format($item_amount, 2)."</td>\n";
+                                                } else {
+                                                    $html_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+                                                }
+                                            } else {
+                                                $html_content .= "<td style='border:solid 1px #dee2e6;'></td>\n";
+                                            }
+
+                                            // get the line total
+                                            $line_total[$category->id][] = $item_amount;
+
+                                            // set the month total
+                                            $breakdown_group[$day][] = $item_amount;
+                                        }
+                                    }
+
+                                    $html_content .= "<td style='font-size:{$default_font};border:solid 1px #dee2e6;' align='right'><strong>".number_format(array_sum($line_total[$category->id]), 2)."</strong></td>";
+                                    $html_content .= "</tr>\n";
+
+                                    $html_content .= "</tr>";
+                                }
+
+                                $html_content .= "<tr style='border:solid 1px #dee2e6; background:#555758; color: #fff'>";
+                                $html_content .= "<td><strong style='font-size:{$default_font};'>TOTAL</strong></td>";
+
+                                $summary_total = 0;
+
+                                foreach($breakdown_group as $_this => $_that) {
+                                    $html_content .= "
+                                    <td align='right'>
+                                        <strong style='font-size:{$default_font};'>".number_format(array_sum($_that), 2)."</strong>
+                                    </td>";
+                                }
+
+                                foreach($breakdown_group as $_this => $_that) {
+                                    $summary_total += array_sum($_that);
+                                }
+
+                                $html_content .= "
+                                    <td align='right'>
+                                        <strong style='font-size:{$default_font};'>".number_format($summary_total, 2)."</strong>
+                                    </td>
+                                </tr>";
+
+                        $html_content .= "
+                            </thead>
+                        </table>";
+
+                    }
+
                     $html_content .= "</div>";
 
                     // display the contact details of the client
@@ -1144,9 +1401,7 @@ class Accounting extends Myschoolgh {
             
             } else {
                 $html_content = "<h3>Sorry! An invalid request was parsed.</h3>";
-            }
-
-            
+            }           
 
             return $html_content;
 
@@ -1182,6 +1437,75 @@ class Accounting extends Myschoolgh {
             
         } catch(PDOException $e) {}
     
+    }
+
+    /**
+     * Reverse Fees Payment
+     * 
+     * @return Array
+     */
+    public function reverse(stdClass $params) {
+
+        try {
+
+            // begin transaction
+            $this->db->beginTransaction();
+
+            // confirm the payment id
+            $payment_check = $this->pushQuery("a.amount, a.balance, a.account_id, a.item_type, a.state,
+                (SELECT c.name FROM accounts_type_head c WHERE c.item_id = a.account_type LIMIT 1) AS account_type_name", 
+                "accounts_transaction a", "a.item_id='{$params->transaction_id}' AND a.client_id='{$params->clientId}' LIMIT 1");
+
+            // end query if empty
+            if(empty($payment_check)) {
+                return ["code" => 203, "data" => "Sorry! An invalid Transaction ID was parsed for processing"];
+            }
+
+            // confirm if already reversed
+            if($payment_check[0]->state == "Reserved") {
+                return ["code" => 203, "data" => "Sorry! This transaction has already been reversed"];
+            }
+
+            // set the amount
+            $amount_paid = $payment_check[0]->amount;
+
+            // reverse the transaction
+            $this->db->query("UPDATE accounts_transaction SET state='Reversed', reversed='1' WHERE item_id='{$params->transaction_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+            // get the account id
+            $account_id = $this->pushQuery("account_id", "accounts_transaction", "item_id='{$params->transaction_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+            // if the account id is not empty
+            if(!empty($account_id)) {
+                // set the arithmetic sign
+                $sign = $payment_check[0]->item_type == "Deposit" ? "-" : "+";
+                
+                // reduce the account balance
+                $this->db->query("UPDATE accounts SET total_credit = (total_credit {$sign} {$amount_paid}), 
+                    balance = (balance {$sign} {$amount_paid})
+                    WHERE item_id = '{$account_id[0]->account_id}' AND client_id = '{$params->clientId}' LIMIT 1
+                ");
+            }
+
+            /* Record the user activity log */
+            $this->userLogs("transaction_reversal", $params->transaction_id, null, 
+                "{$params->userData->name} reversed an amount of <strong>{$amount_paid}</strong> as {$payment_check[0]->item_type} for 
+                    <strong>{$payment_check[0]->account_type_name}</strong>.", $params->userId);
+            
+            // commit the statement
+            $this->db->commit();
+
+            // return success message
+            return [
+                "code" => 200,
+                "data" => "Transaction reversal was successful"
+            ];
+
+        } catch(PDOException $e) {
+            // reverse the db transaction
+            $this->db->rollBack();
+        }
+
     }
 
 }

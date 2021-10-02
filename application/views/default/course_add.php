@@ -16,10 +16,10 @@ jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Add Course";
+$pageTitle = "Add Subject";
 $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = [
-    "assets/js/page/index.js"
+    "assets/js/index.js"
 ];
 
 $the_form = load_class("forms", "controllers")->course_form($clientId, $baseUrl);
@@ -30,7 +30,7 @@ $response->html = '
             <h1>'.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'courses">Course List</a></div>
+                <div class="breadcrumb-item active"><a href="'.$baseUrl.'courses">Subjects List</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>

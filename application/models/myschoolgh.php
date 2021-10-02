@@ -60,7 +60,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Object
 	 */
-	public function client_session_data($clientId, $clear = true) {
+	final function client_session_data($clientId, $clear = true) {
 
 		// initial client data
 		$client_data = (object) [];
@@ -107,7 +107,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Object
 	 */
-	public function grading_system($clientId, $academic_year, $academic_term) {
+	final function grading_system($clientId, $academic_year, $academic_term) {
 
 		// if either the academic term or year are empty
 		if(empty($academic_year) || empty($academic_term)) {
@@ -140,7 +140,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Object
 	 */
-	public function client_data($clientId = null) {
+	final function client_data($clientId = null) {
 
 		$clientId = !empty($clientId) ? $clientId : (!empty($this->clientId) ? $this->clientId : $this->session->clientId);
 
@@ -211,7 +211,7 @@ class Myschoolgh extends Models {
 	 * @param string $column_to_return
 	 * @return return the number of rows counted
 	 **/
-	public function itemById($table, $column, $value, $column_to_return) {
+	final function itemById($table, $column, $value, $column_to_return) {
 		
 		$stmt = $this->db->query("SELECT * FROM $table WHERE $column='{$value}' AND status='1' LIMIT 1");
 
@@ -230,7 +230,7 @@ class Myschoolgh extends Models {
 	 * @param string $column_to_return
 	 * @return return the number of rows counted
 	 **/
-	public function itemByIdNoStatus($table, $column, $value, $column_to_return) {
+	final function itemByIdNoStatus($table, $column, $value, $column_to_return) {
 		
 		$stmt = $this->db->query("SELECT * FROM $table WHERE $column='$value' LIMIT 1");
 
@@ -283,11 +283,19 @@ class Myschoolgh extends Models {
 	 * @method pushQuery($columns, $table, $whereClause)
 	 * @desc Receives user query and returns the full data array
 	 * 
+	 * @param String	$columns
+	 * @param String	$tableName
+	 * @param String	$whereClause
+	 * @param Bool		$print
+	 * @param String	$query_style
+	 * 
 	 * @return array
 	 **/
-	final function pushQuery($columns = "*", $tableName, $whereClause = 1, $print = false, $query_style = "OBJ") {
+	final function pushQuery($columns = "*", $tableName = null, $whereClause = 1, $print = false, $query_style = "OBJ") {
 
 		try {
+
+			if(empty($tableName)) { return []; }
 
 			$stmt = $this->db->prepare("SELECT {$columns} FROM {$tableName} WHERE $whereClause");
 			$stmt->execute();
@@ -344,7 +352,7 @@ class Myschoolgh extends Models {
 				$key = isset($result->item_id) ? $result->item_id : $result->id;
 
 				// loop through this array list
-				foreach(["description", "requirements"] as $eachItem) {
+				foreach(["description", "requirements", "message", "content"] as $eachItem) {
 					// if isset the value
 					if(isset($result->$eachItem)) {
 						// clean the data parsed
@@ -740,13 +748,13 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return String
      */
-    public function the_status_label($status) {
+    final function the_status_label($status) {
 
         $label = $status;
         if(in_array($status, ["Pending", "Due Today"])) {
             $label = "<span class='badge p-1 badge-primary'>{$status}</span>";
         }
-        elseif(in_array($status, ["Rejected", "Cancelled", "Not Paid", "Unpaid", "Unseen", "Closed", "Overdue", "Expired", "Suspended"])) {
+        elseif(in_array($status, ["Rejected", "Reversed", "Cancelled", "Not Paid", "Unpaid", "Unseen", "Closed", "Overdue", "Expired", "Suspended"])) {
             $label = "<span class='badge p-1 badge-danger'>{$status}</span>";
         }
         elseif(in_array($status, ["Reopen", "Waiting", "Draft", "Processing", "In Review", "Confirmed", "Graded", "Requested", "Propagation"])) {
@@ -766,7 +774,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return String
 	 */
-	public function append_zeros($requestId, $number = 5) {
+	final function append_zeros($requestId, $number = 5) {
 		$preOrder = str_pad($requestId, $number, '0', STR_PAD_LEFT);
 		return $preOrder;
 	}
@@ -778,7 +786,7 @@ class Myschoolgh extends Models {
      * 
      * @return Object
      */
-    public function replied_by($user_id) {
+    final function replied_by($user_id) {
 
         try {
             $stmt = $this->db->prepare("SELECT name AS fullname, email, phone_number, image, user_type, position, description, username FROM users WHERE item_id = ? LIMIT 1");
@@ -793,7 +801,7 @@ class Myschoolgh extends Models {
 	 * Confirm that the user is online by checking the difference between the last_seen and the current time
 	 * If the difference is 5 minutes or less then, the user is online if not then the user is offline
 	 */
-	public function user_is_online($last_seen) {
+	final function user_is_online($last_seen) {
 		// online algorithm (user is online if last activity is at most 3 minutes ago)
         return (bool) (raw_time_diff($last_seen) < 0.05);
 	}
@@ -807,7 +815,7 @@ class Myschoolgh extends Models {
 	 * @param array 3 => where_values
 	 * @return json
 	 **/
-	public function auto_update(array $queryString) {
+	final function auto_update(array $queryString) {
 		
 		try {
 			
@@ -849,7 +857,7 @@ class Myschoolgh extends Models {
 	 * @param 2 => where_clause
 	 * @return json
 	 **/
-	public function auto_insert(array $queryString) {
+	final function auto_insert(array $queryString) {
 		
 		try {
 			
@@ -893,7 +901,7 @@ class Myschoolgh extends Models {
      * 
      * @return Array
      */
-    public function format_contact($contact) {
+    final function format_contact($contact) {
         $contact = str_ireplace(" ", "", $contact);
         $contact = "233".substr($contact, -9);
         return $contact;
@@ -906,7 +914,7 @@ class Myschoolgh extends Models {
      * 
      * @return Bool
      */
-    public function check_time($table = "users", $timer = 0.02) {
+    final function check_time($table = "users", $timer = 0.02) {
         
         // get the last date created
         $last_time = $this->columnValue("date_created", $table, "ip_address='{$this->ip_address}' ORDER BY id DESC");
@@ -933,7 +941,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Object
 	 */
-	public function academic_terms($clientId = null) {
+	final function academic_terms($clientId = null) {
 
 		// set the client id
 		$clientId = !empty($clientId) ? $clientId : (!empty($this->clientId) ? $this->clientId : $this->session->clientId);
@@ -949,14 +957,14 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Array
 	 */
-	public function academic_years($clientId = null) {
+	final function academic_years($clientId = null) {
 		/** Set the Parameters */
 		$previous_year = 2020;
-		$next_years = date("Y") + 2;
+		$next_years = date("Y") + 1;
 		
 		/** Loop through the list */
 		for($i = $previous_year; $i <= $next_years; $i++) {
-			$this->academic_calendar_years[] = ($i)."/".($i+1);
+			$this->academic_calendar_years[] = $i."/".($i+1);
 		}
 
 		return $this;
@@ -969,7 +977,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return String
 	 */
-	public function amount_to_words($number) {
+	final function amount_to_words($number) {
 
 		$hyphen      = '-';
 		$conjunction = ' and ';

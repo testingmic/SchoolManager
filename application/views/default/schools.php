@@ -91,16 +91,9 @@ if(!empty($client_id)) {
         foreach($myClass->features_list as $key => $feature) {
             $features_list .= "<tr>";
             $features_list .= "<td width='50%' class='text-uppercase'><label class='cursor' title='Click to select this feature' for='features[$key]'>{$feature}</label></td>";
-            $features_list .= "<td><input ".(in_array($key, $schoolFeatures) ? "checked" : null)." style='width:20px;height:20px' title='Click to select this feature' data-menu_item='{$key}' class='cursor' id='features[$key]' type='checkbox' name='features[$key]' ></td>";
+            $features_list .= "<td><input disabled ".(in_array($key, $schoolFeatures) ? "checked" : null)." style='width:20px;height:20px' title='Click to select this feature' class='cursor' type='checkbox'></td>";
             $features_list .= "</tr>";
         }
-        $features_list .= '
-            <tr>
-                <td width="50%"></td>
-                <td align="left">
-                    <button onclick="return save_client_features(\''.$client_id.'\')" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Record</button>
-                </td>
-            </tr>';
 
         $features_list .= "</table>";
 
@@ -186,7 +179,7 @@ if(!empty($client_id)) {
                                     <div class="tab-pane fade show active" id="account" role="tabpanel" aria-labelledby="account-tab2">
                                         <div class="row">
                                             <div class="col-lg-12 table-responsive">
-                                                <table class="table table-success table-striped table-bordered table-md">
+                                                <table class="table table-striped table-bordered table-md">
                                                     <thead><tr><th colspan="2">CLIENT ACCOUNT INFORMATION</th></tr></thead>
                                                     <tbody>'.$account.'</tbody>
                                                 </table>
@@ -196,7 +189,7 @@ if(!empty($client_id)) {
                                     <div class="tab-pane fade" id="account_analysis" role="tabpanel" aria-labelledby="account_analysis-tab2">
                                         <div class="row">
                                             <div class="col-lg-12 table-responsive">
-                                                <table class="table table-info table-striped table-bordered table-md">
+                                                <table class="table table-striped table-bordered table-md">
                                                     <thead><tr><th colspan="2">CLIENT DATA ANALYSIS</th></tr></thead>
                                                     <tbody>'.$analitics.'</tbody>
                                                 </table>

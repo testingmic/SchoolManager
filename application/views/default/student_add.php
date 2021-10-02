@@ -18,9 +18,7 @@ $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "New Admission";
 $response->title = "{$pageTitle} : {$appName}";
-$response->scripts = [
-    "assets/js/page/index.js"
-];
+$response->scripts = ["assets/js/index.js", "assets/js/filters.js"];
 
 $the_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl);
 
@@ -36,7 +34,7 @@ $response->html = '
         </div>
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
-                <div class="card">
+                <div class="card byPass_Null_Value" id="filter_Department_Class">
                     <div class="card-body">'.$the_form.'</div>
                 </div>
             </div>

@@ -18,7 +18,7 @@ $clientId = $session->clientId;
 $response = (object) [];
 $pageTitle = "Live Chat";
 $response->title = "{$pageTitle} : {$appName}";
-$response->scripts = ["assets/js/page/chat.js"];
+$response->scripts = ["assets/js/chat.js"];
 
 $params = (object) [
     "clientId" => $clientId
@@ -105,7 +105,7 @@ $response->html = '
                   <div class="chat-box" id="mychatbox">
                     <div class="card-body chat-content"></div>
                     <div class="card-footer chat-form">
-                      <form id="chat-form" method="POST">
+                      <form id="chat-form" autocomplete="Off" method="POST">
                         <input id="chat-input" disabled type="text" class="form-control" placeholder="Type a message">
                         <button disabled class="btn btn-primary">
                           <i class="far fa-paper-plane"></i>

@@ -476,7 +476,7 @@ class Assignments extends Myschoolgh {
             "a.client_id='{$params->clientId}' AND c.item_id='{$params->class_id}' AND 
             a.user_type='student' AND a.user_status='Active' AND a.status='1'");
         
-        /** Load the courses list */
+        /** Load the Subjects List */
         $result["courses_list"] = $this->pushQuery("id, item_id, name, course_code", "courses", "class_id LIKE '%{$params->class_id}%' AND academic_term='{$params->academic_term}' AND academic_year='{$params->academic_year}' AND status='1'"); 
 
         /** Return the results */

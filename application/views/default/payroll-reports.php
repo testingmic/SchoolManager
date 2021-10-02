@@ -21,7 +21,7 @@ $response->title = "{$pageTitle} : {$appName}";
 $response->scripts = ["assets/js/analitics.js"];
 
 // access permissions check
-if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
+if(!$accessObject->hasAccess("reports", "payslip")) {
     $response->html = page_not_found("permission_denied");
 } else {
 

@@ -54,6 +54,7 @@ class Users extends Myschoolgh {
 
 			// look up query
 			$params->query = " 1 ";
+			$params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
 			$params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department='{$params->department_id}'" : null;
 			$params->query .= (isset($params->lookup)) ? " AND ((a.name LIKE '%{$params->lookup}%') OR (a.unique_id LIKE '%{$params->lookup}%'))" : null;
 			$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
@@ -67,9 +68,17 @@ class Users extends Myschoolgh {
 			}
 			
 			// set the columns to load
-			$params->columns = "a.id, a.client_id, a.unique_id, a.item_id AS user_id, a.name, a.user_type, a.phone_number, 
-				a.class_id, a.email, a.image, a.gender, cl.name class_name, dp.name AS department_name,
-				(SELECT sum(b.balance) FROM fees_payments b WHERE b.student_id = a.item_id) AS debt, ar.arrears_total AS arrears";
+			$params->columns = "a.id, a.client_id, a.unique_id, a.item_id AS user_id, a.name, 
+				a.user_type, a.phone_number, a.class_id, a.email, a.image, a.gender, 
+				cl.name class_name, dp.name AS department_name, (
+					SELECT CONCAT(
+						COALESCE(SUM(b.amount_paid), '0'), '|', 
+						COALESCE(SUM(b.balance), '0')
+					)
+					FROM fees_payments b 
+					WHERE b.student_id = a.item_id AND b.academic_term = '{$academic_term}'
+						AND b.academic_year = '{$academic_year}' AND b.exempted = '0'
+				) AS payments_data, ar.arrears_total AS arrears";
 			
 			
 			// prepare and execute the statement
@@ -83,14 +92,23 @@ class Users extends Myschoolgh {
 			$sql->execute();
 
 			$data = [];
+			$conter = 0;
+			$idAsKey = (bool) isset($params->set_id_as_key);
+			
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
+				$conter++;
 				// run this section if the user is a student
 				if($result->user_type === "student") {
+					$payments = explode("|", $result->payments_data);
+					$result->debt = $payments[0];
+					$result->amount_paid = $payments[1];
 					$result->debt_formated = number_format($result->debt, 2);
 					$result->arrears_formated = number_format($result->arrears, 2);
 					$result->total_debt_formated = number_format(($result->debt + $result->arrears), 2);
+
+					unset($result->payments_data);
 				}
-				$data[] = $result;
+				$data[($idAsKey ? $result->user_id: $conter)] = $result;
 			}
 
 			// return the data"Sorry! There was an error while processing the request."
@@ -288,7 +306,7 @@ class Users extends Myschoolgh {
 						SELECT SUM(p.balance) FROM fees_payments p 
 						WHERE p.student_id = a.item_id AND p.exempted = '0' 
 							AND p.academic_year = '{$academic_year}' AND p.academic_term = '{$academic_term}'
-					) AS debt,
+					) AS debt, a.last_visited_page,
 					(
 						SELECT ar.arrears_total FROM users_arrears ar WHERE ar.student_id = a.item_id LIMIT 1
 					) AS arrears {$leftJoinQuery}
@@ -726,7 +744,7 @@ class Users extends Myschoolgh {
 							"<div class=\"border-top p-2\">
 								<div class=\"d-flex justify-content-between\">
 									<div>
-										<a href=\"#\" onclick=\"return loadPage('{$this->baseUrl}student/{$ward->student_guid}/view')\" class=\"btn btn-sm btn-outline-success\" title=\"View ward details\"><i class=\"fa fa-eye\"></i> View</a>
+										<a href=\"#\" onclick=\"return load('student/{$ward->student_guid}/view')\" class=\"btn btn-sm btn-outline-success\" title=\"View ward details\"><i class=\"fa fa-eye\"></i> View</a>
 									</div>
 									<div>
 										<a href=\"#\" onclick='return modifyGuardianWard(\"{$guardian_id}_{$ward->student_guid}\", \"remove\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i> Remove</a>
@@ -1028,8 +1046,8 @@ class Users extends Myschoolgh {
 		$i_params = (object) ["limit" => 1, "username" => $params->username];
 
 		// get the user data
-		if(!empty($this->list($i_params)["data"])) {
-			return ["code" => 203, "data" => "Sorry! The username is already in use."];
+		if(!empty($this->quick_list($i_params)["data"])) {
+			$params->username = strtoupper($unique_id);
 		}
 
 		// convert the user type to lowercase
@@ -1043,11 +1061,6 @@ class Users extends Myschoolgh {
 			return ["code" => 203, "data" => "Sorry! An invalid user_type was provided for processing."];
 		}
 
-		// if admin access is false and yet the access id is more than 7 then throw an error
-		if($accessPermissions[0]->id > 5 && !isset($params->adminAccess)) {
-			return ["code" => 203, "data" => "Sorry! An invalid user_type was provided for processing."];
-		}
-
 		// if the email address is not empty
 		if(!empty($params->email)) {
 
@@ -1055,7 +1068,7 @@ class Users extends Myschoolgh {
 			$i_params = (object) ["limit" => 1, "email" => $params->email];
 			
 			// get the user data
-			if(!empty($this->list($i_params)["data"])) {
+			if(!empty($this->quick_list($i_params)["data"])) {
 				return ["code" => 203, "data" => "Sorry! The email is already in use."];
 			}
 		}
@@ -1101,10 +1114,10 @@ class Users extends Myschoolgh {
 			if(in_array($params->user_type, ["student", "parent", "employee"]) || !isset($params->email)) {
 				// set this as a default password if no email was parsed or the usertype is student, parent and employee
 				$params->password = "password";
-			}
 
-			// encrypt the password sent
-			$encrypt_password = password_hash($params->password, PASSWORD_DEFAULT);
+				// encrypt the password sent
+				$encrypt_password = password_hash($params->password, PASSWORD_DEFAULT);
+			}
 			
 			// usertype and fullname
 			$params->fullname = $params->firstname . " " .( $params->lastname ?? null). " " . ($params->othername ?? null);
@@ -1118,7 +1131,7 @@ class Users extends Myschoolgh {
 			$course_ids = [];
 			$add_message = "";
 
-			// append tutor to courses list
+			// append tutor to Subjects List
 			if(isset($params->courses_ids)) {
 				$course_ids = $this->append_user_courses($params->courses_ids, $params->user_id, $params->clientId);
 			}
@@ -1139,6 +1152,10 @@ class Users extends Myschoolgh {
 				".(isset($params->gender) ? ", gender='{$params->gender}'" : null)."
 				".(isset($params->username) ? ", username='{$params->username}'" : null)."
 				".(isset($params->position) ? ", position='{$params->position}'" : null)."
+
+				".(isset($params->hometown) ? ", hometown='{$params->hometown}'" : null)."
+				".(isset($params->place_of_birth) ? ", place_of_birth='{$params->place_of_birth}'" : null)."
+				".(isset($params->alergy) ? ", alergy='{$params->alergy}'" : null)."
 				
 				".(isset($params->relationship) ? ", relationship='{$params->relationship}'" : null)."
 
@@ -1272,11 +1289,12 @@ class Users extends Myschoolgh {
 
 				// set the url
 				if(($redirect == "student")) {
-					$url_link = "{$this->baseUrl}fees-allocate/{$params->user_id}?is_new_admission=1";
+					$canAllocate = $accessObject->hasAccess("allocation", "fees");
+					$url_link = $canAllocate ? "{$this->baseUrl}fees-allocate/{$params->user_id}?is_new_admission=1" : "{$this->baseUrl}student/{$params->user_id}";
 				} elseif(in_array($params->user_type, ["admin", "teacher", "employee", "accountant"])) {
 					$url_link = "{$this->baseUrl}payroll-view/{$params->user_id}?new_staff";
 				} else {
-					$url_link = "{$this->baseUrl}update-{$redirect}/{$params->user_id}";
+					$url_link = "{$this->baseUrl}{$redirect}/{$params->user_id}";
 				}
 
 				// append the redirection url
@@ -1305,6 +1323,9 @@ class Users extends Myschoolgh {
 	 */
 	public function update(stdClass $params) {
 
+		// global variable
+		global $accessObject;
+
 		// confirm that the user_id does not already exist
 		$i_params = (object) ["limit" => 1, "user_id" => $params->user_id, "user_status" => ["Pending", "Active"]];
 		$the_user = $this->list($i_params)["data"];
@@ -1315,7 +1336,7 @@ class Users extends Myschoolgh {
 		}
 
 		// permisssions checker test
-		if(isset($params->userData->user_type) && !in_array($params->userData->user_type, ["admin"]) && ($the_user[0]->created_by !== $params->userData->user_id)) {
+		if(isset($params->userData->user_type) && !in_array($params->userData->user_type, ["admin"]) && ($the_user[0]->user_id !== $params->userData->user_id)) {
 			return ["code" => 201, "data" => "Sorry! You are not permitted to modify this user account details."];
 		}
 
@@ -1340,7 +1361,7 @@ class Users extends Myschoolgh {
 		if(isset($params->username) && ($params->username !== $the_user[0]->username)) {
 			// confirm that the username does not already exist
 			$i_params = (object) ["limit" => 1, "username" => $params->username];
-			if(!empty($this->list($i_params)["data"])) {
+			if(!empty($this->quick_list($i_params)["data"])) {
 				return ["code" => 201, "response" => "Sorry! The username is already in use."];
 			}
 		}
@@ -1350,7 +1371,7 @@ class Users extends Myschoolgh {
 			// confirm that the email does not already exist
 			$i_params = (object) ["limit" => 1, "email" => $params->email];
 			// get the user data
-			if(!empty($this->list($i_params)["data"])) {
+			if(!empty($this->quick_list($i_params)["data"])) {
 				return ["code" => 201, "response" => "Sorry! The email is already in use."];
 			}
 		}
@@ -1399,11 +1420,11 @@ class Users extends Myschoolgh {
 			$params->fullname = $params->firstname . " " .( $params->lastname ?? null). " " . ($params->othername ?? null);
 			
 			// convert the user type to lowercase
-			$params->user_type = strtolower($the_user[0]->user_type);
+			$params->user_type = isset($params->user_type) ? $params->user_type : strtolower($the_user[0]->user_type);
 
 			// init course ids
 			$course_ids = [];
-			// append tutor to courses list
+			// append tutor to Subjects List
 			if(isset($params->courses_ids)) {
 				// find course ids which were initially attached to the tutor but no longer attached
 				$diff = array_diff($prevData->course_ids, $params->courses_ids);
@@ -1420,6 +1441,27 @@ class Users extends Myschoolgh {
 				$this->remove_all_user_courses($params);
 			}
 
+			// log the user access level
+			if($params->user_type !== $the_user[0]->user_type) {
+				// get the user permissions
+				$accessPermissions = $accessObject->getPermissions($params->user_type);
+
+				// if the permission is empty
+				if(empty($accessPermissions)) {
+					return ["code" => 203, "data" => "Sorry! An invalid user_type was provided for processing."];
+				}
+
+				// load the access level permissions
+				$permissions = $accessPermissions[0]->user_permissions;
+				$access_level = $accessPermissions[0]->id;
+
+				$stmt2 = $this->db->prepare("UPDATE users_roles SET permissions = ? WHERE user_id = ? AND client_id = ? LIMIT 1");
+				$stmt2->execute([$permissions, $params->user_id, $params->clientId]);
+
+				// set the value
+				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
+			}
+
 			// insert the user information
 			$stmt = $this->db->prepare("
 				UPDATE users SET last_updated = now(), course_ids = ?
@@ -1430,7 +1472,9 @@ class Users extends Myschoolgh {
 				".(isset($params->email) ? ", email='{$params->email}'" : null)."
 				".(isset($params->residence) ? ", residence='{$params->residence}'" : null)."
 				".(isset($params->gender) ? ", gender='{$params->gender}'" : null)."
+				".(isset($params->user_type) ? ", user_type='{$params->user_type}'" : null)."
 				".(isset($fileName) ? ", image='{$fileName}'" : null)."
+				".(isset($access_level) ? ", access_level='{$access_level}'" : null)."
 				
 				".(isset($params->previous_school) ? ", previous_school='{$params->previous_school}'" : null)."
 				".(isset($params->previous_school_remarks) ? ", previous_school_remarks='{$params->previous_school_remarks}'" : null)."
@@ -1544,63 +1588,63 @@ class Users extends Myschoolgh {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->name, "Name was changed from {$prevData->name}", $params->userId);
 
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 
 			// save the email address
             if(isset($params->email) && ($prevData->email !== $params->email)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->email, "Email Address was changed from {$prevData->email}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 			
 			// save the postal address changes
             if(isset($params->address) && ($prevData->address !== $params->address)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->address, "Postal Address has been changed.", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 
 			// save the date of birth change
             if(isset($params->date_of_birth) && ($prevData->date_of_birth !== $params->date_of_birth)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->date_of_birth, "Date of Birth has been changed to {$params->date_of_birth}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 
 			// save the phone_number change
             if(isset($params->description) && ($prevData->description !== $params->description)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->description, "User description was altered.", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 
 			// save the phone_number_2 change
             if(isset($params->phone_2) && ($prevData->phone_number !== $params->phone_2)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->phone_number_2, "Primary Contact was been changed from {$prevData->phone_number_2}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 			
 			// save the occupation
             if(isset($params->occupation) && ($prevData->occupation !== $params->occupation)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->occupation, "Occupation has been altered. {$prevData->occupation} => {$params->occupation}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 			
 			// save the employer
             if(isset($params->employer) && ($prevData->employer !== $params->employer)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->employer, "Employer details has been altered. {$prevData->employer} => {$params->employer}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 			
 			// save the position
             if(isset($params->position) && ($prevData->position !== $params->position)) {
                 $this->userLogs("{$params->user_type}_account", $params->user_id, $prevData->position, "Position has been altered. {$prevData->position} => {$params->position}", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
             }
 
 			// insert the user activity
@@ -1608,7 +1652,7 @@ class Users extends Myschoolgh {
 				// Insert the log
 				$this->userLogs("{$params->user_type}_account", $params->user_id, null, "You updated your account information", $params->userId);
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}update-{$redirect}/{$params->user_id}/update"];
+				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
 			} else {
 				// notification object
 				global $noticeClass;
@@ -2228,6 +2272,84 @@ class Users extends Myschoolgh {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Bulk Update Students Record
+	 * 
+	 * @param Array		$params->dob
+	 * @param Array		$params->end
+	 * @param Array 	$params->img
+	 * 
+	 * @return Array
+	 */
+	public function bulk_update(stdClass $params) {
+
+		$students_array_list = [];
+
+		// append the date of birth of student
+		if(isset($params->dob) && is_array($params->dob)) {
+			// loop through the date of birth array list
+			foreach($params->dob as $student_id => $dob) {
+				$students_array_list[$student_id]["date_of_birth"] = $dob;
+			}
+		}
+
+		// append the enrollment date
+		if(isset($params->end) && is_array($params->end)) {
+			// loop through the enrollment date array list
+			foreach($params->end as $student_id => $end) {
+				$students_array_list[$student_id]["enrollment_date"] = $end;
+			}
+		}
+
+		// set the upload directory
+		$uploadDir = "assets/img/users/";
+		$allowTypes = array('jpg', 'png', 'jpeg'); 
+
+		// append the student image
+		if(isset($params->img) && is_array($params->img)) {
+			// loop through the student image array list
+			foreach($params->img["name"] as $student_id => $image) {
+				if(!empty($image)) {
+					// if the file is an image file
+					if(in_array($params->img["type"][$student_id], ["image/jpeg", "image/png", "image/jpg"])){
+						$students_array_list[$student_id]["image"] = $uploadDir . random_string('alnum', 10)."__{$image}";
+						$students_array_list[$student_id]["tmp_name"] = $params->img["tmp_name"][$student_id];
+					}
+				}
+			}
+		}
+
+		// return error if no student record was parsed
+		if(empty($students_array_list)) {
+			return ["code" => 203, "data" => "Sorry! No student record was parsed for processing."];
+		}
+
+		// loop through the entire students list
+		foreach($students_array_list as $student_id => $data) {
+
+			// update the image if parsed
+			if(isset($data["image"])) {
+				move_uploaded_file($data["tmp_name"], $data["image"]);
+			}
+
+			// update the student record
+			$this->db->query("UPDATE users SET last_updated = now()
+				".(isset($data["date_of_birth"]) ? ", date_of_birth = '{$data["date_of_birth"]}'" : null)."
+				".(isset($data["enrollment_date"]) ? ", enrollment_date = '{$data["enrollment_date"]}'" : null)."
+				".(isset($data["image"]) ? ", image = '{$data["image"]}'" : null)."
+				WHERE id='{$student_id}' AND client_id='{$params->clientId}' AND user_type = 'student' LIMIT 1
+			");
+
+		}
+
+		// return successfull message
+		return [
+			"code" => 200,
+			"data" => "Student data was successfully updated."
+		];
+
 	}
 	
 }

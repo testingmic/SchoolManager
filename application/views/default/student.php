@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser;
+global $myClass, $SITEURL, $defaultUser, $defaultAcademics;
 
 // initial variables
 $appName = config_item("site_name");
@@ -20,7 +20,7 @@ $response = (object) [];
 $pageTitle = "Student Information";
 $response->title = "{$pageTitle} : {$appName}";
 
-$response->scripts = ["assets/js/page/index.js"];
+$response->scripts = ["assets/js/index.js"];
 
 // student id
 $user_id = $SITEURL[1] ?? null;
@@ -53,7 +53,7 @@ if(!empty($user_id)) {
         $incidents = load_class("incidents", "controllers")->list($student_param);
         
         // user permissions
-        $hasUpdate = $accessObject->hasAccess("update", "guardian");
+        $hasUpdate = $accessObject->hasAccess("update", "student");
         $addIncident = $accessObject->hasAccess("add", "incident");
         $updateIncident = $accessObject->hasAccess("update", "incident");
         $deleteIncident = $accessObject->hasAccess("delete", "incident");
@@ -68,10 +68,8 @@ if(!empty($user_id)) {
 
         // load fees allocation list for class
         $allocation_param = (object) [
-            "clientId" => $clientId, "userData" => $defaultUser, 
-            "student_id" => $user_id, "receivePayment" => $receivePayment, 
-            "client_data" => $defaultUser->client, "parse_owning" => true, 
-            "show_student" =>  false, "group_by" => "GROUP BY a.payment_id"
+            "clientId" => $clientId, "userData" => $defaultUser, "student_id" => $user_id, "receivePayment" => $receivePayment, 
+            "client_data" => $defaultUser->client, "parse_owning" => true, "show_student" =>  false, "group_by" => "GROUP BY a.payment_id"
         ];
         
         // load the class timetable
@@ -84,13 +82,18 @@ if(!empty($user_id)) {
         // if the user has permissions to view fees allocation
         if($viewAllocation) {
 
+            // append the academic year and term
+            $allocation_param->academic_year = $defaultAcademics->academic_year;
+            $allocation_param->academic_term = $defaultAcademics->academic_term;
+
             // create a new object
             $feesObject = load_class("fees", "controllers", $allocation_param);
                         
             // load fees allocation list for the students
             $fees_category_list = "";
-            $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
             $student_fees_list = $feesObject->list($allocation_param)["data"];
+            $allocation_param->limit = 100;
+            $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
             $fees_category_array = $feesObject->category_list($allocation_param)["data"];
 
             // fees category
@@ -103,6 +106,7 @@ if(!empty($user_id)) {
 
                 // add up the amount to be paid
                 $amount += $record->amount;
+                $record->amount_paid = $record->amount_paid ?? 0;
 
                 // append to the fees allocation list
                 $student_fees_payments .='
@@ -191,7 +195,7 @@ if(!empty($user_id)) {
         }
 
         // get the student arrears
-        $student_fees_arrears = "";
+        $student_fees_arrears = null;
         $arrears_array = $myClass->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", "users_arrears", "student_id='{$data->user_id}' AND client_id='{$clientId}' LIMIT 1");
 
         // if the user has permission to view the fees allocation
@@ -236,25 +240,24 @@ if(!empty($user_id)) {
                         foreach($categories as $cat => $value) {
                             // add the sum
                             $total += $value;
+                            $category_name = $students_fees_category_array[$cat]["name"] ?? null;
                             // display the category name and the value
-                            $student_fees_arrears .= "<tr><td>{$students_fees_category_array[$cat]["name"]}</td><td>{$value}</td></tr>";
+                            $student_fees_arrears .= "<tr><td>{$category_name}</td><td>{$value}</td></tr>";
                         }
-                        $student_fees_arrears .= "<tr><td></td>
+                        $student_fees_arrears .= 
+                            !$isParent && $canReceive ? 
+                            "<tr><td></td>
                                 <td class='font-20 font-bold'>
                                     <div class='mb-3'>".number_format($total, 2)."</div>
-                                    <button onclick='return loadPage(\"{$baseUrl}arrears/{$user_id}\")' class='btn text-uppercase btn-outline-success'><i class='fa fa-money-bill-alt'></i> Pay Arrears</button>
+                                    <button onclick='return load(\"arrears/{$user_id}\")' class='btn text-uppercase btn-sm btn-outline-success'><i class='fa fa-money-bill-alt'></i> Pay Arrears</button>
                                 </td>
-                            </tr>";
+                            </tr>" : null;
                         $student_fees_arrears .= "</tbody>";
                     }
                     $student_fees_arrears .= "</table>";
                 } else {
                     $disabled = "disabled";
-                    $student_fees_arrears = "<div class='col-md-12 font-20 text-success'><strong>{$data->name}</strong> currently has no fees arrears.</div>";
                 }
-
-            } else {
-                $student_fees_arrears = "<div class='col-md-12 font-20 text-success'><strong>{$data->name}</strong> currently has no fees arrears.</div>";
             }
 
         }
@@ -365,7 +368,7 @@ if(!empty($user_id)) {
                                 isset($student_allocation_list) && $student_allocation_list["allocated"] && empty($student_allocation_list["owning"]) ?
                                 '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-1 btn-outline-warning"><i class="fa fa-print"></i> Print Bill</a>'
                                 : (
-                                    isset($student_allocation_list) && !$student_allocation_list["allocated"] ? 
+                                    isset($student_allocation_list) && !$student_allocation_list["allocated"] && $canAllocate ? 
                                     '<a class="btn mb-1 btn-outline-warning" href="'.$baseUrl.'fees-allocate/'.$user_id.'?set"><i class="fa fa-ankh"></i> Set Student Bill</a>'
                                     : null
                                 )
@@ -416,6 +419,18 @@ if(!empty($user_id)) {
                             <span class="float-left">Residence</span>
                             <span class="float-right text-muted">'.$data->residence.'</span>
                         </p>
+                        '.($data->hometown ? 
+                            '<p class="clearfix">
+                                <span class="float-left">Hometown</span>
+                                <span class="float-right text-muted">'.$data->hometown.'</span>
+                            </p>' : ''
+                        ).'
+                        '.($data->place_of_birth ? 
+                            '<p class="clearfix">
+                                <span class="float-left">Place of Birth</span>
+                                <span class="float-right text-muted">'.$data->place_of_birth.'</span>
+                            </p>' : ''
+                        ).'
                         '.($data->religion ? 
                             '<p class="clearfix">
                                 <span class="float-left">Religion</span>
@@ -472,7 +487,7 @@ if(!empty($user_id)) {
                                             <td class="p-2">'.$data->previous_school.'</td>
                                         </tr>
                                         <tr>
-                                            <td class="p-2" width="20%">Qualification</td>
+                                            <td class="p-2" width="20%">Previous Class</td>
                                             <td class="p-2">'.$data->previous_school_qualification.'</td>
                                         </tr>
                                         <tr>
@@ -487,30 +502,40 @@ if(!empty($user_id)) {
                         '.($viewAllocation ? 
                         '<div class="tab-pane fade show active" id="fees" role="tabpanel" aria-labelledby="fees-tab2">
                             <div class="row mb-3 pb-2 border-bottom">
-                                <div class="col-md-3"><h5>STUDENT BILL</h5></div>
-                                <div class="col-md-9 text-right">
+                                <div class="col-md-12 text-right">
                                 '.(
-                                    !empty($student_allocation_list["owning"]) ? 
+                                    !empty($student_allocation_list["owning"]) && $canReceive ? 
                                         '<span class="text-right">
                                             <a '.($isParent ? "target='_blank' href='{$myClass->baseUrl}pay/{$defaultUser->client_id}/fees/{$user_id}'" : 'href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'"').' class="btn mb-2 btn-outline-success"><i class="fa fa-adjust"></i> MAKE PAYMENT</a>
                                         </span>
                                         '.($canAllocate ? '
-                                        <button title="Click to Modify Fees Allocated to Student" onclick="return loadPage(\''.$baseUrl.'fees-allocate/'.$user_id.'\')" class="btn text-uppercase mb-2 btn-outline-primary">
+                                        <button title="Click to Modify Fees Allocated to Student" onclick="return load(\'fees-allocate/'.$user_id.'\')" class="btn text-uppercase mb-2 btn-outline-primary">
                                             <i class="fa fa-edit"></i> Modify Bill
                                         </button>' : null).'
                                         '
-                                    : ($student_allocation_list["allocated"] ? '<div class="btn mb-2 btn-success text-uppercase">Fees Fully Paid</div>' :
-                                        '<span>
-                                            <button title="Click to Allocate Fees to Student" onclick="return loadPage(\''.$baseUrl.'fees-allocate/'.$user_id.'\')" class="btn text-uppercase mb-2 btn-primary">
-                                                <i class="fa fa-ankh"></i> Set Student Bill
-                                            </button>
-                                        </span>')
+                                    : ($student_allocation_list["allocated"] && empty($student_allocation_list["owning"]) ? 
+                                        '<div class="btn mb-2 btn-success text-uppercase">Fees Fully Paid</div>' :
+                                        (
+                                            $canAllocate ? '
+                                            <span>
+                                                <button title="Click to Allocate Fees to Student" onclick="return load(\'fees-allocate/'.$user_id.'\')" class="btn text-uppercase mb-2 btn-primary">
+                                                    <i class="fa fa-ankh"></i> Set Student Bill
+                                                </button>
+                                            </span>' : null
+                                        )
+                                    )
                                 ).'
                                 '.(
                                     $student_allocation_list["allocated"] ? '
-                                        <span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-outline-warning text-uppercase"><i class="fa fa-print"></i> Print</a></span>
-                                        <span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?download=1" target="_blank" class="btn mb-2 btn-outline-danger text-uppercase"><i class="fa fa-download"></i> Download</a></span>
+                                        <span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-outline-warning text-uppercase"><i class="fa fa-print"></i> Print Bill</a></span>
+                                        <span><a href="'.$baseUrl.'download/student_bill/'.$user_id.'?download=1" target="_blank" class="btn mb-2 btn-outline-danger hidden text-uppercase"><i class="fa fa-download"></i> Download</a></span>
                                     ' : null
+                                ).'
+                                '.(
+                                    !empty($student_allocation_list["owning"]) ? 
+                                        '<span class="text-right">
+                                        <button onclick="return load(\'reminders/send?sid='.$user_id.'&cid='.$data->class_id.'\')" class="btn mb-2 hidden btn-info"><i class="fa fa-envelope"></i> SEND REMINDER</a>
+                                    </span>' : null
                                 ).'
                                 </div>
                             </div>
@@ -529,8 +554,7 @@ if(!empty($user_id)) {
                                     <tbody>'.$student_allocation_list["list"].'</tbody>
                                 </table>
                             </div>
-                            <div class="col-md-4 mt-5"><h5>FEES ARREARS</h5></div>
-                            '.$student_fees_arrears.'
+                            '.(!empty($student_fees_arrears) ? "<div class=\"col-md-4 mt-5\"><h5>FEES ARREARS</h5></div> {$student_fees_arrears}" : null).'
                         </div>
                         <div class="tab-pane fade" id="fees_payments" role="tabpanel" aria-labelledby="fees_payments-tab2">
                             <div class="row mb-3">

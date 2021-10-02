@@ -47,9 +47,10 @@ if ($(`div[id="filter_Department_Class"]`).length) {
             $(`div[id="make_payment_button"]`).addClass("hidden");
             $(`select[name='student_id']`).find('option').remove().end();
 
-            $(`div[id="fees_payment_history"]`).html(``);
-            $(`div[id="fees_allocation_wrapper"] input[id="select_all"], div[id="fees_payment_form"] *`).prop("disabled", true);
+            $(`div[id="student_information"], div[id="fees_payment_history"]`).html(``);
             $(`select[name='student_id']`).append(`<option value="">Please Select Student</option>`);
+            $(`a[data-link_item="student_go_back"]`).attr("onclick", `return load('fees-history')`);
+            $(`div[id="fees_allocation_wrapper"] input[id="select_all"], div[id="fees_payment_form"] *`).prop("disabled", true);
             $(`div[id="fees_allocation_form"] select[name="category_id"],div[id="fees_allocation_form"] input[name="amount"]`).attr("disabled", true).val(``).change();
             
             if (value.length && value !== "null") {
@@ -58,7 +59,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                 $.get(`${baseUrl}api/users/quick_list?class_id=${value}&minified=simplified&user_type=student`).then((response) => {
                     if (response.code == 200) {
                         $.each(response.data.result, function(i, e) {
-                            $(`select[name='student_id']`).append(`<option data-phone_number="${e.phone_number}" data-email="${e.email}" value='${e.user_id}'>${e.name}</option>`);
+                            $(`div[id="filter_Department_Class"] select[name='student_id']`).append(`<option data-image="${e.image}" data-arrears_formated="${e.arrears_formated}" data-total_debt_formated="${e.total_debt_formated}" data-debt_formated="${e.debt_formated}" data-unique_id="${e.unique_id}" data-name="${e.name}" data-phone_number="${e.phone_number}" data-email="${e.email}" value='${e.user_id}'>${e.name.toUpperCase()}</option>`);
                         });
                         if($(`table[id="simple_load_student"]`).length) {
                             if(response.data.result.length) {
@@ -99,6 +100,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
 
         $(`div[id="fees_payment_preload"] select[name="student_id"]`).on("change", function() {
             let value = $(this).val();
+            $(`a[data-link_item="student_go_back"]`).attr("onclick", `return load('${value.length ? `student/${value}` : "fees-history"}')`);
             $(`div[id="fees_payment_preload"] select[name='category_id']`).prop("disabled", true);
             $(`div[id="make_payment_button"]`).addClass("hidden");
 
@@ -106,12 +108,31 @@ if ($(`div[id="filter_Department_Class"]`).length) {
             $(`div[id="fees_payment_form"] *`).prop("disabled", true);
 
             if (value.length && value !== "null") {
+                let option = $(`select[name="student_id"] > option:selected`).data();
+                $(`div[id="student_information"]`).html(`
+                <div class="card">
+                    <div class="card-body p-3 pb-3 shadow-style">
+                        <div class="d-flex justify content-start">
+                            <div class="mr-2">
+                                <img width="60px" class="img-shadow" src="${baseUrl}${option.image}">
+                            </div>
+                            <div>
+                                <div class="font-20 text-uppercase"><strong>${option.name}</strong></div>
+                                <div><strong>STUDENT ID:</strong> ${option.unique_id}</div>
+                                <div><strong>FEES ARREARS:</strong> ${myPrefs.labels.currency}${option.debt_formated}</div>
+                                <div><strong>PREVIOUS ARREARS:</strong> ${myPrefs.labels.currency}${option.arrears_formated}</div>
+                                <div><strong>BALANCE OUTSTANDING:</strong> ${myPrefs.labels.currency}${option.total_debt_formated}</div>
+                            </div>                            
+                        </div>
+                    </div>
+                </div>`);
                 $(`div[id="make_payment_button"]`).removeClass("hidden");
                 let data = $(`div[id="fees_payment_preload"] select[name="student_id"] option:selected`).data();
                 $(`div[id="fees_payment_form"] input[id="email_address"]`).val(data.email);
                 $(`div[id="fees_payment_form"] input[id="contact_number"]`).val(data.phone_number);
                 $(`div[id="fees_payment_preload"] select[name='category_id']`).prop("disabled", false);
             } else {
+                $(`div[id="student_information"]`).html(``);
                 $(`input[id="contact_number"], input[id="email_address"]`).val("");
             }
         });
@@ -158,6 +179,13 @@ $(`button[id="filter_Fees_Collection"]`).on("click", function() {
         category_id = $(`select[name="category_id"]`).val();
     $.form_data = { department_id, class_id, category_id };
     loadPage(`${baseUrl}fees-history`);
+});
+
+$(`button[id="filter_Fees_Arrears"]`).on("click", function() {
+    department_id = $(`select[name="department_id"]`).val(),
+        class_id = $(`select[name="class_id"]`).val(),
+    $.form_data = { department_id, class_id };
+    loadPage(`${baseUrl}arrears`);
 });
 
 $(`button[id="generate_Fees_Report"]`).on("click", function() {

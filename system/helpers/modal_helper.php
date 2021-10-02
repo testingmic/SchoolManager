@@ -385,3 +385,74 @@ function leave_comments_builder($resource, $recordId, $upload = true, $comment =
 
     return $html;
 }
+
+function quick_add_student() {
+    global $myClass, $defaultClientId;
+
+    $response = '
+    <div class="modal fade" id="quickStudentAdd" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-top modal-md" style="width:100%;" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Student</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <input hidden class="ajax-replies-loaded" value="0" data-form="none">
+                <div class="modal-body" style="text-align:left">
+                    <div class="form-content-loader" style="display: none; position: absolute">
+                        <div class="offline-content text-center">
+                            <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Fullname <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="fullname">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="date_of_birth">Date of Birth</label>
+                                <input type="text" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="gender">Gender <span class="required">*</span></label>
+                                <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
+                                    <option value="">Select Gender</option>';
+                                    foreach($myClass->pushQuery("*", "users_gender") as $each) {
+                                        $response .= "<option value=\"{$each->name}\">{$each->name}</option>";                            
+                                    }
+                            $response .= '
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="residence">Place of Residence</label>
+                                <input type="text" name="residence" id="residence" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mb-0">
+                                <label for="class_id">Class <span class="required">*</span></label>
+                                <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
+                                    <option value="">Select Student Class</option>';
+                                    foreach($myClass->pushQuery("id, name", "classes", "status='1' AND client_id='{$defaultClientId}'") as $each) {
+                                        $response .= "<option value=\"{$each->id}\">{$each->name}</option>";                            
+                                    }
+                                $response .= '</select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-danger" data-dismiss="modal">Cancel</button>
+                    <button onclick="return quick_Add_Student()" class="btn btn-outline-success">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>';
+
+    return $response;
+}

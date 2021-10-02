@@ -54,6 +54,12 @@ var save_Receive_Payment = () => {
                     icon: responseCode(response.code),
                 });
                 if (response.code === 200) {
+                    if(response.data.additional.payment_id !== undefined) {
+                        window.open(
+                            `${baseUrl}receipt/${response.data.additional.payment_id}`, `Payment Receipt`,
+                            `width=850,height=750,left=200,resizable,scrollbars=yes,status=1,left=${($(window).width())*0.25}`
+                        );
+                    }
                     setTimeout(() => {
                         loadPage(`${baseUrl}arrears/${student_id}`);
                     }, refresh_seconds);
@@ -168,6 +174,129 @@ var generate_payment_report = (student_id) => {
         end_date = $(`input[name="group_end_date"]`).val();
     window.open(`${baseUrl}receipt?category_id=${category_id}&start_date=${start_date}&end_date=${end_date}`);
 }
+
+var load_Student_Arrears = () => {
+    let data = {
+        "student_id": $(`div[id="arrearsForm"] select[name="student_id"]`).val(),
+        "class_id": $(`div[id="arrearsForm"] select[name="class_id"]`).val(),
+        "populate": true
+    };
+    if(data.class_id.length < 1) {
+        notify("Sorry! Please select the class to continue");
+        return false;
+    }
+    if(data.student_id.length < 1) {
+        notify("Sorry! Please select the student to continue");
+        return false;
+    }
+    $(`button[data-target="addStudentArrears"]`).addClass("hidden");
+    $.get(`${baseUrl}api/arrears/list`, {data}).then((response) => {
+        if(response.code == 200) {
+            $(`button[data-target="addStudentArrears"]`).removeClass("hidden");
+            if(response.data.result.length) {
+                $(`table[id="student_Fees_Arrears"] tbody`).html(response.data.result);
+            } else {
+                $(`table[id="student_Fees_Arrears"] tbody`).html(`
+                    <tr><td colspan="3" align="center">No record was found for this student.</td></tr>
+                `);
+            }
+        } else {
+            notify(response.data.result);
+        }
+    });
+}
+
+var quick_Add_Arrears = () => {
+    let data = {
+        "student_id": $(`div[id="arrearsForm"] select[name="student_id"]`).val(),
+        "class_id": $(`div[id="arrearsForm"] select[name="class_id"]`).val(),
+        "academic_year": $(`div[id="addStudentArrears"] select[name="academic_year"]`).val(),
+        "academic_term": $(`div[id="addStudentArrears"] select[name="academic_term"]`).val(),
+        "category_id": $(`div[id="addStudentArrears"] select[name="category_id"]`).val(),
+        "amount": $(`div[id="addStudentArrears"] input[name="amount"]`).val(),
+    };
+    if(data.class_id.length < 1) {
+        notify("Sorry! Please select the class to continue");
+        return false;
+    }
+    if(data.student_id.length < 1) {
+        notify("Sorry! Please select the student to continue");
+        return false;
+    }
+    if(data.academic_year.length < 1) {
+        notify("Sorry! Please select the academic year to continue");
+        return false;
+    }
+    if(data.academic_term.length < 1) {
+        notify("Sorry! Please select the academic term to continue");
+        return false;
+    }
+    if(data.category_id.length < 1) {
+        notify("Sorry! Please select the fees category to continue");
+        return false;
+    }
+    if(data.amount.length < 1) {
+        notify("Sorry! Please enter the amount to continue");
+        return false;
+    }
+    swal({
+        title: "Log Fees Arrears",
+        text: "Are you sure you save this student's fees arrears record?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if(proceed) {
+            $(`div[id="addStudentArrears"] div[class="form-content-loader"]`).css("display", "flex");
+            $.post(`${baseUrl}api/arrears/add`, {data}).then((response) => {
+                $(`div[id="addStudentArrears"] div[class="form-content-loader"]`).css("display", "none");
+                if(response.code == 200) {
+                    $(`div[id="addStudentArrears"] *`).val(``);
+                    $(`div[id="addStudentArrears"]`).modal("hide");
+                    $(`button[data-target="addStudentArrears"]`).addClass("hidden");
+                    load_Student_Arrears();
+                } else {
+                    notify(response.data.result);
+                }
+            }).catch(() => {
+                $(`div[id="addStudentArrears"] div[class="form-content-loader"]`).css("display", "none");
+            });
+        }
+    });
+}
+
+var load_debtor_details = () => {
+    let amount = $(`input[id="fees_arrears_payment"]`).val(),
+        student_id = $(`select[name="debtor_id"]`).val(),
+        msg = "";
+    
+    if ($(`div[id="arrears_payment_form"] input[name="amount"]`).val().length) {
+        msg = "You have not finished processing the current request. Are you sure you want to proceed to refresh the page?";
+        swal({
+            title: "Reload Page",
+            text: `${msg}`,
+            icon: 'warning',
+            buttons: true,
+            dangerMode: true,
+        }).then((proceed) => {
+            if (proceed) {
+                loadPage(`${baseUrl}arrears/${student_id}`);
+            }
+        });
+    } else {
+        loadPage(`${baseUrl}arrears/${student_id}`);
+    }
+}
+
+$(`button[data-target="addStudentArrears"]`).on("click", function() { 
+    $(`div[id="addStudentArrears"]`).modal("show");
+    $(`div[id="addStudentArrears"] input`).val(``);
+});
+
+$(`button[data-target="quickStudentAdd"]`).on("click", function() { 
+    $(`div[id="quickStudentAdd"]`).modal("show");
+    $(`div[id="quickStudentAdd"] input`).val(``);
+});
 
 $(`div[id="arrears_payment_form"] select[name="payment_method"]`).on("change", function() {
     let mode = $(this).val();

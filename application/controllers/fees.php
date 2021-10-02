@@ -8,7 +8,7 @@ class Fees extends Myschoolgh {
 		parent::__construct();
 
         // get the client data
-        $client_data = $params->client_data;
+        $client_data = $params->client_data ?? [];
         $this->iclient = $client_data;
 
         // run this query
@@ -42,17 +42,20 @@ class Fees extends Myschoolgh {
 			$student_id = isset($params->student_array_ids) ? $params->student_array_ids : $this->session->student_id;
         }
 
-        $filters = "1";
+        $filters = "a.status='1'";
 		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id IN {$this->inList($params->class_id)}" : "";
         $filters .= isset($params->department_id) && !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : "";
         $filters .= !empty($student_id) ? " AND a.student_id IN {$this->inList($student_id)}" : "";
         $filters .= isset($params->item_id) && !isset($params->payment_id) && !empty($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";
         $filters .= isset($params->query) && !empty($params->query) ? " AND {$params->query}" : "";
+        $filters .= isset($params->reversed) ? " AND a.reversed='{$params->reversed}'" : "";
         $filters .= isset($params->programme_id) && !empty($params->programme_id) ? " AND a.programme_id='{$params->programme_id}'" : "";
         $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id IN {$this->inList($params->category_id)}" : "";
         $filters .= isset($params->date) && !empty($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";
         $filters .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "recorded_date") : null;
-
+        $filters .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : null;
+        $filters .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : null;
+        
         // set the payment id
         if(isset($params->payment_id)) {
             $filters .= isset($params->payment_id) && !empty($params->payment_id) ? " AND (a.item_id='{$params->payment_id}' OR a.payment_id='{$params->payment_id}')" : "";
@@ -63,6 +66,8 @@ class Fees extends Myschoolgh {
         if(isset($params->return_where_clause)) {
             return $filters;
         }
+
+        $order_by = $params->order_by ?? "ORDER BY a.id DESC";
 
 		try {
 
@@ -75,7 +80,7 @@ class Fees extends Myschoolgh {
                 FROM fees_collection a
                 LEFT JOIN users u ON u.item_id = a.student_id
                 LEFT JOIN fees_category fc ON fc.id = a.category_id
-				WHERE {$filters} AND a.client_id = ? {$group_by} ORDER BY a.id DESC LIMIT {$params->limit}
+				WHERE {$filters} AND a.client_id = ? {$group_by} {$order_by} LIMIT {$params->limit}
             ");
 			$stmt->execute([$params->clientId]);
             
@@ -389,6 +394,7 @@ class Fees extends Myschoolgh {
             // set the allocation to true
             $allocated = true;
             $showStudentData = (bool) !isset($params->show_student);
+            $showPrintButton = (bool) isset($params->showPrintButton);
             $groupBy = (bool) isset($params->group_by_student) && ($params->group_by_student == "group_by");
 
             // init values
@@ -409,7 +415,7 @@ class Fees extends Myschoolgh {
                 // add up to the values
                 $total_due += $due;
                 $total_paid += $paid;
-                $total_balance += $balance;
+                $total_balance += !$student->exempted ? $balance : 0;
 
                 // assign variable
                 $isPaid = (bool) ($student->amount_due < $student->amount_paid) || ($student->amount_due === $student->amount_paid);
@@ -458,9 +464,14 @@ class Fees extends Myschoolgh {
                 $student_allocation_list .= "<td>{$student->currency} ".($groupBy ? $student->total_amount_paid : $student->amount_paid)."</td>";
                 $student_allocation_list .= "<td>{$student->currency} ".($groupBy ? $student->total_balance : $student->balance)."</td>";
 
+                // if the student is style owing fees
+                if(!$student->exempted && !$isPaid) {
+                    $owning = true;
+                }
+                
                 // confirm if the user has the permission to make payment
                 if(!empty($params->receivePayment)) {
-                    $student_allocation_list .= "<td width='13%' align='center' class='pl-2'>";
+                    $student_allocation_list .= "<td align='center' class='pl-2'>";
                     // confirm if the fee has been paid
                     if(!$student->exempted) {
                         // if the fee is fully paid
@@ -468,18 +479,21 @@ class Fees extends Myschoolgh {
                             $student_allocation_list .= "<span class='badge badge-success'>Paid</span>";
                         } else {
                             // if the student is still owing
-                            $owning = true;
-                            $_class = "class='btn btn-sm text-uppercase btn-outline-success'";
+                            $_class = "class='btn mb-1 btn-sm text-uppercase btn-outline-success'";
                             $student_allocation_list .= $isParent ? "
                                 <a {$_class} href='{$this->baseUrl}pay/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
                             " : "<button onclick='return load(\"fees-payment?".($groupBy ? "student_id={$student->student_id}&class_id={$student->class_id}" : "checkout_url={$student->checkout_url}")."\");' {$_class}>Pay Fee</button>";
                         }
                         // delete the record if possible => that is allowed only if the student has not already made an payment
                         if(!empty($params->canAllocate) && empty($student->amount_paid)) {
-                            $student_allocation_list .= " &nbsp; <button onclick='return remove_Fees_Allocation(\"{$student->id}\",\"student\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></button>";
+                            $student_allocation_list .= " &nbsp; <button onclick='return remove_Fees_Allocation(\"{$student->id}\",\"student\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></button>";
                         }
                     } else {
                         $student_allocation_list .= "<span class='badge badge-dark'>Exempted</span>";
+                    }
+                    // if the show print button was parsed
+                    if($showPrintButton) {
+                        $student_allocation_list .= '&nbsp;<span><a href="'.$this->baseUrl.'download/student_bill/'.$student->student_id.'?print=1" target="_blank" class="btn mb-1 btn-sm btn-outline-warning text-uppercase"><i class="fa fa-print"></i> Print Bill</a></span>';
                     }
                     $student_allocation_list .= "</td>";
                 }
@@ -527,13 +541,40 @@ class Fees extends Myschoolgh {
      */
     public function payment_form(stdClass $params) {
 
+        global $defaultCurrency;
+
         /** Load the payment information that has been allocated to the student */
         $allocation = isset($params->allocation_info) ? $params->allocation_info : $this->confirm_student_payment_record($params);
         
         /** If no allocation record was found */
-        if(empty($allocation)) {
-            return ["code" => 203, "data" => "Sorry! No allocation has been made for the selected category.
-                Please ensure an allocation has been made before payment can be received."];
+        if(!empty($params->category_id) && empty($allocation)) {
+            
+            // only receive payment that has been allocated to the student
+            return ["code" => 203, "data" => "Sorry! The selected fee item has not yet been allocated to this Student."];
+
+            $category_item = $this->pushQuery("amount, name", "fees_category", "id='{$params->category_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            $allocation = (object) [
+                "checkout_url" => random_string("alnum",  16),
+                "student_id" => $params->student_id,
+                "class_id" => $params->class_id,
+                "category_id" => $params->category_id,
+                "amount_due" => $category_item[0]->amount ?? null,
+                "amount_paid" => 0,
+                "balance" => $category_item[0]->amount ?? null,
+                "last_payment_id" => null, 
+                "academic_year" => $params->academic_year,
+                "academic_term" => $params->academic_term,
+                "currency" => $defaultCurrency,
+                "exempted" => 0,
+                "category_name" => $category_item[0]->name ?? null,
+                "last_payment_info" => null,
+                "account_balance" => 0,
+                "paid_status" => 0,
+                "payment_history" => $this->pushQuery("payment_id, currency, amount, recorded_date, description", 
+                    "fees_collection", "category_id='{$params->category_id}' AND 
+                    student_id='{$params->student_id}' AND academic_year='{$params->academic_year}'
+                    AND academic_term='{$params->academic_term}' LIMIT 20")
+            ];
         }
 
         // set the first item
@@ -789,6 +830,33 @@ class Fees extends Myschoolgh {
             $html_form .= "</table>";
         }
 
+        /** If the payment history was set */
+        if(isset($allocation->payment_history)) {
+            if(is_array($allocation->payment_history)) {
+                $html_form .= "<div class='mt-3 text-center '><h5>Payment History</h5></div>";
+                $html_form .= "<table class='table-md table table-bordered'>";
+                $html_form .= "<thead>";
+                $html_form .= "<tr>";
+                $html_form .= "<th>#</th>";
+                $html_form .= "<th>Description</th>";
+                $html_form .= "<th>Amount Paid</th>";
+                $html_form .= "<th>Date Paid</th>";
+                $html_form .= "</tr>";
+                $html_form .= "</thead>";
+                $html_form .= "<tbody>";
+                foreach($allocation->payment_history as $key => $history) {
+                    $html_form .= "<tr>";
+                    $html_form .= "<td>".($key+1)."</td>";
+                    $html_form .= "<td width='width:30%'>{$history->description}</td>";
+                    $html_form .= "<td>{$history->amount}</td>";
+                    $html_form .= "<td>{$history->recorded_date}</td>";
+                    $html_form .= "</tr>";
+                }
+                $html_form .= "</tbody>";
+                $html_form .= "</table>";
+            }
+        }
+
         $html_form .= "</div>";
         $html_form .= "</div>";
 
@@ -851,7 +919,7 @@ class Fees extends Myschoolgh {
         $stmt = $myschoolgh->prepare("UPDATE fees_payments SET 
                 amount_due = ? {$query_balance}
             WHERE category_id = ? AND student_id = ? AND client_id = ? 
-                AND academic_year = ? AND academic_term = ? AND editable = ?");
+                AND academic_year = ? AND academic_term = ? AND editable = ? LIMIT 1");
 
         /** Execute the prepared statement */
         return $stmt->execute([
@@ -1050,15 +1118,17 @@ class Fees extends Myschoolgh {
             if($this->confirm_class_payment_record($params)) {
 
                 /** Update the existing record */
-                $stmt = $this->db->prepare("UPDATE fees_allocations SET 
-                    amount = ?, date_updated = now() 
-                    WHERE category_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND class_id = ?
+                $stmt = $this->db->prepare("UPDATE fees_allocations SET amount = ?, date_updated = now() 
+                    WHERE 
+                        category_id = ? AND client_id = ? AND academic_year = ? AND 
+                        academic_term = ? AND class_id = ? AND status = ? 
+                    LIMIT 1
                 ");
                 
                 /** Execute the prepared statement */
                 $stmt->execute([
                     $params->amount, $params->category_id, $params->clientId, 
-                    $params->academic_year, $params->academic_term, $params->class_id
+                    $params->academic_year, $params->academic_term, $params->class_id, 1
                 ]);
 
                     // log the user activity
@@ -1301,11 +1371,16 @@ class Fees extends Myschoolgh {
                     a.balance, a.paid_status, a.last_payment_id, a.academic_year, a.academic_term, a.date_created, 
                     a.last_payment_date, a.currency, a.exempted, c.name AS class_name,
                     (
+                        SELECT sum(b.balance) FROM fees_payments b 
+                        WHERE b.student_id = a.student_id AND b.academic_term = '{$academic_term}'
+                            AND b.academic_year = '{$academic_year}'
+                    ) AS debt, ar.arrears_total AS arrears,
+                    (
                         SELECT 
                             CONCAT(
                                 u.name,'|',COALESCE(u.department, 'NULL'),'|',
                                 COALESCE(u.account_balance,'0'),'|',COALESCE(u.unique_id,'0'),'|',
-                                COALESCE(u.phone_number,'NULL'),'|',COALESCE(u.email,'NULL')
+                                COALESCE(u.phone_number,'NULL'),'|',COALESCE(u.email,'NULL'),'|',u.image
                             ) 
                         FROM users u 
                         WHERE u.item_id = a.student_id LIMIT 1
@@ -1321,9 +1396,10 @@ class Fees extends Myschoolgh {
                                 COALESCE(b.paidin_contact,'NULL'),'|',b.item_id
                             )
                         FROM fees_collection b 
-                        WHERE b.item_id = a.last_payment_id LIMIT 1
+                        WHERE b.item_id = a.last_payment_id AND b.status=? LIMIT 1
                     ) AS last_payment_info
 				FROM fees_payments a
+                LEFT JOIN users_arrears ar ON ar.student_id = a.student_id
                 LEFT JOIN classes c ON c.id = a.class_id
 				WHERE 
                     ".(isset($params->checkout_url) && ($params->checkout_url != "general") ? "checkout_url='{$params->checkout_url}'" : 
@@ -1333,7 +1409,7 @@ class Fees extends Myschoolgh {
                     ".($removeExemptions ? " AND exempted = '0'" : null)."
                     AND a.client_id = '{$params->clientId}' AND a.status = '1' LIMIT ".(!empty($category_id) ? 1 : 30)."
 			");
-			$stmt->execute();
+			$stmt->execute([1]);
 
             // count the number of rows found
             $showInfo = (bool) isset($params->clean_payment_info);
@@ -1343,7 +1419,9 @@ class Fees extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 
                 // payment information
-                $result->student_details = $this->stringToArray($result->student_details, "|", ["student_name", "department_id", "account_balance", "unique_id", "phone_number", "email"], true);
+                $result->student_details = $this->stringToArray($result->student_details, "|", ["student_name", "department_id", "account_balance", "unique_id", "phone_number", "email", "image"], true);
+                $result->student_details["arrears"] = $result->arrears;
+                $result->student_details["debt"] = $result->debt;
 
                 // set the account balance
                 $result->account_balance = isset($result->student_details["account_balance"]) ? (float) $result->student_details["account_balance"] : 0;
@@ -1380,7 +1458,7 @@ class Fees extends Myschoolgh {
 
         try {
 
-            global $defaultUser, $clientPrefs;
+            global $defaultUser, $clientPrefs, $defaultCurrency;
             
             // get the preference of the client
             $preference = $this->iclient->client_preferences->labels;
@@ -1405,7 +1483,40 @@ class Fees extends Myschoolgh {
 
             /** If no allocation record was found */
             if(empty($paymentRecord)) {
-                return ["code" => 203, "data" => "Sorry! An invalid checkout url was parsed for processing."];
+
+                return ["code" => 203, "data" => "Sorry! No fees allocation for this selected category found."];
+
+                // $category_item = $this->pushQuery("amount, name", "fees_category", "id='{$params->category_id}' AND client_id='{$params->clientId}' LIMIT 1");
+                
+                // if(empty($category_item)) {
+                //     return ["code" => 203, "data" => "Sorry! An invalid checkout url was parsed for processing."];
+                // }
+                
+                // // get the student name
+                // $student = $this->pushQuery("name AS student_name, class_id", "users", "item_id = '{$params->student_id}' AND user_type='student' AND client_id = '{$params->clientId}' LIMIT 1");
+                
+                // payment record
+                // $paymentRecord = (object) [
+                //     "checkout_url" => random_string("alnum",  16),
+                //     "student_id" => $params->student_id,
+                //     "class_id" => $student[0]->class_id ?? null,
+                //     "category_id" => $params->category_id,
+                //     "amount_due" => $category_item[0]->amount ?? null,
+                //     "amount_paid" => 0,
+                //     "balance" => $category_item[0]->amount ?? null,
+                //     "last_payment_id" => null, 
+                //     "academic_year" => $params->academic_year,
+                //     "academic_term" => $params->academic_term,
+                //     "currency" => $defaultCurrency,
+                //     "exempted" => 0,
+                //     "category_name" => $category_item[0]->name ?? null,
+                //     "last_payment_info" => null,
+                //     "account_balance" => 0,
+                //     "paid_status" => 0,
+                //     "student_details" => [
+                //         "student_name" => $student[0]->student_name ?? null
+                //     ]
+                // ];
             }
 
             /** Validate email address */
@@ -1467,7 +1578,7 @@ class Fees extends Myschoolgh {
                 /* Outstanding balance calculator */
                 $outstandingBalance = $paymentRecord->balance - $params->amount;
                 $totalPayment = $paymentRecord->amount_paid + $params->amount;
-
+                $amount_due = $paymentRecord->amount_due;
                 // set the paid status
                 $paid_status = ((round($totalPayment) === round($paymentRecord->amount_due)) || (round($totalPayment) > round($paymentRecord->amount_due))) ? 1 : 2;
             }
@@ -1479,11 +1590,8 @@ class Fees extends Myschoolgh {
                 $outstandingBalance = 0;
             }
 
-            // if there is any credit balance then end the query
-            if($params->payment_method !== "MoMo_Card") {
-                if($creditBalance) {
-                    return ["code" => 203, "data" => "Sorry! You cannot pay more than the outstanding balance."];
-                }
+            if(round($params->amount) > round($amount_due)) {
+                return ["code" => 203, "data" => "Sorry! The amount to be paid cannot be more than the outstanding balance."];
             }
 
             // get the currency
@@ -1812,7 +1920,7 @@ class Fees extends Myschoolgh {
             // prepare and execute the statement
             $stmt = $this->db->prepare("INSERT INTO fees_category SET amount = ?, name = ?, 
                 description = ?, code = ?, client_id = ?, created_by = ?");
-            $stmt->execute([$params->amount ?? null, $params->name, $params->description ?? null, 
+            $stmt->execute([$params->amount ?? 0, $params->name, $params->description ?? null, 
                 $params->code, $params->clientId, $params->userId]);
 
             // log the user activity
@@ -1820,7 +1928,7 @@ class Fees extends Myschoolgh {
         } else {
             // prepare and execute the statement
             $stmt = $this->db->prepare("UPDATE fees_category SET amount = ?, name = ?, description = ?, code = ? WHERE id = ? AND client_id = ?");
-            $stmt->execute([$params->amount ?? null, $params->name, $params->description ?? null, $params->code, $params->category_id, $params->clientId]);
+            $stmt->execute([$params->amount ?? 0, $params->name, $params->description ?? null, $params->code, $params->category_id, $params->clientId]);
 
             // log the user activity
             $this->userLogs("fees_category", $params->category_id, null, "<strong>{$params->userData->name}</strong> updated the category: {$params->name}", $params->userId);
@@ -1845,7 +1953,7 @@ class Fees extends Myschoolgh {
     public function receipt(stdClass $params) {
         
         // global variable
-        global $defaultClientData;
+        global $defaultClientData, $defaultCurrency;
 
         // init variable
         $student_data = [];
@@ -1875,6 +1983,37 @@ class Fees extends Myschoolgh {
 
         $isPDF = (bool) isset($params->isPDF);
 
+        // set the category name and the class name
+        $category_name = isset($params->category_id) ? ($this->pushQuery("name", "fees_category", "id='{$params->category_id}' LIMIT 1")[0]->name ?? null) : null;
+        $class_name = isset($params->class_id) ? ($this->pushQuery("name", "classes", "id='{$params->class_id}' LIMIT 1")[0]->name ?? null) : null;
+
+        // set the outstanding balance
+        $cur_arreas = 0;
+        $prev_arrears = 0;
+        $outstanding_balance = 0;
+        $isArrears = (bool) ($student_data->category_id == "Arrears");
+
+        // if the fee payment record was found
+        if(!empty($student_data)) {
+            // load init data
+            $out_arrears = $this->pushQuery("arrears_total AS balance", "users_arrears",
+                "client_id='{$student_data->client_id}' AND student_id='{$student_data->student_id}' LIMIT 1");
+
+            $out_fees = $this->pushQuery("(SUM(amount_due) - SUM(amount_paid)) AS balance", "fees_payments",
+                "academic_year='{$student_data->academic_year}' AND academic_term='{$student_data->academic_term}'
+                AND client_id='{$student_data->client_id}' AND student_id='{$student_data->student_id}' LIMIT 40");
+
+            // set more variables
+            $prev_arrears = $out_arrears[0]->balance ?? 0;
+            $cur_arreas = $out_fees[0]->balance ?? 0;
+
+            //set the oustanding balance
+            $outstanding_balance = ($prev_arrears + $cur_arreas);
+
+        }
+
+        $student_name = isset($student_data->student_info->name) ? strtoupper($student_data->student_info->name) : null;
+
         // append the data
         $receipt = '
         <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/app.min.css">
@@ -1898,8 +2037,8 @@ class Fees extends Myschoolgh {
                                     <tr>
                                     <td width="50%">
                                         <div class="invoice-title">
-                                            <h2 style="margin-top:5px;margin-bottom:5px;">Official Receipt</h2>
-                                            <span style="font-size:12px;"><strong>Date & Time:</strong> '.date("d-m-Y h:iA").'</span>
+                                            <h2 style="margin-top:5px;margin-bottom:5px;">'.(!$isPDF ? "Official Receipt" : "Payment History").'</h2>
+                                            <span style="font-size:16px;"><strong>Date & Time:</strong> '.date("d-m-Y h:iA").'</span>
                                         </div>
                                     </td>
                                     <td align="right">
@@ -1918,9 +2057,9 @@ class Fees extends Myschoolgh {
                                         '<table border="0" width="100%">
                                             <tr>
                                                 <td width="50%">
-                                                    <address>
+                                                    <address style="font-size:16px">
                                                         <strong>To:</strong><br>
-                                                        '.($student_data->student_info->name ?? null).'<br>
+                                                        '.($student_name ?? null).'<br>
                                                         '.($student_data->student_info->unique_id ?? null).'<br>
                                                         '.($student_data->class_name ?? null).'<br>
                                                         '.($student_data->department_name ?? null).'<br>
@@ -1928,7 +2067,7 @@ class Fees extends Myschoolgh {
                                                 </td>
                                                 <td align="right">
                                                 '.(!empty($student_data->student_info->guardian_id) ? 
-                                                    '<address>
+                                                    '<address style="font-size:16px">
                                                     <strong>Billed To:</strong><br>
                                                     '.(!empty($student_data->student_info->guardian_id[0]->fullname) ? $student_data->student_info->guardian_id[0]->fullname : null).'
                                                     '.(!empty($student_data->student_info->guardian_id[0]->address) ? "<br>" . $student_data->student_info->guardian_id[0]->address : null).'
@@ -1944,9 +2083,9 @@ class Fees extends Myschoolgh {
                                     '.(!empty($student_data) && !$isPDF ?
                                     '<div class="row">
                                         <div class="col-md-6" '.($isPDF ? "style='text-align:left'" : null).'>
-                                            <address>
+                                            <address style="font-size:16px">
                                                 <strong>To:</strong><br>
-                                                '.($student_data->student_info->name ?? null).'<br>
+                                                '.($student_name ?? null).'<br>
                                                 '.($student_data->student_info->unique_id ?? null).'<br>
                                                 '.($student_data->class_name ?? null).'<br>
                                                 '.($student_data->department_name ?? null).'<br>
@@ -1954,7 +2093,7 @@ class Fees extends Myschoolgh {
                                         </div>
                                         '.(!empty($student_data->student_info->guardian_id) ?
                                         '<div class="col-md-6 text-md-right" '.($isPDF ? "style='text-align:right'" : null).'>
-                                            <address>
+                                            <address style="font-size:16px">
                                             <strong>Billed To:</strong><br>
                                             '.(!empty($student_data->student_info->guardian_id[0]->fullname) ? $student_data->student_info->guardian_id[0]->fullname : null).'
                                             '.(!empty($student_data->student_info->guardian_id[0]->address) ? "<br>" . $student_data->student_info->guardian_id[0]->address : null).'
@@ -1965,10 +2104,21 @@ class Fees extends Myschoolgh {
                                     </div>': '').'
                                 </div>
                             </div>
+                            '.($isPDF ? "
+                                <div style='margin-top:5px;margin-bottom:5px'>
+                                    <table width='100%' cellpadding='5px' border='0'>
+                                        <tr style='color:#2196F3'>
+                                            <td align='center'><strong>Period:</strong> From ".date("jS M, Y", strtotime($params->start_date))." <strong>TO</strong> ".date("jS M, Y", strtotime($params->end_date))."</td>
+                                            ".($category_name ? "<td align='center' width='33%'><strong>Category:</strong> {$category_name}</td>" : null)."
+                                            ".($class_name ? "<td align='center' width='33%'><strong>Class:</strong> {$class_name}</td>" : null)."
+                                        </tr>
+                                    </table>
+                                </div>
+                            " : null).'
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="table-responsive">
-                                        <table width="100%" '.($isPDF ? "cellpadding='5px'" : null).' class="table table-striped table-hover table-md" style="border: 1px solid #dee2e6; font-size:13px;">
+                                        <table width="100%" '.($isPDF ? "cellpadding='5px'" : null).' class="table table-striped table-hover table-md" style="border: 1px solid #dee2e6; font-size:14px;">
                                             <tbody>
                                             <tr align="left">
                                                 <th '.(!$isPDF ? 'style="width: 40px;"' : null).'>#</th>
@@ -1982,7 +2132,7 @@ class Fees extends Myschoolgh {
                                             if(!empty($data)) {
                                                 foreach($data as $key => $record) {
                                                     $amount += $record->amount;
-                                                    $receipt .='<tr>
+                                                    $receipt .='<tr style="font-size:16px">
                                                         <td width="6%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.($key+1).'</td>
                                                         '.(empty($student_data) ? '<td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
                                                             '.$record->student_info->name.'
@@ -2010,15 +2160,37 @@ class Fees extends Myschoolgh {
                                     </div>
                                     <div class="row">
                                         <div class="col-lg-12">
-                                            <table border="1" class="border" cellpadding="5px" width="100%">
+                                            <table style="font-size:16px" class="border table-bordered" cellpadding="5px" width="100%">
                                                 <tr>
-                                                    <td align="right" width="70%"><strong>Amount</strong></td>
-                                                    <td align="right">'.number_format($amount, 2).'</td>
+                                                    <td align="right" width="70%"><strong>Amount Paid</strong></td>
+                                                    <td align="right">'.$defaultCurrency.''.number_format($amount, 2).'</td>
                                                 </tr>
                                                 <tr>
-                                                    <td align="right" width="70%"><strong>Amount in Words</strong></td>
-                                                    <td align="right" class="text-uppercase">'.$this->amount_to_words($amount).'</td>
+                                                    <td align="right" width="70%"><strong>Amount Paid in Words</strong></td>
+                                                    <td align="right">'.$this->amount_to_words($amount).'</td>
                                                 </tr>
+                                                '.($isArrears && !$isPDF ?
+                                                    '<tr>
+                                                        <td align="right" width="70%"><strong>This Terms Fees Balance</strong></td>
+                                                        <td align="right">'.$defaultCurrency.''.number_format($cur_arreas, 2).'</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td align="right" width="70%"><strong>Oustanding Fees Arrears</strong></td>
+                                                        <td align="right">'.$defaultCurrency.''.number_format($prev_arrears, 2).'</td>
+                                                    </tr>' : (
+                                                        !$isPDF ? '
+                                                            <tr>
+                                                                <td align="right" width="70%"><strong>Oustanding Fees Arrears</strong></td>
+                                                                <td align="right">'.$defaultCurrency.''.number_format($prev_arrears, 2).'</td>
+                                                            </tr>' : ''
+                                                        )
+                                                ).'
+                                                '.(!$isPDF ?
+                                                    '<tr>
+                                                        <td align="right" width="70%"><strong>Total Outstanding Fees Balance</strong></td>
+                                                        <td align="right">'.$defaultCurrency.''.number_format($outstanding_balance, 2).'</td>
+                                                    </tr>' : ''
+                                                ).'
                                             </table>
                                         </div>
                                     </div>
@@ -2036,9 +2208,14 @@ class Fees extends Myschoolgh {
 
         // append this section if download element was not parsed
         if(!isset($params->download)) {
-            $receipt .= "<script>
-                window.onload = (evt) => { window.print(); }
+            $receipt .= "
+            <script>
+            function print_receipt() {
+                window.print();
+                window.onfocus = (evt) => {window.close();}
                 window.onafterprint = (evt) => { window.close(); }
+            }
+            print_receipt();
             </script>";
         }
 
@@ -2055,27 +2232,27 @@ class Fees extends Myschoolgh {
         try {
 
             global $defaultClientData, $defaultCurrency;
-
+            
             // get the student information
-            $studentRecord = $this->pushQuery("
-                a.class_id, a.name, a.image, a.unique_id, a.enrollment_date, a.gender, a.email, a.phone_number,
+            $students_list = $this->pushQuery("
+                a.class_id, a.item_id, a.name, a.image, a.unique_id, a.enrollment_date, a.gender, a.email, a.phone_number,
                 (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name",
-                "users a", "a.client_id='{$params->clientId}'
-                AND a.item_id='{$params->student_id}' AND a.user_type='student' LIMIT 1");
+                "users a", "a.client_id='{$params->clientId}' AND a.user_type='student' AND a.status = '1'
+                ".(!empty($params->student_id) ? "AND a.item_id='{$params->student_id}'" : null)." 
+                ".(!empty($params->class_id) ? "AND a.class_id='{$params->class_id}'" : null)." 
+                LIMIT ".(!empty($params->student_id) ? 1 : 1000)
+            );
 
             // confirm that student id is valid
-            if(empty($studentRecord)) {
+            if(empty($students_list)) {
                 return "An invalid student id was submitted for processing.";
             }
 
             // set some variables
-            $studentRecord = $studentRecord[0];
+            $student_bill = "";
             $isPDF = (bool) isset($params->isPDF);
-
-            // get the student allocation list
             $client = $defaultClientData;
             $clientPrefs = $client->client_preferences;
-            $allocation_list = $this->students_fees_allocation($params)["data"];
 
             // get the client logo content
             if(!empty($client->client_logo)) {
@@ -2083,176 +2260,200 @@ class Fees extends Myschoolgh {
                 $logo_data = file_get_contents($client->client_logo);
                 $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
             }
-
-            // get the student fees arrears
-            $arrears_array = $this->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", "users_arrears", "student_id='{$params->student_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            $counter_ = 0;
+            $list_count = count($students_list);
             
-            // get the class and student fees allocation
             $student_fees_arrears = "";
             $fees_arrears = [];
-            $arrears_total = 0;
-           
-            // if the fees arrears not empty
-            if(!empty($arrears_array)) {
-                    
-                // include the array helper
-                load_helpers(['array_helper']);
+
+            // loop through the students list
+            foreach($students_list as $studentRecord) {
+
+                // get the student allocation list
+                $counter_++;
+                $studentId = $studentRecord->item_id;
+                $params->student_id = $studentId;
+                $allocation_list = $this->students_fees_allocation($params)["data"];
+
+                // get the student fees arrears
+                $arrears_array = $this->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", "users_arrears", "student_id='{$studentId}' AND client_id='{$params->clientId}' LIMIT 1");
                 
-                // set a new item for the arrears
-                $arrears = $arrears_array[0];
-                $outstanding = 0;
-
-                // convert the item to array
-                $arrears_details = json_decode($arrears->arrears_details, true);
-
-                foreach($arrears_details as $item => $amount) {
-                    // get the academic year and term
-                    $split = explode("...", $item);
-                    $year = $split[1] . " Term Of " . str_ireplace("_", "/", $split[0]);
+                // get the class and student fees allocation
+                $arrears_total = 0;
+            
+                // if the fees arrears not empty
+                if(!empty($arrears_array)) {
+                        
+                    // include the array helper
+                    load_helpers(['array_helper']);
                     
-                    $total = array_sum($amount);
-                    $arrears_total += $total;
+                    // set a new item for the arrears
+                    $arrears = $arrears_array[0];
+                    $outstanding = 0;
 
-                    // push it into the array
-                    $fees_arrears[$year] = $total;
+                    // convert the item to array
+                    $arrears_details = json_decode($arrears->arrears_details, true);
+
+                    foreach($arrears_details as $item => $amount) {
+                        // get the academic year and term
+                        $split = explode("...", $item);
+                        $year = $split[1] . " Term Of " . str_ireplace("_", "/", $split[0]);
+                        
+                        $total = array_sum($amount);
+                        $arrears_total += $total;
+
+                        // push it into the array
+                        $fees_arrears[$year] = $total;
+                    }
                 }
-            }
-            // set the bill form
-            $student_bill = '
-            <div style="margin:auto auto; '.($isPDF ? '' : "max-width:1050px;").';background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: \'Calibri Regular\'; width:100%;margin-bottom:2px">
-                <div class="row mb-3">
-                    <div class="text-dark bg-white col-md-12" style="padding-top:20px;">
-                        <div align="center">
-                            '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
-                            <h2 style="color:#6777ef;font-size:25px;font-family:helvetica;padding:0px;margin:0px;"> '.strtoupper($client->client_name).'</h2>
-                            <div>'.$client->client_address.'</div>
-                            '.(!empty($client->client_contact) ? "<div><strong>Tel:</strong> {$client->client_contact} / {$client->client_secondary_contact}</div>" : "").'
-                            '.(!empty($client->client_email) ? "<div><strong>Email:</strong> {$client->client_email}</div>" : "").'
-                        </div>
-                        <div style="background-color: #2196F3 !important;margin-top:5px;border-bottom: 1px solid #dee2e6 !important;height:3px;"></div>
-                        <div style="margin-top:0px;">
-                        <table border="0" width="100%" cellpadding="5px">
-                            <tr>
-                                <td align="center" colspan="2">
-                                    <h3 style="border-bottom:solid 1px #ccc;padding:0px;padding-bottom:5px;margin:0px;font-family:\'Calibri Regular\'">OFFICIAL STUDENT BILL</h3>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td width="50%">
-                                    <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Student Details</h3>
-                                    <div style="text-transform:uppercase;margin-bottom:5px;">Name: <strong>'.$studentRecord->name.'</strong></div>
-                                    <div style="text-transform:uppercase;margin-bottom:5px;">Student ID: <strong>'.$studentRecord->unique_id.'</strong></div>
-                                    <div style="text-transform:uppercase;margin-bottom:5px;">Class: <strong>'.$studentRecord->class_name.'<strong></div>
-                                </td>
-                                <td width="50%" align="right">
-                                    <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Academics</h3>
-                                    <div style="text-transform:uppercase;margin-bottom:5px;">Academic Year: <strong>'.$clientPrefs->academics->academic_year.'</strong></div>
-                                    <div style="text-transform:uppercase;margin-bottom:5px;">Term: <strong>'.$clientPrefs->academics->academic_term.'</strong></div>
-                                    <div style="margin-bottom:5px;">'.date("Y-m-d h:ia").'</div>
-                                </td>
-                            </tr>
-                        </table>
-                        <style>table.table tr td {border:solid 1px #dad7d7;padding:5px;}</style>
-                        <div style="background-color: #ccc !important;margin-top:1px;border-bottom: 1px solid #ccc !important;height:0.5px;margin-bottom:5px;"></div>
-                        <table border="0" class="table" width="100%">
-                            <tr>
-                                <td style="font-weight:bold;">#</td>
-                                <td style="font-weight:bold;">Fees Type</td>
-                                <td style="font-weight:bold;">Status</td>
-                                <td style="font-weight:bold;">Amount</td>
-                                <td style="font-weight:bold;">Discount</td>
-                                <td style="font-weight:bold;">Paid</td>
-                                <td style="font-weight:bold;" align="right">Balance</td>
-                            </tr>';
-                        if(empty($allocation_list)) {
-                            $student_bill .= "
-                            <tr>
-                                <td colspan='7' align='center'>No fees has been allocated to this student.</td>
-                            </tr>";
-                        } else {
-                            $total_paid = 0;
-                            $total_discount = 0;
-                            $total_balance = 0;
-                            $total_due = 0;
-                            foreach($allocation_list as $key => $fees) {
-
-                                $discount = $fees->exempted ? $fees->balance : 0;
-                                $balance = !$fees->exempted ? $fees->balance : 0;
-
-                                $total_discount += $discount;
-                                $total_balance += $balance;
-                                $total_due += $fees->amount_due;
-                                $total_paid += $fees->amount_paid;
-                                
-                                if($fees->exempted) {
-                                    $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #000;color: #000;'>Exempted</span>";
-                                } else {
-                                    if($fees->paid_status === 1) {
-                                        $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0aa038;color: #0aa038;'>Paid</span>";
-                                    } elseif($fees->paid_status === 2) {
-                                        $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0b47d2;color: #0b47d2;'>Partly Paid</span>";
-                                    } elseif($fees->paid_status === 0) {
-                                        $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #f13535;color: #f13535;'>Unpaid</span>";
-                                    }
-                                }
-
-                                $student_bill .= "<tr>";
-                                $student_bill .= "<td width='8%'>".($key+1)."</td>";
-                                $student_bill .= "<td>{$fees->category_name}</td>";
-                                $student_bill .= "<td>{$status}</td>";
-                                $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_due, 2)."</td>";
-                                $student_bill .= "<td>{$defaultCurrency} ".number_format($discount, 2)."</td>";
-                                $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_paid, 2)."</td>";
-                                $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($balance, 2)."</td>";
-                                $student_bill .= "</tr>";
-                            }
-                            foreach($fees_arrears as $item => $value) {
-                                $student_bill .= "<tr>";
-                                $student_bill .= "<td>".($key+2)."</td>";
-                                $student_bill .= "<td colspan='2'>Arrears for {$item} Academic Year</td>";
-                                $student_bill .= "<td>{$defaultCurrency} ".number_format($value, 2)."</td>";
-                                $student_bill .= "<td></td>";
-                                $student_bill .= "<td>{$defaultCurrency} ".number_format(0, 2)."</td>";
-                                $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($value, 2)."</td>";
-                                $student_bill .= "</tr>";
-                            }
-                            $student_bill .= "
-                            <tr>
-                                <td colspan='6' align='right'><strong>Grand Total:</strong></td>
-                                <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_due + $arrears_total), 2)."</td>
-                            </tr>
-                            <tr>
-                                <td colspan='6' align='right'><strong>Paid:</strong></td>
-                                <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_paid, 2)."</td>
-                            </tr>
-                            <tr>
-                                <td colspan='6' align='right'><strong>Discount:</strong></td>
-                                <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_discount, 2)."</td>
-                            </tr>
-                            <tr>
-                                <td colspan='6' align='right'><strong>Balance:</strong></td>
-                                <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_balance + $arrears_total), 2)."</td>
-                            </tr>
-                            <tr>
-                                <td colspan='7' align='center'>
-                                    <div style='padding:10px;'>{$client->client_slogan}</div>
-                                </td>
-                            </tr>                           
-                            ";
-                        }
-            $student_bill .= '
+                // set the bill form
+                $student_bill .= '
+                <div style="margin:auto auto; '.($isPDF ? '' : "max-width:1050px;").';background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: \'Calibri Regular\'; width:100%;margin-bottom:2px">
+                    <div class="row mb-3">
+                        <div class="text-dark bg-white col-md-12" style="padding-top:20px;width:90%;margin:auto auto;">
+                            <div align="center">
+                                '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
+                                <h2 style="color:#6777ef;font-size:25px;font-family:helvetica;padding:0px;margin:0px;"> '.strtoupper($client->client_name).'</h2>
+                                <div>'.$client->client_address.'</div>
+                                '.(!empty($client->client_contact) ? "<div><strong>Tel:</strong> {$client->client_contact} / {$client->client_secondary_contact}</div>" : "").'
+                                '.(!empty($client->client_email) ? "<div><strong>Email:</strong> {$client->client_email}</div>" : "").'
+                            </div>
+                            <div style="background-color: #2196F3 !important;margin-top:5px;border-bottom: 1px solid #dee2e6 !important;height:3px;"></div>
+                            <div style="margin-top:0px;">
+                            <table border="0" width="100%" cellpadding="5px">
+                                <tr>
+                                    <td align="center" colspan="2">
+                                        <h3 style="border-bottom:solid 1px #ccc;padding:0px;padding-bottom:5px;margin:0px;font-family:\'Calibri Regular\'">OFFICIAL STUDENT BILL</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="50%">
+                                        <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Student Details</h3>
+                                        <div style="text-transform:uppercase;margin-bottom:5px;">Name: <strong>'.$studentRecord->name.'</strong></div>
+                                        <div style="text-transform:uppercase;margin-bottom:5px;">Student ID: <strong>'.$studentRecord->unique_id.'</strong></div>
+                                        <div style="text-transform:uppercase;margin-bottom:5px;">Class: <strong>'.$studentRecord->class_name.'<strong></div>
+                                    </td>
+                                    <td width="50%" align="right">
+                                        <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Academics</h3>
+                                        <div style="text-transform:uppercase;margin-bottom:5px;">Year: <strong>'.$clientPrefs->academics->academic_year.'</strong></div>
+                                        <div style="text-transform:uppercase;margin-bottom:5px;">Term: <strong>'.$clientPrefs->academics->academic_term.'</strong></div>
+                                        <div style="margin-bottom:5px;">'.date("Y-m-d h:ia").'</div>
+                                    </td>
+                                </tr>
                             </table>
+                            <style>table.table tr td {border:solid 1px #dad7d7;padding:5px;}</style>
+                            <div style="background-color: #ccc !important;margin-top:1px;border-bottom: 1px solid #ccc !important;height:0.5px;margin-bottom:5px;"></div>
+                            <table border="0" class="table" width="100%">
+                                <tr>
+                                    <td style="font-weight:bold;">#</td>
+                                    <td style="font-weight:bold;">Fees Type</td>
+                                    <td style="font-weight:bold;">Status</td>
+                                    <td style="font-weight:bold;">Amount</td>
+                                    <td style="font-weight:bold;">Discount</td>
+                                    <td style="font-weight:bold;">Paid</td>
+                                    <td style="font-weight:bold;" align="right">Balance</td>
+                                </tr>';
+                            if(empty($allocation_list)) {
+                                $student_bill .= "
+                                <tr>
+                                    <td colspan='7' align='center'>No fees has been allocated to this student.</td>
+                                </tr>";
+                            } else {
+                                $total_paid = 0;
+                                $total_discount = 0;
+                                $total_balance = 0;
+                                $total_due = 0;
+                                foreach($allocation_list as $key => $fees) {
+
+                                    $discount = $fees->exempted ? $fees->balance : 0;
+                                    $balance = !$fees->exempted ? $fees->balance : 0;
+
+                                    $total_discount += $discount;
+                                    $total_balance += $balance;
+                                    $total_due += $fees->amount_due;
+                                    $total_paid += $fees->amount_paid;
+                                    
+                                    if($fees->exempted) {
+                                        $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #000;color: #000;'>Exempted</span>";
+                                    } else {
+                                        if($fees->paid_status === 1) {
+                                            $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0aa038;color: #0aa038;'>Paid</span>";
+                                        } elseif($fees->paid_status === 2) {
+                                            $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0b47d2;color: #0b47d2;'>Partly Paid</span>";
+                                        } elseif($fees->paid_status === 0) {
+                                            $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #f13535;color: #f13535;'>Unpaid</span>";
+                                        }
+                                    }
+
+                                    if(!$fees->exempted) {
+
+                                        $student_bill .= "<tr style='font-size:15px'>";
+                                        $student_bill .= "<td width='8%'>".($key+1)."</td>";
+                                        $student_bill .= "<td>{$fees->category_name}</td>";
+                                        $student_bill .= "<td>{$status}</td>";
+                                        $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_due, 2)."</td>";
+                                        $student_bill .= "<td>{$defaultCurrency} ".number_format($discount, 2)."</td>";
+                                        $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_paid, 2)."</td>";
+                                        $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($balance, 2)."</td>";
+                                        $student_bill .= "</tr>";
+
+                                    }
+
+                                }
+                                foreach($fees_arrears as $item => $value) {
+                                    $student_bill .= "<tr>";
+                                    $student_bill .= "<td>".($key+2)."</td>";
+                                    $student_bill .= "<td colspan='2'>Arrears for {$item} Academic Year</td>";
+                                    $student_bill .= "<td>{$defaultCurrency} ".number_format($value, 2)."</td>";
+                                    $student_bill .= "<td></td>";
+                                    $student_bill .= "<td>{$defaultCurrency} ".number_format(0, 2)."</td>";
+                                    $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($value, 2)."</td>";
+                                    $student_bill .= "</tr>";
+                                }
+                                $student_bill .= "
+                                <tr>
+                                    <td colspan='6' align='right'><strong>Grand Total:</strong></td>
+                                    <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_due + $arrears_total), 2)."</td>
+                                </tr>
+                                <tr>
+                                    <td colspan='6' align='right'><strong>Paid:</strong></td>
+                                    <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_paid, 2)."</td>
+                                </tr>
+                                <tr>
+                                    <td colspan='6' align='right'><strong>Discount:</strong></td>
+                                    <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_discount, 2)."</td>
+                                </tr>
+                                <tr>
+                                    <td colspan='6' align='right'><strong>Balance:</strong></td>
+                                    <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_balance + $arrears_total), 2)."</td>
+                                </tr>
+                                <tr>
+                                    <td colspan='7' align='center'>
+                                        <div style='padding:10px;'>{$client->client_slogan}</div>
+                                    </td>
+                                </tr>                           
+                                ";
+                            }
+                $student_bill .= '
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>';
+                </div>';
+                            
+                $student_bill .= ($counter_ < $list_count) && $isPDF ? "<div class=\"page_break\"></div>" : null;
+            }
 
             // append this section if download element was not parsed
             if(isset($params->print)) {
                 $student_bill .= "
                 <script>
-                    window.onload = (evt) => { window.print(); }
+                function print_bill() {
+                    window.print();
+                    window.onfocus = (evt) => {window.close();}
                     window.onafterprint = (evt) => { window.close(); }
+                }
+                print_bill();
                 </script>";
             }
 
@@ -2281,7 +2482,6 @@ class Fees extends Myschoolgh {
                 return $student_array[$class_object->category_id] ?? [];
             }
         }
-
         return [];
     }
 
@@ -2406,6 +2606,8 @@ class Fees extends Myschoolgh {
 
             // confirm if the exemptions list was parsed
             if(isset($params->exemptions) && is_array($params->exemptions)) {
+                // unset all exemptions first
+                $this->db->query("UPDATE fees_payments SET exempted = '0' WHERE student_id='{$params->student_id}' AND client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' LIMIT 20");
                 // loop through the exemptions list
                 foreach($params->exemptions as $category_id => $amount) {
                     $this->db->query("UPDATE fees_payments SET exempted = '1' WHERE category_id='{$category_id}' AND student_id='{$params->student_id}' AND client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' LIMIT 1");
@@ -2423,4 +2625,78 @@ class Fees extends Myschoolgh {
 
     }
 
+    /**
+     * Reverse Fees Payment
+     * 
+     * @return Array
+     */
+    public function reverse(stdClass $params) {
+
+        try {
+
+            // begin transaction
+            $this->db->beginTransaction();
+
+            // confirm the payment id
+            $payment_check = $this->pushQuery("a.amount, a.student_id,
+                    (SELECT b.name FROM users b WHERE b.item_id=a.student_id LIMIT 1) AS student_name", 
+                "fees_collection a", "a.reversed='0' AND a.payment_id='{$params->payment_id}' 
+                    AND a.client_id='{$params->clientId}' LIMIT 40");
+
+            // end query if empty
+            if(empty($payment_check)) {
+                return ["code" => 203, "data" => "Sorry! An invalid Payment ID was parsed for processing"];
+            }
+
+            // init value
+            $amount_paid = 0;
+
+            // loop through to get the total amount paid for that particular transaction
+            foreach($payment_check as $payment) {
+                $amount_paid += $payment->amount;
+            }
+
+            // load the fees allocations category list
+            $allocation_list = $this->pushQuery("category_id, amount", "fees_payments", 
+                "student_id='{$payment_check[0]->student_id} AND client_id = '{$params->clientId}' AND paid_status='2' LIMIT 40");
+
+            // proceed to set the reversed state as 1
+            $this->db->query("UPDATE fees_collection SET reversed = '1', has_reversal = '0' WHERE payment_id='{$params->payment_id}' AND client_id='{$params->clientId}' LIMIT 40");
+
+            // reverse the transaction
+            $this->db->query("UPDATE accounts_transaction SET state='Reversed', reversed='1' WHERE item_id='{$params->payment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+            // get the account id
+            $account_id = $this->pushQuery("account_id", "accounts_transaction", "item_id='{$params->payment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+            // if the account id is not empty
+            if(!empty($account_id)) {
+                // reduce the account balance
+                $this->db->query("UPDATE accounts SET total_credit = (total_credit - {$amount_paid}), 
+                    balance = (balance - {$amount_paid})
+                    WHERE item_id = '{$account_id[0]->account_id}' AND client_id = '{$params->clientId}' LIMIT 1
+                ");
+            }
+
+            /* Record the user activity log */
+            $this->userLogs("fees_payment_reversal", $params->payment_id, null, 
+                "{$params->userData->name} reversed an amount of <strong>{$amount_paid}</strong> as Payment for 
+                    <strong>Fees</strong> received from <strong>{$payment_check[0]->student_name}</strong>.", $params->userId);
+            
+            // commit the statement
+            $this->db->commit();
+
+            // return success message
+            return [
+                "code" => 200,
+                "data" => "Fees payment reversal was successful"
+            ];
+
+        } catch(PDOException $e) {
+            // reverse the db transaction
+            $this->db->rollBack();
+        }
+
+    }
+    
 }

@@ -21,7 +21,7 @@ $pageTitle = "Department Information";
 $response->title = "{$pageTitle} : {$appName}";
 
 $response->scripts = [
-    "assets/js/page/index.js"
+    "assets/js/index.js"
 ];
 
 // item id
@@ -55,22 +55,22 @@ if(!empty($item_id)) {
         $student_list = load_class("users", "controllers")->quick_list($student_param);
 
         // student update permissions
+        $count = 0;
         $students = "";
         $studentUpdate = $accessObject->hasAccess("update", "student");
 
         // loop through the students list
         foreach($student_list["data"] as $key => $student) {
             // view link
-            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}student/{$student->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $count++;
+            $action = "<a href='#' onclick='return load(\"student/{$student->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
                         
             $students .= "<tr data-row_id=\"{$student->user_id}\">";
-            $students .= "<td>".($key+1)."</td>";
+            $students .= "<td>{$count}</td>";
             $students .= "<td>
                 <div class='d-flex justify-content-start'>
                     <div>
-                        <a href=\"#\" onclick='return loadPage(\"{$baseUrl}student/{$student->user_id}\");'>
-                            <span class='text-uppercase font-weight-bold text-primary'>{$student->name}</span>
-                        </a>
+                        <span onclick='return load(\"student/{$student->user_id}\");' class='user_name font-weight-bold text-primary'>{$student->name}</span>
                     </div>
                 </div>
             </td>";

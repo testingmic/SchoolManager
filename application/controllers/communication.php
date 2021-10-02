@@ -8,7 +8,7 @@ class Communication extends Myschoolgh {
 		parent::__construct();
 
         // get the client data
-        $client_data = $params->client_data;
+        $client_data = $params->client_data ?? [];
         $this->iclient = $client_data;
 
         // run this query
@@ -224,6 +224,154 @@ class Communication extends Myschoolgh {
     /**
      * Send an SMS or Email Message
      * 
+     * @param String    $params->reminder_subject
+     * @param String    $params->message
+     * @param Array     $params->send_mode
+     * @param Array     $params->recipients
+     * @param String    $params->class_id
+     * @param String    $params->send_later
+     * @param Date      $params->schedule_date
+     * @param Time      $params->schedule_time
+     * 
+     * @return Array
+     */
+    public function send_reminder(stdClass $params) {
+
+        try {
+
+            // begin the transaction
+            $this->db->beginTransaction();
+
+            // validate the recipient type
+            if(!isset($params->send_mode)) {
+                return ["code" => 203, "data" => "Sorry! An invalid sending mode."];
+            }
+
+            // get the message to be sent type
+            $isSMS = (bool) in_array("sms", $params->send_mode);
+
+            // if the recipient array is empty then return error
+            if(empty($params->recipients)) {
+                return ["code" => 203, "data" => $this->is_required("Reminder Recipient")];
+            }
+
+            // recipient list must be a valid array
+            if(!is_array($params->recipients)) {
+                return ["code" => 203, "data" => "Sorry! The recipient list must be a valid array."];
+            }
+
+            // set the init variables
+            $units = 0;
+            $actual_recipients_array = [];
+
+            // if no class id was selected
+            if(empty($params->class_id)) { return ["code" => 203, "data" => $this->is_required("Class ID")]; }
+
+            // old record
+            $class_check = $this->pushQuery("id, name", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+
+            // return error message
+            if(empty($class_check)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+
+            // get the recipients array list
+            $actual_recipients_array = $this->pushQuery(
+                "name, unique_id, item_id, phone_number, email", "users", 
+                "client_id='{$params->clientId}' AND status='1' AND 
+                item_id IN {$this->inList($params->recipients)} AND 
+                user_status = 'Active' AND class_id='{$class_check[0]->id}' LIMIT {$this->global_limit}"
+            );
+
+            // return false if the recipients list is empty
+            if(empty($actual_recipients_array)) {
+                return ["code" => 203, "data" => "Sorry! No recipient found."];
+            }
+
+            // perform this action if the message type is sms
+            if($isSMS) {
+
+                // calculate the message text count
+                $chars = strlen($params->message);
+                $message_count = ceil($chars / $this->sms_text_count);
+                
+                // get the sms balance
+                $balance = $this->pushQuery("sms_balance", "smsemail_balance", "client_id='{$params->clientId}' LIMIT 1");
+                $balance = $balance[0]->sms_balance ?? 0;
+
+                // messages to send
+                $units = $message_count * count($actual_recipients_array);
+
+                // return error if the balance is less than the message to send
+                if($units > $balance) {
+                    if(empty($class_check)) { return ["code" => 203, 
+                        "data" => "Sorry! Your SMS Balance is insufficient to send this message. 
+                            You have {$balance} units left. However, you would required {$units} units to send the message.
+                        "]; 
+                    }
+                }
+
+            }
+
+            // convert into json string
+            $json = json_encode($actual_recipients_array);
+            $actual_recipients_array = json_decode($json, true);
+
+            // get the list of all user ids
+            $recipient_ids = array_column($actual_recipients_array, "item_id");
+
+            // set the scheduled date and time
+            $params->schedule_time = empty($params->schedule_time) ? date("H:i:s") : $params->schedule_time;
+            $params->schedule_date = empty($params->schedule_date) ? date("Y-m-d") : $params->schedule_date;
+
+            // set the time to send the message
+            $time_to_send = empty($params->schedule_date) ? date("Y-m-d H:i:s", strtotime("+2 minutes")) : "{$params->schedule_date} {$params->schedule_time}";
+            
+            // check the time to ensure its not less than current time
+            if(strtotime($time_to_send) < time()) {
+                return ["code" => 203, "data" => "Sorry! The scheduled time and date must be above current time."];
+            }
+
+            // generate the message unique id
+            $item_id = random_string("alnum", 15);
+
+            // insert the record
+            $stmt = $this->db->prepare("
+                INSERT INTO smsemail_send_list SET client_id = ?, item_id = ?, type = ?, campaign_name = ?,
+                subject = ?, message = ?, recipient_list = ?, recipient_ids = ?,
+                units_used = ?, schedule_time = ?, created_by = ?, send_mode = ?
+            ");
+            $stmt->execute([
+                $params->clientId, $item_id, "reminder", $params->reminder_subject, $params->subject ?? null,
+                $params->message, json_encode($actual_recipients_array), json_encode($recipient_ids), 
+                $units, $time_to_send, $params->userId, json_encode($params->send_mode)
+            ]);
+
+            // if the units to be used is not zero
+            if(!empty($units)) {
+                // reduce the SMS balance
+                $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$units}), sms_sent = (sms_sent + {$units}) WHERE client_id = '{$params->clientId}' LIMIT 1");
+            }
+
+            // commit the prepared statements
+            $this->db->commit();
+
+            // return the success response
+            return [
+                "data" => "Reminders was successfully sent to the selected recipients.",
+                "additional" => [
+                    "item_id" => $item_id
+                ]
+            ];
+
+        } catch(PDOException $e) {
+            $this->db->rollBack();
+            return $this->unexpected_error;
+        }
+
+    }
+
+    /**
+     * Send an SMS or Email Message
+     * 
      * @param String    $params->campaign_name
      * @param String    $params->template_id
      * @param String    $params->message
@@ -288,9 +436,9 @@ class Communication extends Myschoolgh {
                 // get the recipients array list
                 $recipients_array = $this->pushQuery(
                     "name, user_type, unique_id, item_id, {$column}", "users", 
-                    "client_id='{$params->clientId}' AND status='1' AND 
-                    academic_year='{$this->academic_year}' AND user_status = 'Active' AND
-                    academic_term='{$this->academic_term}' AND class_id='{$class_check[0]->id}' LIMIT 1000"
+                    "client_id='{$params->clientId}' AND status='1' AND user_status = 'Active'
+                        AND item_id IN {$this->inList($params->recipients)}
+                        AND class_id='{$class_check[0]->id}' LIMIT {$this->global_limit}"
                 );
             }
 
@@ -311,9 +459,8 @@ class Communication extends Myschoolgh {
                         // get the user info
                         $user = $this->pushQuery(
                             "name, user_type, unique_id, item_id, {$column}", "users", 
-                            "client_id='{$params->clientId}' AND status='1' AND user_status = 'Active' AND
-                            academic_year='{$this->academic_year}' AND item_id = '{$recipient}' AND
-                            academic_term='{$this->academic_term}' LIMIT 1");
+                            "client_id='{$params->clientId}' AND status='1' AND 
+                            user_status = 'Active' AND item_id = '{$recipient}' LIMIT 1");
 
                         // append to the list
                         if(!empty($user)) { $recipients_array[] = $user[0]; }
@@ -331,8 +478,11 @@ class Communication extends Myschoolgh {
 
                 // get the recipients array list
                 $recipients_array = $this->pushQuery(
-                    "name, user_type, unique_id, item_id, {$column}", "users", "client_id='{$params->clientId}' AND
-                        user_type IN {$this->inList($params->role_group)} AND user_type != 'student'"
+                    "name, user_type, unique_id, item_id, {$column}", "users", "
+                    client_id='{$params->clientId}' AND
+                    user_type IN {$this->inList($params->role_group)} AND 
+                    item_id IN {$this->inList($params->recipients)} AND 
+                    user_type != 'student' LIMIT {$this->global_limit}"
                 );
             }
 
@@ -390,7 +540,7 @@ class Communication extends Myschoolgh {
             $params->schedule_date = empty($params->schedule_date) ? date("Y-m-d") : $params->schedule_date;
 
             // set the time to send the message
-            $time_to_send = empty($params->send_later) ? date("Y-m-d H:i:s", strtotime("+2 minutes")) : "{$params->schedule_date} {$params->schedule_time}";
+            $time_to_send = empty($params->schedule_date) ? date("Y-m-d H:i:s", strtotime("+2 minutes")) : "{$params->schedule_date} {$params->schedule_time}";
 
             // check the time to ensure its not less than current time
             if(strtotime($time_to_send) < time()) {
@@ -412,8 +562,11 @@ class Communication extends Myschoolgh {
                 json_encode($recipient_ids), $units, $time_to_send, $params->userId
             ]);
 
-            // reduce the SMS balance
-            $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$units}), sms_sent = (sms_sent + {$units}) WHERE client_id = '{$params->clientId}' LIMIT 1");
+            // if the units to be used is not zero
+            if(!empty($units)) {
+                // reduce the SMS balance
+                $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$units}), sms_sent = (sms_sent + {$units}) WHERE client_id = '{$params->clientId}' LIMIT 1");
+            }
 
             // commit the prepared statements
             $this->db->commit();

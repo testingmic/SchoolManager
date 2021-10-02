@@ -68,6 +68,7 @@ if(!empty($item_id)) {
             "module" => $module,
             "userData" => $defaultUser,
             "item_id" => $item_id,
+            "accept" => "image/*,.pdf,.docx,.doc"
         ];
 
         // append the html content

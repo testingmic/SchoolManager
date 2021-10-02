@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $defaultAcademics, $defaultCurrency;
 
 // initial variables
 $appName = config_item("site_name");
@@ -18,7 +18,7 @@ $clientId = $session->clientId;
 $response = (object) [];
 
 $response->title = "Fees Payment History : {$appName}";
-$response->scripts = ["assets/js/filters.js"];
+$response->scripts = ["assets/js/filters.js", "assets/js/reversals.js"];
 
 $filter = (object) $_POST;
 
@@ -34,9 +34,11 @@ $classes_param->department_id = !empty($filter->department_id) ? $filter->depart
 $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
 // begin the request parameter
-$params = (object) [
+$param = (object) [
     "clientId" => $clientId,
     "userData" => $defaultUser,
+    "academic_year" => $defaultAcademics->academic_year ?? null,
+    "academic_term" => $defaultAcademics->academic_term ?? null,
     "client_data" => $defaultUser->client,
     "student_array_ids" => $defaultUser->wards_list_ids ?? null,
     "department_id" => $filter->department_id ?? null,
@@ -47,21 +49,60 @@ $params = (object) [
 
 // if the student id is not empty
 if(!empty($session->student_id)) {
-    $params->student_id = $session->student_id;
+    $param->student_id = $session->student_id;
 }
 
 // load the student fees payment
-$item_list = load_class("fees", "controllers", $params)->list($params);
+$item_list = load_class("fees", "controllers", $param)->list($param);
 
 $hasAdd = $accessObject->hasAccess("add", "fees");
 $hasUpdate = $accessObject->hasAccess("update", "fees");
+$hasReversal = $accessObject->hasAccess("reversal", "fees");
+
+// initial variables
+$payment_summary = $myClass->pushQuery("
+        SUM(amount_due) AS amount_due,
+        (
+            SELECT SUM(b.amount) FROM fees_collection b WHERE b.client_id='{$clientId}'
+            ".(!empty($param->academic_year) ? " AND b.academic_year='{$param->academic_year}'" : null)."
+            ".(!empty($param->academic_term) ? " AND b.academic_term='{$param->academic_term}'" : null)."
+            AND b.status = '1' AND b.reversed = '0'
+        ) AS amount_paid,
+        SUM(balance) AS total_balance,
+        (
+            SELECT SUM(arrears_total) FROM users_arrears WHERE client_id='{$clientId}'
+        ) AS total_arrears", 
+        "fees_payments", 
+        "client_id = '{$clientId}' AND status = '1'
+    ".(!empty($param->academic_year) ? " AND academic_year='{$param->academic_year}'" : null)."
+    ".(!empty($param->academic_term) ? " AND academic_term='{$param->academic_term}'" : null)."
+    ".(!empty($param->class_id) ? " AND class_id='{$param->class_id}'" : null)."
+");
+
+$amount_due = $payment_summary[0]->amount_due ?? 0;
+$amount_paid = $payment_summary[0]->amount_paid ?? 0;
+$total_balance = $payment_summary[0]->total_balance ?? 0;
+$total_arrears = $payment_summary[0]->total_arrears ?? 0;
 
 $fees_history = "";
+
+// loop through the fees list
 foreach($item_list["data"] as $key => $fees) {
+
+    // set the action button
     $action = "";
     $action = "<a href='#' title='View Receipt' onclick='load(\"fees_view/{$fees->payment_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
-    $action .= "&nbsp;<a title='Print Receipt' href='#' onclick=\"return print_receipt('{$fees->payment_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
+    $action .= "&nbsp;<a title='Print Receipt' href='#' onclick=\"print_receipt('{$fees->payment_id}')\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
     
+    // add the reversal button key
+    if($hasReversal && $fees->has_reversal && !$fees->reversed) {
+        $action .= "&nbsp;<a title='Reverse Fees Payment' href='#' onclick=\"reverse_payment('{$fees->payment_id}','{$fees->student_info->name}','{$fees->currency} ".number_format($fees->amount_paid, 2)."')\" class='btn btn-sm btn-outline-danger'><i class='fa fa-recycle'></i></a>";
+    }
+
+    if($fees->reversed) {
+        $action = "<span class='badge font-bold badge-danger'>REVERSED</span>";
+    }
+
     $fees_history .= "<tr data-row_id=\"{$fees->payment_id}\">";
     $fees_history .= "<td>".($key+1)."</td>";
     $fees_history .= "
@@ -71,11 +112,12 @@ foreach($item_list["data"] as $key => $fees) {
                 <div class='mr-2'><img src='{$baseUrl}{$fees->student_info->image}' width='40px' height='40px'></div>" : "")."
                 <div>
                     <a href='#' onclick='load(\"student/{$fees->student_info->user_id}\");'>{$fees->student_info->name}</a> <br>
-                <strong>{$fees->student_info->unique_id}</strong></div>
+                    <strong>ID: </strong>
+                    <strong class='text-success'>{$fees->receipt_id}</strong>
+                </div>
             </div>
         </td>";
     $fees_history .= "<td>{$fees->class_name}</td>";
-    $fees_history .= "<td>".($fees->category_name ? $fees->category_name : $fees->category_id)."</td>";
     $fees_history .= "<td>{$fees->currency} ".number_format($fees->amount_paid, 2)."</td><td>";
     $fees_history .= "<strong>{$fees->payment_method}</strong>";
 
@@ -86,7 +128,7 @@ foreach($item_list["data"] as $key => $fees) {
         $fees_history .= $fees->cheque_number ? "<br><strong>#{$fees->cheque_number}</strong>" : null;
     }
     $fees_history .= "</td><td> ".(isset($fees->created_by_info->name) ? "{$fees->created_by_info->name} <br>" : null)."  <i class='fa fa-calendar'></i> {$fees->recorded_date}</td>";
-    $fees_history .= "<td width='10%' align='center'>{$action}</td>";
+    $fees_history .= "<td align='center'><span data-action_id='{$fees->payment_id}'>{$action}</span></td>";
     $fees_history .= "</tr>";
 }
 
@@ -131,9 +173,82 @@ $response->html = '
             </select>
         </div>
         <div class="col-xl-2 col-md-2 col-12 form-group">
-            <label for="">&nbsp;</label>
+            <label class="d-sm-none d-md-block" for="">&nbsp;</label>
             <button id="filter_Fees_Collection" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
         </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body pr-2 pl-3 card-type-3">
+                    <div class="row">
+                        <div class="col">
+                            <h6 class="font-14 text-uppercase font-bold mb-0">TOTAL FEES DUE</h6>
+                            <span class="font-bold text-primary font-20 mb-0">'.$defaultCurrency.' '.number_format($amount_due, 2).'</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="bg-info text-white card-circle">
+                                <i class="fas fa-money-bill-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body pr-2 pl-3 card-type-3">
+                    <div class="row">
+                        <div class="col">
+                            <h6 class="font-14 text-uppercase font-bold mb-0">FEES + ARREARS PAID</h6>
+                            <span class="font-bold text-success text-success font-20 mb-0">'.$defaultCurrency.' '.number_format($amount_paid, 2).'</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="bg-success text-white card-circle">
+                                <i class="fas fa-money-bill-wave-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body pr-2 pl-3 card-type-3">
+                    <div class="row">
+                        <div class="col">
+                            <h6 class="font-14 text-uppercase font-bold mb-0">FEES OUTSTANDING</h6>
+                            <span class="font-bold text-danger font-20 mb-0">'.$defaultCurrency.' '.number_format($total_balance, 2).'</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="bg-danger text-white card-circle">
+                                <i class="fas fa-money-bill"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-lg-3 col-md-6">
+            <div class="card">
+                <div class="card-body pr-2 pl-3 card-type-3">
+                    <div class="row">
+                        <div class="col">
+                            <h6 class="font-14 text-uppercase font-bold mb-0">ARREARS OUTSTANDING</h6>
+                            <span class="font-bold text-warning font-20 mb-0">'.$defaultCurrency.' '.number_format($total_arrears, 2).'</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="bg-amber text-white card-circle">
+                                <i class="fas fa-money-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="col-12 col-sm-12 col-lg-12">
             <div class="card">
                 <div class="card-body">
@@ -144,11 +259,10 @@ $response->html = '
                                     <th width="5%" class="text-center">#</th>
                                     <th>Student Name</th>
                                     <th>Class</th>
-                                    <th width="10%">Fees Type</th>
                                     <th>Amount</th>
                                     <th>Payment Method</th>
-                                    <th>Recorded By / Date</th>
-                                    <th align="center" width="12%"></th>
+                                    <th>Recorded By</th>
+                                    <th align="center" width="13%"></th>
                                 </tr>
                             </thead>
                             <tbody>'.$fees_history.'</tbody>

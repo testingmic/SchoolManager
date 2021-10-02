@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultAcademics;
+global $myClass, $defaultAcademics, $defaultCurrency, $session;
 
 // initial variables
 $appName = config_item("site_name");
@@ -19,40 +19,49 @@ $response = (object) [];
 $filter = (object) $_POST;
 $pageTitle = "Fees Reports";
 $response->title = "{$pageTitle} : {$appName}";
-$response->scripts = ["assets/js/analitics.js", "assets/js/filters.js"];
 
-// the default data to stream
-$data_stream = 'id="data-report_stream" data-report_stream="summary_report,fees_revenue_flow"';
+// confirm that the user has the required permissions
+if(!$accessObject->hasAccess("reports", "fees")) {
+    $response->html = page_not_found("permission_denied");
+} else {
+    
+    // include the required js scripts
+    $response->scripts = ["assets/js/analitics.js", "assets/js/filters.js"];
 
-$hasFiltering = $accessObject->hasAccess("filters", "settings");
+    // the default data to stream
+    $data_stream = 'id="data-report_stream" data-report_stream="summary_report,fees_revenue_flow"';
 
-// run the school academic terms
-$myClass->academic_terms();
+    $hasFiltering = $accessObject->hasAccess("filters", "settings");
 
-// if the class_id is not empty
-$classes_param = (object) [
-    "clientId" => $clientId,
-    "columns" => "id, name",
-    "client_data" => $defaultUser->client
-];
-$class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+    // run the school academic terms
+    $myClass->academic_terms();
+    $session->reportPeriod = "this_week";
+    
+    // if the class_id is not empty
+    $classes_param = (object) [
+        "clientId" => $clientId,
+        "columns" => "id, name",
+        "limit" => 100,
+        "client_data" => $defaultUser->client
+    ];
+    $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
-$students_list = [];
+    $students_list = [];
 
-// load fees allocation list for the students
-$fees_category_list = "";
-$feesObject = load_class("fees", "controllers", $classes_param);
-$fees_category_array = $feesObject->category_list($classes_param)["data"];
+    // load fees allocation list for the students
+    $fees_category_list = "";
+    $feesObject = load_class("fees", "controllers", $classes_param);
+    $fees_category_array = $feesObject->category_list($classes_param)["data"];
 
-// set the academic year and term
-$academic_year_term = $defaultAcademics->academic_year."_".$defaultAcademics->academic_term;
+    // set the academic year and term
+    $academic_year_term = $defaultAcademics->academic_year."_".$defaultAcademics->academic_term;
 
-// fees category
-foreach($fees_category_array as $category) {
-    $fees_category_list .= "<option value=\"{$category->id}\">{$category->name}</option>";
-}
+    // fees category
+    foreach($fees_category_array as $category) {
+        $fees_category_list .= "<option value=\"{$category->id}\">{$category->name}</option>";
+    }
 
-$response->html = '
+    $response->html = '
     <section class="section">
         <div class="section-header">
             <h1><i class="fa fa-chart-line"></i> '.$pageTitle.'</h1>
@@ -63,7 +72,7 @@ $response->html = '
             </div>
         </div>
         
-        <div data-current_period="'.($session->reportPeriod ? $session->reportPeriod : "last_14days").'" class="row default_period" '.$data_stream.'>
+        <div data-current_period="'.($session->reportPeriod ? $session->reportPeriod : "this_week").'" class="row default_period" '.$data_stream.'>
 
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
@@ -71,7 +80,7 @@ $response->html = '
                         <div>
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">Fees Report Summary</a>
+                                    <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">Fees Analysis</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="generate-tab2" data-toggle="tab" href="#generate" role="tab" aria-selected="true">Generate Report</a>
@@ -127,11 +136,114 @@ $response->html = '
                                         <div class="col-12 col-sm-12 col-lg-12">
                             
                                             <div class="row">
-                            
+
+                                                <div class="col-lg-3 col-md-4">
+                                                    <div class="card">
+                                                        <div class="card-body card-type-3">
+                                                            <div class="row">
+                                                                <div class="col pr-0">
+                                                                    <h6 class="font-14 text-uppercase font-bold mb-0">TOTAL FEES DUE</h6>
+                                                                    <span data-summary="amount_due" class="font-bold text-primary font-17 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
+                                                                </div>
+                                                                <div class="col-auto">
+                                                                    <div class="bg-info text-white card-circle">
+                                                                        <i class="fas fa-money-bill-alt"></i>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                
+                                                <div class="col-lg-3 col-md-4">
+                                                    <div class="card">
+                                                        <div class="card-body card-type-3">
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    <h6 class="font-14 text-uppercase font-bold mb-0">TOTAL FEES PAID</h6>
+                                                                    <span data-summary="amount_paid" class="font-bold text-success font-17 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
+                                                                </div>
+                                                                <div class="col-auto">
+                                                                    <div class="bg-success text-white card-circle">
+                                                                        <i class="fas fa-money-bill-wave-alt"></i>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                
+                                                <div class="col-lg-3 col-md-4">
+                                                    <div class="card">
+                                                        <div class="card-body card-type-3">
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    <h6 class="font-14 text-uppercase font-bold mb-0">BALANCE</h6>
+                                                                    <span data-summary="balance" class="font-bold text-danger font-17 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
+                                                                </div>
+                                                                <div class="col-auto">
+                                                                    <div class="bg-danger text-white card-circle">
+                                                                        <i class="fas fa-money-bill"></i>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-3 col-md-4">
+                                                    <div class="card">
+                                                        <div class="card-body card-type-3">
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    <h6 class="font-14 text-uppercase font-bold mb-0">ARREARS PAID</h6>
+                                                                    <span data-summary="arrears_paid" class="font-bold text-warning font-17 mb-0">'.$defaultCurrency.' '.number_format(0, 2).'</span>
+                                                                </div>
+                                                                <div class="col-auto">
+                                                                    <div class="bg-warning text-white card-circle">
+                                                                        <i class="fas fa-money-bill-wave-alt"></i>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                        
+                                                <div class="col-xl-3 hidden col-lg-3 col-md-4">
+                                                    <div class="card">
+                                                        <div class="card-body card-type-3">
+                                                            <div class="row">
+                                                                <div class="col">
+                                                                    <h6 class="font-14 text-uppercase font-bold mb-0">FEES ARREARS</h6>
+                                                                    <span data-summary="arrears_total" class="font-bold font-17 mb-0">'.$defaultCurrency.''.number_format(0, 2).'</span>
+                                                                </div>
+                                                                <div class="col-auto">
+                                                                    <div class="bg-amber text-white card-circle">
+                                                                        <i class="fas fa-money-check"></i>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
                                                 <div class="col-lg-8 col-md-12 col-12 col-sm-12">
                                                     <div class="card">
-                                                        <div class="card-header">
-                                                            <h4>Revenue</h4>
+                                                        <div class="card-header pr-0">
+                                                            <div class="row width-100">
+                                                                <div class="col-md-3">
+                                                                    <h4>Revenue</h4>
+                                                                </div>
+                                                                <div align="right" class="col-md-9">
+                                                                    <div class="btn-group" data-filter="quick_summary_filter" role="group" aria-label="Filter Attendance">
+                                                                        <button type="button" data-stream="summary_report" data-period="today" class="btn '.($session->reportPeriod == "today" ? "active" : null).' btn-info">Today</button>
+                                                                        <button type="button" data-stream="summary_report" data-period="last_week" class="btn '.($session->reportPeriod == "last_week" ? "active" : null).' btn-info">Last Week</button>
+                                                                        <button type="button" data-stream="summary_report" data-period="this_week" class="btn '.($session->reportPeriod == "this_week" ? "active" : null).' btn-info">This Week</button>
+                                                                        <button type="button" data-stream="summary_report" data-period="this_month" class="btn '.($session->reportPeriod == "this_month" ? "active" : null).' btn-info">This Month</button>
+                                                                        <button type="button" data-stream="summary_report" data-period="last_month" class="btn '.($session->reportPeriod == "last_month" ? "active" : null).' btn-info">Last Month</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <div class="card-body quick_loader" style="max-height:465px;height:465px;">
                                                             <div class="form-content-loader" style="display: flex; position: absolute">
@@ -171,10 +283,36 @@ $response->html = '
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-lg-12">
+                                                <div class="col-lg-4 hidden col-md-6">
                                                     <div class="card">
                                                         <div class="card-header">
-                                                            <h4>Revenue Flow Chart</h4>
+                                                            <h4>Fees Payment Method</h4>
+                                                        </div>
+                                                        <div class="card-body" data-chart="revenue_payment_category">
+                                                            <canvas style="max-height:420px;height:420px;" id="revenue_payment_category"></canvas>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-12">
+                                                    <div class="card">
+                                                        <div class="card-header pr-0">
+                                                            <div class="row width-100">
+                                                                <div class="col-md-4">
+                                                                    <h4>Fees + Arrears Payments Flow Chart</h4>
+                                                                </div>
+                                                                <div align="right" class="col-md-8">
+                                                                    <div class="btn-group" data-filter="quick_revenue_filter" role="group" aria-label="Filter Attendance">
+                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="today" class="btn '.($session->reportPeriod == "today" ? "active" : null).' btn-info">Today</button>
+                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="last_week" class="btn '.($session->reportPeriod == "last_week" ? "active" : null).' btn-info">Last Week</button>
+                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="this_week" class="btn '.($session->reportPeriod == "this_week" ? "active" : null).'  btn-info">This Week</button>
+                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="this_month" class="btn '.($session->reportPeriod == "this_month" ? "active" : null).' btn-info">This Month</button>
+                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="last_month" class="btn '.($session->reportPeriod == "last_month" ? "active" : null).' btn-info">Last Month</button>
+                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="this_term" class="btn '.($session->reportPeriod == "this_term" ? "active" : null).' btn-info">This Term</button>
+                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="this_year" class="btn '.($session->reportPeriod == "this_year" ? "active" : null).' btn-info">This Year</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                         <div class="card-body quick_loader">
                                                             <div class="form-content-loader" style="display: flex; position: absolute">
@@ -188,17 +326,8 @@ $response->html = '
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-lg-4 col-md-6">
-                                                    <div class="card">
-                                                        <div class="card-header">
-                                                            <h4>Fees Payment Method</h4>
-                                                        </div>
-                                                        <div class="card-body" data-chart="revenue_payment_category">
-                                                            <canvas style="max-height:420px;height:420px;" id="revenue_payment_category"></canvas>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-8 col-md-12">
+
+                                                <div class="col-lg-12 col-md-12">
                                                     <div class="row">
                                                         <div class="col-lg-12" id="revenue_category_counts"></div>
                                                     </div>
@@ -259,17 +388,17 @@ $response->html = '
                                         
                                     </div>
 
-
-
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            
         </div>
     </section>';
-    
+
+}
 // print out the response
 echo json_encode($response);
 ?>

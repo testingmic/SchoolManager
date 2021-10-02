@@ -22,7 +22,6 @@ $response->title = "{$pageTitle} : {$appName}";
 
 // item id
 $item_id = $SITEURL[1] ?? null;
-$pageTitle = confirm_url_id(2, "update") ? "Update {$pageTitle}" : "View {$pageTitle}";
 
 // if the user id is not empty
 if(!empty($item_id)) {
@@ -67,7 +66,7 @@ if(!empty($item_id)) {
                 <h1>'.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'list-events">Events List</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'events">Events List</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>

@@ -41,7 +41,7 @@ foreach($item_list["data"] as $key => $each) {
 
     $classes .= "<tr data-row_id=\"{$each->id}\">";
     $classes .= "<td>".($key+1)."</td>";
-    $classes .= "<td><span class='bold_cursor underline text-info' onclick='return load(\"class/{$each->id}\");'>{$each->name}</span></td>";
+    $classes .= "<td><span class='bold_cursor text-uppercase underline text-info' onclick='return load(\"class/{$each->id}\");'>{$each->name}</span></td>";
     $classes .= "<td>{$each->class_code}</td>";
     $classes .= "<td>{$each->class_size}</td>";
     $classes .= "<td>{$each->students_count}</td>";

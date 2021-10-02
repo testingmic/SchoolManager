@@ -21,7 +21,7 @@ $pageTitle = "Staff Details";
 $response->title = "{$pageTitle} : {$appName}";
 
 $response->scripts = [
-    "assets/js/page/index.js"
+    "assets/js/index.js"
 ];
 
 // staff id
@@ -56,7 +56,7 @@ if(!empty($user_id)) {
         // load the incidents
         $incidents = load_class("incidents", "controllers")->list($staff_param);
 
-        // course listing
+        // Subjects Listing
         $course_listing = "";
 
         // user permissions
@@ -68,6 +68,7 @@ if(!empty($user_id)) {
         $modifySalaryStructure = $accessObject->hasAccess("modify_payroll", "payslip");
 
         // has the right to update the user permissions
+        $viewPermission = $accessObject->hasAccess("view", "permissions");
         $updatePermission = $accessObject->hasAccess("update", "permissions");
 
         // confirm that the user is a teacher
@@ -76,7 +77,7 @@ if(!empty($user_id)) {
         // confirm that the user is a teacher
         if($isTeacher) {
 
-            // course list parameter
+            // Subjects List parameter
             $courses_param = (object) [
                 "clientId" => $session->clientId,
                 "userId" => $defaultUser->user_id,
@@ -88,7 +89,7 @@ if(!empty($user_id)) {
             ];
             $courses_list = load_class("courses", "controllers")->list($courses_param);
 
-            // courses list
+            // Subjects List
             if(!empty($courses_list["data"])) {
 
                 $courseDelete = $accessObject->hasAccess("delete", "course");
@@ -200,46 +201,48 @@ if(!empty($user_id)) {
         $level_data = "<div class='row'>";
 
         // if the user can update permission
-        if($updatePermission) {
+        if(($viewPermission && $defaultUser->user_id == $user_id) || ($updatePermission)) {
+
+            // designation permission
+            $role_permission = $myClass->pushQuery("user_permissions", "users_types", "description='{$data->user_type}' LIMIT 1");
+            $role_permission = $role_permission[0]->user_permissions ?? [];
+            $role_permission = !empty($role_permission) ? json_decode($role_permission, true) : [];
 
             // convert to an array
             $user_permission = json_decode($data->user_permissions, true)["permissions"];
             
             // disable the input field if the current user is also logged in
             $isDisabled = ($session->userId == $user_id) ? "disabled='disabled'" : null;
+            $isDisabled = $updatePermission ? $isDisabled : "disabled='disabled'";
 
             // if the permission is not empty
-            if(!empty($user_permission)) {
+            if(!empty($role_permission)) {
+
                 // loop through the list
-                foreach ($user_permission as $key => $value) {
+                foreach ($role_permission["permissions"] as $key => $value) {
                     $header = ucwords(str_replace("_", " ", $key));
-                    $level_data .= "<div class='".(isset($thisUserAccess) ? "col-lg-4 col-md-4" : "col-lg-12")." mb-2 border-bottom border-default'><h6 style='font-weight:bolder'>".$header."</h6>";
-                    
-                    if(!isset($thisUserAccess)) {
-                        $level_data .= "<div class='row'>";
-                    }
-                    
+                    $level_data .= "<div class='col-lg-12 mb-2 border-bottom border-default'><h6 style='font-weight:bolder'>".$header."</h6>";
+
+                    $level_data .= "<div class='row'>";
                     // loop through the user permissions
-                    foreach($value as $nkey => $nvalue) {						
+                    foreach($value as $nkey => $nvalue) {
+                        
+                        // confirm the user has the permission					
+                        $isPermitted = $user_permission[$key][$nkey] ?? null;
                         
                         // if the user access was parsed
-                        if(isset($thisUserAccess)) {
-                            $level_data .= "<div class='col-lg-12'>";
-                            $level_data .= "<input {$isDisabled} ".(isset($thisUserAccess[$key][$nkey]) && ($thisUserAccess[$key][$nkey] == 1) ? "checked" : null )." type='checkbox' id='access_level[$key][$nkey]' class='brands-checkbox' name='access_level[$key][$nkey][]'>";
-                        } else {
-                            $level_data .= "<div class='col-lg-3 col-md-4'>";
-                            $level_data .= "<input {$isDisabled} checked='checked' type='checkbox' id='access_level[$key][$nkey]' class='brands-checkbox' name='access_level[$key][$nkey][]'>";
-                        }
+                        $level_data .= "<div class='col-lg-3 col-md-4'>";
+                        $level_data .= "<input {$isDisabled} ".($isPermitted ? "checked" : null )." type='checkbox' id='access_level[$key][$nkey]' class='brands-checkbox' name='access_level[$key][$nkey][]'>";
+                   
                         $level_data .= "<label class='cursor' for='access_level[$key][$nkey]'> &nbsp; ".ucwords(str_ireplace("_", " ", $nkey))."</label>";
                         $level_data .= "</div>";
                         
                     }
+                    $level_data .= "</div>";
 
-                    if(!isset($thisUserAccess)) {
-                        $level_data .= "</div>";
-                    }
                     $level_data .= "</div>";
                 }
+
             }
             
             $level_data .= "</div>";
@@ -365,7 +368,7 @@ if(!empty($user_id)) {
                         $isTeacher ? '
                         <li class="nav-item">
                             <a class="nav-link active" id="calendar-tab2" data-toggle="tab" href="#course_list" role="tab"
-                            aria-selected="true">Course List</a>
+                            aria-selected="true">Subjects List</a>
                         </li>' : null
                     ).'
                     <li class="nav-item">
@@ -381,7 +384,7 @@ if(!empty($user_id)) {
                         </li>';
                     }
 
-                    if($updatePermission) {
+                    if(($viewPermission && $defaultUser->user_id == $user_id) || ($updatePermission)) {
                         $response->html .= '
                         <li class="nav-item">
                             <a class="nav-link" id="permissions-tab2" data-toggle="tab" href="#permissions" role="tab"
@@ -396,10 +399,10 @@ if(!empty($user_id)) {
                         $isTeacher ? '
                             <div class="tab-pane show active fade" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
                                 <div class="d-flex justify-content-between mb-4">
-                                    <div class="mb-2"><h5>COURSES LIST</h5></div>
+                                    <div class="mb-2"><h5>Subjects List</h5></div>
                                     '.($addCourse ? '
                                         <div>
-                                            <a href="'.$baseUrl.'course_add" class="btn btn-primary"><i class="fa fa-plus"></i> Add Course</a>
+                                            <a href="'.$baseUrl.'course_add" class="btn btn-primary"><i class="fa fa-plus"></i> Add Subject</a>
                                         </div>' 
                                     : null ).'
                                 </div>
@@ -418,18 +421,19 @@ if(!empty($user_id)) {
                             </div>' : null
                         ).'
                         '.(
-                        $updatePermission ? '
+                        $viewPermission ? '
                             <div class="tab-pane fade" id="permissions" role="tabpanel" aria-labelledby="permissions-tab2">
                                 <div class="mb-3 pb-0 border-bottom"><h5>USER PERMISSIONS</h5></div>
-                                <form class="ajaxform" id="ajaxform" action="'.$baseUrl.'api/users/save_permission" method="POST">
+                                '.($updatePermission ? '<form class="ajaxform" id="ajaxform" action="'.$baseUrl.'api/users/save_permission" method="POST">' : null).'
                                     '.$level_data.'
                                     <div class="row">
                                         <input type="hidden" readonly name="user_id" id="user_id" value="'.$user_id.'">
-                                        <div class="col-lg-12 text-right">
+                                        '.($updatePermission ? 
+                                        '<div class="col-lg-12 text-right">
                                             <button type="submit" '.$isDisabled.' class="btn btn-success"><i class="fa fa-save"></i> Save Permissions</button>
-                                        </div>
+                                        </div>' : null).'
                                     </div>
-                                </form>
+                                '.($updatePermission ? '</form>' : null).'
                             </div>' : null
                         ).'
                         <div class="tab-pane '.(!$isTeacher ? "show active" : null).' fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">

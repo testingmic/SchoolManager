@@ -43,7 +43,7 @@ $color = [
     "accountant" => "danger",
     "teacher" => "warning"
 ];
-
+$count = 0;
 foreach($api_staff_list["data"] as $key => $each) {
     
     $action = "<span title='View staff record' onclick='return loadPage(\"{$baseUrl}staff/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
@@ -52,11 +52,12 @@ foreach($api_staff_list["data"] as $key => $each) {
         $action .= "&nbsp;<span title='Delete Staff Record' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
     }
 
+    $count++;
     $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
-    $staff_list .= "<td>".($key+1)."</td>";
+    $staff_list .= "<td>{$count}</td>";
     $staff_list .= "<td>
         <div class='d-flex justify-content-start'>
-            <div class='mr-2'><img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
+            <div class='mr-2'><img class='author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
             <div>
                 <span class='user_name' onclick='return loadPage(\"{$baseUrl}staff/{$each->user_id}\");'>{$each->name}</span>
                 <br><span class='badge badge-{$color[$each->user_type]} p-1'>".strtoupper($each->user_type)."</span>            
@@ -112,7 +113,7 @@ $response->html = '
                 </select>
             </div>
             <div class="col-xl-2 col-md-2 col-12 form-group">
-                <label for="">&nbsp;</label>
+                <label class="d-sm-none d-md-block" for="">&nbsp;</label>
                 <button id="filter_Staff_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">

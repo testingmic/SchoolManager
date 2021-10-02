@@ -15,7 +15,7 @@ class Crons {
 		$this->rootUrl = "/home/mineconr/app.myschoolgh.com/";
 		$this->dbConn();
 
-		$this->rootUrl = "/var/www/html/myschool_gh/";
+		// $this->rootUrl = "/var/www/html/myschool_gh/";
 
 		require $this->rootUrl."system/libraries/phpmailer.php";
 		require $this->rootUrl."system/libraries/smtp.php";
@@ -31,18 +31,11 @@ class Crons {
 		// CONNECT TO THE DATABASE
 		$connectionArray = array(
 			'hostname' => "localhost",
-			'database' => "mineconr_school",
-			'username' => "mineconr_school",
-			'password' => "YdwQLVx4vKU_"
-		);
-
-		$connectionArray = array(
-			'hostname' => "localhost",
 			'database' => "myschoolgh",
 			'username' => "newuser",
 			'password' => "password"
 		);
-		
+
 		// run the database connection
 		try {
 			$conn = "mysql:host={$connectionArray['hostname']}; dbname={$connectionArray['database']}; charset=utf8";			
@@ -65,7 +58,7 @@ class Crons {
 	 * 
 	 * @return String
 	 */
-	private function generateGeneralMessage($message, $subject) {
+	private function generate_message($message, $subject) {
 
 		$mailerContent = '
 		<!DOCTYPE html>
@@ -113,7 +106,7 @@ class Crons {
 	 * General emails list. Get the list of emails to be sent to users and send them out.
 	 * Includes messages for signup, logins, reset password and the likes.
 	 */
-	public function loadEmailRequests() {
+	public function load_emails() {
 		
 		try {
 
@@ -133,7 +126,7 @@ class Crons {
 
 				// commence the processing
 				$subject = $result->subject;
-				$dataToUse = $this->generateGeneralMessage($result->message, $subject, $result->template_type);
+				$dataToUse = $this->generate_message($result->message, $subject, $result->template_type);
 
 				// use the content submitted
 				if(!empty($dataToUse)) {
@@ -145,82 +138,12 @@ class Crons {
 					$recipient_list = $recipient_list["recipients_list"];
 					
 					// submit the data for processing
-					$mailing = $this->cronSendMail($recipient_list, $subject, $dataToUse);
+					$mailing = $this->send_emails($recipient_list, $subject, $dataToUse);
 
 					// set the mail status to true
 					if($mailing) {
 						$this->db->query("UPDATE users_messaging_list SET sent_status = '1', date_sent=now() WHERE id='{$result->id}' LIMIT 1");
 						print "Mails successfully sent\n";
-					}
-
-				}
-			}
-
-		} catch(PDOException $e) {
-			print "\n{$e->getMessage()}";
-		}
-
-	}
-	
-	/**
-	 * This processes the in-app emails that have been scheduled
-	 * Loop through the list and send out the emails
-	 */
-	public function inApp_Emails() {
-		
-		try {
-
-			// run the query
-			$stmt = $this->db->prepare("SELECT a.*,
-				(SELECT b.description FROM files_attachment b WHERE b.record_id = a.thread_id ORDER BY b.id DESC LIMIT 1) AS attachment
-				FROM users_emails a WHERE a.sent_status='0' AND (CURRENT_TIME() > TIMESTAMP(a.schedule_date)) AND a.status='1' LIMIT 10
-			");
-			$stmt->execute();
-
-			// the data to use
-			$dataToUse = null;
-
-			// looping through the content
-			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-
-				// empty the attachment 
-				$this->mailAttachment = null;
-				
-				// set the store content
-				$this->userAccount = $result;
-				$this->siteName = "Insurehub365";
-
-				$result->message = htmlspecialchars_decode($result->message);
-
-				// commence the processing
-				$subject = $result->subject;
-				$dataToUse = $this->generateGeneralMessage($result->message, $subject);
-
-				// use the content submitted
-				if(!empty($dataToUse)) {
-
-					// convert the recipient and copied list to an array
-					$recipient_list = json_decode($result->recipient_details, true);
-					$copied_list = json_decode($result->copy_recipients, true);
-					$attachments = json_decode($result->attachment, true);
-
-					// if the attachment is not empty then get the files list
-					if(!empty($attachments)) {
-						// gtet the files list
-						$attachments = $attachments["files"];
-						// assign the attachments to the list
-						$this->mailAttachment = $attachments;
-					}
-
-					// submit the data for processing
-					$mailing = $this->cronSendMail($recipient_list, $subject, $dataToUse, $copied_list);
-
-					// set the mail status to true
-					if(!empty($mailing)) {
-						$this->db->query("UPDATE users_emails SET sent_status = '1', sent_date=now() WHERE id='{$result->id}' LIMIT 1");
-						print "Mails successfully sent\n";
-					} else {
-						print "Sending email failed\n";
 					}
 
 				}
@@ -241,7 +164,7 @@ class Crons {
 	 * 
 	 * @return Bool
 	 */
-	private function cronSendMail($recipient_list, $subject, $message, $cc_list = null) {
+	private function send_emails($recipient_list, $subject, $message, $cc_list = null) {
 
 		$mail = new Phpmailer();
 		$smtp = new Smtp();
@@ -350,7 +273,7 @@ class Crons {
 					// loop through each result and share the notice with them
 					while($the_result = $query_stmt->fetch(PDO::FETCH_OBJ)) {
 						$notice_param->user_id = $the_result->user_id;
-						$notice_param->message = "<a title=\"Click to View\" class=\"preview-announcement\" data-announcement_id=\"{$result->item_id}\" href=\"{{APPURL}}announcements\">Hello {$the_result->name}, an announcement was posted for your review.</a>";
+						$notice_param->message = "Hello {$the_result->name}, an announcement was posted for your review. Visit the Announcements section to view.";
 						$this->notice_add($notice_param);
 					}
 				}
@@ -372,7 +295,7 @@ class Crons {
 
 					foreach($query as $eachUser) {
 						$notice_param->user_id = $eachUser->user_id;
-						$notice_param->message = "<a title=\"Click to View\" class=\"preview-email\" data-email_id=\"{$result->item_id}\" href=\"{{APPURL}}emails\">Hello {$eachUser->name}, you have been sent an email message.</a>";
+						$notice_param->message = "Hello {$eachUser->name}, you have been sent an email message. Visit the emails section to view.";
 						$this->notice_add($notice_param);
 					}
 					
@@ -388,6 +311,11 @@ class Crons {
 					$this->terminal_report_handler($result->item_id);
 				}
 
+				// if the activity is to assign fees to a particular class
+				elseif($result->cron_type == "assign_student_fees") {
+					$this->assign_student_fees($result);
+				}
+
 				// update the cron status
 				$this->db->query("UPDATE cron_scheduler SET date_processed=now(), status='1' WHERE id='{$result->id}' LIMIT 1");
 
@@ -398,6 +326,69 @@ class Crons {
 		}
 
     }
+
+	/**
+	 * Assign Fees Schedule to a List of Students
+	 * 
+	 * @return Bool
+	 */
+	private function assign_student_fees($result) {
+
+		// assign some variables
+		$class_id = $result->subject;
+		$client_id = $result->client_id;
+		$students_list = json_decode($result->query, true);
+		
+		// get the class fees schedule
+		$fees_sql = $this->db->prepare("SELECT category_id, amount, currency FROM fees_allocations WHERE
+			class_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? LIMIT 100
+		");
+		$fees_sql->execute([$class_id, $client_id, $result->academic_year, $result->academic_term]);
+
+		// assign the results list
+		$fees_schedule = $fees_sql->fetchAll(PDO::FETCH_OBJ);
+		$students_insert = null;
+		$students_update = null;
+
+		// run this query if the fees_schedule is not empty
+		if(!empty($fees_schedule)) {
+
+			// loop through the students list
+			foreach($students_list as $student) {
+
+				// delete all fees payments owed by the student
+				$students_update .= "UPDATE fees_payments SET status = '0' WHERE client_id = '{$client_id}' AND
+					student_id = (SELECT item_id FROM users WHERE client_id = '{$client_id}' AND id='{$student}' LIMIT 1) LIMIT 100;";
+				
+				// loop through the fees schedule list
+				foreach($fees_schedule as $category) {
+					// create the checkout url
+					$checkout_url = random_string(16);
+					
+					// insert the record
+					$students_insert .= "INSERT INTO fees_payments SET 
+						client_id = '{$client_id}', checkout_url='{$checkout_url}',
+						student_id = (SELECT item_id FROM users WHERE client_id = '{$client_id}' AND id='{$student}' LIMIT 1),
+						class_id = '{$class_id}', category_id = '{$category->category_id}', currency = '{$category->currency}',
+						amount_due = '{$category->amount}', balance = '{$category->amount}',
+						created_by = '{$result->user_id}', academic_year = '{$result->academic_year}',
+						academic_term = '{$result->academic_term}';";
+				}
+				// print some information
+				print "Successfully prepared the fees allocation for Student with ID: {$student}\n";
+			}
+			// execute the prepared statements
+			if(!empty($students_update)) {
+				$this->db->query($students_update);
+				print "\nInitial fees allocation for students have successfully been discarded.\n";
+			}
+			if(!empty($students_insert)) {
+				$this->db->query($students_insert);
+				print "Insertion of new fees allocation for students was successful.\n";
+			}
+		}
+		print "Operation successfully completed.\n";
+	}
 
 	/**
 	 * Perform some modification on the users list
@@ -490,11 +481,29 @@ class Crons {
 		return substr(str_shuffle(str_repeat($pool, ceil($len / strlen($pool)))), 0, $len);
 	}
 
+	/**
+	 * Automatically update the status of transactions, fees collection and events
+	 * 
+	 * Disable reversal after every 30 hours
+	 * 
+	 * @return Bool
+	 */
+	public function auto_updates() {
+		// fees payment reversal disallowed after 30 HOURS
+        $this->db->query("UPDATE fees_collection SET has_reversal='0' WHERE recorded_date < (NOW() + INTERVAL - 30 HOUR) AND has_reversal='1' LIMIT 1000");
+        
+        // do same to transactions recorded - auto set it to approved after 30 hours
+        $this->db->query("UPDATE accounts_transaction SET state='Approved' WHERE date_created < (NOW() + INTERVAL - 30 HOUR) AND state='Pending' AND status='1' LIMIT 1000");
+
+		// update the status of events
+        $this->db->query("UPDATE events SET state='Over' WHERE end_date < CURDATE() AND state='Pending' AND status='1' LIMIT 300");
+	}
+
 }
 
 // create new object
 $jobs = new Crons;
-$jobs->loadEmailRequests();
-$jobs->inApp_Emails();
+$jobs->auto_updates();
+$jobs->load_emails();
 $jobs->scheduler();
 ?>

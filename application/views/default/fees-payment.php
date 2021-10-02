@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultUser, $SITEURL, $defaultClientData;
+global $myClass, $defaultUser, $SITEURL, $defaultClientData, $defaultCurrency;
 
 // initial variables
 $appName = config_item("site_name");
@@ -44,6 +44,7 @@ if(!$receivePayment) {
     $params->class_id = $class_id;
 
     // disable form inputs
+    $student_info = [];
     $search_disabled = null;
     $disabled = "disabled='disabled'";
 
@@ -79,6 +80,17 @@ if(!$receivePayment) {
         $department_id = $data->department_id ?? null;
         $disabled = (($data->paid_status == 1) || ($data->paid_status == '1')) ? "disabled='disabled'" : null;
         $search_disabled = ($data->paid_status == 1) ? null : "disabled='disabled'";
+
+        // set teh student information
+        $student_info = [
+            "name" => $data->student_details["student_name"],
+            "unique_id" => $data->student_details["unique_id"],
+            "phone_number" => $data->student_details["phone_number"],
+            "image" => $data->student_details["image"],
+            "debt" => $data->student_details["debt"],
+            "arrears" => $data->student_details["arrears"],
+            "total" => $data->student_details["debt"]
+        ];
         
         // append the allocation information to the parameters before fetching the payment form
         $params->allocation_info = $data;
@@ -96,17 +108,21 @@ if(!$receivePayment) {
     // load only students
     $params->user_type = "student";
     $params->minified = "simplified";
+    $params->set_id_as_key = true;
 
     // load the students list
     $students_list = [];
     
     // if the student id was parsed
     if(isset($getObject->student_id) || isset($checkout_url)) {
-        $students_list = load_class("users", "controllers")->list($params)["data"];
+        $students_list = load_class("users", "controllers")->quick_list($params)["data"];
     }
 
+    // load the class students list
+    $response->array_stream["class_students_list"] = $students_list;
+
     // scripts for the page
-    $response->scripts = ["assets/js/filters.js", "assets/js/payments.js"];
+    $response->scripts = ["assets/js/payments.js", "assets/js/filters.js"];
 
     // load the classes list
     $classes_param = (object) ["clientId" => $clientId, "columns" => "id, name"];
@@ -130,9 +146,10 @@ if(!$receivePayment) {
             </div>
         </div>
         <div class="section-body">
+            '.(!empty($student_id) && !empty($class_id) ? "<input id='auto_load_form' hidden type='hidden'>" : null).'
             <div class="row mt-sm-4" id="filter_Department_Class">
                 <div class="col-12 col-md-4">
-                    <div class="card">
+                    <div class="card mb-3">
                         <div class="card-header">
                             <h4>Student Details</h4>
                         </div>
@@ -140,24 +157,12 @@ if(!$receivePayment) {
                             <div class="py-3 pt-0" id="fees_payment_preload">
                                 <div class="byPass_Null_Value"></div>
                                 <input type="hidden" name="client_email_address" value="'.$defaultUser->client->client_email.'">
-                                
-                                <div class="form-group">
-                                    <label>Select Department</label>
-                                    <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" id="department_id" name="department_id">
-                                        <option value="">Please Select Department</option>';
-                                        foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
-                                            $response->html .= "<option ".(($department_id === $each->id) ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
-                                        }
-                                        $response->html .= '
-                                    </select>
-                                </div>
-
                                 <div class="form-group">
                                     <label>Select Class <span class="required">*</span></label>
                                     <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" name="class_id">
                                         <option value="">Please Select Class</option>';
                                         foreach($class_list as $each) {
-                                            $response->html .= "<option ".(($class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                                            $response->html .= "<option ".(($class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">".strtoupper($each->name)."</option>";
                                         }
                                         $response->html .= '
                                     </select>
@@ -168,7 +173,18 @@ if(!$receivePayment) {
                                     <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" name="student_id">
                                         <option value="">Please Select Student</option>';
                                         foreach($students_list as $each) {
-                                            $response->html .= "<option ".(($student_id == $each->user_id) ? "selected" : "")." value=\"{$each->user_id}\">{$each->name}</option>";
+                                            if($student_id == $each->user_id) {
+                                                $student_info = [
+                                                    "name" => $each->name,
+                                                    "unique_id" => $each->unique_id,
+                                                    "image" => $each->image,
+                                                    "phone_number" => $each->phone_number,
+                                                    "debt" => $each->debt,
+                                                    "arrears" => $each->arrears,
+                                                    "total" => $each->total_debt_formated
+                                                ];
+                                            }
+                                            $response->html .= "<option data-name=\"{$each->name}\" data-image=\"{$each->image}\" data-phone_number=\"{$each->phone_number}\" data-unique_id=\"{$each->unique_id}\" ".(($student_id == $each->user_id) ? "selected" : "")." value=\"{$each->user_id}\">".strtoupper($each->name)."</option>";
                                         }
                                         $response->html .= '
                                     </select>
@@ -179,25 +195,45 @@ if(!$receivePayment) {
                                     <select '.$search_disabled.' data-width="100%" class="form-control selectpicker" name="category_id">
                                         <option value="">Please Select Category</option>';
                                         foreach($myClass->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$clientId}'") as $each) {
-                                            $response->html .= "<option ".(($category_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";                            
+                                            $response->html .= "<option ".(($category_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">".strtoupper($each->name)."</option>";
                                         }
                                     $response->html .= '
                                     </select>
                                 </div>
                                 <div class="row">
                                     <div class="col-sm-6 mb-1">
-                                        <a class="btn btn-dark" data-link_item="student_go_back" href="#" onclick="return loadPage(\''.$baseUrl.'student/'.(!empty($getObject->student_id) ? $getObject->student_id : $student_id).'\');">
+                                        <a class="btn btn-dark" data-link_item="student_go_back" href="#" onclick="return load(\''.(!empty($getObject->student_id) ? "student/{$getObject->student_id}" : ($student_id ? $student_id : "fees-history")).'\');">
                                             <i class="fa fa-arrow-circle-left"></i> Go Back
                                         </a>
                                     </div>
                                     <div class="col-sm-6 text-right mb-1">
                                         <div class="form-group mb-0 '.($category_id || $class_id ? null : 'hidden').'" id="make_payment_button">
-                                            <button '.$search_disabled.' onclick="return load_Pay_Fees_Form()" class="btn btn-outline-success">Load Form</button>
+                                            <button '.$search_disabled.' onclick="return load_Pay_Fees_Form()" class="btn btn-outline-success"><i class="fa fa-filter"></i> Load Form</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div>    
+                    </div>
+                    <div id="student_information">
+                    '.(!empty($student_info) ?
+                        '<div class="card">
+                            <div class="card-body p-3 pb-3 shadow-style">
+                                <div class="d-flex justify content-start">
+                                    <div class="mr-2">
+                                        <img width="60px" class="img-shadow" src="'.$baseUrl.$student_info["image"].'">
+                                    </div>
+                                    <div>
+                                        <div class="font-20 text-uppercase">'.$student_info["name"].'</div>
+                                        <div><strong>STUDENT ID:</strong> '.$student_info["unique_id"].'</div>
+                                        <div><strong>FEES ARREARS:</strong> '.$defaultCurrency.''.number_format($student_info["debt"], 2).'</div>
+                                        <div><strong>PREVIOUS ARREARS:</strong> '.$defaultCurrency.''.number_format($student_info["arrears"], 2).'</div>
+                                        <div><strong>BALANCE OUTSTANDING:</strong> '.$defaultCurrency.''.$student_info["total"].'</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>'
+                    : null).'
                     </div>
                 </div>
                 <div class="col-12 col-md-8">
@@ -239,15 +275,13 @@ if(!$receivePayment) {
                                     </div>
                                     <div class="col-md-6 form-group">
                                         <label>Amount <span class="required">*</span></label>
-                                        <input '.$disabled.' value="'.($data->balance ?? null).'" class="form-control" name="amount" id="amount" type="number" min="0">
+                                        <input onkeyup="this.value = this.value.replace(/[^\d]+/g, \'\');" '.$disabled.' class="form-control" name="amount" id="amount" type="number" min="0">
                                     </div>
                                     <div class="col-md-12 mt-0 mb-0 form-group"></div>
-                                    <div class="col-md-6 form-group">
-                                        <label>Contact Number</label>
+                                    <div class="col-md-6 hidden form-group">
                                         <input '.$disabled.' class="form-control" name="contact_number" id="contact_number" type="text">
                                     </div>
-                                    <div class="col-md-6 form-group">
-                                        <label class="email_label">Email Address</label>
+                                    <div class="col-md-6 hidden form-group">
                                         <input '.$disabled.' class="form-control" name="email_address" id="email_address" type="email">
                                     </div>
                                     <div class="col-md-12 form-group">
@@ -256,7 +290,7 @@ if(!$receivePayment) {
                                     </div>
                                     <div class="col-md-12 form-group text-right">
                                         <div class="d-flex justify-content-between">
-                                            <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form();" class="btn '.($category_id ? null : 'hidden').' btn-outline-danger">Cancel</button></div>
+                                        <div><button '.$disabled.' id="payment_cancel" onclick="return cancel_Payment_Form();" class="btn '.($category_id ? null : 'hidsden').' btn-dark"><i class="fa fa-ban"></i> Discard</button></div>
                                             <div>
                                                 <button '.$disabled.' id="default_payment_button" onclick="return save_Receive_Payment();" class="btn text-uppercase btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay Fee</button>
                                                 <button '.$disabled.' id="momocard_payment_button" onclick="return receive_Momo_Card_Payment();" class="btn hidden btn-outline-success"><i class="fa fa-money-check-alt"></i> Pay via MoMo/Card</button>
