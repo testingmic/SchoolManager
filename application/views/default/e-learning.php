@@ -51,13 +51,13 @@ $response->html = '
                     </select>
                 </div>
                 <div class="col-xl-4 col-md-4 col-12 form-group">
-                    <label>Select Course <span class="required">*</span></label>
+                    <label>Select Subject <span class="required">*</span></label>
                     <select class="form-control selectpicker" name="course_id">
-                        <option value="">Please Select Course</option>
+                        <option value="">Please Select Subject</option>
                     </select>
                 </div>
                 <div class="col-xl-4 col-md-4 col-12 form-group">
-                    <label>Select Course Unit</label>
+                    <label>Select Subject Unit</label>
                     <select class="form-control selectpicker" name="unit_id">
                         <option value="">Please Select Unit</option>
                     </select>

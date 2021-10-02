@@ -403,9 +403,9 @@ class Forms extends Myschoolgh {
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-4'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Select Course <span class='required'>*</span></label>";
+        $html_content .= "<label>Select Subject <span class='required'>*</span></label>";
         $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='course_id' id='course_id'>";
-        $html_content .= "<option value=''>Select Course</option>";
+        $html_content .= "<option value=''>Select Subject</option>";
         
         // display the Subjects List
         if(isset($ass_data)) {
@@ -2474,7 +2474,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="course_tutor">Course Tutors</label>
                         <select multiple data-width="100%" '.$isAdmin.' name="course_tutor[]" id="course_tutor[]" class="form-control selectpicker">
-                            <option value="">Select Course Tutor</option>';
+                            <option value="">Select Subject Tutor</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND user_status='Active' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && in_array($each->item_id, $itemData->course_tutor_ids) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
@@ -2672,7 +2672,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="courses_ids">Subjects <span class="text-danger">(Select if designation is a teacher)</span></label>
                         <select multiple data-width="100%" name="courses_ids[]" id="courses_ids" class="form-control selectpicker">
-                            <option value="">Select Course</option>';
+                            <option value="">Select Subject</option>';
                             foreach($this->pushQuery("id, name, course_code", "courses", "status='1' AND client_id='{$clientId}' AND academic_year='{$clientPrefs->academics->academic_year}' AND academic_term='{$clientPrefs->academics->academic_term}'") as $each) {
                                 $response .= "<option ".($isData && in_array($each->id, $userData->course_ids) ? "selected" : null)." value=\"{$each->id}\">{$each->course_code}: {$each->name}</option>";                            
                             }
@@ -4442,9 +4442,9 @@ class Forms extends Myschoolgh {
                             </select>
                         </div>
                         <div class="col-xl-4 col-md-4 col-12 form-group">
-                            <label>Select Course <span class="required">*</span></label>
+                            <label>Select Subject <span class="required">*</span></label>
                             <select class="form-control selectpicker" data-width="100%" name="course_id">
-                                <option value="">Please Select Course</option>';
+                                <option value="">Please Select Subject</option>';
                                 foreach($courses_list as $each) {
                                     $html_content .= "<option ".($course === $each->item_id ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
                                 }
@@ -4452,7 +4452,7 @@ class Forms extends Myschoolgh {
                             </select>
                         </div>
                         <div class="col-xl-4 col-md-4 col-12 form-group">
-                            <label>Select Course Unit</label>
+                            <label>Select Subject Unit</label>
                             <select class="form-control selectpicker" data-width="100%" name="unit_id">
                                 <option value="">Please Select Unit</option>';
                                 foreach($units_list as $each) {

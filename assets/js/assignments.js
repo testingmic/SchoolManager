@@ -24,7 +24,7 @@ $(`div[id='create_assignment'] select[name='class_id']`).on("change", function()
         $.get(`${baseUrl}api/assignments/load_course_students`, { class_id }).then((response) => {
             if (response.code == 200) {
                 $(`div[id='create_assignment'] select[name='course_id']`).find('option').remove().end();
-                $(`div[id='create_assignment'] select[name='course_id']`).append(`<option value="null" selected="selected">Select Course</option>`);
+                $(`div[id='create_assignment'] select[name='course_id']`).append(`<option value="null" selected="selected">Select Subject</option>`);
                 $.each(response.data.result.courses_list, (_, e) => {
                     $(`div[id='create_assignment'] select[name='course_id']`).append(`<option data-item_id="${e.item_id}" value='${e.item_id}'>${e.name}</option>'`);
                 });
@@ -361,3 +361,6 @@ var submit_Answers = (assignment_id) => {
 }
 
 trigger_form_submit();
+if($(`input[name="auto_search"]`).length) {
+    student_fullname_search();
+}

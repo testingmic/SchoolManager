@@ -553,36 +553,13 @@ var popup_sendbill = () => {
     
 }
 
-var quick_Add_Student = () => {
-    swal({
-        title: "Add Student",
-        text: "Are you sure you save this student record?",
-        icon: 'warning',
-        buttons: true,
-        dangerMode: true,
-    }).then((proceed) => {
-        if(proceed) {
-            $(`div[id="quickStudentAdd"] div[class="form-content-loader"]`).css("display", "flex");
-            let data = {
-                "fullname": $(`div[id="quickStudentAdd"] input[name="fullname"]`).val(),
-                "dob": $(`div[id="quickStudentAdd"] input[name="dob"]`).val(),
-                "gender": $(`div[id="quickStudentAdd"] select[name="gender"]`).val(),
-                "residence": $(`div[id="quickStudentAdd"] input[name="residence"]`).val(),
-                "class_id": $(`div[id="quickStudentAdd"] select[name="class_id"]`).val(),
-            };
-            $.post(`${baseUrl}api/users/quick_add`, {data}).then((response) => {
-                $(`div[id="quickStudentAdd"] div[class="form-content-loader"]`).css("display", "none");
-                if(response.code == 200) {
-                    $(`div[id="quickStudentAdd"] *`).val(``);
-                    $(`div[id="quickStudentAdd"]`).modal("hide");
-                    $(`div[id="quickStudentAdd"] select`).val(``).change();
-                    $(`[id="filter_Department_Class"] select[name="class_id"]`).val(data.class_id).change();
-                } else {
-                    notify(response.data.result);
-                }
-            }).catch(() => {
-                $(`div[id="quickStudentAdd"] div[class="form-content-loader"]`).css("display", "none");
-            });
-        }
+var student_fullname_search = () => {
+    $.expr[':'].Contains = function(a,i,m){
+        return $(a).text().toUpperCase().indexOf(m[3].toUpperCase())>=0;
+    };
+    $(`div[id="student_search_input"] input[name="student_fullname"]`).on("input", function(event) {
+        let input = $(this).val();
+        $(`tr[data-row_search='name']`).addClass('hidden');
+        $(`tr[data-row_search='name'][data-student_fullname]:Contains(${input}), tr[data-row_search='name'][data-student_unique_id]:Contains(${input})`).removeClass('hidden');
     });
 }

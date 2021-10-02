@@ -136,7 +136,7 @@
                 <ul class="dropdown-menu">
                     <li><a class="nav-link" href="<?= $baseUrl ?>assessments">List Assessments</a></li>
                     <li><a class="nav-link" href="<?= $baseUrl ?>add-assessment">Create Assessment</a></li>
-                    <li><a class="nav-link" href="<?= $baseUrl ?>log-assessment">Log Assessment</a></li>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>log-assessment">Log Previous Assessment</a></li>
                 </ul>
             </li>
         <?php } ?>
@@ -300,7 +300,7 @@
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>assessments">List Assessments</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>add-assessment">Create Assessment</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>log-assessment">Log Assessment</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>log-assessment">Log Previous Assessment</a></li>
         </ul>
     </li>
     <?php } ?>

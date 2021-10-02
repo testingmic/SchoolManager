@@ -110,7 +110,7 @@ $response->html = '
                 </select>
             </div>
             <div class="col-xl-3 '.(!$hasFiltering ? 'hidden': '').' col-md-3 col-12 form-group">
-                <label>Select Course Tutor</label>
+                <label>Select Subject Tutor</label>
                 <select data-width="100%" class="form-control selectpicker" name="course_tutor">
                     <option value="">Please Select Tutor</option>';
                     foreach($myClass->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND user_status='Active' AND client_id='{$clientId}'") as $each) {

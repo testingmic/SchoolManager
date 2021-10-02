@@ -78,7 +78,7 @@ if ($(`select[name="course_id"]`).length) {
     $(`select[name="class_id"]`).on("change", function() {
         let value = $(this).val();
         $(`select[name='course_id']`).find('option').remove().end();
-        $(`select[name='course_id']`).append(`<option value="null">Please Select Course</option>`);
+        $(`select[name='course_id']`).append(`<option value="null">Please Select Subject</option>`);
         if (value !== "null" && value.length) {
             $.get(`${baseUrl}api/courses/list?class_id=${value}&minified=true`).then((response) => {
                 if (response.code == 200) {

@@ -12,7 +12,7 @@ $(`div[id='log_assessment'] select[name='assigned_to']`).on("change", function()
 $(`div[id='log_assessment'] select[name='class_id']`).on("change", function() {
     let class_id = $(this).val();
     $(`div[id='log_assessment'] select[name='course_id']`).find('option').remove().end();
-    $(`div[id='log_assessment'] select[name='course_id']`).append(`<option value="null" selected="selected">Select Course</option>`);
+    $(`div[id='log_assessment'] select[name='course_id']`).append(`<option value="null" selected="selected">Select Subject</option>`);
     if (class_id !== "null" && class_id.length) {
         $.get(`${baseUrl}api/assignments/load_course_students`, { class_id }).then((response) => {
             if (response.code == 200) {

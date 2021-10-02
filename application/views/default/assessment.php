@@ -58,6 +58,7 @@ if(!empty($item_id)) {
         $isClosed = in_array($data->state, ["Closed"]);
         $isActive = in_array($data->state, ["Graded", "Pending", "Answered"]);
         $isMultipleChoice =  (bool) (($data->questions_type == "multiple_choice")); // || ($data->questions_type == "unassigned")
+        $isUnassigned =  (bool) (($data->questions_type == "unassigned"));
 
         $data->isGraded = $isGraded;
         $data->hasUpdate = $hasUpdate;
@@ -183,7 +184,7 @@ if(!empty($item_id)) {
                 $function = $isMultipleChoice ? "review_QuizAssignment" : "load_singleStudentData";
 
                 $grading_info .= '
-                <div class="col-lg-'.($isAuto && !$isMultipleChoice ? 7 : 9).'" id="assignment-content">
+                <div class="col-lg-'.($isAuto && !$isMultipleChoice ? 7 : ($isUnassigned ? 12 : 9)).'" id="assignment-content">
                     '.( $isActive ?
                         '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
                             <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
@@ -194,6 +195,11 @@ if(!empty($item_id)) {
                             ' : ''
                         )
                     ).'
+                    <div class="mb-3" id="student_search_input">
+                        <label>Filter by Student Name or Reg. ID</label>
+                        <input type="search" placeholder="Search by fullname" name="student_fullname" class="form-control">
+                        <input type="hidden" value="true" name="auto_search">
+                    </div>
                     <table width="100%" class="table-hover table mb-0">
                         <thead>
                             <th>Assigned Students List</th>
@@ -210,7 +216,7 @@ if(!empty($item_id)) {
                             $isSubmitted = (bool) ($student->handed_in == "Submitted");
 
                             $grading_info .= '
-                                <tr>
+                                <tr data-row_search="name" data-student_fullname="'.trim($student->name).'" data-student_unique_id="'.$student->unique_id.'">
                                     <td width="60%">
                                         <div class="d-flex justify-content-start">
                                             <div class="mr-2">

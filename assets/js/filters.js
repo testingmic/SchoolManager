@@ -143,7 +143,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
         $(`select[name="class_id"]`).on("change", function() {
             let value = $(this).val();
             $(`select[name='course_id']`).find('option').remove().end();
-            $(`select[name='course_id']`).append(`<option value="">Please Select Course</option>`);
+            $(`select[name='course_id']`).append(`<option value="">Please Select Subject</option>`);
             if (value.length && value !== "null") {
                 $.get(`${baseUrl}api/courses/list?class_id=${value}&minified=true`).then((response) => {
                     if (response.code == 200) {

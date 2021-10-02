@@ -80,9 +80,9 @@ $response->html = '
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label>Select Course <span class="required">*</span></label>
+                                    <label>Select Subject <span class="required">*</span></label>
                                     <select data-width="100%" class="selectpicker form-control" name="course_id" id="course_id">
-                                        <option value="">Select Course</option>';
+                                        <option value="">Select Subject</option>';
                                         if(isset($ass_data)) {
                                             foreach($ass_data["courses_list"] as $course) {
                                                 $response->html .= "<option ".($course_id == $course->item_id ? "selected" : null)." value='{$course->item_id}'>{$course->name}</option>";
@@ -118,6 +118,10 @@ $response->html = '
                     <div class="padding-20">
                         <div class="text-center" id="init_data">The students list for gradding will appear here.</div>
                         <div id="award_marks" class="hidden">
+                            <div class="mb-3" id="student_search_input">
+                                <label>Filter by Student Name or Reg. ID</label>
+                                <input type="search" placeholder="Search by fullname" name="student_fullname" class="form-control">
+                            </div>
                             <div class="mb-4 slim-scroll table-responsive" style="max-height: 800px;">
                                 <table data-empty="" id="student_staff_list" class="table table-bordered table-striped">
                                     <thead>

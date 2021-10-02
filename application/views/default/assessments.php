@@ -60,10 +60,10 @@ foreach($item_list["data"] as $key => $each) {
     
     $each->assignment_type_label = $color[$each->assignment_type];
     $assessment_array[$each->item_id] = $each;
-    $action = "<a title='Click to update assignment record' href='#' onclick='return loadPage(\"{$baseUrl}assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='Click to update assignment record' href='#' onclick='return load(\"assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasUpdate && $each->questions_type == "multiple_choice") {
-        $action .= "&nbsp;<a title='Manage questions for this assignment' href='#' onclick='return loadPage(\"{$baseUrl}add-assessment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
+        $action .= "&nbsp;<a title='Manage questions for this assignment' href='#' onclick='return load(\"add-assessment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
     }
 
     // if the state is either closed or graded
@@ -78,7 +78,7 @@ foreach($item_list["data"] as $key => $each) {
     $assignments .= "<tr data-row_id=\"{$each->id}\">";
     $assignments .= "<td>".($key+1)."</td>";
     $assignments .= "<td>
-        <a href='#' onclick='return loadPage(\"{$baseUrl}assessment/{$each->item_id}\");'>
+        <a href='#' onclick='return load(\"assessment/{$each->item_id}\");'>
             {$each->assignment_title}
         </a> 
         <strong class='badge p-1 pr-2 pl-2 badge-{$color[$each->assignment_type]}'>{$each->assignment_type}</strong>
@@ -164,9 +164,9 @@ $response->html = '
                 </select>
             </div>
             <div class="col-xl-3 '.(!$hasFiltering ? 'hidden': '').' col-md-3 col-12 form-group">
-                <label>Select Course</label>
+                <label>Select Subject</label>
                 <select class="form-control selectpicker" data-width="100%" name="course_id">
-                    <option value="">Please Select Course</option>';
+                    <option value="">Please Select Subject</option>';
                     foreach($courses_list as $each) {
                         $response->html .= "<option ".(isset($filter->course_id) && ($filter->course_id == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";
                     }
