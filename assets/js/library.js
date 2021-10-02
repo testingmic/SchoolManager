@@ -133,6 +133,7 @@ var issue_Request_Handler = (todo, book_id = "") => {
                                 <span class="text-primary text-uppercase">${book.info.title}</span><br>
                                 <i class="fa fa-book-reader"></i> <strong>${book.info.isbn}</strong><br>
                                 <i class="fa fa-user"></i> ${book.info.author}
+                                <p class="mb-0"><i class="fa fa-baby-carriage"></i> <strong>Stock Quantity:</strong>  ${book.info.books_stock}</p>
                                 <p class="mb-0">
                                     <span class="mr-4"><i class="fa fa-table"></i> <strong>Rack:</strong>  ${book.info.rack_no}</span> 
                                     <span><strong>Row:</strong>  ${book.info.row_no}</span>
@@ -343,6 +344,9 @@ var save_Issue_Request = (issue_id, request) => {
                             user_id.val("").change(),
                             overdue_rate.val("");
                     }
+                    setTimeout(() => {
+                        loadPage(`${baseUrl}books_issue`);
+                    },1000);
                 }
                 swal({
                     text: response.data.result,

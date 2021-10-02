@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) [];
-$pageTitle = "Summary Requestion Information";
+$pageTitle = "Summary Request Information";
 
 $hasIssue = $accessObject->hasAccess("issue", "library");
 
@@ -72,7 +72,7 @@ if(!empty($item_id)) {
             $books_list .= "<td>
                 <div class='d-flex justify-content-start'>
                     <div class='mr-2'>".(!empty($book->book_image) ? "<img class='rounded-circle author-box-picture' src='{$baseUrl}{$book->book_image}' width='40px' height='40px'>" : "")."</div>
-                    <div><a href='#' onclick='return loadPage(\"{$baseUrl}book/{$book->book_id}\");'>{$book->title}</a> <br> <strong>{$book->isbn}</strong></div>
+                    <div><a href='#' onclick='return load(\"book/{$book->book_id}\");'>{$book->title}</a> <br> <strong>{$book->isbn}</strong></div>
                 </div>
             </td>";
             $books_list .= "<td>{$book->author}</td>";

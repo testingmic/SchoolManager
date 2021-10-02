@@ -709,7 +709,7 @@ class Forms extends Myschoolgh {
         $list_class = empty($list_class) ? "col-lg-4 col-md-6" : $list_class;
         
         // images mimetypes for creating thumbnails
-        $image_mime = ["jpg", "jpeg", "png", "gif"];
+        $image_mime = ["jpg", "jpeg", "png", "gif", ".webp"];
         $docs_mime = ["pdf", "doc", "docx", "txt", "rtf", "jpg", "jpeg", "png", "gif"];
         $video_mime = ["mp4", "mpeg", "movie", "webm", "mov", "mpg", "mpeg", "qt", "flv"];
 
@@ -794,7 +794,6 @@ class Forms extends Myschoolgh {
                             
                             // if the file does not already exist
                             if(!is_file($filename) && !file_exists($filename)) {
-                                
                                 // create a new thumbnail of the file
                                 create_thumbnail($eachFile->path, $filename);
                             } else {
@@ -811,7 +810,10 @@ class Forms extends Myschoolgh {
                             $filename = "{$eachFile->path}";
                             $padding = "style='padding:0px'";
                             // set the video file
-                            $thumbnail = "<video onclick=\"return load('{$show_view}/{$record_id}_{$eachFile->unique_id}');\" ".($show_controls ? "controls='true'" : null)." style='display: block; cursor:pointer; width:100%;' src='{$this->baseUrl}{$filename}#t=5'></video>";
+                            $thumbnail = "
+                            <div onclick=\"return load('{$show_view}/{$record_id}_{$eachFile->unique_id}');\">
+                                <video ".($show_controls ? "controls='true'" : null)." style='display: block; cursor:pointer; width:100%;' src='{$this->baseUrl}{$filename}#t=5'></video>
+                            </div>";
                         }
                         
 
@@ -1074,7 +1076,7 @@ class Forms extends Myschoolgh {
         $title = isset($params->data->name) ? $params->data->name : null;
 
         $html_content = "
-        <form action='{$this->baseUrl}api/courses/".(!$title ? "add_unit" : "update_unit")."' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
+        <form action='{$this->baseUrl}api/courses/".(!$title ? "add_unit" : "update_unit")."' autocomplete='Off' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
             <div class='row'>
                 <div class='col-lg-12'>
                     <div class='form-group'>
@@ -1202,7 +1204,7 @@ class Forms extends Myschoolgh {
             }
 
             $html_content = "
-            <form action='{$this->baseUrl}api/courses/".(!$title ? "add_lesson" : "update_lesson")."' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
+            <form action='{$this->baseUrl}api/courses/".(!$title ? "add_lesson" : "update_lesson")."' autocomplete='Off' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
                 <div class='row'>
                     <div class='col-lg-12'>
                         <div class='form-group'>
@@ -1271,7 +1273,7 @@ class Forms extends Myschoolgh {
         $lessons_list = $this->pushQuery("id, item_id, course_id, unit_id, name", "courses_plan", "course_id = '".($params->data->the_course_id ?? $course_id)."' AND client_id='{$params->clientId}' AND plan_type='lesson'");
         
         $html_content = "
-        <form id='_ajax-data-form-content' class='_ajax-data-form' enctype=\"multipart/form-data\" action=\"{$this->baseUrl}api/resources/upload_4courses\" method=\"POST\">
+        <form id='_ajax-data-form-content' class='_ajax-data-form' autocomplete='Off' enctype=\"multipart/form-data\" action=\"{$this->baseUrl}api/resources/upload_4courses\" method=\"POST\">
             <div class=\"row\">
                 <div class=\"col-lg-12 pt-0 mt-0\">
                     <div class=\"form-group pb-1 pt-0 mb-2 mt-0\">
@@ -1460,7 +1462,7 @@ class Forms extends Myschoolgh {
             }
 
             $html_content = "
-            <form action='{$this->baseUrl}api/incidents/".(!$title ? "add" : "update")."' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
+            <form autocomplete='Off' action='{$this->baseUrl}api/incidents/".(!$title ? "add" : "update")."' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
                 <div class='row'>
                     <div class='col-lg-12'>
                         <div class='form-group'>
@@ -2089,7 +2091,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth</label>
-                        <input type="date" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control">
+                        <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
                     </div>
                 </div>
                 <div class="col-lg-8 col-md-6">

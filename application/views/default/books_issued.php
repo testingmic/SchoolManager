@@ -31,14 +31,6 @@ foreach($item_list["data"] as $key => $each) {
     
     $action = "<a title='Click to view details of this request' href='{$baseUrl}book_request/{$each->item_id}' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
-    if($hasIssue && in_array($each->status, ["Issued", "Requested"]) && ($each->state !== "Overdue")) {
-        $action .= "&nbsp;<a title='Click to delete this issued book record' href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-stop'></i></a>";
-    }
-
-    if(!$hasIssue && ($each->the_type == "request") && in_array($each->status, ["Requested"])) {
-        $action .= "&nbsp;<a title='Click to delete this requested book record' href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-stop'></i></a>";
-    }
-
     $books_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $books_list .= "<td>".($key+1)."</td>";
 
@@ -53,12 +45,28 @@ foreach($item_list["data"] as $key => $each) {
     }
 
     $books_ = "";
+    $canCancel = true;
     foreach($each->books_list as $key => $book) {
+        // book can be returned
+        if($book->status == "Returned") {
+            $canCancel = false;
+        }
+        
+        // append to the list
         $books_ .= "
         <div class='mb-1'>
             ".($key+1).". {$book->title}
         </div>";
     }
+
+    if($hasIssue && in_array($each->status, ["Issued", "Requested"]) && ($each->state !== "Overdue") && $canCancel) {
+        $action .= "&nbsp;<a title='Delete this issued book record' href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+    }
+
+    if(!$hasIssue && ($each->the_type == "request") && in_array($each->status, ["Requested"])) {
+        $action .= "&nbsp;<a title='Delete this requested book record' href='#' onclick='return delete_record(\"{$each->item_id}\", \"borrow\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
+    }
+
     $books_list .= "<td>{$books_}</td>";
     $books_list .= "<td>{$each->issued_date}</td>";
     $books_list .= "<td>{$each->return_date}</td>";

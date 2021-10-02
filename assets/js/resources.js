@@ -79,7 +79,7 @@ if ($(`select[name="course_id"]`).length) {
         let value = $(this).val();
         $(`select[name='course_id']`).find('option').remove().end();
         $(`select[name='course_id']`).append(`<option value="null">Please Select Course</option>`);
-        if (value.length && value !== "null") {
+        if (value !== "null" && value.length) {
             $.get(`${baseUrl}api/courses/list?class_id=${value}&minified=true`).then((response) => {
                 if (response.code == 200) {
                     $.each(response.data.result, function(i, e) {
@@ -96,7 +96,7 @@ if ($(`select[name="unit_id"]`).length) {
         let value = $(this).val();
         $(`select[name='unit_id']`).find('option').remove().end();
         $(`select[name='unit_id']`).append(`<option value="null">Please Select Unit</option>`);
-        if (value.length && value !== "null") {
+        if (value !== "null" && value.length) {
             $.get(`${baseUrl}api/courses/course_unit_lessons_list?course_id=${value}&minified=true`).then((response) => {
                 if (response.code == 200) {
                     $.each(response.data.result, function(i, e) {

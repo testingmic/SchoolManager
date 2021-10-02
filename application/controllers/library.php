@@ -527,7 +527,9 @@ class Library extends Myschoolgh {
 
 			// return the session list as the response
 			return [
-				"data" => $request ? "The request successfully processed." : "Sorry! There was an error while processing the request"
+				"code" => is_array($request) ? $request["code"] : 200,
+				"data" => !is_array($request) && $request ? "The request successfully processed." : 
+					(is_array($request) ? $request["data"] : "Sorry! There was an error while processing the request")
 			];
 		}
 
@@ -752,6 +754,19 @@ class Library extends Myschoolgh {
 			return ["code" => 203, "data" => "Sorry! The return date for this request must be set."];
 		}
 
+		// confirm that the user id was selected
+		if(($status == "Issued") && empty($data->user_id)) {
+			return ["code" => 203, "data" => "Sorry! Please select the user to issue to this to."];
+		}
+		if(($status == "Issued") && empty($data->user_role)) {
+			return ["code" => 203, "data" => "Sorry! Please select the user to issue to this to."];
+		}
+
+		// confirm the user id parsed
+		if(empty($this->pushQuery("id", "users", "item_id='{$data->user_id}' AND client_id='{$data->clientId}' LIMIT 1"))) {
+			return ["code" => 203, "data" => "Sorry! An invalid user had been selected."];
+		}
+
 		// rate for overdue
 		if(isset($data->overdue_apply) && ($data->overdue_apply !== "single") && !empty($data->overdue_rate)) {
 			$eachBookRate = ($data->overdue_rate / count($data->books_list));
@@ -809,7 +824,6 @@ class Library extends Myschoolgh {
 
 			return true;
 		} catch(PDOException $e) {
-			$this->db->rollback();
 			return false;
 		}
 
@@ -1053,15 +1067,15 @@ class Library extends Myschoolgh {
 		/** Update the returned information */
 		if($isEntire) {
 
+			/** Get all Books and Their Quanities */
+			foreach($this->pushQuery("quantity, book_id", "books_borrowed_details", "borrowed_id = '{$borrowed_id}' AND status !='Returned'") as $book) {
+				/** increase the books stock quantity */
+				$this->db->query("UPDATE books_stock SET quantity = (quantity + {$book->quantity}) WHERE books_id = '{$book->book_id}' LIMIT 1");
+			}
+
 			/** Execute the status */
 			$this->db->query("UPDATE books_borrowed SET status='Returned', actual_date_returned=now(), actual_paid = (fine + 0), fine_paid='1' WHERE item_id='{$borrowed_id}' LIMIT 1");
 			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned=now() WHERE borrowed_id='{$borrowed_id}' LIMIT 100");
-			
-			/** Get all Books and Their Quanities */
-			foreach($this->pushQuery("quantity, book_id", "books_borrowed_details", "books_borrowed = '{$borrowed_id}' AND status !='Returned'") as $book) {
-				/** increase the books stock quantity */
-				$this->db->query("UPDATE books_stock SET quantity = (quantity + {$book[0]->quantity}) WHERE books_id = '{$book[0]->book_id}' LIMIT 1");
-			}
 
 			/** Log the user activity */
 			$this->userLogs("books_borrowed", $borrowed_id, null, "{$params->fullname} returned the Books Borrowed.", $params->userId);

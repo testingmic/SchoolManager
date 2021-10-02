@@ -100,8 +100,8 @@ class Users extends Myschoolgh {
 				// run this section if the user is a student
 				if($result->user_type === "student") {
 					$payments = explode("|", $result->payments_data);
-					$result->debt = $payments[0];
-					$result->amount_paid = $payments[1];
+					$result->debt = $payments[1];
+					$result->amount_paid = $payments[0];
 					$result->debt_formated = number_format($result->debt, 2);
 					$result->arrears_formated = number_format($result->arrears, 2);
 					$result->total_debt_formated = number_format(($result->debt + $result->arrears), 2);

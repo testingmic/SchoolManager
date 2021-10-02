@@ -498,8 +498,8 @@ var ajax_trigger_form_submit = () => {
                                     $replies_loaded.attr("value", "0");
                                     $replies_loaded.attr("data-form", "none");
                                     $(".modal").modal("hide");
-                                    $(`form[class="_ajax-data-form"] select`).val("null").change();
-                                    $(`form[class="ajax-data-form"] input, form[class="_ajax-data-form"] textarea`).val("");
+                                    $(`form[class="_ajax-data-form"] select`).val("").change();
+                                    $(`form[class="_ajax-data-form"] input, form[class="_ajax-data-form"] textarea`).val("");
                                 }
                                 if (response.data.additional.append !== undefined) {
                                     $(`div[id="${response.data.additional.append.div_id}"]`).html(response.data.additional.append.data);
