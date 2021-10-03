@@ -45,7 +45,7 @@ class Library extends Myschoolgh {
 					(SELECT name FROM classes WHERE classes.id = bk.class_id LIMIT 1) AS class_name,
 					(SELECT name FROM departments WHERE departments.id = bk.department_id LIMIT 1) AS department_name,
 					bt.name AS category_name,
-					(SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = bk.created_by LIMIT 1) AS created_by_info,
+					(SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = bk.created_by LIMIT 1) AS created_by_info,
 					(SELECT b.description FROM files_attachment b WHERE b.resource='library_book' AND b.record_id = bk.item_id ORDER BY b.id DESC LIMIT 1) AS attachment ")."
 				FROM books bk
 				LEFT JOIN books_type bt ON bt.id = bk.category_id
@@ -1238,7 +1238,7 @@ class Library extends Myschoolgh {
 		if($query) {
 
 			/** Create a new stock of the book  */
-			$this->db->query("INSERT INTO books_stock SET books_id = '{$item_id}', quantity = '{$params->quantity}'");
+			$this->db->query("INSERT INTO books_stock SET client_id='{$params->clientId}', books_id = '{$item_id}', quantity = '{$params->quantity}'");
 
 			/** Record the user activity **/
 			$this->userLogs("library_book", $item_id, null, "{$params->userData->name} added the Book: {$params->title}", $params->userId);
@@ -1318,5 +1318,72 @@ class Library extends Myschoolgh {
         ];
 
     }
+
+	/**
+	 * Update Book Stock
+	 * 
+	 * @return Array
+	 */
+	public function update_stock(stdClass $params) {
+		
+		try {
+
+			// confirm that the stock quantity parsed is a valid array list
+			if(!is_array($params->stock_quantity)) {
+				return ["code" => 203, "data" => "Sorry! The Stock Quantities must be an array."];
+			}
+
+			// return the quantities
+			$quantities = [];
+
+			// loop through the stock quantities
+			foreach($params->stock_quantity as $stock) {
+				if(isset($stock["book_id"], $stock["quantity"])) {
+					if(isset($quantities[$stock["book_id"]])) {
+						return ["code" => 203, "data" => "Sorry! Please ensure you have not repeated the book to update stock."];
+					}
+					$quantities[$stock["book_id"]] = $stock;
+				} else {
+					return ["code" => 203, "data" => "Sorry! Ensure all required parameters were parsed"];
+				}
+			}
+
+			// compare the current query to the previous
+			if(json_encode($quantities) === $this->session->previousData) {
+				return ["code" => 203, "data" => "Sorry! You are parsing the same query already processed."];
+			}
+
+			// loop through the products list
+			foreach($quantities as $book_id => $book) {
+				// update the book stock quantity
+				$this->db->query("UPDATE books_stock SET quantity = (quantity + {$book["quantity"]}) WHERE 
+					client_id = '{$params->clientId}' AND books_id='{$book_id}' LIMIT 1");
+
+				// update the actual books count
+				$this->db->query("UPDATE books SET quantity = (quantity + {$book["quantity"]}) WHERE 
+					client_id = '{$params->clientId}' AND item_id='{$book_id}' LIMIT 1");
+			}
+
+			/** Create a new stock update id */
+			$item_id = random_string("alnum", 16);
+
+			/** Insert the Stock Details */
+			$this->db->query("INSERT INTO books_stock_history SET stock_id='{$item_id}', books_data = '".json_encode($quantities)."'");
+
+			/** Record the user activity **/
+			$this->userLogs("library_book_stock", $item_id, null, "{$params->userData->name} updated the books Stock", $params->userId);
+
+			/** Set the success response data */
+			$return = ["code" => 200, "data" => "Library books stock successfully updated.", "refresh" => 1000];
+			$return["additional"] = ["href" => "{$this->baseUrl}bookss", "clear" => true];
+
+			// set the previous data
+			$this->session->previousData = json_encode($quantities);
+
+			return $return;
+			
+		} catch(PDOException $e) {}
+
+	}
 
 }

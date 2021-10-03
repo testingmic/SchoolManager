@@ -19,3 +19,4 @@ ALTER TABLE `events` ADD INDEX(`client_id`);
 ALTER TABLE `events` ADD INDEX(`start_date`);
 ALTER TABLE `events` ADD INDEX(`status`);
 ALTER TABLE `events` CHANGE `state` `state` ENUM('Pending','Cancelled','Held','Ongoing','Over') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Pending'; 
+CREATE TABLE `myschoolgh`.`books_stock_history` ( `id` INT NOT NULL AUTO_INCREMENT , `client_id` VARCHAR(32) NULL DEFAULT NULL , `stock_id` VARCHAR(32) NULL DEFAULT NULL , `books_data` TEXT NULL DEFAULT NULL , `reversed` ENUM('0','1') NOT NULL DEFAULT '0' , `has_reversal` ENUM('0','1') NOT NULL DEFAULT '1' , `date_created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP , PRIMARY KEY (`id`)) ENGINE = InnoDB; 

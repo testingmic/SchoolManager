@@ -33,7 +33,7 @@ $hasUpdate = $accessObject->hasAccess("update", "library");
 $books_list = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a title='View this book record' href='#' onclick='return loadPage(\"{$baseUrl}book/{$each->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='View this book record' href='#' onclick='return load(\"book/{$each->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Delete this Book' onclick='return delete_record(\"{$each->item_id}\", \"book\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -63,7 +63,7 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 '.($hasAdd ? '
                     <div class="text-right mb-2">
-                        <a class="btn btn-outline-success" href="'.$baseUrl.'book_stock"><i class="fa fa-book"></i> Add Stock</a>
+                        <a class="btn btn-outline-success" href="'.$baseUrl.'books_stock"><i class="fa fa-book"></i> Update Books Stock</a>
                         <a class="btn btn-outline-primary" href="'.$baseUrl.'book_add"><i class="fa fa-plus"></i> Add Book</a>
                     </div>' : ''
                 ).'

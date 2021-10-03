@@ -476,9 +476,166 @@ $(`div[id='library_form'] select[name='book_id']`).on("change", function() {
     }
 });
 
+var reset_book_stock = () => {
+    swal({
+        title: `Cancel`,
+        text: `Are you sure you want cancel this update?`,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if(proceed) {
+            var lastRowId = $(`div[class~="books_stock_update"] div[data-row]`).length;
+            if (lastRowId > 1) {
+                $.each($(`div[class~="books_stock_update"] div[data-row]`), function(key, val) {
+                    if (lastRowId != 1) {
+                        $(`div[class~="books_stock_update"] div[data-row="${lastRowId}"]`).remove();
+                        lastRowId--;
+                    }
+                });
+            }
+            $(`div[class~="books_stock_update"] select[name="book_id_1"]`).val(``).change();
+            $(`input[name="quantity_1"], input[name="threshold_1"]`).val(0);
+        }
+    });
+}
+
+var clear_stock_update_rows = () => {
+    var lastRowId = $(`div[class~="books_stock_update"] div[data-row]`).length;
+    if (lastRowId > 1) {
+        $.each($(`div[class~="books_stock_update"] div[data-row]`), function(key, val) {
+            if (lastRowId != 1) {
+                $(`div[class~="books_stock_update"] div[data-row="${lastRowId}"]`).remove();
+                lastRowId--;
+            }
+        });
+    }
+    $(`div[class~="books_stock_update"] select[name="book_id_1"]`).val(``).change();
+    $(`input[name="quantity_1"], input[name="threshold_1"]`).val(0);
+}
+
+var update_book_stock = () => {
+    var books_list = {},
+        stock_quantity = "";
+    $.each($(`div[class~="books_stock_update"] div[class~="books_content"]`), function(i, e) {
+        var rowId = $(this).attr("data-row");
+        if($(`select[id="book_id_${rowId}"]`).val() != 'null') {
+            let _book_id = $(`select[id="book_id_${rowId}"]`).val(),
+                _quantity = $(`input[name="quantity_${rowId}"]`).val(),
+                _book_title = $(`input[name="book_title_${rowId}"]`).val();
+            if(_book_id.length) {
+                books_list[i] = {
+                    book_id: _book_id,
+                    quantity: _quantity,
+                    treshold: $(`input[name="threshold_${rowId}"]`).val()
+                }
+                stock_quantity += `${_book_title}: ${_quantity}\n`;
+            }
+        }
+    });
+
+    if(Object.keys(books_list).length == 0) {
+        swal({
+            text: 'Please select at least one item to continue.',
+            icon: 'error',
+        });
+        return false;
+    }
+
+    swal({
+        title: `Update Books Stock`,
+        text: `Are you sure you want to update the stock quantities of the following Books:\n${stock_quantity}`,
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if(proceed) {
+            $.post(`${baseUrl}api/library/update_stock`,{stock_quantity:books_list}).then((response) => {
+                swal({
+                    text: response.data.result,
+                    icon: responseCode(response.code),
+                });
+                if(response.code == 200) {
+                    clear_stock_update_rows();
+                    setTimeout(() => {
+                        loadPage(`${baseUrl}books`);
+                    }, refresh_seconds);
+                }
+            }).catch(() => {});
+        }
+    });
+}
+
+var select_book_options = () => {
+    $(`div[class~="books_stock_update"] div[data-row] select`).on("change", function() {
+        let rowId = $(this).attr("data-row"),
+            stock_quantity = $(`div[class~="books_stock_update"] select[data-row="${rowId}"] option:selected`).attr("data-books_stock"),
+            book_title = $(`div[class~="books_stock_update"] select[data-row="${rowId}"] option:selected`).attr("data-book_title");
+        $(`div[class~="books_stock_update"] input[name="stock_quantity_${rowId}"]`).val(stock_quantity);
+        $(`div[class~="books_stock_update"] input[name="book_title_${rowId}"]`).val(book_title);
+    });
+    $(`div[class~="books_stock_update"] input[name^="quantity_"]`).on('input', function() {
+        let rowId = $(this).attr("data-row");
+        let _value = parseInt($(this).val()),
+            _init = parseInt($(`div[class~="books_stock_update"] select[data-row="${rowId}"] option:selected`).attr("data-books_stock"));
+        if(!isNaN(_value)) {
+            let total = _value + _init;
+            $(`div[class~="books_stock_update"] input[name="stock_quantity_${rowId}"]`).val(total);
+        } else {
+            $(`div[class~="books_stock_update"] input[name="stock_quantity_${rowId}"]`).val(_init);
+        }
+    });
+}
+
+var remove_book_row = (rowId) => {
+    $(`div[class~="books_stock_update"] div[data-row="${rowId}"]`).remove();
+}
+
+var append_new_book_row = () => {
+
+    var htmlData = $('div[class~="books_stock_update"] div[data-row]:last select').html(),
+        lastRowId = $(`div[class~="books_stock_update"] div[data-row]`).length,
+        selectOptions = $('div[class~="books_stock_update"] div[data-row]:last select > option').length;
+
+    lastRowId++;
+
+    if(selectOptions == lastRowId) {
+        return false;
+    }
+
+    $(`div[class~="books_stock_update"] div[data-row]:last`).after(`
+        <div class="row books_content" data-row="${lastRowId}">
+            <div class="col-md-5 mb-3">
+                <div>
+                    <select data-row="${lastRowId}" name="book_id_${lastRowId}" id="book_id_${lastRowId}" class="form-control selectpicker">
+                        ${htmlData}
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+                <input type="number" data-row="${lastRowId}" step="1" value="0" class="form-control" min="1" name="quantity_${lastRowId}">
+            </div>
+            <div class="col-md-2 mb-3">
+                <input data-row="${lastRowId}" name="book_title_${lastRowId}" type="hidden">
+                <input type="number" data-row="${lastRowId}" step="1" value="0" class="form-control" min="1" name="threshold_${lastRowId}">
+            </div>
+            <div class="col-md-2 mb-3">
+                <input type="number" data-row="${lastRowId}" disabled class="form-control" min="1" name="stock_quantity_${lastRowId}">
+            </div>
+            <div class="col-md-1 text-center">
+                <span onclick="return remove_book_row(${lastRowId});" class="btn btn-outline-danger" data-value="${lastRowId}"><i class="fa fa-trash"></i></span>
+            </div>                        
+        </div>
+    `);
+    $(`select[class~="selectpicker"]`).select2();
+    select_book_options();
+}
+
 if(selected_books.length) {
     book_quantity_Checker();
     issue_Request_Handler("list");
 } else {
+    select_book_options();
     request_quantity_Checker();
 }
