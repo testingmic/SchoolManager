@@ -1368,7 +1368,7 @@ class Library extends Myschoolgh {
 			$item_id = random_string("alnum", 16);
 
 			/** Insert the Stock Details */
-			$this->db->query("INSERT INTO books_stock_history SET stock_id='{$item_id}', books_data = '".json_encode($quantities)."'");
+			$this->db->query("INSERT INTO books_stock_history SET client_id = '{$params->clientId}', stock_id='{$item_id}', books_data = '".json_encode($quantities)."'");
 
 			/** Record the user activity **/
 			$this->userLogs("library_book_stock", $item_id, null, "{$params->userData->name} updated the books Stock", $params->userId);

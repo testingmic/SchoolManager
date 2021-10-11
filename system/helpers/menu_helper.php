@@ -160,6 +160,9 @@
                 <li><a class="nav-link" href="<?= $baseUrl ?>books">Books List</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_categories">Books Category</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>books_issued">Issued Books</a></li>
+                <?php if($accessObject->hasAccess("add", "library")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>books_stock">Stock Update</a></li>
+                <?php } ?>
             </ul>
         </li>
     <?php } ?>

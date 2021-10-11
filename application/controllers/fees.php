@@ -2284,9 +2284,6 @@ class Fees extends Myschoolgh {
                 // if the fees arrears not empty
                 if(!empty($arrears_array)) {
                         
-                    // include the array helper
-                    load_helpers(['array_helper']);
-                    
                     // set a new item for the arrears
                     $arrears = $arrears_array[0];
                     $outstanding = 0;
@@ -2515,6 +2512,7 @@ class Fees extends Myschoolgh {
 
             // error bugs
             $error_bugs = [];
+            $existing_payment = [];
             $existing_record = [];
 
             // first perform some initial checks
@@ -2553,6 +2551,7 @@ class Fees extends Myschoolgh {
 
                         // append to the existing record
                         $existing_record[] = $category_id;
+                        $existing_payment[$category_id] = $confirmAllocation[0]->amount_paid;
 
                         // get the payment balance
                         $amount_due = round(($confirmAllocation[0]->amount_due - $confirmAllocation[0]->amount_paid));
@@ -2583,7 +2582,7 @@ class Fees extends Myschoolgh {
                 }
 
                 // execute the statement
-                $update_stmt = $this->db->prepare("UPDATE fees_payments SET balance = ?, exempted = ? WHERE category_id = ? AND student_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND editable = ?");
+                $update_stmt = $this->db->prepare("UPDATE fees_payments SET amount_due = ?, balance = ?, exempted = ? WHERE category_id = ? AND student_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND editable = ?");
 
                 // loop through the category list
                 foreach($params->category_id as $category_id => $amount) {
@@ -2595,7 +2594,7 @@ class Fees extends Myschoolgh {
                     // Confirm if the record already exist
                     if(in_array($category_id,  $existing_record)) {
                         // Update the Existing Record
-                        $update_stmt->execute([$amount, 0, $category_id, $allocation->student_id, $params->clientId, $params->academic_year, $params->academic_term, 1]);
+                        $update_stmt->execute([($existing_payment[$category_id] + $amount), $amount, 0, $category_id, $allocation->student_id, $params->clientId, $params->academic_year, $params->academic_term, 1]);
                     } else {
                         // Insert the record
                         $this->insert_student_fees($allocation);
@@ -2659,6 +2658,14 @@ class Fees extends Myschoolgh {
             // load the fees allocations category list
             $allocation_list = $this->pushQuery("category_id, amount", "fees_payments", 
                 "student_id='{$payment_check[0]->student_id} AND client_id = '{$params->clientId}' AND paid_status='2' LIMIT 40");
+
+            // if the count is just 1
+            if(count($payment_check) == 1) {
+                // update the student fees amount paid and the balance outstanding
+                $this->db->query("UPDATE fees_payments SET amount_paid = (amount_paid - {$amount_paid}), balance = (balance - {$amount_paid})
+                    WHERE student_id='{$payment_check[0]->student_id}' AND client_id = '{$params->clientId}' AND academic_year='{$academic_year}'
+                        AND academic_term='{$params->academic_term}' LIMIT 1");
+            }
 
             // proceed to set the reversed state as 1
             $this->db->query("UPDATE fees_collection SET reversed = '1', has_reversal = '0' WHERE payment_id='{$params->payment_id}' AND client_id='{$params->clientId}' LIMIT 40");

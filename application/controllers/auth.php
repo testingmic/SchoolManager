@@ -243,10 +243,10 @@ class Auth extends Myschoolgh {
      */
     public function execute_cron($clientId) {
         // fees payment reversal disallowed after 30 HOURS
-        // $this->db->query("UPDATE fees_collection SET has_reversal='0' WHERE recorded_date < (NOW() + INTERVAL - 30 HOUR) AND has_reversal='1' AND client_id='{$clientId}' LIMIT 1000");
+        $this->db->query("UPDATE fees_collection SET has_reversal='0' WHERE recorded_date < (NOW() + INTERVAL - 30 HOUR) AND has_reversal='1' AND client_id='{$clientId}' LIMIT 1000");
         
         // do same to transactions recorded - auto set it to approved after 30 hours
-        // $this->db->query("UPDATE accounts_transaction SET state='Approved' WHERE date_created < (NOW() + INTERVAL - 30 HOUR) AND state='Pending' AND status='1' AND client_id='{$clientId}' LIMIT 500");
+        $this->db->query("UPDATE accounts_transaction SET state='Approved' WHERE date_created < (NOW() + INTERVAL - 30 HOUR) AND state='Pending' AND status='1' AND client_id='{$clientId}' LIMIT 500");
     }
 
     /**
