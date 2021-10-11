@@ -1089,5 +1089,44 @@ class Myschoolgh extends Models {
 	
 	}
 
+	/**
+     * Append Fees Owings
+     * 
+     * Going to Join the Two Arrays Together
+     * 
+     * @return Array
+     */
+    public function append_fees_details($current, $previous) {
+        $new_array = [];
+        foreach($previous as $key => $value) {
+            foreach($value as $ikey => $ivalue) {
+                $new_array[$key][$ikey] = isset($new_array[$key][$ikey]) ? ($new_array[$key][$ikey] + $ivalue) : $ivalue;
+            }
+        }
+        foreach($current as $key => $value) {
+            foreach($value as $ikey => $ivalue) {
+                $new_array[$key][$ikey] = isset($new_array[$key][$ikey]) ? ($new_array[$key][$ikey] + $ivalue) : $ivalue;
+            }
+        }
+        return $new_array;
+    }
+
+    /**
+     * Append Fees Owings
+     * 
+     * Going to Join the Two Arrays Together
+     * 
+     * @return Array
+     */
+    public function append_fees_category($current) {
+        $new_array = [];
+        foreach($current as $key => $value) {
+            foreach($value as $ikey => $ivalue) {
+                $new_array[$ikey] = isset($new_array[$key][$ikey]) ? ($new_array[$key][$ikey] + $ivalue) : $ivalue;
+            }
+        }
+        return $new_array;
+    }
+	
 }
 ?>

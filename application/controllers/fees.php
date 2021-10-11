@@ -2582,7 +2582,7 @@ class Fees extends Myschoolgh {
                 }
 
                 // execute the statement
-                $update_stmt = $this->db->prepare("UPDATE fees_payments SET amount_due = ?, balance = ?, exempted = ? WHERE category_id = ? AND student_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND editable = ?");
+                $update_stmt = $this->db->prepare("UPDATE fees_payments SET amount_due = ? balance = ?, exempted = ? WHERE category_id = ? AND student_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND editable = ?");
 
                 // loop through the category list
                 foreach($params->category_id as $category_id => $amount) {
@@ -2637,7 +2637,7 @@ class Fees extends Myschoolgh {
             $this->db->beginTransaction();
 
             // confirm the payment id
-            $payment_check = $this->pushQuery("a.amount, a.student_id,
+            $payment_check = $this->pushQuery("a.amount, a.student_id, a.category_id,
                     (SELECT b.name FROM users b WHERE b.item_id=a.student_id LIMIT 1) AS student_name", 
                 "fees_collection a", "a.reversed='0' AND a.payment_id='{$params->payment_id}' 
                     AND a.client_id='{$params->clientId}' LIMIT 40");
@@ -2660,13 +2660,61 @@ class Fees extends Myschoolgh {
                 "student_id='{$payment_check[0]->student_id} AND client_id = '{$params->clientId}' AND paid_status='2' LIMIT 40");
 
             // if the count is just 1
-            if(count($payment_check) == 1) {
+            if((count($payment_check) == 1) && ($payment_check[0]->category_id !== "Arrears")) {
                 // update the student fees amount paid and the balance outstanding
                 $this->db->query("UPDATE fees_payments SET amount_paid = (amount_paid - {$amount_paid}), balance = (balance - {$amount_paid})
                     WHERE student_id='{$payment_check[0]->student_id}' AND client_id = '{$params->clientId}' AND academic_year='{$academic_year}'
                         AND academic_term='{$params->academic_term}' LIMIT 1");
             }
 
+            // if the category id is equal to arreras 
+            elseif($payment_check[0]->category_id === "Arrears") {
+                // load the arrears log
+                $arrears = $this->pushQuery("student_id, log_history, previous_log", "users_arrears_log", "payment_id='{$params->payment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+                // if the query is not empty
+                if(!empty($arrears)) {
+                    // get the student arrears history
+                    $arrears_array = $this->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", "users_arrears", "student_id='{$payment_check[0]->student_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+                    // get the arrears amount paid
+                    $_current = [];
+                    $arrears = $arrears[0];
+                    $log_history = json_decode($arrears->log_history, true);
+                    $previous_log = json_decode($arrears->previous_log, true);
+
+                    // set the arrears key
+                    foreach($log_history as $log) {
+                        $academic_key = str_ireplace("/", "_", $log["academic_year"])."...".$log["academic_term"];
+                        $_current[$academic_key][$log["category_id"]] = $log["amount_paid"];
+                    }
+                    
+                    // set an init arrears
+                    $old_arrears_details = [];
+
+                    // set a new item for the arrears
+                    if(!empty($arrears_array)) {
+                        $t_arrears = $arrears_array[0];
+
+                        $old_arrears_details = json_decode($t_arrears->arrears_details, true);
+                        $old_arrears_category = json_decode($t_arrears->arrears_category, true);
+
+                        // append the data
+                        $arrears_details = $this->append_fees_details($_current, $old_arrears_details);
+                        $arrears_category = $this->append_fees_category($arrears_details);
+
+                        // arrears total
+                        $new_arrears_total = array_sum($arrears_category);
+
+                        // update the column information
+                        $update_query = $this->db->prepare("UPDATE users_arrears SET arrears_details = ?, arrears_category = ?, arrears_total = ?, last_updated = now() WHERE student_id = ? AND client_id = ? LIMIT 1");
+                        $update_query->execute([json_encode($arrears_details), json_encode($arrears_category), $new_arrears_total, $payment_check[0]->student_id, $params->clientId]);
+                        
+                    }
+
+                }
+            }
+            
             // proceed to set the reversed state as 1
             $this->db->query("UPDATE fees_collection SET reversed = '1', has_reversal = '0' WHERE payment_id='{$params->payment_id}' AND client_id='{$params->clientId}' LIMIT 40");
 
@@ -2702,6 +2750,8 @@ class Fees extends Myschoolgh {
         } catch(PDOException $e) {
             // reverse the db transaction
             $this->db->rollBack();
+            // return error message
+            return $this->unexpected_error;
         }
 
     }

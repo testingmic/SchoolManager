@@ -55,12 +55,15 @@ if(!empty($session->student_id)) {
 // load the student fees payment
 $item_list = load_class("fees", "controllers", $param)->list($param);
 
-$hasAdd = $accessObject->hasAccess("add", "fees");
-$hasUpdate = $accessObject->hasAccess("update", "fees");
 $hasReversal = $accessObject->hasAccess("reversal", "fees");
+$feesReport = $accessObject->hasAccess("reports", "fees");
 
-// initial variables
-$payment_summary = $myClass->pushQuery("
+
+// if the user has permission to view fees history
+if($feesReport) {
+
+    // initial variables
+    $payment_summary = $myClass->pushQuery("
         SUM(amount_due) AS amount_due,
         (
             SELECT SUM(b.amount) FROM fees_collection b WHERE b.client_id='{$clientId}'
@@ -74,15 +77,16 @@ $payment_summary = $myClass->pushQuery("
         ) AS total_arrears", 
         "fees_payments", 
         "client_id = '{$clientId}' AND status = '1'
-    ".(!empty($param->academic_year) ? " AND academic_year='{$param->academic_year}'" : null)."
-    ".(!empty($param->academic_term) ? " AND academic_term='{$param->academic_term}'" : null)."
-    ".(!empty($param->class_id) ? " AND class_id='{$param->class_id}'" : null)."
-");
-
-$amount_due = $payment_summary[0]->amount_due ?? 0;
-$amount_paid = $payment_summary[0]->amount_paid ?? 0;
-$total_balance = $payment_summary[0]->total_balance ?? 0;
-$total_arrears = $payment_summary[0]->total_arrears ?? 0;
+        ".(!empty($param->academic_year) ? " AND academic_year='{$param->academic_year}'" : null)."
+        ".(!empty($param->academic_term) ? " AND academic_term='{$param->academic_term}'" : null)."
+        ".(!empty($param->class_id) ? " AND class_id='{$param->class_id}'" : null)."
+    ");
+    // set the variables
+    $amount_due = $payment_summary[0]->amount_due ?? 0;
+    $amount_paid = $payment_summary[0]->amount_paid ?? 0;
+    $total_balance = $payment_summary[0]->total_balance ?? 0;
+    $total_arrears = $payment_summary[0]->total_arrears ?? 0;
+}
 
 $fees_history = "";
 
@@ -112,14 +116,15 @@ foreach($item_list["data"] as $key => $fees) {
                 <div class='mr-2'><img src='{$baseUrl}{$fees->student_info->image}' width='40px' height='40px'></div>" : "")."
                 <div>
                     <a href='#' onclick='load(\"student/{$fees->student_info->user_id}\");'>{$fees->student_info->name}</a> <br>
-                    <strong>ID: </strong>
+                    <strong>ID:</strong>
                     <strong class='text-success'>{$fees->receipt_id}</strong>
                 </div>
             </div>
         </td>";
     $fees_history .= "<td>{$fees->class_name}</td>";
-    $fees_history .= "<td>{$fees->currency} ".number_format($fees->amount_paid, 2)."</td><td>";
-    $fees_history .= "<strong>{$fees->payment_method}</strong>";
+    $fees_history .= "<td>{$fees->currency} ".number_format($fees->amount_paid, 2)."</td>";
+    $fees_history .= "<td>".($fees->category_name ? $fees->category_name : $fees->category_id)."</td>";
+    $fees_history .= "<td><strong>{$fees->payment_method}</strong></td>";
 
     // if the payment method was a cheque
     if($fees->payment_method === "Cheque") {
@@ -176,8 +181,9 @@ $response->html = '
             <label class="d-sm-none d-md-block" for="">&nbsp;</label>
             <button id="filter_Fees_Collection" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
         </div>
-
-        <div class="col-xl-3 col-lg-3 col-md-6">
+        
+        '.($feesReport ?
+        '<div class="col-xl-3 col-lg-3 col-md-6">
             <div class="card">
                 <div class="card-body pr-2 pl-3 card-type-3">
                     <div class="row">
@@ -247,7 +253,7 @@ $response->html = '
                     </div>
                 </div>
             </div>
-        </div>
+        </div>' : null).'
 
         <div class="col-12 col-sm-12 col-lg-12">
             <div class="card">
@@ -260,6 +266,7 @@ $response->html = '
                                     <th>Student Name</th>
                                     <th>Class</th>
                                     <th>Amount</th>
+                                    <th>Fees Type</th>
                                     <th>Payment Method</th>
                                     <th>Recorded By</th>
                                     <th align="center" width="13%"></th>
