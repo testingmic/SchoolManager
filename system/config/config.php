@@ -12,8 +12,8 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-$config['base_url'] = 'http://localhost/myschool_gh/';
-$config['manager_dashboard'] = 'http://localhost/myschool_gh/app/';
+$config['base_url'] = 'http://localhost/myschoolgh/SchoolManager/';
+$config['manager_dashboard'] = 'http://localhost/myschoolgh/SchoolManager/app/';
 $config['rowsperpage'] = 40;
 $config['version'] = 'v1';
 $config['site_url'] = 'https://www.myschoolgh.com';
@@ -45,7 +45,7 @@ $config['encryption_key'] = 'I99_Obeng_F109';
 $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'mysch_session';
 $config['sess_expiration'] = 3600;
-$config['sess_save_path'] = "/var/www/html/sessions/myschool_gh/";
+$config['sess_save_path'] = "/Applications/XAMPP/htdocs/myschoolgh/SchoolManager/application/sessions/";
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 1800;
 $config['sess_regenerate_destroy'] = FALSE;

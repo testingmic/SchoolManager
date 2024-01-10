@@ -12,8 +12,13 @@
 
 class Db {
 	
+	private $conn;
 	private $medics;
-	
+	private $hostname;
+	private $username;
+	private $password;
+	private $database;
+
 	public function __construct() {
 		
 		$this->hostname = DB_HOST;

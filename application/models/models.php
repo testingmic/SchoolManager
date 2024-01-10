@@ -26,6 +26,22 @@ class Models {
 	public $max_attachment_size = 100;
     public $accepted_attachment_file_types;
 
+    /** Declare variables before use */
+    public $payment_methods;
+    public $accepted_period;
+    public $unexpected_error;
+    public $event_audience;
+    public $fake_files;
+    public $user_roles_list;
+    public $all_user_roles_list;
+    public $incident_user_role;
+    public $the_user_roles;
+    public $user_status_list;
+    public $swal_notification;
+    public $support_sections;
+    public $features_list;
+    public $assessment_group;
+
     // instantiate the class
     public function __construct() {
 
@@ -199,7 +215,7 @@ class Models {
             "accountant" => "Accountant",
             "admin" => "Admin"
         ];
-
+        
         $this->all_user_roles_list = [
             "student" => "Student",
             "teacher" => "Teacher",
@@ -208,7 +224,7 @@ class Models {
             "accountant" => "Accountant",
             "admin" => "Admin"
         ];      
-
+        
         $this->incident_user_role = [
             "student" => "Student",
             "teacher" => "Teacher",
@@ -216,7 +232,7 @@ class Models {
             "accountant" => "Accountant",
             "admin" => "Admin"
         ];
-
+        
         $this->the_user_roles = [
             "parent" => [
                 "_role_title" => "Parent",
@@ -243,7 +259,7 @@ class Models {
                 "report_key" => "admins_report"
             ]
         ];
-
+        
         $this->user_status_list = [
             "0" => "Active",
             "1" => "Inactive"

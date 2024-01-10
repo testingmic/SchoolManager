@@ -1,5 +1,5 @@
 RewriteEngine on
-RewriteBase /myschool_gh
+RewriteBase /myschoolgh/SchoolManager
 RewriteCond $1 !^(index\.php|assets|robots\.txt)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

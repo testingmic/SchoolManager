@@ -641,7 +641,7 @@ function lang_load($langfile, $idiom = '', $return = FALSE, $add_suffix = TRUE, 
 	return TRUE;
 }
 
-function lang_line($line, $log_errors = TRUE, $filename) {
+function lang_line($line, $log_errors = TRUE, $filename = null) {
 	
 	lang_load($filename);
 	
