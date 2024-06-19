@@ -42,6 +42,23 @@ class Models {
     public $features_list;
     public $assessment_group;
 
+	public $default_stream;
+	public $error_codes;
+    public $fees_category_id;
+    public $class_idd_query;
+    public $student_id_query;
+    public $user_status;
+    public $query_date_range;
+    public $date_range;
+
+    public $prevstart_date;
+    public $prevend_date;
+
+    public $client_logo;
+    public $answerString;
+    public $ss_type;
+    public $userPrefs;
+
     // instantiate the class
     public function __construct() {
 

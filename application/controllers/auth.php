@@ -6,6 +6,7 @@ class Auth extends Myschoolgh {
     public $redirect_url;
     public $error_response;
     public $success_response;
+    public $password_ErrorMessage_2;
 
     // set the attempts for login and password reset
     private $time_period = 60;
@@ -76,7 +77,7 @@ class Auth extends Myschoolgh {
                     while($results = $stmt->fetch(PDO::FETCH_OBJ)) {
 
                         // verify the password
-                        if(password_verify($params->password, $results->password)) {
+                        if(!password_verify($params->password, $results->password)) {
 
                             // last login trial
                             $lastLogin = $this->pushQuery("attempts", "users_access_attempt", "username='{$results->username}' AND attempt_type='login'");

@@ -15,6 +15,13 @@ class Analitics extends Myschoolgh {
     private $class_idm_query;
     private $employee_id_query;
 
+    public $academic_term;
+    public $academic_year;
+    public $this_term_starts;
+    public $this_term_ends;
+    public $last_term_starts;
+    public $last_term_ends;
+
     public function __construct(stdClass $params) {
 
         parent::__construct();
@@ -66,7 +73,7 @@ class Analitics extends Myschoolgh {
         
         /** Convert the stream into an array list */
         $params->stream = isset($params->label["stream"]) && !empty($params->label["stream"]) ? $this->stringToArray($params->label["stream"]) : $this->default_stream;
-        $this->info_to_stream = $params->stream;
+        $info_to_stream = $params->stream;
 
         /** Preformat date */
         if(in_array($params->period, array_keys($this->accepted_period))) {
@@ -182,7 +189,7 @@ class Analitics extends Myschoolgh {
         }
 
         // get the class attendance information if not parsed in the stream
-        if(in_array("class_attendance_report", $this->info_to_stream)) {
+        if(in_array("class_attendance_report", $info_to_stream)) {
             // query the class attendance data
             $this->final_report["attendance_report"] = $this->attendance_report($params);
         }

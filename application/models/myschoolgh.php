@@ -26,6 +26,30 @@ class Myschoolgh extends Models {
 	public $academic_calendar_years = [];
 	public $pk_public_key = "XXXXXX";
 	public $mnotify_key = "XXXXXX";
+
+	// set some more variables
+	public $db;
+	public $ip_address;
+	public $baseUrl;
+	public $user_agent;
+	public $agent;
+	public $group_by;
+	public $date_format;
+
+    public $academic_term;
+    public $academic_year;
+	public $iclient;
+	public $this_term_starts;
+	public $this_term_ends;
+	public $last_term_starts;
+	public $last_term_ends;
+
+	public $thisUser;
+	public $color_set = [
+		"#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
+		"#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
+		"#007bff", "#6c757d", "#28a745", "#17a2b8", "#ffc107", "#dc3545"
+	];
 	
 	// class opening days
     public $default_opening_days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -289,7 +313,7 @@ class Myschoolgh extends Models {
 	 * @param Bool		$print
 	 * @param String	$query_style
 	 * 
-	 * @return array
+	 * @return mixed
 	 **/
 	final function pushQuery($columns = "*", $tableName = null, $whereClause = 1, $print = false, $query_style = "OBJ") {
 
@@ -317,7 +341,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Object
 	 **/
-	final function columnValue($column = "*", $tableName, $whereClause = 1) {
+	final function columnValue($column = "*", $tableName = null, $whereClause = 1) {
 
 		try {
 
@@ -338,7 +362,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return array
 	 **/
-	final function prependData($columns = "*", $tableName, $whereClause = 1) {
+	final function prependData($columns = "*", $tableName = null, $whereClause = 1) {
 
 		try {
 
@@ -433,7 +457,7 @@ class Myschoolgh extends Models {
 	 * @return null
 	 *
 	 **/
-	final function userLogs($subject, $itemId, $prevData = null, $description, $userId = null, $clientId = null, $source = null) {
+	final function userLogs($subject, $itemId, $prevData = null, $description = null, $userId = null, $clientId = null, $source = null) {
 		
 		try {
 

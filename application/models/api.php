@@ -24,6 +24,13 @@ class Api {
     public $endpoints = [];
     private $userData;
 
+    private $session;
+    private $config;
+    private $myschoolgh;
+    private $clientId;
+    private $accessCheck;
+    private $myClass;
+
     private $requestPayload;
 
     const PERMISSION_DENIED = "Sorry! You do not have the required permissions to perform this action.";

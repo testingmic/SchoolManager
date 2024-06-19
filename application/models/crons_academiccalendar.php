@@ -10,6 +10,10 @@ class Crons {
 	private $limit = 5000;
 	private $siteName = "MySchoolGH - EmmallexTech.Com";
 
+    private $baseUrl;
+    private $birthday_days_interval;
+    private $session;
+
 	public function __construct() {
 		$this->baseUrl = "https://app.myschoolgh.com/";
 		$this->rootUrl = "/home/mineconr/app.myschoolgh.com/";
@@ -264,7 +268,7 @@ class Crons {
 	 * @param String $clientId
 	 * @param String $studentId
 	 * 
-	 * @return Bool
+	 * @return mixed
 	 */
 	private function student_fees_history_log_exist($studentId, $clientId) {
 

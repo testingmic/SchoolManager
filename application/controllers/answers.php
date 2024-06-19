@@ -4,6 +4,7 @@ class Answers {
 	public $answerStatus = false;
 	public $userAnswer;
 	public $correctAnswer;
+	private $answerString;
 
 	// process the answer that has been submitted the user
 	// as against what we have stored in the database

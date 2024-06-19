@@ -3,7 +3,6 @@
 class Account extends Myschoolgh {
 
     public $accepted_column;
-    private $iclient;
 
 	public function __construct(stdClass $params = null) {
 		parent::__construct();

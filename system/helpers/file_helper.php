@@ -446,7 +446,7 @@ function get_file_mime($file_ext, $array_item) {
 }
 
 
-function show_content($title = null, $file_name, $report_content, $orientation = "L", $force = false) {
+function show_content($title = null, $file_name = null, $report_content = null, $orientation = "L", $force = false) {
 
     // base url
     $appName = config_item("site_name");
@@ -513,7 +513,7 @@ function show_content($title = null, $file_name, $report_content, $orientation =
 }
 
 // create a function
-function dompdf_show_content($title = null, $file_name, $report_content, $orientation = "landscape", $reportObj) {
+function dompdf_show_content($report_content = null) {
 		
 	// instantiate and use the dompdf class
 	// $dompdf = new Dompdf();

@@ -121,7 +121,7 @@ if(!empty($session->userId)) {
 	];
 	$usersClass = load_class('users', 'controllers', $init_param);
 	$defaultUser = $usersClass->list($i_params)["data"];
-	$defaultAcademics = [];
+	$defaultAcademics = (object)[];
 
 	// set the client preferences
 	$clientPrefs = $defaultClientData->client_preferences;

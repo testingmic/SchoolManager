@@ -11,6 +11,9 @@ class SMS_CronJOB {
 	private $siteName = "MySchoolGH - EmmallexTech.Com";
 	private $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
 
+	private $baseUrl;
+	private $rootUrl;
+
 	public function __construct() {
 		$this->baseUrl = "https://app.myschoolgh.com/";
 		$this->rootUrl = "/home/mineconr/app.myschoolgh.com/";

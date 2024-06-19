@@ -10,6 +10,8 @@ if( !defined( 'BASEPATH' ) ) die( 'Restricted access' );
  */
 class Api_validate {
 
+	private $db;
+	
 	public function __construct() {
 		global $myschoolgh;
 

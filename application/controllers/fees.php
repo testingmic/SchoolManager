@@ -2663,7 +2663,7 @@ class Fees extends Myschoolgh {
             if((count($payment_check) == 1) && ($payment_check[0]->category_id !== "Arrears")) {
                 // update the student fees amount paid and the balance outstanding
                 $this->db->query("UPDATE fees_payments SET amount_paid = (amount_paid - {$amount_paid}), balance = (balance - {$amount_paid})
-                    WHERE student_id='{$payment_check[0]->student_id}' AND client_id = '{$params->clientId}' AND academic_year='{$academic_year}'
+                    WHERE student_id='{$payment_check[0]->student_id}' AND client_id = '{$params->clientId}' AND academic_year='{$this->academic_year}'
                         AND academic_term='{$params->academic_term}' LIMIT 1");
             }
 

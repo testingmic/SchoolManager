@@ -2,6 +2,8 @@
 
 class Forms extends Myschoolgh {
 
+    public $hasit;
+    
     public function __construct() {
         parent::__construct();
 

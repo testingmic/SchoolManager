@@ -5,7 +5,8 @@ if( !defined( 'BASEPATH' ) ) die( 'Restricted access' );
 class Users extends Myschoolgh {
 
 	private $password_ErrorMessage;
-	private $iclient = [];
+
+	private $fees_category_count;
 	
 	# start the construct
 	public function __construct(stdClass $data = null) {
@@ -1459,7 +1460,7 @@ class Users extends Myschoolgh {
 				$stmt2->execute([$permissions, $params->user_id, $params->clientId]);
 
 				// set the value
-				$additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
+				// $additional = ["href" => "{$this->baseUrl}{$redirect}/{$params->user_id}"];
 			}
 
 			// insert the user information

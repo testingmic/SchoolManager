@@ -9,6 +9,8 @@ class Accesslevel {
     public $appPrefs;
     public $userPermits = null;
     private $_message = '';
+    private $db;
+    private $session;
 
     public function __construct(){
         global $myschoolgh, $session;

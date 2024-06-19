@@ -2,6 +2,8 @@
 class Terminal_reports extends Myschoolgh {
 
     private $iclient;
+    private $insert_stmt;
+    private $update_stmt;
 
     public function __construct(stdClass $params = null) {
         
