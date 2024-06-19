@@ -6,9 +6,9 @@
   "display": "standalone",
   "orientation": "portrait",
   "description": "Enjoy an all-in-one Solution for your Educational Institution. A school management software built with you in mind and aimed at helping you in achieving your goals. This is a school management system developed on a well structured Api that can accessed remotely.",
-  "id": "https://app.myschoolgh.com/",
-  "scope": "https://app.myschoolgh.com/",
-  "start_url": "https://app.myschoolgh.com/",
+  "id": "http://localhost/myschoolgh/SchoolManager/",
+  "scope": "http://localhost/myschoolgh/SchoolManager/",
+  "start_url": "http://localhost/myschoolgh/SchoolManager/",
   "icons": [
     {
       "src": "https://app.myschoolgh.com/assets/img/icons/icon-72x72.png",

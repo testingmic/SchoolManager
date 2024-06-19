@@ -660,9 +660,10 @@ var loadPage = (loc, pushstate) => {
         method: "POST",
         dataType: "JSON",
         beforeSend: () => {
-            $.mainprogress.show()
+            $.mainprogress.show();
         },
         success: (result) => {
+            console.log('html: ', result);
             $(`div[id="viewOnlyModal"]`).modal("hide");
             $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html("");
             $(`div[class~="toggle-calculator"]`).addClass("hidden");
@@ -692,6 +693,7 @@ var loadPage = (loc, pushstate) => {
                 page_programming(result.page_programming)
             }
 
+            console.log('html: ', result.html);
             $.pagecontent.html($.parseHTML(result.html));
 
             if (result.client_auto_save !== undefined) {

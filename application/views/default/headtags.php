@@ -294,7 +294,7 @@ load_helpers(['menu_helper']);
                     </div>
                     <ul class="sidebar-menu <?= !in_array("live_chat", $clientFeatures) ? "mb-5" : null; ?>">
                         <li class="menu-header">Main</li>
-                        <li><a href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
+                        <li><a id="dashboard-menu" href="<?= $baseUrl ?>dashboard" class="nav-link"><i class="fas fa-home"></i><span>Dashboard</span></a></li>
                         <?php 
                         // set the menu function 
                         $menu_function = $isSupport ? "support_menu" : ($isSuspendedAccount ? "help_menu" : $userData->user_type."_menu");

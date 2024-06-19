@@ -105,17 +105,17 @@ if(loggedIn()) {
   <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
   <script src="<?= $baseUrl ?>assets/js/auth.js"></script>
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('<?= $baseUrl ?>sw.js')
-          .then(registration => {
-            console.log(`Service Worker registered! Scope: ${registration.scope}`);
-          })
-          .catch(err => {
-            console.log(`Service Worker registration failed: ${err}`);
-          });
-      });
-    }
+    // if ('serviceWorker' in navigator) {
+    //   window.addEventListener('load', () => {
+    //     navigator.serviceWorker.register('<?= $baseUrl ?>sw.js')
+    //       .then(registration => {
+    //         console.log(`Service Worker registered! Scope: ${registration.scope}`);
+    //       })
+    //       .catch(err => {
+    //         console.log(`Service Worker registration failed: ${err}`);
+    //       });
+    //   });
+    // }
   </script>
 </body>
 </html>
