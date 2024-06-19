@@ -337,7 +337,7 @@ if(!empty($user_id)) {
             // if the data was is not empty
             if(!empty($prevData)) {
                 // decode the json string
-                $db_attachments = json_decode($prevData[0]->attachment);
+                $db_attachments = !empty($prevData[0]->attachment) ? json_decode($prevData[0]->attachment) : '';
                 $attachment_html = $formObject->list_attachments($db_attachments->files ?? [], $prevData[0]->created_by, "col-lg-4 col-md-6", $isAdmin, false);
             }
 

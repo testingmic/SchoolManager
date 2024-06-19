@@ -56,7 +56,9 @@ foreach($guardian_list as $kkey => $each) {
                         <img src=\"{$baseUrl}{$ward->image}\" class='author-box-picture' width='40px' height='40px'>
                     </div>
                     <div> 
-                        <a href='{$baseUrl}student/{$ward->student_guid}' class='user_name' title='View the details of {$ward->name}'>".strtoupper($ward->name)."</a>
+                        <a href='{$baseUrl}student/{$ward->student_guid}' class='user_name' title='View the details of {$ward->name}'>
+                            ".(!empty($ward->name) ? strtoupper($ward->name) : null)."
+                        </a>
                         <br>".(!empty($ward->class_name) ? "<i class='fa fa-home'></i> {$ward->class_name}" : "")."
                     </div>
                 </div>
@@ -80,7 +82,7 @@ foreach($guardian_list as $kkey => $each) {
             </div>
         </div>
     </td>";
-    $guardians .= "<td>".strtolower($each->email)."</td>";
+    $guardians .= "<td>".(!empty($each->email) ? strtolower($each->email) : null)."</td>";
     $guardians .= "<td>{$each->phone_number}</td>";
     $guardians .= "<td>{$wards_list}</td>";
     $guardians .= "<td width='13%' class='text-center'>{$action}</td>";

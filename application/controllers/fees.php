@@ -20,7 +20,7 @@ class Fees extends Myschoolgh {
 	 * @param array $stdClass->dataColumns 
 	 * @param array $stdClass->whereClause
 	 *
-	 * @return queryResults 
+	 * @return mixed 
 	 **/
 	public function list(stdClass $params) {
 
@@ -129,7 +129,9 @@ class Fees extends Myschoolgh {
             ];
 
 		} catch(PDOException $e) {
-			return $e->getMessage();
+			return [
+                'data' => []
+            ];
 		}
 	}
 
@@ -2104,7 +2106,7 @@ class Fees extends Myschoolgh {
         // get the client logo content
         if(!empty($client->client_logo)) {
             $type = pathinfo($client->client_logo, PATHINFO_EXTENSION);
-            $logo_data = file_get_contents($client->client_logo);
+            $logo_data = @file_get_contents($client->client_logo);
             $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
         }
 

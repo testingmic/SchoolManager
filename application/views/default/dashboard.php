@@ -46,6 +46,8 @@ $global_period = $isWardParent ? "this_term" : "this_week";
 // global params
 $global_params = (object) ["client_data" => $defaultUser->client];
 
+$academicSession = $defaultClientData->client_preferences->sessions->session ?? "Term";
+
 // confirm if the account has been suspended or expired
 if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
     // set the content of the message
@@ -595,7 +597,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                             '.date("F d, Y", strtotime($defaultAcademics->year_ends)).'
                                         </span>
                                         <hr>
-                                        <p class="font-16 p-0 m-0 text-primary text-uppercase">'.$academicSession.'</p>
+                                        <p class="font-16 p-0 m-0 text-primary text-uppercase">'.($academicSession ?? null).'</p>
                                         <h5 class="mt-0 pt-0 text-uppercase">'.$defaultAcademics->academic_term.'</h5>
                                         <span class="font-16 font-bold">
                                             '.date("F d, Y", strtotime($defaultAcademics->term_starts)).' 

@@ -64,7 +64,7 @@ class Terminal_reports extends Myschoolgh {
         // set some values
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
         $params->query = 1;
-        $grading = $defaultClientData->grading_structure->columns;
+        $grading = !empty($defaultClientData->grading_structure) ? $defaultClientData->grading_structure->columns : [];
         
         // get the teachers id
         if(in_array($params->userData->user_type, ["teacher", "parent", "student"])) {

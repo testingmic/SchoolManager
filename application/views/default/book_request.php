@@ -154,12 +154,12 @@ if(!empty($item_id)) {
                             <div class="py-3 pt-0">
                                 <div class="d-flex justify-content-start">
                                     <div class="mr-2">
-                                        <img class="rounded-circle author-box-picture" src="'.$baseUrl.''.$data->user_info->image.'" width="60px">
+                                        <img class="rounded-circle author-box-picture" src="'.$baseUrl.''.(!empty($data->user_info) ? $data->user_info->image : null).'" width="60px">
                                     </div>
                                     <div style="width:100%">
                                         <p class="clearfix mb-0">
                                             <span class="float-left font-bold">Fullname:</span>
-                                            <span class="float-right text-muted">'.($data->user_info->name).'</span>
+                                            <span class="float-right text-muted">'.(!empty($data->user_info) ? $data->user_info->name : null).'</span>
                                         </p>
                                         <p class="clearfix mb-0">
                                             <span class="float-left font-bold">Unique ID:</span>

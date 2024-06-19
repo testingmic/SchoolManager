@@ -2,7 +2,7 @@
 
 class Library extends Myschoolgh {
 
-	private $iclient = [];
+	
 
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
@@ -67,7 +67,7 @@ class Library extends Myschoolgh {
 				if(isset($result->created_by_info)) {
 
 					// convert the attachment into an object
-					$result->attachment = json_decode($result->attachment);
+					$result->attachment = empty($result->attachment) ? '' :json_decode($result->attachment);
 					$result->attachment_html = !empty($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
 
 					// loop through the information
@@ -213,7 +213,7 @@ class Library extends Myschoolgh {
 
 				// set the state
 				$result->state = $result->status;
-				$result->books_id = json_decode($result->books_id);
+				$result->books_id = !empty($result->books_id) ? json_decode($result->books_id) : [];
 
 				// check the return date and status
 				if(!in_array($result->state, ["Returned"])) {
@@ -1285,7 +1285,7 @@ class Library extends Myschoolgh {
         /** Confirm that there is an attached document */
         if(!empty($prevData[0]->attachment)) {
             // decode the json string
-            $db_attachments = json_decode($prevData[0]->attachment);
+            $db_attachments = empty($prevData[0]->attachment) ? '' : json_decode($prevData[0]->attachment);
             // get the files
             if(isset($db_attachments->files)) {
                 $initial_attachment = $db_attachments->files;
@@ -1311,7 +1311,7 @@ class Library extends Myschoolgh {
             "books a", "a.item_id='{$params->book_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1");
         
         // decode the json string
-        $db_attachments = json_decode($prevData[0]->attachment);
+        $db_attachments = empty($prevData[0]->attachment) ? '' : json_decode($prevData[0]->attachment);
         $attachment_html = load_class("forms", "controllers")->list_attachments($db_attachments->files, $params->userId, "col-lg-4 col-md-6", false, false);
 
         return [

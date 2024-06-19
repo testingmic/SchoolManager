@@ -168,8 +168,8 @@ class Applications extends Myschoolgh {
             // loop through the results list
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
               	// convert the form to an array
-              	$result->form = json_decode($result->form);
-                $result->attachment = json_decode($result->attachment);
+              	$result->form = !empty($result->form) ? json_decode($result->form) : '';
+                $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : '';
 
                 // push to the array
                 $data[] = $result;
@@ -218,8 +218,8 @@ class Applications extends Myschoolgh {
             // loop through the results list
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 // convert the form to an array
-                $result->form_fields = json_decode($result->form_fields);
-                $result->form_answers = json_decode($result->form_answers);
+                $result->form_fields = !empty($result->form_fields) ? json_decode($result->form_fields) : '';
+                $result->form_answers = !empty($result->form_answers) ? json_decode($result->form_answers) : '';
 
                 // push to the array
                 $data[] = $result;
@@ -230,7 +230,11 @@ class Applications extends Myschoolgh {
                 "data" => $data
             ];
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return [
+                'data' => []
+            ];
+        }
 
     }
 

@@ -2,8 +2,6 @@
 
 class Timetable extends Myschoolgh {
 
-    private $color_set;
-
     public function __construct(stdClass $params = null) {
 		parent::__construct();
 
@@ -1316,7 +1314,7 @@ class Timetable extends Myschoolgh {
             // get the client logo content
             if(!empty($this->iclient->client_logo)) {
                 $type = pathinfo($this->iclient->client_logo, PATHINFO_EXTENSION);
-                $logo_data = file_get_contents($this->iclient->client_logo);
+                $logo_data = @file_get_contents($this->iclient->client_logo);
                 $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
             }
             

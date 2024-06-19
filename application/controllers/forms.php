@@ -958,7 +958,7 @@ class Forms extends Myschoolgh {
     public function textarea_editor($data = null, $name = "faketext", $id = "ajax-form-content", $predefined = "description") {
 
         // set the form
-        $data = str_ireplace("'", "", $data);
+        $data = !empty($data) ? str_ireplace("'", "", $data) : null;
         $name = empty($name) ? "faketext" : $name;
         $form_content = "<input type='hidden' hidden id='trix-editor-input' value='{$data}'>";
         $form_content .= "<trix-editor name=\"{$name}\" data-predefined_name=\"{$predefined}\" input='trix-editor-input' class=\"trix-slim-scroll\" id=\"{$id}\"></trix-editor>";
@@ -4291,7 +4291,7 @@ class Forms extends Myschoolgh {
         $classes_list = load_class("classes", "controllers")->list($classes_param)["data"];
         
         // if the submission of report is false
-        if($client_data->allow_submission === "false") {
+        if(!empty($client_data->allow_submission) && $client_data->allow_submission === "false") {
             $the_form["general"] = "<div class='text-center alert alert-warning'>Sorry! You are not allowed submit a report at this period of the term.</div>";
             return $the_form;
         }

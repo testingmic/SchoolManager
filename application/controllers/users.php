@@ -204,9 +204,9 @@ class Users extends Myschoolgh {
 
 					if(($result->user_type === "student")) {
 						// set the additional data
-						$result->debt_formated = number_format($result->debt, 2);
-						$result->arrears_formated = number_format($result->arrears, 2);
-						$result->total_debt_formated = number_format(($result->debt + $result->arrears), 2);
+						$result->debt_formated = empty($result->debt) ? 0 : number_format($result->debt, 2);
+						$result->arrears_formated = empty($result->arrears) ? 0 : number_format($result->arrears, 2);
+						$result->total_debt_formated = empty($result->debt) ? 0 : number_format(($result->debt + $result->arrears), 2);
 					}
 				}
 
@@ -507,9 +507,9 @@ class Users extends Myschoolgh {
 
 				// run this section if the user is a student
 				if($result->user_type === "student") {
-					$result->debt_formated = number_format($result->debt, 2);
-					$result->arrears_formated = number_format($result->arrears, 2);
-					$result->total_debt_formated = number_format(($result->debt + $result->arrears), 2);
+					$result->debt_formated = empty($result->debt) ? 0 : number_format($result->debt, 2);
+					$result->arrears_formated = empty($result->arrears) ? 0 : number_format($result->arrears, 2);
+					$result->total_debt_formated = empty($result->debt) ? 0 : number_format(($result->debt + $result->arrears), 2);
 				}
 
 				// append the was present

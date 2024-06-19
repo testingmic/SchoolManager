@@ -38,9 +38,11 @@ foreach($item_list["data"] as $key => $each) {
     if($hasIssue) {
         // if the books list is parsed
         $books_list .= "<td>
-            <span class='text-uppercase'><a title='Click to view details of this request' href='{$baseUrl}book_request/{$each->item_id}'>{$each->user_info->name}</a></span>
+            <span class='text-uppercase'><a title='Click to view details of this request' href='{$baseUrl}book_request/{$each->item_id}'>
+                ".(!empty($each->user_info) ? $each->user_info->name : '')."
+            </a></span>
             <span class='badge badge-primary p-1'>{$each->user_role}</span><br>
-            <strong>{$each->user_info->unique_id}</strong>
+            <strong> ".(!empty($each->user_info) ? $each->user_info->unique_id : '')."</strong>
         </td>";
     }
 

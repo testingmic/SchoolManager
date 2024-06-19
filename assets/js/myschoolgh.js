@@ -445,7 +445,7 @@ var view_AssessmentMarks = (assessment_id) => {
                             <img class="rounded-circle cursor author-box-picture" width="40px" src="${baseUrl}${e.student_image}">
                         </div>
                         <div>
-                            <h6 class="p-0 m-0">${e.student_name.toUpperCase()}</h6>
+                            <h6 class="p-0 m-0">${e.student_name}</h6>
                             <p>${e.unique_id}</p>
                         </div> 
                     </div>
