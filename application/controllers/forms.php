@@ -2,7 +2,7 @@
 
 class Forms extends Myschoolgh {
 
-    private $thisUser;
+    public $thisUser;
     public $hasit;
     public $userPrefs;
 

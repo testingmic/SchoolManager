@@ -6,10 +6,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 date_default_timezone_set('Africa/Accra');
 
 # set the constants for the database connection
-defined('DB_HOST')  OR define('DB_HOST', "localhost");
-defined('DB_USER')  OR define('DB_USER', "mineconr_school");
-defined('DB_PASS')  OR define('DB_PASS', "YdwQLVx4vKU_");
-defined('DB_NAME')  OR define('DB_NAME', "mineconr_school");
+defined('DB_HOST')  OR define('DB_HOST', "127.0.0.1");
+defined('DB_USER')  OR define('DB_USER', "root");
+defined('DB_PASS')  OR define('DB_PASS', "");
+defined('DB_NAME')  OR define('DB_NAME', "myschoolgh");
 
 define('TIME_PERIOD', 60);
 define('RANDOM_STRING', 12);

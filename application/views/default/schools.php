@@ -99,7 +99,9 @@ if(!empty($client_id)) {
         if(isset($thisClientPref->account)) {
             foreach($thisClientPref->account as $key => $value) {
                 $key = ucwords(str_ireplace("_", " ", $key));
-                $account .= "<tr><td class='text-uppercase' width='40%'><strong>{$key}:</strong></td><td class='font-17'>".ucwords($value)."</td></tr>";
+                $account .= "<tr><td class='text-uppercase' width='40%'><strong>{$key}:</strong></td><td class='font-17'>".(
+                    !empty($value) ? ucwords($value) : null
+                )."</td></tr>";
             }
         }
 

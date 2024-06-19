@@ -505,7 +505,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Object
 	 **/
-	final function columnValue($column = "*", $tableName, $whereClause = 1) {
+	final function columnValue($column = "*", $tableName = null, $whereClause = 1) {
 
 		try {
 
@@ -526,7 +526,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return array
 	 **/
-	final function prependData($columns = "*", $tableName, $whereClause = 1) {
+	final function prependData($columns = "*", $tableName = null, $whereClause = 1) {
 
 		try {
 
@@ -621,7 +621,7 @@ class Myschoolgh extends Models {
 	 * @return null
 	 *
 	 **/
-	final function userLogs($subject, $itemId, $prevData = null, $description, $userId = null, $clientId = null, $source = null) {
+	final function userLogs($subject, $itemId, $prevData = null, $description = null, $userId = null, $clientId = null, $source = null) {
 		
 		try {
 

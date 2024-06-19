@@ -253,7 +253,7 @@ $response->html = '
                                         <tr>
                                             <td>Paid At</td>
                                             <td align='right' class='font-bold'>
-                                                ".(!empty($data) ? 
+                                                ".(!empty($data) && !empty($data->paid_at) ? 
                                                     date("l, M d, Y h:i A", strtotime($data->paid_at)) : 
                                                     null
                                                 )."

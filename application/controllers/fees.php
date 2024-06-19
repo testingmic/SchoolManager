@@ -2,8 +2,6 @@
 
 class Fees extends Myschoolgh {
 
-    private $iclient = [];
-
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
 
@@ -2409,7 +2407,7 @@ class Fees extends Myschoolgh {
      * @param Global        $this->academic_term
      * @param String        $studentId
      * 
-     * @return Array
+     * @return mixed
      */
     public function student_current_bill($studentId) {
         global $defaultAcademics;

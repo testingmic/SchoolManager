@@ -10,6 +10,9 @@ if( !defined( 'BASEPATH' ) ) die( 'Restricted access' );
  */
 class Api_validate {
 
+	private $maximum;
+	private $db;
+	
 	public function __construct() {
 		global $myschoolgh;
 		// this is the maximum number of rows to query

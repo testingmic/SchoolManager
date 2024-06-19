@@ -26,6 +26,17 @@ class Api {
     private $userData;
     private $requestPayload;
 
+    private $defaultUser;
+    public $session;
+    public $config;
+    public $usersClass;
+    public $myClass;
+    public $myschoolgh;
+    public $clientId;
+    public $current_timestamp;
+    public $accessCheck;
+    
+
     const PERMISSION_DENIED = "Sorry! You do not have the required permissions to perform this action.";
 
     /**

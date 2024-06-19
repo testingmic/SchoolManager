@@ -2,8 +2,6 @@
 
 class Accounting extends Myschoolgh {
 
-    private $iclient;
-
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
 
@@ -526,7 +524,7 @@ class Accounting extends Myschoolgh {
                     // convert the created by string into an object
                     $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["name", "phone_number", "email", "image","user_type"]);
                 }
-                $result->payment_data = json_decode($result->payment_data);
+                $result->payment_data = !empty($result->payment_data) ? json_decode($result->payment_data) : [];
 
                 $data[] = $result;
             }

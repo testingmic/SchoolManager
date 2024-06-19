@@ -4,8 +4,8 @@ if( !defined( 'BASEPATH' ) ) die( 'Restricted access' );
 
 class Users extends Myschoolgh {
 
-	private $password_ErrorMessage;
-	private $iclient = [];
+	public $password_ErrorMessage;
+	public $iclient = [];
 	public $fees_category_count;
 	
 	# start the construct
@@ -452,8 +452,10 @@ class Users extends Myschoolgh {
 				}
 
 				$result->course_ids = !empty($result->course_ids) ? json_decode($result->course_ids, true) : [];
-				$result->class_ids = !empty($result->class_id) ? json_decode($result->class_id, true) : json_decode($result->class_ids, true);
-				$result->changed_password = (int) $result->changed_password;
+				$result->class_ids = !empty($result->class_id) ? json_decode($result->class_id, true) : (
+					!empty($result->class_ids) ? json_decode($result->class_ids, true) : []
+				);
+				$result->changed_password = $result->changed_password;
 
 				// if not a minified suggestion list
 				if(!isset($params->minified)) {
