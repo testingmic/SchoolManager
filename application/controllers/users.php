@@ -103,9 +103,9 @@ class Users extends Myschoolgh {
 					$payments = explode("|", $result->payments_data);
 					$result->debt = $payments[1];
 					$result->amount_paid = $payments[0];
-					$result->debt_formated = number_format($result->debt, 2);
-					$result->arrears_formated = number_format($result->arrears, 2);
-					$result->total_debt_formated = number_format(($result->debt + $result->arrears), 2);
+					$result->debt_formated = empty($result->debt) ? 0 : number_format($result->debt, 2);
+					$result->arrears_formated = empty($result->arrears) ? 0 : number_format($result->arrears, 2);
+					$result->total_debt_formated = empty($result->debt) ? 0 : number_format(($result->debt + $result->arrears), 2);
 
 					unset($result->payments_data);
 				}
@@ -388,9 +388,9 @@ class Users extends Myschoolgh {
 
 				// run this section if the user is a student
 				if($result->user_type === "student") {
-					$result->debt_formated = number_format($result->debt, 2);
-					$result->arrears_formated = number_format($result->arrears, 2);
-					$result->total_debt_formated = number_format(($result->debt + $result->arrears), 2);
+					$result->debt_formated = empty($result->debt) ? 0 : number_format($result->debt, 2);
+					$result->arrears_formated = empty($result->arrears) ? 0 : number_format($result->arrears, 2);
+					$result->total_debt_formated = empty($result->debt) ? 0 : number_format(($result->debt + $result->arrears), 2);
 				}
 
 				// append the was present

@@ -1,8 +1,6 @@
 <?php 
 
 class Classes extends Myschoolgh {
-    
-    private $iclient = [];
 
     public function __construct(stdClass $data = null) {
     

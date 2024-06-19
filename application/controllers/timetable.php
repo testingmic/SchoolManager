@@ -2,8 +2,6 @@
 
 class Timetable extends Myschoolgh {
 
-    private $color_set;
-
     public function __construct(stdClass $params = null) {
 		parent::__construct();
 

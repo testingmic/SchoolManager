@@ -685,7 +685,7 @@ class Forms extends Myschoolgh {
     public function textarea_editor($data = null, $name = "faketext", $id = "ajax-form-content", $predefined = "description") {
 
         // set the form
-        $data = str_ireplace("'", "", $data);
+        $data = !empty($data) ? str_ireplace("'", "", $data) : null;
         $name = empty($name) ? "faketext" : $name;
         $form_content = "<input type='hidden' hidden id='trix-editor-input' value='{$data}'>";
         $form_content .= "<trix-editor name=\"{$name}\" data-predefined_name=\"{$predefined}\" input='trix-editor-input' class=\"trix-slim-scroll\" id=\"{$id}\"></trix-editor>";
@@ -720,7 +720,7 @@ class Forms extends Myschoolgh {
 
         // create directories if none existent
         if(!is_dir("assets/uploads/{$user_id}")) {
-            mkdir("assets/uploads/{$user_id}/tmp/thumbnail/", 0777, true);
+            @mkdir("assets/uploads/{$user_id}/tmp/thumbnail/", 0777, true);
         }
         
         // confirm if the variable is not empty and an array

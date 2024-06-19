@@ -77,7 +77,7 @@ class Auth extends Myschoolgh {
                     while($results = $stmt->fetch(PDO::FETCH_OBJ)) {
 
                         // verify the password
-                        if(!password_verify($params->password, $results->password)) {
+                        if(password_verify($params->password, $results->password)) {
 
                             // last login trial
                             $lastLogin = $this->pushQuery("attempts", "users_access_attempt", "username='{$results->username}' AND attempt_type='login'");

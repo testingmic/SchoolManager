@@ -517,7 +517,7 @@ class Files extends Myschoolgh {
 
             // create the directory
             if(!is_dir($docs_dir)) {
-                mkdir($docs_dir, 0777, true);
+                @mkdir($docs_dir, 0777, true);
             }
 
             // set the list to the existing record... 

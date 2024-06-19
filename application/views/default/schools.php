@@ -91,7 +91,7 @@ if(!empty($client_id)) {
         foreach($myClass->features_list as $key => $feature) {
             $features_list .= "<tr>";
             $features_list .= "<td width='50%' class='text-uppercase'><label class='cursor' title='Click to select this feature' for='features[$key]'>{$feature}</label></td>";
-            $features_list .= "<td><input disabled ".(in_array($key, $schoolFeatures) ? "checked" : null)." style='width:20px;height:20px' title='Click to select this feature' class='cursor' type='checkbox'></td>";
+            $features_list .= "<td><input ".(!$isSupport ? "disabled" : null)." ".(in_array($key, $schoolFeatures) ? "checked" : null)." style='width:20px;height:20px' title='Click to select this feature' class='cursor' type='checkbox'></td>";
             $features_list .= "</tr>";
         }
 
@@ -170,7 +170,7 @@ if(!empty($client_id)) {
                                     <li class="nav-item">
                                         <a class="nav-link" id="sms-tab2" data-toggle="tab" href="#sms" role="tab" aria-selected="true">SMS</a>
                                     </li>' : null).'
-                                    '.($is_disabled  ? 
+                                    '.($is_disabled || $isSupport  ? 
                                     '<li class="nav-item">
                                         <a class="nav-link" id="features-tab2" data-toggle="tab" href="#features" role="tab" aria-selected="true">FEATURES</a>
                                     </li>' : null).'

@@ -226,8 +226,8 @@ if(!$receivePayment) {
                                     <div>
                                         <div class="font-20 text-uppercase">'.$student_info["name"].'</div>
                                         <div><strong>STUDENT ID:</strong> '.$student_info["unique_id"].'</div>
-                                        <div><strong>FEES ARREARS:</strong> '.$defaultCurrency.''.number_format($student_info["debt"], 2).'</div>
-                                        <div><strong>PREVIOUS ARREARS:</strong> '.$defaultCurrency.''.number_format($student_info["arrears"], 2).'</div>
+                                        <div><strong>FEES ARREARS:</strong> '.$defaultCurrency.''.(empty($student_info["debt"]) ? 0 : number_format($student_info["debt"], 2)).'</div>
+                                        <div><strong>PREVIOUS ARREARS:</strong> '.$defaultCurrency.''.(empty($student_info["arrears"]) ? 0 : number_format($student_info["arrears"], 2)).'</div>
                                         <div><strong>BALANCE OUTSTANDING:</strong> '.$defaultCurrency.''.$student_info["total"].'</div>
                                     </div>
                                 </div>

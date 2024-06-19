@@ -91,7 +91,7 @@ if(!empty($user_id)) {
                         
             // load fees allocation list for the students
             $fees_category_list = "";
-            $student_fees_list = $feesObject->list($allocation_param)["data"];
+            $student_fees_list = $feesObject->list($allocation_param)["data"] ?? [];
             $allocation_param->limit = 100;
             $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
             $fees_category_array = $feesObject->category_list($allocation_param)["data"];
@@ -102,24 +102,26 @@ if(!empty($user_id)) {
             }
 
             // loop through the list of all fees payment
-            foreach($student_fees_list as $key => $record) {
+            if(!empty($student_fees_list) && is_array($student_fees_list)) {
+                foreach($student_fees_list as $key => $record) {
 
-                // add up the amount to be paid
-                $amount += $record->amount;
-                $record->amount_paid = $record->amount_paid ?? 0;
+                    // add up the amount to be paid
+                    $amount += $record->amount;
+                    $record->amount_paid = $record->amount_paid ?? 0;
 
-                // append to the fees allocation list
-                $student_fees_payments .='
-                <tr>
-                    <td>'.($key+1).'</td>
-                    <td>'.($record->category_name ? $record->category_name : $record->category_id).'</td>
-                    <td>'.$record->payment_method.'</td>
-                    <td>'.($record->description ? $record->description : null).'</td>
-                    <td>'.$record->recorded_date.'</td>
-                    <td>'.number_format($record->amount_paid, 2).'</td>
-                    <td>'.($record->reversed ? "<span class='badge p-1 badge-danger'>Reversed</span>" : 
-                        '<a href="'.$myClass->baseUrl.'receipt/'.$record->payment_id.'" target="_blank" title="Click to print Receipt" class="btn btn-sm btn-outline-warning"><i class="fa fa-print"></i></a></td>').'
-                </tr>';
+                    // append to the fees allocation list
+                    $student_fees_payments .='
+                    <tr>
+                        <td>'.($key+1).'</td>
+                        <td>'.($record->category_name ? $record->category_name : $record->category_id).'</td>
+                        <td>'.$record->payment_method.'</td>
+                        <td>'.($record->description ? $record->description : null).'</td>
+                        <td>'.$record->recorded_date.'</td>
+                        <td>'.number_format($record->amount_paid, 2).'</td>
+                        <td>'.($record->reversed ? "<span class='badge p-1 badge-danger'>Reversed</span>" : 
+                            '<a href="'.$myClass->baseUrl.'receipt/'.$record->payment_id.'" target="_blank" title="Click to print Receipt" class="btn btn-sm btn-outline-warning"><i class="fa fa-print"></i></a></td>').'
+                    </tr>';
+                }
             }
         }
 
@@ -420,13 +422,13 @@ if(!empty($user_id)) {
                             <span class="float-left">Residence</span>
                             <span class="float-right text-muted">'.$data->residence.'</span>
                         </p>
-                        '.($data->hometown ? 
+                        '.(!empty($data->hometown) ? 
                             '<p class="clearfix">
                                 <span class="float-left">Hometown</span>
                                 <span class="float-right text-muted">'.$data->hometown.'</span>
                             </p>' : ''
                         ).'
-                        '.($data->place_of_birth ? 
+                        '.(!empty($data->place_of_birth) ? 
                             '<p class="clearfix">
                                 <span class="float-left">Place of Birth</span>
                                 <span class="float-right text-muted">'.$data->place_of_birth.'</span>

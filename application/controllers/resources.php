@@ -2,7 +2,7 @@
 
 class Resources extends Myschoolgh {
 
-    private $iclient = [];
+    
 
     public function __construct(stdClass $params = null) {
 		parent::__construct();
