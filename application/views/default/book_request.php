@@ -8,22 +8,22 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $SITEURL, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Summary Request Information";
 
 $hasIssue = $accessObject->hasAccess("issue", "library");
 
 $tTitle = $hasIssue ? "Issued Books List" : "My Books List";
 
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // item id
 $item_id = $SITEURL[1] ?? null;

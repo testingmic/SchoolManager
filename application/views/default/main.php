@@ -6,7 +6,7 @@ $page_title = "Dashboard";
 require "headtags.php";
 
 // global variable
-global $isActiveAccount, $clientData, $clientId, $isSchool, $isChurch, $isBooking;
+global $isActiveAccount, $clientData, $clientId, $isSchool;
 ?>
 <?= pageoverlay(); ?>
 <?php if(!$isActiveAccount) { ?>
@@ -69,13 +69,7 @@ global $isActiveAccount, $clientData, $clientId, $isSchool, $isChurch, $isBookin
         load_helpers(['setup_helper']);
         ?>
         <div class="main-content" id="pagecontent">
-            <?php if(in_array($clientData->client_state, ["Pending"])) { ?>
-                <div class="alert alert-danger text-center">
-                    Sorry! Your Account has not yet been activated. Please check your
-                    email for the verification link. You may not be able to perform certain functions if
-                    not done.
-                </div>
-            <?php } ?>
+            <?= $myClass->async_notification(); ?>
             <div class="card">
                 <div class="card-body mb-0 pb-0">
                     <h1 class="text-center text-info text-uppercase"><?= $clientData->client_name ?></h1>
@@ -99,6 +93,7 @@ global $isActiveAccount, $clientData, $clientId, $isSchool, $isChurch, $isBookin
         </div>
     <?php } ?>
 <?php } else { ?>
+    <div id="content_menu_display"></div>
     <div class="main-content" id="pagecontent"></div>
 <?php } ?>
 <?php require "foottags.php"; ?>

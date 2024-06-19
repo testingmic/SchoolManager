@@ -8,17 +8,25 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $filter = (object) $_GET;
 $pageTitle = "Simple Accounting";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
+
+// end query if the user has no permissions
+if(!$accessObject->hasAccess("account_type_head", "accounting")) {
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
+
 $response->scripts = [
     "assets/js/accounting.js"
 ];
@@ -44,7 +52,6 @@ $account_headtype_array = [];
 
 // if the user has the required permissions
 $hasUpdate = $accessObject->hasAccess("account_type_head", "accounting");
-$hasModify = $accessObject->hasAccess("modify", "accounting");
 
 // loop through the list of account type heads
 foreach($list_data as $key => $each) {
@@ -68,7 +75,7 @@ foreach($list_data as $key => $each) {
 }
 
 // load the form
-$the_form = $hasModify ? load_class("forms", "controllers")->account_type_head($params) : null;
+$the_form = $hasUpdate ? load_class("forms", "controllers")->account_type_head($params) : null;
 $response->array_stream["account_headtype_array"] = $account_headtype_array;
 
 $response->html = '
@@ -82,13 +89,13 @@ $response->html = '
         </div>
         <div class="row">
             '.$the_form.'
-            <div class="col-12 '.($hasModify ? "col-md-7 col-lg-8" : "col-md-12").'">
+            <div class="col-12 '.($hasUpdate ? "col-md-7 col-lg-8" : "col-md-12").'">
                 <div class="card">
                     <div class="card-header"><i class="fa fa-list"></i> &nbsp; Account Type Head List</div>
                     <div class="card-body">
 
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-bordered table-striped raw_datatable">
+                            <table data-empty="" class="table table-bordered table-sm table-striped raw_datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>

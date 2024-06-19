@@ -9,13 +9,14 @@ class Api {
     /* Leave it open to allow the user to preset it */
     public $inner_url;
     public $outer_url;
+    public $endpoint_url;
 
     /* Allow the user to preset the the userId after instantiating the class */
     public $userId;
     
 
     /* method will contain the request method parsed by the user */
-    public $method;
+    public $requestMethod;
     public $uri;
     public $appendClient;
     public $default_params;
@@ -23,14 +24,6 @@ class Api {
     /* the endpoint variable is only accessible in the class */
     public $endpoints = [];
     private $userData;
-
-    private $session;
-    private $config;
-    private $myschoolgh;
-    private $clientId;
-    private $accessCheck;
-    private $myClass;
-
     private $requestPayload;
 
     const PERMISSION_DENIED = "Sorry! You do not have the required permissions to perform this action.";
@@ -52,12 +45,16 @@ class Api {
         
         $this->userId = $param["userId"] ?? null;
         $this->clientId = $param["clientId"] ?? null;
+        $this->current_timestamp = date("Y-m-d H:i:s");
 
         // set the access object parameters
         $this->accessCheck = $accessObject;
 
         // myschoolgh class initializing
         $this->myClass = $myClass;
+
+        // set the default user data
+        $this->defaultUser = $param["defaultUser"];
         
         // if the users class is not empty
         if(!empty($usersClass)) {
@@ -114,7 +111,7 @@ class Api {
             // return error if not valid
             return $this->output($code, ['accepted' => ["endpoints" => $this->endpoints ] ]);
         }
-        elseif( !isset( $this->endpoints[$this->inner_url][$this->method] ) ) {
+        elseif( !isset( $this->endpoints[$this->inner_url][$this->requestMethod] ) ) {
             
             // log the api request
             if(isset($params["remote"])) { $this->logRequest($this->default_params, 405); }
@@ -123,16 +120,16 @@ class Api {
             return $this->output(405, ['accepted' => ["method" => $this->endpoints[$this->inner_url] ] ]);
         }
         // continue process
-        elseif(!isset($this->endpoints[$this->inner_url][$this->method][$this->outer_url])) {
+        elseif(!isset($this->endpoints[$this->inner_url][$this->requestMethod][$this->outer_url])) {
             
             // log the api request
             if(isset($params["remote"])) { $this->logRequest($this->default_params, 404); }
             
             // return error if not valid
-            return $this->output(404, ['accepted' => ["endpoints" => $this->endpoints[$this->inner_url][$this->method]] ]);
+            return $this->output(404, ['accepted' => ["endpoints" => $this->endpoints[$this->inner_url][$this->requestMethod]] ]);
         } else {
             // set the acceptable parameters
-            $accepted =  $this->endpoints[$this->inner_url][$this->method][$this->outer_url];
+            $accepted =  $this->endpoints[$this->inner_url][$this->requestMethod][$this->outer_url];
 
             // confirm that the parameters parsed is not more than the accpetable ones
             if( !isset($accepted['params']) ) {
@@ -147,9 +144,11 @@ class Api {
                 
                 // confirm that the supplied parameters are within the list of expected parameters
                 foreach($params as $key => $value) {
-                    if(!in_array($key,  ["the_button", "faketext", "faketext_2", "remote", "message"]) && !in_array($key, $endpointKeys)) {
+                    if(!in_array($key,  
+                        ["the_button", "faketext", "faketext_2", "remote", "message", "limit", "date_range"]
+                    ) && !in_array($key, $endpointKeys)) {
                         // set the error variable to true
-                        $errorFound = true;                        
+                        $errorFound = true;                   
                         // break the loop
                         break;
                     }
@@ -233,8 +232,9 @@ class Api {
      * @return  
      */
     final function requestHandler(stdClass $params) {
+        
         // global variable
-        global $defaultClientData, $isSupport;
+        global $defaultClientData, $isSupport, $defaultAcademics;
 
         // preset the response
         $result = [];
@@ -246,7 +246,7 @@ class Api {
         $client_data = empty($defaultClientData->client_name) ? $this->myClass->client_data($this->clientId) : $defaultClientData;
         
         // reassign the variable data
-        $academics = $client_data->client_preferences->academics ?? null;
+        $academics = $defaultAcademics ?? null;
         
         // set the academic year and term
         $params->academic_term = isset($params->academic_term) ? $params->academic_term : ($academics->academic_term ?? null);
@@ -255,14 +255,24 @@ class Api {
         // set additional parameters
         $params->userId = $this->userId;
         $params->clientId = $this->clientId;
-        $params->userData = (object) $this->userData;
+        $params->requestMethod = $this->requestMethod;
+        $params->userData = !empty($this->userData) ? (object) $this->userData : $this->defaultUser;
 
         // parse the code to return
         $code = !empty($code) ? $code : 201;
 
         // if the append client variable is not empty
         if(!empty($this->appendClient)) {
+            // set some global variables
+            global $defaultClientData, $clientPrefs, $academicSession;
+
+            // set some additional data
             $params->client_data = $client_data;
+            $defaultClientData = $params->client_data;
+            
+            // set the client preferences
+            $clientPrefs = $defaultClientData->client_preferences ?? [];
+            $academicSession = $clientPrefs->sessions->session ?? "Term";
         }
 
         // end the query here if nothing was found
@@ -277,6 +287,13 @@ class Api {
             // if the client id is empty and yet the user is not selecting which account to manage
             if(empty($this->userId) && (!in_array($this->outer_url, ["select", "pay", "verify"]) && !in_array($this->inner_url, ["account", "payment"]))) {
                 return $this->output($code, $result);
+            }
+
+            // do not change the academic year and term in these instances
+            if(!in_array($this->outer_url, ["set_default_year"])) {
+                // reset the academic year and term if the session variables are not empty
+                $params->academic_year = (!empty($this->session->is_readonly_academic_year)) ? $this->session->is_readonly_academic_year : $params->academic_year;
+                $params->academic_term = (!empty($this->session->is_readonly_academic_term)) ? $this->session->is_readonly_academic_term : $params->academic_term;
             }
 
             // set the default object to parse when instantiating a class
@@ -309,30 +326,12 @@ class Api {
             }
 
             // log the user request
-            $this->update_onlineStatus($this->userId);
+            // $this->update_onlineStatus($this->userId);
             $params->remote ? $this->logRequest($this->default_params, $code) : null;
         }
 
         // output the results
         return $this->output($code, $result);
-    }
-
-    /**
-     * Update the user online status
-     * 
-     * @param String $userId
-     * 
-     * @return Bool
-     */
-    private function update_onlineStatus($userId) {
-        
-        try {
-
-            /** prepare and execute the statement */
-            $stmt = $this->myschoolgh->prepare("UPDATE users SET online='1', last_seen = now() WHERE item_id = ? LIMIT 1");
-            return $stmt->execute([$userId]);
-
-        } catch(PDOException $e) {}
     }
     
     /**
@@ -365,7 +364,7 @@ class Api {
 			$stmt->execute([
 				$this->userId, $this->uri, ip_address(), 
 				"{$this->myClass->platform} {$this->myClass->browser}",
-				$code, json_encode($default_params), $this->method, $this->clientId
+				$code, json_encode($default_params), $this->requestMethod, $this->clientId
 			]);
 
 			return true;
@@ -402,7 +401,7 @@ class Api {
         $data = [
             'code' => $code,
             'description' => $this->outputMessage($code),
-            'method' => $this->method,
+            'method' => $this->requestMethod,
             'endpoint' => $_SERVER["REQUEST_URI"]
         ];
         // remove the description endpoint if the response is 200

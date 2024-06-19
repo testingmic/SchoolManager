@@ -5,26 +5,41 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass;
+global $myClass, $isPayableStaff;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Add Staff";
-$response->title = "{$pageTitle} : {$appName}";
-$response->scripts = [
-    "assets/js/index.js"
-];
+$response->title = $pageTitle;
 
-$the_form = load_class("forms", "controllers")->staff_form($clientId, $baseUrl);
+// If the user is not a teacher, employee, accountant or admin then end the request
+if(!$isPayableStaff) {
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
 
-$response->html = '
+// execute the client limit query
+$myClass->clients_accounts_limit($clientId);
+
+// check if the page limit has reached
+if($myClass->accountLimit->staff) {
+    $response->html = notification_modal("Student Limit Reached", $myClass->error_logs["student_limit"]["msg"], $myClass->error_logs["student_limit"]["link"]);
+} else {
+
+    // include the scripts to load for the page
+    $response->scripts = ["assets/js/index.js"];
+
+    $the_form = load_class("forms", "controllers")->staff_form($clientId, $baseUrl);
+
+    $response->html = '
     <section class="section">
         <div class="section-header">
             <h1>'.$pageTitle.'</h1>
@@ -42,6 +57,7 @@ $response->html = '
             </div>
         </div>
     </section>';
+}
 // print out the response
 echo json_encode($response);
 ?>

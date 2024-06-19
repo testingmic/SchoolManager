@@ -8,17 +8,17 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $SITEURL, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Library Book Details";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // item id
 $item_id = $SITEURL[1] ?? null;
@@ -35,7 +35,7 @@ if(!empty($item_id)) {
     $response->scripts = [
         "assets/js/comments.js",
         "assets/js/library.js",
-        "assets/js/comments_upload.js"
+        "assets/js/upload.js"
     ];
 
     $data = load_class("library", "controllers")->list($item_param);
@@ -68,7 +68,8 @@ if(!empty($item_id)) {
             "module" => $module,
             "userData" => $defaultUser,
             "item_id" => $item_id,
-            "accept" => "image/*,.pdf,.docx,.doc"
+            "ismultiple" => true,
+            "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf", ".flv", ".mpg", ".mpeg"]),
         ];
 
         // append the html content
@@ -215,9 +216,14 @@ if(!empty($item_id)) {
                     <div class="modal-body p-0">
                         <div class="p-2">
                             <div class="p-3">
-                                '.$formsObj->comments_form_attachment_placeholder($form_params).'
-                                <div class="text-right">
-                                    <button onclick="return upload_EBook_Resource(\''.$item_id.'\');" class="btn btn-outline-success btn-sm"><i class="fa fa-upload"></i> Upload Files</button>
+                                '.$formsObj->form_attachment_placeholder($form_params).'
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <button data-dismiss="modal" class="btn btn-outline-secondary">CLose</button>
+                                    </div>
+                                    <div>
+                                        <button onclick="return upload_EBook_Resource(\''.$item_id.'\');" class="btn btn-outline-success btn-sm"><i class="fa fa-upload"></i> Upload Files</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

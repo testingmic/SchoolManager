@@ -5,11 +5,11 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultUser, $SITEURL, $isTutor;
+global $myClass, $defaultUser, $SITEURL, $isTutor, $isWardParent;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
@@ -17,9 +17,9 @@ jump_to_main($baseUrl);
 // additional update
 $userId = $session->userId;
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Subject Details";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // item id
 $item_id = $SITEURL[1] ?? null;
@@ -59,6 +59,9 @@ if(!empty($item_id)) {
         // set the first key
         $data = $data["data"][0];
 
+        // set the page title
+        $response->title = $data->name;
+
         $response->scripts = ["assets/js/index.js"];
 
         // append is admin to the query string
@@ -75,6 +78,40 @@ if(!empty($item_id)) {
 
         //links list
         $links_list = "";
+        $class_ids_list = null;
+        $subject_class_list = null;
+
+        // if the class id is not empty
+        if(!empty($data->class_list)) {
+            // loop throught the classes list
+            foreach($data->class_list as $class) {
+                $class_ids_list .=  "{$class->item_id},";
+                $subject_class_list .= '
+                <div class="col-lg-6 col-md-6">
+                    <div class="card">
+                        <div class="card-body pt-0 pb-0">
+                            <div class="pb-2 pt-3 border-bottom">
+                                <p class="clearfix mb-2">
+                                    <span class="float-left">Name</span>
+                                    <span class="float-right text-muted">
+                                        <span class="user_name" '.(!$isWardParent || ($isTutor && in_array($class->item_id, $defaultUser->class_ids)) ? 'onclick="load(\'class/'.$class->item_id.'\');"' : null).'>'.$class->name.'
+                                        </span>
+                                    </span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Code</span>
+                                    <span class="float-right text-muted">'.$class->class_code.'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Students Count</span>
+                                    <span class="float-right text-muted">'.$class->students_count.'</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>';
+            }
+        }
 
         // confirm that the link is not empty
         if(!empty($data->resources_list) && isset($data->resources_list["link"])) {
@@ -215,59 +252,74 @@ if(!empty($item_id)) {
         $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1>'.$pageTitle.'</h1>
+                <h1><i class="fa fa-book"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'courses">Courses</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'courses">Subjects</a></div>
                     <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>
             <div class="section-body">
             <div class="row mt-sm-4">
-            <div class="col-12 col-md-12 col-lg-3">
-                <div class="card author-box">
-                <div class="card-body">
-                    <div class="author-box-center">
-                        <div class="clearfix"></div>
-                        <div class="author-box-name"><a href="#">'.$data->name.'</a></div>
-                        <div class="author-box-job">'.$data->course_code.'</div>
-                        <div class="author-box-job">('.$data->credit_hours.' Hours)</div>
-                    </div>
-                </div>
-                </div>
+            <div class="col-md-3">
                 <div class="card">
-                    <div class="card-header">
-                        <h4>Description</h4>
+                    <div class="card-body p-3 text-center bg-info">
+                        <div class="text-uppercase font-25 font-weight-bolder text-white">'.$data->name.'</div>
+                        <div class="font-18 font-weight-bold text-uppercase text-white">('.$data->course_code.')</div>
                     </div>
-                    <div class="card-body p-0 pt-0">
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="card-header">
+                            <h4>SUBJECT DESCRIPTION</h4>
+                        </div>
                         <div class="p-3 pt-0">
                         '.(!empty($data->description) ? $data->description : "<div class='text-center'>Description Not Set</div>").'
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="col-12 col-md-12 col-lg-3">
+                <div class="mb-3">
+                    <button onclick="load(\'gradebook/'.$data->item_id.'/attendance?class_id='.trim($class_ids_list, ",").'\');" class="btn btn-block btn-primary"><i class="fa fa-book-open"></i> GRADEBOOK</button>
+                </div>
                 <div class="card">
                     <div class="card-header">
-                        <h4>Course Tutor(s) Details</h4>
+                        <h4>CLASS NAME</h4>
+                    </div>
+                    <div class="card-body text-center">
+                        '.$data->class_name.'
+                    </div>
+                </div>';
+
+            $response->html .= '
+                <div class="card">
+                    <div class="card-header">
+                        <h4>SUBJECT TUTOR DETAILS</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">';
-                    foreach($data->course_tutors as $tutor) {
-                        $response->html .= '
-                        <div class="pb-2 pt-3 border-bottom">
-                            <p class="clearfix mb-2">
-                                <span class="float-left">Fullname</span>
-                                <span class="float-right text-muted"><a href="'.$baseUrl.'staff/'.$tutor->item_id.'/view">'.$tutor->name.'</a></span>
-                            </p>
-                            <p class="clearfix mb-2">
-                                <span class="float-left">Email</span>
-                                <span class="float-right text-muted">'.$tutor->email.'</span>
-                            </p>
-                            <p class="clearfix">
-                                <span class="float-left">Contact</span>
-                                <span class="float-right text-muted">'.$tutor->phone_number.'</span>
-                            </p>
-                        </div>';
+                    if(!empty($data->course_tutors)) {
+                        foreach($data->course_tutors as $tutor) {
+                            $response->html .= '
+                            <div class="pb-2 pt-3 border-bottom">
+                                <p class="clearfix mb-2">
+                                    <span class="float-left">Fullname</span>
+                                    <span class="float-right text-muted"><a href="'.$baseUrl.'staff/'.$tutor->item_id.'/documents">'.$tutor->name.'</a></span>
+                                </p>
+                                <p class="clearfix mb-2">
+                                    <span class="float-left">Email</span>
+                                    <span class="float-right text-muted">'.$tutor->email.'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Contact</span>
+                                    <span class="float-right text-muted">'.$tutor->phone_number.'</span>
+                                </p>
+                            </div>';
+                        }
                     }
-                $response->html .= empty($data->course_tutors) ? "<div class='p-3 text-center'>Course Tutors Not Set</div>" : null;
+                $response->html .= empty($data->course_tutors) ? "<div class='p-3 text-center'>Subject Tutors Not Set</div>" : null;
                 $response->html .= '</div></div>';
 
             $response->html .= '
@@ -280,10 +332,10 @@ if(!empty($item_id)) {
                         <a class="nav-link '.(!$updateItem ? "active" : null).'" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Classes List</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Course Lesson Planner</a>
+                        <a class="nav-link" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Subject Lesson Planner</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="resources-tab2" data-toggle="tab" href="#resources" role="tab" aria-selected="true">Course Materials</a>
+                        <a class="nav-link" id="resources-tab2" data-toggle="tab" href="#resources" role="tab" aria-selected="true">Subject Materials</a>
                     </li>';
 
                     if($hasUpdate) {
@@ -303,31 +355,7 @@ if(!empty($item_id)) {
 
                             // if the class list is not empty
                             if(!empty($data->class_list)) {
-                                
-                                // loop throught the classes list
-                                foreach($data->class_list as $class) {
-                                    $response->html .= '
-                                    <div class="col-lg-6 col-md-6">
-                                        <div class="card">
-                                            <div class="card-body pt-0 pb-0">
-                                                <div class="pb-2 pt-3 border-bottom">
-                                                    <p class="clearfix mb-2">
-                                                        <span class="float-left">Name</span>
-                                                        <span class="float-right text-muted"><a href="'.$baseUrl.'class/'.$class->id.'/view">'.$class->name.'</a></span>
-                                                    </p>
-                                                    <p class="clearfix">
-                                                        <span class="float-left">Code</span>
-                                                        <span class="float-right text-muted">'.$class->class_code.'</span>
-                                                    </p>
-                                                    <p class="clearfix">
-                                                        <span class="float-left">Class Size</span>
-                                                        <span class="float-right text-muted">'.$class->class_size.'</span>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>';
-                                }
+                                $response->html .= $subject_class_list;
                             } else {
                                 $response->html .= '<div class="col-lg-12 font-italic">No class is currently offering this course.</div>';
                             }
@@ -338,7 +366,7 @@ if(!empty($item_id)) {
 
                         <div class="tab-pane fade" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
                             <div class="d-flex justify-content-between">
-                                <div><h5>COURSE LESSONS</h5></div>
+                                <div><h5>SUBJECT LESSONS</h5></div>
                                 <div>
                                     '.($unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success" href="'.$baseUrl.'download/coursematerial?cs_mat='.base64_encode($data->id."_".$data->item_id."_".$data->client_id).'&dw=true"><i class="fa fa-download"></i> Download</a>' : '').'
                                     '.($hasPlanner ? '
@@ -353,7 +381,7 @@ if(!empty($item_id)) {
                         
                         <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab2">
                             <div class="d-flex justify-content-between">
-                                <div><h5>COURSE MATERIALS</h5></div>
+                                <div><h5>SUBJECT MATERIALS</h5></div>
                                 '.($hasPlanner ? 
                                     add_new_item($data->item_id) 
                                 : null ).'
@@ -366,7 +394,7 @@ if(!empty($item_id)) {
                             <div class="mt-4"><h5>RESOURCE LINKS</h5></div>
                             <div class="slim-scroll p-0 m-0" id="resource_link_list" style="max-height:400px; overflow-y:auto;">
                                 '.($links_list ? $links_list : 
-                                    '<div class="text-left font-italic">Course Tutor has not uploaded any resource links to this course.</div>'
+                                    '<div class="text-left font-italic">Subject Tutor has not uploaded any resource links to this course.</div>'
                                 ).'
                             </div>
                         </div>

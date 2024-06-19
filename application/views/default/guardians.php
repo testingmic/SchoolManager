@@ -9,14 +9,14 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
-$response->title = "Guardians List : {$appName}";
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$response->title = "Guardians List";
 $response->scripts = [];
 
 $guardian_param = (object) [
@@ -56,7 +56,7 @@ foreach($guardian_list as $kkey => $each) {
                         <img src=\"{$baseUrl}{$ward->image}\" class='author-box-picture' width='40px' height='40px'>
                     </div>
                     <div> 
-                        <a href='{$baseUrl}student/{$ward->student_guid}' title='View the details of {$ward->name}'>".strtoupper($ward->name)."</a>
+                        <a href='{$baseUrl}student/{$ward->student_guid}' class='user_name' title='View the details of {$ward->name}'>".strtoupper($ward->name)."</a>
                         <br>".(!empty($ward->class_name) ? "<i class='fa fa-home'></i> {$ward->class_name}" : "")."
                     </div>
                 </div>
@@ -80,7 +80,7 @@ foreach($guardian_list as $kkey => $each) {
             </div>
         </div>
     </td>";
-    $guardians .= "<td>{$each->email}</td>";
+    $guardians .= "<td>".strtolower($each->email)."</td>";
     $guardians .= "<td>{$each->phone_number}</td>";
     $guardians .= "<td>{$wards_list}</td>";
     $guardians .= "<td width='13%' class='text-center'>{$action}</td>";
@@ -101,7 +101,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive table-student_staff_list">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
+                            <table data-empty="" class="table table-bordered table-sm table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>

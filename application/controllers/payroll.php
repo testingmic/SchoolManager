@@ -2,7 +2,7 @@
 
 class Payroll extends Myschoolgh {
 
-    
+    private $iclient = [];
 
     public function __construct(stdClass $params = null) {
 		parent::__construct();
@@ -15,6 +15,13 @@ class Payroll extends Myschoolgh {
         $this->academic_term = $client_data->client_preferences->academics->academic_term ?? null;
         $this->academic_year = $client_data->client_preferences->academics->academic_year ?? null;
 
+        // set the colors to use for the loading of pages
+        $this->color_set = [
+            "#007bff", "#6610f2", "#6f42c1", "#e83e8c", "#dc3545", "#fd7e14", 
+            "#ffc107", "#28a745", "#20c997", "#17a2b8", "#6c757d", "#343a40", 
+            "#007bff", "#6c757d", "#28a745", "#17a2b8", "#ffc107", "#dc3545"
+        ];
+
 	}
 
     /**
@@ -24,14 +31,14 @@ class Payroll extends Myschoolgh {
      */
     public function paysliplist(stdClass $params) {
 
-        
-        global $accessObject;
+        // get global variables
+        global $accessObject, $defaultUser;
 
         if(isset($params->employee_id)) {
             $params->employee_id = $params->employee_id;
         } else {
             if(!$accessObject->hasAccess("generate", "payslip") && !isset($params->payslip_id)) {
-                $params->employee_id = $params->userId ?? $this->session->userId;
+                $params->employee_id = $params->userId ?? $defaultUser->user_id;
             }
         }
 
@@ -51,8 +58,8 @@ class Payroll extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT CONCAT(c.item_id,'|',c.name,'|',COALESCE(c.phone_number,'NULL'),'|',COALESCE(c.email,'NULL'),'|',c.image,'|',c.unique_id,'|',c.user_type) FROM users c WHERE c.item_id = a.employee_id LIMIT 1) AS employee_info,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.unique_id,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                    (SELECT CONCAT(c.item_id,'|',c.name,'|',c.phone_number,'|',c.email,'|',c.image,'|',c.unique_id,'|',c.last_seen,'|',c.online,'|',c.user_type) FROM users c WHERE c.item_id = a.employee_id LIMIT 1) AS employee_info,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.unique_id,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM payslips a
                 WHERE {$params->query} AND a.deleted = ? ORDER BY a.id DESC LIMIT {$params->limit}
             ");
@@ -64,7 +71,7 @@ class Payroll extends Myschoolgh {
                 // loop through the information
                 foreach(["employee_info", "created_by_info"] as $each) {
                     // convert the created by string into an object
-                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","unique_id","user_type"]);
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["user_id", "name", "phone_number", "email", "image","unique_id","last_seen","online","user_type"]);
                 }
 
                 if($payslipDetails) {
@@ -134,7 +141,7 @@ class Payroll extends Myschoolgh {
                         'allowance_amount' => $value,
                         'allowance_type' => 'Allowance'
                     ];
-                    $t_allowances += $value;
+                    $t_allowances += !empty($value) && preg_match("/^[0-9]+$/", $value) ? $value : 0;
                 }
             }
         }
@@ -151,7 +158,7 @@ class Payroll extends Myschoolgh {
                         'allowance_amount' => $value,
                         'allowance_type' => 'Deduction'
                     ];
-                    $t_deductions += $value;
+                    $t_allowances += !empty($value) && preg_match("/^[0-9]+$/", $value) ? $value : 0;
                 }
             }
         }
@@ -573,7 +580,7 @@ class Payroll extends Myschoolgh {
                             'allowance_amount' => $value,
                             'allowance_type' => 'Allowance'
                         ];
-                        $t_allowances += !empty($value) && preg_match("/^[0-9]+$/", $value) ? $value : 0;
+                        $t_allowances += $value;
                     }
                 }
             }
@@ -590,7 +597,7 @@ class Payroll extends Myschoolgh {
                             'allowance_amount' => $value,
                             'allowance_type' => 'Deduction'
                         ];
-                        $t_allowances += !empty($value) && preg_match("/^[0-9]+$/", $value) ? $value : 0;
+                        $t_deductions += $value;
                     }
                 }
             }
@@ -610,7 +617,7 @@ class Payroll extends Myschoolgh {
             if(empty($payslip_id)) {
                 
                 /** Create new record id */
-                $item_id = random_string("alnum", 16);
+                $item_id = random_string("alnum", RANDOM_STRING);
 
                 /** Insert the Payslip Record */
                 $stmt = $this->db->prepare("INSERT INTO payslips SET item_id = ?, client_id =?, employee_id=?, basic_salary=?, 
@@ -665,6 +672,7 @@ class Payroll extends Myschoolgh {
                     'username' => $data->name,
                     'remote' => false, 
                     'message' => "Your Payslip for <strong>{$params->month_id} {$params->year_id}</strong> has been generated successfully. Visit the payslips page to view it.",
+                    'content' => "Your Payslip for <strong>{$params->month_id} {$params->year_id}</strong> has been generated successfully. <a target=\"_blank\" href=\"{{APPURL}}download/payslip?pay_id={$item_id}&dw=true\">Click Here</a> to download it.",
                     'notice_type' => 12,
                     'userId' => $params->userId,
                     'clientId' => $params->clientId,

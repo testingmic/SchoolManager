@@ -6,7 +6,6 @@ class Auth extends Myschoolgh {
     public $redirect_url;
     public $error_response;
     public $success_response;
-    public $password_ErrorMessage_2;
 
     // set the attempts for login and password reset
     private $time_period = 60;
@@ -23,15 +22,6 @@ class Auth extends Myschoolgh {
 			<li style='padding-left:15px;'>At least 1 Lowercase</li>
 			<li style='padding-left:15px;'>At least 1 Numeric</li>
 			<li style='padding-left:15px;'>At least 1 Special Character</li></ul></div>";
-        
-        $this->password_ErrorMessage_2 = "
-            Sorry! Please use a stronger password.
-            Password Format:
-			1. Password should be at least 8 characters long
-			2. At least 1 Uppercase
-			3. At least 1 Lowercase
-			4. At least 1 Numeric
-			5. At least 1 Special Character";
     }
 
     /**
@@ -57,8 +47,10 @@ class Auth extends Myschoolgh {
                     u.id, u.password, u.item_id AS user_id, 
                     u.access_level, u.username, u.client_id, 
                     u.status AS activated, u.email, u.user_type,
-                    u.last_timetable_id, c.client_state, u.user_status
+                    u.last_timetable_id, c.client_state, u.user_status,
+                    cl.item_id AS class_guid
                 FROM users u
+                LEFT JOIN classes cl ON cl.id = u.class_id
                 LEFT JOIN clients_accounts c ON c.client_id = u.client_id
                 WHERE (u.username = ? OR u.email = ?) AND u.deleted =  ? ORDER BY u.id DESC LIMIT 1
             ");
@@ -79,129 +71,132 @@ class Auth extends Myschoolgh {
                         // verify the password
                         if(password_verify($params->password, $results->password)) {
 
-                            // last login trial
-                            $lastLogin = $this->pushQuery("attempts", "users_access_attempt", "username='{$results->username}' AND attempt_type='login'");
-                            
-                            // if the last login information is not empty
-                            if(!empty($lastLogin)) {
+                            // confirm if the user has permission to login
+                            if(in_array($results->user_status, $this->allowed_login_status)) {
 
-                                // get the user record
-                                $last_attempt = $lastLogin[0]->attempts;
-
-                                // if the attempt is 4 or more then lodge a notification to the user
-                                if($last_attempt >= 3) {
-
-                                    // form the notification parameters
-                                    $params = (object) [
-                                        '_item_id' => random_string("alnum", 16),
-                                        'user_id' => $results->user_id,
-                                        'subject' => "Login Failures",
-                                        'username' => $results->username,
-                                        'remote' => false, 
-                                        'message' => "An attempt count of <strong>{$last_attempt}</strong> was made to access your Account. 
-                                            We recommend that you change your password to help secure it. Visit the profile section to effect the change.",
-                                        'notice_type' => 3,
-                                        'clientId' => $results->client_id,
-                                        'userId' => $results->user_id,
-                                        'initiated_by' => 'system'
-                                    ];
-
-                                    // add a new notification
-                                    $noticeClass->add($params);
-                                }
-                            }
-
-                            // clear the login attempt
-                            $this->clearAttempt($params->username);
-
-                            // set the status variable to true
-                            $this->status = true;
-
-                            // unset the password from the results
-                            unset($results->password);
-
-                            // set these sessions if not a remote call
-                            if(!$params->remote) {
-
-                                // set the user sessions for the person to continue
-                                $session->set("userLoggedIn", random_string('alnum', 50));
-                                $session->set("userId", $results->user_id);
-                                $session->set("userName", $params->username);
-                                $session->set("clientId", $results->client_id);
-                                $session->set("activated", $results->user_status);
-                                $session->set("userRole", $results->access_level);
-
-                                // check the client state
-                                if($results->client_state === "Pending") {
-                                    $session->set("initialAccount_Created", true);
-                                }
-
-                                // set the last timetable id in session
-                                $session->set("last_TimetableId", $results->last_timetable_id);
-
-                                // set additional session for student
-                                if($results->user_type === "student") {
-                                    $session->set("student_id", $results->user_id);
-                                }
-
-                                // set a general session for all except for a parent user
-                                if($results->user_type !== "parent") {
-                                    $session->set("ready_App", true);
-                                }
-                            }
-                            
-                            // unset session locked
-                            $session->userSessionLocked = null;
-
-                            // if a remote call was made for the access token
-                            if($params->remote) {
+                                // last login trial
+                                $lastLogin = $this->pushQuery("attempts", "users_access_attempt", "username='{$results->username}' AND attempt_type='login' LIMIT 5");
                                 
-                                // get any active access token available or generate a new one if none exists
-                                $access = $this->temporary_access($results);
+                                // if the last login information is not empty
+                                if(!empty($lastLogin)) {
 
-                                // commit the transactions
+                                    // get the user record
+                                    $last_attempt = $lastLogin[0]->attempts;
+
+                                    // if the attempt is 4 or more then lodge a notification to the user
+                                    if($last_attempt >= 3) {
+
+                                        // form the notification parameters
+                                        $params = (object) [
+                                            '_item_id' => random_string("alnum", RANDOM_STRING),
+                                            'user_id' => $results->user_id,
+                                            'subject' => "Login Failures",
+                                            'username' => $results->username,
+                                            'remote' => false, 
+                                            'message' => "An attempt count of <strong>{$last_attempt}</strong> was made to access your Account. 
+                                                We recommend that you change your password to help secure it. Visit the profile section to effect the change.",
+                                            'content' => "An attempt count of <strong>{$last_attempt}</strong> was made to access your Account. 
+                                                    We recommend that you change your password to help secure it. Visit the <a href=\"{{APPURL}}profile\">profile section</a> to effect the change.",
+                                            'notice_type' => 3,
+                                            'clientId' => $results->client_id,
+                                            'userId' => $results->user_id,
+                                            'initiated_by' => 'system'
+                                        ];
+
+                                        // add a new notification
+                                        $noticeClass->add($params);
+                                    }
+                                }
+
+                                // clear the login attempt
+                                $this->clearAttempt($params->username);
+
+                                // set the status variable to true
+                                $this->status = true;
+
+                                // unset the password from the results
+                                unset($results->password);
+
+                                // set these sessions if not a remote call
+                                if(!$params->remote) {
+
+                                    // set the user sessions for the person to continue
+                                    $session->set("userLoggedIn", random_string('alnum', 50));
+                                    $session->set("userId", $results->user_id);
+                                    $session->set("userName", $params->username);
+                                    $session->set("clientId", $results->client_id);
+                                    $session->set("activated", $results->user_status);
+                                    $session->set("userRole", $results->access_level);
+
+                                    // check the client state
+                                    if($results->client_state === "Pending") {
+                                        $session->set("initialAccount_Created", true);
+                                    }
+
+                                    // set the last timetable id in session
+                                    $session->set("last_TimetableId", $results->last_timetable_id);
+
+                                    // set additional session for student
+                                    if($results->user_type === "student") {
+                                        // set the student id
+                                        $session->set("student_id", $results->user_id);
+                                        // set the student class ids
+                                        $session->set("student_class_id", $results->class_guid);
+                                    }
+                                }
+                                
+                                // if a remote call was made for the access token
+                                if($params->remote) {
+                                    
+                                    // get any active access token available or generate a new one if none exists
+                                    $access = $this->temporary_access($results);
+
+                                    // commit the transactions
+                                    $this->db->commit();
+                                    
+                                    // return the response
+                                    return $access;
+                                }
+
+                                // remove all temporary files uploaded before a logout
+                                $this->clear_temp_files($results->user_id);
+                                
+                                #update the table
+                                $ip = ip_address();
+                                $br = $this->browser."|".$this->platform;
+
+                                // update the last login for this user
+                                $stmt = $this->db->prepare("UPDATE users SET last_login='{$this->current_timestamp}', last_visited_page='{{APPURL}}dashboard', last_seen = '{$this->current_timestamp}' WHERE item_id=? LIMIT 55");
+                                $stmt->execute([$results->user_id]);
+
+                                // log the history record
+                                $stmt = $this->db->prepare("INSERT INTO users_login_history 
+                                    SET username='{$params->username}', client_id='{$results->client_id}', log_ipaddress='{$ip}', log_browser='{$br}', 
+                                    user_id='{$session->userId}', log_platform='{$this->agent}'
+                                ");
+                                $stmt->execute();
+
+                                // if the user is an admin or accountant
+                                if(in_array($results->user_type, ["admin", "accountant"])) {
+                                    // run simple cron activity
+                                    $this->execute_cron($results->client_id);
+                                }
+
+                                // commit all transactions
                                 $this->db->commit();
-                                
-                                // return the response
-                                return $access;
+
+                                // response to return
+                                return [
+                                    "code" => 200,
+                                    "data" => "Login successful. Redirecting", 
+                                    "refresh" => 1000
+                                ];
+                            } else {
+                                //return the error message
+                                return ["code" => 201, "data" => "Sorry! You have been denied access to the system."];
                             }
-
-                            // remove all temporary files uploaded before a logout
-                            $this->clear_temp_files($results->user_id);
-                            
-                            #update the table
-                            $ip = ip_address();
-                            $br = $this->browser."|".$this->platform;
-
-                            // log the history record
-                            $stmt = $this->db->prepare("INSERT INTO users_login_history 
-                                SET username='{$params->username}', client_id='{$results->client_id}', log_ipaddress='{$ip}', log_browser='{$br}', 
-                                user_id='{$session->userId}', log_platform='{$this->agent}'
-                            ");
-                            $stmt->execute();
-
-                            // update the last login for this user
-                            $stmt = $this->db->prepare("UPDATE users SET last_login=now(), last_visited_page='{{APPURL}}dashboard', last_seen = now() WHERE item_id=? LIMIT 10");
-                            $stmt->execute([$results->user_id]);
-
-                            // if the user is an admin or accountant
-                            if(in_array($results->user_type, ["admin", "accountant"])) {
-                                // run simple cron activity
-                                $this->execute_cron($results->client_id);
-                            }
-
-                            // commit all transactions
-                            $this->db->commit();
-
-                            // response to return
-                            return [
-                                "code" => 200,
-                                "data" => "Login successful. Redirecting", 
-                                "refresh" => 1000
-                            ];
 
                         } else {
-
                             // add user attempt
                             $this->addAttempt($params->username, "login", 1);
                             $this->db->commit();
@@ -243,11 +238,21 @@ class Auth extends Myschoolgh {
      * @return Bool
      */
     public function execute_cron($clientId) {
-        // fees payment reversal disallowed after 30 HOURS
-        $this->db->query("UPDATE fees_collection SET has_reversal='0' WHERE recorded_date < (NOW() + INTERVAL - 30 HOUR) AND has_reversal='1' AND client_id='{$clientId}' LIMIT 1000");
-        
-        // do same to transactions recorded - auto set it to approved after 30 hours
-        $this->db->query("UPDATE accounts_transaction SET state='Approved' WHERE date_created < (NOW() + INTERVAL - 30 HOUR) AND state='Pending' AND status='1' AND client_id='{$clientId}' LIMIT 500");
+
+        try {
+            // fees payment reversal disallowed after 24 HOURS
+            $this->db->query("UPDATE fees_collection SET has_reversal='0' WHERE recorded_date < (NOW() + INTERVAL - 24 HOUR) AND has_reversal='1' AND client_id='{$clientId}' LIMIT 1000");
+            
+            // do same to transactions recorded - auto set it to approved after 24 hours
+            $this->db->query("UPDATE accounts_transaction SET state='Approved' WHERE date_created < (NOW() + INTERVAL - 24 HOUR) AND state='Pending' AND status='1' AND client_id='{$clientId}' LIMIT 500");
+
+            // update the status of events
+            $this->db->query("UPDATE events SET state='Over' WHERE end_date < CURDATE() AND state='Pending' AND status='1' AND client_id='{$clientId}' LIMIT 500");
+
+            // users comments is not deletable after 3 hours of posting
+            $this->db->query("UPDATE users_feedback SET is_deletable='0' WHERE date_created < (NOW() + INTERVAL - 3 HOUR) AND is_deletable='1' AND client_id='{$clientId}' LIMIT 500");
+            
+        } catch(PDOException $e) {}
     }
 
     /**
@@ -263,7 +268,7 @@ class Auth extends Myschoolgh {
             // file travessing
             foreach(get_dir_file_info("assets/uploads/{$user_id}/tmp/", false, true) as $eachFile) {
                 // format the output
-                if($eachFile["relative_path"] !== "assets/uploads/{$user_id}/tmp/thumbnail") {
+                if($eachFile["relative_path"] !== "assets/uploads/{$user_id}/tmp/thumbnail\\") {
                     unlink($eachFile["server_path"]);
                 }
             }
@@ -281,7 +286,7 @@ class Auth extends Myschoolgh {
     public function temporary_access(stdClass $params) {
 
         // create the temporary accesstoken
-        $token = random_string("alnum", mt_rand(68, 70));
+        $token = random_string("alnum", 32);
         $expiry = date("Y-m-d H:i:s", strtotime("+2 hours"));
 
         // replace the string
@@ -309,7 +314,7 @@ class Auth extends Myschoolgh {
         
         try {
             // delete all temporary tokens
-            $stmt = $this->db->prepare("UPDATE users_api_keys SET status = ? WHERE (TIMESTAMP(expiry_timestamp) < CURRENT_TIME()) AND access_type = ? LIMIT 100");
+            $stmt = $this->db->prepare("UPDATE users_api_keys SET status = ? WHERE (TIMESTAMP(expiry_timestamp) < CURRENT_TIME()) AND access_type = ? LIMIT {$this->temporal_maximum}");
             $stmt->execute([0, 'temp']);
 
             // create the temporary token
@@ -550,7 +555,7 @@ class Auth extends Myschoolgh {
 
                         #update the table
                         $ip = $user_agent->ip_address();
-                        $random_string = random_string("alnum", 16);
+                        $random_string = random_string("alnum", RANDOM_STRING);
                         $br = $user_agent->browser()." ".$user_agent->platform();
 
                         #deactivate all reset tokens
@@ -570,11 +575,11 @@ class Auth extends Myschoolgh {
                         $stmt->execute();
                         
                         #FORM THE MESSAGE TO BE SENT TO THE USER
-                        $message = 'Hi '.$fullname.'<br>You have requested to reset your password at '.config_item('site_name');
+                        $message = 'Hi '.$fullname.'<br>You have requested to reset your password at '.$this->appName;
                         $message .= '<br><br>Before you can reset your password please follow this link. The reset link expires after 2 hours<br><br>';
-                        $message .= '<a class="alert alert-success" href="'.config_item('base_url').'verify?dw=password&token='.$request_token.'">Click Here to Reset Password</a>';
+                        $message .= '<a class="alert alert-success" href="'.$this->baseUrl.'verify?dw=password&token='.$request_token.'">Click Here to Reset Password</a>';
                         $message .= '<br><br>If it does not work please copy this link and place it in your browser url.<br><br>';
-                        $message .= config_item('base_url').'verify?dw=password&token='.$request_token;
+                        $message .= $this->baseUrl.'verify?dw=password&token='.$request_token;
 
                         // recipient list
                         $reciepient = ["recipients_list" => [["fullname" => $fullname,"email" => $params->email,"customer_id" => $user_id]]];
@@ -586,7 +591,7 @@ class Auth extends Myschoolgh {
                         ");
                         $stmt->execute([
                             'password-recovery', $results->client_id, $random_string, json_encode($reciepient),
-                            $user_id, "[".config_item('site_name')."] Change Password", $message, $user_id
+                            $user_id, "[".$this->appName."] Change Password", $message, $user_id
                         ]);
 
                         // send a notification to the user
@@ -643,7 +648,7 @@ class Auth extends Myschoolgh {
     public function reset_user_password(stdClass $params) {
 
         // set the url
-        $baseUrl = config_item("base_url");
+        $baseUrl = $this->baseUrl;
 
         // if the email parameter was not parsed
         if(!isset($params->password) || !isset($params->password_2)) {
@@ -714,7 +719,7 @@ class Auth extends Myschoolgh {
                     $this->userLogs("password-recovery", $user_id, null, "You successfully changed your password.", $user_id);
                    
                     //FORM THE MESSAGE TO BE SENT TO THE USER
-                    $message = 'Hi '.$fullname.'<br>You have successfully changed your password at '.config_item('site_name');
+                    $message = 'Hi '.$fullname.'<br>You have successfully changed your password at '.$this->appName;
                     $message .= '<br><br>Ignore this message if your rightfully effected this change.<br>';
                     $message .= '<br>If not,';
                     $message .= '<a class="alert alert-success" href="'.$this->baseUrl.'forgot-password">Click Here</a> if you did not perform this act.';
@@ -729,7 +734,7 @@ class Auth extends Myschoolgh {
                     ");
                     $stmt->execute([
                         'password-recovery', $user_id, $user_id, json_encode($reciepient),
-                        $user_id, "[".config_item('site_name')."] Change Password", $message
+                        $user_id, "[{$this->appName}] Change Password", $message
                     ]);
 
                     // commit all transactions
@@ -766,6 +771,9 @@ class Auth extends Myschoolgh {
     public function change_password(stdClass $params) {
 
         try {
+
+            // global variable
+            global $defaultUser;
             
             if(in_array($params->clientId, ["TLIS0000001"])) {
                 return ["code" => "203", "data" => "Sorry! Changing of password is currently disabled for this account."];   
@@ -787,7 +795,7 @@ class Auth extends Myschoolgh {
             }
 
             // get the user information
-            $user = $this->pushQuery("password, email, name", "users", "item_id='{$params->user_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            $user = $this->pushQuery("password, changed_password, email, name", "users", "item_id='{$params->user_id}' AND client_id='{$params->clientId}' LIMIT 1");
             if(empty($user)) {
                 return ["code" => "203", "data" => "Sorry! An invalid user id was submitted."];
             }
@@ -795,19 +803,29 @@ class Auth extends Myschoolgh {
             // get the first item
             $user = $user[0];
 
-            // compare the password
-            if(!password_verify($params->password, $user->password)){
+            // if the defaultUser is not empty and the password parameter was not set
+            if(!empty($defaultUser)) {
 
-                // count the error number
-                $this->session->reset_count = !empty($this->session->reset_count) ? ($this->session->reset_count + 1) : 1;
+                // if the password parameter was not set
+                if($defaultUser->changed_password && !isset($params->password)) {
+                    return ["code" => "203", "data" => "Sorry! The current password is required."];
+                }
 
-                // return the error message
-                return ["code" => "203", "data" => "Sorry! We could not validate the password provided."];
+                // compare the password
+                elseif($defaultUser->changed_password && !password_verify($params->password, $user->password)){
+
+                    // count the error number
+                    $this->session->reset_count = !empty($this->session->reset_count) ? ($this->session->reset_count + 1) : 1;
+
+                    // return the error message
+                    return ["code" => "203", "data" => "Sorry! We could not validate the password provided."];
+                }
+
             }
 
             // change the password
-            $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE item_id = ? AND client_id = ? LIMIT 10");
-            $stmt->execute([password_hash($params->password_1, PASSWORD_DEFAULT), $params->user_id, $params->clientId]);
+            $stmt = $this->db->prepare("UPDATE users SET last_password_change = now(), password = ?, changed_password = ? WHERE item_id = ? AND client_id = ? LIMIT 3");
+            $stmt->execute([password_hash($params->password_1, PASSWORD_DEFAULT), 1, $params->user_id, $params->clientId]);
 
             // log the user activity
             $this->userLogs("password_reset", $params->user_id, null, "Password was successfully changed.", $params->userId);
@@ -826,7 +844,7 @@ class Auth extends Myschoolgh {
                 users_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?
             ");
             $stmt->execute(['password_reset', $params->user_id, $params->user_id, json_encode($reciepient),
-                $params->user_id, "[".config_item('site_name')."] Password Reset", $message
+                $params->user_id, "[{$this->appName}] Password Reset", $message
             ]);
 
             // reset the counter
@@ -837,13 +855,12 @@ class Auth extends Myschoolgh {
                 "code" => 200,
                 "data" => "Your password was successfully changed.",
                 "additional" => [
-                    "clear" => true
+                    "clear" => true,
+                    "href" => $this->session->user_current_url
                 ]
             ];
 
-        } catch(PDOException $e) {
-
-        }
+        } catch(PDOException $e) {}
         
     }
 
@@ -858,8 +875,9 @@ class Auth extends Myschoolgh {
     public function logout(stdClass $params = null) {
         // unset the sessions
         $this->session->remove([
-            "userLoggedIn", "userName", "current_url", "clientId",
-            "userId", "userRole", "activated", "client_subaccount",
+            "userLoggedIn", "userName", "current_url", "clientId", 
+            "student_courses_id", "student_class_id", "student_id",
+            "userId", "userRole", "activated", "client_subaccount", "recentSQLQuery",
             "student_csv_file", "course_csv_file", "staff_csv_file", "last_recordUpload"
         ]);
         // update the user online status
@@ -884,7 +902,7 @@ class Auth extends Myschoolgh {
         global $accessObject, $session;
 
         // check if the user has registered an account with the past 5 minutes
-        if(!$this->check_time("clients_accounts", 0.1)) {
+        if(!$this->check_time("clients_accounts", 5)) {
             return ["code" => 201, "data" => "Sorry! You are prohibited from registering multiple accounts within a short space of time."];
         }
 
@@ -906,6 +924,9 @@ class Auth extends Myschoolgh {
         
         try {
 
+            // begin transaction
+            $this->db->beginTransaction();
+
             // check if an account aready exists with the same email address
             $a_check = $this->pushQuery("client_status", "clients_accounts", "client_email='{$params->email}' LIMIT 1");
 
@@ -914,13 +935,22 @@ class Auth extends Myschoolgh {
                 if($a_check[0]->client_status == 0) {
                     return ["code" => 201, "data" => "Sorry! You already have an account pending verification. Please wait while we verify."];
                 } elseif($a_check[0]->client_status == 1) {
-                    return ["code" => 201, "data" => "Sorry! You already have an account. Please try login instead."];
+                    return ["code" => 201, "data" => "Sorry! You already have an account. Please try to login instead."];
                 }
             }
+
+            // confirm if the username already exists
             $u_check = $this->pushQuery("username", "users", "username='{$username}' LIMIT 1");
+
+            // if it does then set a new username for the admin user by appending a number to it.
             if(!empty($u_check)){
-                return ["code" => 201, "data" => "Sorry! There is an existing account with the same email address. Please try login instead."];
-            }
+                $username = $username.rand(1, 9);
+            }           
+
+            // get the details of the tiral account
+            $package = $this->pushQuery("*", "clients_packages", "package='Trial' LIMIT 1");
+            $package = (array) $package[0];
+            unset($package["id"]);
 
             // get the prefix from the school name
             $name = explode(" ", $params->school_name);
@@ -933,8 +963,8 @@ class Auth extends Myschoolgh {
 
             // create a token
             $user_id = "{$prefix}U".$this->append_zeros(1, 6);
-            $item_id = random_string("alnum", 16);
-            $token = random_string("alnum", 54);
+            $item_id = random_string("alnum", RANDOM_STRING);
+            $token = random_string("alnum", 32);
 
             // the preferences
             $preference = (object) [
@@ -943,6 +973,9 @@ class Auth extends Myschoolgh {
                     "student" => "$prefix",
                     "parent" => "{$prefix}P",
                     "receipt" => "R{$prefix}"
+                ],
+                "sessions" => [
+                    "session" => "Term"
                 ],
                 "academics" => [
                     "academic_year" => date("Y") . "/" . (date("Y") - 1),
@@ -964,11 +997,6 @@ class Auth extends Myschoolgh {
                 "features_list" => array_keys($this->features_list)
             ];
 
-            // get the details of the tiral account
-            $package = $this->pushQuery("*", "clients_packages", "package='Trial' LIMIT 1");
-            $package = (array) $package[0];
-            unset($package["id"]);
-
             // merge the array information
             $new = array_merge($preference->account, $package);
             $preference->account = $new;
@@ -983,27 +1011,24 @@ class Auth extends Myschoolgh {
             $last_id = $this->lastRowId("clients_accounts") + 1;
             
             // create a client id
-            $client_id = "MSGH".$this->append_zeros($last_id, 8);
+            $client_id = "MSGH".$this->append_zeros($last_id, 5);
 
             // create and insert a new event with the slug public holiday
             $evt_stmt = $this->db->prepare("INSERT INTO events_types SET client_id = ?, item_id = ?");
-            $evt_stmt->execute([$client_id, random_string("alnum", 16)]);
+            $evt_stmt->execute([$client_id, random_string("alnum", RANDOM_STRING)]);
 
             // gift 10 sms messages to the client
             $sms_stmt = $this->db->prepare("INSERT INTO smsemail_balance SET client_id = ?, sms_balance = ?");
             $sms_stmt->execute([$client_id, 10]);
 
             // insert the academic terms information for the client
-            $sms_stmt = $this->db->prepare("
-                INSERT INTO academic_terms SET client_id = '{$client_id}', name='1st', description='1st Term';
-                INSERT INTO academic_terms SET client_id = '{$client_id}', name='2nd', description='2nd Term';
-                INSERT INTO academic_terms SET client_id = '{$client_id}', name='3rd', description='3rd Term';
-            ");
-            $sms_stmt->execute();
+            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}',name='1st',description='1st Term'");
+            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}',name='2nd',description='2nd Term'");
+            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}',name='3rd',description='3rd Term'");
             
             // insert the client details
             $client_stmt = $this->db->prepare("INSERT INTO clients_accounts SET 
-                client_id = ?, client_name = ?, client_contact = ?, client_email = ?, client_preferences = ?, ip_address = ?
+                client_id = ?, client_name = ?, client_contact = ?, client_email = ?, client_preferences = ?, ipaddress = ?
                 ".(isset($params->school_address) ? ",client_address='{$params->school_address}'" : null)."
                 ".(isset($contact_2) ? ",client_secondary_contact='{$contact_2}'" : null)."
             ");
@@ -1030,8 +1055,14 @@ class Auth extends Myschoolgh {
 			$stmt2 = $this->db->prepare("INSERT INTO users_roles SET user_id = ?, client_id = ?, permissions = ?");
 			$stmt2->execute([$item_id, $client_id, $permissions]);
 
+            // insert the client into the limits table
+            $this->db->query("INSERT INTO clients_accounts_limit SET client_id = '{$client_id}'");
+
+            // insert the school grading remarks record
+            $this->db->query("INSERT INTO grading_remarks_list SET client_id = '{$client_id}'");
+
             // send a message to the user email
-            $message = "Thank you for registering your School: <strong>{$params->school_name}</strong> with ".config_item('site_name').".
+            $message = "Thank you for registering your School: <strong>{$params->school_name}</strong> with {$this->appName}
                         We are pleased to have you join and benefit from our platform.<br><br>
                         Your can login with your <strong>Email Address:</strong> {$params->email} or <strong>Username:</strong> {$username}
                         and the password that was provided during signup.<br><br>";
@@ -1048,8 +1079,11 @@ class Auth extends Myschoolgh {
             ");
             $m_stmt->execute([
                 'verify_account', $client_id, $item_id, json_encode($reciepient),
-                $item_id, "[".config_item('site_name')."] Account Verification", $message, $item_id
+                $item_id, "[{$this->appName}] Account Verification", $message, $item_id
             ]);
+
+            // create the client css file
+            $fd = fopen("assets/css/clients/{$client_id}.css", "w");
 
             // insert the user activity
             $this->userLogs("verify_account", $item_id, null, "{$params->school_name} created a new Account pending Verification.", $item_id, $client_id);
@@ -1063,9 +1097,11 @@ class Auth extends Myschoolgh {
                 "userRole" => $access_level,
                 "last_TimetableId" => true,
                 "initialAccount_Created" => true,
-                "activated" => 0,
-                "ready_App" => true
+                "activated" => 0
             ]);
+
+            // commit the statements
+            $this->db->commit();
 
             // create the account
             return [
@@ -1075,11 +1111,13 @@ class Auth extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
+            // reverse any transaction
+            $this->db->rollBack();
+            // return the error message
             return ["code" => 201, "data" => "Sorry! An error occured while processing the request."];
         }
 
     }
-
 
     /**
      * Password Manager Control
@@ -1092,7 +1130,7 @@ class Auth extends Myschoolgh {
 
         try {
 
-            global $noticeClass, $accessObject;
+            global $noticeClass, $accessObject, $isSupport, $isAdmin;
 
             // confirm if the user has the required permission
             if(!$accessObject->hasAccess("change_password", "permissions")) {
@@ -1192,11 +1230,11 @@ class Auth extends Myschoolgh {
                 }
 
                 // change the password
-                $stmt = $this->db->prepare("UPDATE users SET password = ?, last_password_change=now() WHERE item_id = ? AND client_id = ? LIMIT 10");
+                $stmt = $this->db->prepare("UPDATE users SET password = ?, last_password_change='{$this->current_timestamp}' WHERE item_id = ? AND client_id = ? LIMIT 10");
                 $stmt->execute([password_hash($params->data["password"], PASSWORD_DEFAULT), $check[0]->user_id, $params->clientId]);
 
                 // process the form
-                $stmt = $this->db->query("UPDATE users_reset_request SET request_token=NULL, reset_date=now(), reset_agent='{$br}|{$ip}', token_status='USED', expiry_time='".time()."', changed_by = '{$params->userId}' WHERE item_id='{$request_id}' LIMIT 1");
+                $stmt = $this->db->query("UPDATE users_reset_request SET request_token=NULL, reset_date='{$this->current_timestamp}', reset_agent='{$br}|{$ip}', token_status='USED', expiry_time='".time()."', changed_by = '{$params->userId}' WHERE item_id='{$request_id}' LIMIT 1");
 
                 // add a new notification
                 $notice_param->message = "Your password was successfully changed by <strong>{$params->userData->name}.";
@@ -1234,37 +1272,63 @@ class Auth extends Myschoolgh {
                 }
 
                 // get the user details using the username
-                $check = $this->pushQuery("id, username, email, name, user_type", "users", "item_id = '{$request_id}' ORDER BY id DESC LIMIT 1");
+                $check = $this->pushQuery("id, username, item_id, email, name, user_type", "users", "item_id = '{$request_id}' ORDER BY id DESC LIMIT 1");
                 
                 // confirm that the request and request id were parsed
                 if(empty($check)) {
                     return ["code" => 203, "data" => "Sorry! An invalid user id was parsed."];
                 }
 
-                // if the username parsed does not match the existing one
-                if(!empty($username) && ($username !== $check[0]->username)) {
+                // send a notification to the user
+                $notice_param = (object) [
+                    '_item_id' => $request_id,
+                    'user_id' => $check[0]->item_id,
+                    'subject' => "Password Changed",
+                    'username' => $check[0]->username,
+                    'remote' => false, 
+                    'notice_type' => 4,
+                    'userId' => $params->userId,
+                    'clientId' => $params->clientId,
+                    'initiated_by' => 'system'
+                ];
 
-                    // check the username to see if its available to be used
-                    $check_2 = $this->pushQuery("id", "users", "username = '{$username}' AND item_id != '{$request_id}' ORDER BY id DESC LIMIT 1");
-                    
-                    // return error message
-                    if(!empty($check_2)) {
-                        return ["code" => 203, "data" => "Sorry! The username parsed is not available for use."];
+                // username can only be changed by the support admin personnel
+                if($isSupport || $isAdmin) {
+                
+                    // if the username parsed does not match the existing one
+                    if(!empty($username) && ($username !== $check[0]->username)) {
+
+                        // check the username to see if its available to be used
+                        $check_2 = $this->pushQuery("id", "users", "username = '{$username}' AND item_id != '{$request_id}' ORDER BY id DESC LIMIT 1");
+                        
+                        // return error message
+                        if(!empty($check_2)) {
+                            return ["code" => 203, "data" => "Sorry! The username parsed is not available for use."];
+                        }
                     }
-                }
 
-                // set the new password
-                $stmt = $this->db->prepare("UPDATE users SET username = ?, password = ?, last_password_change=now() WHERE item_id = ? AND client_id = ? LIMIT 10");
-                $stmt->execute([$username, password_hash($params->data["password"], PASSWORD_DEFAULT), $request_id, $params->clientId]);
+                    // set the new password
+                    $stmt = $this->db->prepare("UPDATE users SET 
+                        ".(!empty($username) ? "username = '{$username}', " : null)."
+                        password = ?, last_password_change='{$this->current_timestamp}', 
+                        changed_password='0' WHERE item_id = ? AND client_id = ? LIMIT 1"
+                    );
+                    $stmt->execute([password_hash($params->data["password"], PASSWORD_DEFAULT), $request_id, $params->clientId]);
 
-                // reset the requests list
-                $stmt = $this->db->query("UPDATE users_reset_request SET request_token=NULL, reset_date=now(), reset_agent='{$br}|{$ip}', token_status='ANNULED', expiry_time='".time()."', changed_by = '{$params->userId}' WHERE user_id='{$request_id}' AND token_status='PENDING' LIMIT 10");
+                    // add a new notification
+                    $notice_param->message = "Your password was successfully changed by <strong>{$params->userData->name}.";
+                    $notice_param->subject = "Password Changed";
+                    $noticeClass->add($notice_param);
 
-                // if the usernames are not the same
-                if(!empty($username) && ($username !== $check[0]->username)) {
-                    // change the username in the login_history table
-                    $stmt = $this->db->query("UPDATE users_login_history SET username='{$username}' WHERE username='{$check[0]->username}' AND client_id='{$params->clientId}' ORDER BY id DESC LIMIT 1000");
-                    $stmt = $this->db->query("UPDATE users_reset_request SET username='{$username}' WHERE username='{$check[0]->username}' AND client_id='{$params->clientId}' ORDER BY id DESC LIMIT 1000");
+                    // reset the requests list
+                    $stmt = $this->db->query("UPDATE users_reset_request SET request_token=NULL, reset_date='{$this->current_timestamp}', reset_agent='{$br}|{$ip}', token_status='ANNULED', expiry_time='".time()."', changed_by = '{$params->userId}' WHERE user_id='{$request_id}' AND token_status='PENDING' LIMIT 10");
+
+                    // if the usernames are not the same
+                    if(!empty($username) && ($username !== $check[0]->username)) {
+                        // change the username in the login_history table
+                        $stmt = $this->db->query("UPDATE users_login_history SET username='{$username}' WHERE username='{$check[0]->username}' AND client_id='{$params->clientId}' ORDER BY id DESC LIMIT 500");
+                        $stmt = $this->db->query("UPDATE users_reset_request SET username='{$username}' WHERE username='{$check[0]->username}' AND client_id='{$params->clientId}' ORDER BY id DESC LIMIT 500");
+                    }
                 }
 
             }
@@ -1275,4 +1339,5 @@ class Auth extends Myschoolgh {
         } catch(PDOException $e) {}
 
     }
+    
 }

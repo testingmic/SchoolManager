@@ -7,7 +7,7 @@
  * @package		Helpers
  * @subpackage	Upload Helper Functions
  * @category	Core Functions
- * @author		Analitica Innovare Dev Team
+ * @author		Emmallex Technologies Dev. Team
  */
 
 defined('BASEPATH') OR exit('No direct script access allowed');
@@ -81,6 +81,12 @@ if ( ! function_exists('file_size'))
 
 function create_thumbnail($source_image_path, $thumbnail_image_path, $THUMBNAIL_IMAGE_MAX_WIDTH = 250, $THUMBNAIL_IMAGE_MAX_HEIGHT = 194) {
 	
+	// if the file does not exit end the query
+	if(!is_file($source_image_path) || !file_exists($source_image_path)) {
+		return;
+	}
+
+	// list the array string
 	list($source_image_width, $source_image_height, $source_image_type) = getimagesize($source_image_path);
 	switch ($source_image_type) {
 		case IMAGETYPE_GIF:
@@ -108,11 +114,11 @@ function create_thumbnail($source_image_path, $thumbnail_image_path, $THUMBNAIL_
 		$thumbnail_image_width = $THUMBNAIL_IMAGE_MAX_WIDTH;
 		$thumbnail_image_height = (int) ($THUMBNAIL_IMAGE_MAX_WIDTH / $source_aspect_ratio);
 	}
-	$thumbnail_gd_image = imagecreatetruecolor($thumbnail_image_width, $thumbnail_image_height);
-	imagecopyresampled($thumbnail_gd_image, $source_gd_image, 0, 0, 0, 0, $thumbnail_image_width, $thumbnail_image_height, $source_image_width, $source_image_height);
-	imagejpeg($thumbnail_gd_image, $thumbnail_image_path, 90);
-	imagedestroy($source_gd_image);
-	imagedestroy($thumbnail_gd_image);
+	$thumbnail_gd_image = @imagecreatetruecolor($thumbnail_image_width, $thumbnail_image_height);
+	@imagecopyresampled($thumbnail_gd_image, $source_gd_image, 0, 0, 0, 0, $thumbnail_image_width, $thumbnail_image_height, $source_image_width, $source_image_height);
+	@imagejpeg($thumbnail_gd_image, $thumbnail_image_path, 90);
+	@imagedestroy($source_gd_image);
+	@imagedestroy($thumbnail_gd_image);
 	
 	return true;
 	

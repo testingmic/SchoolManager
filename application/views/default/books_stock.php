@@ -9,58 +9,147 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
-$response->title = "Update Book Stock : {$appName}";
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$response->title = "Update Book Stock ";
 $hasAdd = $accessObject->hasAccess("add", "library");
 
 // confirm if the user has the required permissions
 if(!$hasAdd) {
     $response->html = page_not_found("permission_denied");
 } else {
-    // call the library class
-    $response->scripts = ["assets/js/library.js"];
-
     // get the books list
     $params = (object) [
         "clientId" => $session->clientId,
         "client_data" => $defaultUser->client,
-        "minified" => true,
-        "limit" => 99999
+        "minified" => true
     ];
 
-    $item_list = load_class("library", "controllers", $params)->list($params);
+    // call the library class
+    $libraryObj = load_class("library", "controllers", $params);
+    $response->scripts = ["assets/js/library.js"];
 
-
+    // if the user has the permission to add a new item
+    $isAddURL = (bool) confirm_url_id(1, "add");
     $hasDelete = $accessObject->hasAccess("delete", "library");
     $hasUpdate = $accessObject->hasAccess("update", "library");
 
-    $books_listing = "";
-    // if the result is an array
-    if(is_array($item_list["data"])) {
-        // loop through the books list
-        foreach($item_list["data"] as $book) {
-            $books_listing .= "<option data-book_title='{$book->title}' data-books_stock='{$book->books_stock}' value='{$book->item_id}'>{$book->title}</option>";
-        }
-    }
-    
+    // begin the page html content
     $response->html = '
-        <section class="section">
-            <div class="section-header">
-                <h1><i class="fa fa-book-open"></i> Update Book Stock</h1>
-                <div class="section-header-breadcrumb">
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'books">Books List</a></div>
-                    <div class="breadcrumb-item">Update Book Stock</div>
+    <section class="section">
+    <div class="section-header">
+        <h1><i class="fa fa-book-open"></i> '.($isAddURL ? 'Update Book Stock' : 'Stock Update History').'</h1>
+        <div class="section-header-breadcrumb">
+            <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
+            <div class="breadcrumb-item active"><a href="'.$baseUrl.'books">Books List</a></div>
+            '.($isAddURL ? '<div class="breadcrumb-item active"><a href="'.$baseUrl.'books_stock/list">Stock Update History</a></div>' : '').'
+            <div class="breadcrumb-item">'.($isAddURL ? 'Update Book Stock' : 'Stock Update History').'</div>
+        </div>
+    </div>';
+
+    // get the url parsed
+    if(!$isAddURL) {
+
+        // initial count
+        $count = 0;
+        $stock_update_history = "";
+
+        // get the list
+        $stocks_list = $libraryObj->stock_update_list($params);
+
+        // if the record is not empty
+        if(!empty($stocks_list["data"]) && is_array($stocks_list["data"])) {
+
+            // loop through the record
+            foreach($stocks_list["data"] as $stock) {
+                $count++;
+
+                // format the books list
+                $books_list = "";
+
+                foreach($stock->books_list as $book) {
+                    $books_list .= "
+                    <div>
+                        <p class='mb-0'>
+                            <strong>Book Title:</strong>
+                            <a href='{$baseUrl}book/{$book["stock"]->book_id}'>
+                                <strong>{$book["data"]->title}</strong> (ISBN: {$book["data"]->isbn})
+                            </a> 
+                            <strong>Quantity:</strong> {$book["stock"]->quantity}
+                        </p>
+                    </div>";
+                }
+
+                // append to the query list
+                $stock_update_history .= "
+                <tr>
+                    <td>{$count}</td>
+                    <td>{$stock->date_created}</td>
+                    <td>{$books_list}</td>
+                    <td></td>
+                    <td>".($stock->reversed ? "<span class='badge badge-danger'>Reversed</span>" : "<span class='badge badge-success'>Active</span>")."</td>
+                    <td></td>
+                </tr>";
+            }
+
+        }
+
+        // get the list of books to add to stock
+        $response->html .= '
+        <div class="row">
+            <div class="col-12 col-sm-12 col-lg-12">
+                '.($hasAdd ? '
+                    <div class="text-right mb-2">
+                        <a class="btn btn-outline-success" href="'.$baseUrl.'books_stock/add"><i class="fa fa-book"></i> Update Books Stock</a>
+                    </div>' : ''
+                ).'
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table data-empty="" class="table table-bordered table-sm table-striped datatable">
+                                <thead>
+                                    <tr>
+                                        <th width="5%" class="text-center">#</th>
+                                        <th width="15%">Date</th>
+                                        <th>Books List</th>
+                                        <th width="15%">Created By</th>
+                                        <th width="10%">Status</th>
+                                        <th align="center" width="12%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>'.$stock_update_history.'</tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>';
+
+    }
+
+    // if the user wants to add the stocks
+    elseif($isAddURL) {
+
+        // get the books list
+        $item_list = $libraryObj->list($params);
+
+        $books_listing = "";
+        // if the result is an array
+        if(is_array($item_list["data"])) {
+            // loop through the books list
+            foreach($item_list["data"] as $book) {
+                $books_listing .= "<option data-book_title='{$book->title}' data-books_stock='{$book->books_stock}' value='{$book->item_id}'>{$book->title}</option>";
+            }
+        }
+        
+        $response->html .= '
+        <div class="mt-4">
             <div class="books_stock_update">
-                
 
                 <div class="row books_content" data-row="1">
                         
@@ -98,11 +187,14 @@ if(!$hasAdd) {
                     <button onclick="return update_book_stock()" class="btn btn-outline-success"><i class="fa fa-save"></i> Update Stock</button>
                 </div>
 
-
             </div>
-        </section>';
+        </div>';
 
-    // print out the response
-    echo json_encode($response);
+    }
+
+    $response->html .= '</section>';
+
 }
+// print out the response
+echo json_encode($response);
 ?>

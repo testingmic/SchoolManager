@@ -26,6 +26,53 @@ function form_loader($position = "absolute") {
     </div>';
 }
 
+// set the login window
+function page_load_error($title = null, $content = null) {
+    
+$appName = config_item("site_name");
+$baseUrl = config_item("base_url");
+
+$html = "
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <meta content='width=device-width, initial-scale=1, maximum-scale=1' name='viewport'>
+  <link rel='stylesheet' href='{$baseUrl}assets/css/app.min.css'>
+  <link rel='shortcut icon' type='image/x-icon' href='{$baseUrl}assets/img/favicon.ico' />
+  <title>{$title} - {$appName}</title>
+  <style>
+  .bg {
+    background-image: url('{$baseUrl}assets/img/background_2.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+  }
+  </style>
+</head>
+<body class='bg'>
+    <style>
+        .wrapper {
+            border: solid 1px #ccc;
+            width: 90%;
+            margin: auto auto;
+            background: #fbfbfb;
+            padding: 30px;
+        }
+    </style>
+    <div class='wrapper mt-4'>
+        <div align='center'>
+            <h1 class='text-danger'>{$appName}</h1>
+            <h1>{$title}</h1>
+            <p class='font-17'>{$content}</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+    return $html;
+}
+
 /** 
  * Form loader placeholder 
  * 
@@ -88,7 +135,7 @@ function ajax_forms_modal($auto_close_modal) {
 
     $html = "
     <div class=\"auto_close_modal\" id=\"auto_close_modal\" data-value=\"{$auto_close_modal}\"></div>
-    <div class=\"modal fade modal-dialog-right right\" id=\"formsModal\" ".(!$auto_close_modal ? null :  'data-backdrop="static" data-keyboard="false"').">
+    <div class=\"modal fade modal-dialog-right right\" id=\"formsModal\" data-backdrop=\"static\" data-keyboard=\"false\">
         <div class=\"modal-dialog modal-dialog-centered modal-lg\" style=\"width:100%;height:100%;\" role=\"document\">
             <div class=\"modal-content\">
                 <div class=\"modal-header\">
@@ -185,22 +232,22 @@ function save_form_data() {
  * 
  * @return String
  */
-function page_not_found($request = "not_found", $string = "The page you were looking for could not be found.") {
+function page_not_found($request = "not_found", $string = "The resource you trying to access for could not be found.") {
     global $baseUrl, $_SERVER;
 
     $notFound = (bool) ($request == "not_found");
-    $message = $notFound ? $string : "You don't have permission to access the requested object. It is either read-protected or not readable by the server.";
+    $message = $notFound ? $string : "You don't have permission to access the requested object. It is either read-protected or not readable on this server.";
     $title = $notFound ? "404" : "403";
 
     return '
     <section class="section">
-        <div class="container mt-5">
+        <div class="container">
             <div class="page-error">
             <div class="page-inner">
-                <h1>'.$title.'</h1>
-                <div class="page-description">'.$message.'</div>
+                <h1 class="text-warning">'.$title.'</h1>
+                <div class="page-description text-danger">'.$message.'</div>
                 <div class="page-search">
-                <form method="GET" class="ajaxform" action="'.$baseUrl.'api/search/list">
+                <form method="GET" autocomplete="Off" class="ajaxform" action="'.$baseUrl.'api/search/list">
                     <div class="form-group floating-addon floating-addon-not-append">
                     '.($notFound ? '
                         <div class="input-group">
@@ -218,9 +265,9 @@ function page_not_found($request = "not_found", $string = "The page you were loo
                     </div>
                 </form>
                 <div class="mt-3">
-                    <a href="'.$baseUrl.'dashboard"><i class="fa fa-home"></i> Back to Home</a> | 
-                    <a href="'.$_SERVER["REQUEST_URI"].'"><i class="fa fa-redo-alt"></i>  Reload Page</a> |
-                    <a href="javascript:history.back()" class="anchor"><i class="fa fa-arrow-left"></i> Go Back</a>
+                    <span class="user_name font-13" onclick="return load(\'dashboard\');"><i class="fa fa-home"></i> Back to Home</span> | 
+                    <span class="user_name font-13" onclick="return loadPage(\''.$_SERVER["REQUEST_URI"].'\');"><i class="fa fa-redo-alt"></i>  Reload Page</span> |
+                    <span class="user_name font-13" onclick="javascript:history.back()" class="anchor"><i class="fa fa-arrow-left"></i> Go Back</span>
                 </div>
                 </div>
             </div>
@@ -285,6 +332,111 @@ function session_logout() {
             </div>
         </div>
     ';
+}
+
+/**
+ * Change Default Password
+ * 
+ * @return String
+ */
+function changed_password($title = null, $timer = null) {
+    global $baseUrl, $defaultUser;
+    return '
+        <div class="row">
+            <div class="col-lg-3 col-md-3"></div>
+            <div class="col-lg-6 col-md-6 col-sm-12">
+                <div class="card">
+                    <div class="p-2 border-bottom border-3px text-center text-uppercase"><h4>'.$title.'</h4></div>
+                    <div class="card-body">
+                        <div class="empty-state pt-0" data-height="400">
+                            <div class="empty-state-icon bg-danger"><i class="fas fa-lock"></i></div>
+                            <form autocomplete="Off" method="POST" class="ajaxform" id="ajaxform" action="'.$baseUrl.'api/auth/change_password">
+                                <div>
+                                    <h5 class="border-bottom pb-2 pt-3">Complete the form below to change the default password.</h5>
+                                </div>
+                                <div class="row" align="left">
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label>Password <span class="required">*</span></label>
+                                            <input title="Set the new password." autocomplete="Off" type="password" name="password_1" id="password_1" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label>Confirm Password <span class="required">*</span></label>
+                                            <input title="Confirm the new password." autocomplete="Off" type="password" name="password_2" id="password_2" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12" align="right">
+                                        <input type="hidden" name="user_id" id="user_id" value="'.$defaultUser->user_id.'">
+                                        <button class="btn btn-outline-success" type="submit"><i class="fa fa-lock"></i> Change Password</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    ';
+}
+
+/**
+ * Account Expired or Suspended
+ * 
+ * @return String
+ */
+function access_denied($state = null, $timer = null) {
+    global $baseUrl, $_SERVER;
+    return '
+        <div class="row">
+            <div class="col-lg-3 col-md-3"></div>
+            <div class="col-lg-6 col-md-6 col-sm-12">
+                <div class="card">
+                    <div class="p-2 border-bottom border-3px text-center text-uppercase"><h4>'.$state.' Account</h4></div>
+                    <div class="card-body">
+                        <div class="empty-state" data-height="400">
+                            <div class="empty-state-icon bg-danger"><i class="fas fa-lock"></i></div>
+                            <h2>Your Account '.($state == "Expired" ? "Expired on {$timer}" : "is {$state}").'</h2>
+                            <p class="lead">
+                                Sorry! You have been denied access to the system
+                                because your account has '.($state == "Suspended" ? "been {$state}" : $state).'
+                            </p>
+                            <button onclick="return loadPage(\''.$baseUrl.'support\');" class="btn anchor btn-warning mt-4">Visit Support Section</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    ';
+}
+
+/**
+ * Global Sample Page for Content Display
+ *
+ * @return String
+ **/
+function notification_modal($title = null, $caption = null, $url_link = null) {
+    
+    // global variable data
+    global $defaultClientData, $baseUrl;
+
+    // return the content
+    return '
+        <div class="row">
+            <div class="col-lg-3 col-md-3"></div>
+            <div class="col-lg-6 col-md-6 col-sm-12">
+                <div class="card">
+                    <div class="p-2 border-bottom border-3px text-center text-uppercase"><h4>'.$title.'</h4></div>
+                    <div class="card-body">
+                        <div class="empty-state" data-height="400">
+                            <div class="empty-state-icon bg-danger"><i class="fas fa-bell"></i></div>
+                            <p class="mt-3 font-17 no-weight">'.$caption.'</p> '.$url_link.'
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>';
 }
 
 /**
@@ -353,6 +505,7 @@ function leave_comments_builder($resource, $recordId, $upload = true, $comment =
     /** Set parameters for the data to attach */
     $form_params = (object) [
         "module" => "{$resource}_{$recordId}",
+        "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg"]),
         "userData" => $userData,
         "item_id" => $recordId
     ];
@@ -366,6 +519,11 @@ function leave_comments_builder($resource, $recordId, $upload = true, $comment =
         }
         </style>
         <div class=\"leave-comment-wrapper\" data-id=\"{$recordId}\">
+            <div class='form-content-loader' style='display: none; position: absolute;'>
+                <div class='offline-content text-center'>
+                    <p><i class='fa fa-spin fa-spinner fa-3x'></i></p>
+                </div>
+            </div>
             ".absolute_loader()."
             <div class=\"form-group mt-1\">
                 <label for=\"leave_comment_content\" title=\"Click to display comment form\" class=\"cursor\">
@@ -419,7 +577,7 @@ function quick_add_student() {
                             <div class="form-group">
                                 <label for="gender">Gender <span class="required">*</span></label>
                                 <select data-width="100%" name="gender" id="gender" class="form-control selectpicker">
-                                    <option value="">Select Gender</option>';
+                                    <option value="null">Select Gender</option>';
                                     foreach($myClass->pushQuery("*", "users_gender") as $each) {
                                         $response .= "<option value=\"{$each->name}\">{$each->name}</option>";                            
                                     }
@@ -437,7 +595,7 @@ function quick_add_student() {
                             <div class="form-group mb-0">
                                 <label for="class_id">Class <span class="required">*</span></label>
                                 <select data-width="100%" name="class_id" id="class_id" class="form-control selectpicker">
-                                    <option value="">Select Student Class</option>';
+                                    <option value="null">Select Student Class</option>';
                                     foreach($myClass->pushQuery("id, name", "classes", "status='1' AND client_id='{$defaultClientId}'") as $each) {
                                         $response .= "<option value=\"{$each->id}\">{$each->name}</option>";                            
                                     }
@@ -455,4 +613,119 @@ function quick_add_student() {
     </div>';
 
     return $response;
+}
+
+/**
+ * Change Status Modal
+ * 
+ * @used
+ * 
+ * @return String
+ */
+function change_status_modal($user_id = null, $status = "Active") {
+    
+    // global variable
+    global $baseUrl, $myClass;
+
+    $html = '
+    <div data-backdrop="static" data-keyboard="false" class="modal fade" id="change_user_Status">
+        <form action="'.$baseUrl.'api/users/change_status" class="ajax-data-form" id="change_status_modal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Change User Status</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Select Status <span class="required">*</span></label>
+                                    <select name="user_status" class="selectpicker" data-width="100%" id="user_status">';
+                                    foreach($myClass->student_statuses as $_status) {
+                                        $html .= "<option ".($status == $_status ? "selected='selected'" : null)." value='{$_status}'>{$_status}</option>";
+                                    }
+                                    $html .= '
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="description">Additional Message</label>
+                                    <textarea placeholder="" maxlength="255" name="description" id="description" rows="5" class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer p-0">
+                            <input type="hidden" readonly name="user_id[]" value="'.$user_id.'">
+                            <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
+                            <button data-form_id="change_status_modal" type="button-submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>';
+
+    return $html;
+}
+
+/**
+ * Form manager select options
+ */
+function form_manager_options() {
+    $html = "
+        <div>
+            <div class=\"btn-group dropdown\">
+                <button type=\"button\" class=\"btn btn-primary dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">
+                    <i style=\"font-size:10px;\" class=\"fa fa-plus\"></i> Add New
+                </button>
+                <div class=\"dropdown-menu\" data-function=\"jsform-module\">
+                    <a onclic=\"return false;\" class=\"dropdown-item\" data-module=\"jsform\" data-field=\"input\" href=\"#\">Text Input Field</a>
+                    <a onclic=\"return false;\" class=\"dropdown-item\" data-module=\"jsform\" data-field=\"date\" href=\"#\">Date Input Field</a>
+                    <a onclic=\"return false;\" class=\"dropdown-item\" data-module=\"jsform\" data-field=\"email\" href=\"#\">Email Field</a>
+                    <a onclic=\"return false;\" class=\"dropdown-item\" data-module=\"jsform\" data-field=\"textarea\" href=\"#\">Textarea</a>
+                    <a onclic=\"return false;\" class=\"dropdown-item\" data-module=\"jsform\" data-field=\"select\" href=\"#\">Select Options</a>
+                </div>
+            </div>
+        </div>";
+
+    return $html;
+}
+
+/**
+ * Select Field Popup
+ * 
+ * 
+ * @return String
+ */
+function select_field_modal() {
+    $html = "<div class=\"modal fade\" id=\"selectFieldModal\" data-backdrop=\"static\" data-keyboard=\"false\">
+        <div class=\"modal-dialog modal-dialog-top modal-md\" style=\"width:100%;\" role=\"document\">
+            <div class=\"modal-content\">
+                <div class=\"modal-header\">
+                    <h5 class=\"modal-title\">Update Select</h5>
+                    <button type=\"button\" class=\"add-row btn btn-outline-primary btn-sm\">Add Option</span></button>
+                </div>
+                <div class=\"modal-body\" data-scrolling=\"false\" style=\"text-align:left\">
+                    <table class=\"table table-bordered\">
+                        <thead>
+                            <tr>
+                                <th>Label</th>
+                                <!--<th>Value</th>-->
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class=\"modal-footer\">
+                    <button class=\"btn btn-outline-success\">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>";
+    return $html;
 }

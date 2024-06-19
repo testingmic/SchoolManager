@@ -37,9 +37,10 @@ class Support extends Myschoolgh {
 
             // perform the query
             $stmt = $this->db->prepare("
-                SELECT a.*,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_info
+                SELECT a.*, c.client_name, c.client_contact, c.client_secondary_contact, c.client_email, c.client_website, 
+                    (SELECT CONCAT(b.item_id,'|',COALESCE(b.name,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_info
                 FROM support_tickets a
+                LEFT JOIN clients_accounts c ON c.client_id = a.client_id
                 WHERE {$params->query} ORDER BY a.id {$order} LIMIT {$params->limit}
             ");
             $stmt->execute();
@@ -101,7 +102,7 @@ class Support extends Myschoolgh {
             $stmt = $this->db->prepare("INSERT INTO support_tickets SET client_id =?, content = ?, 
                 user_id = ?, subject = ?, department = ?, date_created = now(), date_updated = now(), section = ?, user_type = ?");
             $stmt->execute([$params->clientId, $params->content, $params->userId, $params->subject, 
-                $params->department, $params->section ?? null, $user_type]);
+                $params->department ?? null, $params->section ?? null, $user_type]);
 
             // return success message
             return ["code" => 200, "data" => "Your ticket was successfully created."];
@@ -130,7 +131,7 @@ class Support extends Myschoolgh {
             // set the table
             $params->section = $params->section ?? "ticket";
             $table = ($params->section == "ticket") ? "support_tickets" : "knowledge_base";
-            $append = $isSupport ? "" : " AND client_id='{$params->clientId}'";
+            $append = $isSupport ? "" : (($params->section == "ticket") ? " AND client_id='{$params->clientId}'" : null);
             
             // the message to send
             $message = ($params->section == "ticket") ? "Reply was successfully shared." : "Comment was successfully sent.";
@@ -140,7 +141,7 @@ class Support extends Myschoolgh {
 
             // confirm if the ticket exists
             if(empty($query)) {
-                return ["code" => 203, "data" => "Sorry! An invalid ticket id was parsed."];
+                return ["code" => 203, "data" => "Sorry! An invalid {$table} was parsed."];
             }
 
             // set the client id
@@ -224,7 +225,7 @@ class Support extends Myschoolgh {
 
             // close the ticket
             $this->db->query("UPDATE {$table} SET status = 'Closed' WHERE id='{$params->ticket_id}' LIMIT 1");
-            $this->db->query("UPDATE {$table} SET status = 'Closed' WHERE parent_id='{$params->ticket_id}' LIMIT 100");
+            $this->db->query("UPDATE {$table} SET status = 'Closed' WHERE parent_id='{$params->ticket_id}' LIMIT {$this->temporal_maximum}");
 
             // return success message
             return ["code" => 200, "data" => $message];
@@ -259,7 +260,7 @@ class Support extends Myschoolgh {
 
             // close the ticket
             $this->db->query("UPDATE support_tickets SET status = 'Reopened' WHERE id='{$params->ticket_id}' LIMIT 1");
-            $this->db->query("UPDATE support_tickets SET status = 'Reopened' WHERE parent_id='{$params->ticket_id}' LIMIT 100");
+            $this->db->query("UPDATE support_tickets SET status = 'Reopened' WHERE parent_id='{$params->ticket_id}' LIMIT {$this->temporal_maximum}");
 
             // return success message
             return ["code" => 200, "data" => "Ticket successfully Reopened."];
@@ -286,8 +287,8 @@ class Support extends Myschoolgh {
 
         // additional query parameters
         $params->query .= (isset($params->q)) ? " AND a.subject LIKE '%{$params->q}%'" : null;
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->knowledge_id) && !empty($params->knowledge_id)) ? " AND a.id='{$params->knowledge_id}'" : null;
+        $params->query .= (isset($params->item_id) && !empty($params->item_id)) ? " AND a.item_id='{$params->item_id}'" : null;
+        $params->query .= (isset($params->knowledge_id) && !empty($params->knowledge_id)) ? " AND (a.id='{$params->knowledge_id}' OR a.item_id='{$params->knowledge_id}')" : null;
         $params->query .= isset($params->parent_id) ? " AND a.parent_id='{$params->parent_id}'" : null;
 
         $order = isset($params->order) ? $params->order : "DESC";
@@ -301,14 +302,30 @@ class Support extends Myschoolgh {
             // perform the query
             $stmt = $this->db->prepare("
                 SELECT a.*,
+                    (SELECT b.description FROM files_attachment b WHERE b.resource='knowledgebase' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.user_id LIMIT 1) AS user_info
                 FROM knowledge_base a
                 WHERE {$params->query} ORDER BY a.id {$order} LIMIT {$params->limit}
             ");
             $stmt->execute();
 
+            // create a new object
+            $filesObj = load_class("forms", "controllers");
+
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // clean the description
+                $result->content = htmlspecialchars_decode($result->content);
+
+                // set the list
+                $result->content = $this->replace_placeholder($result->content);
+
+                // if attachment variable was parsed
+                $result->attachments_list = json_decode($result->attachment);
+
+                // clean the words
+                $result->attachment_html = isset($result->attachments_list->files) ? $filesObj->list_attachments($result->attachments_list->files, $result->user_id, "col-lg-3 col-md-6", false, false) : "";
 
                 // loop through the information
                 foreach(["user_info"] as $each) {
@@ -333,6 +350,172 @@ class Support extends Myschoolgh {
         } catch(PDOException $e) {
             return $this->unexpected_error;
         } 
+
+    }
+
+    /**
+     * Create a new support ticket
+     * 
+     * @param $params->department
+     * @param $params->content
+     * @param $params->subject
+     * 
+     * @return Array
+     */
+    public function knowledgebase_add(stdClass $params) {
+
+        global $isSupport;
+
+        try {
+
+            // only support personnel are allowed to add
+            if(!$isSupport) {
+                return ["code" => 203, "data" => $this->permission_denied];
+            }
+
+            // modify the content variable
+            $params->content = custom_clean(htmlspecialchars_decode($params->content));
+            $params->content = htmlspecialchars($params->content);
+
+            // create an item id
+            $item_id = random_string("alnum", RANDOM_STRING);
+
+            // set the user type
+            $user_type = ($params->userData->user_type === "support") ? "support" : "user";
+
+            // insert the article data information
+            $stmt = $this->db->prepare("INSERT INTO knowledge_base SET client_id =?, content = ?, 
+                user_id = ?, subject = ?, department = ?, date_created = now(), date_updated = now(), 
+                section = ?, user_type = ?, item_id = ?, status = ?");
+            $stmt->execute([$params->clientId, $params->content, $params->userId, $params->subject, 
+                $params->department ?? null, $params->section ?? null, $user_type, $item_id, "Active"]);
+
+            // create a new object
+            $filesObj = load_class("files", "controllers");
+
+            // attachments
+            $attachments = $filesObj->prep_attachments("knowledgebase", $params->userId, $item_id);
+            
+            // log the user activity
+            $this->userLogs("knowledgebase", $item_id, null, "{$params->userData->name} created a new article: {$params->subject}", $params->userId);
+
+            // insert the record if not already existing
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");
+            $files->execute(["knowledgebase", $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"], $params->clientId]);
+
+            // return success message
+            return [
+                "code" => 200, 
+                "data" => "The article was successfully created.",
+                "additional" => [
+                    "href" => "{$this->baseUrl}article/modify/{$item_id}"
+                ]
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+    }
+
+    /**
+     * Save User Access Level Permissions
+     *
+     * @param $params->data["permission"]
+     * @param $params->data["access_id"]
+     * 
+     * @return Array
+     */
+    public function access_permission(stdClass $params) {
+
+        // global variable
+        global $isSupport, $defaultUser;
+        
+        // end query is the session access_denied_log is not empty
+        if(!empty($this->session->access_denied_log)) {
+            return ["code" => 203, "data" => $this->permission_denied];
+        }
+
+        // only support personnel are allowed to add
+        if(!$isSupport) {
+
+            // log the user information
+            $this->db->query("INSERT INTO security_logs SET 
+                client_id='{$params->clientId}', created_by='{$params->userId}', 
+                section='Access Control Manager',
+                description='The user attempted to change the user type access permissions on the system.'
+            ");
+            // set the session record
+            $this->session->access_denied_log = true;
+
+            // return an error
+            return ["code" => 203, "data" => $this->permission_denied];
+        }
+
+        // unset the sessions
+        $this->session->remove(["access_denied_log"]);
+
+        // array data check
+        if(!is_array($params->data)) {
+            return ["code" => 203, "data" => "Sorry! An invalid dataset was parsed."];
+        }
+
+        // access permission check
+        if(!isset($params->data["access_id"]) || !isset($params->data["permission"])) {
+            return ["code" => 203, "data" => "Sorry! An invalid dataset was parsed."];
+        }
+
+        // set the access id
+        $access_id = $params->data["access_id"];
+
+        // confirm a valid json was parsed
+        $permissions = $params->data["permission"];
+        $param = json_decode($permissions);
+
+        // if the param is empty
+        if(empty($param)) {
+           return ["code" => 203, "data" => "Please ensure a valid json data was parsed as permissions."];
+        }
+
+        // confirm that the permissions key was also parsed
+        if(!isset($param->permissions)) {
+            return ["code" => 203, "data" => "Please ensure a valid json data was parsed as permissions."];
+        }
+
+        try {
+
+            // get the existing record
+            $record = $this->pushQuery("id, description, user_permissions", 
+                "users_types", "id='{$access_id}' LIMIT 1");
+
+            // confirm the access permission id
+            if(empty($record)) {
+                return ["code" => 203, "data" => "Sorry! An invalid access level id was parsed."];
+            }
+
+            // update the user permissions
+            if($record[0]->description == $defaultUser->user_type) {
+                // set the user permissions to the current one
+                $this->db->query("UPDATE users_roles SET last_updated=now(), permissions='{$permissions}' WHERE user_id='{$params->userId}' LIMIT 1");
+            }
+
+            // if there was a change in the original content
+            if($record[0]->user_permissions !== $permissions) {
+                // update the database information
+                $stmt = $this->db->prepare("UPDATE users_types SET user_permissions=? WHERE id=? LIMIT 1");
+                $stmt->execute([$permissions, $access_id]);
+
+                // log the user activity
+                $this->userLogs(
+                    "permission_log", $access_id, $record[0]->user_permissions, 
+                    "{$params->userData->name} updated the user permissions type.", $params->userId
+                );
+            }
+
+            // return the success message
+            return ["data" => "Access permission successfully logged."];
+
+        } catch(PDOException $e) {}
 
     }
 

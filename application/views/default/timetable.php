@@ -8,16 +8,16 @@ header("Access-Control-Max-Age: 3600");
 global $myClass;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Timetable";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // confirm that the user has the required permissions
 if(!$accessObject->hasAccess("manage", "timetable")) {
@@ -169,7 +169,7 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
                                                 <select class="form-control selectpicker" data-width="100%" name="class_id">
                                                     <option value="">Please Select Class</option>';
                                                     foreach($class_list as $each) {
-                                                        $response->html .= "<option ".($class_id == $each->item_id ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";
+                                                        $response->html .= "<option ".($class_id == $each->item_id ? "selected" : "")." value=\"{$each->item_id}\">".strtoupper($each->name)."</option>";
                                                     }
                                                     $response->html .= '
                                                 </select>
@@ -180,7 +180,7 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Name<span class="required">*</span></span>
                                                 </div>
-                                                <input type="text" value="'.($d_name ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="name" id="name">
+                                                <input autocomplete="Off" type="text" value="'.($d_name ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="name" id="name">
                                             </div>
                                         </div>
                                         <div class="col-md-3">
@@ -188,7 +188,7 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
                                                 <div class="input-group-prepend">
                                                     <span class="input-group-text">Start Time<span class="required">*</span></span>
                                                 </div>
-                                                <input max="22:00" type="time" value="'.($d_time ?? null).'" class="form-control" style="border-radius:0px; height:42px;" name="start_time" id="start_time">
+                                                <input max="22:00" type="time" value="'.($d_time ?? "08:00").'" class="form-control" style="border-radius:0px; height:42px;" name="start_time" id="start_time">
                                             </div>
                                         </div>
                                         <div class="col-md-3">

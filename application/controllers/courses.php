@@ -48,42 +48,45 @@ class Courses extends Myschoolgh {
      */
     public function list(stdClass $params) {
 
-        $params->query = "1";
-
-        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+        $_filters = "1";
+        
+        $params->order_by = $params->order_by ?? "a.name";
+        $params->limit = $params->limit ?? $this->global_limit;
 
         // run this portion if the userData is parsed
         if(isset($params->userData)) {
             // append the class_id if the user type is student
             if(($params->userData->user_type === "student") && !isset($params->bypass)) {
-                $params->class_id = $params->userData->class_id;
+                $params->class_id = $params->userData->class_guid;
             } elseif(($params->userData->user_type === "teacher")) {
                 $params->course_tutor = $params->userData->user_id;
             }
         }
 
-        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id LIKE '%{$params->class_id}%'" : null;
-        $params->query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
-        $params->query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
-        $params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+        $_filters .= (!empty($params->class_id) && !is_array($params->class_id)) ? 
+            " AND a.class_id LIKE '%{$params->class_id}%'" : (!empty($params->class_id) && is_array($params->class_id) ? " AND a.class_id IN {$this->inList($params->class_id)} " : null);
+        $_filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
+        $_filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
+        $_filters .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
+        $_filters .= !empty($params->course_tutor) ? " AND a.course_tutor LIKE '%{$params->course_tutor}%'" : null;
+        $_filters .= !empty($params->courses_ids) ? " AND a.id IN {$this->inList($params->courses_ids)}" : null;
         
         if(!isset($params->minified)) {
-            $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
-            $params->query .= (isset($params->course_tutor) && !empty($params->course_tutor)) ? " AND a.course_tutor LIKE '%{$params->course_tutor}%'" : null;
-            $params->query .= (isset($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
-            $params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
-            $params->query .= (isset($params->programme_id)) ? " AND a.programme_id='{$params->programme_id}'" : null;
-            $params->query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND (a.id='{$params->course_id}' OR a.item_id='{$params->course_id}')" : null;
+            $_filters .= !empty($params->q) ? " AND a.name LIKE '%{$params->q}%'" : null;
+            $_filters .= !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
+            $_filters .= !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : null;
+            $_filters .= !empty($params->programme_id) ? " AND a.programme_id='{$params->programme_id}'" : null;
+            $_filters .= !empty($params->course_id) ? " AND (a.id='{$params->course_id}' OR a.item_id='{$params->course_id}')" : null;
         }
 
         try {
 
             $stmt = $this->db->prepare("
-                SELECT a.*,
-                    (SELECT name FROM classes WHERE classes.id = a.class_id LIMIT 1) AS class_name,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                SELECT a.*, b.name AS class_name,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM courses a
-                WHERE {$params->query} AND a.deleted = ? ORDER BY a.name LIMIT {$params->limit}
+                LEFT JOIN classes b ON b.item_id = a.class_id
+                WHERE {$_filters} AND a.deleted = ? ORDER BY {$params->order_by} LIMIT {$params->limit}
             ");
             $stmt->execute([0]);
 
@@ -144,7 +147,7 @@ class Courses extends Myschoolgh {
                     $result->course_tutor_ids = empty($course_tutors) ? [] : $course_tutors;
 
                     // convert to array
-                    $result->class_ids = !empty($result->class_id) ? json_decode($result->class_id, true) : [];
+                    $result->class_ids = !empty($result->class_id) ? $this->stringToArray($result->class_id) : [];
                     
                     // load the course tutor details
                     if(!empty($course_tutors)) {
@@ -162,10 +165,13 @@ class Courses extends Myschoolgh {
 
                     // load the course tutor details
                     if(!empty($result->class_ids)) {
+                        
                         // loop through the array list
                         foreach($result->class_ids as $class) {
                             // get the course tutor information
-                            $class_info = $this->pushQuery("name, id, class_size, class_code", "classes", "item_id='{$class}' AND status='1' LIMIT 1");
+                            $class_info = $this->pushQuery("name, id, item_id, class_size, class_code, 
+                                (SELECT COUNT(*) FROM users b WHERE b.class_id = a.id AND b.user_type = 'student') AS students_count", 
+                                "classes a", "item_id='{$class}' AND status='1' LIMIT 1");
                             if(!empty($class_info)) {
                                 $result->class_list[] = $class_info[0];
                             }
@@ -223,9 +229,9 @@ class Courses extends Myschoolgh {
             $stmt = $this->db->prepare("
                 SELECT a.*,
                     (SELECT b.description FROM files_attachment b WHERE b.resource='courses_plan' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM courses_plan a
-                WHERE client_id=? AND plan_type = ? AND a.status = ? {$query} ORDER BY a.id
+                WHERE client_id=? AND plan_type = ? AND a.status = ? {$query} ORDER BY a.id LIMIT {$this->global_limit}
             ");
             $stmt->execute([$params->clientId, $type, 1]);
 
@@ -292,15 +298,13 @@ class Courses extends Myschoolgh {
             return ["code" => 203, "data" => $this->permission_denied];
         }
 
+        // ensure at least one class has been selected
+        if(empty($params->class_id)) {
+            return ["code" => 203, "data" => "Sorry! Select at least one class to continue."];   
+        }
+
         // create a new Course code
-        if(isset($params->course_code) && !empty($params->course_code)) {
-            // replace any empty space with 
-            $params->course_code = str_replace("/^[\s]+$/", "", $params->course_code);
-            // confirm if the Course code already exist
-            if(!empty($this->pushQuery("id, name", "courses", "status='1' AND client_id='{$params->clientId}' AND course_code='{$params->course_code}'"))) {
-                return ["code" => 203, "data" => "Sorry! There is an existing Course with the same code."];
-            }
-        } else {
+        if(empty($params->course_code)) {
             // generate a new Course code
             $counter = $this->append_zeros(($this->itemsCount("courses", "client_id = '{$params->clientId}'") + 1), 3);
             $params->course_code = $defaultClientData->client_preferences->labels->{"course_label"}.$counter;
@@ -312,44 +316,45 @@ class Courses extends Myschoolgh {
         try {
 
             // init
-			$tutor_ids = [];
+			$tutor_ids = $params->course_tutor ?? [];
             $class_ids = [];
 
-            $item_id = random_string("alnum", 16);
+            // loop through the classes that offers this course and insert the record
+            foreach($params->class_id as $class_id) {
 
-			// append class to Subjects List
-			if(isset($params->class_id)) {
-				$class_ids = $this->append_class_courses($params->class_id, $item_id, $params->clientId);
-			}
+                // generate a unique subject id
+                $item_id = random_string("alnum", RANDOM_STRING);
 
-            // append tutor to Subjects List
-			if(isset($params->course_tutor)) {
-				$tutor_ids = $this->append_course_tutors($params->course_tutor, $item_id, $params->clientId);
-			}
+                // execute the statement
+                $stmt = $this->db->prepare("
+                    INSERT INTO courses SET course_tutor = ?, class_id = ?, client_id = ?, created_by = ?, item_id = '{$item_id}'
+                    ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
+                    ".(!empty($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
+                    ".(!empty($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
+                    ".(!empty($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
+                    ".(!empty($params->weekly_meeting) ? ", weekly_meeting = '{$params->weekly_meeting}'" : null)."
+                    ".(!empty($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
+                    ".(!empty($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                    ".(!empty($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
+                    ".(!empty($params->description) ? ", description = '{$params->description}'" : null)."
+                ");
+                $stmt->execute([json_encode($tutor_ids), $class_id, $params->clientId, $params->userId]);
+                
+                // set the course id
+                $course_id = $this->lastRowId("courses");
 
-            // execute the statement
-            $stmt = $this->db->prepare("
-                INSERT INTO courses SET course_tutor = ?, class_id = ?, client_id = ?, created_by = ?, item_id = '{$item_id}'
-                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
-                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
-                ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
-                ".(isset($params->weekly_meeting) ? ", weekly_meeting = '{$params->weekly_meeting}'" : null)."
-                ".(isset($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
-                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
-                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
-            ");
-            $stmt->execute([json_encode($tutor_ids), json_encode($class_ids), $params->clientId, $params->userId]);
-            
-            // log the user activity
-            $this->userLogs("courses", $item_id, null, "{$params->userData->name} created a new Course: {$params->name}", $params->userId);
+                // append the course tutors
+                $this->append_course_tutors($tutor_ids, $course_id, $params->clientId);
+
+                // log the user activity
+                $this->userLogs("courses", $item_id, null, "{$params->userData->name} created a new Subject: {$params->name} for the Class with ID::{$class_id}", $params->userId);
+            }
 
             # set the output to return when successful
-			$return = ["code" => 200, "data" => "Course successfully created.", "refresh" => 2000];
+			$return = ["code" => 200, "data" => "Subject successfully created.", "refresh" => 2000];
 			
 			# append to the response
-            $return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}course/{$item_id}/view"];
+            $return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}courses"];
 
 			// return the output
             return $return;
@@ -385,105 +390,47 @@ class Courses extends Myschoolgh {
             if(empty($prevData)) {
                 return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
             }
-            
-            // create a new class code
-            if(isset($params->course_code) && !empty($params->course_code) && ($prevData[0]->course_code !== $params->course_code)) {
-                // replace any empty space with 
-                $params->course_code = str_replace("/^[\s]+$/", "", $params->course_code);
-                $params->course_code = strtoupper($params->course_code);
-                // confirm if the class code already exist
-                if(!empty($this->pushQuery("id, name", "courses", "status='1' AND client_id='{$params->clientId}' AND course_code='{$params->course_code}'"))) {
-                    return ["code" => 203, "data" => "Sorry! There is an existing Course with the same code."];
-                }
-            } elseif(empty($prevData[0]->course_code) && !isset($params->course_code)) {
-                // generate a new class code
-                $counter = $this->append_zeros(($this->itemsCount("courses", "client_id = '{$params->clientId}'") + 1), 3);
-                $params->course_code = $defaultClientData->client_preferences->labels->{"course_label"}.$counter;
-                $params->course_code = strtoupper($params->course_code);
-            }
 
             // init
-			$tutor_ids = [];
-            $class_ids = [];
-
-			// append tutor to Subjects List
-			if(isset($params->course_tutor)) {
-
-                // convert the course tutor into an array
-                $course_tutor = !empty($prevData[0]->course_tutor) ? json_decode($prevData[0]->course_tutor, true) : [];
-
-				// find tutor ids which were initially attached to the course but no longer attached
-				$diff = array_diff($course_tutor, $params->course_tutor);
-
-				// append
-				$tutor_ids = $this->append_course_tutors($params->course_tutor, $params->course_id, $params->clientId);
-
-				// remove user from courses
-				if(!empty($diff)) {
-					$this->remove_course_tutor($diff, $params->course_id, $params->clientId);
-					$tutor_ids = $params->course_tutor;
-				}
-			} else {
-				$this->remove_all_course_tutors($params);
-			}
-
-            // append tutor to Subjects List
-			if(isset($params->class_id)) {
-
-                // convert the course tutor into an array
-                $class_course = !empty($prevData[0]->class_course) ? json_decode($prevData[0]->class_course, true) : [];
-
-				// find class ids which were initially attached to the course but no longer attached
-				$diff = array_diff($class_course, $params->class_id);
-
-				// append
-				$class_ids = $this->append_class_courses($params->class_id, $prevData[0]->item_id, $params->clientId);
-
-				// remove user from courses
-				if(!empty($diff)) {
-					$this->remove_class_course($diff, $prevData[0]->item_id, $params->clientId);
-					$class_ids = $params->class_id;
-				}
-			} else {
-				$this->remove_all_class_courses($params, $prevData[0]->item_id);
-			}          
+			$tutor_ids = !empty($params->course_tutor) ? $this->stringToArray($params->course_tutor) : [];
+            $class_ids = !empty($params->class_id) ? $params->class_id : null;
 
             // execute the statement
             $stmt = $this->db->prepare("
-                UPDATE courses SET date_updated = now(), course_tutor = ?, class_id = ?
-                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                ".(isset($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
-                ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
-                ".(isset($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
-                ".(isset($params->weekly_meeting) ? ", weekly_meeting = '{$params->weekly_meeting}'" : null)."
-                ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
-                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
-                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
+                UPDATE courses SET date_updated = '{$this->current_timestamp}', course_tutor = ?
+                ".(!empty($class_ids) ? ", class_id = '{$class_ids}'" : null)."
+                ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(!empty($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
+                ".(!empty($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
+                ".(!empty($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
+                ".(!empty($params->weekly_meeting) ? ", weekly_meeting = '{$params->weekly_meeting}'" : null)."
+                ".(!empty($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
+                ".(!empty($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(!empty($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
+                ".(!empty($params->description) ? ", description = '{$params->description}'" : null)."
                 WHERE id = ? AND client_id = ? LIMIT 1
             ");
-            $stmt->execute([json_encode($tutor_ids), json_encode($class_ids), $params->course_id, $params->clientId]);
+            $stmt->execute([json_encode($tutor_ids), $params->course_id, $params->clientId]);
             
+            // append the course tutors
+            $this->append_course_tutors($tutor_ids, $params->course_id, $params->clientId);
+
             // log the user activity
             $this->userLogs("courses", $prevData[0]->item_id, $prevData[0], "{$params->userData->name} updated the Course: {$prevData[0]->name}", $params->userId);
 
             # set the output to return when successful
-			$return = ["code" => 200, "data" => "Course successfully updated.", "refresh" => 2000];
+			$return = ["code" => 200, "data" => "Subject successfully updated.", "refresh" => 2000];
 
             if(isset($params->name) && ($prevData[0]->name !== $params->name)) {
-                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->name, "Course name was changed from {$prevData[0]->name}", $params->userId);
+                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->name, "Subject name was changed from {$prevData[0]->name}", $params->userId);
             }
 
             if(isset($params->credit_hours) && ($prevData[0]->credit_hours !== $params->credit_hours)) {
-                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->credit_hours, "Course credit hours was changed from {$prevData[0]->credit_hours}", $params->userId);
-            }
-
-            if(isset($params->description) && ($prevData[0]->description !== $params->description)) {
-                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->description, "Course description was changed from {$prevData[0]->description}", $params->userId);
+                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->credit_hours, "Subject credit hours was changed from {$prevData[0]->credit_hours}", $params->userId);
             }
 
             if(isset($params->course_code) && ($prevData[0]->course_code !== $params->course_code)) {
-                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->course_code, "Course code was changed from {$prevData[0]->course_code}", $params->userId);
+                $this->userLogs("courses", $prevData[0]->item_id, $prevData[0]->course_code, "Subject code was changed from {$prevData[0]->course_code}", $params->userId);
             }
 
             if(isset($params->weekly_meeting) && ($prevData[0]->weekly_meeting !== $params->weekly_meeting)) {
@@ -491,7 +438,7 @@ class Courses extends Myschoolgh {
             }
 			
 			# append to the response
-			$return["additional"] = ["href" => "{$this->baseUrl}course/{$prevData[0]->item_id}/update"];
+			$return["additional"] = ["href" => "{$this->baseUrl}course/{$params->course_id}/update"];
 
 			// return the output
             return $return;
@@ -514,7 +461,7 @@ class Courses extends Myschoolgh {
         try {
             // get & set some default variables
             global $defaultClientData;
-            $item_id = random_string("alnum", 16);
+            $item_id = random_string("alnum", RANDOM_STRING);
             
             // set the academic_term and the academic_year
             $params->academic_term = isset($params->academic_term) ? $params->academic_term : $defaultClientData->client_preferences->academics->academic_term;
@@ -523,19 +470,19 @@ class Courses extends Myschoolgh {
             // execute the statement
             $stmt = $this->db->prepare("
                 INSERT INTO courses_plan SET client_id = ?, created_by = ?, item_id = '{$item_id}'
-                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
-                ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
-                ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
-                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
-                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
-                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
+                ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(!empty($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
+                ".(!empty($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
+                ".(!empty($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
+                ".(!empty($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
+                ".(!empty($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(!empty($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
+                ".(!empty($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
             
             // update the course date
-            $this->db->query("UPDATE courses SET date_updated=now(), units_count=(units_count+1) WHERE id='{$params->course_id}' LIMIT 1");
+            $this->db->query("UPDATE courses SET date_updated='{$this->current_timestamp}', units_count=(units_count+1) WHERE id='{$params->course_id}' LIMIT 1");
 
             // set the last unit id
             $unit_id = $this->lastRowId("courses_plan");
@@ -548,7 +495,7 @@ class Courses extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Unit successfully created.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/view"];
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/lesson"];
 
 			// return the output
             return $return;
@@ -580,13 +527,13 @@ class Courses extends Myschoolgh {
 
             // execute the statement
             $stmt = $this->db->prepare("
-                UPDATE courses_plan SET date_updated = now()
-                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
-                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
-                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
-                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
+                UPDATE courses_plan SET date_updated = '{$this->current_timestamp}'
+                ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(!empty($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
+                ".(!empty($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
+                ".(!empty($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(!empty($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
+                ".(!empty($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
                 WHERE client_id = ? AND course_id = ? AND id = ? LIMIT 1
             ");
             $stmt->execute([$params->clientId, $params->course_id, $params->unit_id]);
@@ -595,7 +542,7 @@ class Courses extends Myschoolgh {
             $this->session->set("thisLast_UnitId", $params->unit_id);
 
             // update the course date
-            $this->db->query("UPDATE courses SET date_updated=now() WHERE id='{$params->course_id}' LIMIT 1");
+            $this->db->query("UPDATE courses SET date_updated='{$this->current_timestamp}' WHERE id='{$params->course_id}' LIMIT 1");
             
             // log the user activity
             $this->userLogs("courses_plan", $params->unit_id, $prevData[0], "{$params->userData->name} Updated Course Unit: {$params->name}", $params->userId);
@@ -620,7 +567,7 @@ class Courses extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Unit successfully updated.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["href" => "{$this->baseUrl}course/{$params->course_id}/view"];
+			$return["additional"] = ["href" => "{$this->baseUrl}course/{$params->course_id}/lesson"];
 
 			// return the output
             return $return;
@@ -645,7 +592,7 @@ class Courses extends Myschoolgh {
 
             // get and set some default data
             global $defaultClientData;
-            $item_id = random_string("alnum", 16);
+            $item_id = random_string("alnum", RANDOM_STRING);
 
             if(isset($params->unit_id)) {
                 $this->session->set("thisLast_UnitId", $params->unit_id);
@@ -659,14 +606,14 @@ class Courses extends Myschoolgh {
             $stmt = $this->db->prepare("
                 INSERT INTO courses_plan SET client_id = ?, created_by = ?, 
                 plan_type = 'lesson', item_id = '{$item_id}'
-                ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
-                ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
-                ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(isset($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
-                ".(isset($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
-                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
-                ".(isset($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
+                ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(!empty($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
+                ".(!empty($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
+                ".(!empty($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
+                ".(!empty($params->course_id) ? ", course_id = '{$params->course_id}'" : null)."
+                ".(!empty($params->start_date) ? ", start_date = '{$params->start_date}'" : null)."
+                ".(!empty($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
+                ".(!empty($params->end_date) ? ", end_date = '{$params->end_date}'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
 
@@ -675,7 +622,7 @@ class Courses extends Myschoolgh {
             $filesObj = load_class("files", "controllers");
 
             // update the course date
-            $this->db->query("UPDATE courses SET date_updated=now(), lessons_count=(lessons_count+1) WHERE id='{$params->course_id}' LIMIT 1");
+            $this->db->query("UPDATE courses SET date_updated='{$this->current_timestamp}', lessons_count=(lessons_count+1) WHERE id='{$params->course_id}' LIMIT 1");
 
             // attachments
             $attachments = $filesObj->prep_attachments("course_lesson_{$params->unit_id}", $params->userId, $item_id);
@@ -684,14 +631,14 @@ class Courses extends Myschoolgh {
             $this->userLogs("courses_plan", $lesson_id, null, "{$params->userData->name} created a new Course Unit: {$params->name}", $params->userId);
 
             // insert the record if not already existing
-            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
-            $files->execute(["courses_plan", $params->course_id ?? $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");
+            $files->execute(["courses_plan", $params->course_id ?? $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"], $params->clientId]);
             
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Lesson successfully created.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/view"];
+			$return["additional"] = ["clear" => true, "href" => "{$this->baseUrl}course/{$params->course_id}/lesson"];
 
 			// return the output
             return $return;
@@ -749,7 +696,7 @@ class Courses extends Myschoolgh {
 
             // execute the statement
             $stmt = $this->db->prepare("
-                UPDATE courses_plan SET date_updated = now()
+                UPDATE courses_plan SET date_updated = '{$this->current_timestamp}'
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->unit_id) ? ", unit_id = '{$params->unit_id}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
@@ -762,16 +709,16 @@ class Courses extends Myschoolgh {
             $stmt->execute([$params->clientId, $params->course_id, $params->lesson_id]);
 
             // update the course date
-            $this->db->query("UPDATE courses SET date_updated=now() WHERE id='{$params->course_id}' LIMIT 1");
+            $this->db->query("UPDATE courses SET date_updated='{$this->current_timestamp}' WHERE id='{$params->course_id}' LIMIT 1");
 
             // update attachment if already existing
             if(isset($db_attachments)) {
-                $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? LIMIT 1");
-                $files->execute([json_encode($attachments), $attachments["raw_size_mb"], $prevData[0]->item_id]);
+                $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? AND client_id = ? LIMIT 1");
+                $files->execute([json_encode($attachments), $attachments["raw_size_mb"], $prevData[0]->item_id, $params->clientId]);
             } else {
                 // insert the record if not already existing
-                $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
-                $files->execute(["courses_plan", $params->course_id ?? $prevData[0]->item_id, json_encode($attachments), "{$prevData[0]->item_id}", $params->userId, $attachments["raw_size_mb"]]);
+                $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");
+                $files->execute(["courses_plan", $params->course_id ?? $prevData[0]->item_id, json_encode($attachments), "{$prevData[0]->item_id}", $params->userId, $attachments["raw_size_mb"], $params->clientId]);
             }
 
             // log the user activity
@@ -797,7 +744,7 @@ class Courses extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Lesson successfully updated.", "refresh" => 2000];
 			
 			# append to the response
-			$return["additional"] = ["href" => "{$this->baseUrl}course/{$params->course_id}/view"];
+			$return["additional"] = ["href" => "{$this->baseUrl}course/{$params->course_id}/lesson"];
 
 			// return the output
             return $return;
@@ -876,7 +823,7 @@ class Courses extends Myschoolgh {
 	 */
 	public function remove_all_class_courses(stdClass $params, $item_id) {
 
-		$class_ids = $this->pushQuery("courses_list, id", "classes", "client_id='{$params->clientId}' AND status='1' LIMIT 100");
+		$class_ids = $this->pushQuery("courses_list, id", "classes", "client_id='{$params->clientId}' AND status='1' LIMIT {$this->temporal_maximum}");
 
 		foreach($class_ids as $class) {
 			if(!empty($class->courses_list)) {
@@ -915,11 +862,17 @@ class Courses extends Myschoolgh {
 					$result = json_decode($query[0]->course_ids, true);
 					if(!in_array($course_id, $result)) {
 						array_push($result, $course_id);
-						$this->db->query("UPDATE users SET course_ids = '".json_encode($result)."' WHERE item_id='{$tutor}' LIMIT 1");
+						$this->db->query("UPDATE users SET 
+                            course_ids = '".json_encode($result)."', class_ids = NULL
+                            WHERE item_id='{$tutor}' LIMIT 1"
+                        );
 					}
 				} else {
 					$tutors = [$course_id];
-					$this->db->query("UPDATE users SET course_ids = '".json_encode($tutors)."' WHERE item_id='{$tutor}' LIMIT 1");
+					$this->db->query("UPDATE users SET 
+                        course_ids = '".json_encode($tutors)."', class_ids = NULL 
+                        WHERE item_id='{$tutor}' LIMIT 1"
+                    );
 				}
 			}
 		}
@@ -962,7 +915,7 @@ class Courses extends Myschoolgh {
 	 */
 	public function remove_all_course_tutors(stdClass $params) {
 
-		$tutor_ids = $this->pushQuery("course_ids, id", "users", "client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' AND user_type='teacher' AND user_status='Active' LIMIT 400");
+		$tutor_ids = $this->pushQuery("course_ids, id", "users", "client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' AND user_type='teacher' AND user_status='Active' LIMIT {$this->temporal_maximum}");
 
 		foreach($tutor_ids as $course) {
 			if(!empty($course->course_ids)) {
@@ -1061,7 +1014,7 @@ class Courses extends Myschoolgh {
         // run this section if there are any resource links
         if(isset($content->resources_list["link"])) {
             // header
-            $html .= "<tr><td style=\"line-height:30px;height:30px;border:solid 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;ADDITIONAL COURSE RESOURCES</span></td></tr>";
+            $html .= "<tr><td style=\"line-height:30px;height:30px;border:solid 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;ADDITIONAL SUBJECT RESOURCES</span></td></tr>";
             // loop through the links list
             foreach($content->resources_list["link"] as $key => $resource) {
                 $html .= "<tr>";
@@ -1074,7 +1027,7 @@ class Courses extends Myschoolgh {
         }
         // load this section if the course tutors are not empty
         if(!empty($content->course_tutors)) {
-            $html .= "<tr><td style=\"border:solid 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;COURSE TUTORS</span></td></tr>";
+            $html .= "<tr><td style=\"border:solid 1px #ccc; font-size:18px; color:#fff; background-color:#607d8b;\"><span>&nbsp;SUBJECT TUTORS</span></td></tr>";
         }
         $html .= "</table>";
         // load this section if the course tutors are not empty

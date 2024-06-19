@@ -2,8 +2,10 @@
 
 class Forms extends Myschoolgh {
 
+    private $thisUser;
     public $hasit;
-    
+    public $userPrefs;
+
     public function __construct() {
         parent::__construct();
 
@@ -18,7 +20,7 @@ class Forms extends Myschoolgh {
      * and parse back in the data key of the result set. The process will be very intellegent and take into consideration 
      * everything that should be considered in generating a form for the user.
      * 
-     * @param \stdClass $params
+     * @param stdClass $params
      * @param Array $params->module
      * 
      * @return Array
@@ -115,7 +117,7 @@ class Forms extends Myschoolgh {
                 if($the_form == "incident_log_followup_form") {
                     $result = $this->incident_log_followup_form($item_id[1], $params->clientId, $item_id[0]);
                 } else {
-                    $resources = ["assets/js/upload.js"];
+                    $resources = ["assets/js/upload_2.js"];
                     $result = $this->incident_log_form($params, $item_id[0]);
                 }
             }
@@ -188,7 +190,7 @@ class Forms extends Myschoolgh {
                 $item_id = explode("_", $params->module["item_id"]);
 
                 // get the course
-                $course = $this->pushQuery("id, item_id", "courses", "item_id = '{$item_id[0]}' AND client_id='{$params->clientId}'");
+                $course = $this->pushQuery("id, item_id", "courses", "item_id = '{$item_id[0]}' AND client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' LIMIT {$this->temporal_maximum}");
                 $course_id = $course[0]->id;
 
                 /** If a second item was parsed then load the lesson unit information */
@@ -285,6 +287,103 @@ class Forms extends Myschoolgh {
                 $result = $this->create_assignment($params, $the_form);
             }
 
+            /** Document Manager **/
+            elseif(in_array($the_form, ["document_create_folder", "document_create_file", "document_upload_files", "document_update_folder", "document_update_file"])) {
+
+                $data = [];
+                $resources = ["assets/js/upload.js"];
+
+                // get the record id
+                $item_id = isset($params->module["item_id"]) ? $params->module["item_id"] : null;
+
+                // load the information for the file or document
+                if(!empty($item_id) && in_array($the_form, ["document_update_folder", "document_update_file", "document_upload_files"])) {
+
+                    // paramters to use
+                    $_params = (object) [
+                        "unique_id" => $item_id,
+                        "limit" => 1,
+                        "state" => ["Active", "Trash"],
+                        "clientId" => $params->clientId
+                    ];
+                    
+                    // get the data
+                    $data = load_class("documents", "controllers")->list($_params)["data"];
+
+                    // confirm that the record is not empty
+                    if(!isset($data["directory_list"]) && !isset($data["file_list"])) {
+                        return ["code" => 201, "data" => "An invalid document id was parsed"];
+                    }
+
+                    // confirm that the record is not empty
+                    if(isset($data["directory_list"]) && empty($data["directory_list"])) {
+                        return ["code" => 201, "data" => "An invalid folder id was parsed"];
+                    }
+
+                    // confirm that the record is not empty
+                    if(isset($data["file_list"]) && empty($data["file_list"])) {
+                        return ["code" => 201, "data" => "An invalid document id was parsed"];
+                    }
+
+                    // get the information
+                    $data = $data["directory_list"][0] ?? $data["file_list"][0];
+                }
+
+                // call the document_manager model for the information
+                $result = $this->document_manager($the_form, $data, $item_id);
+            }
+
+            /** Student Assignment Manager **/ 
+            elseif(in_array($the_form, ["assignment_detail"])) {
+
+                /** Assign a variable to the item id */
+                $resources = ["assets/js/upload.js", "assets/js/assignments.js"];
+                $item_id = isset($params->module["item_id"]) ? $params->module["item_id"] : null;
+                
+                /** Make a request for the data is the item_id was parsed */
+                if(empty($item_id)) {
+                    return ["code" => 201, "data" => "An invalid id was parsed."];
+                }
+
+                /** Parameter breakdown **/
+                $split = explode("_", $item_id);
+
+                // return error if the second key (assignment_id) was not parsed
+                if(!isset($split[1])) {
+                    return ["code" => 201, "data" => "An invalid id was parsed."];
+                }                
+
+                // object parameter
+                $assignments_param = (object) [
+                    "clientId" => $params->clientId,
+                    "assignment_id" => $split[1],
+                    "student_id" => $split[0],
+                    "limit" => 1
+                ];
+                $data = load_class("assignments", "controllers")->student_info($assignments_param);
+                
+                // ensure the request is not empty
+                if(empty($data["data"])) {
+                    return ["code" => 201, "data" => "An invalid id was parsed"];
+                }
+
+                /** Call the function to process the request */
+                $result = $this->assignment_review_detail($data["data"]);
+
+            }
+            
+            /** Daily Report Log Form */
+            elseif(in_array($the_form, ["daily_report_log_form"])) {
+
+                /** Assign a variable to the item id */
+                $resources = ["assets/js/upload.js"];
+                $item_id = isset($params->module["item_id"]) ? $params->module["item_id"] : null;
+                $params->data = null;
+
+                /** Call the function to process the request */
+                $result = $this->daily_report_log_form($params, $the_form);
+            }
+
         }
 
         // the result set to return
@@ -307,6 +406,158 @@ class Forms extends Myschoolgh {
     }
 
     /**
+     * This model controls the document management
+     * 
+     * @param String $the_form
+     * @param Object $data
+     *
+     * @return String
+     */
+    public function document_manager($the_form, $data = null, $item_id = null) {
+
+        // init value
+        $html = "";
+        $description = $data->description ?? null;
+
+        // IF THE REQUEST IS TO MANAGE A FOLDER
+        if(in_array($the_form, ["document_create_folder", "document_update_folder", "document_update_file"])) {
+
+            // set the url and some few parameters
+            $parameters = [
+                "document_create_folder" => [
+                    "action" => "folders",
+                    "label" => "Folder"
+                ],
+                "document_update_folder" => [
+                    "action" => "folders",
+                    "label" => "Folder"
+                ],
+                "document_update_file" => [
+                    "action" => "files",
+                    "label" => "File"
+                ]
+            ];
+
+
+            // set the document information
+            if(!empty($data->content) && ($data->mode === "manual")) {
+                $description = $data->content;
+            }
+
+            // set the html form content
+            $html = "
+            <form autocomplete='Off' action='{$this->baseUrl}api/documents/{$parameters[$the_form]["action"]}' method='POST' class='ajax-data-form' id='{$the_form}'>
+                <div>
+                    <div class='form-group'>
+                        <label class='font-bold'>{$parameters[$the_form]["label"]} Name</label>
+                        <input type='text' value=\"".($data->name ?? null)."\" name='name' id='name' class='form-control'>
+                    </div>
+                    <div class='form-group'>
+                        <label class='font-bold'>{$parameters[$the_form]["label"]} Description</label>
+                        {$this->textarea_editor($description, "faketext", "ajax-form-content")}
+                    </div>
+                    ".(in_array($the_form, ["document_update_file"]) ? 
+                        "
+                        <div class='form-group mb-0'>
+                            <label class='font-bold'>File Type:</label> {$data->file_type}
+                        </div>
+                        <div class='form-group'>
+                            <label class='font-bold'>File Size:</label> ".file_size_convert(round($data->file_size * 1024))."
+                        </div>" : null
+                    )."
+                    <div class='p-0'>
+                        <div class='d-flex justify-content-between'>
+                            <div>
+                                <button type='reset' class='btn btn-light' data-dismiss='modal'>Close</button>
+                            </div>
+                            <div>                        
+                                <input type='hidden' readonly name='unique_id' value='".($item_id ?? null)."'>
+                                <input type='hidden' readonly name='request' value='".(!empty($data->unique_id) ? "modify" : "save")."'>
+                                <button data-form_id='{$the_form}' type='button-submit' class='btn btn-outline-success'><i class='fa fa-save'></i> Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>";
+        }
+
+        // IF THE REQUEST IS TO UPLOAD FILES
+        elseif($the_form === "document_upload_files") {
+
+            /** Set parameters for the data to attach */
+            $file_params = (object) [
+                "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf"]),
+                "module" => "documents_".(!empty($item_id) ? $item_id : "root"),
+                "userData" => $this->thisUser,
+                "ismultiple" => true,
+                "item_id" => $item_id ?? null
+            ];
+
+            // set the html form content
+            $html = "
+            <form autocomplete='Off' action='{$this->baseUrl}api/documents/upload' method='POST' class='ajax-data-form' id='file_upload'>
+                <div>
+                    <div class='form-group'>
+                        <h4><strong>UPLOAD MULTIPLE FILES INTO \"".(!empty($data) ? $data->name : "MAIN")."\" FOLDER</strong></h4>
+                        <div class='font-16 border-top mt-3 pt-3 border-bottom pb-3'>Select the Files that you wish to upload</div>
+                    </div>
+                    <div class='form-group p-0'>
+                        {$this->form_attachment_placeholder($file_params, "")}
+                    </div>
+                    <div class='d-flex justify-content-between'>
+                        <div>
+                            <button type='reset' class='btn btn-light' data-dismiss='modal'>Close</button>
+                        </div>
+                        <div>                        
+                            <input type='hidden' readonly name='unique_id' value='".($item_id ?? null)."'>
+                            <button data-form_id='file_upload' type='button-submit' class='btn btn-outline-success'><i class='fa fa-upload'></i> Upload Files</button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </form>";
+        }
+
+        // IF THE REQUEST IS TO CREATE OR UPDATE A PDF DOCUMENT
+        elseif($the_form === "document_create_file") {
+            // set the html form content
+            $html = "
+            <style>
+            .ajax-data-form trix-editor {
+                min-height: 300px;
+                max-height: 300px;
+            }
+            </style>
+            <form autocomplete='Off' action='{$this->baseUrl}api/documents/files' method='POST' class='ajax-data-form' id='{$the_form}'>
+                <div>
+                    <div class='form-group'>
+                        <label class='font-bold'>File Name <span class='required'>*</span></label>
+                        <input type='text' value=\"".($data->name ?? null)."\" name='name' id='name' class='form-control'>
+                    </div>
+                    <div class='form-group'>
+                        <label class='font-bold'>Document Information <span class='required'>*</span></label>
+                        {$this->textarea_editor($description, "faketext", "ajax-form-content")}
+                    </div>
+                    <div class='p-0'>
+                        <div class='d-flex justify-content-between'>
+                            <div>
+                                <button type='reset' class='btn btn-light' data-dismiss='modal'>Close</button>
+                            </div>
+                            <div>                        
+                                <input type='hidden' readonly name='unique_id' value='".($item_id ?? null)."'>
+                                <input type='hidden' readonly name='request' value='".(!empty($data->unique_id) ? "modify" : "save")."'>
+                                <button data-form_id='{$the_form}' type='button-submit' class='btn btn-outline-success'><i class='fa fa-save'></i> Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>";
+        }
+
+        return $html;
+    }
+
+    /**
      * Assignment Template
      * 
      * This is a common form fields that are present in all forms of assignments
@@ -320,10 +571,13 @@ class Forms extends Myschoolgh {
         
         /** Set parameters for the data to attach */
         $file_params = (object) [
+            "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf"]),
             "module" => "assignments",
             "userData" => $params->userData,
             "item_id" => $params->data->item_id ?? null
         ];
+
+        global $defaultUser, $isTutor;
 
         $preloaded_attachments = null;
         $description = $params->data->assignment_description ?? null;
@@ -358,6 +612,7 @@ class Forms extends Myschoolgh {
                 $files_param = (object) [
                     "userData" => $params->userData,
                     "label" => "list",
+                    "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf"]),
                     "is_deletable" => (bool) !$disabled,
                     "module" => "assignments",
                     "item_id" => $params->data->item_id,
@@ -372,7 +627,12 @@ class Forms extends Myschoolgh {
             }
 
         }
+        // class filter
+        $classFilter = $isTutor ? "AND item_id IN ".$this->inList($defaultUser->class_ids) : null;
 
+        // get the classes list
+        $classes_list = $this->pushQuery("name, id, item_id, payment_module", "classes", "client_id='{$params->clientId}' AND status='1' {$classFilter} LIMIT 100");
+        
         $html_content = "<div class='col-lg-8'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>Title <span class='required'>*</span></label>";
@@ -382,11 +642,14 @@ class Forms extends Myschoolgh {
 
         $html_content .= "<div class='col-md-4'>";
         $html_content .= "<div class='form-group'>";
-        $html_content .= "<label>Select Category <span class='required'>*</span></label>";
+        $html_content .= "<label>Select Assessment Type <span class='required'>*</span></label>";
         $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='assignment_type' id='assignment_type'>";
         $html_content .= "<option value=''>Select Assignment Category</option>";
         foreach($this->assessment_group as $value) {
-            $html_content .= "<option ".($class_id && $params->data->assignment_type == $value ? "selected" : null)." value='{$value}'>{$value}</option>";
+            $html_content .= "
+            <option ".($class_id && $params->data->assignment_type == $value ? "selected" : null)." value='{$value}'>
+                ".strtoupper($value)."
+            </option>";
         }
         $html_content .= "</select>";
         $html_content .= "</div>";
@@ -397,8 +660,15 @@ class Forms extends Myschoolgh {
         $html_content .= "<label>Select Class <span class='required'>*</span></label>";
         $html_content .= "<select {$disabled} data-width='100%' class='selectpicker form-control' name='class_id' id='class_id'>";
         $html_content .= "<option value=''>Select Class</option>";
-        foreach($this->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'") as $class) {
-            $html_content .= "<option ".($class_id == $class->item_id ? "selected" : null)." value='{$class->item_id}'>{$class->name}</option>";
+        // if the content is an array
+        if(is_array($classes_list)) {
+            // loop through the results list
+            foreach($classes_list as $class) {
+                $html_content .= "
+                <option data-payment_module='{$class->payment_module}' ".($class_id == $class->item_id ? "selected" : null)." value='{$class->item_id}'>
+                    ".strtoupper($class->name)."
+                </option>";
+            }
         }
         $html_content .= "</select>";
         $html_content .= "</div>";
@@ -412,7 +682,10 @@ class Forms extends Myschoolgh {
         // display the Subjects List
         if(isset($ass_data)) {
             foreach($ass_data["courses_list"] as $course) {
-                $html_content .= "<option ".($course_id == $course->item_id ? "selected" : null)." value='{$course->item_id}'>{$course->name}</option>";
+                $html_content .= "
+                <option ".($course_id == $course->item_id ? "selected" : null)." value='{$course->item_id}'>
+                    ".strtoupper($course->name)."
+                </option>";
             }
         }
 
@@ -512,7 +785,7 @@ class Forms extends Myschoolgh {
             max-height: 150px;
         }
         </style>
-        <form ".(!$disabled ? "class='ajax-data-form' id='ajax-data-form-content' action='{$this->baseUrl}api/assignments/".(!$params->data ? "add" : "update")."'": "")." method='post'>";
+        <form autocomplete='Off' ".(!$disabled ? "class='ajax-data-form' id='ajax-data-form-content' action='{$this->baseUrl}api/assignments/".(!$params->data ? "add" : "update")."'": "")." method='post'>";
         $html_content .= "<div class='row' id='create_assignment'>";
         
         $html_content .= "<div class='col-lg-4'>";
@@ -540,11 +813,11 @@ class Forms extends Myschoolgh {
             
             // append the submit and cancel buttons
             $html_content .= "
-                <div class=\"row border-top\">
-                    <div class=\"col-md-6 mt-4 text-left\">
+                <div class=\"d-flex justify-content-between\">
+                    <div>
                         <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
                     </div>
-                    <div class=\"col-md-6 mt-4 text-right\">
+                    <div>
                         <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Assignment</button>
                     </div>
                 </div>";
@@ -685,7 +958,7 @@ class Forms extends Myschoolgh {
     public function textarea_editor($data = null, $name = "faketext", $id = "ajax-form-content", $predefined = "description") {
 
         // set the form
-        $data = !empty($data) ? str_ireplace("'", "", $data) : null;
+        $data = str_ireplace("'", "", $data);
         $name = empty($name) ? "faketext" : $name;
         $form_content = "<input type='hidden' hidden id='trix-editor-input' value='{$data}'>";
         $form_content .= "<trix-editor name=\"{$name}\" data-predefined_name=\"{$predefined}\" input='trix-editor-input' class=\"trix-slim-scroll\" id=\"{$id}\"></trix-editor>";
@@ -720,7 +993,7 @@ class Forms extends Myschoolgh {
 
         // create directories if none existent
         if(!is_dir("assets/uploads/{$user_id}")) {
-            @mkdir("assets/uploads/{$user_id}/tmp/thumbnail/", 0777, true);
+            mkdir("assets/uploads/{$user_id}/tmp/thumbnail/", 0777, true);
         }
         
         // confirm if the variable is not empty and an array
@@ -743,6 +1016,7 @@ class Forms extends Myschoolgh {
                     if(is_file($eachFile->path) && file_exists($eachFile->path)) {
 
                         // is image check
+                        $isPDF = in_array($eachFile->type, ["pdf"]);
                         $isImage = in_array($eachFile->type, $image_mime);
                         $isVideo = in_array($eachFile->type, $video_mime);
 
@@ -782,7 +1056,7 @@ class Forms extends Myschoolgh {
 
                         // display this if the object is deletable.
                         if($is_deletable) {
-                            $delete_btn = "&nbsp;<a href=\"#\" onclick=\"return delete_existing_file_attachment('{$record_id}_{$eachFile->unique_id}');\" style=\"padding:5px\" class='btn btn-sm anchor btn-outline-danger'><i class='fa fa-trash'></i></a>";
+                            $delete_btn = "&nbsp;<button onclick=\"return delete_existing_file_attachment('{$record_id}_{$eachFile->unique_id}');\" class='btn btn-sm anchor btn-outline-danger'><i class='fa fa-trash'></i></button>";
                         }
 
                         $the_class = "attachment-item";
@@ -818,7 +1092,6 @@ class Forms extends Myschoolgh {
                             </div>";
                         }
                         
-
                         // append to the list
                         $files_list .= "<div data-file_container='{$record_id}_{$eachFile->unique_id}' class=\"{$list_class} attachment-container text-center p-1 mb-2\">";
                         $files_list .= $isImage ? "<div class=\"gallery-item\">" : null;
@@ -826,7 +1099,13 @@ class Forms extends Myschoolgh {
                                 <div class=\"col-lg-12 p-0 {$the_class} border\" {$padding} data-attachment_item='{$record_id}_{$eachFile->unique_id}'>
                                     <span style=\"display:none\" class=\"file-options\" data-attachment_options='{$record_id}_{$eachFile->unique_id}'>
                                         {$view_option}
-                                        <a title=\"Click to Download\" target=\"_blank\" class=\"btn btn-sm btn-success\" style=\"padding:;\" href=\"{$this->baseUrl}download?file={$file_to_download}\">
+                                        ".($isPDF ? 
+                                            "
+                                            <a title=\"Click to view\" onclick=\"return preview_pdf('{$eachFile->path}')\" class=\"btn btn-sm btn-outline-primary\" href=\"#\">
+                                                <i style=\"font-size:12px\" class=\"fa fa-eye fa-1x\"></i>
+                                            </a>" : null
+                                        )."
+                                        <a title=\"Click to Download\" target=\"_blank\" class=\"btn btn-sm btn-outline-success\" href=\"{$this->baseUrl}download?file={$file_to_download}\">
                                             <i style=\"font-size:12px\" class=\"fa fa-download fa-1x\"></i>
                                         </a>
                                         {$delete_btn}    
@@ -853,11 +1132,11 @@ class Forms extends Myschoolgh {
     /**
      * A global space for uploading temporary files
      * 
-     * @param \stdClass $params
+     * @param stdClass $params
      * 
      * @return String
      */
-    public function form_attachment_placeholder(stdClass $params = null) {
+    public function form_attachment_placeholder(stdClass $params = null, $width = "col-lg-12") {
         
         // initialize
         $preloaded_attachments = "";
@@ -898,20 +1177,21 @@ class Forms extends Myschoolgh {
         
         // set the file content
         $html_content = "
-        <div class=\"col-lg-12\">
+        <div class=\"{$width}\">
             <div class='post-attachment'>
                 <div class='row'>
                     <div class=\"col-lg-12\" id=\"".($params->module ?? null)."\">
                         <div class=\"file_attachment_url\" data-url=\"{$this->baseUrl}api/files/attachments\"></div>
                     </div>
                     <div class=\"".(isset($params->class) ? $params->class : "col-md-12")." text-left\">
-                        <div class='d-flex justify-content-start'>";
+                        <div class='d-flex justify-content-between'>";
                         if(!isset($params->no_title)) {
-                            $html_content .= "<label>Attach a Document <small class='text-danger'>(Maximum size <strong>{$this->max_attachment_size}MB</strong>)</small></label><br>";
+                            $html_content .= "<label>Attach a Document ".(empty($params->no_notice) ? "<small class='text-danger'>(Maximum size <strong>{$this->max_attachment_size}MB</strong>)</small>" : null)."</label><br>";
                         }
                     $html_content .= "
                             <div class=\"ml-3\">
-                                <input ".(isset($params->accept) ? "accept='{$params->accept}'" : null)." class='form-control cursor attachment_file_upload' data-form_item_id=\"".($params->item_id ?? "temp_attachment")."\" data-form_module=\"".($params->module ?? null)."\" type=\"file\" name=\"attachment_file_upload\" id=\"attachment_file_upload\">
+                                <button type='button' id='".($params->input_button ?? "ajax-upload-input")."' class='btn btn-outline-primary'>Select Files</button>
+                                <input hidden ".(isset($params->accept) && !empty($params->accept) ? "accept='{$params->accept}'" : null)." ".(isset($params->ismultiple) && !empty($params->ismultiple) ? "multiple" : null)." class='form-control cursor ".($params->form_input_class ?? "attachment_file_upload")."' data-form_item_id=\"".($params->item_id ?? "temp_attachment")."\" data-form_module=\"".($params->module ?? null)."\" type=\"file\" name=\"".($params->form_input_class ?? "attachment_file_upload")."\" id=\"".($params->form_input_class ?? "attachment_file_upload")."\">
                             </div>
                             <div class=\"upload-document-loader hidden\"><span class=\"float-right\">Uploading <i class=\"fa fa-spin fa-spinner\"></i></span></div>
                         </div>
@@ -920,7 +1200,7 @@ class Forms extends Myschoolgh {
             </div>
             
             <div class=\"col-md-12\">
-                <div class=\"file-preview slim-scroll\" preview-id=\"".($params->module ?? null)."\">{$fresh_attachments}</div>
+                <div class=\"file-preview mb-3 slim-scroll\" preview-id=\"".($params->module ?? null)."\">{$fresh_attachments}</div>
                 <div class='form-group text-center mb-1'>{$preloaded_attachments}</div>
             </div>";
             $html_content .= !isset($params->no_footer) ? "<div class=\"col-lg-12 mb-3 border-bottom mt-3\"></div>" : null;
@@ -933,7 +1213,7 @@ class Forms extends Myschoolgh {
     /**
      * A global space for uploading temporary files
      * 
-     * @param \stdClass $params
+     * @param stdClass $params
      * 
      * @return String
      */
@@ -946,6 +1226,7 @@ class Forms extends Myschoolgh {
         $files_param = (object) [
             "userData" => $params->userData ?? $this->thisUser,
             "label" => "list",
+            "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf"]),
             "module" => $params->module ?? null,
             "item_id" => $params->item_id ?? "temp_attachment",
         ];
@@ -963,6 +1244,7 @@ class Forms extends Myschoolgh {
             $files_param = (object) [
                 "userData" => $this->thisUser ?? null,
                 "label" => "list",
+                "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf"]),
                 "is_deletable" => isset($params->is_deletable) ? $params->is_deletable : false,
                 "module" => $params->module ?? null,
                 "item_id" => $params->item_id ?? null,
@@ -1038,7 +1320,7 @@ class Forms extends Myschoolgh {
         $html_content .= "<div class='col-md-10'>";
         $html_content .= "<div class='form-group'>";
         $html_content .= "<label>{$array[$data->user_type]["title"]}</label>";
-        $html_content .= "<input type='text' placeholder='Search {$array[$data->user_type]["title"]} name' name='user_name_search' id='user_name_search' class='form-control'>";
+        $html_content .= "<input autocomplete='Off' type='text' placeholder='Search {$array[$data->user_type]["title"]} name' name='user_name_search' id='user_name_search' class='form-control'>";
         $html_content .= "</div>";
         $html_content .= "</div>";
         $html_content .= "<div class='col-md-2'>";
@@ -1146,6 +1428,7 @@ class Forms extends Myschoolgh {
         /** Set parameters for the data to attach */
         $form_params = (object) [
             "module" => "course_lesson_{$unit_id}",
+            "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf", ".ppt", ".pptx"]),
             "userData" => $this->thisUser,
             "item_id" => $item_id ?? null
         ];
@@ -1191,6 +1474,7 @@ class Forms extends Myschoolgh {
                 $files_param = (object) [
                     "userData" => $this->thisUser,
                     "label" => "list",
+                    "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf"]),
                     "is_deletable" => $hasAccess,
                     "module" => "course_lesson_{$unit_id}",
                     "item_id" => $item_id,
@@ -1379,6 +1663,10 @@ class Forms extends Myschoolgh {
         /** Set parameters for the data to attach */
         $form_params = (object) [
             "module" => "incidents",
+            "form_input_class" => "_attachment_file_upload",
+            "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf"]),
+            "input_button" => "_ajax-upload-input",
+            "ismultiple" => true,
             "userData" => $this->thisUser,
             "item_id" => $item_id ?? null
         ];
@@ -1449,6 +1737,7 @@ class Forms extends Myschoolgh {
                 $files_param = (object) [
                     "userData" => $this->thisUser,
                     "label" => "list",
+                    "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf"]),
                     "is_deletable" => $hasAccess,
                     "module" => "incidents",
                     "item_id" => $item_id,
@@ -1532,13 +1821,14 @@ class Forms extends Myschoolgh {
                     
                     $html_content .= "<div class='col-md-12 text-center mb-4'>{$preloaded_attachments}</div>";
 
-                    $html_content .= "<div class=\"col-md-6 text-left\">
-                        <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
-                        <input type=\"hidden\" name=\"user_id\" id=\"user_id\" value=\"{$user_id}\" hidden class=\"form-control\">
-                        <input type=\"hidden\" name=\"incident_id\" id=\"incident_id\" value=\"{$item_id}\" hidden class=\"form-control\">
+                    $html_content .= "
+                    <div class=\"col-md-6 text-left\">
+                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
                     </div>
                     <div class=\"col-md-6 text-right\">
-                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                        <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
+                        <input type=\"hidden\" name=\"user_id\" id=\"user_id\" value=\"{$user_id}\" hidden class=\"form-control\">
+                        <input type=\"hidden\" name=\"incident_id\" id=\"incident_id\" value=\"{$item_id}\" hidden>
                     </div>
                 </div>
             </div>";
@@ -1601,7 +1891,7 @@ class Forms extends Myschoolgh {
             "user_id" => $user_id, "incident_type" => "followup", 
             "followup_id" => $item_id, "clientId" => $clientId
         ];
-		$followups = empty($followups) ? load_class("incidents", "controllers")->list($q_param)["data"] : $followups;
+        $followups = empty($followups) ? load_class("incidents", "controllers")->list($q_param)["data"] : $followups;
 
         /** Loop through the followups */
         foreach($followups as $followup) {
@@ -1654,8 +1944,13 @@ class Forms extends Myschoolgh {
      */
     public function student_form($clientId, $baseUrl, $userData = null) {
 
+        // global variable
+        global $clientPrefs;
+
+        // if data is parsed
         $isData = !empty($userData) && isset($userData->user_id) ? true : false;
 
+        $unique_id = null;
         $guardian = "";
         $guardian_list = [];
 
@@ -1666,26 +1961,26 @@ class Forms extends Myschoolgh {
             foreach($userData->guardian_list as $key => $eachItem) {
                 $key_id = $key+1;
                 $guardian .= '
-                <div class="row mb-3 pb-3" data-row="'.$key_id.'">
-                    <div class="col-lg-4 col-md-4">
+                <div class="row mb-3 pb-3 '.($key_id !== 1 ? "mt-4 border-primary border-top pt-4" : null).'" data-row="'.$key_id.'">
+                    <div class="col-lg-4 col-md-4 mb-3">
                         <label for="guardian_info[guardian_fullname]['.$key_id.']">Fullname</label>
                         <input type="hidden" name="guardian_info[guardian_id]['.$key_id.']" id="guardian_info[guardian_id]['.$key_id.']" value="'.$eachItem->user_id.'">
                         <input type="text" value="'.$eachItem->fullname.'" name="guardian_info[guardian_fullname]['.$key_id.']" id="guardian_info[guardian_fullname]['.$key_id.']" class="form-control">
                     </div>
-                    <div class="col-lg-4 col-md-4">
-                        <label for="guardian_info[guardian_contact]['.$key_id.']">Contact Number</label>
+                    <div class="col-lg-4 col-md-4 mb-3">
+                        <label for="guardian_info[guardian_contact]['.$key_id.']">Primary Contact</label>
                         <input type="text" value="'.$eachItem->contact.'" name="guardian_info[guardian_contact]['.$key_id.']" id="guardian_info[guardian_contact]['.$key_id.']" class="form-control">
                     </div>
-                    <div class="col-lg-3 col-md-3">
+                    <div class="col-lg-3 col-md-3 mb-3">
                         <label for="guardian_info[guardian_email]['.$key_id.']">Email Address</label>
                         <input type="email" value="'.$eachItem->email.'" name="guardian_info[guardian_email]['.$key_id.']" id="guardian_info[guardian_email]['.$key_id.']" class="form-control">
                     </div>
-                    <div class="col-lg-1 col-md-1 text-right">
-                        <div class="d-flex justify-content-end">';
+                    <div class="col-lg-1 col-md-1 text-right">';
                         if($key_id == 1) {
                             $guardian .= '
-                            <div class="mr-1"><br>
-                                <button data-row="'.$key_id.'" class="btn append-row btn-primary" type="button"><i class="fa fa-plus"></i></button>
+                            <div class="mr-1 form-group">
+                                <label class="text-white"></label>
+                                <button data-row="'.$key_id.'" onclick="return append_student_guardian_row()" class="btn form-control btn-primary" type="button"><i class="fa fa-user"></i> Add</button>
                             </div>';
                         } else {
                             $guardian .= '
@@ -1694,7 +1989,6 @@ class Forms extends Myschoolgh {
                             </div>';
                         }
                         $guardian .= '
-                            </div>
                     </div>
                     <div class="col-lg-4 col-md-4 mt-2">
                         <label for="guardian_info[guardian_relation]['.$key_id.']">Relationship</label>
@@ -1721,8 +2015,14 @@ class Forms extends Myschoolgh {
             $guardian_list = $this->pushQuery("name, item_id, unique_id, phone_number, email", "users", "client_id='{$clientId}' AND user_type='parent' AND status='1' AND deleted='0'");
         }
 
+        // auto generate the student id
+        if(empty($isData)) {
+            $counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$clientId}' AND user_type='student'") + 1), $this->append_zeros);
+            $unique_id = $clientPrefs->labels->student_label."/".$counter."/".date("Y");
+        }
+
         $response = '
-        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+        <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4">
                 <div class="col-lg-12">
                     <h5 class="text-primary border-bottom pb-2 mb-3">BIO INFORMATION</h5>
@@ -1731,14 +2031,14 @@ class Forms extends Myschoolgh {
                     <div class="row mb-4">
                         <div class="col-lg-4 col-md-6">
                             <div class="form-group">
-                                <label for="unique_id">Student ID (optional) '.(!$isData ? '<small class="text-danger">Auto generate when empty</small>' : null).'</label>
-                                <input type="text" readonly value="'.($userData->unique_id ?? null).'" '.($isData ? "disabled='disabled'" : null).' name="unique_id" id="unique_id" class="form-control">
+                                <label for="unique_id">Student ID '.(!$isData ? '<small class="text-danger">Auto generated ID</small>' : null).'</label>
+                                <input type="text" readonly value="'.($userData->unique_id ?? $unique_id).'" '.($isData ? "disabled='disabled'" : null).' name="unique_id" id="unique_id" class="form-control text-uppercase">
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-6">
                             <div class="form-group">
                                 <label for="enrollment_date">Enrollment Date <span class="required">*</span></label>
-                                <input type="text" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control datepicker">
+                                <input type="text" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control datepicker">
                             </div>
                         </div>
                         <div class="col-lg-4 col-md-5">
@@ -1765,16 +2065,27 @@ class Forms extends Myschoolgh {
                                 <input type="text" value="'.($userData->lastname ?? null).'" name="lastname" id="lastname" class="form-control">
                             </div>
                         </div>
-                        <div class="col-lg-12 col-md-12">
+                        <div class="col-lg-8 col-md-8">
                             <div class="form-group">
                                 <label for="othername">Othernames</label>
                                 <input type="text" value="'.($userData->othername ?? null).'" name="othername" id="othername" class="form-control">
                             </div>
                         </div>
+                        <div class="col-lg-4 col-md-5">
+                            <div class="form-group">
+                                <label for="is_bus_user">Is Bus User</label>
+                                <select data-width="100%" name="is_bus_user" id="is_bus_user" class="form-control selectpicker">
+                                    <option value="">Please Select</option>';
+                                    foreach(["Yes", "No"] as $item) {
+                                        $response .= "<option ".($isData && ($item == $userData->is_bus_user) ? "selected" : null)." value=\"{$item}\">{$item}</option>";                            
+                                    }
+                            $response .= '</select>
+                            </div>
+                        </div>
                         <div class="col-lg-4 col-md-4">
                             <div class="form-group">
                                 <label for="date_of_birth">Date of Birth</label>
-                                <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
+                                <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" class="form-control datepicker">
                             </div>
                         </div>
                         <div class="col-lg-8 col-md-8">
@@ -1797,7 +2108,7 @@ class Forms extends Myschoolgh {
                     ).'
                     <div class="form-group">
                         <label for="image">Student Image</label>
-                        <input accept="image/*" type="file" name="image" id="image" class="form-control">
+                        <input data-student_image="upload" data-student_id="'.($userData->user_id ?? null).'" accept=".jpg,.jpeg,.png,.gif" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">CONTACT INFORMATION</h5></div> 
@@ -1940,16 +2251,24 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-12 mb-4 border-bottom pb-3">
                     <div class="row">
-                        <div class="col-lg-9 col-md-8"><h5 class="text-primary mb-0">GUARDIAN INFORMATION</h5></div>
+                        <div class="col-lg-8 col-md-8"><h5 class="text-primary mb-0">GUARDIAN INFORMATION</h5></div>
                         '.(
                             !$isData ? '
-                            <div class="col-lg-3 col-md-4">
-                                <select id="switch_select" data-width="100%" class="selectpicker form-control">
-                                    <option value="add_new">Add New Guardian</option>
-                                    <option value="select_existing">Select Existing Guardian</option>
-                                </select>
+                            <div class="col-lg-4 col-md-4">
+                                <div class="d-flex justify-content-between">
+                                    <div class="col-9">
+                                        <select id="switch_select" data-width="100%" class="selectpicker form-control">
+                                            <option value="add_new">Add New Guardian</option>
+                                            <option value="select_existing">Select Existing Guardian</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <button onclick="return append_student_guardian_row()" data-row="1" class="btn form-control btn-primary" type="button"><i class="fa fa-user"></i> Add</button>
+                                    </div>
+                                </div>
                             </div>' : null
                         ).'
+
                     </div>
                 </div>
                 <div class="col-lg-12" id="student_guardian_list">';
@@ -1966,20 +2285,18 @@ class Forms extends Myschoolgh {
                             <input type="text" name="guardian_info[guardian_fullname][1]" id="guardian_info[guardian_fullname][1]" class="form-control">
                         </div>                        
                         <div class="col-lg-4 col-md-4">
-                            <label for="guardian_info[guardian_contact][1]">Contact Number</label>
+                            <label for="guardian_info[guardian_contact][1]">Primary Contact</label>
                             <input type="text" name="guardian_info[guardian_contact][1]" id="guardian_info[guardian_contact][1]" class="form-control">
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <label for="guardian_info[guardian_contact_2][1]">Secondary Contact</label>
+                            <input type="text" name="guardian_info[guardian_contact_2][1]" id="guardian_info[guardian_contact_2][1]" class="form-control">
                         </div>
                         <div class="col-lg-3 col-md-3">
                             <label for="guardian_info[guardian_email][1]">Email Address</label>
                             <input type="text" name="guardian_info[guardian_email][1]" id="guardian_info[guardian_email][1]" class="form-control">
                         </div>
-                        <div class="col-lg-1 col-md-1 text-right">
-                            <div class="form-group">
-                                <div>&nbsp;</div>
-                                <button data-row="1" class="btn pr-1 pl-1 append-row btn-primary" type="button"><i class="fa fa-user"></i> Add</button>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-4 mt-2">
+                        <div class="col-lg-3 col-md-3 mt-2">
                             <label for="guardian_info[guardian_relation][1]">Relationship</label>
                             <select data-width="100%" name="guardian_info[guardian_relation][1]" id="guardian_info[guardian_relation][1]" class="form-control selectpicker">
                                 <option value="">Select Relation</option>';
@@ -1988,7 +2305,7 @@ class Forms extends Myschoolgh {
                                 }
                         $response .= '</select>
                         </div>
-                        <div class="col-lg-8 col-md-8 mt-2">
+                        <div class="col-lg-6 col-md-6 mt-2">
                             <label for="guardian_info[guardian_address][1]">Address</label>
                             <input type="text" name="guardian_info[guardian_address][1]" id="guardian_info[guardian_address][1]" class="form-control">
                         </div>
@@ -2020,13 +2337,13 @@ class Forms extends Myschoolgh {
                 $response .= '
             </div>
             <input type="hidden" id="user_id" value="'.($userData->user_id ?? null).'" name="user_id">
-            <div class="row">
-                <div class="col-lg-6">
+            <div class="d-flex justify-content-between">
+                <div class="">
                     '.($isData ? 
                         '<button onclick="return load(\'student/'.$userData->user_id.'\');" type="button" class="btn btn-dark"><i class="fa fa-ban"></i> Discard Changes</button>': null
                     ).'
                 </div>
-                <div class="col-lg-6 text-right">
+                <div class=" text-right">
                     <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>
@@ -2048,22 +2365,32 @@ class Forms extends Myschoolgh {
 
         $isData = !empty($userData) && isset($userData->user_id) ? true : false;
 
+        // global variable
+        global $clientPrefs;
+
+        // init variable
+        $unique_id = null;
+
+        // auto generate the student id
+        if(empty($isData)) {
+            $counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$clientId}' AND user_type = 'parent'") + 1), $this->append_zeros);
+            $unique_id = $clientPrefs->labels->parent_label."/".$counter."/".date("Y");
+        }
+
         $response = '
-        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+        <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
-                <div class="col-lg-12">
-                    <h5>BIO INFORMATION</h5>
-                </div>
+                <div class="col-lg-12"><h5 class="text-primary">BIO INFORMATION</h5></div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Guardian Image</label>
-                        <input accept="image/*" type="file" name="image" id="image" class="form-control">
+                        <input accept=".jpg,.jpeg,.png,.gif" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-'.(!empty($userData) ? 4 : 4 ).' col-md-6">
                     <div class="form-group">
                         <label for="unique_id">Guardian ID (optional)</label>
-                        <input type="text" readonly value="'.($userData->unique_id ?? "").'" name="unique_id" id="unique_id" class="form-control">
+                        <input type="text" readonly value="'.($userData->unique_id ?? $unique_id).'" name="unique_id" id="unique_id" class="form-control">
                         <input type="text" readonly value="'.($userData->user_id ?? "").'" hidden name="user_id" id="user_id" class="form-control">
                     </div>
                 </div>
@@ -2093,9 +2420,10 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth</label>
-                        <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
+                        <input type="text" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
                     </div>
                 </div>
+                <div class="col-lg-12"><h5 class="text-primary">CONTACT INFORMATION</h5></div>
                 <div class="col-lg-8 col-md-6">
                     <div class="form-group">
                         <label for="email">Email Address</label>
@@ -2150,7 +2478,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="relationship">Relationship</label>
+                        <label for="relationship">Relationship with Ward</label>
                         <select data-width="100%" name="relationship" id="relationship" class="form-control selectpicker">
                             <option value="">Select Relation</option>';
                             foreach($this->pushQuery("id, name", "guardian_relation", "status='1'") as $each) {
@@ -2159,6 +2487,7 @@ class Forms extends Myschoolgh {
                 $response .= '</select>
                     </div>
                 </div>
+                <div class="col-lg-12"><h5 class="text-primary">EMPLOYMENT DETAILS</h5></div>
                 <div class="col-lg-6 col-md-6">
                     <div class="form-group">
                         <label for="employer">Name of Employer</label>
@@ -2205,25 +2534,19 @@ class Forms extends Myschoolgh {
         $guardian = "";
 
         $response = '
-        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/departments/'.( $isData ? "update" : "add").'" method="POST">
+        <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/departments/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12"><h5>DEPARTMENT INFORMATION</h5></div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Department Image</label>
-                        <input accept="image/*" type="file" name="image" id="image" class="form-control">
+                        <input accept=".jpg,.jpeg,.png,.gif" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="department_code">Department Code (optional)</label>
                         <input type="text" value="'.($itemData->department_code ?? null).'" name="department_code" id="department_code" class="form-control text-uppercase">
-                    </div>
-                </div>
-                <div class="col-lg-8 col-md-6">
-                    <div class="form-group">
-                        <label for="name">Department Name<span class="required">*</span></label>
-                        <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2235,6 +2558,12 @@ class Forms extends Myschoolgh {
                                 $response .= "<option ".($isData && ($each->item_id == $itemData->department_head) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
                             }
                         $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-6">
+                    <div class="form-group">
+                        <label for="name">Department Name<span class="required">*</span></label>
+                        <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-12 col-md-12">
@@ -2269,7 +2598,7 @@ class Forms extends Myschoolgh {
         $isData = !empty($itemData) && isset($itemData->id) ? true : false;
 
         $response = '
-        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/sections/'.( $isData ? "update" : "add").'" method="POST">
+        <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/sections/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
                     <h5>SECTION INFORMATION</h5>
@@ -2277,7 +2606,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Section Image</label>
-                        <input accept="image/*" type="file" name="image" id="image" class="form-control">
+                        <input accept=".jpg,.jpeg,.png,.gif" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2337,28 +2666,28 @@ class Forms extends Myschoolgh {
         $guardian = "";
 
         $response = '
-        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/classes/'.( $isData ? "update" : "add").'" method="POST">
+        <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/classes/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12"><h5>CLASS INFORMATION</h5></div>
-                <div class="col-lg-4 col-md-4">
-                    <div class="form-group">
-                        <label for="class_code">Class Code (optional)</label>
-                        <input type="text" value="'.($itemData->class_code ?? null).'" name="class_code" id="class_code" class="form-control text-uppercase">
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4">
-                    <div class="form-group">
-                        <label for="class_size">Class Size (optional)</label>
-                        <input type="text" value="'.($itemData->class_size ?? null).'" name="class_size" id="class_size" class="form-control text-uppercase">
-                    </div>
-                </div>
-                <div class="col-lg-12 col-md-12">
+                <div class="col-lg-6 col-md-6">
                     <div class="form-group">
                         <label for="name">Class Name<span class="required">*</span></label>
                         <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
                     </div>
                 </div>
-                <div class="'.($isData ? "col-lg-6 col-md-6" : "col-lg-4 col-md-4").'">
+                <div class="col-lg-3 col-md-3">
+                    <div class="form-group">
+                        <label for="class_code">Class Code (optional)</label>
+                        <input type="text" value="'.($itemData->class_code ?? null).'" name="class_code" id="class_code" class="form-control text-uppercase">
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <div class="form-group">
+                        <label for="class_size">Class Size (optional)</label>
+                        <input type="text" value="'.($itemData->class_size ?? null).'" name="class_size" id="class_size" class="form-control text-uppercase">
+                    </div>
+                </div>
+                <div class="'.($isData ? "col-lg-4 col-md-4" : "col-lg-4 col-md-4").'">
                     <div class="form-group">
                         <label for="department_id">Department ID</label>
                         <select data-width="100%" name="department_id" id="department_id" class="form-control selectpicker">
@@ -2369,7 +2698,7 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="'.($isData ? "col-lg-6 col-md-6" : "col-lg-4 col-md-4").'">
+                <div class="'.($isData ? "col-lg-4 col-md-4" : "col-lg-4 col-md-4").'">
                     <div class="form-group">
                         <label for="class_teacher">Class Teacher</label>
                         <select data-width="100%" name="class_teacher" id="class_teacher" class="form-control selectpicker">
@@ -2380,18 +2709,28 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="'.($isData ? "col-lg-6 col-md-6" : "col-lg-4 col-md-4").'">
+                <div class="'.($isData ? "col-lg-4 col-md-4" : "col-lg-4 col-md-4").'">
                     <div class="form-group">
-                        <label for="class_assistant">Class Assistant</label>
+                        <label for="class_assistant">Class Prefect</label>
                         <select data-width="100%" name="class_assistant" id="class_assistant" class="form-control selectpicker">
-                            <option value="">Select Class Assistant</option>';
+                            <option value="">Select Class Prefect</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('student') AND status='1' AND client_id='{$clientId}' ".($isData ? " AND class_id='{$itemData->id}'" : "")."") as $each) {
                                 $response .= "<option ".($isData && ($each->item_id == $itemData->class_assistant) ? "selected" : null)." value=\"{$each->item_id}\">".strtoupper($each->name)." ({$each->unique_id})</option>";                            
                             }
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-6">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="payment_module">Payment Module</label>
+                        <select data-width="100%" name="payment_module" id="payment_module" class="form-control selectpicker">';
+                            foreach(["Termly", "Monthly"] as $each) {
+                                $response .= "<option ".($isData && $each === $itemData->payment_module ? "selected" : null)." value=\"{$each}\">{$each}</option>";                            
+                            }
+                        $response .= '</select>
+                    </div>
+                </div>
+                <div class="col-md-8">
                     <div class="form-group">
                         <label for="room_id[]">Class Rooms</label>
                         <select data-width="100%" multiple name="room_id[]" id="room_id" class="form-control selectpicker">
@@ -2433,14 +2772,15 @@ class Forms extends Myschoolgh {
 
         $isData = !empty($itemData) && isset($itemData->id) ? true : false;
         $isAdmin = !empty($itemData) && !$itemData->isAdmin ? "disabled='disabled'" : "";
+        $isAdmin2 = !empty($itemData) && !$itemData->isAdmin ? "readonly='readonly'" : "";
 
         $response = '
-        <form class="ajax-data-form" id="ajax-data-form-content" action="'.$baseUrl.'api/courses/'.( $isData ? "update" : "add").'" method="POST">
+        <form autocomplete="Off" class="ajax-data-form" id="ajax-data-form-content" action="'.$baseUrl.'api/courses/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="course_code">Course Code <span class="required">*</span></label>
-                        <input '.$isAdmin.' type="text" maxlength="12" value="'.($itemData->course_code ?? null).'" name="course_code" id="course_code" class="form-control text-uppercase">
+                        <label for="course_code">Subject Code <span class="required">*</span></label>
+                        <input '.$isAdmin2.' type="text" maxlength="12" value="'.($itemData->course_code ?? null).'" name="course_code" id="course_code" class="form-control text-uppercase">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2455,16 +2795,16 @@ class Forms extends Myschoolgh {
                         <input type="number" min="1" max="30" value="'.($itemData->weekly_meeting ?? null).'" name="weekly_meeting" id="weekly_meeting" class="form-control text-uppercase">
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-12">
+                <div class="col-lg-6 col-md-6">
                     <div class="form-group">
-                        <label for="name">Course Title <span class="required">*</span></label>
-                        <input type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
+                        <label for="name">Subject Title <span class="required">*</span></label>
+                        <input '.$isAdmin2.' type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-12">
+                <div class="col-lg-3 col-md-4">
                     <div class="form-group">
-                        <label for="class_id">Classes that offer this course <span class="required">*</span></label>
-                        <select multiple '.$isAdmin.' data-width="100%" name="class_id[]" id="class_id[]" class="form-control selectpicker">
+                        <label for="class_id">Select subject class <span class="required">*</span></label>
+                        <select '.$isAdmin.' '.(!empty($itemData->name) && $isData ? "disabled" : "multiple").' data-width="100%" '.($isData ? 'name="class_id" id="class_id"' : 'name="class_id[]" id="class_id[]"').' class="form-control selectpicker">
                             <option value="">Select Class</option>';
                             foreach($this->pushQuery("id, name, item_id", "classes", "status='1' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && in_array($each->item_id, $itemData->class_ids) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name}</option>";                            
@@ -2472,10 +2812,10 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-12">
+                <div class="col-lg-3 col-md-4">
                     <div class="form-group">
-                        <label for="course_tutor">Course Tutors</label>
-                        <select multiple data-width="100%" '.$isAdmin.' name="course_tutor[]" id="course_tutor[]" class="form-control selectpicker">
+                        <label for="course_tutor">Subject Tutors</label>
+                        <select data-width="100%" '.$isAdmin.' name="course_tutor[]" id="course_tutor[]" class="form-control selectpicker">
                             <option value="">Select Subject Tutor</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND user_status='Active' AND client_id='{$clientId}'") as $each) {
                                 $response .= "<option ".($isData && in_array($each->item_id, $itemData->course_tutor_ids) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
@@ -2512,11 +2852,22 @@ class Forms extends Myschoolgh {
     public function staff_form($clientId, $baseUrl, $userData = null) {
 
         $isData = !empty($userData) && isset($userData->name) ? true : false;
+
+        // global variable
         global $clientPrefs;
+
+        // some variables
         $guardian = "";
+        $unique_id = null;
+
+        // auto generate the student id
+        if(empty($isData)) {
+            $counter = $this->append_zeros(($this->itemsCount("users", "client_id = '{$clientId}' AND user_type NOT IN ('student','parent')") + 1), $this->append_zeros);
+            $unique_id = $clientPrefs->labels->staff_label."/".$counter."/".date("Y");
+        }
 
         $response = '
-        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+        <form class="ajax-data-form" autocomplete="Off" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-3">
                 <div class="col-lg-12">
                     <h5 class="text-primary border-bottom pb-2 mb-3">BIO INFORMATION</h5>
@@ -2524,19 +2875,19 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Staff Image</label>
-                        <input accept="image/*" type="file" name="image" id="image" class="form-control">
+                        <input accept=".jpg,.jpeg,.png,.gif" type="file" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="unique_id">Staff ID (optional)</label>
-                        <input type="text" readonly value="'.($userData->unique_id ?? null).'" name="unique_id" id="unique_id" class="form-control">
+                        <input type="text" readonly value="'.($userData->unique_id ?? $unique_id).'" name="unique_id" id="unique_id" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="enrollment_date">Date Employed <span class="required">*</span></label>
-                        <input type="text" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control datepicker">
+                        <input type="text" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->enrollment_date ?? null).'" name="enrollment_date" id="enrollment_date" class="form-control datepicker">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2571,7 +2922,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="date_of_birth">Date of Birth <span class="required">*</span></label>
-                        <input type="text" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
+                        <input type="text" data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.($userData->date_of_birth ?? null).'" name="date_of_birth" id="date_of_birth" class="form-control datepicker">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -2641,7 +2992,7 @@ class Forms extends Myschoolgh {
                     <div class="form-group">
                         <label for="user_type">Designation <span class="required">*</span></label>
                         <select data-width="100%" name="user_type" id="user_type" class="form-control selectpicker">
-                            <option value="">Select Designation</option>';
+                            <option value="teacher">Select Designation</option>';
                             foreach($this->user_roles_list as $key => $value) {
                                 $response .= "<option ".($isData && ($key == $userData->user_type) ? "selected" : null)." value=\"{$key}\">{$value}</option>";                            
                             }
@@ -2670,19 +3021,19 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-12 col-md-6 '.($isData && $userData->user_type !== "teacher" ? "hidden" : "").'" id="course_ids_container">
+                <div class="col-lg-12 col-md-6 '.($isData && $userData->user_type !== "teacher" ? "hidden" : "").'" data-value="course_ids_container">
                     <div class="form-group">
-                        <label for="courses_ids">Subjects <span class="text-danger">(Select if designation is a teacher)</span></label>
+                        <label for="courses_ids">Class & Subjects <span class="text-danger">(Select the class and subjects taught by this teacher)</span></label>
                         <select multiple data-width="100%" name="courses_ids[]" id="courses_ids" class="form-control selectpicker">
                             <option value="">Select Subject</option>';
-                            foreach($this->pushQuery("id, name, course_code", "courses", "status='1' AND client_id='{$clientId}' AND academic_year='{$clientPrefs->academics->academic_year}' AND academic_term='{$clientPrefs->academics->academic_term}'") as $each) {
-                                $response .= "<option ".($isData && in_array($each->id, $userData->course_ids) ? "selected" : null)." value=\"{$each->id}\">{$each->course_code}: {$each->name}</option>";                            
+                            foreach($this->pushQuery("a.id, a.name, a.course_code, b.name AS class_name", "courses a LEFT JOIN classes b ON b.item_id = a.class_id", "a.status='1' AND a.client_id='{$clientId}' AND a.academic_year='{$clientPrefs->academics->academic_year}' AND a.academic_term='{$clientPrefs->academics->academic_term}' ORDER BY b.name LIMIT 100") as $each) {
+                                $response .= "<option ".($isData && in_array($each->id, $userData->course_ids) ? "selected" : null)." value=\"{$each->id}\">{$each->class_name} > {$each->course_code}: {$each->name}</option>";                            
                             }
                         $response .= '</select>
                     </div>
                 </div>
             </div>
-            <div class="row mb-4 pb-4">
+            <div class="row mb-4 pb-4 hidden">
                 <div class="col-lg-12"><h5 class="text-primary border-bottom pb-2 mb-3">LOGIN INFORMATION</h5></div>
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
@@ -2723,7 +3074,7 @@ class Forms extends Myschoolgh {
 
         $disabled = isset($data->state) && in_array($data->state, ["Held", "Cancelled"]) ? "disabled='disabled'" : null;
 
-        $html_content = (!$disabled ? '<form enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/events/'.(isset($data->item_id) ? "update" : "add").'" method="POST" id="ajax-data-form-content">': '').'
+        $html_content = (!$disabled ? '<form autocomplete="Off" enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/events/'.(isset($data->item_id) ? "update" : "add").'" method="POST" id="ajax-data-form-content">': '').'
             <div id="modalBody2" class="modal-body">
                 <div class="row">
                     <div class="col-lg-12">
@@ -2776,7 +3127,7 @@ class Forms extends Myschoolgh {
                         <div class="form-group">
                             <label>Event Image</label>
                             <input type="hidden" hidden name="event_id" class="form-control" value="'.($data->item_id ?? null).'">
-                            <input '.$disabled.' accept="image/*" type="file" name="event_image" class="form-control" id="event_image">
+                            <input '.$disabled.' accept=".jpg,.jpeg,.png,.gif" type="file" name="event_image" class="form-control" id="event_image">
                         </div>';
                     // confirm that the event cover image was parsed and file is found
                     if(isset($data->event_image) && file_exists($data->event_image)) {
@@ -2836,12 +3187,12 @@ class Forms extends Myschoolgh {
     public function library_book_form($data = null) {
 
         $html_content = '
-        <form enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/library/'.(isset($data->title) ? "update_book" : "add_book").'" method="POST" id="ajax-data-form-content">    
+        <form autocomplete="Off" enctype="multipart/form-data" class="ajax-data-form" action="'.$this->baseUrl.'api/library/'.(isset($data->title) ? "update_book" : "add_book").'" method="POST" id="ajax-data-form-content">    
             <div class="row">
                 <div class="col-lg-5 col-md-5">
                     <div class="form-group">
                         <label for="book_image">Cover Image</label>
-                        <input accept="image/*" type="file" name="book_image" id="book_image" class="form-control">
+                        <input accept=".jpg,.jpeg,.png,.gif" type="file" name="book_image" id="book_image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-7 col-md-7"></div>
@@ -2948,7 +3299,7 @@ class Forms extends Myschoolgh {
     public function library_category_form($data = null) {
 
         $html_content = '
-        <form class="ajax-data-form" action="'.$this->baseUrl.'api/library/'.(isset($data->name) ? "update_category" : "add_category").'" method="POST" id="ajax-data-form-content">    
+        <form autocomplete="Off" class="ajax-data-form" action="'.$this->baseUrl.'api/library/'.(isset($data->name) ? "update_category" : "add_category").'" method="POST" id="ajax-data-form-content">    
             <div class="row">
                 <div class="col-md-8">
                     <div class="form-group">
@@ -2993,7 +3344,7 @@ class Forms extends Myschoolgh {
     public function class_room_form($data = null) {
 
         $html_content = '
-        <form class="ajax-data-form" action="'.$this->baseUrl.'api/rooms/'.(isset($data->name) ? "update_classroom" : "add_classroom").'" method="POST" id="ajax-data-form-content">
+        <form autocomplete="Off" class="ajax-data-form" action="'.$this->baseUrl.'api/rooms/'.(isset($data->name) ? "update_classroom" : "add_classroom").'" method="POST" id="ajax-data-form-content">
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
@@ -3154,7 +3505,7 @@ class Forms extends Myschoolgh {
         $isData = !empty($userData) && isset($userData->client_id) ? true : false;
 
         $response = '
-        <form class="ajax-data-form" id="'.$form_id.'" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
+        <form autocomplete="Off" class="ajax-data-form" id="'.$form_id.'" enctype="multipart/form-data" action="'.$baseUrl.'api/users/'.( $isData ? "update" : "add").'" method="POST">
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-12">
                     <h5>BIO INFORMATION</h5>
@@ -3162,7 +3513,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="image">Image</label>
-                        <input type="file" accept="image/*" name="image" id="image" class="form-control">
+                        <input type="file" accept=".jpg,.jpeg,.png,.gif" name="image" id="image" class="form-control">
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -3294,7 +3645,7 @@ class Forms extends Myschoolgh {
     public function settings_form($clientId, $form_id = "ajax-data-form-content") {
         
         // global
-        global $defaultUser, $defaultClientData;
+        global $defaultUser, $defaultClientData, $academicSession;
 
         // run the school academic terms query
         $this->academic_terms();
@@ -3321,11 +3672,11 @@ class Forms extends Myschoolgh {
         ];
 
         $logoUploaded = (bool) ($client_data && $client_data->client_logo);
-        $last_date = date("Y-m-d", strtotime("+1 year"));
+        $last_date = date("Y-m-d", strtotime("+1 year 6 month"));
 
         // GENERAL FORM
         $general = '
-        <form class="ajax-data-form" action="'.$this->baseUrl.'api/account/update" method="POST" id="'.$form_id.'">
+        <form autocomplete="Off" class="ajax-data-form" action="'.$this->baseUrl.'api/account/update" method="POST" id="'.$form_id.'">
         <div class="row">
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GENERAL SETTINGS</h5></div>
             '.($logoUploaded ? 
@@ -3337,7 +3688,7 @@ class Forms extends Myschoolgh {
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
                     <label for="logo">Logo</label>
-                    <input type="file" name="logo" id="logo" accept="image/*" class="form-control">
+                    <input type="file" name="logo" id="logo" accept=".jpg,.jpeg,.png,.gif" class="form-control">
                 </div>
             </div>
             <div class="col-lg-'.($logoUploaded ? 7 : 9).' col-md-12">
@@ -3443,13 +3794,23 @@ class Forms extends Myschoolgh {
         </form></div>';
         $forms["general"] = $general;
 
-
-
         // ACADEMIC CALENDAR FORM
         $form_id = "_ajax-data-form-content";
         $calendar = '
-        <form class="_ajax-data-form" action="'.$this->baseUrl.'api/account/calendar" method="POST" id="'.$form_id.'">
+        <form autocomplete="Off" class="_ajax-data-form" action="'.$this->baseUrl.'api/account/calendar" method="POST" id="'.$form_id.'">
         <div class="row">
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">ACADEMIC SESSIONS</h5></div>
+            <div class="col-lg-3 col-md-6">
+                <div class="form-group">
+                    <select data-width="100%" name="general[sessions][session]" class="form-control selectpicker">
+                        <option value="">Select Academic Session</option>';
+                            foreach($this->academic_sessions as $_sess => $_session) {
+                                $calendar .= "<option ".(($client_data && $_sess === $academicSession) ? "selected" : null)." value=\"{$_sess}\">{$_session}</option>";                            
+                            }
+                        $calendar .= '</select>
+                    </select>
+                </div>
+            </div>
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">CURRENT ACADEMIC CALENDAR</h5></div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
@@ -3478,9 +3839,9 @@ class Forms extends Myschoolgh {
             <div class="col-lg-12"></div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
-                    <label for="academic_term">Academic Term</label>
+                    <label for="academic_term">Academic Session</label>
                     <select data-width="100%" name="general[academics][academic_term]" class="form-control selectpicker">
-                        <option value="">Select Academic Term</option>';
+                        <option value="">Select Academic Session</option>';
                             foreach($this->school_academic_terms as $each) {
                                 $calendar .= "<option ".(($client_data && $each->name === $prefs->academics->academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
                             }
@@ -3490,13 +3851,13 @@ class Forms extends Myschoolgh {
             </div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
-                    <label for="term_starts">Academic Term Start</label>
+                    <label for="term_starts">Academic Session Start</label>
                     <input type="text" value="'.($prefs->academics->term_starts ?? null).'" name="general[academics][term_starts]" id="term_starts" data-maxdate="'.$last_date.'" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
-                    <label for="term_ends">Academic Term Ends</label>
+                    <label for="term_ends">Academic Session Ends</label>
                     <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" data-maxdate="'.$last_date.'" class="form-control datepicker">
                 </div>
             </div>
@@ -3528,9 +3889,9 @@ class Forms extends Myschoolgh {
             <div class="col-lg-12"></div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
-                    <label for="next_academic_term">Next Academic Term</label>
+                    <label for="next_academic_term">Next Academic Session</label>
                     <select data-width="100%" name="general[academics][next_academic_term]" class="form-control selectpicker">
-                        <option value="">Select Academic Term</option>';
+                        <option value="">Select Academic Session</option>';
                             foreach($this->school_academic_terms as $each) {
                                 $calendar .= "<option ".(($client_data && $each->name === $prefs->academics->next_academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
                             }
@@ -3540,13 +3901,13 @@ class Forms extends Myschoolgh {
             </div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
-                    <label for="next_term_starts">Next Academic Term Start</label>
+                    <label for="next_term_starts">Next Academic Session Start</label>
                     <input type="text" value="'.($prefs->academics->next_term_starts ?? null).'" name="general[academics][next_term_starts]" data-maxdate="'.$last_date.'" id="next_term_starts" class="form-control datepicker">
                 </div>
             </div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
-                    <label for="next_term_ends">Next Academic Term Ends</label>
+                    <label for="next_term_ends">Next Academic Session Ends</label>
                     <input type="text" value="'.($prefs->academics->next_term_ends ?? null).'" name="general[academics][next_term_ends]" data-maxdate="'.$last_date.'" id="next_term_ends" class="form-control datepicker">
                 </div>
             </div>
@@ -3571,7 +3932,7 @@ class Forms extends Myschoolgh {
         foreach($select as $key => $import) {
             $form = '
             <div data-csv_import_column="'.$key.'">
-                <form method="post" action="'.$this->baseUrl.'api/account/import" class="csvDataImportForm" enctype="multipart/form-data">
+                <form autocomplete="Off" method="post" action="'.$this->baseUrl.'api/account/import" class="csvDataImportForm" enctype="multipart/form-data">
                     <div class="row">
                         <div id="dropify-space" class="col-md-8  mt-5 text-center m-auto border pt-4 border-white">
                             <div class="form-content-loader" style="display: none;">
@@ -3748,12 +4109,50 @@ class Forms extends Myschoolgh {
         // examination forms
         $results_structure = '
         <div class="row">
+            <div class="col-lg-9"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GRADEBOOK ASSESSMENT (SBA)</h5></div>
+            <div class="col-lg-9 mb-3 col-md-12" id="term_sba_columns_list">';
+            // init values
+            $qu = 0;
+            // loop through the assessment test group
+            foreach($this->assessment_group as $sba) {
+                // increment
+                $qu++;
+                $sba_mark = $client_data->grading_sba[$sba]["counter"] ?? 0;
+                $sba_percent = $client_data->grading_sba[$sba]["percentage"] ?? 0;
+                $name = $sba == "Test" ? "Test or Quiz" : $sba;
+
+                // append to the structure
+                $results_structure .= "
+                    <div class='row mb-4 sba_item' data-column_id='{$qu}' data-column_name='{$sba}'>
+                        <div class='col-lg-5'>
+                            <label class='text-white'>...</label>
+                            <div><strong>".strtoupper($name)."</strong></div>
+                        </div>
+                        <div class='col-lg-5'>
+                            <label>Least {$sba} Assigned to Students</label>
+                            <input type='number' min='0' value='{$sba_mark}' name='sba_least_{$qu}' data-column_id='{$qu}' class='form-control text-center'>
+                        </div>
+                        <div class='col-lg-2'>
+                            <label>Percentage(%)</label>
+                        <input type='number' title='The overall percentage that it weighs' min='0' value='{$sba_percent}' name='sba_percentage_{$qu}' data-column_id='{$qu}' class='form-control text-center'>
+                        </div>
+                    </div>";
+            }
+        $results_structure .= "
+            </div>
+        </div>";
+
+        // examination forms
+        $results_structure .= '
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="d-flex pb-3 justify-content-between">
+                    <div><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">TERMINAL REPORT STRUCTURE</h5></div>
+                    <div><button type="button" title="Add new Column" onclick="return add_report_column()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
+                </div>
+            </div>
             <div class="col-lg-9 mb-3 col-md-12">
                 <div class="form-group">
-                    <div class="d-flex pb-3 justify-content-between">
-                        <div><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">TERMINAL REPORT STRUCTURE</h5></div>
-                        <div><button type="button" title="Add new Column" onclick="return add_report_column()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
-                    </div>
                     '.$default_columns_list[0].'
                     <div class="font-italic text-success">Add to list</div>
                     <div id="term_report_columns_list">'.$columns_listing.'</div>
@@ -3796,6 +4195,73 @@ class Forms extends Myschoolgh {
 
         $forms["results_structure"] = $results_structure;
 
+        // get the remarks list
+        $remarks_listing = "";
+
+        // get the user record
+        $remarks_list = $this->pushQuery("*", "grading_remarks_list", "client_id='{$clientId}' LIMIT 1");
+        $remarks_category_list = $this->pushQuery("*", "grading_remarks_category", "1 LIMIT 10");
+
+        // if the grading information is not empty
+        if(!empty($remarks_list)) {
+            // get the information
+            $remarks_list = $remarks_list[0]->remarks;
+            $remarks_list = !empty($remarks_list) ? json_decode($remarks_list) : [];
+
+            $count = 0;
+            // loop through the remarks list
+            foreach($remarks_list as $key => $remark) {
+                $count++;
+                $remarks_listing .= "
+                <div class='row mb-3 remark_item' data-remark_id='{$key}'>
+                    <div class='col-lg-4 mb-1 col-md-5'>
+                        ".($key == 1 ? '<label>Category</label>' : null)."
+                        <select data-width='100%' name='remarks[{$key}][category_id]' class='form-control selectpicker'>
+                            <option value=''>Select Category</option>";
+                            foreach($remarks_category_list as $category) {
+                                $remarks_listing .= "<option ".($remark->category_id == $category->id ? "selected" : null)." value='{$category->id}'>{$category->name}</option>";
+                            }
+                $remarks_listing .= "</select>
+                    </div>
+                    <div class='col-lg-7 mb-1 col-md-6'>
+                        ".($key == 1 ? '<label>Remarks</label>' : null)."
+                        <input type='text' value='{$remark->remarks}' maxlength='500' name='remarks[{$key}][remarks]' class='form-control'>
+                    </div>
+                    <div class='col-lg-1 mb-1'>
+                        ".($key == 1 ? '<label class="text-white">.</label>' : null)."
+                        <button type='button' onclick='return remove_remark_row({$key})' data-remark_id='{$key}' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
+                    </div>
+                </div>";
+            }
+        }
+
+        // remarks structure
+        $results_remarks = '
+        <div class="row">
+            <div class="col-lg-11">
+                <div class="d-flex pb-3 justify-content-between">
+                    <div><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">EXAMS RESULTS STRUCTURE</h5></div>
+                    <div class="mt-2"><button type="button" title="Add new Column" onclick="return add_result_comment()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
+                </div>
+            </div>
+            <div class="col-lg-11 mb-3 col-md-12">
+                <div class="form-group">
+                    <div class="font-italic text-success"></div>
+                    <div id="results_comments_list">'.$remarks_listing.'</div>
+                </div>
+            </div>
+            <div class="col-lg-11 pt-3 col-md-12 border-top">
+                <div class="form-group text-right">
+                    <button type="button" onclick="return save_results_remarks()" id="save_results_remarks" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Remarks</button>
+                </div>
+            </div>
+        </div>';
+
+        $forms["_remarks"] = [
+            "remarks_category_list" => $remarks_category_list,
+            "results_remarks" => $results_remarks
+        ];
+
         return $forms;
     }
 
@@ -3817,9 +4283,10 @@ class Forms extends Myschoolgh {
         $classes_param = (object) [
             "filter" => $defaultUser->user_type,
             "userId" => $defaultUser->user_id,
-            "columns" => "id, item_id, name",
+            "columns" => "id, item_id, name, payment_module",
+            "user_type" => $defaultUser->user_type,
             "clientId" => $clientId,
-            "limit" => 99999
+            "limit" => 100
         ];
         $classes_list = load_class("classes", "controllers")->list($classes_param)["data"];
         
@@ -3842,13 +4309,13 @@ class Forms extends Myschoolgh {
                     <select data-width='100%' class='form-control selectpicker' name='class_id' id='class_id'>
                         <option value=''>Select the Class</option>";
                         foreach($classes_list as $class) {
-                            $the_form["general"] .= "<option value='{$class->item_id}'>{$class->name}</option>";
+                            $the_form["general"] .= "<option data-payment_module='{$class->payment_module}' value='{$class->item_id}'>".strtoupper($class->name)."</option>";
                         }
         $the_form["general"] .= "</select>
                     </div>
                     <div class='col-lg-4 mb-2'>
                         <select data-width='100%' class='form-control selectpicker' name='course_id' id='course_id'>
-                            <option value=''>Select the Course</option>
+                            <option value=''>Select the Subject</option>
                         </select>
                     </div>
                     <div class='col-lg-3 mb-2'>
@@ -3871,6 +4338,12 @@ class Forms extends Myschoolgh {
                             <input type='file' name='upload_report_file' accept='.csv' class='form-control'>
                         </div>
                     </div>
+                    <div class='col-md-2 mt-3 hidden' id='upload_file'>
+                        <div class='form-group'>
+                            <label>&nbsp;</label>
+                            <button onclick='return upload_csv_file();' class='btn btn-block btn-primary'><i class='fa fa-upload'></i> Click to Upload</button>
+                        </div>
+                    </div>
                     <div class='col-lg-12 mt-4' id='summary_report_sheet_content'></div>
                 </div>";
 
@@ -3889,7 +4362,7 @@ class Forms extends Myschoolgh {
         $the_form = [];
 
         // get the client data
-        global $defaultUser;
+        global $defaultUser, $academicSession;
         $client_data = $additional->client_data;
 
         // run the school academic terms query
@@ -3910,9 +4383,9 @@ class Forms extends Myschoolgh {
         $classes_param = (object) [
             "filter" => $defaultUser->user_type,
             "userId" => $defaultUser->user_id,
-            "columns" => "id, item_id, name",
+            "columns" => "id, item_id, name, payment_module",
             "clientId" => $clientId,
-            "limit" => 99999
+            "limit" => 100
         ];
         $classes_list = load_class("classes", "controllers")->list($classes_param)["data"];
         
@@ -3930,7 +4403,7 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class='col-md-4 mb-2'>
                     <select data-width='100%' class='form-control selectpicker' name='academic_term' id='academic_term'>
-                        <option value=''>Select Academic Term</option>";
+                        <option value=''>Select Academic {$academicSession}</option>";
                             foreach($this->school_academic_terms as $each) {
                                 $the_form["general"] .= "<option ".(($client_data && $each->name === $prefs->academics->academic_term) ? "selected" : null)." value=\"{$each->name}\">{$each->description}</option>";                            
                             }
@@ -3942,7 +4415,7 @@ class Forms extends Myschoolgh {
                     <select data-width='100%' {$disabled} class='form-control selectpicker' name='class_id' id='class_id'>
                         <option value=''>Select the Class</option>";
                         foreach($classes_list as $class) {
-                            $the_form["general"] .= "<option ".($additional->class_guid ==  $class->item_id ? "selected" : null)." value='{$class->item_id}'>{$class->name}</option>";
+                            $the_form["general"] .= "<option data-payment_module='{$class->payment_module}' ".($additional->class_guid ==  $class->item_id ? "selected" : null)." value='{$class->item_id}'>".strtoupper($class->name)."</option>";
                         }
         $the_form["general"] .= "</select>
                     </div>
@@ -3978,7 +4451,7 @@ class Forms extends Myschoolgh {
         $banks_list = $this->pushQuery("id, bank_name, phone_number", "banks_list", "1 ORDER BY bank_name");
         
         $bank = '
-        <form class="ajax-data-form" action="'.$this->baseUrl.'api/payroll/paymentdetails" method="POST" id="ajax-data-form-content">
+        <form autocomplete="Off" class="ajax-data-form" action="'.$this->baseUrl.'api/payroll/paymentdetails" method="POST" id="ajax-data-form-content">
             <div class="row">
                 <div class="col-lg-12">
                     <h5>BANK DETAILS</h5>
@@ -4304,6 +4777,7 @@ class Forms extends Myschoolgh {
                                     <div class="col-lg-8">
                                         <div class="input-group mb-3">
                                             <select name="payment_mode" id="payment_mode" class="form-control selectpicker">
+                                                <option value="">Select Payment Mode</option>
                                                 <option value="Bank">Bank</option>
                                                 <option value="Cash">Cash</option>
                                                 <option value="Other">Other</option>
@@ -4409,6 +4883,7 @@ class Forms extends Myschoolgh {
                     "show_view" => "e-learning_view",
                     "module" => "elearning_resource",
                     "item_id" => $params->data->item_id,
+                    "accept" => implode(",", [".mp4", ".mpg", ".mpeg", ".flv"]),
                     "attachments_list" => $attachment
                 ];
 
@@ -4423,13 +4898,14 @@ class Forms extends Myschoolgh {
 
         // load the classes list
         $classes_param = (object) [
+            "limit" => 100,
             "clientId" => $params->clientId,
-            "columns" => "id, item_id, name"
+            "columns" => "id, item_id, name, payment_module"
         ];
         $classes_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
         $html_content = '
-        <form class="ajax-data-form" action="'.$this->baseUrl.'api/resources/'.(isset($params->data) ? "update_4elearning" : "upload_4elearning").'" method="POST" id="ajax-data-form-content">
+        <form autocomplete="Off" class="ajax-data-form" action="'.$this->baseUrl.'api/resources/'.(isset($params->data) ? "update_4elearning" : "upload_4elearning").'" method="POST" id="ajax-data-form-content">
             <div class="row">
                 <div class="col-lg-9">
                     <div class="row">
@@ -4438,7 +4914,7 @@ class Forms extends Myschoolgh {
                             <select class="form-control selectpicker" data-width="100%" name="class_id">
                                 <option value="">Please Select Class</option>';
                                 foreach($classes_list as $each) {
-                                    $html_content .= "<option ".($class === $each->item_id ? "selected" : null)." value=\"{$each->id}\">{$each->name}</option>";
+                                    $html_content .= "<option data-payment_module='{$each->payment_module}' ".($class === $each->item_id ? "selected" : null)." value=\"{$each->id}\">".strtoupper($each->name)."</option>";
                                 }
                                 $html_content .= '
                             </select>
@@ -4538,7 +5014,7 @@ class Forms extends Myschoolgh {
         $html .= "<div class=\"card\">";
         $html .= "<div class=\"card-header\">".(empty($data) ? "Add Account Type Head" : "Update Account Type Head")."</div>";
         $html .= "<div class=\"card-body\">";
-        $html .= "<form method=\"post\" action=\"{$this->baseUrl}api/accounting/".(!empty($data) ? "update_accounttype" : "add_accounttype")."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">";
+        $html .= "<form autocomplete=\"Off\" method=\"post\" action=\"{$this->baseUrl}api/accounting/".(!empty($data) ? "update_accounttype" : "add_accounttype")."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">";
         $html .= "<div class=\"form-group\">";
         $html .= "<label>Name <span class=\"required\">*</span></label>";
         $html .= "<input type=\"text\" name=\"name\" value=\"".($data->name ?? null)."\" class=\"form-control\">";
@@ -4560,10 +5036,85 @@ class Forms extends Myschoolgh {
         $html .= "<button class=\"btn btn-outline-success\" data-function=\"save\" type=\"button-submit\"><i class=\"fa fa-save\"></i> Save</button>";
         $html .= "</div>";
         $html .= "</div>";
-        $html .= "<form>";
+        $html .= "</form>";
         $html .= "</div>";
         $html .= "</div>";
         $html .= "</div>";
+
+        return $html;
+    }
+
+    /**
+     * Account Head
+     * 
+     * @return String
+     */
+    public function bank_transaction_form(stdClass $params) {
+
+        // init data
+        $data = isset($params->data) && !empty($params->data) ? $params->data : null;
+
+        /** Set parameters for the data to attach */
+        $form_params = (object) [
+            "module" => "bank_transactions_{$params->form_type}",
+            "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf"]),
+            "ismultiple" => true,
+            "no_notice" => true,
+            "userData" => $params->userData,
+            "item_id" => $data->item_id ?? null
+        ];
+
+        // get the list of banks
+        $banks_list = $this->pushQuery("id, bank_name, phone_number", "banks_list", "1 ORDER BY bank_name");
+
+        $html = "";
+        $html .= "<div id=\"bank_transaction_form\" class=\"col-12 col-md-5 col-lg-4\">";
+        $html .= "<div class=\"card\">";
+        $html .= "<div class=\"card-header\">".(empty($data) ? "Add {$params->form_type}" : "Update {$params->form_type}")."</div>";
+        $html .= "<div class=\"card-body\">";
+        $html .= "<form autocomplete=\"Off\" method=\"post\" action=\"{$this->baseUrl}api/accounting/".(!empty($data) ? "update_{$params->form_url}" : "add_{$params->form_url}")."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">";
+        $html .= '<div class="form-group">
+            <label>Bank Name <span class="required">*</span></label>
+            <select data-width="100%" class="form-control selectpicker" id="bank_id" name="bank_id">
+            <option value="">Select Bank</option>';
+            foreach($banks_list as $bank) {
+                $html .= "<option value=\"{$bank->id}\">{$bank->bank_name}</option>";
+            }
+        $html .= "</select></div>
+            <div class=\"form-group\">
+                <label>Bank Account Number <span class=\"required\">*</span></label>
+                <input type=\"text\" onkeyup='this.value = this.value.replace(/[^\d.]+/g, \"\");' maxlength='15' name=\"account_number\" value=\"".($data->account_number ?? null)."\" class=\"form-control\">
+                <input type=\"hidden\" readonly value=\"".($data->transaction_id ?? null)."\" name=\"transaction_id\" class=\"form-control\">
+            </div>
+            <div class=\"form-group\">
+                <label>Account Name <span class=\"required\">*</span></label>
+                <input maxlength='64' type=\"text\" name=\"account_name\" value=\"".($data->account_name ?? null)."\" class=\"form-control\">
+            </div>
+            <div class=\"form-group\">
+                <label>Amount {$params->form["amount"]}<span class=\"required\">*</span></label>
+                <input type=\"text\" maxlength='7' onkeyup='this.value = this.value.replace(/[^\d.]+/g, \"\");' name=\"amount\" value=\"".($data->amount ?? null)."\" class=\"form-control\">
+            </div>
+            <div class=\"form-group\">
+                <label>Description</label>
+                <textarea maxlength='255' type=\"text\" name=\"description\" class=\"form-control\">".($data->account_name ?? null)."</textarea>
+            </div>
+            <div class='form-group text-center mb-0'>
+                <div class='row'>{$this->form_attachment_placeholder($form_params)}</div>
+            </div>
+            <div class='form-group text-danger text-center'>
+                <em>NB: This action cannot be reversed once confirmed.</em>
+            </div><div class=\"d-flex justify-content-between\">
+            <div align=\"left\">
+                <button class=\"btn btn-outline-danger\" onclick=\"return reset_account_form('api/accounting/add_accounttype')\" type=\"button\">Cancel</button>
+            </div>
+                <div align=\"right\">
+                    <button class=\"btn btn-outline-success\" data-function=\"save\" type=\"button-submit\"><i class=\"fa fa-save\"></i> Save</button>
+                    </div>
+                </div>
+            </form>
+            </div>
+            </div>
+        </div>";
 
         return $html;
     }
@@ -4585,7 +5136,7 @@ class Forms extends Myschoolgh {
         $html .= "<div class=\"card\">";
         $html .= "<div class=\"card-header\">".(empty($data) ? "Create Account" : "Update Account")."</div>";
         $html .= "<div class=\"card-body\">";
-        $html .= "<form method=\"post\" action=\"{$this->baseUrl}api/accounting/".(!empty($data) ? "update_account" : "add_account")."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">";
+        $html .= "<form autocomplete=\"Off\" method=\"post\" action=\"{$this->baseUrl}api/accounting/".(!empty($data) ? "update_account" : "add_account")."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">";
         $html .= "<div class=\"form-group\">";
         $html .= "<label>Account Name <span class=\"required\">*</span></label>";
         $html .= "<input type=\"text\" name=\"account_name\" value=\"".($data->account_name ?? null)."\" class=\"form-control\">";
@@ -4611,15 +5162,15 @@ class Forms extends Myschoolgh {
         $html .= "<label>Opening Balance <span class=\"required\">*</span></label>";
         $html .= "<input type=\"number\" name=\"opening_balance\" value=\"".($data->opening_balance ?? 0)."\" class=\"form-control\">";
         $html .= "</div>";
-        $html .= "<div class=\"row\">";
-        $html .= "<div class=\"col-md-6\" align=\"left\">";
+        $html .= "<div class=\"d-flex justify-content-between\">";
+        $html .= "<div align=\"left\">";
         $html .= "<button class=\"btn btn-outline-danger\" onclick=\"return reset_account_form('api/accounting/add_account', 'Create Account')\" type=\"button\">Cancel</button>";
         $html .= "</div>";
-        $html .= "<div class=\"col-md-6\" align=\"right\">";
+        $html .= "<div align=\"right\">";
         $html .= "<button class=\"btn btn-outline-success\" data-function=\"save\" type=\"button-submit\"><i class=\"fa fa-save\"></i> Save</button>";
         $html .= "</div>";
         $html .= "</div>";
-        $html .= "<form>";
+        $html .= "</form>";
         $html .= "</div>";
         $html .= "</div>";
         $html .= "</div>";
@@ -4640,7 +5191,7 @@ class Forms extends Myschoolgh {
         $form_route = [
             "deposit" => [
                 "type" => "Income",
-                "title" => "Add Deposit",
+                "title" => "Add Income",
                 "add" => "{$this->baseUrl}api/accounting/add_deposit",
                 "update" => "{$this->baseUrl}api/accounting/update_deposit"
             ],
@@ -4657,7 +5208,9 @@ class Forms extends Myschoolgh {
 
         /** Set parameters for the data to attach */
         $form_params = (object) [
-            "module" => "accounts_transaction",
+            "module" => "accounts_transaction_{$params->route}",
+            "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf"]),
+            "ismultiple" => true,
             "userData" => $params->userData,
             "item_id" => $data->item_id ?? null
         ];
@@ -4672,6 +5225,7 @@ class Forms extends Myschoolgh {
             $files_param = (object) [
                 "userData" => $params->userData,
                 "label" => "list",
+                "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf"]),
                 "is_deletable" => (bool) ($data->state === "Pending"),
                 "module" => "accounts_transaction",
                 "item_id" => $data->item_id,
@@ -4687,7 +5241,7 @@ class Forms extends Myschoolgh {
         }
 
         // load the accounts
-        $accounts_list = $this->pushQuery("account_name, item_id, account_number, account_bank, default_account", "accounts", "client_id = '{$params->clientId}' AND status='1'");
+        $accounts_list = $this->pushQuery("account_name, item_id, account_number, account_bank, default_account", "accounts", "client_id = '{$params->clientId}' AND state='Active' AND status='1'");
         $accounts_head_list = $this->pushQuery("name, item_id", "accounts_type_head", "client_id = '{$params->clientId}' AND status='1' AND type='{$form_route[$params->route]["type"]}'");
 
         $html = "
@@ -4702,7 +5256,7 @@ class Forms extends Myschoolgh {
                     </div>
                     <div class=\"card-header\">".(empty($data) ? $form_route[$params->route]["title"] : $form_route[$params->route]["title"])."</div>
                     <div class=\"card-body\">
-                    <form method=\"post\" action=\"".(!empty($data) ? $form_route[$params->route]["update"] : $form_route[$params->route]["add"])."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">
+                    <form autocomplete=\"Off\" method=\"post\" action=\"".(!empty($data) ? $form_route[$params->route]["update"] : $form_route[$params->route]["add"])."\" class=\"ajax-data-form\" id=\"ajax-data-form-content\">
                         <div class=\"form-group\">
                             <label>Account <span class=\"required\">*</span></label>
                             <select data-width=\"100%\" name=\"account_id\" class=\"form-control selectpicker\">";
@@ -4725,7 +5279,7 @@ class Forms extends Myschoolgh {
                             $html .= "</select>
                         </div>
                         <div class=\"form-group\">
-                            <label>Reference</label>
+                            <label>Reference <span class=\"required\">*</span></label>
                             <input type=\"text\" name=\"reference\" value=\"".($data->reference ?? null)."\" class=\"form-control\">
                         </div>
                         <div class=\"form-group\">
@@ -4734,7 +5288,7 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class=\"form-group\">
                             <label>Date <span class=\"required\">*</span></label>
-                            <input type=\"text\" name=\"date\" value=\"".($data->record_date ?? null)."\" class=\"form-control datepicker\">
+                            <input type=\"text\" name=\"date\" readonly value=\"".($data->record_date ?? date("Y-m-d"))."\" class=\"form-control\">
                         </div>
                         <div class=\"form-group\">
                             <label>Pay Via</label>
@@ -4762,7 +5316,7 @@ class Forms extends Myschoolgh {
                                 <button class=\"btn btn-outline-success\" data-function=\"save\" type=\"button-submit\"><i class=\"fa fa-save\"></i> Save</button>
                             </div>
                         </div>
-                    <form>
+                    </form>
                     </div>
                 </div>
             </div>
@@ -5199,173 +5753,901 @@ class Forms extends Myschoolgh {
     }
 
     /**
-     * Booking Log Form
+     * Generate the Bus Form
      * 
-     * @param stdClass $params
-     * @param String $course_id
+     * @return Array
+     */
+    public function bus_form($data) {
+
+        /** Set parameters for the data to attach */
+        $file_params = (object) [
+            "accept" => implode(",", [".pdf",".jpg",".png",".jpeg",".pjpeg"]),
+            "module" => "buses_attachment_".(!empty($data) ? $data->item_id : "root"),
+            "userData" => $this->thisUser,
+            "ismultiple" => true,
+            "item_id" => $data->item_id ?? null
+        ];
+
+        $html = '<div data-backdrop="static" data-keyboard="false" class="modal fade" id="busModal">
+            <form method="POST" autocomplete="Off" action="'.$this->baseUrl.'api/buses/save" class="ajax-data-form" id="ajax-data-form-content">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Allowance / Deduction Types</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="name">Brand Name <span class="required">*</span></label>
+                                        <input type="text" maxlength="100" name="brand" id="brand" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="registration_number">Registration Number <span class="required">*</span></label>
+                                        <input type="text" maxlength="14" name="registration_number" class="form-control text-uppercase">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="color">Amount Purchased</label>
+                                        <input type="number" min="1" maxlength="20" name="amount" id="amount" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="Color">Color</label>
+                                        <input type="color" maxlength="20" name="color" id="color" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="year_of_purchase">Date / Year Purchased</label>
+                                        <input type="text" maxlength="20" name="year_of_purchase" class="form-control datepicker">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="insurance_company">Insurance Company <span class="required">*</span></label>
+                                        <input type="text" maxlength="255" name="insurance_company" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="insurance_date">Date of Insurance <span class="required">*</span></label>
+                                        <input type="text" maxlength="12" name="insurance_date" class="form-control datepicker">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="description">Description</label>
+                                        <textarea placeholder="" maxlength="255" name="description" id="description" rows="5" class="form-control"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        '.$this->form_attachment_placeholder($file_params, "").'
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer p-0">
+                                <input type="hidden" name="bus_id">
+                                <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
+                                <button data-form_id="ajax-data-form-content" type="button-submit" class="btn btn-primary">Save Record</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>';
+
+        return $html;
+
+    }
+
+
+    /**
+     * Display the submitted assignment by the student
+     * It displays content submitted and also any uploaded file attachment
+     * 
+     * @param Object $data
      * 
      * @return String
      */
-    public function booking_form(stdClass $params) {
+    public function assignment_review_detail($data) {
 
-        // description
-        $html_content = "";
+        // begin the html content
+        $html = "";
 
-        $item_id = isset($params->data->item_id) ? $params->data->item_id : null;
-        
-        $html_content = "
-        <form action='{$this->baseUrl}api/booking/log' autocomplete='Off' method='POST' id='_ajax-data-form-content' class='_ajaxform'>
-            <div class='row border-bottom pb-2'>
-            ".(empty($item_id) ? "
-                <div class='col-md-6 col-sm-12 text-left'>
-                    <h5>Add Record</h5>
+        // set the content to display
+        if(!empty($data["content"])) {
+            // is graded
+            $graded = $data["content"]->graded ? "Graded" : "Pending";
+            $graded_color = $data["content"]->graded ? "success" : "primary";
+
+            // set the content
+            $html .= "
+            <table class='table table-sm table-bordered' width='100%'>
+                <tr>
+                    <td colspan='2' align='center'><span class='font-25'>{$data["content"]->assignment_title}</span></td>
+                </tr>
+                <tr>
+                    <td class='text-uppercase text-small'>
+                        <div><strong>STUDENT NAME:</strong></div>
+                        <div><strong class='text-primary font-20'>{$data["content"]->student_name}</strong></div>
+                    </td>
+                    <td class='text-uppercase text-small'>
+                        <div><strong>REG. ID:</strong></div>
+                        <div><strong class='text-primary font-20'>{$data["content"]->unique_id}</strong></div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <strong>Date Submitted:</strong> {$data["content"]->date_submitted}
+                    </td>
+                    <td>
+                        <span class='badge badge-{$graded_color}'>{$graded}</span>
+                    </td>
+                </tr>
+            </table>";
+            $html .= "<div class='col-lg-12 p-0'>{$data["content"]->content}</div>";
+            $html .= !empty($data["file"]) ? '<div class="col-lg-12 border-bottom mb-3 pb-3"></div>' : null;
+        }
+
+        // set the file content
+        $html .= !empty($data["file"]) ? $data["file"] : null;
+
+        // set the close modal
+        $html .= '<div class="col-lg-12 border-top mt-3 pt-3" align="center">
+                <button type="reset" class="btn btn-light" data-dismiss="modal">Close Modal</button>
+            </div>';
+
+        return $html;
+
+    }
+
+    /**
+     * Knowledgebase Form
+     * 
+     * @param stdClass $data
+     * 
+     * @return String
+     */
+    public function knowledgebase_form($data = null) {
+        // global variables
+        global $defaultUser;
+
+        // file upload parameter
+        $file_params = (object) [
+            "module" => "knowledgebase",
+            "userData" => $defaultUser,
+            "accept" => ".png,.jpg,jpeg",
+            "is_deletable" => true,
+            "attachments_list" => $data->attachments_list ?? []
+        ];
+
+        $html_content = '
+        <form autocomplete="Off" class="ajax-data-form" action="'.$this->baseUrl.'api/support/'.(isset($data->subject) ? "knowledgebase_update" : "knowledgebase_add").'" method="POST" id="ajax-data-form-content">
+            <div class="row">
+                <div class="col-md-8">
+                    <label for="">Article Title <span class="required">*</span></label>
+                    <input type="text" placeholder="Enter Title" value="'.($data->subject ?? null).'" class="form-control" name="subject">
                 </div>
-                <div class='col-md-6 col-sm-12 text-right'>
-                    <button type='button' class='btn btn-primary' title='Add a New Member' onclick='return add_sibling()'><i class='fa fa-user'></i> Add New Member</button>
-                </div>" : "
-                <div class='col-md-6 col-sm-12 text-left'>
-                    <h5>Update Record</h5>
+                <div class="col-md-4">
+                    <label>Section:</label>
+                    <select name="section" data-width="100%" class="selectpicker form-control">
+                        <option value="">Please Select Section of App</option>';
+                        foreach($this->support_sections as $value => $section) {
+                            $html_content .= "<option ".(!empty($data->section) && ($data->section == $value) ? "selected" : null)." value='{$value}'>{$section}</option>";
+                        }
+                    $html_content .= '
+                    </select>
                 </div>
-                <div class='col-md-6 col-sm-12 text-right'>
-                    <a href='{$this->baseUrl}booking_log' class='btn btn-primary' title='Log New Attendance' onclick='return add_sibling()'><i class='fa fa-user'></i> Log New Attendance</a>
+                <div class="col-md-12 mt-3 mb-3">
+                    <label for="">Full Content <span class="required">*</span></label>
+                    '.$this->textarea_editor($data->content ?? null, "faketext", "ajax-form-content", "content").'
                 </div>
-            ")."
+                <div class="col-md-12 p-0">
+                    <div class="form-group">
+                        '.$this->form_attachment_placeholder($file_params).'
+                    </div>
+                </div>
+                <div class="col-md-12 text-right">
+                    <input type="hidden" value="'.($data->item_id ?? null).'" name="item_id" readonly>
+                    <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
+                </div>
             </div>
-            <div class='row'>
-            <div class='col-md-12'>
-                <div id='log_attendance_container'>";
+        </form>';
 
-                // if the member list is id
-                if(empty($params->data->members_list)) {
+        return $html_content;
+    }
 
-                    // get the member id
-                    $member_id = random_string("alnum", 15);
+    /**
+     * This method is used for display the form however fill in with the answers submitted by the user
+     * 
+     * @param \stdClass $formData        These are the form fields
+     * @param \stdClass $form_answers       These are the answers provided by the user
+     * @param Bool  $is_editable            This is to specify whether the user wants to 
+     * 
+     * @return String 
+     */
+    public function preload_form_data($formData, $form_answers, $is_editable = true, $form_name = null) {
 
-                    // get the list
-                    $html_content .= "
-                        <div class='row member_item' data-row_id='1'>
-                            <div class='col-md-3'>
-                                <div class='form-group'>
-                                    <label>Date <span class='required'>*</span></label>
-                                    <input maxlength='12' type='text' name='log_date' id='log_date' class='form-control datepicker'>
-                                </div>
-                            </div>
-                            <div class='col-md-9'>
-                                <div class='form-group'>
-                                    <label>Fullname <span class='required'>*</span></label>
-                                    <input oninput='return suggest_member(this.value, 1)' maxlength='64' type='text' name='fullname[1]' id='fullname[1]' class='form-control'>
-                                    <div data-row_id='1' class='picomplete-items col-12 p-0'></div>
-                                </div>
-                            </div>
-                            <div class='col-md-3'>
-                                <div class='form-group'>
-                                    <label>Gender</label>
-                                    <select type='text' data-width='100%' name='gender[1]' id='gender[1]' class='selectpicker form-control'>
-                                        <option value=''>Please Select</option>
-                                        <option value='Male'>Male</option>
-                                        <option value='Female'>Female</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class='col-md-4'>
-                                <div class='form-group'>
-                                    <label>Contact Number</label>
-                                    <input maxlength='12' min='0' type='number' name='contact[1]' id='contact[1]' class='form-control'>
-                                </div>
-                            </div>
-                            <div class='col-md-3'>
-                                <div class='form-group'>
-                                    <label>Place of Residence</label>
-                                    <input maxlength='32' type='text' name='residence[1]' id='residence[1]' class='form-control'>
-                                </div>
-                            </div>
-                            <div class='col-md-2'>
-                                <div class='form-group'>
-                                    <label>Temperature <span class='required'>*</span></label>
-                                    <input maxlength='32' min='10' type='hidden' data-input='item_id' name='item_id[1]' id='item_id[1]' class='form-control'>
-                                    <input maxlength='6' autocomplete='Off' type='float' name='temperature[1]' id='temperature[1]' class='form-control'>
-                                </div>
-                            </div>
-                        </div>";
-                } else {
+        $readonly = !$is_editable ? "disabled=\"disabled\"" : null;
+        $form_answers = (array) $form_answers;
 
-                    // convert to object
-                    $members_list = json_encode($params->data->members_list);
-                    $members_list = json_decode($members_list);
+        /** Form content display */
+        $html_content = "<form action='{$this->baseUrl}api/{$form_name}/update' method='POST' id='ajax-data-form-content' class='ajax-data-form'>
+            <div class='row'>";
+        $html_content .= form_loader();
 
-                    // loop through the users list
-                    foreach($members_list as $key => $member) {
-                        // top list
-                        $border_top = $key != 1 ? "mt-2 border-top pt-3" : null;
+        // loop throught the list of form fields
+        foreach($formData->form_fields as $key => $eachField) {
 
-                        // set the html
-                        $html_content .= "
-                        <div class='row member_item {$border_top}' data-row_id='{$key}'>
-                            ".($key == 1 ? 
-                                "<div class='col-md-3'>
-                                    <div class='form-group'>
-                                        <label>Date <span class='required'>*</span></label>
-                                        <input maxlength='12' value='".($member->log_date ?? null)."' type='text' name='log_date' id='log_date' class='form-control datepicker'>
-                                    </div>
-                                </div>": ""
-                            )."
-                            <div class='col-md-".($key == 1 ? 9 : 11)."'>
-                                <div class='form-group'>
-                                    <label>Fullname <span class='required'>*</span></label>
-                                    <input maxlength='64' value='{$member->fullname}' type='text' name='fullname[{$key}]' id='fullname[{$key}]' class='form-control'>
-                                </div>
-                            </div>
-                            ".($key == 1 ? "" : "
-                            <div class='col-md-1'>
-                                <div class='form-group'>
-                                    <label class='text-center'>.</label>
-                                    <button type='button' onclick='return remove_row({$key})' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
-                                </div>
-                            </div>")."
-                            <div class='col-md-3'>
-                                <div class='form-group'>
-                                    <label>Gender</label>
-                                    <select type='text' name='gender[{$key}]' id='gender[{$key}]' data-width='100%' class='form-control selectpicker'>
-                                        <option value=''>Please Select</option>
-                                        <option ".(isset($member->gender) && $member->gender == "Male" ? "selected" : null)." Male'>Male</option>
-                                        <option ".(isset($member->gender) && $member->gender == "Female" ? "selected" : null)." value='Female'>Female</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class='col-md-3'>
-                                <div class='form-group'>
-                                    <label>Contact Number</label>
-                                    <input maxlength='12' min='0' value='".($member->contact ?? null)."' type='number' name='contact[{$key}]' id='contact[{$key}]' class='form-control'>
-                                </div>
-                            </div>
-                            <div class='col-md-3'>
-                                <div class='form-group'>
-                                    <label>Place of Residence</label>
-                                    <input maxlength='32' value='".($member->residence ?? null)."' type='text' name='residence[{$key}]' id='residence[{$key}]' class='form-control'>
-                                </div>
-                            </div>
-                            <div class='col-md-3'>
-                                <div class='form-group'>
-                                    <label>Temperature <span class='required'>*</span></label>
-                                    <input maxlength='32' min='10' value='".($member->item_id ?? null)."' type='hidden' hidden name='item_id[{$key}]' id='item_id[{$key}]' class='form-control'>
-                                    <input maxlength='6' autocomplete='Off' value='".($member->temperature ?? null)."' type='float' name='temperature[{$key}]' id='temperature[{$key}]' class='form-control'>
-                                </div>
-                            </div>
-                        </div>";
-                    }
+            // required field
+            $required = $eachField->required == "yes" ? "required" : "";
+
+            // if prefill is true
+            $value =  "";
+            
+            // if preload is not null and the value is set
+            $value = isset($form_answers[$key]) ? $form_answers[$key] : null;
+
+            // form content
+            $html_content .= "<div class=\"col-lg-{$eachField->_width}\">";
+            $html_content .= "<div class=\"form-group\">";
+            $html_content .= "<label for=\"field[{$key}]\">{$eachField->label} ".(($required) ? " &nbsp;<span class='required'>*</span>" : null)."</label>";
+
+            // if the type is an input, date or email
+            if(in_array($eachField->type, ["input", "date", "email"])) {
+                
+                // set some additional variables
+                $type = (in_array($eachField->type, ["input", "date"])) ? "text" : $eachField->type;
+                $class = $eachField->type == "date" ? "datepicker" : "";
+
+                $html_content .= "<input {$readonly} value=\"{$value}\" type=\"{$type}\" {$required} class=\"form-control {$class}\" name=\"field[{$key}]\" id=\"field[{$key}]\">";
+
+            }
+
+            // if a textarea was parsed
+            if(in_array($eachField->type, ["textarea"])) {
+                $html_content .= "<textarea {$readonly} {$required} rows=\"7\" class=\"form-control\" name=\"field[{$key}]\" id=\"field[{$key}]\">{$value}</textarea>";
+            }
+
+            // if a select field was parsed
+            if(in_array($eachField->type, ["select"])) {
+                // show this list
+                $html_content .= "<select {$readonly} class=\"form-control selectpicker\" {$required} name=\"field[{$key}]\" id=\"field[{$key}]\" data-width=\"100%\">";
+
+                // show the values for the select fields
+                $html_content .= "<option value=\"null\">Please Select:</option>";
+                
+                // loop through the list
+                foreach($eachField->select as $eachItem) {
+                    // append to the list
+                    $html_content .= "<option ".(($value == $eachItem->value) ? "selected" : "null")." value=\"{$eachItem->value}\">{$eachItem->label}</option>";
+                }
+                
+                $html_content .= "</select>";
+            }
+            $html_content .= "
+                    </div>
+                </div>";
+
+        }
+
+        /** Additional html for the form */
+        $html_content .= "</div></form>";
+
+        return $html_content;
+
+    }
+
+    /**
+     * This method will be enlisting the form
+     * It displays both during the updating of the form by Admins or Completing it by the Client.
+     * 
+     * @param stdClass $params
+     * 
+     * @param Bool $is_editable         When set to false, the form will be presented in the form that users can fill in
+     *                                  A true value will make it editable by an admin
+     * 
+     * @param Array $data               This holds data that is need for prefilling the form before displaying to the user
+     * @param Bool  $preview            This when set to true will make all the fields readonly
+     * 
+     * @return Array
+     */
+    public function form_enlisting($params, $is_editable = true, $data = [], $preview = false) {
+        
+        // assign the data set
+        $thisRowId = 0;
+        $thisSelectRow = 0;
+        $html_content = "";
+        $name = isset($params->form_name) ? $params->form_name : null;
+        $readonly = $preview ? "disabled=\"disabled\"" : null;
+        $form_data = isset($params->fields) ? $params->fields : (object)[];
+        $autoComplete = $params->autocomplete ?? "On";
+
+        // loop throught the list of form fields
+        foreach($form_data as $key => $eachField) {
+
+            // if the form is editable
+            if($is_editable) {
+
+                // append to the list
+                $html_content .= "<div class='form-group' data-row=\"{$key}\">
+                    <div class=\"input-group\">
+                        <div class=\"input-group-prepend\">
+                        <div class=\"input-group-text\">".strtoupper($eachField->type)." LABEL &nbsp;</div>
+                        </div>
+                        <input data-name=\"form[type][{$key}]\" hidden type=\"hidden\" value=\"{$eachField->type}\">
+                        <input type=\"text\" value=\"{$eachField->label}\" input-type=\"{$eachField->type}\" data-row=\"{$key}\" required data-name=\"form[label][{$key}]\" id=\"input_label_{$key}\" class=\"form-control\">
+                        <div class=\"input-group-prepend\">
+                            <select class=\"form-control\" data-role=\"required\" data-row=\"{$key}\" style=\"width:130px\" data-name=\"form[required][{$key}]\">
+                                <option ".(($eachField->required == "no") ? "selected" : null)." value=\"no\">Not Required</option>
+                                <option ".(($eachField->required == "yes") ? "selected" : null)." value=\"yes\">Required</option>
+                            </select>";
+
+                        // show this section for only select fields
+                        if(in_array($eachField->type, ["select"])) {
+                            // show this list
+                            $html_content .= "<select class=\"form-control\" data-role=\"values\" data-row=\"{$key}\" style=\"width:230px\" data-name=\"form[values][{$key}]\">";
+
+                            // if the data is empty
+                            if(empty($eachField->select)) {
+                                $html_content .= "<option value=\"null\">No values added:</option>";
+                            } else {
+                                $html_content .= "<option value=\"null\">Values Added:</option>";
+                                // loop through the list
+                                foreach($eachField->select as $eachItem) {
+                                    // append to the list
+                                    $html_content .= "<option value=\"{$eachItem->value}\">{$eachItem->label}</option>";
+                                }
+                            }
+                            $html_content .= "</select>";
+                            // increment the select rows count
+                            $thisSelectRow++;
+                        }
+
+                        // if the field type is in the list
+                        if(in_array($eachField->type, ["input", "date", "email", "textarea"])) {
+                            $html_content .= "
+                                <select class=\"form-control\" data-role=\"_width\" data-row=\"{$key}\" style=\"width:230px\" data-name=\"form[_width][{$key}]\">
+                                    <option ".(($eachField->_width == "6") ? "selected" : null)." value=\"6\">Field Width: - 50%</option>
+                                    <option ".(($eachField->_width == "3") ? "selected" : null)." value=\"3\">Half Width (25%):</option>
+                                    <option ".(($eachField->_width == "6") ? "selected" : null)." value=\"6\">Half Width (50%):</option>
+                                    <option ".(($eachField->_width == "9") ? "selected" : null)." value=\"9\">Half Width (75%):</option>
+                                    <option ".(($eachField->_width == "12") ? "selected" : null)." value=\"12\">Full Width (100%):</option>
+
+                                </select>";
+                        }
+
+                        // show the buttons
+                        $html_content .= "<div class=\"input-group-text\" style=\"background:none;padding:0px;border:0px; margin-left: 10px;\">";
+                        // show the update button for select fields
+                        if(in_array($eachField->type, ["select"])) {
+                            $html_content .= "<button type=\"button\" data-row=\"{$key}\" class=\"btn update-row btn-outline-success mr-1 btn-sm\"><i class=\"fa fa-edit\"></i></button> &nbsp; ";
+                        }                    
+                        $html_content .= "<button type=\"button\" data-row=\"{$key}\" class=\"btn remove-row btn-outline-danger btn-sm\"><i class=\"fa fa-times\"></i></button>
+                            </div>";
+                        
+
+                        $html_content .= "</div>
+                    </div>  
+                </div>";
+                $thisRowId = $key;
+                
+            }
+
+            // if the form is not editable
+            elseif(!$is_editable) {
+                
+                // required field
+                $required = $eachField->required == "yes" ? "required" : "";
+
+                // form content
+                $html_content .= "<div class=\"col-lg-12 p-0\">";
+                $html_content .= "<div class=\"form-group\">";
+                $html_content .= "<label for=\"{$name}field[{$key}]\">{$eachField->label} ".(($required) ? " &nbsp;<span class='required'>*</span>" : null)."</label>";
+                
+                // init the value
+                $value = "";
+
+                // if prefill is true
+                $value =  $data[$key] ?? $value;
+
+                // if the type is an input, date or email
+                if(in_array($eachField->type, ["input", "date", "email"])) {
+                    
+                    // set some additional variables
+                    $type = (in_array($eachField->type, ["input", "date"])) ? "text" : $eachField->type;
+                    $class = $eachField->type == "date" ? "datepicker" : "";
+
+                    $html_content .= "<input autocomplete=\"{$autoComplete}\" {$readonly} value=\"{$value}\" type=\"{$type}\" {$required} class=\"form-control {$class}\" name=\"{$name}field[{$key}]\" id=\"{$name}field[{$key}]\">";
+
                 }
 
-            $html_content .= "
+                // if a textarea was parsed
+                if(in_array($eachField->type, ["textarea"])) {
+                    $html_content .= "<textarea autocomplete=\"{$autoComplete}\" {$readonly} {$required} rows=\"5\" class=\"form-control\" name=\"{$name}field[{$key}]\" id=\"{$name}field[{$key}]\">{$value}</textarea>";
+                }
+
+                // if a select field was parsed
+                if(in_array($eachField->type, ["select"])) {
+                    // show this list
+                    $html_content .= "<select autocomplete=\"{$autoComplete}\" {$readonly} class=\"form-control selectpicker\" {$required} name=\"{$name}field[{$key}]\" id=\"{$name}field[{$key}]\" data-width=\"100%\">";
+
+                    // show the values for the select fields
+                    $html_content .= "<option value=\"null\">Please Select:</option>";
+                    
+                    // loop through the list
+                    foreach($eachField->select as $eachItem) {
+                        // append to the list
+                        $html_content .= "<option ".(($value == $eachItem->value) ? "selected" : "null")." value=\"{$eachItem->value}\">{$eachItem->label}</option>";
+                    }
+                    
+                    $html_content .= "</select>";
+                }
+
+                $html_content .= "</div>";
+                $html_content .= "</div>";
+
+            }
+
+        }
+
+        // return the results
+        return [
+            "form" => $html_content,
+            "thisRowId" => $thisRowId+1,
+            "thisSelectRow" => $thisSelectRow+1
+        ];
+
+    }
+
+    /**
+     * This method will be show the form in an api call
+     * It displays both during the updating of the form by Admins or Completing it by the Client.
+     * 
+     * @param stdClass $params
+     * 
+     * @param Bool $is_editable         When set to false, the form will be presented in the form that users can fill in
+     *                                  A true value will make it editable by an admin
+     * 
+     * @param Array $data               This holds data that is need for prefilling the form before displaying to the user
+     * @param Bool  $preview            This when set to true will make all the fields readonly
+     * 
+     * @return Array
+     */
+    public function form_enlisting_api($params, $is_editable = true, $data = [], $preview = false) {
+        
+        // assign the data set
+        $thisRowId = 0;
+        $thisSelectRow = 0;
+        $html_content = "";
+        $name = "mysgh_app_form";
+        $readonly = $preview ? "disabled=\"disabled\"" : null;
+        $form_data = isset($params->form->fields) ? $params->form->fields : (object)[];
+        $autoComplete = $params->autocomplete ?? "On";
+
+        // set additional variables
+        $description = htmlspecialchars_decode($params->description);
+        $requirements = htmlspecialchars_decode($params->requirements);
+
+        // populate the form
+        $html_content .= "<form class='mysgh_app_form' method='POST' id='mysgh_app_form' action='javascript:mysgh_app_form_submit()'>";
+        $html_content .= "
+        <div class='mysgh_app_form-column_span-12 text-center border-bottom border-primary'>
+            <h2>".strtoupper($params->name)."</h2>
+        </div>";
+        $html_content .= "<div class='mysgh_app_form-column_span-12 text-center border-bottom border-primary pb'>{$description}</div>";
+        $html_content .= "<div id='requirements_container' class='mysgh_app_form-column_span-12 border-bottom border-primary'>{$requirements}</div>";
+        $html_content .= "<div class='mysgh_app_form-column_row' id='mysgh_app_form-form_content'>";
+        // loop throught the list of form fields
+        foreach($form_data as $key => $eachField) {
+
+            // required field
+            $required = $eachField->required == "yes" ? "required" : "";
+
+            // form content
+            $html_content .= "<div class=\"mysgh_app_form-column_span-{$eachField->_width} p-0\">";
+            $html_content .= "<div class=\"form-group\">";
+            $html_content .= "<label for=\"{$name}_field[{$key}]\">{$eachField->label} ".(($required) ? " &nbsp;<span class='required'>*</span>" : null)."</label>";
+            
+            // init the value
+            $value = "";
+
+            // if prefill is true
+            $value =  $data[$key] ?? $value;
+
+            // if the type is an input, date or email
+            if(in_array($eachField->type, ["input", "date", "email"])) {
+                
+                // set some additional variables
+                $type = (in_array($eachField->type, ["date"])) ? "date" : $eachField->type;
+                $class = $eachField->type == "date" ? "datepicker" : "";
+
+                $html_content .= "<input autocomplete=\"{$autoComplete}\" {$readonly} value=\"{$value}\" type=\"{$type}\" {$required} class=\"mysgh_app_form-input {$class}\" name=\"{$name}_field[{$key}]\" id=\"{$name}_field[{$key}]\">";
+
+            }
+
+            // if a textarea was parsed
+            if(in_array($eachField->type, ["textarea"])) {
+                $html_content .= "<textarea autocomplete=\"{$autoComplete}\" {$readonly} {$required} rows=\"5\" class=\"mysgh_app_form-textarea\" name=\"{$name}_field[{$key}]\" id=\"{$name}_field[{$key}]\">{$value}</textarea>";
+            }
+
+            // if a select field was parsed
+            if(in_array($eachField->type, ["select"])) {
+                // show this list
+                $html_content .= "<select autocomplete=\"{$autoComplete}\" {$readonly} class=\"mysgh_app_form-input selectpicker\" {$required} name=\"{$name}_field[{$key}]\" id=\"{$name}_field[{$key}]\" data-width=\"100%\">";
+
+                // show the values for the select fields
+                $html_content .= "<option value=\"null\">Please Select:</option>";
+                
+                // loop through the list
+                foreach($eachField->select as $eachItem) {
+                    // append to the list
+                    $html_content .= "<option ".(($value == $eachItem->value) ? "selected" : "null")." value=\"{$eachItem->value}\">{$eachItem->label}</option>";
+                }
+                
+                $html_content .= "</select>";
+            }
+
+            $html_content .= "</div>";
+            $html_content .= "</div>";
+
+        }
+        $html_content .= "<div class='mysgh_app_form-column_span-12 pb' align='center'><em>{$params->form->form_footnote}</em></div>";
+        $html_content .= "
+        <div class='mysgh_app_form-column_span-12 form-group' align='center'>
+            <button id='mysgh_app_form-submit_botton' class='submit-button'>Submit Form</button>
+        </div>";
+        $html_content .= "
+        <div id='mysgh_app_form-submit_loader' class='mysgh_app_form-results-container'></div>";
+        $html_content .= "</div>";
+        $html_content .= "</form>";
+        $html_content .= "
+        <style>
+            .mysgh_app_form {
+                max-width: 1040px!important;
+                margin: auto auto!important;
+                padding: 15px!important;
+                font-family: 'Nunito', 'Segoe UI', arial!important;
+            }
+            .mysgh_app_form .pb1 {
+                padding-bottom: 5px!important;
+            }
+            .mysgh_app_form .pb {
+                padding-bottom: 10px!important;
+            }
+            .mysgh_app_form .text-center {
+                text-align: center!important;
+            }
+            .mysgh_app_form .submit-button {
+                box-shadow: 0 2px 6px #acb5f6;
+                background-color: #64c909;
+                border-color: #64c909;
+                color: #fff;
+                font-size: 14px;
+                padding: 10px;
+                border-radius: 7px;
+                cursor: pointer;
+            }            
+            .mysgh_app_form .submit-button:hover {
+                background-color: #3f7c08!important;
+            }
+            .mysgh_app_form .submit-button[disabled] {
+                box-shadow: 0 2px 6px #cccccc;
+                background-color: #cccccc;
+                border-color: #a0a1ab;
+            }
+            .mysgh_app_form .submit-button[disabled]:hover {
+                box-shadow: 0 2px 6px #ababab!important;
+                background-color: #ababab!important;
+                cursor: not-allowed;
+                border-color: #a0a1ab!important;
+            }
+            .mysgh_app_form-results-container {
+                color: #fff;
+                width: 100%;
+                font-size: 15px;
+                border-radius: 7px;
+            }
+            .mysgh_app_form .error-container {
+                background: #dc3545;
+                border-radius: 7px;
+                font-size: 15px;
+                padding: 10px;
+            }
+            .mysgh_app_form .success-container {
+                background: #428109;
+                text-align: center;
+                border-radius: 7px;
+                color: #fff;
+                font-size: 25px;
+                padding: 20px;
+                width: 100%;
+            }
+            .mysgh_app_form .border-bottom {
+                border-bottom: solid 3px #ccc;
+                margin-bottom: 15px!important;
+            }
+            .mysgh_app_form .form-group {
+                margin-bottom: 15px!important;
+                padding-right: 20px;
+                padding-left: 20px;
+            }
+            .mysgh_app_form .border-primary {
+                border-color: #6777ef;
+            }
+            .mysgh_app_form .mysgh_app_form-column_row {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+            }
+            .mysgh_app_form .mysgh_app_form-column_span-12 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            .mysgh_app_form .mysgh_app_form-column_span-9 {
+                flex: 0 0 75%;
+                max-width: 75%;
+            }
+            .mysgh_app_form .mysgh_app_form-column_span-6 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+            .mysgh_app_form .mysgh_app_form-column_span-4 {
+                flex: 0 0 33.333333%;
+                max-width: 33.333333%;
+            }
+            .mysgh_app_form .mysgh_app_form-column_span-3 {
+                flex: 0 0 25%;
+                max-width: 25%;
+            }
+            @media only screen and (max-width: 770px) {
+                .mysgh_app_form .mysgh_app_form-column_span-6 {
+                    flex: 0 0 45%;
+                    max-width: 45%;
+                    margin-right: 15px;
+                }
+            }
+            @media only screen and (max-width: 425px) {
+                .mysgh_app_form .mysgh_app_form-column_span-9,
+                .mysgh_app_form .mysgh_app_form-column_span-3 {
+                    flex: 0 0 100%;
+                    max-width: 100%;
+                }
+            }
+            @media only screen and (max-width: 420px) {
+                .mysgh_app_form .mysgh_app_form-column_span-9,
+                .mysgh_app_form .mysgh_app_form-column_span-6,
+                .mysgh_app_form .mysgh_app_form-column_span-4,
+                .mysgh_app_form .mysgh_app_form-column_span-3 {
+                    flex: 0 0 100%!important;
+                    max-width: 100%!important;
+                }
+                .mysgh_app_form .form-group {
+                    margin-bottom: 15px!important;
+                    padding-right: 10px;
+                    padding-left: 0px;
+                }
+            }
+            .mysgh_app_form .required {
+                color: #ff4000!important;
+            }
+            .mysgh_app_form .control-label, .mysgh_app_form>label {
+                color: #34395e!important;
+                font-weight: bold!important;
+                font-size: 12px!important;
+                letter-spacing: .5px!important;
+            }
+            .mysgh_app_form label {
+                display: inline-block!important;
+                font-weight: bold!important;
+                font-size: 13px!important;
+                margin-bottom: 0.5rem!important;
+            }
+
+            .mysgh_app_form .mysgh_app_form-input, .mysgh_app_form .mysgh_app_form-textarea {
+                height: 20px;
+                display: block!important;
+                width: 100%!important;
+                padding: 10px!important;
+                font-weight: 400!important;
+                line-height: 1.5!important;
+                background-clip: padding-box!important;
+                border: 1px solid #ced4da!important;
+                transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out!important;
+                border-radius: 5px!important;
+            }
+            .mysgh_app_form .mysgh_app_form-input {
+                height: 20px;
+            }
+            .mysgh_app_form .mysgh_app_form-textarea {
+                height: 70px;
+                width: 100%!important;
+            }
+            .mysgh_app_form .mysgh_app_form-input:focus, 
+            .mysgh_app_form .mysgh_app_form-textarea:focus {
+                background-color: #fefeff!important;
+                border-color: #95a0f4!important;
+                box-shadow: none !important!important;
+                outline: none!important;
+            }
+        </style>";
+        // return the results
+        return $html_content;
+
+    }
+
+    /**
+     * Daily Student Report Form
+     * 
+     * @return String
+     */
+    public function daily_report_log_form($params) {
+
+        // global variables
+        global $defaultUser, $isTutor;
+
+        // variables 
+        $class_id = null;
+
+        // class filter
+        $classFilter = $isTutor ? "AND item_id IN ".$this->inList($defaultUser->class_ids) : null;
+
+        // get the classes list
+        $classes_list = $this->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1' {$classFilter} LIMIT 100");
+
+        $html = '
+        <form method="POST" autocomplete="Off" action="'.$this->baseUrl.'api/incidents/report" class="ajax-data-form" id="ajax-data-form-content">
+            <div class="row">
+
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label>Select Student Class <span class="required">*</span></label>
+                        <select data-width="100%" class="selectpicker form-control" name="class_id" id="class_id">";
+                            <option value="">Select Class</option>';
+                            // if the content is an array
+                            if(is_array($classes_list)) {
+                                // loop through the results list
+                                foreach($classes_list as $class) {
+                                    $html .= "
+                                    <option ".($class_id == $class->item_id ? "selected" : null)." value='{$class->item_id}'>
+                                        ".strtoupper($class->name)."
+                                    </option>";
+                                }
+                            }
+                        $html .= '
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-7">
+                    <div class="form-group">
+                        <label>Select Student</label>
+                        <select data-width="100%" class="selectpicker form-control" name="student_id" id="student_id">";
+                            <option value="">Select Student</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="description">Daily Report <span class="required">*</span></label>
+                        '.$this->textarea_editor(null, "faketext", "ajax-form-content").'
+                    </div>
+                </div>
+                <div class="col-md-12 form-group text-center text-danger">
+                    <em>Logging report for <strong>'.date("l, jS F Y").'</strong></em>
                 </div>
             </div>
-            </div>
-            <div class='row'>
-                <div class=\"col-md-6 text-left\">
-                    <button ".(empty($item_id) ? "onclick=\"return clear_input()\" type=\"button\"" : "type=\"button\" onclick=\"return load('booking_log/{$item_id}')\"")." class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
                 </div>
-                <div class=\"col-md-6 text-right\">
-                    <input type=\"hidden\" name=\"booking_id\" id=\"booking_id\" value=\"{$item_id}\" hidden class=\"form-control\">
-                    <button class=\"btn btn-outline-success btn-sm\" type='submit'><i class='fa fa-save'></i> ".(empty($item_id) ? "Save" : "Update")." Record</button>
+                <div>
+                    <button data-form_id="ajax-data-form-content" type="button-submit" class="btn btn-success">Save Record</button>
+                </div>
+            </div>
+        </form>';
+
+        return $html;
+    }
+
+    /**
+     * Staff Leave Application Form
+     * 
+     * @return String
+     */
+    public function leave_form($data = null) {
+
+        $method = !empty($data) ? "PUT" : "POST";
+        $reason = !empty($data) ? $data->reason : null;
+
+        global $isAdmin, $defaultUser;
+
+        $html_content = "
+        <form method='{$method}' autocomplete='Off' action='{$this->baseUrl}api/leave/apply' class='ajax-data-form' id='ajax-data-form-content'>
+            <div class='row'>";
+                if($isAdmin) {
+                    $html_content .= "
+                    <div class='col-md-4'>
+                        <div class='form-group'>
+                            <label>Name <span class='required'>*</span></label>
+                            <select class='selectpicker' data-width='100%' name='user_id' id='user_id'>
+                                <option value=''>Select Staff</option>";
+
+
+                        // loop through the staff list
+                        foreach($this->pushQuery("item_id, name", "users", "status='1' AND user_type IN ('admin', 'teacher', 'accountant', 'employee') AND client_id='{$defaultUser->client_id}' LIMIT 100") as $type) {
+                            $html_content .= "<option value='{$type->item_id}'>".strtoupper($type->name)."</option>";
+                        }
+
+
+                    $html_content .= "
+                            </select>
+                        </div>
+                    </div>";
+                } else {
+                    $html_content .= "<input type='hidden' readonly name='user_id' value='{$defaultUser->user_id}'>";
+                }
+                $html_content .= "
+                <div class='col-md-4'>
+                    <div class='form-group'>
+                        <label>Leave Date <span class='required'>*</span></label>
+                        <input type='text' name='leave_from_to' id='leave_from_to' value='' class='form-control daterange'>
+                    </div>
+                </div>
+                <div class='col-md-4'>
+                    <div class='form-group'>
+                        <label>Leave Type <span class='required'>*</span></label>
+                        <select class='selectpicker' data-width='100%' name='type_id' id='type_id'>
+                            <option value=''>Select Type</option>";
+
+                        // loop through the leave types
+                        foreach($this->pushQuery("*", "leave_types", "status='1'") as $type) {
+                            $html_content .= "<option value='{$type->id}'>{$type->name}</option>";
+                        }
+
+                        $html_content .= "
+                        </select>
+                    </div>
+                </div>
+                <div class='col-md-8'>
+                    <div class='form-group'>
+                        <label>Reason <span class='required'>*</span></label>
+                        <input type='hidden' hidden id='trix-editor-input' value='{$reason}'>
+                        <trix-editor name=\"faketext\" data-predefined_name=\"reason\" input='trix-editor-input' class=\"trix-slim-scroll\" id=\"ajax-form-content\"></trix-editor>
+                    </div>
+                </div>";
+                if($isAdmin) {
+                    $html_content .= "
+                    <div class='col-md-4'>
+                        <div class='form-group'>
+                            <label>Leave Status</label>
+                            <select class='selectpicker' data-width='100%' name='status' id='status'>
+                                <option value='Pending'>Pending</option>
+                                <option value='Approved'>Approved</option>
+                                <option value='Disapproved'>Disapproved</option>
+                            </select>
+                        </div>
+                    </div>";
+                }
+                $html_content .= "
+                <div class='col-md-".($isAdmin ? 12 : 8)."'>
+                    <div class='d-flex justify-content-between'>
+                        <div class='mb-2'>
+                            <button type='button' class='btn btn-sm btn-danger' onclick='return load(\"leave\");'>Cancel</button>
+                        </div>
+                        <div class='mb-2'>
+                            <button class='btn btn-sm btn-success' type='button-submit'><i class='fa fa-save'></i> Apply</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </form>";
@@ -5375,110 +6657,355 @@ class Forms extends Myschoolgh {
     }
 
     /**
-     * Members Form
+     * Admission Enquiry Form
      * 
      * @return String
      */
-    public function members_form(stdClass $params) {
-        
-        $data = $params->data ?? null;
-        $item_id = isset($data->item_id) ? $data->item_id : null;
+    public function enquiry_form($data = null) {
 
-        $class_list = $this->pushQuery("item_id, name, language", "church_bible_classes", "client_id = '{$params->clientId}' AND status='1' LIMIT 100");
-        $organizations_list = $this->pushQuery("item_id, name", "church_organizations", "client_id = '{$params->clientId}' AND status='1' LIMIT 100");
-        $organizations = !empty($data) ? $data->organizations_list : [];
+        $reason = !empty($data) ? $data->reason : null;
+
+        global $isAdmin, $defaultUser;
 
         $html_content = "
-        <form action='{$this->baseUrl}api/booking/members' autocomplete='Off' method='POST' id='ajax-data-form-content' class='ajaxform'>
-            <div class='row member_item' data-row_id='1'>
-                <div class='col-md-3'>
+        <form method='POST' autocomplete='Off' action='{$this->baseUrl}api/frontoffice/log' class='ajax-data-form' id='ajax-data-form-content'>
+            <div class='row'>
+                <div class='col-md-4'>
                     <div class='form-group'>
-                        <label>Date of Birth <span class='required'>*</span></label>
-                        <input value='".($data->date_of_birth ?? null)."' maxlength='12' type='text' name='data[date_of_birth]' id='data[date_of_birth]' class='form-control datepicker'>
-                    </div>
-                </div>
-                <div class='col-md-6'>
-                    <div class='form-group'>
-                        <label>Fullname <span class='required'>*</span></label>
-                        <input maxlength='64' value='".($data->fullname ?? null)."' type='text' name='data[fullname]' id='data[fullname]' class='form-control'>
-                    </div>
-                </div>
-                <div class='col-md-3'>
-                    <div class='form-group'>
-                        <label>Gender</label>
-                        <select type='text' data-width='100%' name='data[gender]' id='data[gender]' class='selectpicker form-control'>
-                            <option value=''>Please Select</option>
-                            <option ".(isset($data->gender) && $data->gender == "Male" ? "selected" : null)." Male'>Male</option>
-                            <option ".(isset($data->gender) && $data->gender == "Female" ? "selected" : null)." value='Female'>Female</option>
-                        </select>
-                    </div>
-                </div>
-                <div class='col-lg-4 col-md-4'>
-                    <div class='form-group'>
-                        <label>Contact Number</label>
-                        <input maxlength='12' min='0' value='".($data->contact ?? null)."' type='number' name='data[contact]' id='data[contact]' class='form-control'>
-                    </div>
-                </div>
-                <div class='col-lg-4 col-md-4'>
-                    <div class='form-group'>
-                        <label>Phone Number</label>
-                        <input maxlength='12' min='0' value='".($data->contact_2 ?? null)."' type='number' name='data[contact_2]' id='data[contact_2]' class='form-control'>
-                    </div>
-                </div>
-                <div class='col-lg-4 col-md-4'>
-                    <div class='form-group'>
-                        <label>Email Address</label>
-                        <input type='email' name='data[email]' value='".($data->email ?? null)."' id='data[email]' class='form-control'>
-                    </div>
-                </div>
-                <div class='col-lg-4 col-md-4'>
-                    <div class='form-group'>
-                        <label>Place of Residence</label>
-                        <input maxlength='32' type='text' value='".($data->residence ?? null)."' name='data[residence]' id='data[residence]' class='form-control'>
-                    </div>
-                </div> 
-                <div class='col-lg-8 col-md-8'>
-                    <div class='form-group'>
-                        <label>Profession</label>
-                        <input type='text' name='data[profession]' value='".($data->profession ?? null)."' id='data[profession]' class='form-control'>
+                        <label>Name <span class='required'>*</span></label>
+                        <input type='text' name='data[fullname]' value='' class='form-control'>
                     </div>
                 </div>
                 <div class='col-md-4'>
                     <div class='form-group'>
-                        <label>Bible Class</label>
-                        <select type='text' data-width='100%' name='data[bible_class]' id='data[bible_class]' class='selectpicker form-control'>
-                            <option value=''>Please Select</option>";
-                            foreach($class_list as $item) {
-                                $html_content .= "<option ".(isset($data->bible_class) && $data->bible_class == $item->item_id ? "selected" : null)." value='{$item->item_id}'>{$item->name} ({$item->language})</option>";
-                            }
-            $html_content .= "</select>
+                        <label>Phone Number <span class='required'>*</span></label>
+                        <input type='text' name='data[phone_number]' value='' class='form-control'>
                     </div>
                 </div>
-                <div class='col-md-8'>
+                <div class='col-md-4'>
                     <div class='form-group'>
-                        <label>Organization(s)</label>
-                        <select type='text' multiple data-width='100%' name='data[organization][]' id='data[organization][]' class='selectpicker form-control'>
-                            <option value=''>Please Select</option>";
-                            foreach($organizations_list as $item) {
-                                $html_content .= "<option ".(in_array($item->item_id, $organizations) ? "selected" : null)." value='{$item->item_id}'>{$item->name}</option>";
-                            }
-            $html_content .= "</select>
+                        <label>Email Address</label>
+                        <input type='email' name='data[email]' value='' class='form-control'>
                     </div>
                 </div>
-            </div>
-            <div class='row'>
-                <div class=\"col-md-6 text-left\">
-                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                <div class='col-md-4'>
+                    <div class='form-group'>
+                        <label>Address</label>
+                        <textarea class='form-control' name='data[address]'></textarea>
+                    </div>
                 </div>
-                <div class=\"col-md-6 text-right\">
-                    <input type=\"hidden\" name=\"data[request]\" id=\"data[request]\" value=\"add_update\" hidden>
-                    <input type=\"hidden\" name=\"data[item_id]\" id=\"data[item_id]\" value=\"{$item_id}\" hidden class=\"form-control\">
-                    <button class=\"btn btn-outline-success btn-sm\" type='submit'><i class='fa fa-save'></i> ".(empty($item_id) ? "Save" : "Update")." Record</button>
+                <div class='col-md-4'>
+                    <div class='form-group'>
+                        <label>Description & Note</label>
+                        <textarea class='form-control' name='data[description]'></textarea>
+                    </div>
+                </div>
+                <div class='col-md-4'>
+                    <div class='form-group'>
+                        <label>Source <span class='required'>*</span></label>
+                        <select class='selectpicker' data-width='100%' name='data[source]'>
+                            <option value=''>Select Source</option>";
+                            // loop through the source
+                            foreach(['Parent', 'Online', 'Radio'] as $source) {
+                                $html_content .= "<option value='{$source}'>{$source}</option>";
+                            }
+                        $html_content .= "
+                        </select>
+                    </div>
+                </div>
+                <div class='col-md-4'>
+                    <div class='form-group'>
+                        <label>Date <span class='required'>*</span></label>
+                        <input type='text' name='data[date]' value='' class='form-control datepicker'>
+                    </div>
+                </div>
+                <div class='col-md-4'>
+                    <div class='form-group'>
+                        <label>Followup Date</label>
+                        <input type='text' data-maxdate='".date("Y-m-d", strtotime("+3 month"))."' name='data[followup]' value='' class='form-control datepicker'>
+                    </div>
+                </div>
+                <div class='col-md-4'>
+                    <div class='form-group'>
+                        <label>Assigned To</label>
+                        <input type='text' name='data[assigned]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='d-flex justify-content-between'>
+                        <input type='hidden' name='section' value='admission_enquiry' readonly>
+                        <div class='mb-2'>
+                            <button type='button' class='btn btn-sm btn-danger' onclick='return load(\"office_enquiry\");'>Cancel</button>
+                        </div>
+                        <div class='mb-2'>
+                            <button class='btn btn-sm btn-success' type='button-submit'><i class='fa fa-save'></i> Save</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </form>";
 
-        return $html_content;  
+        return $html_content;
+
+    }
+
+    /**
+     * Visitors Form
+     * 
+     * @return String
+     */
+    public function visitors_form() {
+
+        $html_content = "
+        <form method='POST' autocomplete='Off' action='{$this->baseUrl}api/frontoffice/log' class='ajax-data-form' id='ajax-data-form-content'>
+            <div class='row'>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Purpose <span class='required'>*</span></label>
+                        <select class='selectpicker' data-width='100%' name='data[purpose]'>
+                            <option value=''>Select Purpose</option>";
+                            // loop through the purpose
+                            foreach($this->office_purpose as $purpose) {
+                                $html_content .= "<option value='{$purpose}'>{$purpose}</option>";
+                            }
+                        $html_content .= "
+                        </select>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Name <span class='required'>*</span></label>
+                        <input type='text' name='data[fullname]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Phone Number <span class='required'>*</span></label>
+                        <input type='text' name='data[phone_number]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Email Address</label>
+                        <input type='email' name='data[email]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Number of Person</label>
+                        <input type='number' name='data[number_of_person]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Date <span class='required'>*</span></label>
+                        <input type='text' name='data[date]' value='' class='form-control datepicker'>
+                    </div>
+                </div>
+                <div class='col-md-6'>
+                    <div class='form-group'>
+                        <label>Time In</label>
+                        <input type='time' name='data[time_in]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-6'>
+                    <div class='form-group'>
+                        <label>Time Out</label>
+                        <input type='time' name='data[time_out]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Note</label>
+                        <textarea class='form-control' name='data[note]'></textarea>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='d-flex justify-content-between'>
+                        <input type='hidden' name='section' value='visitor' readonly>
+                        <div class='mb-2'>
+                            <button type='button' class='btn btn-sm btn-danger' onclick='return load(\"office_visitors\");'>Cancel</button>
+                        </div>
+                        <div class='mb-2'>
+                            <button class='btn btn-sm btn-success' type='button-submit'><i class='fa fa-save'></i> Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>";
+
+        return $html_content;
+
+    }
+
+    /**
+     * Phonecall Log Form
+     * 
+     * @return String
+     */
+    public function phonecall_log_form() {
+
+        $html_content = "
+        <form method='POST' autocomplete='Off' action='{$this->baseUrl}api/frontoffice/log' class='ajax-data-form' id='ajax-data-form-content'>
+            <div class='row'>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Call Type <span class='required'>*</span></label>
+                        <select class='selectpicker' data-width='100%' name='data[type]'>
+                            <option value=''>Select Call Type</option>";
+                            // loop through the type
+                            foreach(['Incoming', 'Outgoing'] as $type) {
+                                $html_content .= "<option value='{$type}'>{$type}</option>";
+                            }
+                        $html_content .= "
+                        </select>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Name <span class='required'>*</span></label>
+                        <input type='text' name='data[fullname]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Phone Number <span class='required'>*</span></label>
+                        <input type='text' name='data[phone_number]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Date <span class='required'>*</span></label>
+                        <input type='text' name='data[date]' value='' class='form-control datepicker'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Call Duration</label>
+                        <input type='text' name='data[call_duration]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Next Followup Date</label>
+                        <input type='text' data-maxdate='".date("Y-m-d", strtotime("+3 month"))."' name='data[followup]' value='' class='form-control datepicker'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Note</label>
+                        <textarea class='form-control' name='data[note]'></textarea>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='d-flex justify-content-between'>
+                        <input type='hidden' name='section' value='phonecall' readonly>
+                        <div class='mb-2'>
+                            <button type='button' class='btn btn-sm btn-danger' onclick='return load(\"office_visitors\");'>Cancel</button>
+                        </div>
+                        <div class='mb-2'>
+                            <button class='btn btn-sm btn-success' type='button-submit'><i class='fa fa-save'></i> Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>";
+
+        return $html_content;
+
+    }
+
+    /**
+     * Postal Form Form
+     * 
+     * @return String
+     */
+    public function postal_form($type = 'dispatch') {
+
+        $types = [
+            'dispatch' => [
+                'to' => 'To',
+                'to_key' => 'to',
+                'from' => 'From',
+                'from_key' => 'from'
+            ],
+            'receive' => [
+                'to' => 'From',
+                'to_key' => 'from',
+                'from' => 'To',
+                'from_key' => 'to'
+            ]
+        ];
+
+        /** Set parameters for the data to attach */
+        $form_params = (object) [
+            "module" => "postal_{$type}",
+            "accept" => implode(",", [".doc",".docx",".pdf",".jpg",".png",".jpeg",".pjpeg",".xls",".xlsx",".rtf", ".ppt", ".pptx"]),
+            "userData" => $this->thisUser,
+            "item_id" => null
+        ];
+
+        $html_content = "
+        <form method='POST' autocomplete='Off' action='{$this->baseUrl}api/frontoffice/log' class='ajax-data-form' id='ajax-data-form-content'>
+            <div class='row'>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>{$types[$type]['to']} <span class='required'>*</span></label>
+                        <input type='text' name='data[{$types[$type]['to_key']}]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Reference Number</label>
+                        <input type='text' name='data[reference]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Address</label>
+                        <textarea class='form-control' name='data[address]'></textarea>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>{$types[$type]['from']} <span class='required'>*</span></label>
+                        <input type='text' name='data[{$types[$type]['from_key']}]' value='' class='form-control'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Date</label>
+                        <input type='text' name='data[date]' value='' class='form-control datepicker'>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='form-group'>
+                        <label>Note</label>
+                        <textarea class='form-control' name='data[note]'></textarea>
+                    </div>
+                </div>
+                <div class='col-lg-12'>
+                    <div class='form-group text-center mb-1'>
+                        <div class='row'>
+                            ".$this->form_attachment_placeholder($form_params)."
+                        </div>
+                    </div>
+                </div>
+                <div class='col-md-12'>
+                    <div class='d-flex justify-content-between'>
+                        <input type='hidden' name='section' value='postal_{$type}' readonly>
+                        <div class='mb-2'>
+                            <button type='button' class='btn btn-sm btn-danger' onclick='return load(\"office_postal{$type}\");'>Cancel</button>
+                        </div>
+                        <div class='mb-2'>
+                            <button class='btn btn-sm btn-success' type='button-submit'><i class='fa fa-save'></i> Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>";
+
+        return $html_content;
 
     }
 

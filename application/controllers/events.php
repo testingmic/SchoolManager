@@ -94,7 +94,7 @@ class Events extends Myschoolgh {
         /** Date mechanism */
         $date = explode(":", $params->date);
         $start_date = $date[0];
-        $item_id = random_string("alnum", 16);
+        $item_id = random_string("alnum", RANDOM_STRING);
         $end_date = isset($date[1]) ? $date[1] : $date[0];
 
         // global variables
@@ -129,9 +129,9 @@ class Events extends Myschoolgh {
             $allowTypes = array('jpg', 'png', 'jpeg','gif');
 
             // check if its a valid image
-            if(!empty($file_name) && in_array($fileType, $allowTypes)){
+            if(!empty($file_name) && validate_image($params->event_image["tmp_name"])){
                 // set a new file_name
-                $image = $uploadDir . random_string('alnum', 32).".{$fileType}";
+                $image = $uploadDir . random_string("alnum", RANDOM_STRING).".{$fileType}";
                 // Upload file to the server 
                 if(move_uploaded_file($params->event_image["tmp_name"], $image)){}
             } else {
@@ -151,20 +151,16 @@ class Events extends Myschoolgh {
             $params->userId, $params->is_mailable ?? null, $params->type
         ]);
 
-        /** Refresh the JavaScript file */
-        if($this->preload($params)) {
-            /** log the user activity */
-            $this->userLogs("events", $item_id, null, "{$params->userData->name} created a new Event with title <strong>{$params->title}</strong> to be held on {$start_date}.", $params->userId);
+        /** log the user activity */
+        $this->userLogs("events", $item_id, null, "{$params->userData->name} created a new Event with title <strong>{$params->title}</strong> to be held on {$start_date}.", $params->userId);
 
-            return [
-                "data" => "Event was successfully created.",
-                "additional" => [
-                    "clear" => true,
-                    "href" => "{$this->baseUrl}update-event/{$item_id}"
-                ]
-            ];
-        }
-
+        return [
+            "data" => "Event was successfully created.",
+            "additional" => [
+                "clear" => true,
+                "href" => "{$this->baseUrl}update-event/{$item_id}"
+            ]
+        ];
     }
 
     /**
@@ -226,9 +222,9 @@ class Events extends Myschoolgh {
             $allowTypes = array('jpg', 'png', 'jpeg','gif');
 
             // check if its a valid image
-            if(!empty($file_name) && in_array($fileType, $allowTypes)){
+            if(!empty($file_name) && validate_image($params->event_image["name"])){
                 // set a new file_name
-                $image = $uploadDir . random_string('alnum', 32).".{$fileType}";
+                $image = $uploadDir . random_string("alnum", RANDOM_STRING).".{$fileType}";
                 // Upload file to the server 
                 if(move_uploaded_file($params->event_image["tmp_name"], $image)){}
             } else {
@@ -254,31 +250,28 @@ class Events extends Myschoolgh {
             $params->title, $start_date, $end_date, $params->clientId, $item_id
         ]);
 
-        /** Refresh the JavaScript file */
-        if($this->preload($params)) {
-            /** log the user activity */
-            $this->userLogs("events", $item_id, null, "{$params->userData->name} updated the event details.", $params->userId);
-            
-            if(isset($start_date) && ($prev[0]->start_date !== $start_date)) {
-                $this->userLogs("events", $item_id, $prev[0]->start_date, "The Start Date was changed from {$prev[0]->start_date}", $params->userId);
-            }
-
-            if(isset($end_date) && ($prev[0]->end_date !== $end_date)) {
-                $this->userLogs("events", $item_id, $prev[0]->end_date, "The End Date was changed from {$prev[0]->end_date}", $params->userId);
-            }
-
-            if(isset($params->status) && ($prev[0]->state !== $params->status)) {
-                $this->userLogs("events", $item_id, $prev[0]->state, "Event Status was changed from {$prev[0]->state}", $params->userId);
-            }
-
-            /** Save the changes applied to each column of the table */
-            return [
-                "data" => "Event was successfully updated.",
-                "additional" => [
-                    "href" => "{$this->baseUrl}update-event/{$item_id}"
-                ]
-            ];
+        /** log the user activity */
+        $this->userLogs("events", $item_id, null, "{$params->userData->name} updated the event details.", $params->userId);
+        
+        if(isset($start_date) && ($prev[0]->start_date !== $start_date)) {
+            $this->userLogs("events", $item_id, $prev[0]->start_date, "The Start Date was changed from {$prev[0]->start_date}", $params->userId);
         }
+
+        if(isset($end_date) && ($prev[0]->end_date !== $end_date)) {
+            $this->userLogs("events", $item_id, $prev[0]->end_date, "The End Date was changed from {$prev[0]->end_date}", $params->userId);
+        }
+
+        if(isset($params->status) && ($prev[0]->state !== $params->status)) {
+            $this->userLogs("events", $item_id, $prev[0]->state, "Event Status was changed from {$prev[0]->state}", $params->userId);
+        }
+
+        /** Save the changes applied to each column of the table */
+        return [
+            "data" => "Event was successfully updated.",
+            "additional" => [
+                "href" => "{$this->baseUrl}update-event/{$item_id}"
+            ]
+        ];
 
     }
 
@@ -296,7 +289,7 @@ class Events extends Myschoolgh {
         $query = isset($params->type_id) && !empty($params->type_id) ? " AND item_id='{$params->type_id}'" : "";
 
         // make the request
-        $events_types = $this->pushQuery("*", "events_types", "client_id = '{$params->clientId}' AND status='1' {$query} LIMIT 100");
+        $events_types = $this->pushQuery("*", "events_types", "client_id = '{$params->clientId}' AND status='1' {$query} LIMIT {$this->temporal_maximum}");
 
         $data = [];
 
@@ -320,7 +313,7 @@ class Events extends Myschoolgh {
     public function add_type(stdClass $params) {
 
         /** Push the record into the database */
-        $item_id = random_string("alnum", 16);
+        $item_id = random_string("alnum", RANDOM_STRING);
 
         /** Insert */
         $stmt = $this->db->prepare("INSERT INTO events_types SET 
@@ -381,23 +374,20 @@ class Events extends Myschoolgh {
         ");
         $stmt->execute([$params->name, create_slug($params->name), $params->clientId, $item_id]);
 
-        /** Refresh the JavaScript file */
-        if($this->preload($params)) {
 
-            /** Log the user activity */
-            $this->userLogs("events_type", $item_id, $prevData[0], "{$params->userData->name} successfully updated the event type: {$params->name}", $params->userId);
+        /** Log the user activity */
+        $this->userLogs("events_type", $item_id, $prevData[0], "{$params->userData->name} successfully updated the event type: {$params->name}", $params->userId);
 
-            // unset the type id
-            $params->type_id = null;
+        // unset the type id
+        $params->type_id = null;
 
-            // return the response together with the types list
-            return [
-                "data" => "Event type was successfully updated",
-                "additional" => [
-                    "event_types" => $this->types_list($params)
-                ]
-            ];
-        }
+        // return the response together with the types list
+        return [
+            "data" => "Event type was successfully updated",
+            "additional" => [
+                "event_types" => $this->types_list($params)
+            ]
+        ];
 
     }
 
@@ -409,6 +399,9 @@ class Events extends Myschoolgh {
      * @return Object
      */
     public function events_list($data = null) {
+
+        // global variable
+        global $defaultClientData;
 
         // init
         $birthday_list = [];
@@ -422,16 +415,18 @@ class Events extends Myschoolgh {
 
             // load user birthdays
             $birth_list = $this->pushQuery(
-                "name, phone_number, email, image, item_id, unique_id, user_type,
-                    DAY(date_of_birth) AS the_day, MONTH(date_of_birth) AS the_month", 
-                "users", "
+                "u.name, u.phone_number, u.email, u.image, u.item_id, u.unique_id, u.user_type,
+                    DAY(u.date_of_birth) AS the_day, MONTH(u.date_of_birth) AS the_month, cl.name AS class_name", 
+                "users u LEFT JOIN classes cl ON cl.id = u.class_id", "
                 (
-                    DATE_ADD(date_of_birth,
-                        INTERVAL YEAR(CURDATE()) - YEAR(date_of_birth)
-                            + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(date_of_birth), 1, 0)
+                    DATE_ADD(u.date_of_birth,
+                        INTERVAL YEAR(CURDATE()) - YEAR(u.date_of_birth)
+                            + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(u.date_of_birth), 1, 0)
                         YEAR)
-                    BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL {$this->birthday_days_interval} DAY)
-                ) AND client_id = '{$data->client_id}' AND user_status='Active' AND status='1' AND deleted='0' ORDER BY date_of_birth ASC LIMIT 200"
+                    BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL {$defaultClientData->birthday_days_interval} DAY)
+                ) AND u.client_id = '{$data->client_id}' AND u.user_status='Active' AND u.status='1' AND u.deleted='0'
+                AND u.user_type IN ('student','teacher','admin','accountant','admin')
+                ORDER BY MONTH(u.date_of_birth), DAY(u.date_of_birth) ASC LIMIT {$this->temporal_maximum}"
             );
             
             // loop through the users list
@@ -463,14 +458,16 @@ class Events extends Myschoolgh {
                             <button type='button' class='btn btn-outline-secondary' data-dismiss='modal'>Close</button>
                         </div>";
                 } else {
+                    $user->name = trim($user->name);
                     $description = $user;
                 }
 
                 // append to the array list
                 $birthday_list[] = [
                     "title" => $user->name,
-                    "start" => "{$dob}T06:00:00",
-                    "end" => "{$dob}T18:00:00",
+                    "link" => $this->the_user_roles[$user->user_type]["link"],
+                    "start" => "{$dob} 06:00:00",
+                    "end" => "{$dob} 18:00:00",
                     "description" => $description
                 ];
             }
@@ -484,12 +481,13 @@ class Events extends Myschoolgh {
 
         // append the holidays list
         $array_list = [
-            "holidays_list" => ["holiday" => "on"], "calendar_events_list" => ["holiday" => "not"]
+            "holidays_list" => ["holiday" => "on"], 
+            "calendar_events_list" => ["holiday" => "not"]
         ];  
 
         // init the parameters for the events (holidays and other events)
         $params = (object) ["userData" => $data, "date_range" => $data->events_date_range ?? null, "clientId" => $data->client_id, "the_user_type" => $data->the_user_type];
-
+        
         // loop through the query to use
         foreach($array_list as $key => $each) {
 
@@ -537,8 +535,8 @@ class Events extends Myschoolgh {
                 // append the array list
                 $query_array[$ekey] = [
                     "title" => $event->title,
-                    "start" => "{$event->start_date}T06:00:00",
-                    "end" => "{$event->end_date}T18:00:00",
+                    "start" => "{$event->start_date} 06:00:00",
+                    "end" => "{$event->end_date} 18:00:00",
                     "description" => $description,
                     "backgroundColor" => "{$event->color_code}",
                     "borderColor" => "{$event->color_code}",
@@ -562,7 +560,7 @@ class Events extends Myschoolgh {
                 }
             }
 
-            $result->{$key} = !$do_not_encode ? json_encode($query_array) : $query_array;
+            $result->{$key} = $query_array;
 
         }
 
@@ -579,33 +577,30 @@ class Events extends Myschoolgh {
      */
     public function preload($params) {
 
+        // global object
+        global $accessObject, $defaultUser;
+
+        // set the access object
+        $params->hasEventDelete = $accessObject->hasAccess("delete", "events");
+        $params->hasEventUpdate = $accessObject->hasAccess("update", "events");
+
         // append the the parameters
         $params->userData->hasEventDelete = $params->hasEventDelete;
         $params->userData->hasEventUpdate = $params->hasEventUpdate;
+
         $scriptsClass = load_class("scripts", "controllers");
-
-        // loop through the various user types
-        foreach(["admin", "accountant", "teacher", "parent", "student", "employee"] as $user_type) {
             
-            // append the usertype
-            $params->userData->the_user_type = $user_type;
+        // append the usertype
+        $params->userData->the_user_type = $defaultUser->user_type;
 
-            // set the parameters for the events
-            $param = (object) [
-                "container" => "events_management",
-                "events_list" => $this->events_list($params->userData),
-                "event_Sources" => "birthdayEvents,holidayEvents,calendarEvents"
-            ];
+        // set the parameters for the events
+        $param = (object) [
+            "container" => "events_management",
+            "events_list" => $this->events_list($params->userData)->calendar_events_list ?? [],
+            "event_Sources" => "birthdayEvents,holidayEvents,calendarEvents"
+        ];
 
-            // generate a new script for this client
-            $filename = "assets/js/scripts/{$params->clientId}_{$user_type}_events.js";
-            $data = $scriptsClass->attendance($param);
-            $file = fopen($filename, "w");
-            fwrite($file, $data);
-            fclose($file);
-        }
-
-        return true;
+        return $param->events_list ?? $param;
 
     }
     

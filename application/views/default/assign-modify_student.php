@@ -24,11 +24,12 @@ $response->title = $pageTitle." : {$appName}";
 $students_list = "";
 $filter = (object) [];
 $class_array_list = $myClass->pushQuery("name, item_id, id", "classes", "client_id='{$clientId}' AND status='1'", false, "ASSOC");
+$departments_array_list = $myClass->pushQuery("name, item_id, id", "departments", "client_id='{$clientId}' AND status='1'", false, "ASSOC");
 
 // get the list of all other users
 $other_users_list = $myClass->pushQuery("
     a.id, a.name, a.user_type, a.unique_id, a.item_id, a.phone_number, a.class_id, 
-        a.image, a.date_of_birth, a.enrollment_date, a.username", 
+        a.image, a.date_of_birth, a.enrollment_date, a.username, a.department", 
     "users a", "a.client_id='{$clientId}' AND a.user_status='Active' AND a.user_type = 'student'
         AND a.status='1' ORDER BY a.name LIMIT {$myClass->global_limit}");
 
@@ -45,6 +46,7 @@ foreach($other_users_list as $user) {
 
 // append to the array list
 $response->array_stream["users_array_list"] = $users_array_list;
+$response->array_stream["departments_array_list"] = $departments_array_list;
 
 // set the classes list
 $classes_list = "";
@@ -138,7 +140,7 @@ $response->html = '
                                     <thead>
                                         <tr>
                                             <th width="5%" class="text-center">#</th>
-                                            <th width="35%">Student Name</th>
+                                            <th width="25%">Student Name</th>
                                             <th width="20%">Date of Birth</th>
                                             <th width="20%">Enrollment Date</th>
                                             <th width="20%">Image</th>

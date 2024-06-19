@@ -6,20 +6,19 @@ class Crons {
 	private $userAccount;
 	private $mailAttachment = array();
 	private $rootUrl;
+	private $ini_data;
 	private $clientId;
 	private $limit = 5000;
 	private $siteName = "MySchoolGH - EmmallexTech.Com";
 
-    private $baseUrl;
-    private $birthday_days_interval;
-    private $session;
-
 	public function __construct() {
-		$this->baseUrl = "https://app.myschoolgh.com/";
-		$this->rootUrl = "/home/mineconr/app.myschoolgh.com/";
-		$this->dbConn();
+		// INI FILE
+		$this->ini_data = parse_ini_file("db.ini");
 
-		$this->rootUrl = "/var/www/html/myschool_gh/";
+		// set some more variables
+		$this->baseUrl = $this->ini_data["base_url"];
+		$this->rootUrl = $this->ini_data["root_url"];
+		$this->dbConn();		
 
 		require $this->rootUrl."system/libraries/phpmailer.php";
 		require $this->rootUrl."system/libraries/smtp.php";
@@ -34,17 +33,10 @@ class Crons {
 		
 		// CONNECT TO THE DATABASE
 		$connectionArray = array(
-			'hostname' => "localhost",
-			'database' => "mineconr_school",
-			'username' => "mineconr_school",
-			'password' => "YdwQLVx4vKU_"
-		);
-
-		$connectionArray = array(
-			'hostname' => "localhost",
-			'database' => "myschoolgh",
-			'username' => "newuser",
-			'password' => "password"
+			'hostname' => $this->ini_data['hostname'],
+			'database' => $this->ini_data['database'],
+			'username' => $this->ini_data['username'],
+			'password' => $this->ini_data['password']
 		);
 		
 		// run the database connection
@@ -150,7 +142,7 @@ class Crons {
 			$result->client_preferences = json_decode($result->client_preferences);
 			
 			// set this value
-			$this->birthday_days_interval = 30;
+			$birthday_days_interval = 30;
 
 			// set the defaults
 			$academic_year = null;
@@ -387,10 +379,10 @@ class Crons {
                     FROM 
                         users a 
                     WHERE 
-                        a.user_type = ? AND a.user_status = ? AND a.client_id = ? AND a.status = ?
+                        a.user_type = ? AND a.user_status IN ('Graduated','Active','Transferred') AND a.client_id = ? AND a.status = ?
                     LIMIT {$this->limit}"
                 );
-                $list_users->execute([$academic_year, $academic_term, "student", "Active", $clientId, 1]);
+                $list_users->execute([$academic_year, $academic_term, "student", $clientId, 1]);
                 $students_list = $list_users->fetchAll(PDO::FETCH_ASSOC);
 
                 // variables
@@ -440,10 +432,10 @@ class Crons {
                 $total_actual_balance = $total_balance - $total_discount;
 
                 $school_fees_summary = [
-                    "total_due" => $total_due,
-                    "total_paid" => $total_paid,
-                    "total_balance" => $total_balance,
-                    "total_actual_balance" => $total_actual_balance,
+                    "total_due" => number_format($total_due, 2),
+                    "total_paid" => number_format($total_paid, 2),
+                    "total_balance" => number_format($total_balance, 2),
+                    "total_actual_balance" => number_format($total_actual_balance, 2),
                 ];
 
                 // school fees log information
@@ -562,6 +554,14 @@ class Crons {
                         json_encode($original_client->client_preferences)
                     ]);
                 }
+
+                // update the fees collection table
+                $no_reversal = $this->db->prepare("UPDATE fees_collection SET has_reversal = ? WHERE academic_year =? AND academic_term = ? AND client_id = ? AND has_reversal = ? LIMIT 5000");
+                $no_reversal->execute([0, $academic_year, $academic_term, $clientId, 1]);
+
+                // disallow reversal of all 
+                $t_no_reversal = $this->db->prepare("UPDATE accounts_transaction SET state = ? WHERE state = ? AND academic_year =? AND academic_term = ? AND status='1' AND client_id=? LIMIT 5000");
+                $t_no_reversal->execute(["Approved", "Pending", $academic_year, $academic_term, $clientId]);
 
                 // set the new term in the clients data table
                 $preferences->academics->academic_year = $next_academic_year;
@@ -799,7 +799,7 @@ class Crons {
                             fees_allocations a 
                         WHERE 
                             a.academic_year = ? AND a.academic_term = ? AND a.client_id = ? AND a.status = ?
-                        LIMIT {$this->limit}"
+                        LIMIT 100"
                     );
                     $fees_allocation->execute([$academic_year, $academic_term, $clientId, 1]);
                     $fees_allocation_list = $fees_allocation->fetchAll(PDO::FETCH_ASSOC);
@@ -887,6 +887,39 @@ class Crons {
                     }
                     
                 }
+
+                // set the account state to closed
+                $this->db->query("UPDATE accounts SET state='Closed' WHERE default_account='0' AND client_id='{$clientId}' AND state='Active' LIMIT 1");
+
+                // load the promotions list
+                $promotions_log = $this->db->prepare("SELECT a.*, u.name AS student_name, c.name AS promote_to_class_name,
+                		(SELECT b.id FROM classes b WHERE b.item_id = a.promote_from LIMIT 1) AS promote_from_class_id,
+                		(SELECT b.id FROM classes b WHERE b.item_id = a.promote_to LIMIT 1) AS promote_to_class_id
+                	FROM promotions_log a 
+                	LEFT JOIN users u ON u.item_id = a.student_id
+                	LEFT JOIN classes c ON c.item_id = a.promote_to
+                	WHERE a.academic_year=? AND a.academic_term=? AND a.client_id=? AND a.is_promoted='1' LIMIT 5000"
+                );
+                $promotions_log->execute([$academic_year, $academic_term, $clientId]);
+                $promotions_history = $promotions_log->fetchAll(PDO::FETCH_ASSOC);
+                
+                // reset the the student class id in the users and payments tables
+                $reset_users = $this->db->prepare("UPDATE users SET class_id = ? WHERE item_id = ? AND user_type=? AND client_id = ? LIMIT 1");
+                $reset_payments = $this->db->prepare("UPDATE fees_payments SET class_id = ? WHERE student_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? LIMIT 50");
+
+                // loop through the promotions history list and change the user class id
+                foreach($promotions_history as $key => $promote) {
+                	// change the student class id in the users table
+                	$reset_users->execute([$promote["promote_to_class_id"], $promote["student_id"], 'student', $clientId]);
+                	// change the student class id in the payments table
+                	$reset_payments->execute([$promote["promote_to_class_id"], $promote["student_id"], $clientId, $next_academic_year, $next_academic_term]);
+
+                	// print the success message
+                	print "{$key}. {$promote["student_name"]} successfully promotted to {$promote["promote_to_class_name"]}.\n";
+                }
+
+                // set all promotions log to Processed
+                $this->db->query("UPDATE promotions_history SET status='Processed' WHERE client_id='{$clientId}' AND status='Pending' LIMIT 100");
 
                 print "Finally update the client preferences\n";
 

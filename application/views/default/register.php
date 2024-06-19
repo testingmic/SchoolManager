@@ -1,5 +1,5 @@
 <?php
-$baseUrl = $config->base_url();
+$baseUrl = $myClass->baseUrl;
 $user_current_url = current_url();
 
 // remove the session value
@@ -16,7 +16,7 @@ if(loggedIn()) {
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title>Create Account - <?= config_item("site_name") ?></title>
+  <title>Create Account - <?= $myClass->appName ?></title>
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-social/bootstrap-social.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
@@ -43,7 +43,7 @@ if(loggedIn()) {
             <div class="text-left mb-4 pb-4 mb-2 p-2 bg-white">
                 <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="70px" /></div>
                 <div>
-                    <div class="font-25px text-center font-weight-bold text-dark"><?= config_item('site_name') ?></div> 
+                    <div class="font-25px text-center font-weight-bold text-dark"><?= $myClass->appName ?></div> 
                     <div class="text-dark text-center">Your advanced school management system.</div>
                 </div>
             </div>
@@ -53,7 +53,7 @@ if(loggedIn()) {
               </div>
               <div class="card-body">
                 <?= form_loader(); ?>
-                <form method="POST" action="<?= $baseUrl ?>api/auth" id="auth-form" class="needs-validation" novalidate="">
+                <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth" id="auth-form" class="needs-validation">
                   <div class="row">
                     <div class="col-lg-12">
                       <div class="form-group">

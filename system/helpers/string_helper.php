@@ -7,7 +7,7 @@
  * @package		Helpers
  * @subpackage	String Helper Functions
  * @category	Core Functions
- * @author		Analitica Innovare Dev Team
+ * @author		Emmallex Technologies Dev. Team
  */
 
 // ------------------------------------------------------------------------
@@ -335,9 +335,13 @@ if ( ! function_exists('repeater'))
  * @param	number	$word_limit	Number to limit the words to 
  * @return	text
  */
-function limit_words($str, $word_limit = null) {
+function limit_words($str, $word_limit = null, $exempt = []) {
 	
-	$words = strip_tags($str);
+	if(is_array($str)) {
+		return $str;
+	}
+	
+	$words = strip_tags($str, $exempt);
 	
 	$words = explode(" ", $words);
 	

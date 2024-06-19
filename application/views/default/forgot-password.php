@@ -1,5 +1,6 @@
 <?php
-$baseUrl = $config->base_url();
+global $myClass;
+$baseUrl = $myClass->baseUrl;
 $user_current_url = current_url();
 
 // remove the session value
@@ -16,7 +17,7 @@ if(loggedIn()) {
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title>Verify - <?= config_item("site_name") ?></title>
+  <title>Verify - <?= $myClass->appName ?></title>
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-social/bootstrap-social.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
@@ -32,6 +33,7 @@ if(loggedIn()) {
     background-size: cover;
   }
   </style>
+  <?= $myClass->google_analytics_code ?>
 </head>
 <body class="bg">
   <div class="loader"></div>
@@ -78,7 +80,7 @@ if(loggedIn()) {
   </div>
   <div class="app-foottag">
     <div class="d-flex justify-content-between">
-        <div>&copy; Copyright <strong><a href="<?= config_item("site_url") ?>"><?= config_item("site_name") ?></a></strong> &bull; All Rights Reserved</div>
+        <div>&copy; Copyright <strong><a href="<?= $myClass->baseUrl ?>"><?= $myClass->appName ?></a></strong> &bull; All Rights Reserved</div>
         <div>By: <strong><?= config_item("developer") ?></strong></div>
     </div>
   </div>

@@ -41,7 +41,7 @@ function check_url($params) {
 function pay_student_fees_checkout() {
 
     // make use of some global variables
-    global $client, $myschoolgh, $myClass, $paymentObj, $getObject, $clientPref;
+    global $client, $myschoolgh, $myClass, $paymentObj, $getObject, $clientPref, $defaultUser;
     
     // get the payment information
     $pay_info = $paymentObj->confirm_student_payment_record($getObject);
@@ -70,12 +70,25 @@ function pay_student_fees_checkout() {
     $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Student Name:</strong> {$payInit->student_details["student_name"]}</div>";
     $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Student ID:</strong> {$payInit->student_details["unique_id"]}</div>";
     $payment_form .= "<div class='font-15 mb-0 text-uppercase'><strong>Student Class:</strong> {$payInit->class_name}</div>";
-    $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Outstanding Balance: </strong><span class='font-20'>{$clientPref->labels->currency}{$balance}</span></div>";
+    $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Outstanding Balance: </strong><span class='font-20'>{$clientPref->labels->currency}".number_format($balance, 2)."</span></div>";
     
     // if the item was specified
     if($getObject->item_specified) {
         $payment_form .= "<div class='font-15 mb-2 text-uppercase'><strong>Payment For: </strong>{$payInit->category_name}</div>";
-        
+    }
+
+    // set the contact number of email address
+    $contact_number = $payInit->student_details["phone_number"] ?? null;
+    $email_address = $payInit->student_details["email"] ?? null;
+
+    // get the parent contact and email address
+    if(!empty($defaultUser->phone_number)) {
+        $contact_number = $defaultUser->phone_number;
+    }
+
+    // set the email address
+    if(!empty($defaultUser->email)) {
+        $email_address = $defaultUser->email;
     }
 
     // append to the payment form
@@ -83,12 +96,12 @@ function pay_student_fees_checkout() {
 
     if($balance > 0) {
         $payment_form .= "<label>Email Address <span class='required'>*</span></label>";
-        $payment_form .= "<input value='".($payInit->student_details["email"] ?? null)."' maxlength='60' type='email' placeholder='Please enter your email address' class='form-control' id='email' name='email'>";
+        $payment_form .= "<input value='{$email_address}' maxlength='60' type='email' placeholder='Please enter your email address' class='form-control' id='email' name='email'>";
         $payment_form .= "</div>";
         $payment_form .= "<div class='form-group mb-1'>\n";
         $payment_form .= "<input class='form-control' disabled hidden type='hidden' name='payment_param' value='".json_encode($getObject)."'>\n";
         $payment_form .= "<label>Phone Number</label>";
-        $payment_form .= "<input value='".($payInit->student_details["phone_number"] ?? null)."' maxlength='15' type='text' placeholder='Please phone number (optional)' class='form-control' id='contact' name='contact'>";
+        $payment_form .= "<input value='{$contact_number}' maxlength='15' type='text' placeholder='Please phone number (optional)' class='form-control' id='contact' name='contact'>";
         $payment_form .= "</div>";
         $payment_form .= "<div class='form-group mb-1'>";
         $payment_form .= "<div class='row'>";

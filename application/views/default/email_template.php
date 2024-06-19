@@ -8,16 +8,16 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $myschoolgh, $defaultUser, $accessObject;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Email Templates";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // not found
 if(!$accessObject->hasAccess("send", "communication")) {
@@ -100,7 +100,7 @@ $response->html = '
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="templates_list" role="tabpanel" aria-labelledby="templates_list-tab2">
                                     <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered table-striped raw_datatable">
+                                        <table class="table table-bordered table-sm table-striped raw_datatable">
                                             <thead>
                                                 <th></th>
                                                 <th>Name</th>

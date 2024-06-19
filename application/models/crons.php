@@ -1,21 +1,31 @@
 <?php
- 
+//Import PHPMailer classes into the global namespace
+//These must be at the top of your script, not inside a function
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
 class Crons {
 
+	private $mailer;
 	private $db;
 	private $userAccount;
 	private $mailAttachment = array();
 	private $rootUrl;
 	private $clientId;
+	private $ini_data;
 	private $limit = 2000;
 	private $siteName = "MySchoolGH - EmmallexTech.Com";
 
 	public function __construct() {
-		$this->baseUrl = "https://app.myschoolgh.com/";
-		$this->rootUrl = "/home/mineconr/app.myschoolgh.com/";
-		$this->dbConn();
+		// INI FILE
+		$this->ini_data = parse_ini_file("db.ini");
 
-		// $this->rootUrl = "/var/www/html/myschool_gh/";
+		// set some more variables
+		$this->baseUrl = $this->ini_data["base_url"];
+		$this->rootUrl = $this->ini_data["root_url"];
+		
+		$this->dbConn();
 
 		require $this->rootUrl."system/libraries/phpmailer.php";
 		require $this->rootUrl."system/libraries/smtp.php";
@@ -27,15 +37,15 @@ class Crons {
 	 * @return $this
 	 */
 	private function dbConn() {
-		
+
 		// CONNECT TO THE DATABASE
 		$connectionArray = array(
-			'hostname' => "localhost",
-			'database' => "myschoolgh",
-			'username' => "newuser",
-			'password' => "password"
+			'hostname' => $this->ini_data['hostname'],
+			'database' => $this->ini_data['database'],
+			'username' => $this->ini_data['username'],
+			'password' => $this->ini_data['password']
 		);
-
+		
 		// run the database connection
 		try {
 			$conn = "mysql:host={$connectionArray['hostname']}; dbname={$connectionArray['database']}; charset=utf8";			
@@ -111,7 +121,7 @@ class Crons {
 		try {
 
 			// run the query
-			$stmt = $this->db->prepare("SELECT a.* FROM users_messaging_list a WHERE a.sent_status='0' AND a.deleted='0' LIMIT 200");
+			$stmt = $this->db->prepare("SELECT a.* FROM users_messaging_list a WHERE a.sent_status='0' AND a.deleted='0' LIMIT 100");
 			$stmt->execute();
 
 			$dataToUse = null;
@@ -166,29 +176,35 @@ class Crons {
 	 */
 	private function send_emails($recipient_list, $subject, $message, $cc_list = null) {
 
-		$mail = new Phpmailer();
-		$smtp = new Smtp();
+		//Create an instance; passing `true` enables exceptions
+		$mailer = new PHPMailer(true);
 
 		// configuration settings
 		$config = (Object) array(
 			'subject' => $subject,
-			'headers' => "From: {$this->siteName} - MySchoolGH.Com<noreply@myschoolgh.com> \r\n Content-type: text/html; charset=utf-8",
+			'headers' => "From: {$this->siteName} - MySchoolGH.Com<{$this->ini_data["smtp_user"]}> \r\n Content-type: text/html; charset=utf-8",
 			'Smtp' => true,
-			'SmtpHost' => 'school.mineconrsl.com',
-			'SmtpPort' => '465',
-			'SmtpUser' => 'noreply@myschoolgh.com',
-			'SmtpPass' => 'C30C5aamUl',
+			'SmtpHost' => $this->ini_data["smtp_host"],
+			'SmtpPort' => $this->ini_data["smtp_port"],
+			'SmtpUser' => $this->ini_data["smtp_user"],
+			'SmtpPass' => $this->ini_data["smtp_password"],
 			'SmtpSecure' => 'ssl'
 		);
 
 		// additional settings
-		$mail->isSMTP();
-		$mail->SMTPDebug = 0;
-		$mail->Host = $config->SmtpHost;
-		$mail->SMTPAuth = true;
-		$mail->Username = $config->SmtpUser;
-		$mail->Password = $config->SmtpPass;
-		$mail->SMTPSecure = $config->SmtpSecure;
+		$mailer->SMTPDebug = SMTP::DEBUG_SERVER;
+		$mailer->isSMTP();
+		$mailer->Host = $config->SmtpHost;
+		$mailer->SMTPAuth = true;
+		$mailer->Username = $config->SmtpUser;
+		$mailer->Password = $config->SmtpPass;
+		$mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+
+		// set the port to sent the mail
+		$mailer->Port = $config->SmtpPort;
+
+		// set the user from which the email is been sent
+		$mailer->setFrom($this->ini_data["smtp_from"], $this->siteName);
 
 		// attach documents if any was found
 		if(!empty($this->mailAttachment)) {
@@ -197,43 +213,44 @@ class Crons {
 				// file path
 				$filepath = $theAttachment["path"];
 				// append the attachment to the mail
-				$mail->AddAttachment($filepath, $theAttachment["name"]);
+				$mailer->AddAttachment($filepath, $theAttachment["name"]);
 			}
 		}
-		// set the port to sent the mail
-		$mail->Port = $config->SmtpPort;
-
-		// set the user from which the email is been sent
-		$mail->setFrom('noreply@myschoolgh.com', $this->siteName);
 
 		// loop through the list of recipients for this mail
         foreach($recipient_list as $emailRecipient) {
-			// user fullname
-			$fullname = isset($emailRecipient['fullname']) ? $emailRecipient['fullname'] : $emailRecipient['name'];
-			// append the email address
-			$mail->addAddress($emailRecipient['email'], $fullname);
+        	if(!empty($emailRecipient['email'])) {
+				// user fullname
+				$fullname = isset($emailRecipient['fullname']) ? $emailRecipient['fullname'] : $emailRecipient['name'];
+				// append the email address
+				$mailer->addAddress($emailRecipient['email'], $fullname);
+			}
 		}
 
 		// loop through the list of cc if not empty
 		if(!empty($cc_list)) {
 			// loop through the copied list
 			foreach($cc_list as $copiedRecipient) {
-				// user fullname
-				$fullname = isset($copiedRecipient['fullname']) ? $copiedRecipient['fullname'] : $copiedRecipient['name'];
-				// append the email address
-				$mail->addCC($copiedRecipient['email'], $fullname);
+				// if the email address is not empty
+				if(!empty($copiedRecipient['email'])) {
+					// user fullname
+					$fullname = isset($copiedRecipient['fullname']) ? $copiedRecipient['fullname'] : $copiedRecipient['name'];
+					// append the email address
+					$mailer->addCC($copiedRecipient['email'], $fullname);
+				}
 			}
 		}
 
 		// this is an html message
-		$mail->isHTML(true);
+		$mailer->isHTML = true;
 
 		// set the subject and message
-		$mail->Subject = $subject;
-		$mail->Body    = $message;
+		$mailer->Subject = $subject;
+		$mailer->Body    = $message;
+		$mailer->AltBody = strip_tags($message);
 		
 		// send the email message to the users
-		if($mail->send()) {
+		if($mailer->send()) {
 			return true;
 		} else {
  			return false;
@@ -254,6 +271,11 @@ class Crons {
 			// loop through the result
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
+				print "Looping through the cron job activity list.\n";
+
+				// if the processed is true
+				$processed = false;
+
 				// if the request is notification
 				if($result->cron_type == "notification") {
 					// get the query to process
@@ -263,7 +285,7 @@ class Crons {
 					$query_stmt->execute();	
 					// form the notification parameters
 					$notice_param = (object) [
-						'_item_id' => $this->random_string(32),
+						'_item_id' => $this->random_string(16),
 						'subject' => $result->subject,
 						'remote' => false, 
 						'notice_type' => $result->notice_code,
@@ -276,6 +298,7 @@ class Crons {
 						$notice_param->message = "Hello {$the_result->name}, an announcement was posted for your review. Visit the Announcements section to view.";
 						$this->notice_add($notice_param);
 					}
+					$processed = true;
 				}
 
 				// if the request is email
@@ -285,7 +308,7 @@ class Crons {
 
 					// form the notification parameters
 					$notice_param = (object) [
-						'_item_id' => $this->random_string(32),
+						'_item_id' => $this->random_string(16),
 						'subject' => $result->subject,
 						'remote' => false, 
 						'notice_type' => $result->notice_code,
@@ -298,32 +321,80 @@ class Crons {
 						$notice_param->message = "Hello {$eachUser->name}, you have been sent an email message. Visit the emails section to view.";
 						$this->notice_add($notice_param);
 					}
+
+					$processed = true;
 					
 				}
 
 				// if a user information have been uploaded
 				elseif($result->cron_type == "users_upload") {
 					$this->users_upload_modification($result->item_id, $result->client_id);
+					$processed = true;
 				}
 
 				// if the type is to manage the terminal report functionality
 				elseif($result->cron_type == "terminal_report") {
 					$this->terminal_report_handler($result->item_id);
+					$processed = true;
 				}
 
 				// if the activity is to assign fees to a particular class
 				elseif($result->cron_type == "assign_student_fees") {
 					$this->assign_student_fees($result);
+					$processed = true;
 				}
 
-				// update the cron status
-				$this->db->query("UPDATE cron_scheduler SET date_processed=now(), status='1' WHERE id='{$result->id}' LIMIT 1");
+				// if the query is to update the student parent information
+				elseif($result->cron_type == "bulk_student_update") {
+					$this->update_student_information($result->query);
+					$processed = true;
+				}
+
+				// if the processed state is true
+				if($processed) {
+					// update the cron status
+					$this->db->query("UPDATE cron_scheduler SET date_processed=now(), status='1' WHERE id='{$result->id}' LIMIT 1");
+				}
 
 			}
 
 		} catch(PDOException $e) {
 			print $e->getMessage();
 		}
+
+    }
+
+    /**
+     * 
+     * 
+     * 
+     */
+    public function update_student_information($result) {
+
+    	try {
+
+    		// convert to array
+    		$students_array_list = json_decode($result, true);
+
+    		// loop through the entire students list
+			foreach($students_array_list as $student_id => $data) {
+
+				// update the student record
+				$this->db->query("UPDATE users SET last_updated = now()
+					".(isset($data["phone_number_2"]) ? ", phone_number_2 = '{$data["phone_number_2"]}'" : null)."
+					".(isset($data["phone_number"]) ? ", phone_number = '{$data["phone_number"]}'" : null)."
+					".(isset($data["gender"]) ? ", gender = '{$data["gender"]}'" : null)."
+					".(!empty($data["date_of_birth"]) ? ", date_of_birth = '{$data["date_of_birth"]}'" : null)."
+					".(!empty($data["enrollment_date"]) ? ", enrollment_date = '{$data["enrollment_date"]}'" : null)."
+					".(!empty($data["image"]) ? ", image = '{$data["image"]}'" : null)."
+					WHERE id='{$student_id}' AND user_type = 'student' LIMIT 1
+				");
+
+			}
+
+			print "\nStudents data information successfully updated.\n";
+
+    	} catch(PDOException $e) {}
 
     }
 
@@ -399,15 +470,9 @@ class Crons {
 		// set the fullname of the user
 		$u_stmt = $this->db->prepare("UPDATE users SET 
 			name = CONCAT(firstname,' ', lastname,' ', othername), 
-			client_id = UPPER(client_id) WHERE upload_id='{$upload_id}' AND client_id='{$clientId}'
+			client_id = UPPER(client_id) WHERE upload_id='{$upload_id}' AND client_id='{$clientId}' LIMIT 2000
 		");
 		$u_stmt->execute();
-
-		// get the list of all users that was uploaded
-		$u_list = $this->db->prepare("UPDATE users SET username = (SUBSTRING(email, 1, LOCATE('@', email) - 1))
-			WHERE LENGTH(email) > 5 AND upload_id='{$upload_id}' AND client_id='{$clientId}'
-		");
-		$u_list->execute();
 	}	
 
 	/**
@@ -417,20 +482,27 @@ class Crons {
 	 */
 	private function terminal_report_handler($report_id) {
 		
-		// set the fullname of the user
-		$u_stmt = $this->db->prepare("UPDATE grading_terminal_scores a SET 
-			a.student_item_id = (SELECT u.item_id FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
-			a.student_name = (SELECT u.name FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
-			a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
-		WHERE a.report_id='{$report_id}'");
-		$u_stmt->execute();
+		try {
+			// set the fullname of the user
+			$u_stmt = $this->db->prepare("
+				UPDATE grading_terminal_scores a SET 
+					a.student_item_id = (SELECT u.item_id FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+					a.student_name = (SELECT u.name FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+					a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1),
+					a.student_row_id = (SELECT u.id FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1)
+				WHERE a.report_id='{$report_id}' LIMIT 1
+			");
+			$u_stmt->execute();
 
-		// get the list of all users that was uploaded
-		$u_stmt = $this->db->prepare("UPDATE grading_terminal_logs a SET 
-			a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
-		WHERE a.report_id='{$report_id}' LIMIT 1");
-		$u_stmt->execute();
-		
+			// get the list of all users that was uploaded
+			$u_stmt = $this->db->prepare("UPDATE grading_terminal_logs a SET 
+				a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
+				WHERE a.report_id='{$report_id}' LIMIT 1
+			");
+			$u_stmt->execute();
+
+		} catch(PDOException $e) {}
+			
 	}
 	
     /**
@@ -481,29 +553,10 @@ class Crons {
 		return substr(str_shuffle(str_repeat($pool, ceil($len / strlen($pool)))), 0, $len);
 	}
 
-	/**
-	 * Automatically update the status of transactions, fees collection and events
-	 * 
-	 * Disable reversal after every 30 hours
-	 * 
-	 * @return Bool
-	 */
-	public function auto_updates() {
-		// fees payment reversal disallowed after 30 HOURS
-        $this->db->query("UPDATE fees_collection SET has_reversal='0' WHERE recorded_date < (NOW() + INTERVAL - 30 HOUR) AND has_reversal='1' LIMIT 1000");
-        
-        // do same to transactions recorded - auto set it to approved after 30 hours
-        $this->db->query("UPDATE accounts_transaction SET state='Approved' WHERE date_created < (NOW() + INTERVAL - 30 HOUR) AND state='Pending' AND status='1' LIMIT 1000");
-
-		// update the status of events
-        $this->db->query("UPDATE events SET state='Over' WHERE end_date < CURDATE() AND state='Pending' AND status='1' LIMIT 300");
-	}
-
 }
 
 // create new object
 $jobs = new Crons;
-$jobs->auto_updates();
 $jobs->load_emails();
-$jobs->scheduler();
+// $jobs->scheduler();
 ?>

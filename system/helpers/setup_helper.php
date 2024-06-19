@@ -5,11 +5,11 @@
             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                 <?php if(in_array($client_state, ["Activated", "Pending"])) { ?>
                 <li class="nav-item">
-                    <a class="nav-link active" id="profile-tab2" data-toggle="tab" href="#profile" role="tab" aria-selected="true">Account Profile Setup</a>
+                    <a class="nav-link active" id="profile-tab2" data-toggle="tab" href="#profile" role="tab" aria-selected="true">User Profile</a>
                 </li>
                 <?php } ?>
                 <li class="nav-item">
-                    <a class="nav-link <?= !in_array($client_state, ["Activated", "Pending"]) ? "active" : null ?>" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">General</a>
+                    <a class="nav-link <?= !in_array($client_state, ["Activated", "Pending"]) ? "active" : null ?>" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">School Profile</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" id="academic_calendar-tab2" data-toggle="tab" href="#academic_calendar" role="tab" aria-selected="true">Academic Calendar</a>
@@ -18,21 +18,15 @@
                     <a class="nav-link" id="examination-tab2" data-toggle="tab" href="#examination" role="tab" aria-selected="true">Grading System</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="results_structure-tab2" data-toggle="tab" href="#results_structure" role="tab" aria-selected="true">Results Structure & Settings</a>
+                    <a class="nav-link" id="results_structure-tab2" data-toggle="tab" href="#results_structure" role="tab" aria-selected="true">Results Structure</a>
                 </li>
                 <?php  if(in_array($client_state, ["Activated", "Pending"])) { ?>
                 <li class="nav-item">
-                    <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Import Courses</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">Import Students</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="staff-tab2" data-toggle="tab" href="#staff" role="tab" aria-selected="true">Import Staff</a>
                 </li>
                 <?php } ?>
                 <li class="nav-item">
-                    <a class="nav-link" id="complete-tab2" data-toggle="tab" href="#complete" role="tab" aria-selected="true">Complete Process</a>
+                    <a class="nav-link" id="complete-tab2" data-toggle="tab" href="#complete" role="tab" aria-selected="true">Complete</a>
                 </li>
             </ul>
             <div class="tab-content tab-bordered" id="myTab3Content">
@@ -57,7 +51,13 @@
                     <?php } ?>
                 </div>                                    
                 <div class="tab-pane fade" id="results_structure" role="tabpanel" aria-labelledby="results_structure-tab2">
-                    <?= $the_form["results_structure"] ?? null; ?>
+                    <?php if($notReady) { ?>
+                        <div class="alert alert-warning text-center">
+                            You must first set the Academic Year and Term to proceed.
+                        </div>
+                    <?php } else { ?>
+                        <?= $the_form["results_structure"] ?? null; ?>
+                    <?php } ?>
                 </div>
                 <?php  if(in_array($client_state, ["Activated", "Pending"])) { ?>
                     <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
@@ -67,24 +67,6 @@
                             </div>
                         <?php } else { ?>
                             <?= $the_form["student"] ?? null; ?>
-                        <?php } ?>
-                    </div>
-                    <div class="tab-pane fade" id="staff" role="tabpanel" aria-labelledby="staff-tab2">
-                        <?php if($notReady) { ?>
-                            <div class="alert alert-warning text-center">
-                                You must first set the Academic Year and Term to proceed.
-                            </div>
-                        <?php } else { ?>
-                            <?= $the_form["staff"] ?? null; ?>
-                        <?php } ?>
-                    </div>
-                    <div class="tab-pane fade" id="courses" role="tabpanel" aria-labelledby="courses-tab2">
-                        <?php if($notReady) { ?>
-                            <div class="alert alert-warning text-center">
-                                You must first set the Academic Year and Term to proceed.
-                            </div>
-                        <?php } else { ?>
-                            <?= $the_form["course"] ?? null; ?>
                         <?php } ?>
                     </div>
                 <?php } ?>

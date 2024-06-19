@@ -9,27 +9,36 @@ header("Access-Control-Max-Age: 3600");
 global $session, $myClass, $accessObject, $defaultAcademics;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Modify Students Record";
-$response->title = $pageTitle." : {$appName}";
+$response->title = $pageTitle;
+
+// end query if the user has no permissions
+if(!$accessObject->hasAccess("modify_student", "settings")) {
+    // permission denied information
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
 
 // get the class list
 $students_list = "";
 $filter = (object) [];
 $class_array_list = $myClass->pushQuery("name, item_id, id", "classes", "client_id='{$clientId}' AND status='1'", false, "ASSOC");
+$departments_array_list = $myClass->pushQuery("name, item_id, id", "departments", "client_id='{$clientId}' AND status='1'", false, "ASSOC");
 
 // get the list of all other users
 $other_users_list = $myClass->pushQuery("
-    a.id, a.name, a.user_type, a.unique_id, a.item_id, a.phone_number, a.class_id, 
-        a.image, a.date_of_birth, a.enrollment_date, a.username", 
-    "users a", "a.client_id='{$clientId}' AND a.user_status='Active' AND a.user_type = 'student'
+    a.id, a.name, a.user_type, a.unique_id, a.item_id, a.phone_number, a.phone_number_2, a.class_id, 
+        a.image, a.date_of_birth, a.enrollment_date, a.username, a.department, a.gender", 
+    "users a", "a.client_id='{$clientId}' AND a.user_status IN ({$myClass->default_allowed_status_users_list}) AND a.user_type = 'student'
         AND a.status='1' ORDER BY a.name LIMIT {$myClass->global_limit}");
 
 // get the list of only students
@@ -45,11 +54,12 @@ foreach($other_users_list as $user) {
 
 // append to the array list
 $response->array_stream["users_array_list"] = $users_array_list;
+$response->array_stream["departments_array_list"] = $departments_array_list;
 
 // set the classes list
 $classes_list = "";
 foreach($class_array_list as $class) {
-    $classes_list .= "<option ".((isset($filter->class_id) && ($class["id"] == $filter->class_id)) ? "selected='selected'" : null)." data-class_id='{$class["item_id"]}' value='{$class["id"]}'>{$class["name"]}</option>";
+    $classes_list .= "<option ".((isset($filter->class_id) && ($class["id"] == $filter->class_id)) ? "selected='selected'" : null)." data-class_id='{$class["item_id"]}' value='{$class["id"]}'>".strtoupper($class["name"])."</option>";
 }
 
 // set the input field
@@ -123,6 +133,7 @@ $response->html = '
                                         <label> Apply to All</label>
                                         <select disabled id="t_column" class="custom_select">
                                             <option value="end">Enrollment Date</option>
+                                            <option value="dob">Date of Birth</option>
                                         </select>
                                         <input disabled type="date" id="t_input" class="custom_input">
                                         <button type="button" disabled onclick="return apply_to_all()" class="btn btn-dark">Apply to All</button>
@@ -136,11 +147,12 @@ $response->html = '
                                 <table id="simple_load_student" class="table table-md table-bordered table-striped">
                                     <thead>
                                         <tr>
-                                            <th width="5%" class="text-center">#</th>
-                                            <th width="35%">Student Name</th>
-                                            <th width="20%">Date of Birth</th>
-                                            <th width="20%">Enrollment Date</th>
-                                            <th width="20%">Image</th>
+                                            <th width="22%">Student Name</th>
+                                            <th>Primary Contact</th>
+                                            <th>Secondary Contact</th>
+                                            <th>Date of Birth</th>
+                                            <th width="13%">Gender</th>
+                                            <th width="15%">Image</th>
                                         </tr>
                                     </thead>
                                     <tbody class="list_students_record"></tbody>

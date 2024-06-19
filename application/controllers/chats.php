@@ -3,10 +3,14 @@
 class Chats extends Myschoolgh {
 
     private $message_id;
+    private $encryptObj;
 
     public function __construct()
     {
         parent::__construct();
+
+        // create an object of the crypt class
+        $this->encryptObj = load_class("crypt", "controllers");
     }
 
     /**
@@ -89,8 +93,15 @@ class Chats extends Myschoolgh {
 
                 // send the raw message
                 $result->seen_status = (int) $result->seen_status;
-                $result->raw_message = $result->full_message;
 
+                // set the key for decryption
+                $key = "{$result->sender_id}_{$msg_id}";
+
+                // decrypt the message
+                $result->raw_message = $this->encryptObj->decrypt($result->full_message, $key);
+
+                unset($result->full_message);
+                
                 $result->timestamp = strtotime($result->date_created);
 
                 $data[$result->timestamp] = $result;
@@ -323,11 +334,11 @@ class Chats extends Myschoolgh {
             $data = [];
             // loop through the results list
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-
+                $result->name = $this->remove_quotes($result->name);
                 // online algorithm (user is online if last activity is at most 5minutes ago)
                 $result->online = $this->user_is_online($result->last_seen);
                 $result->offline_ago = time_diff($result->last_seen);
-                $result->message_unique_id = empty($result->message_unique_id) ? strtoupper(random_string('alnum', 16)) : $result->message_unique_id;
+                $result->message_unique_id = empty($result->message_unique_id) ? strtoupper(random_string("alnum", RANDOM_STRING)) : $result->message_unique_id;
 
                 $data[] = $result;
             }
@@ -413,6 +424,12 @@ class Chats extends Myschoolgh {
 		$params->message_id = (empty($params->message_id) || $params->message_id == "null") ? strtoupper(random_string("alnum", 24)) : $params->message_id;
 		$this->message_id = $params->message_id;
 
+        // set the key using the combination of the sender_id and the message id
+        $key = "{$params->sender_id}_{$this->message_id}";
+
+        // encrypt the message to save in the database
+        $params->message = $this->encryptObj->encrypt($params->message, $key);
+
         // initiate a connection and append the messages
         $last_insert_id = $this->save_message($params);
 
@@ -439,12 +456,14 @@ class Chats extends Myschoolgh {
 
 		try {
 			/** Save the message log */
-			$stmt = $this->db->prepare("INSERT INTO users_chat SET message_unique_id = ?, sender_id = ?, receiver_id = ?, message = ?, user_agent = ?");
-			$stmt->execute([$this->message_id, $data->sender_id, $data->receiver_id, $data->message, $this->agent]);
+			$stmt = $this->db->prepare("INSERT INTO users_chat SET client_id = ?, message_unique_id = ?, sender_id = ?, receiver_id = ?, message = ?, user_agent = ?");
+			$stmt->execute([$data->clientId, $this->message_id, $data->sender_id, $data->receiver_id, $data->message, $this->agent]);
             
             return $this->db->lastInsertId();
 
-		} catch(\PDOException $e) {}
+		} catch(\PDOException $e) {
+            print $e->getMessage();
+        }
 	}
 
     /**
@@ -493,7 +512,7 @@ class Chats extends Myschoolgh {
         // $prev_messages = $this->list($data)["data"];
 
         /** Update the seeen status for messages between these two users */
-        // $s_stmt = $this->db->prepare("UPDATE users_chat SET seen_status = ?, seen_date=now() WHERE receiver_id = ? AND sender_id = ? AND seen_status = ? LIMIT 20");
+        // $s_stmt = $this->db->prepare("UPDATE users_chat SET seen_status = ?, seen_date='{$this->current_timestamp}' WHERE receiver_id = ? AND sender_id = ? AND seen_status = ? LIMIT 20");
         // $s_stmt->execute([1, $params->sender_id, $params->userId, 0]);
         
         /** Return the results */

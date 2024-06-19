@@ -7,7 +7,7 @@
  * @package		Helpers
  * @subpackage	File Helper Functions
  * @category	Core Functions
- * @author		Analitica Innovare Dev Team
+ * @author		Emmallex Technologies Dev. Team
  */
 
 if ( ! function_exists('read_file'))
@@ -415,24 +415,62 @@ if ( ! function_exists('octal_permissions'))
 	 * @param	int	$perms	Permissions
 	 * @return	string
 	 */
-	function octal_permissions($perms)
-	{
+	function octal_permissions($perms) {
 		return substr(sprintf('%o', $perms), -3);
 	}
 }
 
-function validate_image($theValue) {
+function validate_document($filename, $tmp_file = null) {
 
-	if(!empty($theValue)):
-		$allowed = array("jpg","jpeg","gif","png");
-		$extension = pathinfo($theValue, PATHINFO_EXTENSION);
-		
-		if(in_array(strtolower($extension), $allowed)):
-			//this is a valid image
-			return true;
-		endif;
-	endif;
+	$extension = strtolower(substr(strrchr($filename, '.'), 1));
 
+    static $mimes;
+
+	if ( ! is_array($mimes)) {
+		$mimes = get_mimes();
+		if (empty($mimes)) {
+			return false;
+		}
+	}
+
+	// init value
+	$accepted_mimes = false;
+
+	// set the tmp file
+	$tmp_file = !$tmp_file ? $filename : $tmp_file;
+
+	// if the mime type exists
+	if (isset($mimes[$extension])) {
+		$accepted_mimes = $mimes[$extension];
+	}
+
+	// end query here
+	if(!$accepted_mimes) {
+		return false;
+	}
+
+	// get the mime content type
+	$mime_type = @mime_content_type($tmp_file);
+	
+	// if is an image file
+	if(!in_array($mime_type, $accepted_mimes)) {
+		return false;
+	}
+
+	return true;
+}
+
+function validate_image($the_image) {
+
+	// validate the image uploaded
+	$mime_type = mime_content_type($the_image);
+
+	// if is an image file
+	if(!in_array($mime_type, ['image/jpeg', 'image/pjpeg', 'image/png',  'image/x-png', 'image/gif'])) {
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -446,7 +484,7 @@ function get_file_mime($file_ext, $array_item) {
 }
 
 
-function show_content($title = null, $file_name = null, $report_content = null, $orientation = "L", $force = false) {
+function show_content($title = null, $file_name, $report_content, $orientation = "L", $force = false) {
 
     // base url
     $appName = config_item("site_name");
@@ -513,7 +551,7 @@ function show_content($title = null, $file_name = null, $report_content = null, 
 }
 
 // create a function
-function dompdf_show_content($report_content = null) {
+function dompdf_show_content($title = null, $file_name, $report_content, $orientation = "landscape", $reportObj) {
 		
 	// instantiate and use the dompdf class
 	// $dompdf = new Dompdf();

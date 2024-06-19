@@ -9,15 +9,23 @@ header("Access-Control-Max-Age: 3600");
 global $session, $myClass, $accessObject, $defaultAcademics;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
-$response->title = "Assign Student Department : {$appName}";
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$response->title = "Assign Student Department ";
+
+// end query if the user has no permissions
+if(!$accessObject->hasAccess("assign_department", "settings")) {
+    // permission denied information
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
 
 // get the class list
 $response->scripts = ["assets/js/bulk_update.js"];
@@ -35,7 +43,8 @@ $response->html = '
                 <div class="breadcrumb-item active">Assign Department to Students</div>
             </div>
         </div>
-        <div class="row" id="bulk_assign_department">
+        <input type="hidden" disabled name="assign_param" value="department">
+        <div class="row" id="bulk_assign_department_section">
             <div class="col-12 col-sm-12 col-md-12 mb-2 text-primary">
                 <h4 class="font-italic">Use this panel to assign department to a class of students.</h4>
             </div>
@@ -47,24 +56,24 @@ $response->html = '
                             <select name="class_id" data-width="100%" class="form-control selectpicker">
                                 <option value="">Please Select Class</option>';
                                 foreach($class_list as $each) {
-                                    $response->html .= "<option data-department_id='{$each->department_id}' data-class_name='{$each->name}' value=\"{$each->id}\">{$each->name}</option>";
+                                    $response->html .= "<option data-department_id='{$each->department_id}' data-class_name='{$each->name}' value=\"{$each->id}\">".strtoupper($each->name)."</option>";
                                 }
                                 $response->html .= '
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Assign Class Fees <span class="required">*</span></label>
+                            <label>Select Department <span class="required">*</span></label>
                             <select name="department_id" data-width="100%" class="form-control selectpicker">
                                 <option value="">Please Select Department</option>';
                                 foreach($department_list as $each) {
-                                    $response->html .= "<option data-department_name='{$each->name}' value=\"{$each->id}\">{$each->name}</option>";
+                                    $response->html .= "<option data-department_name='{$each->name}' value=\"{$each->id}\">".strtoupper($each->name)."</option>";
                                 }
                                 $response->html .= '
                             </select>
                         </div>
 
                         <div class="form-group" align="right" id="allocate_fees_button">
-                            <button type="submit" disabled="disabled" onclick="return save_Department_Allocation()" class="btn btn-outline-success"><i class="fa fa-save"></i> Assign Department</button>
+                            <button type="submit" disabled="disabled" onclick="return save_Section_Department_Allocation(\'department\')" class="btn btn-outline-success"><i class="fa fa-save"></i> Assign Department</button>
                         </div>
                         
                     </div>
@@ -73,6 +82,7 @@ $response->html = '
             <div class="col-12 col-sm-12 col-md-8">
                 <div class="card">
                     <div class="card-body">
+                        '.$myClass->quick_student_search_form.'
                         <div class="table-responsive">
                             <table id="simple_load_student" class="table table-bordered table-striped">
                                 <thead>

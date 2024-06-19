@@ -4,19 +4,15 @@ if( !defined( 'BASEPATH' ) ) die( 'Restricted access' );
 
 class Payment extends Myschoolgh {
 
-    private $url;
-    private $default_email;
-
-    private $pk_secret_key = "sk_test_3ceb4c33b4b0ea31cb10ef3b41ef05a673758cee";
+    private $pk_secret_key = "sk_live_6adbaeaeed4f7206d959c5e3efb480678593e8f4";
+    public $url;
     
     public function __construct() {
 
         global $myschoolgh, $session;
 
-		$this->db = $myschoolgh;
+        $this->db = $myschoolgh;
         $this->session = $session;
-
-        $this->default_email = "emmallob14@gmail.com";
 
         $this->url["init"] = "https://api.paystack.co/transaction/initialize";
         $this->url["verify"] = "https://api.paystack.co/transaction/verify"; // reference code
@@ -24,6 +20,41 @@ class Payment extends Myschoolgh {
         $this->url["timeline"] = "https://api.paystack.co/transaction/timeline";
         $this->url["total"] = "https://api.paystack.co/transaction/totals";
         $this->url["export"] = "https://api.paystack.co/transaction/export";
+
+    }
+
+    /**
+     * Convert Amount to Words
+     * 
+     * @param Float     $params->amount
+     *
+     * @return Array
+     **/
+    public function convert_amount(stdClass $params) {
+
+        // amount value
+        $amount = [];
+
+        // convert the amount to an array
+        $params->amount = $this->stringToArray($params->amount);
+
+        // loop through the amount list
+        if(is_array($params->amount)) {
+
+            // loop through the array list
+            foreach($params->amount as $_amount) {
+                // ensure the amount is valid numeric integer
+                if(!preg_match("/^[0-9.]+$/", $_amount)) {
+                    $amount[$_amount] = "NIL";
+                } else {
+                    // return the conversion
+                    $amount[$_amount] = $this->amount_to_words($_amount);
+                }
+            }
+        }
+
+        // return the conversion
+        return $amount;
 
     }
 
@@ -42,7 +73,7 @@ class Payment extends Myschoolgh {
         
         // set the field parameters
         $fields = [
-            "email" => $params->email ?? $this->default_email,
+            "email" => $params->email ?? $this->default_pay_email,
             "amount" => $params->amount ?? 1,
             "callback_url" => "{$this->baseUrl}pay_smstopup"
         ];
@@ -138,11 +169,19 @@ class Payment extends Myschoolgh {
         try {
 
             // global variable
-            global $session;
+            global $session, $defaultClientData;
+
+            // set the client data
+            $client = $params->client_data;
+
+            // if the client subaccount is empty then end the query
+            if(empty($client->client_account)) {
+                return ["code" => 203, "data" => "Sorry! {$client->client_name} have not yet subscribed to use the e-Payment Module."];
+            }
 
             // trim all the variables parsed
             $params->amount = substr($params->amount, 0, 6);
-            $params->contact = substr($params->contact, 0, 12);
+            $params->contact = substr($params->contact, 0, 13);
             $params->email = substr($params->email, 0, 60);
 
             // validate the param variable
@@ -221,25 +260,55 @@ class Payment extends Myschoolgh {
                 return ["code" => 203, "data" => "Sorry! The amount to be paid must not exceed the oustanding balance."];
             }
 
-            // set the client data
-            $client = $params->client_data;
+            // set the data
+            $_data = [];
+            $_data["clientId"] = $params->clientId;
+            $_data["subaccount"] = $client->client_account;
+            $_data["amount"] = $params->amount;
+            $_data["userId"] = $payInit->student_id;
+            $_data["student_id"] = $payInit->student_id;
+            $_data["checkout_url"] = $param["checkout_url"] ?? "";
+            $_data["userName"] = $payInit->student_details->student_name ?? null;
+            $_data["academic_term"] = $payInit->academic_term;
+            $_data["academic_year"] = $payInit->academic_year;
+            $_data["contact_number"] = $params->contact ?? null;
+            $_data["email_address"] = $params->email ?? null;
+            
+            // convert back to object
+            $_data = (object) $_data;
+
+            // create a new transaction id
+            $transaction_id = empty($session->self_pay_reference_id) ? "MSG" . random_string("numeric", 15) : $session->self_pay_reference_id;
+            $session->self_pay_reference_id = $transaction_id;
 
             // set a new payment reference
-            $session->reference_id = "MT".random_string("numeric", 16);
             $session->user_contact = $params->contact ?? null;
 
-            // set the client subaccount in a session
-            $session->subaccount = $client->client_account;
+            // confirm if the transaction id already exists
+            if(!empty($this->pushQuery("id", "transaction_logs", "transaction_id='{$transaction_id}' AND state='Pending' LIMIT 1"))) {
+                // log the information
+                $stmt = $this->db->prepare("UPDATE transaction_logs 
+                    SET amount = ?, transaction_data = ? WHERE transaction_id = ? LIMIT 1");
+                $stmt->execute([$params->amount, json_encode($_data), $transaction_id]);
+            } else {
+                // log the information
+                $stmt = $this->db->prepare("INSERT INTO transaction_logs SET 
+                    client_id = ?, transaction_id = ?, reference_id = ?, endpoint = ?, amount = ?, 
+                    transaction_data = ?, state = ?, created_by = '{$params->userId}'");
+                $stmt->execute([$params->clientId, $transaction_id, $transaction_id, "fees", $params->amount, 
+                    json_encode($_data), "Pending"
+                ]);
+            }
 
             // set the data to return if request was successful
             $data = [
                 "data" => [
-                    "email" => $params->email,
+                    "email" => !empty($params->email) ? $params->email : $params->default_pay_email,
                     "amount" => $params->amount * 100,
                     "contact" => $params->contact ?? null,
                     "subaccount" => $client->client_account,
                     "payment_key" => $this->pk_public_key,
-                    "reference" => $session->reference_id,
+                    "reference" => $session->self_pay_reference_id,
                     "currency" => $client->client_preferences->labels->currency
                 ]
             ];
@@ -285,20 +354,8 @@ class Payment extends Myschoolgh {
             }
 
             // confirm the reference_id exists
-            if(empty($session->reference_id)) {
+            if(empty($session->self_pay_reference_id)) {
                 return ["code" => 203, "result" => "Sorry! Payment validation unsuccessful."];
-            }
-
-            // payment parameter
-            $data = (object) ["reference" => $params->reference_id, "route" => "verify"];
-
-            // confirm the payment
-            $payment_check = $this->get($data);
-            $session->payment = $payment_check;
-
-            // check
-            if(empty($payment_check["data"])) {
-                return ["code" => 203, "data" => "Sorry! We could not validate the transaction."];
             }
 
             // academic year
@@ -306,12 +363,36 @@ class Payment extends Myschoolgh {
             $academic_year = $clientPref->academics->academic_year;
             $academic_term = $clientPref->academics->academic_term;
 
+            // payment parameter
+            $data = (object) ["reference" => $params->reference_id, "route" => "verify"];
+
+            // confirm the payment
+            $payment_check = empty($params->paystack_data) ? $this->get($data) : $params->paystack_data;
+
+            // check
+            if(empty($payment_check["data"])) {
+                return ["code" => 203, "data" => "Sorry! We could not validate the transaction."];
+            }
+
             // if payment status is true
             if($payment_check["data"]->status === true) {
 
                 // confirm the reference_id
-                if($session->reference_id !== $payment_check["data"]->data->reference) {
+                if($session->self_pay_reference_id !== $payment_check["data"]->data->reference) {
                     return ["code" => 203, "result" => "Sorry! Payment validation unsuccessful."];
+                }
+
+                // end query if the $params->subaccount was not parsed for verification
+                if(empty($params->subaccount)) {
+                    return ["code" => 203, "data" => "Sorry! We could not validate this transaction."];
+                }
+
+                // if the subaccount was parsed
+                if(isset($payment_check["data"]->data->subaccount)) {
+                    // if the client subaccount is empty then end the query
+                    if($payment_check["data"]->data->subaccount->subaccount_code !== $params->subaccount) {
+                        return ["code" => 203, "data" => "Sorry! We could not validate this transaction."];
+                    }
                 }
 
                 // set the amount 
@@ -321,7 +402,7 @@ class Payment extends Myschoolgh {
                 $meta_data = $payment_check["data"]->data->metadata->referrer;
                 
                 // clean metadata
-                $clean_meta = str_ireplace(["http://", "https://", "localhost/myschool_gh"], ["", "", "app.myschoolgh.com"], $meta_data);
+                $clean_meta = str_ireplace(["http://", "https://", "localhost/myschoolgh"], ["", "", "app.myschoolgh.com"], $meta_data);
 
                 // split the referrer information
                 $split = explode("/", $clean_meta);
@@ -344,8 +425,11 @@ class Payment extends Myschoolgh {
                     // set the client id and the student id
                     $student_param->clientId = $split[2];
                     $student_param->student_id = $split[4];
+                } elseif(isset($split[5]) && ($split[4] == "fees")) {
+                    $student_param->clientId = $split[3];
+                    $student_param->student_id = $split[5];
                 }
-                
+
                 // append the client id to it
                 $student_param->client_data = $params->client_data;
 
@@ -383,23 +467,25 @@ class Payment extends Myschoolgh {
 
                         // algorithm to get the items being paid for
                         if($paying > 0) {
-                            if(($fee->balance < $paying) || ($fee->balance == $paying)) {
-                                $paying = $paying - $fee->balance;
-                                $fees_list[$fee->category_id] = 0;
-                                // if the paid status is not equal to one
-                                if($fee->balance != 0.00) {
-                                    $amount_paid[$fee->category_id] = $fee->balance;
+                            if(!$fee->exempted) {
+                                if(($fee->balance < $paying) || ($fee->balance == $paying)) {
+                                    $paying = $paying - $fee->balance;
+                                    $fees_list[$fee->category_id] = 0;
+                                    // if the paid status is not equal to one
+                                    if($fee->balance != 0.00) {
+                                        $amount_paid[$fee->category_id] = $fee->balance;
+                                    }
+                                } elseif($fee->balance > $paying) {
+                                    $n_value = $fee->balance - $paying;
+                                    $amount_paid[$fee->category_id] = $paying;
+                                    $fees_list[$fee->category_id] = $n_value;
+                                    $paying = 0;
+                                } else {
+                                    $n_value = $fee->balance - $paying;
+                                    $amount_paid[$fee->category_id] = $paying;
+                                    $fees_list[$fee->category_id] = $n_value;
+                                    $paying -= $fee->balance; 
                                 }
-                            } elseif($fee->balance > $paying) {
-                                $n_value = $fee->balance - $paying;
-                                $amount_paid[$fee->category_id] = $paying;
-                                $fees_list[$fee->category_id] = $n_value;
-                                $paying = 0;
-                            } else {
-                                $n_value = $fee->balance - $paying;
-                                $amount_paid[$fee->category_id] = $paying;
-                                $fees_list[$fee->category_id] = $n_value;
-                                $paying -= $fee->balance; 
                             }
                         }
                     }
@@ -435,6 +521,9 @@ class Payment extends Myschoolgh {
                 // if the payment method is momo or card payment
                 $append_sql .= ", paidin_by='{$email_address}', paidin_contact='".($session->user_contact ?? null)."'";
 
+                // append the $this->session->e_payment_transaction_id
+                $append_sql .= ", reference_id='{$params->reference_id}'";
+
                 // count the number of rows found
                 if(isset($student_param->checkout_url) && count($paymentRecord) == 1) {
                     $paymentRecord = $paymentRecord[0];
@@ -444,7 +533,7 @@ class Payment extends Myschoolgh {
                 if(!is_array($paymentRecord)) {
 
                     // generate a unique id for the payment record
-                    $payment_id = $uniqueId = random_string('alnum', 15);
+                    $payment_id = $uniqueId = random_string("alnum", RANDOM_STRING);
                     $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
                     $receiptId = $params->client_data->client_preferences->labels->receipt_label.$counter;
                     $receiptId = strtoupper($receiptId);
@@ -479,7 +568,7 @@ class Payment extends Myschoolgh {
                 } else {
 
                     // generate a new payment_id
-                    $payment_id = random_string('alnum', 15);
+                    $payment_id = random_string("alnum", RANDOM_STRING);
 
                     // get the student name
                     $student = $this->pushQuery("name AS student_name", "users", "item_id = '{$student_param->student_id}' AND user_type='student' AND client_id = '{$params->clientId}' LIMIT 1");
@@ -501,7 +590,7 @@ class Payment extends Myschoolgh {
                             $paid_status = ((round($totalPayment) === round($record->amount_due)) || (round($totalPayment) > round($record->amount_due))) ? 1 : 2;
 
                             // generate a unique id for the payment record
-                            $uniqueId = random_string('alnum', 15);
+                            $uniqueId = random_string("alnum", RANDOM_STRING);
                             $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
                             $receiptId = $clientPref->labels->receipt_label.$counter;
                             $receiptId = strtoupper($receiptId);
@@ -568,6 +657,15 @@ class Payment extends Myschoolgh {
 
                 }
 
+                // if the cpayment_url is not empty
+                if(!empty($session->cpayment_url)) {
+                    // set the checkout url
+                    $checkout_url = "pay/{$params->clientId}/fees/{$student_id}";
+                    // update the status of the status
+                    $this->db->query("UPDATE payment_urls SET status='1' WHERE client_id='{$params->clientId}' AND short_url='{$session->cpayment_url}' LIMIT 1");
+                    $this->db->query("UPDATE payment_urls SET status='1' WHERE client_id='{$params->clientId}' AND checkout_url='{$checkout_url}' LIMIT 10");
+                }
+
                 // if the contact number is not empty
                 if(preg_match("/^[0-9+]+$/", $session->user_contact)) {
                     
@@ -629,12 +727,13 @@ class Payment extends Myschoolgh {
                 }
 
                 // log the transaction information
-                $this->db->query("INSERT INTO transaction_logs SET client_id = '{$student_param->clientId}', transaction_id = '{$params->transaction_id}', 
-                    endpoint = 'fees', reference_id = '{$params->reference_id}', amount='{$amount}', metadata='{$meta_data}'"
-                );
+                $this->db->query("UPDATE transaction_logs 
+                    SET payment_data='".json_encode($payment_check["data"])."', state='Processed' 
+                    WHERE reference_id='{$params->reference_id}' LIMIT 1
+                ");
 
                 // unset the reference id
-                $session->remove(["reference_id", "user_contact", "payment"]);
+                $session->remove(["self_pay_reference_id", "user_contact", "reference_id", "cpayment_url"]);
 
                 // commit the statment
                 $this->db->commit();
@@ -656,5 +755,64 @@ class Payment extends Myschoolgh {
 
     }
 
+
+
+    /**
+     * Check the payment request status from paystack
+     * 
+     * @return Array
+     */
+    public function epay_validate(stdClass $params) {
+
+        // end query is the session access_denied_log is not empty
+        if(empty($this->session->self_pay_reference_id)) {
+            // return permission denied
+            return ["code" => 203, "data" => "Payment request cancelled."];
+        }
+
+        // set the transaction id
+        $tid = $this->session->self_pay_reference_id;
+
+        // get the request log
+        $log = $this->pushQuery("*", "transaction_logs", "transaction_id='{$tid}' LIMIT 1");
+
+        // confirm if a record already exists
+        if(empty($log)) {
+            return ["code" => 203, "data" => "Payment request cancelled."];
+        }
+
+        // get the status
+        if($log[0]->state == "Processed") {
+            return ["code" => 203, "data" => "Payment request already processed."];   
+        }
+
+        // set the parameters
+        $data = (object) [
+            "route" => "verify",
+            "reference" => $log[0]->reference_id
+        ];
+
+        // confirm the payment
+        $payment_check = $this->get($data);
+
+        // if payment status is true
+        if(!empty($payment_check["data"]) && isset($payment_check["data"]->status) && ($payment_check["data"]->status === true)) {
+            // convert the data to object
+            $_param = json_decode($log[0]->transaction_data);
+            $_param->client_data = $params->client_data;
+            $_param->paystack_data = $payment_check;
+            $_param->transaction_id = $tid;
+            $_param->userId = $params->userId ?? $_param->student_id;
+            $_param->reference_id = $log[0]->reference_id;
+            $_param->param["student_id"] = $_param->student_id;
+            $_param->param["checkout_url"] = $_param->checkout_url;
+
+            // process the payment
+            return $this->verify($_param);
+        } else {
+            return ["code" => 203, "data" => "Payment request cancelled."];
+        }
+
+    }
 }
 ?>

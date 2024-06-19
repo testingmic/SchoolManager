@@ -1,12 +1,15 @@
 <?php
+// if the user is not loggedin then show the login form
+if(!loggedIn()) { require "login.php"; exit(-1); }
+
+// end page if not a support personnel logged in
+if(!$isSupport) { invalid_route(); exit; }
+
 // set the title
 $page_title = "Api Endpoints";
 
 // load the api endpoints
 $api = load_class("endpoints", "controllers");
-
-// if the user is not loggedin then show the login form
-if(!loggedIn()) { require "login.php"; exit(-1); }
 
 // the query parameter to load the user information
 $i_params = (object) [

@@ -1,6 +1,8 @@
 <?php 
 
 class Classes extends Myschoolgh {
+    
+    private $iclient = [];
 
     public function __construct(stdClass $data = null) {
     
@@ -22,27 +24,50 @@ class Classes extends Myschoolgh {
      */
     public function list(stdClass $params) {
 
+        global $isAdmin, $defaultUser;
 
         $params->query = "1";
 
+        // set the user data
+        if(!empty($defaultUser)) {
+            $params->userData = $defaultUser;
+        }
+
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
-        if(isset($params->filter, $params->userId)) {
-            if(in_array($params->filter, ["teacher"])) {
-                // $params->class_teacher = $params->userId;
+        // if the class id was not parsed
+        if(empty($params->class_id)) {
+
+            // then use this query
+            if($params->userData->user_type === "teacher") {
+                $params->class_id = $params->userData->class_ids;
+            } elseif($params->userData->user_type === "student") {
+                $params->class_id = $params->userData->class_id;
             }
         }
 
         $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
         $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
 
-        $params->query .= (isset($params->q) && !empty($params->q)) ? " AND a.name='{$params->q}'" : null;
-        $params->query .= (isset($params->class_teacher) && !empty($params->class_teacher)) ? " AND a.class_teacher LIKE '%{$params->class_teacher}%'" : null;
-        $params->query .= (isset($params->class_assistant) && !empty($params->class_assistant)) ? " AND a.class_assistant='{$params->class_assistant}'" : null;
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->department_id) && !empty($params->department_id)) ? " AND a.department_id='{$params->department_id}'" : null;
-        $params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND (a.id='{$params->class_id}' OR a.item_id='{$params->class_id}')" : null;
+        $params->query .= !empty($params->q) ? " AND a.name='{$params->q}'" : null;
+        $params->query .= !$isAdmin && !empty($params->class_teacher) ? " AND a.class_teacher LIKE '%{$params->class_teacher}%'" : null;
+        $params->query .= !empty($params->class_assistant) ? " AND a.class_assistant='{$params->class_assistant}'" : null;
+        $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : null;
 
+        // format the class id query
+        if(!empty($params->class_id)) {
+            // convert the class id to array
+            $class_ids = $this->stringToArray($params->class_id);
+
+            // if the strlen is greater than 6
+            if(strlen($class_ids[0]) > 6) {
+                $params->query .= !empty($params->class_id) ? " AND a.item_id IN {$this->inList($params->class_id)}" : null;
+            } else {
+                $params->query .= !empty($params->class_id) ? " AND a.id IN {$this->inList($params->class_id)}" : null;
+            }
+        }
+		
         try {
 
             $stmt = $this->db->prepare("
@@ -50,22 +75,22 @@ class Classes extends Myschoolgh {
                     (SELECT name FROM departments WHERE departments.id = a.department_id LIMIT 1) AS department_name,
                     (
                         SELECT COUNT(*) FROM users b 
-                        WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
-                        AND b.class_id = a.id AND b.client_id='{$params->clientId}'
+                        WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.user_type='student' 
+                        AND b.class_id = a.id AND b.client_id='{$params->clientId}' AND b.user_status IN {$this->inList($this->default_allowed_status_users_array)} LIMIT {$this->maximum_class_count}
                     ) AS students_count,
                     (
                         SELECT COUNT(*) FROM users b 
-                        WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
-                        AND b.gender='Male' AND b.class_id = a.id AND b.client_id='{$params->clientId}'
+                        WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.user_type='student' 
+                        AND b.gender='Male' AND b.class_id = a.id AND b.client_id='{$params->clientId}' AND b.user_status IN {$this->inList($this->default_allowed_status_users_array)} LIMIT {$this->maximum_class_count}
                     ) AS students_male_count,
                     (
                         SELECT COUNT(*) FROM users b 
-                        WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' 
-                        AND b.gender='Female' AND b.class_id = a.id AND b.client_id='{$params->clientId}'
+                        WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.user_type='student' 
+                        AND b.gender='Female' AND b.class_id = a.id AND b.client_id='{$params->clientId}' AND b.user_status IN {$this->inList($this->default_allowed_status_users_array)} LIMIT {$this->maximum_class_count}
                     ) AS students_female_count,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.class_assistant LIMIT 1) AS class_assistant_info,
-                    (SELECT CONCAT(b.item_id,'|',b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.class_teacher LIMIT 1) AS class_teacher_info
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.class_assistant LIMIT 1) AS class_assistant_info,
+                    (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.class_teacher LIMIT 1) AS class_teacher_info
                     ")."
                 FROM classes a
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
@@ -95,16 +120,7 @@ class Classes extends Myschoolgh {
                 // if the user also requested to load the courses
                 if($loadCourses) {
                     // convert to array
-                    $class_courses_list = !empty($result->courses_list) ? json_decode($result->courses_list, true) : [];
-                    
-                    // loop through the array list
-                    foreach($class_courses_list as $course) {
-                        // get the course tutor information
-                        $course_info = $this->pushQuery("id, item_id, name, course_code, credit_hours, description", "courses", "item_id='{$course}' AND status='1' LIMIT 1");
-                        if(!empty($course_info)) {
-                            $result->class_courses_list[] = $course_info[0];
-                        }
-                    }
+                    $result->class_courses_list = $this->pushQuery("id, item_id, name, course_code, credit_hours, description, class_id", "courses", "class_id LIKE '%{$result->item_id}%' AND status='1' AND academic_term='{$params->academic_term}' AND academic_year='{$params->academic_year}' LIMIT 15");
                 }
 
                 // if the user also requested to load the courses
@@ -163,7 +179,7 @@ class Classes extends Myschoolgh {
 
             // init
 			$room_ids = [];
-            $item_id = random_string("alnum", 16);
+            $item_id = random_string("alnum", RANDOM_STRING);
 
             // append
 			if(isset($params->room_id)) {
@@ -179,6 +195,7 @@ class Classes extends Myschoolgh {
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
                 ".(isset($params->class_code) ? ", class_code = '{$params->class_code}'" : null)."
                 ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
+                ".(isset($params->payment_module) ? ", payment_module = '{$params->payment_module}'" : null)."
                 ".(isset($params->class_teacher) ? ", class_teacher = '{$params->class_teacher}'" : null)."
                 ".(isset($params->class_size) ? ", class_size = '{$params->class_size}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
@@ -234,7 +251,7 @@ class Classes extends Myschoolgh {
                 // replace any empty space with 
                 $params->class_code = str_replace("/^[\s]+$/", "", $params->class_code);
                 // confirm if the class code already exist
-                if(!empty($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$params->clientId}' AND class_code='{$params->class_code}'"))) {
+                if(!empty($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$params->clientId}' AND class_code='{$params->class_code}' LIMIT 1"))) {
                     return ["code" => 203, "data" => "Sorry! There is an existing Class with the same code."];
                 }
             } elseif(empty($prevData[0]->class_code) || !isset($params->class_code)) {
@@ -278,12 +295,13 @@ class Classes extends Myschoolgh {
                 ".(isset($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(isset($params->class_teacher) ? ", class_teacher = '{$params->class_teacher}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
+                ".(isset($params->payment_module) ? ", payment_module = '{$params->payment_module}'" : null)."
                 ".(isset($params->class_size) ? ", class_size = '{$params->class_size}'" : null)."
                 ".(isset($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(isset($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
                 ".(isset($params->class_assistant) ? ", class_assistant = '{$params->class_assistant}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
-                WHERE id = ? AND client_id = ?
+                WHERE id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([json_encode($room_ids), $params->class_id, $params->clientId]);
             
@@ -360,7 +378,7 @@ class Classes extends Myschoolgh {
             // if the assign fees was parsed
             if($assignFees) {
                 // set the unique id
-                $item_id = random_string("alnum", 16);
+                $item_id = random_string("alnum", RANDOM_STRING);
 
                 // Insert the activity into the cron_scheduler
                 $query = $this->db->prepare("INSERT INTO cron_scheduler SET `client_id` = ?, `item_id` = ?, `user_id` = ?, 
@@ -375,7 +393,10 @@ class Classes extends Myschoolgh {
             return [
                 "code" => 200, 
                 "data" => count($params->data["student_id"]) ." Students were successfully assigned to {$check[0]->name}.", 
-                "additional" => $params->data["student_id"]
+                "additional" => [
+                    "students_list" => $params->data["student_id"],
+                    "href" => "{$this->baseUrl}assign_class"
+                ]
             ];
 
         } catch(PDOException $e) {
@@ -450,7 +471,7 @@ class Classes extends Myschoolgh {
 	 */
 	public function remove_all_class_rooms(stdClass $params, $item_id) {
 
-		$room_ids = $this->pushQuery("classes_list, item_id", "classes_rooms", "client_id='{$params->clientId}' AND status='1' LIMIT 100");
+		$room_ids = $this->pushQuery("classes_list, item_id", "classes_rooms", "client_id='{$params->clientId}' AND status='1' LIMIT {$this->temporal_maximum}");
 
 		foreach($room_ids as $class) {
 			if(!empty($class->classes_list)) {

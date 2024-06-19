@@ -20,14 +20,16 @@ class Myschoolgh extends Models {
 	public $appName;
 	public $start_date;
     public $end_date;
+    public $defaultUser;
 	public $client_data;
 	public $birthday_days_interval;
+	public $accountLimit = [];
 	public $school_academic_terms = [];
 	public $academic_calendar_years = [];
-	public $pk_public_key = "XXXXXX";
-	public $mnotify_key = "XXXXXX";
+	public $pk_public_key = "pk_live_1eca68da1afea8bb9d567a05fe05db1b4297a8c6";
+	public $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
+	public $default_pay_email = "payments@myschoolgh.com";
 
-	// set some more variables
 	public $db;
 	public $ip_address;
 	public $baseUrl;
@@ -63,10 +65,8 @@ class Myschoolgh extends Models {
 		$this->db = $myschoolgh;
 
 		$this->session = $session;
-		$this->clientId = $session->clientId;
+		$this->clientId = !empty($session->clientId) ? $session->clientId : null;
 		$this->ip_address = ip_address();
-		$this->baseUrl = config_item('base_url');
-
 		$this->user_agent = load_class('user_agent', 'libraries');
 		$this->appName = config_item("site_name");
 		$this->platform = $this->user_agent->platform();
@@ -74,7 +74,114 @@ class Myschoolgh extends Models {
 		$this->agent = $this->user_agent->agent_string();
 
 		$this->academic_years();
+		$this->menu_content_array();
 	}
+
+	/**
+	* menu_content_array
+	* 
+	* @return Array
+	*/
+	public function menu_content_array() {
+        
+        global $SITEURL;
+
+        // set the default array list
+        $content = [
+            "students" => [
+                "right" => [
+                    "student_add" => ["Add Student", "fa-plus", "btn-warning"],
+                    "fees-history" => ["Fees Payment History", "fa-list", "btn-dark"],
+                    "fees-allocation" => ["Fees Allocation", "fa-money-bill", "btn-primary"],
+                ]
+            ],
+            "student_add" => [
+                "right" => [
+                    "students" => ["List Students", "fa-list", "btn-primary"]
+                ]
+            ],
+            "accounts" => [
+                "right" => [
+                	"transactions" => ["Transactions", "fa-balance-scale", "btn-plain"],
+                    "incomes" => ["Incomes", "fa-money-bill-alt", "btn-primary"],
+                    "expenses" => ["Expenses", "fa-money-bill", "btn-dark"],
+                    "bank_deposits" => ["Bank Deposits", "fa-desktop", "btn-success"],
+                    "bank_withdrawals" => ["Bank Withdrawals", "fa-wind", "btn-warning"],
+                ]
+            ],
+            "incomes" => [
+                "right" => [
+                    "transactions" => ["Transactions", "fa-balance-scale", "btn-primary"],
+                    "expenses" => ["Expenses", "fa-money-bill", "btn-dark"],
+                    "bank_deposits" => ["Bank Deposits", "fa-desktop", "btn-success"],
+                    "bank_withdrawals" => ["Bank Withdrawals", "fa-wind", "btn-warning"]
+                ]
+            ],
+            "expenses" => [
+                "right" => [
+                    "transactions" => ["Transactions", "fa-balance-scale", "btn-primary"],
+                    "incomes" => ["Incomes", "fa-money-bill", "btn-dark"],
+                    "bank_deposits" => ["Bank Deposits", "fa-desktop", "btn-success"],
+                    "bank_withdrawals" => ["Bank Withdrawals", "fa-wind", "btn-warning"]
+                ]
+            ],
+            "transactions" => [
+                "right" => [
+                    "incomes" => ["Incomes", "fa-money-bill", "btn-primary"],
+                    "expenses" => ["Expenses", "fa-money-bill-alt", "btn-dark"],
+                    "bank_deposits" => ["Bank Deposits", "fa-desktop", "btn-success"],
+                    "bank_withdrawals" => ["Bank Withdrawals", "fa-wind", "btn-warning"]
+                ]
+            ],
+            "fees-history" => [
+                "right" => [
+                    "fees-payment" => ["Term Fees Payment", "fa-money-bill", "btn-success"],
+                    "arrears/apay" => ["Arrears Payment", "fa-money-bill-alt", "btn-dark"],
+                    // "fees-allocation" => ["Fees Allocation", "fa-desktop", "btn-success"],
+                    "debtors" => ["Debtors List", "fa-wind", "btn-warning"]
+                ]
+            ],
+        ];
+
+        $this->menu_content_array = $content[$SITEURL[0]] ?? [];
+
+        return $this;
+    }
+
+	/**
+	 * Check if the user account is activated
+	 *
+	 * @return String
+	 **/
+	public function async_notification() {
+		global $defaultClientData, $defaultUser;
+		
+		// if the user has not yet activated the account
+		if(
+			($defaultClientData->client_state === "Pending") ||
+			($defaultUser->user_status == "Pending")
+		) {
+			return "
+			<div class=\"alert alert-danger p-2 mb-2 text-center\">
+				Your Account has not yet been activated. Please check your email for the verification link.
+			</div>";
+		}
+	}
+	
+    /**
+     * Replace all placeholders in the message content
+     * 
+     * @param String $message
+     * @param String $page 
+     * 
+     * @return String 
+     */
+    public function replace_placeholder($message, $page = null) {
+
+        $content = str_ireplace(["{{APPURL}}", "{{RESOURCE_PAGE}}"], [$this->baseUrl, $page], $message);
+
+        return $content;
+    }
 
 	/**
 	 * Run the Query to Load the Client Data
@@ -88,7 +195,7 @@ class Myschoolgh extends Models {
 
 		// initial client data
 		$client_data = (object) [];
-
+		
 		// if the clear is true then unset the session variable
 		if($clear === true) {
 			$this->session->remove("defaultClientData");
@@ -141,7 +248,7 @@ class Myschoolgh extends Models {
 		// prepare and execute the statement
 		$stmt = $this->db->prepare("SELECT
 				c.grading AS grading_system, c.structure AS grading_structure, 
-				c.show_position, c.show_teacher_name, c.allow_submission
+				c.show_position, c.show_teacher_name, c.allow_submission, sba AS grading_sba
 			FROM grading_system c
 			WHERE c.client_id = ? AND c.academic_year = ? AND c.academic_term = ? LIMIT 1
 		");
@@ -164,14 +271,19 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Object
 	 */
-	final function client_data($clientId = null) {
+	final function client_data($clientId = null, $no_grading_system = false) {
 
 		$clientId = !empty($clientId) ? $clientId : (!empty($this->clientId) ? $this->clientId : $this->session->clientId);
 
 		try {
 
 			// prepare and execute the statement
-			$stmt = $this->db->prepare("SELECT * FROM clients_accounts WHERE client_id = ? AND client_status = ? LIMIT 1");
+			$stmt = $this->db->prepare("
+				SELECT a.*, b.item_id AS default_account_id, b.balance AS default_account_balance
+				FROM clients_accounts a
+				LEFT JOIN accounts b ON b.client_id = a.client_id AND b.default_account = '1' AND b.status = '1'
+				WHERE a.client_id = ? AND a.client_status = ? LIMIT 1
+			");
 			$stmt->execute([$clientId, 1]);
 			
 			// loop through the list
@@ -184,7 +296,7 @@ class Myschoolgh extends Models {
 				$result->client_preferences = json_decode($result->client_preferences);
 				
 				// set this value
-				$this->birthday_days_interval = 30;
+				$this->birthday_days_interval = 8;
 
 				// set the defaults
 				$academic_year = null;
@@ -200,20 +312,27 @@ class Myschoolgh extends Models {
 					$academic_term = $result->client_preferences->academics->academic_term;
 				}
 
-				// get the structure
-				$structure = $this->grading_system($clientId, $academic_year, $academic_term);
+				// if no_grading_system was not parsed
+				if(!$no_grading_system) {
 
-				// convert to an array
-				$result = (array) $result;
+					// get the structure
+					$structure = $this->grading_system($clientId, $academic_year, $academic_term);
 
-				// if the structure is not empty
-				if(!empty($structure)) {
-					$result = array_merge($result, $structure);
-					$result["grading_system"] = json_decode($result["grading_system"]);
-					$result["grading_structure"] = json_decode($result["grading_structure"]);
-				} else {
-					$result["grading_system"] = [];
-					$result["grading_structure"] = [];
+					// convert to an array
+					$result = (array) $result;
+					$result["birthday_days_interval"] = $this->birthday_days_interval;
+
+					// if the structure is not empty
+					if(!empty($structure)) {
+						$result = array_merge($result, $structure);
+						$result["grading_system"] = json_decode($result["grading_system"]);
+						$result["grading_structure"] = json_decode($result["grading_structure"]);
+						$result["grading_sba"] = json_decode($result["grading_sba"], true);
+					} else {
+						$result["grading_sba"] = [];
+						$result["grading_system"] = [];
+						$result["grading_structure"] = [];
+					}
 				}
 
 				// convert to object
@@ -225,6 +344,51 @@ class Myschoolgh extends Models {
 		} catch(PDOException $e) {
 			return (object) $e;
 		}
+	}
+
+	/**
+	 * Get the Account Package Limit
+	 * 
+	 * @param String $clientId
+	 * 
+	 * @return Object
+	 */
+	final function clients_accounts_limit($clientId = null) {
+
+		try {
+
+			// set the client id
+			$clientId = empty($clientId) ? $this->session->clientId : $clientId;
+
+			// get the default account information
+			$this->accountLimit = $this->pushQuery("student, staff, fees", "clients_accounts_limit", "client_id='{$clientId}' LIMIT 1")[0];
+
+			return $this;
+
+		} catch(PDOException $e) {
+			return [];
+		}
+
+	}
+
+	/**
+	 * Get the Default Payment Account Set by the School Admin
+	 * 
+	 * @param String $clientId
+	 * 
+	 * @return Object
+	 */
+	final function default_payment_account($clientId = null) {
+
+		try {
+
+			// get the default account information
+			return $this->pushQuery("item_id, balance","accounts","client_id='{$clientId}' AND status='1' AND default_account='1' AND state='Active' LIMIT 1");
+
+		} catch(PDOException $e) {
+			return false;
+		}
+
 	}
 
 	/**
@@ -267,9 +431,9 @@ class Myschoolgh extends Models {
 	}
 
 	/**
-	 * @method lastRowId()
+	 * The user needs to specify the table name for the query
 	 * 
-	 * @param $tableName The user needs to specify the table name for the query
+	 * @method lastRowId()
 	 * 
 	 * @return Int
 	 **/
@@ -331,7 +495,7 @@ class Myschoolgh extends Models {
 			return $query_style === "OBJ" ? $stmt->fetchAll(PDO::FETCH_OBJ) : $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		} catch(PDOException $e) {
-			return [];
+			return $e->getMessage();
 		}
 
 	}
@@ -341,7 +505,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Object
 	 **/
-	final function columnValue($column = "*", $tableName = null, $whereClause = 1) {
+	final function columnValue($column = "*", $tableName, $whereClause = 1) {
 
 		try {
 
@@ -362,7 +526,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return array
 	 **/
-	final function prependData($columns = "*", $tableName = null, $whereClause = 1) {
+	final function prependData($columns = "*", $tableName, $whereClause = 1) {
 
 		try {
 
@@ -457,7 +621,7 @@ class Myschoolgh extends Models {
 	 * @return null
 	 *
 	 **/
-	final function userLogs($subject, $itemId, $prevData = null, $description = null, $userId = null, $clientId = null, $source = null) {
+	final function userLogs($subject, $itemId, $prevData = null, $description, $userId = null, $clientId = null, $source = null) {
 		
 		try {
 
@@ -530,7 +694,7 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return Array
 	 */
-	final function stringToArray($string, $delimiter = ",", $key_name = [], $allowEmpty = false) {
+	final function stringToArray($string, $delimiter = ",", $key_name = [], $allowEmpty = false, $func = "isNull") {
 		
 		// if its already an array then return the data
 		if(is_array($string) || empty($string)) {
@@ -543,9 +707,9 @@ class Myschoolgh extends Models {
 		foreach($expl as $key => $each) {
 			if(!empty($each) || $allowEmpty) {
 				if(!empty($key_name)) {
-					$array[$key_name[$key]] = (trim($each) === "NULL" ? null : trim($each));
+					$array[$key_name[$key]] = trim($each) == "NULL" ? null : $func(trim($each));
 				} else{
-					$array[] = (trim($each) === "NULL") ? null : trim($each, "\"");
+					$array[] = trim($each) == "NULL" ? null : trim($func($each), "\"");
 				}
 			}
 		}
@@ -641,10 +805,19 @@ class Myschoolgh extends Models {
 		$fPart = (isset($date[0]) && $this->validDate($date[0])) ? $date[0] : '2020-01-01';
 		$lPart = (isset($date[1]) && $this->validDate($date[1])) ? $date[1] : date('Y-m-d');
 
+		// if the prefix is rparts then return the various items
+		if($prefix === "rparts") {
+			return [
+				"start_date" => $fPart,
+				"end_date" => $lPart
+			];
+		}
+		
+		// format the data to return
 		if(!empty($date[1])) {
-			return " AND (DATE($prefix.{$column}) >= '{$fPart}' AND DATE($prefix.{$column}) <= '{$lPart}')";
+			return " AND (DATE({$prefix}.{$column}) >= '{$fPart}' AND DATE({$prefix}.{$column}) <= '{$lPart}')";
 		} else {
-			return " AND (DATE($prefix.{$column}) = '{$fPart}')";
+			return " AND (DATE({$prefix}.{$column}) = '{$fPart}')";
 		}
 	}
 
@@ -772,20 +945,21 @@ class Myschoolgh extends Models {
 	 * 
 	 * @return String
      */
-    final function the_status_label($status) {
+    final function the_status_label($status, $class = "") {
 
         $label = $status;
-        if(in_array($status, ["Pending", "Due Today"])) {
-            $label = "<span class='badge p-1 badge-primary'>{$status}</span>";
+        
+        if(in_array($status, ["Pending", "Due Today", "Graduated"])) {
+            $label = "<span class='badge badge-primary {$class}'>{$status}</span>";
         }
-        elseif(in_array($status, ["Rejected", "Reversed", "Cancelled", "Not Paid", "Unpaid", "Unseen", "Closed", "Overdue", "Expired", "Suspended"])) {
-            $label = "<span class='badge p-1 badge-danger'>{$status}</span>";
+        elseif(in_array($status, ["Rejected", "Dismissed", "Reversed", "Transferred", "Cancelled", "Not Paid", "Unpaid", "Unseen", "Closed", "Overdue", "Expired", "Suspended", "Denied", "Withdrawn", "Lost"])) {
+            $label = "<span class='badge badge-danger {$class}'>{$status}</span>";
         }
-        elseif(in_array($status, ["Reopen", "Waiting", "Draft", "Processing", "In Review", "Confirmed", "Graded", "Requested", "Propagation"])) {
-            $label = "<span class='badge p-1 badge-warning text-white'>{$status}</span>";
+        elseif(in_array($status, ["Reopen", "Waiting", "Draft", "Processing", "In Review", "Confirmed", "Graded", "Requested", "Propagation", "Passive"])) {
+            $label = "<span class='badge badge-warning text-white {$class}'>{$status}</span>";
         }
-        elseif(in_array($status, ["Complete", "Answered", "Solved", "Enrolled", "Active", "Approved", "Paid", "Running", "Seen", "Submitted", "Held", "Issued", "Returned", "Processed"])) {
-            $label = "<span class='badge p-1 badge-success'>{$status}</span>";
+        elseif(in_array($status, ["Exported", "Complete", "Answered", "Solved", "Enrolled", "Active", "Approved", "Paid", "Running", "Seen", "Submitted", "Held", "Issued", "Returned", "Processed", "Won"])) {
+            $label = "<span class='badge badge-success {$class}'>{$status}</span>";
         }
 
         return $label;
@@ -920,6 +1094,72 @@ class Myschoolgh extends Models {
 		}
 	}
 
+	/**
+	 * Insert a record into the database
+	 *
+	 * @param String 		$table
+	 * @param Array 		$query
+	 *
+	 * @return Bool
+	 **/
+	final function _save($table, array $query, array $where = [], $limit = 1) {
+
+		// set the date columns
+		$date_columns = ["last_updated"];
+
+		// confirm that the where clause is empty
+		if(empty($where)) {
+			$sql = "INSERT INTO {$table} SET ";
+		} else {
+			$sql = "UPDATE {$table} SET ";
+		}
+
+		// loop through the query
+		foreach($query as $key => $value) {
+			// skip empty value columns
+			if(!empty($value) || ($value === 0)) {
+				$sql .= in_array($key, $date_columns) ? ''.$key.'='.$value.',' : 
+					(
+						($key === "column_value") ? $value . ',' : 
+						(is_array($value) ? ''.$key.'="'.json_encode($value).'",' : ''.$key.'="'.addslashes($value).'",')
+					);
+			}
+		}
+
+		// if the where variable is not empty
+		if(!empty($where)) {
+
+			// remove the trailing comma
+			$sql = trim($sql, ",");
+
+			// set the where parameter
+			$sql .= " WHERE ";
+
+			// loop through the where clause parameter
+			foreach($where as $key => $value) {
+				$sql .= ' '.$key.'="'.addslashes($value).'" AND ';
+			}
+
+			// remove the trailing AND word
+			$sql = trim($sql);
+			$sql = trim($sql, "AND");
+			$sql .= " LIMIT {$limit}";
+		}
+
+		$sql = trim($sql, ",");
+
+		try {
+			
+			// execute the query
+			return $this->db->query($sql);
+
+		} catch(PDOException $e) {
+			print $e->getMessage();
+			return [];
+		}
+
+	}
+
     /**
      * Format the Contact Number properly
      * 
@@ -938,24 +1178,36 @@ class Myschoolgh extends Models {
      * 
      * @return Bool
      */
-    final function check_time($table = "users", $timer = 0.02) {
+    final function check_time($table = "users", $timer = 2, $where = null) {
         
         // get the last date created
-        $last_time = $this->columnValue("date_created", $table, "ip_address='{$this->ip_address}' ORDER BY id DESC");
+        $last_time = $this->columnValue("date_created", $table, "ipaddress='{$this->ip_address}' {$where} ORDER BY id DESC");
 
+        // print_r($last_time);
         // confirm if not empty
         if(empty($last_time)) {
             return true;
         }
-		
-		// if no record was found
-		if(!isset($last_time->date_created)) {
-			return true;
-		}
 
-        // online algorithm (user is online if last activity is at most 2 minutes ago)
+        // return false if the column was not found
+        if(!isset($last_time->date_created)) {
+        	return false;
+        }
+
+        // online algorithm (user is online if last activity is at most 3 minutes ago)
         return (bool) (raw_time_diff($last_time->date_created) > $timer);
 
+    }
+
+    /**
+     * Remove Quotes
+     * 
+     * This method removes all single and double quotes from a string
+     * 
+     * @return String
+     */
+    final function remove_quotes($string) {
+    	return str_ireplace(['"', "'"], [""], trim($string));
     }
 
 	/**
@@ -971,7 +1223,7 @@ class Myschoolgh extends Models {
 		$clientId = !empty($clientId) ? $clientId : (!empty($this->clientId) ? $this->clientId : $this->session->clientId);
 
 		// get the schools academic years
-		$this->school_academic_terms = $this->pushQuery("id, name, description", "academic_terms","1 AND client_id = '{$clientId}' LIMIT 100");
+		$this->school_academic_terms = $this->pushQuery("id, name, description", "academic_terms","1 AND client_id = '{$clientId}' LIMIT {$this->temporal_maximum}");
 
 		return $this;
 	}
@@ -984,11 +1236,11 @@ class Myschoolgh extends Models {
 	final function academic_years($clientId = null) {
 		/** Set the Parameters */
 		$previous_year = 2020;
-		$next_years = date("Y") + 1;
+		$next_years = date("Y") + 2;
 		
 		/** Loop through the list */
 		for($i = $previous_year; $i <= $next_years; $i++) {
-			$this->academic_calendar_years[] = $i."/".($i+1);
+			$this->academic_calendar_years[] = ($i)."/".($i+1);
 		}
 
 		return $this;
@@ -1043,7 +1295,16 @@ class Myschoolgh extends Models {
 			1000000000          	=> 'Billion',
 			1000000000000       	=> 'Trillion',
 			1000000000000000    	=> 'Quadrillion',
-			1000000000000000000 	=> 'Quintillion'
+			1000000000000000000 	=> 'Quintillion',
+			1000000000000000000000 						=> 'Sexitillion',
+			1000000000000000000000000					=> 'Septillion',
+			1000000000000000000000000000				=> 'Octillion',
+			1000000000000000000000000000000				=> 'Nonillion',
+			1000000000000000000000000000000000			=> 'Decillion',
+			1000000000000000000000000000000000000		=> 'Undecillion',
+			1000000000000000000000000000000000000000		=> 'Duodecillion',
+			1000000000000000000000000000000000000000000		=> 'Tredecillion',
+			1000000000000000000000000000000000000000000000	=> 'Quattuordecillion'
 		];
 	
 		if (!is_numeric($number)) {
@@ -1053,7 +1314,6 @@ class Myschoolgh extends Models {
 		if (($number >= 0 && (int) $number < 0) || (int) $number < 0 - PHP_INT_MAX) {
 			// overflow
 			return 'This function only accepts numbers between -' . PHP_INT_MAX . ' and ' . PHP_INT_MAX;
-			return false;
 		}
 	
 		if ($number < 0) {
@@ -1066,54 +1326,78 @@ class Myschoolgh extends Models {
 		if (strpos($number, '.') !== false) {
 			list($number, $fraction) = explode('.', $number);
 		}
-	
-		switch (true) {
-			case $number < 21:
-				$string = $dictionary[$number];
-				break;
-			case $number < 100:
-				$tens   = ((int) ($number / 10)) * 10;
-				$units  = $number % 10;
-				$string = $dictionary[$tens];
-				if ($units) {
-					$string .= $hyphen . $dictionary[$units];
-				}
-				break;
-			case $number < 1000:
-				$hundreds  = $number / 100;
-				$remainder = $number % 100;
-				$string = $dictionary[$hundreds] . ' ' . $dictionary[100];
-				if ($remainder) {
-					$string .= $conjunction . $this->amount_to_words($remainder);
-				}
-				break;
-			default:
-				$baseUnit = pow(1000, floor(log($number, 1000)));
-				$numBaseUnits = (int) ($number / $baseUnit);
-				$remainder = $number % $baseUnit;
-				$string = $this->amount_to_words($numBaseUnits) . ' ' . $dictionary[$baseUnit];
-				if ($remainder) {
-					$string .= $remainder < 100 ? $conjunction : $separator;
-					$string .= $this->amount_to_words($remainder);
-				}
-				break;
-		}
 		
-		if (null !== $fraction && is_numeric($fraction)) {
-			$tens   = ((int) ($fraction / 10)) * 10;
-			$units  = $fraction % 10;
-			$string .= $dictionary[$tens];
-			if ($units) {
-				$string .= $hyphen . $dictionary[$units];
+		try {
+			switch (true) {
+				case $number < 21:
+					$string = $dictionary[$number];
+					break;
+				case $number < 100:
+					$tens   = ((int) ($number / 10)) * 10;
+					$units  = $number % 10;
+					$string = $dictionary[$tens];
+					if ($units) {
+						$string .= $hyphen . $dictionary[$units];
+					}
+					break;
+				case $number < 1000:
+					$hundreds  = $number / 100;
+					$remainder = $number % 100;
+					$string = $dictionary[$hundreds] . ' ' . $dictionary[100];
+					if ($remainder) {
+						$string .= $conjunction . $this->amount_to_words($remainder);
+					}
+					break;
+				default:
+					$baseUnit = pow(1000, floor(log($number, 1000)));
+					$numBaseUnits = (int) ($number / $baseUnit);
+					$remainder = $number % $baseUnit;
+					$string = $this->amount_to_words($numBaseUnits) . ' ' . ($dictionary[$baseUnit] ?? null);
+					if ($remainder) {
+						$string .= $remainder < 100 ? $conjunction : $separator;
+						$string .= $this->amount_to_words($remainder);
+					}
+					break;
 			}
-			$string .= " Pesewas";
-		}
+
+			if (null !== $fraction && is_numeric($fraction)) {
+				$string .= " Cedis";
+				// if the strlen is two
+				if(strlen($fraction) < 3) {
+					// confirm if the number is less than 21 then replace it directly
+					if($fraction < 21) {
+						$string .= " ".$dictionary[$fraction];
+						$string .= " Pesewas";
+					} else {
+						// clean the number
+						$tens   = ((int) ($fraction / 10)) * 10;
+						$units  = $fraction % 10;
+						$string .= " ".($dictionary[$tens] ?? null);
+						if ($units) {
+							$string .= $hyphen . $dictionary[$units];
+						}
+						$string .= " Pesewas";
+					}
+				} else {
+					// split the numbers
+					$split = str_split($fraction);
+					// mention the numbers as a single integer
+					foreach($split as $number) {
+						$string .= " ".$dictionary[$number];
+					}
+					$string .= " Pesewas";
+				}
+			}
 		
 		return $string;
+
+		} catch(DivisionByZeroError $e) {
+			return "Error: {$e->getMessage()}";
+		}
 	
 	}
 
-	/**
+    /**
      * Append Fees Owings
      * 
      * Going to Join the Two Arrays Together
@@ -1124,12 +1408,12 @@ class Myschoolgh extends Models {
         $new_array = [];
         foreach($previous as $key => $value) {
             foreach($value as $ikey => $ivalue) {
-                $new_array[$key][$ikey] = isset($new_array[$key][$ikey]) ? ($new_array[$key][$ikey] + $ivalue) : $ivalue;
+                $new_array[$key][$ikey] = isset($new_array[$key][$ikey]) ? $ivalue : $ivalue;
             }
         }
         foreach($current as $key => $value) {
             foreach($value as $ikey => $ivalue) {
-                $new_array[$key][$ikey] = isset($new_array[$key][$ikey]) ? ($new_array[$key][$ikey] + $ivalue) : $ivalue;
+                $new_array[$key][$ikey] = isset($new_array[$key][$ikey]) ? $ivalue : $ivalue;
             }
         }
         return $new_array;
@@ -1146,11 +1430,11 @@ class Myschoolgh extends Models {
         $new_array = [];
         foreach($current as $key => $value) {
             foreach($value as $ikey => $ivalue) {
-                $new_array[$ikey] = isset($new_array[$key][$ikey]) ? ($new_array[$key][$ikey] + $ivalue) : $ivalue;
+                $new_array[$ikey] = isset($new_array[$ikey]) ? ($new_array[$ikey] + $ivalue) : $ivalue;
             }
         }
         return $new_array;
     }
-	
+
 }
 ?>

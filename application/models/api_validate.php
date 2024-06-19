@@ -10,11 +10,10 @@ if( !defined( 'BASEPATH' ) ) die( 'Restricted access' );
  */
 class Api_validate {
 
-	private $db;
-	
 	public function __construct() {
 		global $myschoolgh;
-
+		// this is the maximum number of rows to query
+		$this->maximum = 200;
 		$this->db = $myschoolgh;
 	}
 
@@ -32,10 +31,15 @@ class Api_validate {
 		$authHeader = null;
 
 		// get teh redirect http authorization headers
-		if(isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION']) && $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] != "") {
-            $authHeader = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+		if(isset($_SERVER['HTTP_AUTHORIZATION']) && $_SERVER['HTTP_AUTHORIZATION'] != "") {
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
         }
-
+        
+        // if the host is not from api.myschoolgh.com then end the query
+        if($headers['Host'] !== 'api.myschoolgh.com') {
+            return [];
+        }
+        
 		/** authenticate the headers that have been parsed **/
 		if((isset($headers["Authorization"]) && ($headers["Authorization"] == $authHeader)) || isset($_GET['access_token'])) {
 			
@@ -44,6 +48,7 @@ class Api_validate {
 			
 			/** Split the Authorization Code **/
 			$authorizationToken = base64_decode(str_ireplace("Bearer", "", $accessToken));
+			$authorizationToken = trim($authorizationToken);
 
 			$splitAuthInfo = explode(":", $authorizationToken);
 			$userName = xss_clean(
@@ -96,7 +101,7 @@ class Api_validate {
 						FROM users_api_queries c
 						WHERE DATE(request_date) = CURDATE()
 					) AS requests_count
-				FROM users_api_keys a WHERE a.username = '{$username}' AND a.status = ? AND (TIMESTAMP(a.expiry_timestamp) >= CURRENT_TIMESTAMP()) LIMIT 100
+				FROM users_api_keys a WHERE a.username = '{$username}' AND a.status = ? AND (TIMESTAMP(a.expiry_timestamp) >= CURRENT_TIMESTAMP()) LIMIT {$this->maximum}
 			");
 			$stmt->execute([1]);
 			
@@ -250,7 +255,9 @@ class Api_validate {
 	 * @return Array
 	 */
 	public function apiEndpoint($endpoint, $method, $resource = null) {
+		
 		try {
+
 			/**
 			 * The endpoint will be an associative array which where the switch will be done 
 			 * based on the request type that the user has sent.
@@ -264,19 +271,25 @@ class Api_validate {
 			 */
 			/** Split the endpoint */
 			$expl = explode("/", $endpoint);
-			$endpoint = isset($expl[1]) ? $endpoint : null;
+			$endpoint = isset($expl[1]) ? strtolower($endpoint) : null;
 
+			// set the resource as a lower case
+			$expl[0] = strtolower($expl[0]);
+
+			// set the request_method
+			$request_method = !empty($_GET["request_method"]) ? "AND method='{$_GET["request_method"]}'" : null;
+			
 			/** The request query */
 			$stmt = $this->db->prepare("SELECT 
 					endpoint, resource, method, description, parameter AS params, description 
 				FROM users_api_endpoints 
-				WHERE 1 ".(!empty($endpoint) ? " AND method='{$method}' AND endpoint='{$endpoint}' ORDER BY endpoint LIMIT 1 " : (!empty($expl[0]) ? " AND resource='{$expl[0]}' ORDER BY endpoint" : ""))."
+				WHERE 1 ".(!empty($endpoint) ? " AND method='{$method}' AND endpoint='{$endpoint}' ORDER BY endpoint LIMIT 1 " : (!empty($expl[0]) ? " AND resource='{$expl[0]}' {$request_method} ORDER BY endpoint" : "ORDER BY endpoint"))."
 			");
 			$stmt->execute();
 			$data = [];
 			$count = $stmt->rowCount();
 			$results = $stmt->fetchAll(PDO::FETCH_OBJ);
-			// print_r($results);
+			
 			/** Loop through the list */
 			foreach($results as $result) {
 				$result->params = json_decode($result->params, true);
@@ -309,6 +322,7 @@ class Api_validate {
 		} catch(PDOException $e) {
 			return [];
 		}
+
 	}
 
 }

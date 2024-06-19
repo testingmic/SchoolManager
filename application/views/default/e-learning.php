@@ -8,16 +8,16 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $isAdminAccountant, $isTutorAdmin, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "E-Learning";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 $response->scripts = ["assets/js/resources.js"];
 
 // load the classes list
@@ -31,7 +31,7 @@ $class_list = load_class("classes", "controllers")->list($classes_param)["data"]
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>'.$pageTitle.'</h1>
+            <h1><i class="fa fa-assistive-listening-systems"></i> '.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>

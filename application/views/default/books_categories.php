@@ -9,20 +9,19 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Books Category";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 $params = (object) [
     "clientId" => $session->clientId,
-    "client_data" => $defaultUser->client,
-    "limit" => 9999
+    "client_data" => $defaultUser->client
 ];
 
 $item_list = load_class("library", "controllers", $params)->category_list($params);
@@ -34,7 +33,7 @@ $hasUpdate = $accessObject->hasAccess("update", "library");
 $category_list = "";
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<span title='View the book category record' onclick='return loadPage(\"{$baseUrl}book_category/{$each->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
+    $action = "<span title='View the book category record' onclick='return load(\"book_category/{$each->item_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
 
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Delete this Book Category' onclick='return delete_record(\"{$each->item_id}\", \"book_category\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -42,7 +41,7 @@ foreach($item_list["data"] as $key => $each) {
 
     $category_list .= "<tr data-row_id=\"{$each->item_id}\">";
     $category_list .= "<td>".($key+1)."</td>";
-    $category_list .= "<td><span class='user_name' onclick='return loadPage(\"{$baseUrl}book_category/{$each->item_id}\");'>{$each->name}</span></td>";
+    $category_list .= "<td><span class='user_name' onclick='return load(\"book_category/{$each->item_id}\");'>{$each->name}</span></td>";
     $category_list .= "<td>{$each->description}</td>";
     $category_list .= "<td>{$each->books_count}</td>";
     $category_list .= "<td align='center'>{$action}</td>";
@@ -68,7 +67,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
+                            <table data-empty="" class="table table-sm table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>

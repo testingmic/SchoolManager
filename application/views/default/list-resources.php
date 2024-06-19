@@ -8,16 +8,16 @@ header("Access-Control-Max-Age: 3600");
 global $myClass;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Courses E-Resources";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 $response->scripts = ["assets/js/resources.js"];
 
 $params = (object)[
@@ -37,7 +37,7 @@ $response->html = '
         </div>
         <div class="row" id="course_resource">
             <div class="col-sm-12 col-lg-12">
-                <div class="row mb-2">
+                <div class="row mb-2 hidden">
                     <div class="col-md-10 col-lg-10">
                         <input placeholder="Search for a e-learning resource" id="search_term" name="search_term" type="text" class="form-control">
                     </div>

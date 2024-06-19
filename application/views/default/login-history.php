@@ -8,18 +8,19 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
+$limit = 300;
 $userId = $session->userId;
 $clientId = $session->clientId;
 
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "User Login History";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // if the user has no permissions
 if(!$accessObject->hasAccess("login_history", "settings")) {
@@ -27,18 +28,27 @@ if(!$accessObject->hasAccess("login_history", "settings")) {
     $response->html = page_not_found();
 } else {
 
+    // include the script to be executed on the page.
     $response->scripts = ["assets/js/timeline.js"];
 
+    // set the dates
+    $start_date = $filter->start_date ?? date("Y-m-d", strtotime("yesterday"));
+    $end_date = $filter->end_date ?? date("Y-m-d");
+    $activity_type = $filter->activity_type ?? null;
+
     // get the array list of values
-    $activity_list = $myClass->pushQuery(
+    $login_history_list = $myClass->pushQuery(
         "a.*, u.name AS fullname, u.unique_id, u.email, u.phone_number, u.image, u.description, u.user_type", 
         "users_login_history a LEFT JOIN users u ON u.item_id = a.user_id",
-        "(a.client_id='{$clientId}' OR a.user_id='{$userId}') ORDER BY a.id DESC");
+        "(a.client_id='{$clientId}' OR a.user_id='{$userId}') 
+        AND DATE(a.lastlogin) >= '{$start_date}' AND DATE(a.lastlogin) <= '{$end_date}'
+        ORDER BY a.id DESC LIMIT {$limit}");
     
     $activities = "";
     $user_login_history = [];
 
-    foreach($activity_list as $activity) {
+    // loop through the results list
+    foreach($login_history_list as $activity) {
         
         $user_login_history[$activity->id] = $activity;
         $time_ago = time_diff($activity->lastlogin);
@@ -64,18 +74,11 @@ if(!$accessObject->hasAccess("login_history", "settings")) {
     $response->array_stream["user_login_history"] = $user_login_history;
 
     // if the activility list
-    if(empty($activity_list)) {
+    if(empty($login_history_list)) {
         $activities = "No login history has been logged for now. Please check back for more detailed activity logged";
     }
-
-    // set the dates
-    $start_date = date("Y-m-d", strtotime("yesterday"));
-    $end_date = date("Y-m-d");
-
-
-    // user types
-
     
+    // set the page content
     $response->html = '
         <section class="section">
             <div class="section-header">
@@ -86,30 +89,30 @@ if(!$accessObject->hasAccess("login_history", "settings")) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-2 col-md-3">
+                <div class="col-lg-3 col-md-3">
                     <label>Start Date</label>
                     <input type="text" class="form-control datepicker" value="'.$start_date.'" name="start_date">
                 </div>
-                <div class="col-lg-2 col-md-3">
+                <div class="col-lg-3 col-md-3">
                     <label>End Date</label>
                     <input type="text" class="form-control datepicker" value="'.$end_date.'" name="end_date">
                 </div>
-                <div class="col-lg-3 col-md-3">
+                <div class="col-lg-3 hidden col-md-3">
                     <label>User Type</label>
                     <select class="form-control selectpicker" name="user_type">
-                        <option>All Types</option>
+                        <option value="">All Types</option>
                     </select>
                 </div>
-                <div class="col-lg-3 col-md-3">
+                <div class="col-lg-3 hidden col-md-3">
                     <label>Select User</label>
                     <select class="form-control selectpicker" name="user_id">
-                        <option>All Users</option>
+                        <option value="">All Users</option>
                     </select>
                 </div>
                 <div class="col-lg-2 col-md-3">
                     <div class="form-group">
                         <label>&nbsp;</label>
-                        <button class="btn btn-primary btn-block"><i class="fa fa-filter"></i> Filter</button>
+                        <button id="filter_User_Login" class="btn btn-primary btn-block"><i class="fa fa-filter"></i> Filter</button>
                     </div>
                 </div>
                 <div class="col-12 mt-2 col-sm-12 col-lg-12">

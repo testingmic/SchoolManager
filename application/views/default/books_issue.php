@@ -8,20 +8,20 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 
 $hasIssue = $accessObject->hasAccess("issue", "library");
 
 $pageTitle = "Issue Book";
 
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 if(!$hasIssue) {
     $response->html = page_not_found("permission_denied");

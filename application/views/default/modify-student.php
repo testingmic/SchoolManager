@@ -9,24 +9,24 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
-$filter = (object) $_POST;
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$filter = (object) array_map("xss_clean", $_POST);
 
 $user_id = $SITEURL[1] ?? null;
-$response->title = "Update Student Record : {$appName}";
+$response->title = "Update Student Record ";
 
 $clientId = $session->clientId;
 
 // if the user id is not empty
-if(empty($user_id)) {
+if(empty($user_id) || !$accessObject->hasAccess("update", "student")) {
     // parse error message
-    $response->html = page_not_found();
+    $response->html = page_not_found("permission_denied");
 } else {
 
     // set the student parameter
@@ -34,6 +34,7 @@ if(empty($user_id)) {
         "clientId" => $clientId,
         "user_id" => $user_id,
         "limit" => 1,
+        "user_status" => ["Active"],
         "full_details" => true,
         "no_limit" => 1,
         "user_type" => "student",

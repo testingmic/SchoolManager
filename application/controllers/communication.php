@@ -2,19 +2,19 @@
 
 class Communication extends Myschoolgh {
 
-    
+    private $iclient = [];
 
-	public function __construct(stdClass $params = null) {
-		parent::__construct();
+    public function __construct(stdClass $params = null) {
+        parent::__construct();
 
         // get the client data
         $client_data = $params->client_data ?? [];
         $this->iclient = $client_data;
 
         // run this query
-        $this->academic_term = $client_data->client_preferences->academics->academic_term;
-        $this->academic_year = $client_data->client_preferences->academics->academic_year;
-	}
+        $this->academic_term = $client_data->client_preferences->academics->academic_term ?? null;
+        $this->academic_year = $client_data->client_preferences->academics->academic_year ?? null;
+    }
 
     /**
      * List Templates
@@ -141,7 +141,7 @@ class Communication extends Myschoolgh {
         try {
             
             // create a new item id
-            $item_id = random_string("alnum", 15);
+            $item_id = random_string("alnum",  12);
 
             // clean the template
             $params->message = custom_clean(htmlspecialchars_decode($params->message));
@@ -239,6 +239,8 @@ class Communication extends Myschoolgh {
 
         try {
 
+            global $defaultClientData;
+
             // begin the transaction
             $this->db->beginTransaction();
 
@@ -249,6 +251,7 @@ class Communication extends Myschoolgh {
 
             // get the message to be sent type
             $isSMS = (bool) in_array("sms", $params->send_mode);
+            $isEmail = (bool) in_array("email", $params->send_mode);
 
             // if the recipient array is empty then return error
             if(empty($params->recipients)) {
@@ -303,7 +306,7 @@ class Communication extends Myschoolgh {
                 // return error if the balance is less than the message to send
                 if($units > $balance) {
                     if(empty($class_check)) { return ["code" => 203, 
-                        "data" => "Sorry! Your SMS Balance is insufficient to send this message. 
+                        "data" => "Sorry! Your SMS Balance is insufficient to send this message.\n
                             You have {$balance} units left. However, you would required {$units} units to send the message.
                         "]; 
                     }
@@ -331,7 +334,7 @@ class Communication extends Myschoolgh {
             }
 
             // generate the message unique id
-            $item_id = random_string("alnum", 15);
+            $item_id = random_string("alnum",  12);
 
             // insert the record
             $stmt = $this->db->prepare("
@@ -349,6 +352,37 @@ class Communication extends Myschoolgh {
             if(!empty($units)) {
                 // reduce the SMS balance
                 $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$units}), sms_sent = (sms_sent + {$units}) WHERE client_id = '{$params->clientId}' LIMIT 1");
+            }
+
+            // if the reminder must also be sent via email
+            if($isEmail) {
+                // init
+                $recipient_list = [];
+
+                // parameter
+                $fees_param = (object) [
+                    "userData" => $params->userData,
+                    "clientId" => $params->clientId,
+                    "client_data" => $defaultClientData,
+                    "save_bill" => true
+                ];
+
+
+                // create new object
+                $feesObj = load_class("fees", "controllers", $fees_param);
+
+                // generate the email list of the students
+                foreach($actual_recipients_array as $each) {
+                    // send only when the email is not empty
+                    if(!empty($each["email"])) {
+                        // generate the bill
+                        $fees_param->student_id = $each["item_id"];
+                        $fullname = $this->remove_quotes($each["name"]);
+                        $fees_param->recipient_list = json_encode([$fullname => trim($each["email"])]);
+                        // prepare the bill and insert the log
+                        $feesObj->bill($fees_param);
+                    }
+                }
             }
 
             // commit the prepared statements
@@ -548,7 +582,7 @@ class Communication extends Myschoolgh {
             }
 
             // generate the message unique id
-            $item_id = random_string("alnum", 15);
+            $item_id = random_string("alnum",  12);
 
             // insert the record
             $stmt = $this->db->prepare("
@@ -557,7 +591,8 @@ class Communication extends Myschoolgh {
                 units_used = ?, schedule_time = ?, created_by = ?
             ");
             $stmt->execute([
-                $params->clientId, $item_id, $params->type, $params->campaign_name, $params->subject ?? null,
+                $params->clientId, $item_id, $params->type, $params->campaign_name, 
+                $params->subject ?? $params->campaign_name,
                 $params->message, $params->recipient_type, json_encode($actual_recipients_array),
                 json_encode($recipient_ids), $units, $time_to_send, $params->userId
             ]);
@@ -593,67 +628,141 @@ class Communication extends Myschoolgh {
      */
     public function verify_and_update(stdClass $params) {
         
-        // check if any item is empty
-        if(empty($params->package_id) || empty($params->reference_id) || empty($params->transaction_id)) {
-            return ["code" => 203, "data" => "Sorry! Ensure all required parameters have been parsed."];
-        }
+        try {
+            // check if any item is empty
+            if(empty($params->package_id) || empty($params->reference_id) || empty($params->transaction_id)) {
+                return ["code" => 203, "data" => "Sorry! Ensure all required parameters have been parsed."];
+            }
 
-        // check if the transaction id already exits
-        $transaction = $this->pushQuery("id", "transaction_logs", "transaction_id='{$params->transaction_id}' LIMIT 1");
-        if(!empty($transaction)) {
-            return ["code" => 203, "data" => "Sorry! This transaction has already been processed."];
-        }
+            // check if the transaction id already exits
+            $transaction = $this->pushQuery("id", "transaction_logs", "transaction_id='{$params->transaction_id}' AND state='Processed' LIMIT 1");
+            if(!empty($transaction)) {
+                return ["code" => 203, "data" => "Sorry! This transaction has already been processed."];
+            }
 
-        // validate the package
-        $sms_package = $this->pushQuery("*", "sms_packages", "item_id='{$params->package_id}'");
-        if(empty($sms_package)) {
-            return ["code" => 203, "data" => "Sorry! An invalid package id was parsed."];
-        }
+            // validate the package
+            $sms_package = $this->pushQuery("*", "sms_packages", "item_id='{$params->package_id}' LIMIT 1");
+            if(empty($sms_package)) {
+                return ["code" => 203, "data" => "Sorry! An invalid package id was parsed."];
+            }
 
-        // create a new payment object
-        $payObject = load_class("payment", "controllers");
+            // create a new payment object
+            $payObject = load_class("payment", "controllers");
 
-        // set the parameters
-        $data = (object) [
-            "route" => "verify",
-            "reference" => $params->reference_id
-        ];
+            // set the parameters
+            $data = (object) [
+                "route" => "verify",
+                "reference" => $params->reference_id
+            ];
 
-        // confirm the payment
-        $payment_check = $payObject->get($data);
-        
-        // if payment status is true
-        if($payment_check["data"]->status === true) {
-
-            // set the amount 
-            $amount = $payment_check["data"]->data->amount / 100;
+            // confirm the payment
+            $payment_check = $payObject->get($data);
             
-            // update the user sms balance
-            $this->db->query("UPDATE smsemail_balance SET sms_balance=(sms_balance + {$sms_package[0]->units}) WHERE client_id='{$params->clientId}' LIMIT 1");
-            
-            // update the total amount purchased on the package
-            $this->db->query("UPDATE sms_packages SET amount_purchased=(amount_purchased + {$amount}) WHERE item_id='{$params->package_id}' LIMIT 1");
-            
-            // log the transaction information
-            $this->db->query("
-                INSERT INTO transaction_logs SET client_id = '{$params->clientId}',
-                transaction_id = '{$params->transaction_id}', endpoint = 'sms',
-                reference_id = '{$params->reference_id}', amount='{$amount}'
-            ");
+            // if payment status is true
+            if($payment_check["data"]->status === true) {
 
-            // log the user activity
-            $this->userLogs("sms_topup", $params->package_id, null,  "{$params->userData->name} purchased {$sms_package[0]->units} sms units at the rate of {$payment_check["data"]->data->currency}{$amount}.", $params->userId);
+                // set the amount 
+                $amount = (int) ($payment_check["data"]->data->amount / 100);
+                $db_amount = (int) $sms_package[0]->amount;
+                
+                // confirm that the user actually paid the right amount for the package
+                if($amount !== $db_amount) {
+                    // log the attempt to bypass the system security
+                    $this->db->query("INSERT INTO security_logs SET 
+                        client_id='{$params->clientId}', created_by='{$params->userId}', section='SMS Topup',
+                        description='The user attempted to purchase <strong>{$sms_package[0]->units} units</strong> of SMS\'s
+                        with an amount of <strong>{$amount}</strong> which actually costs {$sms_package[0]->amount}'
+                    ");
+                    // return a warning to the user.
+                    return ["code" => 203, "data" => "Sorry! You attempted to purchase a different SMS Package with an amount that is lower/higher than required. Your Account may be terminated should you try this again in future."];
+                }
+                
+                // update the user sms balance
+                $this->db->query("UPDATE smsemail_balance SET sms_balance=(sms_balance + {$sms_package[0]->units}) WHERE client_id='{$params->clientId}' LIMIT 1");
+                
+                // update the total amount purchased on the package
+                $this->db->query("UPDATE sms_packages SET amount_purchased=(amount_purchased + {$amount}) WHERE item_id='{$params->package_id}' LIMIT 1");
+                
+                // log the transaction information
+                $this->db->query("
+                    INSERT INTO transaction_logs SET client_id = '{$params->clientId}',
+                    transaction_id = '{$params->transaction_id}', endpoint = 'sms',
+                    reference_id = '{$params->reference_id}', amount='{$amount}',
+                    payment_data='".json_encode($payment_check["data"])."', state='Processed'
+                ");
 
-        } else {
-            return ["code" => 203, "data" => "Sorry! An error was encountered while processing the request."];
-        }
-        
-        // validate the package
-        $package = $this->pushQuery("sms_balance", "smsemail_balance", "client_id='{$params->clientId}' LIMIT 1")[0];
-        
-        // return the response message
-        return [ "data" => $package->sms_balance ];
+                // log the user activity
+                $this->userLogs("sms_topup", $params->package_id, null,  "{$params->userData->name} purchased {$sms_package[0]->units} sms units at the rate of {$payment_check["data"]->data->currency}{$amount}.", $params->userId);
+
+            } else {
+                return ["code" => 203, "data" => "Sorry! An error was encountered while processing the request."];
+            }
+            
+            // validate the package
+            $package = $this->pushQuery("sms_balance", "smsemail_balance", "client_id='{$params->clientId}' LIMIT 1")[0];
+            
+            // return the response message
+            return [ "data" => $package->sms_balance ];
+            
+        } catch(PDOException $e) {}
 
     }
 
+
+    /**
+     * Log the information and set the information to return
+     * 
+     * @return Array
+     */
+    public function log(stdClass $params) {
+
+        try {
+
+            // global variables
+            global $defaultClientData;
+
+            // get the data parsed
+            if(!is_array($params->data)) {
+                return ["code" => 203, "data" => "Sorry! An array data is required."];
+            }
+
+            // get the email address parsed
+            $email = $params->data["email"] ?? null;
+
+            // confirm the email address to be a valid email address
+            if(!empty($email)) {
+                // validate the email address
+                if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    return ["code" => 203, "data" => "Sorry! A valid email address is required."];
+                }
+            }
+
+            // if email is empty then set it to the client email address
+            $email = empty($email) ? $defaultClientData->client_email : $email;
+
+            // check and confirm the package id
+            if(!isset($params->data["package_id"])) {
+                return ["code" => 203, "data" => "Sorry! The package_id is required."];
+            }
+
+            // validate the package
+            $sms_package = $this->pushQuery("*", "sms_packages", "item_id='{$params->data["package_id"]}' LIMIT 1");
+            if(empty($sms_package)) {
+                return ["code" => 203, "data" => "Sorry! An invalid package id was parsed."];
+            }
+
+            // return the data 
+            return [
+                "code" => 200,
+                "data" => [
+                    "pk_public_key" => $this->pk_public_key,
+                    "email" => $email,
+                    "amount" => ($sms_package[0]->amount * 100),
+                    "currency" => "GHS"
+                ]
+            ];
+
+        } catch(PDOException $e) {}
+
+    }
 }

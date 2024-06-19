@@ -9,19 +9,19 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultUser, $defaultClientData;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 $clientId = $session->clientId;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $response->scripts = [];
-$filter = (object) $_POST;
-$response->title = "Class Assessment List : {$appName}";
+$filter = (object) array_map("xss_clean", $_POST);
+$response->title = "School Based Assessment List ";
 
-$response->scripts = ["assets/js/filters.js"];
+$response->scripts = ["assets/js/filters.js", "assets/js/lessons.js"];
 
 // the query parameter to load the user information
 $assignments_param = (object) [
@@ -36,76 +36,22 @@ $assignments_param = (object) [
 
 // unset the session
 $session->remove("assignment_uploadID");
+$assessmentObj = load_class("assignments", "controllers");
 
-$item_list = load_class("assignments", "controllers")->list($assignments_param);
-
+// permissions
 $hasDelete = $accessObject->hasAccess("delete", "assignments");
 $hasUpdate = $accessObject->hasAccess("update", "assignments");
 
 $hasFiltering = $accessObject->hasAccess("filters", "settings");
 
-// colors for the list
-$color = [
-    "Test" => "success",
-    "Assignment" => "warning",
-    "Quiz" => "primary",
-    "Exam" => "dark",
-    "Group Work" => "secondary",
-];
+$item_list = $assessmentObj->list($assignments_param);
 
-// unset the sessions if $session->currentQuestionId is not empty
 $assignments = "";
-$assessment_array = [];
-foreach($item_list["data"] as $key => $each) {
-    
-    $each->assignment_type_label = $color[$each->assignment_type];
-    $assessment_array[$each->item_id] = $each;
-    $action = "<a title='Click to update assignment record' href='#' onclick='return load(\"assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+$formated_content = $assessmentObj->format_list($item_list, true);
 
-    if($hasUpdate && $each->questions_type == "multiple_choice") {
-        $action .= "&nbsp;<a title='Manage questions for this assignment' href='#' onclick='return load(\"add-assessment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
-    }
-
-    // if the state is either closed or graded
-    if(in_array($each->state, ["Closed", "Graded"]) && $hasUpdate) {
-        $action .= "&nbsp;<a href='#' title='View student marks this Assignment' onclick='return view_AssessmentMarks(\"{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-list'></i></a>";
-    }
-
-    if($hasDelete && in_array($each->state, ["Pending", "Draft"])) {
-        $action .= "&nbsp;<a href='#' title='Click to delete this Assignment' onclick='return delete_record(\"{$each->id}\", \"assignments\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
-    }
-
-    $assignments .= "<tr data-row_id=\"{$each->id}\">";
-    $assignments .= "<td>".($key+1)."</td>";
-    $assignments .= "<td>
-        <a href='#' onclick='return load(\"assessment/{$each->item_id}\");'>
-            {$each->assignment_title}
-        </a> 
-        <strong class='badge p-1 pr-2 pl-2 badge-{$color[$each->assignment_type]}'>{$each->assignment_type}</strong>
-        ".(
-        $hasUpdate ? 
-            "<br>Class: <strong>{$each->class_name}</strong>
-            <br>Course: <strong>{$each->course_name}</strong>" : 
-            "<br>Course:</strong> {$each->course_name}</strong>"
-        )."</td>";
-    $assignments .= "<td>{$each->due_date} ".(!empty($each->due_time) ? "@ {$each->due_time}" : null)."</td>";
-
-    // show this section if the user has the necessary permissions
-    if($hasUpdate) {
-        $assignments .= "<td>{$each->students_assigned}</td>";
-        $assignments .= "<td>{$each->students_handed_in}</td>";
-        $assignments .= "<td>{$each->students_graded}</td>";
-    }
-    
-    if(!$hasUpdate) {
-        $assignments .= "<td>{$each->awarded_mark}</td>";
-    }
-
-    $assignments .= "<td>{$each->date_created}</td>";
-    $assignments .= "<td>".($hasUpdate ? $myClass->the_status_label($each->state) : $each->handedin_label)."</td>";
-    $assignments .= "<td align='center'>{$action}</td>";
-    $assignments .= "</tr>";
-}
+// new items list
+$assessment_array = $formated_content["array_list"];
+$assignments = $formated_content["assignments_list"];
 
 // default class_list and courses_list
 $courses_list = [];
@@ -121,6 +67,7 @@ $class_list = load_class("classes", "controllers")->list($classes_param)["data"]
 
 // if the class_id is not empty
 if(!empty($filter->class_id)) {
+    // set the params
     $courses_param = (object) [
         "clientId" => $clientId,
         "minified" => true,
@@ -136,10 +83,10 @@ $response->array_stream["assessment_array"] = $assessment_array;
 $response->html = '
     <section class="section">
         <div class="section-header byPass_Null_Value">
-            <h1><i class="fa fa-book-reader"></i> Class Assessment List</h1>
+            <h1><i class="fa fa-book-reader"></i> School Based Assessment List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item">Class Assessment List</div>
+                <div class="breadcrumb-item">School Based Assessment List</div>
             </div>
         </div>
         <div class="row" id="filter_Department_Class">
@@ -181,7 +128,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
+                            <table data-empty="" class="table table-sm table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
@@ -194,7 +141,7 @@ $response->html = '
                                         ).'
                                         <th>Date Created</th>
                                         <th>Status</th>
-                                        <th align="center" width="10%"></th>
+                                        <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$assignments.'</tbody>

@@ -5,20 +5,20 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultUser, $SITEURL;
+global $myClass, $defaultUser, $SITEURL, $defaultAcademics;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Fees Allocation";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // fees allocation mandate
 $canAllocate = $accessObject->hasAccess("allocation", "fees");
@@ -33,24 +33,40 @@ if(!$canAllocate) {
     $response->scripts = ["assets/js/filters.js", "assets/js/payments.js"];
 
     // load the classes list
-    $classes_param = (object) ["clientId" => $clientId, "columns" => "id, name"];
+    $classes_param = (object) ["limit" => $myClass->temporal_maximum, "clientId" => $clientId, "columns" => "id, name, payment_module"];
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
+    // get the category list
+    $category_list = $myClass->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$clientId}' LIMIT {$myClass->temporal_maximum}");
+
     // load fees allocation list for class
-    $allocation_param = (object) ["group_by_student" => "group_by", "clientId" => $clientId, "userData" => $defaultUser, "receivePayment" => $receivePayment, "canAllocate" => $canAllocate, "showPrintButton" => true];
+    $allocation_param = (object) [
+        "limit" => $myClass->maximum_class_count,
+        "group_by_student" => "group_by", "clientId" => $clientId, 
+        "userData" => $defaultUser, "receivePayment" => $receivePayment, 
+        "canAllocate" => $canAllocate, "showPrintButton" => true,
+        "academic_year" => $defaultAcademics->academic_year ?? null, 
+        "academic_term" => $defaultAcademics->academic_term ?? null
+    ];
     $allocation_param->client_data = $defaultUser->client;
     
     // create a new object
     $feesObject = load_class("fees", "controllers", $allocation_param);
 
+    // load fees allocation list for the students
+    $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
+    
     // load the class allocation list
     $class_allocation_list = $feesObject->class_allocation_array($allocation_param);
 
-    // load fees allocation list for the students
-    $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
-
     // info
     $info = "Use this form to assign fees to a class or to a particular student. Leave the student id field blank if you want to set for the entire class.";
+
+    // include the fees_helper file
+    load_helpers(['fees_helper']);
+
+    // call the class fees allocation form
+    $class_fees_allocation_form = fees_allocation_form($info, $class_list, $category_list, $clientId);
 
     // append the html content
     $response->html = '
@@ -81,117 +97,42 @@ if(!$canAllocate) {
                             </ul>
 
                             <div class="tab-content tab-bordered" id="myTab3Content">
-                                <div class="tab-pane fade show active" id="allocation_form" role="tabpanel" aria-labelledby="allocation_form-tab2">
-                                    
-                                <div class="row" id="fees_allocation_wrapper">
-                                    <div class="col-lg-4 col-md-6">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <div style="width:100%" class="d-flex justify-content-between">
-                                                    <div><h4>Allocate Fees To Class</h4></div>
-                                                    <div class="text-right"><i data-toggle="tooltip" title="'.$info.'" class="fa cursor text-primary fa-info"></i></div>
-                                                </div>
-                                            </div>
-                                            <div class="card-body pt-0 pb-0">
-                                                <div class="py-3 pt-0" id="fees_allocation_form">
-                                                
-                                                    <div class="form-group hidden mb-2">
-                                                        <label>Allocate To <span class="required">*</span></label>
-                                                        <select data-width="100%" disabled class="form-control selectpicker" id="allocate_to" name="allocate_to">
-                                                            <option selected value="class">Entire Class</option>
-                                                            <!--<option value="student">Specific Student</option>-->
-                                                        </select>
-                                                    </div>
-                    
-                                                    <div class="form-group mb-2">
-                                                        <label>Select Class <span class="required">*</span></label>
-                                                        <select data-width="100%" class="form-control selectpicker" name="class_id">
-                                                            <option value="">Please Select Class</option>';
-                                                            foreach($class_list as $each) {
-                                                                $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
-                                                            }
-                                                            $response->html .= '
-                                                        </select>
-                                                    </div>
-                    
-                                                    <div class="form-group mb-2 hidden" id="students_list">
-                                                        <label>Select Student <span class="required">*</span></label>
-                                                        <select data-width="100%" class="form-control selectpicker" name="student_id">
-                                                            <option value="">Please Select Student</option>
-                                                        </select>
-                                                    </div>
-                    
-                                                    <div class="form-group mb-2">
-                                                        <label>Select Category <span class="required">*</span></label>
-                                                        <select disabled data-width="100%" class="form-control selectpicker" name="category_id">
-                                                            <option value="">Please Select Category</option>';
-                                                            foreach($myClass->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$clientId}'") as $each) {
-                                                                $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";                            
-                                                            }
-                                                        $response->html .= '
-                                                        </select>
-                                                    </div>
-                    
-                                                    <div class="form-group">
-                                                        <label>Set Amount <span class="required">*</span></label>
-                                                        <input type="number" disabled="disabled" name="amount" id="amount" class="form-control">
-                                                    </div>
-                    
-                                                    <div class="form-group text-right mb-0" id="allocate_fees_button">
-                                                        <button onclick="return save_Fees_Allocation()" class="btn btn-outline-success"><i class="fa fa-save"></i> Allocate Fee</button>
-                                                    </div>
-                    
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-8 col-md-6">
-                                        <div class="form-content-loader" style="display: none; position: absolute">
-                                            <div class="offline-content text-center">
-                                                <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
-                                            </div>
-                                        </div>
-                                        <table id="simple_load_student" class="table table-bordered table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th width="40%">Name</th>
-                                                    <th>Due</th>
-                                                    <th>Paid</th>
-                                                    <th>Balance</th>
-                                                    <td style="background-color: rgba(0,0,0,0.04);" align="center">
-                                                        <input disabled style="height:20px;width:20px;" id="select_all" type="checkbox" class="cursor">
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td align="center" colspan="6">Students data appears here.</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
+                                <div class="tab-pane fade show active" id="allocation_form" role="tabpanel" aria-labelledby="allocation_form-tab2">';
+                                
+                                // display class not set error
+                                if(empty($class_list)) {
+                                    // no class added error
+                                    $response->html .= notification_modal("Class Not Set", $myClass->error_logs["class_not_set"]["msg"], $myClass->error_logs["class_not_set"]["link"]);
+                                } elseif(empty($category_list)) {
+                                    // fees category not added error
+                                    $response->html .= notification_modal("Fees Category Not Set", $myClass->error_logs["fees_category_not_set"]["msg"], $myClass->error_logs["fees_category_not_set"]["link"]);
+                                } else {
+                                    $response->html .= '
+                                        '.$class_fees_allocation_form.'
+                                    ';
+                                }
+                            $response->html .= '
                                 </div>
                                 <div class="tab-pane fade" id="classes" role="tabpanel" aria-labelledby="classes-tab2">
                                     <div class="table-responsive">
-                                        <table data-empty="" class="table table-bordered table-striped raw_datatable">
+                                        <table data-empty="" class="table table-bordered table-sm table-striped raw_datatable">
                                             <thead>
                                                 <tr>
                                                     <th width="7%" class="text-center">#</th>
                                                     <th>Class</th>
                                                     <th>Fees Category</th>
                                                     <th>Amount</th>
+                                                    <th align="center"></th>
                                                 </tr>
                                             </thead>
                                             <tbody>'.$class_allocation_list.'</tbody>
                                         </table>
                                     </div>
                                 </div>
+
                                 <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
                                     <div class="table-responsive">
-                                        <table data-empty="" class="table table-bordered table-striped datatable">
+                                        <table data-empty="" class="table table-bordered table-sm table-striped datatable">
                                             <thead>
                                                 <tr>
                                                     <th width="7%" class="text-center">#</th>
@@ -207,7 +148,6 @@ if(!$canAllocate) {
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>

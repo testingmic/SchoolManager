@@ -2,6 +2,8 @@
 
 class Dictionary extends Myschoolgh {
 
+    public $ss_type;
+    
     public function __construct()
     {
         $this->ss_type = [

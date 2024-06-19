@@ -2,7 +2,7 @@
 
 class Resources extends Myschoolgh {
 
-    
+    private $iclient = [];
 
     public function __construct(stdClass $params = null) {
 		parent::__construct();
@@ -49,7 +49,7 @@ class Resources extends Myschoolgh {
         }
 
         // create an item id
-        $item_id = random_string("alnum", 16);
+        $item_id = random_string("alnum", RANDOM_STRING);
 
         // clean the lesson id
         if(isset($upload->lesson_id) && is_array($upload->lesson_id)) {
@@ -409,8 +409,8 @@ class Resources extends Myschoolgh {
         $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
 
         $params->query .= (isset($params->rq)) ? " AND a.subject LIKE '%{$params->rq}%'" : null;
-        $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
-        $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
+        // $params->query .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
+        // $params->query .= isset($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
         $params->query .= isset($params->state) ? " AND a.state='{$params->state}'" : "";
         $params->query .= (isset($params->resource_id) && !empty($params->resource_id)) ? " AND a.item_id='{$params->resource_id}'" : null;
         $params->query .= (isset($params->course_tutor) && !empty($params->course_tutor)) ? " AND a.course_tutors LIKE '%{$params->course_tutor}%'" : null;
@@ -553,7 +553,7 @@ class Resources extends Myschoolgh {
             return ["code" => 203, "data" => "Sorry! An invalid course id was supplied."];
         }
 
-        $item_id = random_string("alnum", 16);
+        $item_id = random_string("alnum", RANDOM_STRING);
 
         try {
             

@@ -8,17 +8,27 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $SITEURL, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Attendance Report";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
+
+// end query if the user has no permissions
+if($isWardParent) {
+    // unset the page additional information
+    $response->page_programming = [];
+    // permission denied information
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
 
 // permissive users to be created by each access level
 $permissions = [
@@ -68,7 +78,7 @@ $response->html = '
                                     <select data-width="100%" class="form-control selectpicker" name="user_type" id="user_type">
                                         <option value="">Please select group</option>';
                                         foreach($permissions[$defaultUser->user_type] as $key => $value) {
-                                            $response->html .= "<option value=\"{$key}\">{$value}</option>";
+                                            $response->html .= "<option value=\"{$key}\">".strtoupper($value)."</option>";
                                         }
                                     $response->html .= '</select>
                                 </div>
@@ -79,7 +89,7 @@ $response->html = '
                                     <select data-width="100%" class="form-control selectpicker" name="class_id">
                                         <option value="">Please Select Class</option>';
                                         foreach($class_list as $each) {
-                                            $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                                            $response->html .= "<option value=\"{$each->id}\">".strtoupper($each->name)."</option>";
                                         }
                                         $response->html .= '
                                     </select>

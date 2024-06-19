@@ -1,9 +1,9 @@
 <?php 
 class Terminal_reports extends Myschoolgh {
 
-    private $iclient;
-    private $insert_stmt;
-    private $update_stmt;
+    public $iclient;
+    public $update_stmt;
+    public $insert_stmt;
 
     public function __construct(stdClass $params = null) {
         
@@ -59,7 +59,7 @@ class Terminal_reports extends Myschoolgh {
     public function results_list(stdClass $params) {
         
         // additional variables
-        global $defaultUser, $defaultClientData;
+        global $defaultClientData, $clientPrefs;
 
         // set some values
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
@@ -67,19 +67,19 @@ class Terminal_reports extends Myschoolgh {
         $grading = $defaultClientData->grading_structure->columns;
         
         // get the teachers id
-        if(in_array($defaultUser->user_type, ["teacher", "parent", "student"])) {
-            if($defaultUser->user_type == "teacher") {
-                $params->teacher_id = !isset($params->teacher_id) ? $defaultUser->unique_id : $params->teacher_id;
+        if(in_array($params->userData->user_type, ["teacher", "parent", "student"])) {
+            if($params->userData->user_type == "teacher") {
+                $params->teacher_id = !isset($params->teacher_id) ? $params->userData->unique_id : $params->teacher_id;
             }
-            elseif($defaultUser->user_type == "student") {
-                $params->class_id = !isset($params->class_id) ? $defaultUser->class_id : $params->class_id;
+            elseif($params->userData->user_type == "student") {
+                $params->class_id = !isset($params->class_id) ? $params->userData->class_id : $params->class_id;
             }
         }
         
         // append some additional queries
         $params->query .= isset($params->created_by) && !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
         $params->query .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : null;
-        $params->query .= isset($params->teacher_id) && !empty($params->teacher_id) ? " AND (a.teacher_ids='{$params->teacher_id}' OR a.created_by='{$defaultUser->user_id}')" : null;
+        $params->query .= isset($params->teacher_id) && !empty($params->teacher_id) ? " AND (a.teacher_ids='{$params->teacher_id}' OR a.created_by='{$params->userData->user_id}')" : null;
         $params->query .= isset($params->course_id) && !empty($params->course_id) ? " AND a.course_id='{$params->course_id}'" : null;
         $params->query .= isset($params->course_code) && !empty($params->course_code) ? " AND a.course_code='{$params->course_code}'" : null;
         $params->query .= isset($params->status) && !empty($params->status) ? " AND a.status='{$params->status}'" : null;
@@ -155,10 +155,7 @@ class Terminal_reports extends Myschoolgh {
                             COALESCE(u.name,'NULL'),'|',COALESCE(u.date_of_birth,'NULL'),'|',
                             COALESCE(u.unique_id,'NULL'),'|',COALESCE(u.guardian_id,'NULL')
                         ) 
-                        FROM users u 
-                        WHERE 
-                            u.item_id = a.student_item_id AND u.academic_term = a.academic_term AND u.academic_year = a.academic_year 
-                        LIMIT 1
+                        FROM users u WHERE u.item_id = a.student_item_id LIMIT 1
                     ) AS student_info
                 FROM grading_terminal_scores a
                 WHERE {$where_clause} LIMIT 200
@@ -179,7 +176,6 @@ class Terminal_reports extends Myschoolgh {
                     $scores_array[$scores[$key]["item"]] = $scores[$key][$getItem];
                 }
                 
-                // print_r($scores_array);
                 // set the scores as an array
                 $result->scores = $scores_array;
 
@@ -238,7 +234,7 @@ class Terminal_reports extends Myschoolgh {
             "grading_terminal_logs", 
             "course_id = '{$params->course_id}' AND 
             academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' AND
-            class_id='{$params->class_id}' AND client_id='{$params->clientId}'"
+            class_id='{$params->class_id}' AND client_id='{$params->clientId}' LIMIT 1"
         );
             
         if(!empty($check)) {
@@ -250,7 +246,7 @@ class Terminal_reports extends Myschoolgh {
                 return ["code" => 203, "data" => "Sorry! This result has been submitted pending approval hence cannot be updated."];
             }
         } else {
-            return ["code" => 200, "data" => "You can proceed to upload the results of the class"];
+            return ["code" => 200, "data" => "You can proceed to upload the results of the class."];
         }
     }
 
@@ -283,22 +279,21 @@ class Terminal_reports extends Myschoolgh {
 
         // get the students for the classes
         $students_list = $this->pushQuery("name, unique_id", "users", 
-            "academic_year = '{$params->academic_year}' AND academic_term = '{$params->academic_term}' 
-            AND class_id='{$class_name[0]->id}' AND client_id='{$params->clientId}' 
-            AND user_status='Active' AND user_type='student'"
+            "class_id='{$class_name[0]->id}' AND client_id='{$params->clientId}' 
+            AND user_status='Active' AND user_type='student' LIMIT {$this->global_limit}"
         );
 
         // if empty then return
         if(empty($students_list)) {
-            return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+            return ["code" => 203, "data" => "Sorry! No student was found under the specified Class."];
         }
 
         $course_item = $course_item[0];
         $course_name = ucwords($course_item->name);
         $course_code = strtoupper($course_item->course_code);
 
-        $csv_file = "Student Name,Student ID,";
-        $csv_file .= "Subject Name,Subject Code,";
+        $csv_file = "STUDENT NAME,STUDENT ID,";
+        $csv_file .= "SUBJECT NAME,SUBJECT CODE,";
 
         // get the grading structure
         if(!empty($client_data->grading_structure)) {
@@ -307,21 +302,21 @@ class Terminal_reports extends Myschoolgh {
                 $count = 0;
                 foreach($columns->columns as $key => $column) {
                     $count++;
-                    $csv_file .= "{$key} - {$column->markscap} Marks,";
+                    $csv_file .= strtoupper("{$key} - {$column->markscap} Marks,");
                 }
             }
         }
 
-        $csv_file .= "Teacher ID,";
-        $csv_file .= "Teacher Remarks\n";
+        $csv_file .= "TEACHER ID,";
+        $csv_file .= "TEACHER REMARKS\n";
         $course_name = str_ireplace(", ", "", $course_name);
 
         foreach($students_list as $student) {
-            $csv_file .= "{$student->name},{$student->unique_id},{$course_name},{$course_code}\n";
+            $csv_file .= strtoupper($student->name).",{$student->unique_id},{$course_name},{$course_code}\n";
         }
 
         // upload file
-        $temp_dir = "assets/uploads/{$params->clientId}/temp";
+        $temp_dir = "assets/uploads/results/{$params->clientId}/tmp/";
         
         // if not a directory then create it
         if(!is_dir($temp_dir)) {
@@ -329,7 +324,7 @@ class Terminal_reports extends Myschoolgh {
         }
 
         // set the name
-        $filename = "{$temp_dir}/terminal_report_".create_slug($class_name[0]->name, "_")."_{$course_code}.csv";
+        $filename = "{$temp_dir}/".create_slug($class_name[0]->name, "_")."_".create_slug($course_item->name, "_")."_results_sheet.csv";
 
         try {
 
@@ -355,7 +350,11 @@ class Terminal_reports extends Myschoolgh {
     public function upload_csv(stdClass $params) {
 
         // set the global variable
-        global $defaultClientData, $defaultUser;
+        global $defaultClientData;
+
+        if(!isset($params->report_file['tmp_name'])) {
+            return ["code" => 203, "data" => "Sorry! Please select a file to upload."];
+        }
     
         // reading tmp_file name
         $report_file = fopen($params->report_file['tmp_name'], 'r');
@@ -371,7 +370,7 @@ class Terminal_reports extends Myschoolgh {
         }
 
         // check the file that have been uploaded
-        $headers = ["Student Name","Student ID","Subject Name","Subject Code"];
+        $headers = ["STUDENT NAME","STUDENT ID","SUBJECT NAME","SUBJECT CODE"];
 
         // get the client data
         $client_data = $defaultClientData;
@@ -384,25 +383,45 @@ class Terminal_reports extends Myschoolgh {
                 $count = 0;
                 foreach($columns["columns"] as $key => $column) {
                     $count++;
-                    $headers[] = trim($key);
+                    $headers[] = strtoupper(trim($key));
                 }
+
+                // set new variables
+                $_columns_new = [];
+                foreach($columns["columns"] as $key => $column) {
+                    $_columns_new[strtoupper($key)] = $column;
+                }
+
+                $columns["columns"] = $_columns_new;
+
             }
         }
-        $headers[] = "Teacher ID";
-        $headers[] = "Teacher Remarks";
+        $headers[] = "TEACHER ID";
+        $headers[] = "TEACHER REMARKS";
 
         // set a new header
         $file_headers = [];
         foreach($csv_headers as $item) {
             // explode the text
             $_item = explode("-", $item);
-            $file_headers[] = trim($_item[0]);
+
+            // change the headers to uppercase
+            $h_name = trim($_item[0]);
+
+            // if the string length is more than one
+            if(strlen($h_name) > 1) {
+                // append the array list
+                $file_headers[] = $h_name;
+            }
         }
 
         // loop through the headers and ensure that they all match
         foreach($file_headers as $item) {
+            // change the header item to uppercase
+            $h_item = strtoupper($item);
+
             // if not in array
-            if(!in_array($item, $headers)) {
+            if(!in_array($h_item, $headers)) {
                 return ["code" => 203, "data" => "Ensure you have uploaded the sample CSV File with the predefined headers."];
             }
         }
@@ -418,6 +437,7 @@ class Terminal_reports extends Myschoolgh {
         $report_table .= "</thead>";
         $report_table .= "<tbody>";
 
+
         // set the files
         foreach($complete_csv_data as $key => $result) {
             $report_table .= "<tr>";
@@ -427,12 +447,12 @@ class Terminal_reports extends Myschoolgh {
                 if(in_array($file_headers[$kkey], array_keys($columns["columns"]))) {
                     $column = create_slug($file_headers[$kkey], "_");
                     $report_table .= "<td><input style='min-width:100px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? "disabled='disabled' data-input_total_id='{$key}'" : "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." class='form-control pl-0 pr-0 font-18 text-center' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}'></td>";
-                } elseif($file_headers[$kkey] == "Teacher Remarks") {
+                } elseif($file_headers[$kkey] == "TEACHER REMARKS") {
                     $report_table .= "<td><input style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
-                } elseif($file_headers[$kkey] == "Teacher ID") {
-                    $report_table .= "<td><span style='font-weight-bold font-17'>".(empty($kvalue) ? $defaultUser->unique_id : $kvalue)."</span></td>";                    
+                } elseif($file_headers[$kkey] == "TEACHER ID") {
+                    $report_table .= "<td><span style='font-weight-bold font-17'>".(empty($kvalue) ? $params->userData->unique_id : $kvalue)."</span></td>";                    
                 } else {
-                    $report_table .= "<td><span ".($file_headers[$kkey] == "Student ID" ? "data-student_row_id='{$key}' data-student_id='{$kvalue}'" : "").">{$kvalue}</span></td>";
+                    $report_table .= "<td><span ".($file_headers[$kkey] == "STUDENT ID" ? "data-student_row_id='{$key}' data-student_id='{$kvalue}'" : "").">{$kvalue}</span></td>";
                 }
             }
             $report_table .= "</tr>";
@@ -448,9 +468,7 @@ class Terminal_reports extends Myschoolgh {
         // save the information in a session
         $this->session->set("terminal_report_{$params->class_id}_{$params->course_id}", ["headers" => $headers, "students" => $complete_csv_data]);
 
-        return [
-            "data" => $report_table
-        ];
+        return ["data" => $report_table];
 
     }
 
@@ -464,14 +482,14 @@ class Terminal_reports extends Myschoolgh {
     public function save_report(stdClass $params) {
 
         // confirm that the record set is an array
-        if(!is_array($params->report_sheet)) {
-            return ["code" => 203, "data" => "Sorry! The report_sheet parameter must be an array."];
+        if(!is_array($params->rs)) {
+            return ["code" => 203, "data" => "Sorry! The rs parameter must be an array."];
         }
 
-        global $defaultClientData, $defaultUser;
+        global $defaultClientData;
 
         // set the report
-        $report = (object) $params->report_sheet;
+        $report = (object) $params->rs;
         $report->clientId = $params->clientId;
 
         // set the academic year and term
@@ -515,24 +533,27 @@ class Terminal_reports extends Myschoolgh {
             }
 
             // student scores checkeer
-            if(!isset($report->student_scores)) {
+            if(!isset($report->ss)) {
                 return ["code" => 203, "data" => "Sorry! The students scores is required and must be submitted."];
             }
 
             $overall_score = 0;
             $scores_array = [];
             // group the information in an array
-            foreach($report->student_scores as $score) {
+            foreach($report->ss as $score) {
+                // explode the record
+                $split = explode("|", $score);
+
                 // append to the array if its a numeric figure
-                if(is_numeric($score["score"])) {
-                    $scores_array[$score["student_id"]]["marks"][] = [
-                        "item" => $score["item"],
-                        "score" => $score["score"]
+                if(isset($split[1]) && preg_match("/^[0-9.]+$/", $split[1])) {
+                    $scores_array[$split[2]]["marks"][] = [
+                        "item" => $split[0],
+                        "score" => $split[1]
                     ];
-                    $overall_score += $score["score"];
+                    $overall_score += $split[1];
                 }
                 // append the teachers remarks to the array
-                $scores_array[$score["student_id"]]["remarks"] = $score["remarks"];
+                $scores_array[$split[2]]["remarks"] = $split[3] ?? null;
             }
 
             // get the sum for all scores
@@ -554,14 +575,14 @@ class Terminal_reports extends Myschoolgh {
             $session_array = $this->session->get("terminal_report_{$report->class_id}_{$report->course_id}");
 
             // get the class teacher id
-            $teacher_key = array_search("Teacher ID", $session_array["headers"]);
+            $teacher_key = array_search("TEACHER ID", $session_array["headers"]);
             $teacher_ids = $session_array["students"][0][$teacher_key];
 
             // set the current user id if the teacher id was not parsed.
-            $teacher_ids = empty($teacher_ids) ? $defaultUser->unique_id : $teacher_ids;
+            $teacher_ids = empty($teacher_ids) ? $params->userData->unique_id : $teacher_ids;
 
             // set a new log id
-            $report_id = random_string("alnum", 16);
+            $report_id = random_string("alnum", RANDOM_STRING);
             $isFound = false;
 
             // loop through the list and insert the record
@@ -613,8 +634,8 @@ class Terminal_reports extends Myschoolgh {
             if($isFound) {
 
                 // insert the activity into the cron_scheduler
-                $query = $this->db->prepare("UPDATE cron_scheduler SET client_id = '{$params->clientId}', status = ?, active_date = now() WHERE item_id = ? AND cron_type = ?");
-                $query->execute([0, $report_id, "terminal_report"]);
+                $query = $this->db->prepare("UPDATE cron_scheduler SET client_id = '{$params->clientId}', status = ?, active_date = now() WHERE item_id = ? AND cron_type = ? LIMIT 1");
+                $query->execute([1, $report_id, "terminal_report"]);
 
                 // log the information
                 $log_stmt = $this->db->prepare("UPDATE grading_terminal_logs 
@@ -651,7 +672,12 @@ class Terminal_reports extends Myschoolgh {
             // delete the session
             $this->session->remove("terminal_report_{$report->class_id}_{$report->course_id}");
 
-            return $data;
+            return [
+                "data" => $data,
+                "additional" => [
+                    "reportId" => $report_id
+                ]
+            ];
 
         } catch(PDOException $e) {
             return $this->unexpected_error;
@@ -668,19 +694,25 @@ class Terminal_reports extends Myschoolgh {
      */
     public function run_result_cron_job($report_id, $clientId) {
 
-        // set the fullname of the user
-        $u_stmt = $this->db->prepare("UPDATE grading_terminal_scores a SET 
-            a.student_item_id = (SELECT u.item_id FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
-            a.student_name = (SELECT u.name FROM users u WHERE u.academic_year = a.academic_year AND u.academic_term = a.academic_term AND u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
-            a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
-        WHERE a.report_id='{$report_id}' AND a.client_id = '{$clientId}'");
-        $u_stmt->execute();
+        try {
+            // set the fullname of the user
+            $u_stmt = $this->db->prepare("
+                UPDATE grading_terminal_scores a SET 
+                a.student_item_id = (SELECT u.item_id FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+                a.student_name = (SELECT u.name FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1),
+                a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1),
+                a.student_row_id = (SELECT u.id FROM users u WHERE u.unique_id = a.student_unique_id AND u.user_type='student' LIMIT 1)
+            WHERE a.report_id='{$report_id}' AND a.client_id = '{$clientId}' LIMIT 500");
+            $u_stmt->execute();
 
-        // get the list of all users that was uploaded
-        $u_stmt = $this->db->prepare("UPDATE grading_terminal_logs a SET 
-            a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
-        WHERE a.report_id='{$report_id}' AND a.client_id='{$clientId}' LIMIT 1");
-        $u_stmt->execute();
+            // get the list of all users that was uploaded
+            $u_stmt = $this->db->prepare("UPDATE grading_terminal_logs a SET 
+                a.teachers_name = (SELECT u.name FROM users u WHERE u.unique_id = a.teacher_ids AND u.user_type NOT IN ('student','parent') LIMIT 1)
+            WHERE a.report_id='{$report_id}' AND a.client_id='{$clientId}' LIMIT 1");
+            $u_stmt->execute();
+
+        } catch(PDOException $e) {}
+
     }
 
     /**
@@ -738,7 +770,7 @@ class Terminal_reports extends Myschoolgh {
             if(isset($student_id)) {
                 // confirm that the student id is valid
                 $student_check = $this->pushQuery("a.status", 
-                    "grading_terminal_scores a", "a.report_id='{$report_id}' AND a.student_item_id='{$student_id}' LIMIT 1");
+                    "grading_terminal_scores a", "a.report_id='{$report_id}' AND a.student_row_id='{$student_id}' LIMIT 1");
                 
                 // if empty then return false
                 if(empty($student_check)) {
@@ -747,7 +779,7 @@ class Terminal_reports extends Myschoolgh {
                 $student_info = $student_check[0];
                 $status = $student_info->status;
                 $students_count = 1;
-                $where_clause = " AND student_item_id='{$student_id}'";
+                $where_clause = " AND student_row_id='{$student_id}'";
             }
 
             // continue to process the user request
@@ -895,7 +927,7 @@ class Terminal_reports extends Myschoolgh {
                 // get the details of the terminal report
                 $check = $this->pushQuery("
                     a.status, a.student_name, a.report_id, a.course_name, a.class_name, a.course_code, a.course_id", 
-                    "grading_terminal_scores a", "a.student_item_id='{$student_id}' AND a.report_id='{$report_id}' LIMIT 1");
+                    "grading_terminal_scores a", "a.student_row_id='{$student_id}' AND a.report_id='{$report_id}' LIMIT 1");
             }
 
             // confirm if the result is not empty
@@ -975,7 +1007,7 @@ class Terminal_reports extends Myschoolgh {
             // update query
             $update_stmt = $this->db->prepare("UPDATE grading_terminal_scores SET 
                 scores = ?, total_score = ?, total_percentage = ?, date_modified = now(), average_score = ?, class_teacher_remarks = ?
-                WHERE academic_year = ? AND academic_term = ? AND student_item_id = ? AND report_id = ? AND client_id = ? LIMIT 1
+                WHERE academic_year = ? AND academic_term = ? AND student_row_id = ? AND report_id = ? AND client_id = ? LIMIT 1
             ");
             
             // loop through the list and insert the record
@@ -1036,7 +1068,7 @@ class Terminal_reports extends Myschoolgh {
         try {
 
             // global variable
-            global $accessObject;
+            global $accessObject, $academicSession;
 
             // set the student id if the user do not have the permission to view the report for the entire class
             if(isset($params->student_id)) {
@@ -1089,6 +1121,7 @@ class Terminal_reports extends Myschoolgh {
             // set the grading column
             $column_count = 0;
             $grading_column = "";
+            $next_term_fees = null;
 
             // loop through the grading columns
             foreach($grading as $key => $value) {
@@ -1117,8 +1150,8 @@ class Terminal_reports extends Myschoolgh {
                 // get the student information
                 $table .= "<tr>";
                 $table .= "<td><strong>".strtoupper($student["data"]["student_name"])."</strong></td>\n";
-                $table .= "<td><strong style=\"text-transform:uppercase\">YEAR: {$student["data"]["academic_year"]} / {$student["data"]["academic_term"]}</strong></td>\n";
-                $table .= "<td><strong>GRADE: {$student["data"]["class_name"]}</strong></td>\n";
+                $table .= "<td><strong style=\"text-transform:uppercase\">YEAR: {$student["data"]["academic_year"]} - {$student["data"]["academic_term"]} {$academicSession}</strong></td>\n";
+                $table .= "<td><strong>GRADE: ".strtoupper($student["data"]["class_name"])."</strong></td>\n";
                 $table .= "<td><strong>AGE: {$student["data"]["student_age"]}</strong></td>\n";
                 $table .= "</tr>";
                 $table .= "</table>\n";
@@ -1126,24 +1159,44 @@ class Terminal_reports extends Myschoolgh {
                 // set the address and the other information
                 $table .= "<table cellpadding=\"5\" width=\"100%\">";
                 $table .= "<tr>
-                    <td width=\"25%\" valign=\"top\">
-                        <div style=\"background-color:{$bg_color}; padding:5px; color:#fff; height:50px\"></div>
-                        <div style=\"padding:5px;\"><strong style=\"color:#6777ef\">CLASS AVERAGE: ".round($student["data"]["average_score"], 2)."</strong></div>
-                        <div style=\"padding:5px; text-transform:uppercase;\"><strong>SCHOOL RESUMES ON:<br><span style=\"color:#6777ef\">".date("jS M Y", strtotime($academics->next_term_starts))."</span></strong></div>
+                    <td valign=\"top\">
+                        <table style=\"border: 1px solid #dee2e6;\" width='100%'>
+                            <tr>
+                                <td style=\"border: 1px solid #dee2e6;\" align='center' width='110px'>
+                                    ".(!empty($this->iclient->client_logo) ? "<img width=\"100px\" src=\"{$client_logo}\">" : "")."
+                                </td>
+                                <td style=\"border: 1px solid #dee2e6;\" align='center' valign='top'>
+                                    <h2 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">
+                                        ".strtoupper($this->iclient->client_name)."
+                                    </h2>
+                                    <span style=\"padding:0px; margin:0px;\">
+                                        <strong>Address:</strong> {$this->iclient->client_address}
+                                    </span><br>
+                                    <span style=\"padding:0px; margin:0px;\">
+                                        <strong>Contact:</strong> {$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."
+                                    </span><br>
+                                    <span style=\"padding:0px; margin:0px;\">
+                                        <strong>Email:</strong> {$this->iclient->client_email}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
                     </td>";
-                $table .= "
-                    <td align=\"center\" width=\"45%\">
-                        ".(!empty($this->iclient->client_logo) ? "<img width=\"100px\" src=\"{$client_logo}\"><br>" : "")."
-                        <h2 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($this->iclient->client_name)."</h2>
-                        <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_address}</span><br>
-                        <span style=\"padding:0px; font-weight:bold; margin:0px;\">{$this->iclient->client_contact} ".(!$this->iclient->client_secondary_contact ? " / {$this->iclient->client_secondary_contact}" : null)."</span>
-                    </td>";
-                $table .= "<td style=\"padding:5px; color:#fff;\" align=\"center\" valign=\"top\" width=\"30%\">
-                    <div style=\"padding:10px; background-color:{$bg_color};\">
-                        <strong>MESSAGE</strong><br>
-                        Please visit www.myschoolgh.com/report/{$student["data"]["unique_id"]} for a
-                        graphical analysis of this report.
-                    </div></td>
+                $table .= "<td style=\"padding:5px;\" align=\"center\" valign=\"top\" width=\"30%\">
+                    <div style=\"padding:5px;\">
+                        <strong style=\"color:#6777ef\">CLASS AVERAGE: ".round($student["data"]["average_score"], 2)."</strong>
+                    </div>
+                    <div style=\"padding:5px; text-transform:uppercase;\">
+                        <strong>SCHOOL RESUMES ON:<br>
+                            <span style=\"color:#6777ef\">".date("jS M Y", strtotime($academics->next_term_starts))."</span>
+                        </strong>
+                    </div>
+
+                    <div style=\"padding:10px; color:#fff; background-color:{$bg_color};\">
+                        Please visit www.myschoolgh.com/report/{$student["data"]["unique_id"]} for a graphical analysis of this report.
+                    </div>
+
+                    </td>
                     </tr>";
                 $table .= "</table>\n";
                 $table .= "<table style=\"font-size:12px\" cellpadding=\"5\" width=\"100%\" style=\"border: 1px solid #dee2e6;\">";
@@ -1232,7 +1285,8 @@ class Terminal_reports extends Myschoolgh {
                 // append to the students list
                 $students[$key] = [
                     "report" => $table,
-                    "attendance" => $attendance_log
+                    "attendance" => $attendance_log,
+                    "term_fees" => $next_term_fees
                 ];
             }
 

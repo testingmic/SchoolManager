@@ -333,7 +333,7 @@ class Announcements extends Myschoolgh {
         }
 
         // clean the message
-        $params->_item_id = random_string("alnum", 16);
+        $params->_item_id = random_string("alnum", RANDOM_STRING);
         $params->message = custom_clean(htmlspecialchars_decode($params->message));
 
         // form the post modal information

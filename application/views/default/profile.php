@@ -8,17 +8,17 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $SITEURL, $defaultUser, $isStudent;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "My Profile";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // staff id
 $user_id = $session->userId;
@@ -39,6 +39,7 @@ if(!empty($user_id)) {
 
     // has the right to update the user permissions
     $updatePermission = $accessObject->hasAccess("update", "permissions");
+    $isSecurity = (bool) isset($_GET["security"]);
     
     // if no record was found
     if(empty($data["data"])) {
@@ -97,7 +98,7 @@ if(!empty($user_id)) {
                     </div>
                     <div class="card">
                     <div class="card-header">
-                        <h4>Personal Details</h4>
+                        <h4>PERSONAL INFORMATION</h4>
                     </div>
                     <div class="card-body pt-0 pb-0">
                         <div class="py-4">
@@ -153,7 +154,7 @@ if(!empty($user_id)) {
                         <div class="padding-20">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="home-tab2" data-toggle="tab" href="#about" role="tab"
+                                    <a class="nav-link '.(!$isSecurity ? "active": null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab"
                                     aria-selected="true">Summary Description</a>
                                 </li>
                                 <li class="nav-item">
@@ -161,12 +162,12 @@ if(!empty($user_id)) {
                                     aria-selected="false">Update Record</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="settings-tab2" data-toggle="tab" href="#settings" role="tab"
+                                    <a class="nav-link '.($isSecurity ? "active": null).'" id="settings-tab2" data-toggle="tab" href="#settings" role="tab"
                                     aria-selected="true">Security / Settings</a>
                                 </li>
                             </ul>
                             <div class="tab-content tab-bordered" id="myTab3Content">
-                                <div class="tab-pane fade show active" id="about" role="tabpanel" aria-labelledby="home-tab2">
+                                <div class="tab-pane fade '.(!$isSecurity ? "show active": null).'" id="about" role="tabpanel" aria-labelledby="home-tab2">
                                     '.($data->description ? "
                                         <div class='mb-4 border-bottom'>
                                             <div class='card-body p-2 pl-0'>
@@ -201,7 +202,7 @@ if(!empty($user_id)) {
                                 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab2">
                                     '.$user_form.'
                                 </div>
-                                <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab2">
+                                <div class="tab-pane fade '.($isSecurity ? "show active": null).'" id="settings" role="tabpanel" aria-labelledby="settings-tab2">
                                     <form autocomplete="Off" method="POST" class="ajaxform" id="ajaxform" action="'.$baseUrl.'api/auth/change_password">
                                         <div>
                                             <h5 class="border-bottom pb-2">Change Password</h5>
@@ -210,33 +211,33 @@ if(!empty($user_id)) {
                                             <div class="col-lg-12">
                                                 <div class="form-group">
                                                     <label>Username</label>
-                                                    <input type="text" disabled name="username" id="username" value="'.$data->username.'" class="form-control">
+                                                    <input type="text" title="Username cannot be changed." disabled name="username" id="username" value="'.$data->username.'" class="form-control">
                                                 </div>
                                             </div>
                                             '.(
                                                 !$updatePermission || $updatePermission ? '
                                                 <div class="col-lg-12">
                                                     <div class="form-group">
-                                                        <label>Current Password</label>
-                                                        <input type="password" name="password" id="password" class="form-control">
+                                                        <label>Current Password <span class="required">*</span></label>
+                                                        <input title="Enter the current password" autocomplete="Off" type="password" name="password" id="password" class="form-control">
                                                     </div>
                                                 </div>' : ''
                                             ).'
                                             <div class="col-lg-12">
                                                 <div class="form-group">
-                                                    <label>Password</label>
-                                                    <input type="password" name="password_1" id="password_1" class="form-control">
+                                                    <label>Password <span class="required">*</span></label>
+                                                    <input title="Set the new password." autocomplete="Off" type="password" name="password_1" id="password_1" class="form-control">
                                                 </div>
                                             </div>
                                             <div class="col-lg-12">
                                                 <div class="form-group">
-                                                    <label>Confirm Password</label>
-                                                    <input type="password" name="password_2" id="password_2" class="form-control">
+                                                    <label>Confirm Password <span class="required">*</span></label>
+                                                    <input title="Confirm the new password." autocomplete="Off" type="password" name="password_2" id="password_2" class="form-control">
                                                 </div>
                                             </div>
                                             <div class="col-lg-12">
                                                 <input type="hidden" name="user_id" id="user_id" value="'.$user_id.'">
-                                                <button class="btn btn-outline-success" type="submit">Change Password</button>
+                                                <button class="btn btn-outline-success" type="submit"><i class="fa fa-lock"></i> Change Password</button>
                                             </div>
                                         </div>
                                     </form>

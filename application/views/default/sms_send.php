@@ -8,16 +8,16 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $myschoolgh, $defaultUser, $accessObject;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Bulk SMS";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // not found
 if(!$accessObject->hasAccess("send", "communication")) {
@@ -42,7 +42,7 @@ $templates_array = $myClass->pushQuery("name, id, item_id, type, message", "smse
 $class_array_list = $myClass->pushQuery("name, id, item_id", "classes", "client_id='{$params->clientId}' AND status='1'");
         
 // get the list of all other users
-$other_users_list = $myClass->pushQuery("name, user_type, unique_id, item_id, phone_number, class_id", "users", "client_id='{$params->clientId}' AND user_status='Active' AND status='1' ORDER BY name LIMIT {$myClass->global_limit}");
+$other_users_list = $myClass->pushQuery("name, user_type, unique_id, item_id, phone_number, class_id", "users", "client_id='{$params->clientId}' AND user_status IN ({$myClass->default_allowed_status_users_list}) AND status='1' ORDER BY name LIMIT {$myClass->global_limit}");
 
 // get the list of only students
 $users_array_list = [];
@@ -131,7 +131,7 @@ $response->html = '
                                         <select data-selectors="'.$route.'" data-route="'.$route.'" name="class_id" class="form-control selectpicker" data-width="100%">
                                             <option value="">Select</option>';
                                             foreach($class_array_list as $class) {
-                                                $response->html .= "<option data-class_id='{$class->item_id}' value='{$class->id}'>{$class->name}</option>";
+                                                $response->html .= "<option data-class_id='{$class->item_id}' value='{$class->id}'>".strtoupper($class->name)."</option>";
                                             }
                                     $response->html .= '</select>
                                     </div>
@@ -200,7 +200,7 @@ $response->html = '
                             </div>
                             <div class="form-group mb-1">
                                 <label>Message <span class="required">*</span></label>
-                                <textarea data-route="'.$route.'" maxlength="480" name="message" style="height:200px" class="form-control"></textarea>
+                                <textarea data-route="'.$route.'" maxlength="480" id="message_textarea" name="message" style="height:200px" class="form-control"></textarea>
                                 <div class="text-right alert-success p-1"> 
                                     <span class="remaining_count p-1">'.$myClass->sms_text_count.' characters remaining</span>
                                     <span id="messages">0 message</span>
@@ -233,12 +233,12 @@ $response->html = '
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mt-3">
-                                <div class="col-md-6" align="left">
+                            <div class="d-flex justify-content-between">
+                                <div align="left">
                                     <button onclick="return cancel_sending_form()" class="btn btn-dark" type="button"><i class="fa fa-ban"></i> Cancel</button>
                                 </div>
-                                <input type="hidden" data-route="'.$route.'" readonly name="type" value="'.$route.'">
-                                <div class="col-md-6" align="right">
+                                <div align="right">
+                                    <input type="hidden" data-route="'.$route.'" readonly name="type" value="'.$route.'">
                                     <button class="btn btn-outline-success" type="submit"><i class="fa fa-mail-bulk"></i> Send Message</button>
                                 </div>
                             </div>

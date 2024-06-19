@@ -5,20 +5,24 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $session;
+global $myClass, $session, $usersClass;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Live Chat";
-$response->title = "{$pageTitle} : {$appName}";
-$response->scripts = ["assets/js/chat.js"];
+$response->title = $pageTitle;
+$response->scripts = [
+  // "assets/js/crypt/crypto.js", 
+  // "assets/js/crypt/crypto.format.js", 
+  "assets/js/chat.js"
+];
 
 $params = (object) [
     "clientId" => $clientId
@@ -26,6 +30,7 @@ $params = (object) [
 
 $chatObj = load_class("chats", "controllers");
 $recentChat = $chatObj->recent($session->userId);
+$usersClass->update_onlineStatus($session->userId);
 
 // get users list
 $users_list = '<li id="temp_user_list" class="clearfix"><div>No user to display for now.</div></li>';

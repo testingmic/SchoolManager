@@ -2,7 +2,7 @@
 // set the item id
 $receipt_id = $SITEURL[1] ?? null;
 
-global $defaultUser;
+global $defaultUser, $isSupport;
 
 // base url
 $receipt = null;
@@ -22,14 +22,14 @@ if($session->clientId) {
 
     // set the parameters
     $item_param = (object) [
-        "clientId" => $clientId,
-        "item_id" => $receipt_id,
+        "clientId" => !$isSupport ? $clientId : null,
         "userData" => $defaultUser,
         "date_range" => $date_range,
         "client_data" => $defaultUser->client,
         "student_id" => $getObject->student_id ?? null,
         "category_id" => $getObject->category_id ?? null,
         "payment_id" => $receipt_id ?? null,
+        "limit" => 20
     ];
 
     // create a new object

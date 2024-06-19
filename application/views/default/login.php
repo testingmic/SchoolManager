@@ -1,6 +1,7 @@
 <?php
 // set some global variables
-$appName = config_item("site_name");
+global $myClass;
+$appName = $myClass->appName;
 $baseUrl = config_item("base_url");
 $user_current_url = current_url();
 
@@ -16,6 +17,7 @@ if(loggedIn()) {
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
   <title>Login - <?= $appName ?></title>
+  <link id="mobile" rel="manifest" href="<?= $baseUrl ?>manifest.json" />
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-social/bootstrap-social.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
@@ -31,6 +33,7 @@ if(loggedIn()) {
     background-size: cover;
   }
   </style>
+  <?= $myClass->google_analytics_code ?>
 </head>
 <body class="bg">
   <div class="loader"></div>
@@ -52,10 +55,10 @@ if(loggedIn()) {
               </div>
               <div class="card-body">
                   <?= form_loader(); ?>
-                <form method="POST" action="<?= $baseUrl ?>api/auth" id="auth-form" class="needs-validation" novalidate="">
+                <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth" id="auth-form" class="needs-validation" novalidate="">
                   <div class="form-group">
                     <label for="username">Username</label>
-                    <input id="username" type="text" class="form-control" name="username" tabindex="1" required autofocus>
+                    <input id="username" type="text" autocomplete="Off" class="form-control" name="username" tabindex="1" required autofocus>
                     <div class="invalid-feedback">
                       Please fill in your username
                     </div>
@@ -69,7 +72,7 @@ if(loggedIn()) {
                         </a>
                       </div>
                     </div>
-                    <input id="password" type="password" class="form-control" name="password" tabindex="2" required>
+                    <input id="password" type="password" autocomplete="Off" class="form-control" name="password" tabindex="2" required>
                     <div class="invalid-feedback">
                       please fill in your password
                     </div>
@@ -94,12 +97,25 @@ if(loggedIn()) {
   </div>
   <div class="app-foottag">
     <div class="d-flex justify-content-between">
-        <div>&copy; Copyright <strong><a href="<?= config_item("site_url") ?>"><?= config_item("site_name") ?></a></strong> &bull; All Rights Reserved</div>
+        <div>&copy; Copyright <strong><a href="<?= $myClass->baseUrl ?>"><?= $myClass->appName ?></a></strong> &bull; All Rights Reserved</div>
         <div>By: <strong><?= config_item("developer") ?></strong></div>
     </div>
   </div>
   <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
   <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
   <script src="<?= $baseUrl ?>assets/js/auth.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('<?= $baseUrl ?>sw.js')
+          .then(registration => {
+            console.log(`Service Worker registered! Scope: ${registration.scope}`);
+          })
+          .catch(err => {
+            console.log(`Service Worker registration failed: ${err}`);
+          });
+      });
+    }
+  </script>
 </body>
 </html>

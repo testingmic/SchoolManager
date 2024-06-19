@@ -5,20 +5,20 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser;
+global $myClass, $SITEURL, $defaultUser, $isAdmin;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Guardian Information";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 $response->scripts = [
     "assets/js/index.js"
@@ -51,6 +51,9 @@ if(!empty($user_id)) {
         // set the first key
         $data = $data[0];
 
+        // set the page title
+        $response->title = $data->name;
+
         // guardian information
         $user_form = load_class("forms", "controllers")->guardian_form($clientId, $baseUrl, $data);
 
@@ -65,6 +68,16 @@ if(!empty($user_id)) {
             $wards_list .= $usersClass->guardian_wardlist($data->wards_list, $data->user_id, $hasUpdate);
         }
         $wards_list .= "</div>";
+
+        // change password url
+        $change_password_url = null;
+        if($isAdmin || ($defaultUser->user_id == $user_id)) {
+            if($isAdmin && ($defaultUser->user_id !== $user_id)) {
+                $change_password_url = "password_manager?lookup={$data->unique_id}";
+            } else {
+                $change_password_url = "profile?security";
+            }
+        }
         
         // append the html content
         $response->html = '
@@ -97,57 +110,101 @@ if(!empty($user_id)) {
                 </div>
                 </div>
                 <div class="card">
-                <div class="card-header">
-                    <h4>Personal Details</h4>
-                </div>
-                <div class="card-body pt-0 pb-0">
-                    <div class="py-4">
-                        <p class="clearfix">
-                            <span class="float-left">Occupation</span>
-                            <span class="float-right text-muted">'.$data->occupation.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Employer</span>
-                            <span class="float-right text-muted">'.$data->employer.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Date of Birth</span>
-                            <span class="float-right text-muted">'.$data->date_of_birth.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Blood Group</span>
-                            <span class="float-right text-muted">'.$data->blood_group.'</span>
-                        </p>                        
-                        <p class="clearfix">
-                            <span class="float-left">Gender</span>
-                            <span class="float-right text-muted">'.$data->gender.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Primary Contact</span>
-                            <span class="float-right text-muted">'.$data->phone_number.'</span>
-                        </p>
-                        '.($data->phone_number_2 ? 
-                            '<p class="clearfix">
-                                <span class="float-left">Secondary Contact</span>
-                                <span class="float-right text-muted">'.$data->phone_number_2.'</span>
+                    <div class="card-header">
+                        <h4>PERSONAL INFORMATION</h4>
+                    </div>
+                    <div class="card-body pt-0 pb-0">
+                        <div class="py-4">
+                            <p class="clearfix">
+                                <span class="float-left">Occupation</span>
+                                <span class="float-right text-muted">'.$data->occupation.'</span>
                             </p>
-                            ' : ''
-                        ).'
-                        <p class="clearfix">
-                            <span class="float-left">E-Mail</span>
-                            <span class="float-right text-muted">'.$data->email.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Residence</span>
-                            <span class="float-right text-muted">'.$data->residence.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Country</span>
-                            <span class="float-right text-muted">'.$data->country_name.'</span>
-                        </p>
+                            '.(
+                                !empty($data->employer) ? '
+                                <p class="clearfix">
+                                    <span class="float-left">Employer</span>
+                                    <span class="float-right text-muted">'.$data->employer.'</span>
+                                </p>' : null
+                            ).'
+                            '.(
+                                !empty($data->employer) ? '
+                                <p class="clearfix">
+                                    <span class="float-left">Date of Birth</span>
+                                    <span class="float-right text-muted">'.$data->date_of_birth.'</span>
+                                </p>' : null
+                            ).'
+                            '.(
+                                !empty($data->blood_group_name) ? '
+                                <p class="clearfix">
+                                    <span class="float-left">Blood Group</span>
+                                    <span class="float-right text-muted">'.$data->blood_group_name.'</span>
+                                </p>' : null
+                            ).'
+                            <p class="clearfix">
+                                <span class="float-left">Gender</span>
+                                <span class="float-right text-muted">'.$data->gender.'</span>
+                            </p>
+                            <p class="clearfix">
+                                <span class="float-left">Primary Contact</span>
+                                <span class="float-right text-muted">'.$data->phone_number.'</span>
+                            </p>
+                            '.($data->phone_number_2 ? 
+                                '<p class="clearfix">
+                                    <span class="float-left">Secondary Contact</span>
+                                    <span class="float-right text-muted">'.$data->phone_number_2.'</span>
+                                </p>' : null
+                            ).'
+                            '.(
+                                !empty($data->email) ? '
+                                <p class="clearfix">
+                                    <span class="float-left">E-Mail</span>
+                                    <span class="float-right text-muted">'.$data->email.'</span>
+                                </p>' : null
+                            ).'
+                            '.(
+                                !empty($data->residence) ? '
+                                <p class="clearfix">
+                                    <span class="float-left">Residence</span>
+                                    <span class="float-right text-muted">'.$data->residence.'</span>
+                                </p>' : null
+                            ).'
+                            '.(
+                                !empty($data->country_name) ? '
+                                <p class="clearfix">
+                                    <span class="float-left">Country</span>
+                                    <span class="float-right text-muted">'.$data->country_name.'</span>
+                                </p>' : null
+                            ).'
+                        </div>
                     </div>
                 </div>
-                </div>
+                '.($isAdmin || $user_id == $defaultUser->user_id ?         
+                    '<div class="card">
+                        <div class="card-header">
+                            <h4>LOGIN INFORMATION</h4>
+                        </div>
+                        <div class="card-body pt-0 pb-0">
+                            <div class="py-4">
+                                <p class="clearfix">
+                                    <span class="float-left">Username</span>
+                                    <span class="float-right text-muted">'.$data->username.'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Password</span>
+                                    <span class="float-right text-muted">
+                                        <button onclick="return load(\''.$change_password_url.'\')" class="btn btn-outline-primary btn-sm">
+                                            <i class="fa fa-lock"></i> Security Update
+                                        </button>
+                                    </span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Last Login</span>
+                                    <span class="float-right text-muted">'.$data->last_login.'</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>' : null
+                ).'
             </div>
             <div class="col-12 col-md-12 col-lg-8">
                 <div class="card">
@@ -155,7 +212,7 @@ if(!empty($user_id)) {
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
                         <a class="nav-link '.(!$updateItem ? "active" : null).'" id="home-tab2" data-toggle="tab" href="#about" role="tab"
-                        aria-selected="true">Other Information</a>
+                        aria-selected="true">Ward Information</a>
                     </li>';
 
                     if($hasUpdate) {

@@ -5,20 +5,20 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultUser;
+global $myClass, $defaultUser, $accessObject;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $disabled_inputs = [];
 $pageTitle = "View Timetable";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 $response->scripts = [];
 $response->timer = 0;
 
@@ -34,6 +34,8 @@ $params = (object)["clientId" => $clientId, "client_data" => $defaultUser->clien
 // if a student is logged in then show timetables for the class
 if(in_array($defaultUser->user_type, ["student", "parent"])) {
     $params->class_id = $session->student_class_id ? $session->student_class_id : $defaultUser->class_guid;
+} elseif($defaultUser->user_type === "teacher") {
+    $params->class_id = $defaultUser->class_ids;
 }
 
 // create a new object
@@ -64,7 +66,7 @@ if(!empty($timetable_list)) {
         $timetable_found = true;
         
         // load the class Subjects List
-        $params->class_id = $data->class_id;
+        $params->class_id = $data->class_id ?? null;
 
         // load the allocations
         $params->limit = 1;
@@ -72,6 +74,8 @@ if(!empty($timetable_list)) {
         
         // draw the timetable to show
         $table = $timetableClass->draw($params);
+
+        // print_r($table);exit;
 
     } else {
         // once again set the $timetable_id == null even if a session has been set 
@@ -98,13 +102,17 @@ $response->html = '
                         <div class="row">
                             <div class="col-lg-12 text-center">
                                 <div class="form-group">
-                                    <label>Timetable</label>
+                                    <label><strong>Select Class Timetable</strong></label>
                                     <select data-width="100%" class="form-control selectpicker" data-url="timetable-view" id="change_TimetableViewId" name="change_TimetableViewId">';
                                     if(empty($timetable_id)) {
                                         $response->html .= "<option value='auto_select'>Select Timetable</option>";
                                     }
-                                    foreach($timetable_list as $key => $value) {
-                                        $response->html .= "<option ".($timetable_id === $value->item_id ? "selected" : "")." value='{$value->item_id}'>{$value->name} - {$value->class_name}</option>";
+                                    // if the timetable record is not empty
+                                    if(is_array($timetable_list)) {
+                                        // loop through the timetable record
+                                        foreach($timetable_list as $key => $value) {
+                                            $response->html .= "<option ".($timetable_id === $value->item_id ? "selected" : "")." value='{$value->item_id}'>{$value->name} - {$value->class_name}</option>";
+                                        }
                                     }
                                     $response->html .= '
                                     </select>
@@ -119,9 +127,9 @@ $response->html = '
                                             </div>
                                         </div>
                                         <div class="table-responsive" id="timetable_content">
-                                            '.($table["table"] ?? "<div class='text-center alert alert-warning'>{$table}</div>").'
+                                            '.(isset($table["table"]) ? $table["table"] : "<div class='text-center alert alert-warning'>{$table}</div>").'
                                         </div>
-                                        '.(isset($table["table"]) ? "<div class='text-center mt-2'><a class='btn btn-outline-success' target='_blank' href='{$baseUrl}download/timetable?tb_id={$timetable_id}&dw=true'>
+                                        '.(isset($table["table"]) && !empty($table["result"]) ? "<div class='text-center mt-2'><a class='btn btn-outline-success' target='_blank' href='{$baseUrl}download/timetable?tb_id={$timetable_id}&dw=true'>
                                             <i class='fa fa-download'></i> Download Timetable</a></div>" : "").'
                                     </div>
                                 </div>

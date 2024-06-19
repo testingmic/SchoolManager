@@ -7,7 +7,7 @@
  * @package     Helpers
  * @subpackage  Time Helper Functions
  * @category    Core Functions
- * @author      Analitica Innovare Dev Team
+ * @author      Emmallex Technologies Dev. Team
  */
 
 function time_diff($timestamp, $current_time = false) {
@@ -59,13 +59,16 @@ function time_diff($timestamp, $current_time = false) {
  */
 function raw_time_diff($timestamp) {
 	
-	$current_time = time();
-    $timestamp = !preg_match("/^[0-9]+$/", $timestamp) ? strtotime($timestamp) : $timestamp;
+	$current = date("Y-m-d H:i:s");
+    $start_date = new DateTime($timestamp);
+    $since_start = $start_date->diff(new DateTime($current));
+    
+    // minutes count
+    $minutes = $since_start->days * 24 * 60;
+    $minutes += $since_start->h * 60;
+    $minutes += $since_start->i;
 
-    $difference = ($current_time - $timestamp);
-
-    return round(($difference / (60*60)), 2);
-	
+    return $minutes;	
 }
 
  function secondsToTime($inputSeconds, $shortText=true) {

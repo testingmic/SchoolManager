@@ -2,8 +2,10 @@
 
 class Arrears extends Myschoolgh {
 
-	public function __construct(stdClass $params = null) {
-		parent::__construct();
+    private $iclient = [];
+
+    public function __construct(stdClass $params = null) {
+        parent::__construct();
 
         // get the client data
         $client_data = $params->client_data ?? [];
@@ -12,7 +14,7 @@ class Arrears extends Myschoolgh {
         // run this query
         $this->academic_term = $client_data->client_preferences->academics->academic_term ?? null;
         $this->academic_year = $client_data->client_preferences->academics->academic_year ?? null;
-	}
+    }
     
     /**
      * List the fees arrears
@@ -26,6 +28,10 @@ class Arrears extends Myschoolgh {
 
         try {
 
+            // global variable
+            global $accessObject;
+
+            // init parameters
             $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
             $populate = false;
 
@@ -37,20 +43,33 @@ class Arrears extends Myschoolgh {
             $academic_term = $params->academics->academic_term ?? $params->academic_term;
             $academic_year = $params->academics->academic_year ?? $params->academic_year;
 
+            $user_status = $params->user_status ?? null;
+
             $filters = 1;
             $filters .= !empty($params->student_id) ? " AND a.student_id IN {$this->inList($params->student_id)}" : "";
             $filters .= !empty($params->clientId) ? " AND a.client_id IN {$this->inList($params->clientId)}" : "";
             $filters .= !empty($params->class_id) ? " AND c.id IN {$this->inList($params->class_id)}" : "";
+            $filters .= !empty($user_status) ? " AND u.user_status IN {$this->inList($user_status)}" : null;
         
             // prepare and execute the statement
             $stmt = $this->db->prepare("SELECT 
                     a.student_id, u.id as _student_id, u.name AS student_name, a.arrears_details, a.arrears_category, 
-                    a.fees_category_log, a.arrears_total, c.id AS class_id, c.name AS class_name,
+                    a.fees_category_log, a.arrears_total, c.id AS class_id, c.name AS class_name, u.user_status,
                     (
                         SELECT CONCAT(
                             b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.guardian_id,'NULL')
                         ) FROM users b WHERE b.item_id = a.student_id LIMIT 1
                     ) AS student_info,
+                    (
+                        SELECT sum(b.amount_due) FROM fees_payments b 
+                        WHERE b.student_id = a.student_id AND b.academic_term = '{$academic_term}'
+                            AND b.academic_year = '{$academic_year}' AND b.exempted = '0'
+                    ) AS term_bill,
+                    (
+                        SELECT sum(b.amount_paid) FROM fees_payments b 
+                        WHERE b.student_id = a.student_id AND b.academic_term = '{$academic_term}'
+                            AND b.academic_year = '{$academic_year}' AND b.exempted = '0'
+                    ) AS amount_paid,
                     (
                         SELECT sum(b.balance) FROM fees_payments b 
                         WHERE b.student_id = a.student_id AND b.academic_term = '{$academic_term}'
@@ -86,6 +105,10 @@ class Arrears extends Myschoolgh {
             // format the data before submission
             if($populate && !empty($data)) {
 
+                // modify arrears permission
+                $canModifyArrears = $accessObject->hasAccess("modify_arrears", "fees");
+
+                // get the arrears details
                 $arrears_details = $data[0]->arrears_details;
                 $fees_category_log = $data[0]->fees_category_log;
                 
@@ -95,46 +118,60 @@ class Arrears extends Myschoolgh {
                 $student_fees_arrears .= "<table class='table table-md'>";
                 $students_fees_category_array = filter_fees_category($fees_category_log);
 
-                // loop through the arrears details
-                foreach($arrears_details as $year => $categories) {
-                    // clean the year term
-                    $split = explode("...", $year);
-                    
-                    // set the academic year header
-                    $student_fees_arrears .= "<thead>";
+                // set a value
+                if(empty($arrears_details)) {
+                    $student_fees_arrears .= '<tr><td colspan="3" align="center">No record was found for this student.</td></tr>';
+                } else {
 
-                    $student_fees_arrears .= "<tr class='font-20'><td><strong>Academic Year: </strong>".str_ireplace("_", "/", $split[0])."</td>";
-                    $student_fees_arrears .= "<td><strong>Academic Term: </strong> {$split[1]}</td></tr>";
-                    $student_fees_arrears .= "<tr><th>DESCRIPTION</th><th>BALANCE</th></tr>";
-                    $student_fees_arrears .= "</thead>";
-                    $student_fees_arrears .= "<tbody>";
-                    $total = 0;
-                    // loop through the items for each academic year
-                    foreach($categories as $cat => $value) {
-                        // add the sum
-                        $total += $value;
-                        $category_name = $students_fees_category_array[$cat]["name"] ?? null;
-                        // display the category name and the value
-                        $student_fees_arrears .= "<tr><td>{$category_name}</td><td>{$value}</td></tr>";
+                    // loop through the arrears details
+                    foreach($arrears_details as $year => $categories) {
+                        // clean the year term
+                        $split = explode("...", $year);
+                        
+                        // set the academic year header
+                        $student_fees_arrears .= "<thead>";
+
+                        $student_fees_arrears .= "<tr class='font-20'><td><strong>Academic Year: </strong>".str_ireplace("_", "/", $split[0])."</td>";
+                        $student_fees_arrears .= "<td><strong>Academic Term: </strong> {$split[1]}</td></tr>";
+                        $student_fees_arrears .= "<tr><th>DESCRIPTION</th><th>BALANCE</th></tr>";
+                        $student_fees_arrears .= "</thead>";
+                        $student_fees_arrears .= "<tbody>";
+                        $total = 0;
+                        // loop through the items for each academic year
+                        foreach($categories as $cat => $value) {
+                            // add the sum
+                            $total += $value;
+                            $category_name = $students_fees_category_array[$cat]["name"] ?? null;
+                            // display the category name and the value
+                            $student_fees_arrears .= "<tr><td>{$category_name}</td><td>{$value}</td></tr>";
+                        }
+                        $student_fees_arrears .= "
+                            <tr><td></td>
+                                <td class='font-20 font-bold'>
+                                    <div class='mb-2'>".number_format($total, 2)."</div>
+                                    <button onclick='return load(\"arrears/{$data[0]->student_id}\")' class='btn text-uppercase btn-sm btn-outline-success'><i class='fa fa-money-bill-alt'></i> Pay Arrears</button>
+                                    ".($canModifyArrears ? "
+                                        <button onclick='return delete_arrears(\"{$data[0]->student_id}\",\"{$year}\")' class='btn btn-outline-danger btn-sm'><i class='fa fa-trash'></i> Delete</button>" : null
+                                    )."
+                                </td>
+                            </tr>";
+                        $student_fees_arrears .= "</tbody>";
                     }
-                    $student_fees_arrears .= "
-                        <tr><td></td>
-                            <td class='font-20 font-bold'>
-                                <div class='mb-2'>".number_format($total, 2)."</div>
-                                <button onclick='return load(\"arrears/{$data[0]->student_id}\")' class='btn text-uppercase btn-sm btn-outline-success'><i class='fa fa-money-bill-alt'></i> Pay Arrears</button>
-                            </td>
-                        </tr>";
-                    $student_fees_arrears .= "</tbody>";
+
                 }
+
                 $student_fees_arrears .= "</table>";
                 $student_fees_arrears .= "</td>";
                 $student_fees_arrears .= "</tr>";
 
-                $data = $student_fees_arrears;
+                $data = [
+                    "arrears_table" => $student_fees_arrears,
+                    "change_history" => $this->pushQuery("*", "users_arrears_history", "student_id='{$params->student_id}' LIMIT 100")
+                ];
 
             }
             
-			return [
+            return [
                 "code" => 200,
                 "data" => $data
             ];
@@ -154,14 +191,19 @@ class Arrears extends Myschoolgh {
      * 
      * @return Array
      */
-	public function make_payment(stdClass $params) {
+    public function make_payment(stdClass $params) {
 
         try {
 
-            global $defaultUser, $clientPrefs;
+            global $clientPrefs;
             
             // get the preference of the client
             $preference = $clientPrefs->labels;
+
+            // readonly mode session
+            if(!empty($this->session->is_only_readable_app)) {
+                return $this->readonly_mode;
+            }
             
             // begin transaction
             $this->db->beginTransaction();
@@ -251,7 +293,7 @@ class Arrears extends Myschoolgh {
             }
 
             // generate the payment id
-            $uniqueId = $payment_id = random_string('alnum', 15);
+            $uniqueId = $payment_id = random_string("alnum", RANDOM_STRING);
 
             /** Run this section if the record is not empty */
             if(!empty($amount_paid)) {
@@ -306,6 +348,9 @@ class Arrears extends Myschoolgh {
             // if the payment method is momo or card payment
             $append_sql .= ", paidin_by='".($params->email_address ?? null)."', paidin_contact='".($params->contact_number ?? null)."'";
 
+            // append the $this->session->e_payment_transaction_id
+            $append_sql .= !empty($this->session->e_payment_transaction_id) ? ", reference_id='{$this->session->e_payment_transaction_id}'" : null;
+            
             // get the student name
             $student = $this->pushQuery("name AS student_name", "users", "item_id = '{$params->student_id}' AND user_type='student' AND client_id = '{$params->clientId}' LIMIT 1");
             $student_name = !empty($student) ? $student[0]->student_name : "Unknown";
@@ -346,8 +391,8 @@ class Arrears extends Myschoolgh {
             $this->userLogs("arrears_payment", $params->student_id, null, "{$params->userData->name} received an amount of <strong>{$params->amount}</strong> as Payment for <strong>Fees Arrears</strong> from <strong>{$arrearsRecord->student_name}</strong>. Outstanding Arrears is <strong>{$arrears_total}</strong>", $params->userId);
             
             // log the data in the statement account
-            $check_account = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1' LIMIT 1");
-
+            $check_account = $this->default_payment_account($params->clientId);
+            
             // if the account is not empty
             if(!empty($check_account)) {
 
@@ -373,10 +418,20 @@ class Arrears extends Myschoolgh {
 
             // Log the transaction information
             if(isset($params->transaction_id) && isset($params->reference_id)) {
-                // Insert the transaction
-                $this->db->query("INSERT INTO transaction_logs SET client_id = '{$params->clientId}',
-                    transaction_id = '{$params->transaction_id}', endpoint = 'arrears', reference_id = '{$params->reference_id}', amount='{$params->amount}'
-                ");
+                // update the status of the logged data
+                if(!empty($this->session->e_payment_transaction_id)) {
+                    $this->db->query("UPDATE transaction_logs SET state='Processed', 
+                        payment_data='".json_encode($params->paystack_data["data"])."' WHERE
+                        transaction_id = '{$this->session->e_payment_transaction_id}' LIMIT 1
+                    ");
+                } else {
+                    // Insert the transaction
+                    $this->db->query("INSERT INTO transaction_logs SET client_id = '{$params->clientId}',
+                        transaction_id = '{$params->transaction_id}', endpoint = 'arrears', 
+                        reference_id = '{$params->reference_id}', amount='{$params->amount}', 
+                        payment_data='".json_encode($params->paystack_data["data"])."', created_by = '{$params->userId}'
+                    ");
+                }
             }
 
             // send the receipt via sms
@@ -386,7 +441,7 @@ class Arrears extends Myschoolgh {
                 if(strlen($params->contact_number) > 9 && preg_match("/^[0-9+]+$/", $params->contact_number)) {
                     
                     // append the message
-                    $message = "Hello {$student_name},\nFees Arrears Payment was successfully processed.\nAmount Paid: {$currency} {$params->amount}\nBalance: {$currency} {$arrears_total}\n";
+                    $message = "Hello {$student_name},\nFees Arrears Payment of {$currency} {$params->amount} was successfully processed.\nBalance Is: {$currency} {$arrears_total}\n";
                     
                     // calculate the message text count
                     $chars = strlen($message);
@@ -446,6 +501,9 @@ class Arrears extends Myschoolgh {
             // commit the statements
             $this->db->commit();
 
+            // unset the sessions
+            $this->session->remove(["e_payment_transaction_id"]);
+
             // return the success message
             return [
                 "data" => "Fees Arrears Payment was successfully recorded.",
@@ -470,6 +528,14 @@ class Arrears extends Myschoolgh {
      * @return Array
      */
     public function add(stdClass $params) {
+
+        // global variable
+        global $accessObject, $noticeClass;
+
+        // readonly mode session
+        if(!empty($this->session->is_only_readable_app)) {
+            return $this->readonly_mode;
+        }
 
         // assign the values
         $student_id = $params->data["student_id"] ?? null;
@@ -500,7 +566,6 @@ class Arrears extends Myschoolgh {
         }
 
         // load the student fees arrear list
-        // get the student arrears
         $student_fees_arrears = "";
         $arrears_array = $this->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", "users_arrears", "student_id='{$student_id}' AND client_id='{$params->clientId}' LIMIT 1");
         $fees_category = $this->pushQuery("id, name, amount, code, created_by", "fees_category", "id='{$category_id}' AND client_id='{$params->clientId}' LIMIT 1");
@@ -524,9 +589,15 @@ class Arrears extends Myschoolgh {
             // category found check
             $categories_id = array_column($fees_category_log, "id");
 
+            // push it into the array if not exist
             if(!in_array($fees_category_id->id, $categories_id)) {
                 // append the category
                 array_push($fees_category_log, $fees_category_id);
+            } else {
+                // if the user does not have the permission to modify the arrears value
+                if(!$accessObject->hasAccess("modify_arrears", "fees")) {
+                    return ["code" => 203, "data" => $this->permission_denied];
+                }
             }
             
             // existing arrears
@@ -541,12 +612,37 @@ class Arrears extends Myschoolgh {
             // arrears total
             $new_arrears_total = array_sum($arrears_category);
 
+            // log the user activity
+            if($arrears->arrears_total !== $new_arrears_total) {
+                // insert a log of the change made to the arrears totals
+                $this->db->query("INSERT INTO users_arrears_history SET 
+                    client_id = '{$params->clientId}', student_id='{$student_id}',
+                    description = '<strong>{$params->userData->name}</strong> changed the amount of {$fees_category_id->name} from <strong>{$arrears->arrears_total}</strong> to <strong>{$amount}</strong>.'
+                ");
+
+                // notify the student of this new change
+                $item_param = (object) [
+                    '_item_id' => random_string("alnum", RANDOM_STRING),
+                    'user_id' => $student_id,
+                    'subject' => "Outstanding Arrears",
+                    'message' => "Your outstanding arrears payable have been changed from <strong>{$arrears->arrears_total}</strong> to <strong>{$new_arrears_total}</strong>",
+                    'content' => "Your outstanding arrears payable have been changed from <strong>{$arrears->arrears_total}</strong> to <strong>{$new_arrears_total}</strong>. Please visit the accounts department if you need any clarrification concerning this new update OR visit <a href=\"{{APPURL}}fees_bill\">Click Here</a> for a summary detail of your current Bill.",
+                    'notice_type' => 12,
+                    'userId' => $params->userId,
+                    'clientId' => $params->clientId,
+                    'initiated_by' => 'system'
+                ];
+
+                // add a new notification
+                $noticeClass->add($item_param);
+            }
+            
             // update the fees arrears log
             $update_query = $this->db->prepare("UPDATE users_arrears SET arrears_details = ?, arrears_category = ?, arrears_total = ?, last_updated = now(), fees_category_log = ? WHERE student_id = ? AND client_id = ? LIMIT 1");
             $update_query->execute([json_encode($arrears_details), json_encode($arrears_category), $new_arrears_total, json_encode($fees_category_log), $student_id, $params->clientId]);
 
             // insert the user activity
-			$this->userLogs("fees_arrears", $student_id, null, "{$params->userData->name} - updated a new fees arrears record of the student.", $params->userId, null);
+            $this->userLogs("fees_arrears", $student_id, null, "{$params->userData->name} - updated a new fees arrears record of the student.", $params->userId, null);
 
             return [
                 "code" => 200,
@@ -568,8 +664,30 @@ class Arrears extends Myschoolgh {
             $insert_query = $this->db->prepare("INSERT INTO users_arrears SET client_id = ?, student_id = ?, arrears_details = ?, arrears_category = ?, arrears_total = ?, date_created = now(), last_updated = now(), fees_category_log = ?");
             $insert_query->execute([$params->clientId, $student_id, json_encode($arrears_details), json_encode($arrears_category), $new_arrears_total, json_encode([$fees_category_id])]);
 
+            // insert a log of the change made to the arrears totals
+            $this->db->query("INSERT INTO users_arrears_history SET 
+                client_id = '{$params->clientId}', student_id='{$student_id}',
+                description = '<strong>{$params->userData->name}</strong> logged an amount of <strong>{$amount}</strong> as arrears for <strong>{$fees_category_id->name}</strong> in <strong>{$academic_key}</strong>.'
+            ");
+
+            // notify the student of this new change
+            $item_param = (object) [
+                '_item_id' => random_string("alnum", RANDOM_STRING),
+                'user_id' => $student_id,
+                'subject' => "Outstanding Arrears",
+                'message' => "Your outstanding arrears payable for <strong>{$fees_category_id->name}</strong> have been set as <strong>{$amount}</strong>",
+                'content' => "Your outstanding arrears payable for <strong>{$fees_category_id->name}</strong> have been set as <strong>{$amount}</strong>. Kindly visit the accounts department if you think this new update is not the true reflection of your outstanding arrears OR visit <a href=\"{{APPURL}}fees_bill\">Click Here</a> for a summary detail of your current Bill.",
+                'notice_type' => 12,
+                'userId' => $params->userId,
+                'clientId' => $params->clientId,
+                'initiated_by' => 'system'
+            ];
+
+            // add a new notification
+            $noticeClass->add($item_param);
+
             // insert the user activity
-			$this->userLogs("fees_arrears", $student_id, null, "{$params->userData->name} - inserted a new fees arrears record of the student.", $params->userId, null);
+            $this->userLogs("fees_arrears", $student_id, null, "{$params->userData->name} - inserted a new fees arrears record of the student.", $params->userId, null);
 
             return [
                 "code" => 200,
@@ -577,6 +695,208 @@ class Arrears extends Myschoolgh {
             ];
         }
 
+
+    }
+
+    /**
+     * Delete Fees Arrears Payment
+     * 
+     * @param Array         $params->data
+     * 
+     * @return Array
+     */
+    public function delete(stdClass $params) {
+
+        // global variable
+        global $accessObject, $noticeClass;
+
+        // readonly mode session
+        if(!empty($this->session->is_only_readable_app)) {
+            return $this->readonly_mode;
+        }
+
+        // if the user does not have the permission to modify the arrears value
+        if(!$accessObject->hasAccess("modify_arrears", "fees")) {
+            return ["code" => 203, "data" => $this->permission_denied];
+        }
+
+        // get the student arrears information
+        $arrears_array = $this->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", "users_arrears", "student_id='{$params->student_id}' AND client_id='{$params->clientId}' LIMIT 1");
+
+        // return error if empty
+        if(empty($arrears_array)) { 
+            return ["code" => 203, "data" => "Sorry! An invalid student id was parsed."];
+        }
+
+        // set a new item for the arrears
+        $arrears = $arrears_array[0];
+
+        // convert the item to array
+        $fees_category_log = json_decode($arrears->fees_category_log, true);
+
+        // existing arrears
+        $old_arrears_details = json_decode($arrears->arrears_details, true);
+        $old_arrears_category = json_decode($arrears->arrears_category, true);
+
+        // confirm that the array key really exists 
+        if(!isset($old_arrears_details[$params->academic_key])) {
+            return ["code" => 203, "data" => "Sorry! An invalid record id was parsed to be deleted."];
+        }
+
+        // get the total amount of the record deleted
+        $record_deleted_amount = array_sum($old_arrears_details[$params->academic_key]);
+
+        // remove the record from the list
+        unset($old_arrears_details[$params->academic_key]);
+
+        // reformat the record information
+        $arrears_category = $this->append_fees_category($old_arrears_details);
+
+        // arrears total
+        $new_arrears_total = array_sum($arrears_category);
+
+        // update the student fees arrears information details
+        $update_query = $this->db->prepare("UPDATE users_arrears SET arrears_details = ?, arrears_category = ?, arrears_total = ?, last_updated = now(), fees_category_log = ? WHERE student_id = ? AND client_id = ? LIMIT 1");
+        $update_query->execute([json_encode($old_arrears_details), json_encode($arrears_category), $new_arrears_total, json_encode($fees_category_log), $params->student_id, $params->clientId]);
+
+        // log the user activity information
+        $this->db->query("INSERT INTO users_arrears_history SET 
+            client_id = '{$params->clientId}', student_id='{$params->student_id}',
+            description = '<strong>{$params->userData->name}</strong> deleted the arrears of <strong>{$params->academic_key}</strong> which amounted to <strong>{$record_deleted_amount}</strong> from the system. This leaves the student a total arrears to be paid at <strong>{$new_arrears_total}</strong>.'
+        ");
+
+        // notify the student of this new change
+        $item_param = (object) [
+            '_item_id' => random_string("alnum", RANDOM_STRING),
+            'user_id' => $params->student_id,
+            'subject' => "Outstanding Arrears",
+            'message' => "<strong>{$params->userData->name}</strong> deleted the arrears of <strong>{$params->academic_key}</strong> which amounted to <strong>{$record_deleted_amount}</strong> from your record. This leaves your total arrears to be paid at <strong>{$new_arrears_total}</strong>",
+            'content' => "<strong>{$params->userData->name}</strong> deleted the arrears of <strong>{$params->academic_key}</strong> which amounted to <strong>{$record_deleted_amount}</strong> from your record. This leaves your total arrears to be paid at <strong>{$new_arrears_total}</strong>. Kindly visit the accounts department if you think this new update is an anomaly and does not the true reflection of your outstanding arrears. Visit <a href=\"{{APPURL}}fees_bill\">Click Here</a> for a summary detail of your current Bill.",
+            'notice_type' => 12,
+            'userId' => $params->userId,
+            'clientId' => $params->clientId,
+            'initiated_by' => 'system'
+        ];
+
+        // add a new notification
+        $noticeClass->add($item_param);
+
+        // return success message
+        return [
+            "code" => 200,
+            "data" => "Fees arrears record was successfully deleted."
+        ];
+    }
+
+    /**
+     * Confirm MoMo / Card Payment
+     * 
+     * @return Array
+     */
+    public function momocard_payment(stdClass $params) {
+
+        try {
+            
+            // check if the transaction id already exits
+            $transaction = $this->pushQuery("id", 
+                "transaction_logs", 
+                "transaction_id='{$params->transaction_id}' AND state='Processed' LIMIT 1"
+            );
+            if(!empty($transaction)) {
+                return ["code" => 203, "data" => "Sorry! This transaction has already been processed."];
+            }
+
+            // create a new payment object
+            $payObject = load_class("payment", "controllers");
+
+            /** Validate the amount */
+            if(!$params->amount) {
+                return ["code" => 203, "data" => "Sorry! The amount cannot be empty."];
+            }
+
+            // set the parameters
+            $data = (object) [
+                "route" => "verify",
+                "reference" => $params->reference_id
+            ];
+
+            // confirm the payment
+            $payment_check = $payObject->get($data);
+            
+            // if payment status is true
+            if(!empty($payment_check["data"]) && isset($payment_check["data"]->status) && ($payment_check["data"]->status === true)) {
+                // set the payment method
+                $params->payment_method = "MoMo_Card";
+                $params->paystack_data = $payment_check;
+
+                // process the payment
+                return $this->make_payment($params);
+
+            } else {
+                return ["code" => 203, "data" => "Sorry! An error was encountered while processing the request."];
+            }
+
+        } catch(PDOException $e) {
+            // return an unexpected error notice
+            return $this->unexpected_error;
+        }
+
+    }
+
+    /**
+     * Check the payment request status from paystack
+     * 
+     * @return Array
+     */
+    public function epay_validate(stdClass $params) {
+
+        // end query is the session access_denied_log is not empty
+        if(empty($this->session->e_payment_transaction_id)) {
+            // return permission denied
+            return ["code" => 203, "data" => "Payment request cancelled."];
+        }
+
+        // set the transaction id
+        $tid = $this->session->e_payment_transaction_id;
+
+        // get the request log
+        $log = $this->pushQuery("*", "transaction_logs", "transaction_id='{$tid}' LIMIT 1");
+
+        // confirm if a record already exists
+        if(empty($log)) {
+            return ["code" => 203, "data" => "Payment request cancelled."];
+        }
+
+        // get the status
+        if($log[0]->state == "Processed") {
+            return ["code" => 203, "data" => "Payment request already processed."];   
+        }
+
+        // create a new payment object
+        $payObject = load_class("payment", "controllers");
+
+        // set the parameters
+        $data = (object) [
+            "route" => "verify",
+            "reference" => $log[0]->reference_id
+        ];
+
+        // confirm the payment
+        $payment_check = $payObject->get($data);
+        
+        // if payment status is true
+        if(!empty($payment_check["data"]) && isset($payment_check["data"]->status) && ($payment_check["data"]->status === true)) {
+            // convert the data to object
+            $param = json_decode($log[0]->transaction_data);
+            $param->paystack_data = $payment_check;
+            $param->userData = $params->userData;
+            $param->userId = $params->userId ?? null;
+
+            // process the payment
+            return $this->make_payment($param);
+        } else {
+            return ["code" => 203, "data" => "Payment request cancelled."];
+        }
 
     }
 

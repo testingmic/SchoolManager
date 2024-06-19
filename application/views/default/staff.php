@@ -5,31 +5,29 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser, $defaultAcademics;
+global $myClass, $SITEURL, $defaultUser, $defaultAcademics, $isWardParent, $isAdmin, $isPayableStaff;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Staff Details";
-$response->title = "{$pageTitle} : {$appName}";
-
-$response->scripts = [
-    "assets/js/index.js"
-];
+$response->title = $pageTitle;
 
 // staff id
 $user_id = $SITEURL[1] ?? null;
 
 // if the user id is not empty
-if(!empty($user_id)) {
-
+if(empty($user_id)) {
+    $response->html = page_not_found("permission_denied");
+} else {
+    // set the parameters for the user information
     $staff_param = (object) [
         "clientId" => $clientId,
         "user_id" => $user_id,
@@ -56,8 +54,11 @@ if(!empty($user_id)) {
         // load the incidents
         $incidents = load_class("incidents", "controllers")->list($staff_param);
 
-        // Subjects Listing
+        // course listing
         $course_listing = "";
+
+        // set the page title
+        $response->title = $data["data"][0]->name;
 
         // user permissions
         $hasUpdate = $accessObject->hasAccess("update", $data["data"][0]->user_type);
@@ -73,17 +74,19 @@ if(!empty($user_id)) {
 
         // confirm that the user is a teacher
         $isTeacher = (bool) ($data["data"][0]->user_type == "teacher");
+        
+        // set the url
+        $url_link = $SITEURL[2] ?? null;
 
         // confirm that the user is a teacher
         if($isTeacher) {
 
-            // Subjects List parameter
+            // course list parameter
             $courses_param = (object) [
                 "clientId" => $session->clientId,
                 "userId" => $defaultUser->user_id,
                 "userData" => $defaultUser,
                 "course_tutor" => $data["data"][0]->user_id,
-                "limit" => 99999,
                 "academic_year" => $defaultAcademics->academic_year,
                 "academic_term" => $defaultAcademics->academic_term,
             ];
@@ -98,17 +101,17 @@ if(!empty($user_id)) {
                 // loop through the courses that the teacher handles
                 foreach($courses_list["data"] as $key => $each) {
 
-                    $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+                    $action = "<a href='#' onclick='return load(\"course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
                     if($courseDelete) {
                         $action .= "&nbsp;<a href='#' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
                     }
 
                     $course_listing .= "<tr data-row_id=\"{$each->id}\">";
-                    $course_listing .= "<td>{$each->name} {$each->course_code}</td>";
+                    $course_listing .= "<td><span class='user_name' onclick='load(\"course/{$each->item_id}\")'>{$each->name}</span></td>";
                     $course_listing .= "<td>";
                     foreach($each->class_list as $class) {
-                        $course_listing .= "<p class='mb-0 pb-0'><a href='#' onclick='return loadPage(\"{$baseUrl}class/{$class->id}\")'>".$class->name."</a></p>";
+                        $course_listing .= "<p class='mb-0 pb-0'><span class='user_name' ".(!$isWardParent ? 'onclick="load(\'class/'.$class->id.'\');"' : null).">".$class->name."</span></p>";
                     }
                     $course_listing .= "</td><td class='text-center'>{$action}</td>";
                     $course_listing .= "</tr>";
@@ -191,8 +194,11 @@ if(!empty($user_id)) {
         // set the first key
         $data = $data["data"][0];
 
+        // create a new object of the forms class
+        $formsObj = load_class("forms", "controllers");
+
         // guardian information
-        $user_form = load_class("forms", "controllers")->staff_form($clientId, $baseUrl, $data);
+        $user_form = $formsObj->staff_form($clientId, $baseUrl, $data);
 
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
@@ -209,7 +215,7 @@ if(!empty($user_id)) {
             $role_permission = !empty($role_permission) ? json_decode($role_permission, true) : [];
 
             // convert to an array
-            $user_permission = json_decode($data->user_permissions, true)["permissions"];
+            $user_permission = json_decode($data->user_permissions, true)["permissions"] ?? [];
             
             // disable the input field if the current user is also logged in
             $isDisabled = ($session->userId == $user_id) ? "disabled='disabled'" : null;
@@ -232,9 +238,9 @@ if(!empty($user_id)) {
                         
                         // if the user access was parsed
                         $level_data .= "<div class='col-lg-3 col-md-4'>";
-                        $level_data .= "<input {$isDisabled} ".($isPermitted ? "checked" : null )." type='checkbox' id='access_level[$key][$nkey]' class='brands-checkbox' name='access_level[$key][$nkey][]'>";
+                        $level_data .= "<input {$isDisabled} ".($isPermitted ? "checked" : null )." type='checkbox' class='brands-checkbox' ".($updatePermission ? "id='access_level[$key][$nkey]' name='access_level[$key][$nkey][]'" : null).">";
                    
-                        $level_data .= "<label class='cursor' for='access_level[$key][$nkey]'> &nbsp; ".ucwords(str_ireplace("_", " ", $nkey))."</label>";
+                        $level_data .= "<label class='cursor' ".($updatePermission ? "for='access_level[$key][$nkey]'" : null)."> &nbsp; ".ucwords(str_ireplace("_", " ", $nkey))."</label>";
                         $level_data .= "</div>";
                         
                     }
@@ -249,6 +255,46 @@ if(!empty($user_id)) {
 
         }
 
+        // change password url
+        $attachment_html = null;
+        $change_password_url = null;
+        $isCurrentUser = (bool) ($defaultUser->user_id == $user_id);
+
+        // if the user has permission
+        if($isAdmin || $isCurrentUser) {
+            // set up the information
+            if($isAdmin && ($defaultUser->user_id !== $user_id)) {
+                $change_password_url = "password_manager?lookup={$data->unique_id}";
+            } else {
+                $change_password_url = "profile?security";
+            }
+
+            // fetch the files again
+            $prevData = $myClass->pushQuery("a.id, a.created_by, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment", 
+                "users a", "a.item_id='{$user_id}' AND a.client_id='{$clientId}' LIMIT 1");
+
+            // if the data was is not empty
+            if(!empty($prevData)) {
+                // decode the json string
+                $db_attachments = json_decode($prevData[0]->attachment);
+                $attachment_html = $formsObj->list_attachments($db_attachments->files ?? [], $prevData[0]->created_by, "col-lg-4 col-md-6", $isAdmin, false);
+            }
+        }
+
+        // set the other parametrs
+        if($hasUpdate) {
+            // append to the scripts
+            $response->scripts = ["assets/js/analitics.js", "assets/js/upload.js", "assets/js/staff.js"];
+
+            // file upload parameter
+            $file_params = (object) [
+                "module" => "staff_documents_".$user_id,
+                "userData" => $defaultUser,
+                "ismultiple" => true,
+                "accept" => ".doc,.docx,.pdf,.png,.jpg,jpeg"
+            ];
+        }
+
         // append the html content
         $response->html = '
         <section class="section">
@@ -256,7 +302,10 @@ if(!empty($user_id)) {
                 <h1><i class="fa fa-user-tie"></i> '.$pageTitle.'</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'staffs">Staff</a></div>
+                    '.($isPayableStaff ? 
+                        '<div class="breadcrumb-item active"><a href="'.$baseUrl.'staffs">Staff</a></div>' : 
+                        '<div class="breadcrumb-item active"><a href="#" onclick="return false;">Staff</a></div>'
+                    ).'
                     <div class="breadcrumb-item">'.$data->name.'</div>
                 </div>
             </div>
@@ -305,84 +354,123 @@ if(!empty($user_id)) {
                     </div>
                 </div>
                 <div class="card">
-                <div class="card-header">
-                    <h4>Personal Details</h4>
-                </div>
-                <div class="card-body pt-0 pb-0">
-                    <div class="py-4">
-                        <p class="clearfix">
-                            <span class="float-left">Date of Employment</span>
-                            <span class="float-right text-muted">'.$data->enrollment_date.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Gender</span>
-                            <span class="float-right text-muted">'.$data->gender.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Section</span>
-                            <span class="float-right text-muted">'.$data->section_name.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Birthday</span>
-                            <span class="float-right text-muted">'.$data->date_of_birth.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Primary Contact</span>
-                            <span class="float-right text-muted">'.$data->phone_number.'</span>
-                        </p>
-                        '.(!empty($data->phone_number_2) ? 
-                        '<p class="clearfix">
-                            <span class="float-left">Secondary Contact</span>
-                            <span class="float-right text-muted">'.$data->phone_number_2.'</span>
-                        </p>' : '').'
-                        '.(!empty($data->position) ? 
-                        '<p class="clearfix">
-                            <span class="float-left">Position</span>
-                            <span class="float-right text-muted">'.$data->position.'</span>
-                        </p>' : '').'
-                        <p class="clearfix">
-                            <span class="float-left">E-Mail</span>
-                            <span class="float-right text-muted">'.$data->email.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Blood Group</span>
-                            <span class="float-right text-muted">'.$data->blood_group_name.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Residence</span>
-                            <span class="float-right text-muted">'.$data->residence.'</span>
-                        </p>
-                        <p class="clearfix">
-                            <span class="float-left">Country</span>
-                            <span class="float-right text-muted">'.$data->country_name.'</span>
-                        </p>
+                    <div class="card-header">
+                        <h4>PERSONAL INFORMATION</h4>
+                    </div>
+                    <div class="card-body pt-0 pb-0">
+                        <div class="py-4">
+                            <p class="clearfix">
+                                <span class="float-left">Date of Employment</span>
+                                <span class="float-right text-muted">'.$data->enrollment_date.'</span>
+                            </p>
+                            <p class="clearfix">
+                                <span class="float-left">Gender</span>
+                                <span class="float-right text-muted">'.$data->gender.'</span>
+                            </p>
+                            '.(!empty($data->section_name) ? 
+                            '<p class="clearfix">
+                                <span class="float-left">Section</span>
+                                <span class="float-right text-muted">'.$data->section_name.'</span>
+                            </p>' : '').'
+                            '.(!empty($data->date_of_birth) ? 
+                            '<p class="clearfix">
+                                <span class="float-left">Date of Birth</span>
+                                <span class="float-right text-muted">'.$data->date_of_birth.'</span>
+                            </p>' : '').'
+                            <p class="clearfix">
+                                <span class="float-left">Primary Contact</span>
+                                <span class="float-right text-muted">'.$data->phone_number.'</span>
+                            </p>
+                            '.(!empty($data->phone_number_2) ? 
+                            '<p class="clearfix">
+                                <span class="float-left">Secondary Contact</span>
+                                <span class="float-right text-muted">'.$data->phone_number_2.'</span>
+                            </p>' : '').'
+                            '.(!empty($data->position) ? 
+                            '<p class="clearfix">
+                                <span class="float-left">Position</span>
+                                <span class="float-right text-muted">'.$data->position.'</span>
+                            </p>' : '').'
+                            <p class="clearfix">
+                                <span class="float-left">E-Mail</span>
+                                <span class="float-right text-muted">'.$data->email.'</span>
+                            </p>
+                            '.(
+                                !empty($data->blood_group_name) ? '
+                                <p class="clearfix">
+                                    <span class="float-left">Blood Group</span>
+                                    <span class="float-right text-muted">'.$data->blood_group_name.'</span>
+                                </p>' : null
+                            ).'
+                            '.(
+                                !empty($data->residence) ? '
+                                <p class="clearfix">
+                                    <span class="float-left">Residence</span>
+                                    <span class="float-right text-muted">'.$data->residence.'</span>
+                                </p>' : null
+                            ).'
+                            '.(
+                                !empty($data->country_name) ? '
+                                <p class="clearfix">
+                                    <span class="float-left">Country</span>
+                                    <span class="float-right text-muted">'.$data->country_name.'</span>
+                                </p>' : null
+                            ).'
+                        </div>
                     </div>
                 </div>
-                </div>
+                '.($isAdmin || $user_id == $defaultUser->user_id ?         
+                    '<div class="card">
+                        <div class="card-header">
+                            <h4>LOGIN INFORMATION</h4>
+                        </div>
+                        <div class="card-body pt-0 pb-0">
+                            <div class="py-4">
+                                <p class="clearfix">
+                                    <span class="float-left">Username</span>
+                                    <span class="float-right text-muted">'.$data->username.'</span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Password</span>
+                                    <span class="float-right text-muted">
+                                        <button onclick="return load(\''.$change_password_url.'\')" class="btn btn-outline-primary btn-sm">
+                                            <i class="fa fa-lock"></i> Security Update
+                                        </button>
+                                    </span>
+                                </p>
+                                <p class="clearfix">
+                                    <span class="float-left">Last Login</span>
+                                    <span class="float-right text-muted">'.$data->last_login.'</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>' : null
+                ).'
             </div>
             <div class="col-12 col-md-12 col-lg-8">
                 <div class="card">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
+                    '.($isCurrentUser || $isAdminAccountant ? '
+                        <li class="nav-item">
+                            <a class="nav-link '.(empty($url_link) || $url_link === "documents" ? "active" : null).'" id="documents-tab2" data-toggle="tab" href="#documents" role="tab" aria-selected="true">Documents</a>
+                        </li>' : null
+                    ).'
                     '.(
                         $isTeacher ? '
                         <li class="nav-item">
-                            <a class="nav-link active" id="calendar-tab2" data-toggle="tab" href="#course_list" role="tab"
-                            aria-selected="true">Subjects List</a>
+                            <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#course_list" role="tab"
+                            aria-selected="true">Subjects</a>
                         </li>' : null
                     ).'
                     <li class="nav-item">
-                        <a class="nav-link '.(!$isTeacher ? "active" : null).'" id="incident-tab2" data-toggle="tab" href="#incident" role="tab"
+                        <a class="nav-link '.(empty($url_link) || $url_link === "incidents" ? "active" : null).'" id="incident-tab2" data-toggle="tab" href="#incident" role="tab"
                         aria-selected="true">Incidents</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link '.($url_link === "attendance" ? "active" : null).'" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab"
+                        aria-selected="true">Attendance</a>
                     </li>';
-
-                    if($hasUpdate) {
-                        $response->html .= '
-                        <li class="nav-item">
-                            <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
-                            aria-selected="false">Update Record</a>
-                        </li>';
-                    }
 
                     if(($viewPermission && $defaultUser->user_id == $user_id) || ($updatePermission)) {
                         $response->html .= '
@@ -391,15 +479,23 @@ if(!empty($user_id)) {
                             aria-selected="true">Permissions</a>
                         </li>';
                     }
+
+                    if($hasUpdate) {
+                        $response->html .= '
+                        <li class="nav-item">
+                            <a class="nav-link '.($url_link === "update" ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
+                            aria-selected="false">Edit Record</a>
+                        </li>';
+                    }
                     
                     $response->html .= '
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         '.(
                         $isTeacher ? '
-                            <div class="tab-pane show active fade" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
+                            <div class="tab-pane fade" id="course_list" role="tabpanel" aria-labelledby="course_list-tab2">
                                 <div class="d-flex justify-content-between mb-4">
-                                    <div class="mb-2"><h5>Subjects List</h5></div>
+                                    <div class="mb-2"><h5>SUBJECTS LIST</h5></div>
                                     '.($addCourse ? '
                                         <div>
                                             <a href="'.$baseUrl.'course_add" class="btn btn-primary"><i class="fa fa-plus"></i> Add Subject</a>
@@ -407,10 +503,10 @@ if(!empty($user_id)) {
                                     : null ).'
                                 </div>
                                 <div class="table-responsive">
-                                    <table data-empty="" class="table table-bordered table-striped raw_datatable">
+                                    <table data-empty="" class="table table-bordered table-sm table-striped raw_datatable">
                                         <thead>
                                             <tr>
-                                                <th>Course Title</th>
+                                                <th>Subject Title</th>
                                                 <th width="30%">Class</th>
                                                 <th class="text-center" width="15%"></th>
                                             </tr>
@@ -420,11 +516,53 @@ if(!empty($user_id)) {
                                 </div>
                             </div>' : null
                         ).'
+                        '.($isCurrentUser || $isAdminAccountant ? '
+                            <div class="tab-pane '.($url_link === "documents" ? "show active" : null).' fade" id="documents" role="tabpanel" aria-labelledby="documents-tab2">
+                                <div class="d-flex justify-content-between">
+                                    <div class="mb-2 text-uppercase"><h5>Staff Documents</h5></div>
+                                    '.($hasUpdate ? "<div><button onclick='return show_eDocuments_Modal();' class='btn btn-outline-primary btn-sm'><i class='fa fa-plus'></i> Upload</button></div>" : null).'
+                                </div>
+                                <div data-ebook_resource_list="'.$user_id.'">
+                                    '.($attachment_html ? $attachment_html : "No documents uploaded yet.").'
+                                </div>
+                            </div>' : null
+                        ).'
+                        <div class="tab-pane '.($url_link === "attendance" ? "show active" : null).' fade" id="attendance" role="tabpanel" aria-labelledby="attendance-tab2">
+                            <div id="single_user_data" class="row default_period" data-current_period="this_month">
+                                <div id="data-report_stream" data-report_stream="attendance_report&label[staff_id]='.$user_id.'">
+                                    <div class="row p-2">
+                                        <div class="col-lg-6 col-md-5">
+                                            <h4 class="text-uppercase font-20">Attendance Record</h4>
+                                        </div>
+                                        <div class="col-lg-6 col-md-7 text-right">
+                                            <div class="input-group mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text"><i class="fa fa-calendar-check"></i></span>
+                                                </div>
+                                                <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d", strtotime("first day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
+                                                <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
+                                                <div class="input-group-append">
+                                                    <button style="border-radius:0px" onclick="return filter_UserGroup_Attendance(\'&label[staff_id]='.$user_id.'\')" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="p-2 quick_loader" id="users_attendance_loader">
+                                        <div class="form-content-loader" style="display: flex; position: absolute">
+                                            <div class="offline-content text-center">
+                                                <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                            </div>
+                                        </div>
+                                        <div id="attendance_chart_list"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         '.(
                         $viewPermission ? '
                             <div class="tab-pane fade" id="permissions" role="tabpanel" aria-labelledby="permissions-tab2">
                                 <div class="mb-3 pb-0 border-bottom"><h5>USER PERMISSIONS</h5></div>
-                                '.($updatePermission ? '<form class="ajaxform" id="ajaxform" action="'.$baseUrl.'api/users/save_permission" method="POST">' : null).'
+                                '.($updatePermission ? '<form class="ajaxform" id="ajaxform" '.(!$isDisabled ? 'action="'.$baseUrl.'api/users/save_permission"' : null).' method="POST">' : null).'
                                     '.$level_data.'
                                     <div class="row">
                                         <input type="hidden" readonly name="user_id" id="user_id" value="'.$user_id.'">
@@ -436,7 +574,7 @@ if(!empty($user_id)) {
                                 '.($updatePermission ? '</form>' : null).'
                             </div>' : null
                         ).'
-                        <div class="tab-pane '.(!$isTeacher ? "show active" : null).' fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
+                        <div class="tab-pane '.(empty($url_link) || $url_link === "incidents" ? "show active" : null).' fade" id="incident" role="tabpanel" aria-labelledby="incident-tab2">
                             <div class="d-flex justify-content-between">
                                 <div class="mb-2"><h5>INCIDENTS LOG</h5></div>
                                 '.($addIncident ? '
@@ -447,7 +585,7 @@ if(!empty($user_id)) {
                             </div>
                             '.$incidents_list.'
                         </div>
-                        <div class="tab-pane fade '.($updateItem ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
+                        <div class="tab-pane fade '.($url_link === "update" ? "show active" : null).'" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
                         
                         if($hasUpdate) {
                             $response->html .= $user_form;
@@ -461,6 +599,36 @@ if(!empty($user_id)) {
             </div>
         </div>
         </section>';
+
+        // if the user has permission to upload files
+        if($hasUpdate) {
+
+            // append the form
+            $response->html .= '
+            <div class="modal fade" id="ebook_Resource_Modal_Content" data-backdrop="static" data-keyboard="false">
+                <div class="modal-dialog modal-lg" style="width:100%;height:100%;" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><div><strong>Upload E-Resource</strong></div></h5>
+                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <div class="p-3">
+                                '.$formsObj->form_attachment_placeholder($file_params).'
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <button data-dismiss="modal" class="btn btn-outline-secondary">CLose</button>
+                                    </div>
+                                    <div>
+                                        <button onclick="return upload_Employee_Documents(\''.$user_id.'\');" class="btn btn-outline-success"><i class="fa fa-upload"></i> Upload Files</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>';
+        }
         
     }
 

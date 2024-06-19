@@ -8,14 +8,14 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $myschoolgh, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $additional = (object) [
     "user" => $defaultUser,
     "client_data" => $defaultUser->client,
@@ -23,7 +23,7 @@ $additional = (object) [
     "class_guid" => $defaultUser->class_guid,
 ];
 $pageTitle = "Generate Report Cards";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // confirm that the user has the required permissions
 $the_form = load_class("forms", "controllers")->generate_terminal_reports($clientId, $additional);

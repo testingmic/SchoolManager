@@ -8,17 +8,17 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $SITEURL, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Allocate Student Fees";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 $response->scripts = ["assets/js/fees_allocation.js"];
 
@@ -60,7 +60,8 @@ elseif(!empty($user_id)) {
         $feesParam = (object) [
             "client_data" => $defaultUser->client, 
             "userData" => $defaultUser, 
-            "student_id" => $data->user_id, 
+            "student_id" => $data->user_id,
+            "clientId" => $defaultUser->client_id,
             "set_category_key" => true
         ];
 
@@ -70,7 +71,9 @@ elseif(!empty($user_id)) {
         // get the class and student fees allocation
         $pay_button = true;
         $allocation_list = "";
+        $allocationReviewList = null;
         $existing_category = [];
+        $studentAllocationArray = [];
         $dont_show_button = false;
         
         $total_amount = 0;
@@ -87,11 +90,10 @@ elseif(!empty($user_id)) {
         if((empty($studentAllocation) && !empty($classAllocation)) || !empty($studentAllocation)) {
             
             // convert the student variable into an array list
-            $studentAllocationArray = [];
             foreach($studentAllocation as $item) {
                 $studentAllocationArray[$item->category_id] = (array) $item;
             }
-            
+
             // if the student allocation is empty
             if(empty($studentAllocation)) {
                 $headers["balance"] = "PAYABLE";
@@ -99,7 +101,7 @@ elseif(!empty($user_id)) {
 
             // set the allocation list to display
             $allocationReviewList = !empty($studentAllocationArray) ? $studentAllocationArray : $classAllocation;
-            
+
             // loop through the allocation
             foreach($allocationReviewList as $allocation) {
                 
@@ -193,7 +195,7 @@ elseif(!empty($user_id)) {
                 // append to the list
                 $allocation_list .= "
                     <tr data-row_id='{$allocation->category_id}'>
-                        <td><span class='font-18'>{$allocation->category_name}</span><br>{$status}</td>
+                        <td><span class='font-18'>".($allocation->category_name ?? ($allocation->category_list ?? null))."</span><br>{$status}</td>
                         <td><input style='min-width:90px' value='{$amount_due}' disabled class='form-control font-weight-bold font-17 text-center'></td>
                         <td><input style='min-width:90px' value='{$amount_paid}' disabled class='form-control font-17 text-center'></td>
                         <td><input style='min-width:90px' min='0' max='{$amount_due}' value='{$balance}' {$idisabled} ".($disabled ? $disabled : "data-item='amount' data-category_id='{$allocation->category_id}'")." class='form-control font-weight-bold font-17 p-0 text-center {$exempt_class}' type='number'></td>
@@ -203,8 +205,8 @@ elseif(!empty($user_id)) {
 
         }
 
-        // loop through the fees category list
-        if($is_new_admission) {
+        // If this is a new addition and the fees allocation is not empty
+        if(!empty($allocationReviewList) && $is_new_admission) {
 
             // fees category list
             $feesCategoryList = $myClass->pushQuery("id, name, amount", "fees_category", "client_id='{$clientId}' AND status='1'");
@@ -240,15 +242,16 @@ elseif(!empty($user_id)) {
                     </tr>";
                 }
             }
+
         }
 
-        // final table variable
+        // if the fees has been allocated to the user
         $allocation_list .= "
         <tr>
-            <td><span class='font-18 text-weight-bold'>TOTAL</td>
-            <td><input style='min-width:90px' value='{$total_amount}' readonly class='form-control font-weight-bold font-20 text-center'></td>
-            <td><input style='min-width:90px' value='{$total_paid}' readonly class='form-control font-20 text-center'></td>
-            <td><input style='min-width:90px' min='0' data-input_function='total_amount' max='{$total_balance}' readonly value='{$total_balance}' class='form-control font-weight-bold font-20 p-0 text-center' type='number'></td>
+            <td><span class='font-18 font-bold'>TOTAL</td>
+            <td><input style='min-width:90px' value='{$total_amount}' readonly class='form-control bg-dark text-white font-weight-bold font-20 text-center'></td>
+            <td><input style='min-width:90px' value='{$total_paid}' readonly class='form-control bg-dark text-white font-20 text-center'></td>
+            <td><input style='min-width:90px' min='0' data-input_function='total_amount' max='{$total_balance}' readonly value='{$total_balance}' class='form-control bg-dark text-white font-weight-bold font-20 p-0 text-center' type='number'></td>
             <td align='center'>-</td>
         </tr>";
 
@@ -275,51 +278,63 @@ elseif(!empty($user_id)) {
                                 <div class="text-center border-top mt-0">
                                     <div class="author-box-description font-22 text-success font-weight-bold">'.$data->unique_id.'</div>
                                     <div class="author-box-description font-22 text-info font-weight-bold mt-1">'.$data->class_name.'</div>
-                                    <div class="w-100 mt-2 border-top pt-3">
+                                        <div class="w-100 mt-2 border-top pt-3">
                                         <a class="btn mb-2 btn-dark" href="'.$baseUrl.'student/'.$user_id.'"><i class="fa fa-arrow-circle-left"></i> Go Back</a>
-                                        '.($pay_button ? '&nbsp;<a href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'" class="btn mb-2 btn-outline-success"><i class="fa fa-adjust"></i> PAY FEES</a>' : null).'
-                                    </div>
+                                            '.(!empty($allocationReviewList) ? '
+                                                '.($pay_button ? 
+                                                    '&nbsp;
+                                                    <a href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'" class="btn mb-2 btn-outline-success">
+                                                    <i class="fa fa-adjust"></i> PAY FEES
+                                                    </a>' : null
+                                                ).'' : null
+                                            ).'
+                                        </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-12 col-md-7 col-lg-8">
                         <div class="card">
-                            <div class="card-header text-uppercase">Fees Allocation Table</div>
-                            <div class="card-body" id="fees_allocation_table">
-                                <div class="form-content-loader" style="display: none; position: absolute">
-                                    <div class="offline-content text-center">
-                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                            '.(!empty($allocationReviewList) ? '
+                                <div class="card-header text-uppercase">Fees Allocation Table</div>
+                                    <div class="card-body" id="fees_allocation_table">
+                                        <div class="form-content-loader" style="display: none; position: absolute">
+                                            <div class="offline-content text-center">
+                                                <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-end">
+                                            '.($dont_show_button ? '
+                                                <button onclick="return save_student_bill(\''.$user_id.'\',\''.$myClass->remove_quotes($data->name).'\');" title="Click to save student bill." class="btn mb-2 btn-outline-primary"><i class="fa fa-save"></i> SAVE BILL</button>&nbsp;
+                                            ' : null).'
+                                            '.($studentAllocationArray ? 
+                                                '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-outline-warning"><i class="fa fa-print"></i> PRINT BILL</a>' : null
+                                            ).'
+                                        </div>
+                                        <div class="mt-3 border-top pt-3">
+                                            <div class="table-responsive">
+                                                <input type="hidden" disabled id="is_new_admission" name="is_new_admission" value="'.$is_new_admission.'">
+                                                <table class="table table-bordered table-striped">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="mb-3 font-weight-bold">CATEGORY</th>
+                                                            <th width="18%" class="mb-3 font-weight-bold">DUE</th>
+                                                            <th width="18%" class="mb-3 font-weight-bold">PAID</th>
+                                                            <th width="20%" class="mb-3 font-weight-bold">'.$headers["balance"].'</th>
+                                                            <th class="mb-3 font-weight-bold"></th>                    
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        '.$allocation_list.'
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="d-flex justify-content-end">
-                                    '.($dont_show_button ? '
-                                        <button onclick="return save_student_bill(\''.$user_id.'\',\''.$data->name.'\')" title="Click to save student bill." class="btn mb-2 btn-outline-primary"><i class="fa fa-save"></i> SAVE BILL</button>&nbsp;
-                                    ' : null).'
-                                    '.($studentAllocationArray ? 
-                                        '<a href="'.$baseUrl.'download/student_bill/'.$user_id.'?print=1" target="_blank" class="btn mb-2 btn-outline-warning"><i class="fa fa-print"></i> PRINT BILL</a>' : null
-                                    ).'
-                                </div>
-                                <div class="mt-3 border-top pt-3">
-                                    <div class="table-responsive">
-                                        <input type="hidden" disabled id="is_new_admission" name="is_new_admission" value="'.$is_new_admission.'">
-                                        <table class="table table-bordered table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th class="mb-3 font-weight-bold">CATEGORY</th>
-                                                    <th width="18%" class="mb-3 font-weight-bold">DUE</th>
-                                                    <th width="18%" class="mb-3 font-weight-bold">PAID</th>
-                                                    <th width="20%" class="mb-3 font-weight-bold">'.$headers["balance"].'</th>
-                                                    <th class="mb-3 font-weight-bold"></th>                    
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                '.$allocation_list.'
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                                        ' : 
+                            notification_modal("Fees Category Not Set", $myClass->error_logs["fees_category_not_set"]["msg"], $myClass->error_logs["fees_category_not_set"]["link"])
+                        ).'
                         </div>
                     </div>
                 </div>

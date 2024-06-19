@@ -8,17 +8,17 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $defaultUser, $defaultAcademics;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "My Bill";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // set the parameters
 $param = (object) [
@@ -49,7 +49,7 @@ $response->html = '
         <div class="col-sm-12">
             <div class="card">
                 <div class="card-body">
-                    '.$pages_content.'
+                    '.$pages_content["student_bill"].'
                     <div class="mt-3" align="center">
                         <a title="Click to Download Bill" class="btn btn-outline-success" target="_blank" href="'.$baseUrl.'download/student_bill/'.$param->student_id.'?download=1">
                             <i class="fa fa-download"></i> DOWNLOAD BILL

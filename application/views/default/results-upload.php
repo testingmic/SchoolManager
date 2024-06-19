@@ -5,19 +5,19 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $myschoolgh, $defaultUser;
+global $myClass, $myschoolgh, $defaultUser, $academicSession;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Upload Results";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // confirm that the user has the required permissions
 $the_form = load_class("forms", "controllers")->terminal_reports($clientId);
@@ -44,16 +44,16 @@ foreach($results_list as $key => $report) {
     $terminal_reports_list .= "
     <tr>
         <td>".($key+1)."</td>
-        <td>{$report->class_name}</td>
-        <td>{$report->course_name} ({$report->course_code})</td>
+        <td><span class='user_name' onclick='return load(\"class/{$report->class_id}\");'>".strtoupper($report->class_name)."</span></td>
+        <td><span class='user_name' onclick='return load(\"course/{$report->course_id}\");'>{$report->course_name} ({$report->course_code})</span></td>
         <td>{$report->academic_year}</td>
         <td>{$report->academic_term}</td>
-        <td>
+        <td width='18%'>
             <div>{$report->fullname}</div>
             <div class='font-weight-bold'>{$report->user_unique_id}</div>
             {$report->date_created}
         </td>
-        <td>{$myClass->the_status_label($report->status)}</td>
+        <td width='10%'>{$myClass->the_status_label($report->status)}</td>
         <td align='center' width='14%'>{$action}</td>
     </tr>";
 }
@@ -86,15 +86,15 @@ $response->html = '
                                 </div>
                                 <div class="tab-pane fade" id="upload_reports" role="tabpanel" aria-labelledby="upload_reports-tab2">
                                     <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered table-striped raw_datatable">
+                                        <table class="table table-sm table-bordered table-striped raw_datatable">
                                             <thead>
                                                 <th></th>
                                                 <th>Class</th>
-                                                <th>Course / Code</th>
+                                                <th>Subject</th>
                                                 <th>Academic Year</th>
-                                                <th>Academic Term</th>
+                                                <th>'.$academicSession.'</th>
                                                 <th>Details</th>
-                                                <th>Status</th>
+                                                <th width="10%">Status</th>
                                                 <th></th>
                                             </thead>
                                             <tbody>'.$terminal_reports_list.'</tbody>

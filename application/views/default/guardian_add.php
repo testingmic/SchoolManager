@@ -8,16 +8,26 @@ header("Access-Control-Max-Age: 3600");
 global $myClass;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Add Guardian";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
+
+// end query if the user has no permissions
+if(!$accessObject->hasAccess("add", "guardian")) {
+    // unset the page additional information
+    $response->page_programming = [];
+    // permission denied information
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
 
 $the_form = load_class("forms", "controllers")->guardian_form($clientId, $baseUrl);
 

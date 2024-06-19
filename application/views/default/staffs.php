@@ -5,24 +5,35 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-// global 
-global $myClass, $accessObject, $defaultUser;
+// global variables
+global $myClass, $accessObject, $defaultUser, $isPayableStaff;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
-$filter = (object) $_POST;
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$filter = (object) array_map("xss_clean", $_POST);
 
-$response->title = "Staff List : {$appName}";
+$response->title = "Staff List";
+
+// If the user is not a teacher, employee, accountant or admin then end the request
+if(!$isPayableStaff) {
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
+
+// include the scripts to load for the page
 $response->scripts = ["assets/js/filters.js"];
 
+// add additional filters
 $filter->user_type = !empty($filter->user_type) ? $filter->user_type : "employee,teacher,admin,accountant";
 
+// set the parameters
 $staff_param = (object) [
     "clientId" => $session->clientId,
     "user_type" => $filter->user_type,
@@ -31,36 +42,30 @@ $staff_param = (object) [
     "client_data" => $defaultUser->client
 ];
 
-$api_staff_list = load_class("users", "controllers", $staff_param)->list($staff_param);
+$api_staff_list = load_class("users", "controllers", $staff_param)->quick_list($staff_param);
 
 $clientId = $session->clientId;
 
 $staff_list = "";
+$counter = 0;
 
-$color = [
-    "admin" => "success",
-    "employee" => "primary",
-    "accountant" => "danger",
-    "teacher" => "warning"
-];
-$count = 0;
-foreach($api_staff_list["data"] as $key => $each) {
+foreach($api_staff_list["data"] as $each) {
     
-    $action = "<span title='View staff record' onclick='return loadPage(\"{$baseUrl}staff/{$each->user_id}\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
+    $counter++;
+    $action = "<span title='View staff record' onclick='return load(\"staff/{$each->user_id}/documents\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
 
-    if($accessObject->hasAccess("delete", $each->user_type)) {
+    if($accessObject->hasAccess("delete", $each->user_type) && ($each->user_id !== $defaultUser->user_id)) {
         $action .= "&nbsp;<span title='Delete Staff Record' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
     }
 
-    $count++;
     $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
-    $staff_list .= "<td>{$count}</td>";
+    $staff_list .= "<td>{$counter}</td>";
     $staff_list .= "<td>
         <div class='d-flex justify-content-start'>
             <div class='mr-2'><img class='author-box-picture' width='40px' src=\"{$baseUrl}{$each->image}\"></div>
             <div>
-                <span class='user_name' onclick='return loadPage(\"{$baseUrl}staff/{$each->user_id}\");'>{$each->name}</span>
-                <br><span class='badge badge-{$color[$each->user_type]} p-1'>".strtoupper($each->user_type)."</span>            
+                <span class='user_name' onclick='return load(\"staff/{$each->user_id}/documents\");'>{$each->name}</span>
+                <br><span class='badge badge-{$myClass->user_colors[$each->user_type]} p-1'>".strtoupper($each->user_type)."</span>
             </div>
         </div></td>";
     $staff_list .= "<td>{$each->position}</td>";
@@ -120,7 +125,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive table-student_staff_list">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
+                            <table data-empty="" class="table table-bordered table-sm table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>

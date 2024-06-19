@@ -9,24 +9,30 @@ header("Access-Control-Max-Age: 3600");
 global $session, $myClass, $accessObject, $defaultAcademics;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
-$response->title = "Assign Student Class : {$appName}";
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$response->title = "Assign Student Class";
+
+// end query if the user has no permissions
+if(!$accessObject->hasAccess("assign_class", "settings")) {
+    // permission denied information
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
 
 // get the class list
 $class_list = $myClass->pushQuery("name, id", "classes", "client_id='{$clientId}' AND status='1'", false, "ASSOC");
-$class_id_list = !empty($class_list) ? array_column($class_list, "id") : [];
 
 // get the students list
 $students_array_list = $myClass->pushQuery("id, name, unique_id, gender, residence, item_id, class_id, image", "users", 
-    "academic_year = '{$defaultAcademics->academic_year}' AND academic_term = '{$defaultAcademics->academic_term}'
-    AND client_id='{$clientId}' AND user_type='student' AND class_id NOT IN {$myClass->inList($class_id_list)}");
+    "client_id='{$clientId}' AND user_type='student' AND class_id IS NULL LIMIT 500");
 
 $students_list = "";
 
@@ -38,7 +44,7 @@ if(empty($students_array_list)) {
     $response->scripts = ["assets/js/bulk_update.js"];
     foreach($students_array_list as $key => $student) {
         $students_list .= "
-        <tr data-row_id='{$student->item_id}'>
+        <tr data-row_id='{$student->id}'>
             <td>".($key + 1)."</td>
             <td><label class='cursor' title='Click to select {$student->name}' for='student_id_{$student->item_id}'>".strtoupper($student->name)."</label></td>
             <td>{$student->unique_id}</td>
@@ -62,7 +68,10 @@ $response->html = '
         </div>
         <div class="row" id="bulk_assign_class">
             <div class="col-12 col-sm-12 col-md-12 mb-2 text-primary">
-                <h4 class="font-italic">Use this panel to assign class to students that has not been set yet.</h4>
+                <h4 class="font-italic">
+                    Use this panel to assign class to students that has not been set yet.
+                    You can only update up to 500 students at a go.
+                </h4>
             </div>
             <div class="col-12 col-sm-12 col-md-4">
                 <div class="card">
@@ -72,16 +81,16 @@ $response->html = '
                             <select '.(empty($students_array_list) ? "disabled='disabled'" : 'name="class_id"').' data-width="100%" class="form-control selectpicker">
                                 <option value="">Please Select Class</option>';
                                 foreach($class_list as $each) {
-                                    $response->html .= "<option data-class_name='{$each["name"]}' value=\"{$each["id"]}\">{$each["name"]}</option>";
+                                    $response->html .= "<option data-class_name='{$each["name"]}' value=\"{$each["id"]}\">".strtoupper($each["name"])."</option>";
                                 }
                                 $response->html .= '
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Assign Class Fees <span class="required">*</span></label>
-                            <select '.(empty($students_array_list) ? "disabled='disabled'" : 'name="assign_fees"').' data-width="100%" class="form-control selectpicker">
-                                <option value="assign">Assign Class Fees</option>
+                            <select '.(empty($students_array_list) ? "disabled='disabled'" : "disabled='disabled'").' data-width="100%" class="form-control selectpicker">
                                 <option value="dont_assign">Do not Assign Class Fees</option>
+                                <option value="assign">Assign Class Fees</option>
                             </select>
                         </div>
 
@@ -96,6 +105,7 @@ $response->html = '
             <div class="col-12 col-sm-12 col-md-8">
                 <div class="card">
                     <div class="card-body">
+                        '.$myClass->quick_student_search_form.'
                         <div class="table-responsive">
                             <table id="simple_load_student" class="table table-bordered table-striped">
                                 <thead>

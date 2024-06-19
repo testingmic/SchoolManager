@@ -9,14 +9,14 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
-$response->title = "Fees Category List : {$appName}";
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$response->title = "Fees Category List ";
 $response->scripts = ["assets/js/fees.js"];
 
 $category_param = (object) [
@@ -64,53 +64,6 @@ $response->html = '
                 <div class="breadcrumb-item">Fees Category List</div>
             </div>
         </div>
-        <div data-backdrop="static" data-keyboard="false" class="modal fade" id="feesCategoryModal">
-            <form action="'.$baseUrl.'api/fees/savecategory" class="ajax-data-form" id="ajax-data-form-content">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Allowance / Deduction Types</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="name">Name</label>
-                                        <input type="text" maxlength="100" placeholder="Type name" name="name" id="name" class="form-control">
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="code">Code</label>
-                                        <input type="text" maxlength="12" placeholder="Category Code" name="code" id="code" class="form-control text-uppercase">
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="default_amount">Default Amount</label>
-                                        <input type="number" min="1" maxlength="20" placeholder="Type default amount" name="amount" id="amount" class="form-control">
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="description">Description</label>
-                                        <textarea placeholder="" maxlength="255" name="description" id="description" rows="5" class="form-control"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer p-0">
-                                <input type="hidden" name="category_id">
-                                <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
-                                <button type="button-submit" class="btn btn-primary">Save changes</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 '.($hasAdd ? '
@@ -121,7 +74,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
+                            <table data-empty="" class="table table-bordered table-sm table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
@@ -139,7 +92,54 @@ $response->html = '
                 </div>
             </div>
         </div>
-    </section>';
+    </section>
+    <div data-backdrop="static" data-keyboard="false" class="modal fade" id="feesCategoryModal">
+        <form autocomplete="Off" action="'.$baseUrl.'api/fees/savecategory" class="ajax-data-form" id="ajax-data-form-content">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Allowance / Deduction Types</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="name">Name <span class="required">*</span></label>
+                                    <input type="text" maxlength="100" placeholder="Type name" name="name" id="name" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="code">Code</label>
+                                    <input type="text" maxlength="12" placeholder="Category Code" name="code" id="code" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="default_amount">Default Amount <span class="required">*</span></label>
+                                    <input type="number" min="1" maxlength="20" placeholder="Type default amount" name="amount" id="amount" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="description">Description</label>
+                                    <textarea placeholder="" maxlength="255" name="description" id="description" rows="5" class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer p-0">
+                            <input type="hidden" name="category_id">
+                            <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
+                            <button data-form_id="ajax-data-form-content" type="button-submit" class="btn btn-primary">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>';
 // print out the response
 echo json_encode($response);
 ?>

@@ -5,63 +5,65 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultAcademics, $defaultCurrency, $session;
+global $myClass, $defaultAcademics, $defaultCurrency, $session, $accessObject;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
-$filter = (object) $_POST;
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$filter = (object) array_map("xss_clean", $_POST);
 $pageTitle = "Fees Reports";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
+$response->scripts = ["assets/js/analitics.js", "assets/js/filters.js"];
 
-// confirm that the user has the required permissions
-if(!$accessObject->hasAccess("reports", "fees")) {
+// the default data to stream
+$data_stream = 'id="data-report_stream" data-report_stream="summary_report,fees_revenue_flow"';
+
+$hasFiltering = $accessObject->hasAccess("filters", "settings");
+$feesReport = $accessObject->hasAccess("reports", "fees");
+
+// if the user does not the request permission
+if(!$feesReport) {
+    // end the page and return the access denied content
     $response->html = page_not_found("permission_denied");
-} else {
-    
-    // include the required js scripts
-    $response->scripts = ["assets/js/analitics.js", "assets/js/filters.js"];
+    echo json_encode($response);
+    exit;
+}
 
-    // the default data to stream
-    $data_stream = 'id="data-report_stream" data-report_stream="summary_report,fees_revenue_flow"';
+// run the school academic terms
+$myClass->academic_terms();
+$session->reportPeriod = "this_week";
 
-    $hasFiltering = $accessObject->hasAccess("filters", "settings");
+// if the class_id is not empty
+$classes_param = (object) [
+    "clientId" => $clientId,
+    "columns" => "id, name",
+    "limit" => 100,
+    "client_data" => $defaultUser->client
+];
+$class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
-    // run the school academic terms
-    $myClass->academic_terms();
-    $session->reportPeriod = "this_week";
-    
-    // if the class_id is not empty
-    $classes_param = (object) [
-        "clientId" => $clientId,
-        "columns" => "id, name",
-        "limit" => 100,
-        "client_data" => $defaultUser->client
-    ];
-    $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+$students_list = [];
 
-    $students_list = [];
+// load fees allocation list for the students
+$fees_category_list = "";
+$feesObject = load_class("fees", "controllers", $classes_param);
+$fees_category_array = $feesObject->category_list($classes_param)["data"];
 
-    // load fees allocation list for the students
-    $fees_category_list = "";
-    $feesObject = load_class("fees", "controllers", $classes_param);
-    $fees_category_array = $feesObject->category_list($classes_param)["data"];
+// set the academic year and term
+$academic_year_term = $defaultAcademics->academic_year."_".$defaultAcademics->academic_term;
 
-    // set the academic year and term
-    $academic_year_term = $defaultAcademics->academic_year."_".$defaultAcademics->academic_term;
+// fees category
+foreach($fees_category_array as $category) {
+    $fees_category_list .= "<option value=\"{$category->id}\">".strtoupper($category->name)."</option>";
+}
 
-    // fees category
-    foreach($fees_category_array as $category) {
-        $fees_category_list .= "<option value=\"{$category->id}\">{$category->name}</option>";
-    }
-
-    $response->html = '
+$response->html = '
     <section class="section">
         <div class="section-header">
             <h1><i class="fa fa-chart-line"></i> '.$pageTitle.'</h1>
@@ -80,7 +82,7 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                         <div>
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">Fees Analysis</a>
+                                    <a class="nav-link active" id="general-tab2" data-toggle="tab" href="#general" role="tab" aria-selected="true">Fees Report Summary</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="generate-tab2" data-toggle="tab" href="#generate" role="tab" aria-selected="true">Generate Report</a>
@@ -90,7 +92,7 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                                 <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
                                     
                                     <div class="row" id="reports_insight">
-
+                                        <input type="hidden" hidden name="no_status_filters" value="not_filtered">
                                         <div class="col-lg-3 hidden col-md-4 col-12 form-group">
                                             <label>Academic Year & Term</label>
                                             <select data-width="100%" class="form-control selectpicker" name="academic_year_term">
@@ -111,7 +113,7 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                                             <select data-width="100%" class="form-control selectpicker" name="class_id">
                                                 <option value="">Please Select Class</option>';
                                                 foreach($class_list as $each) {
-                                                    $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                                                    $response->html .= "<option value=\"{$each->id}\">".strtoupper($each->name)."</option>";
                                                 }
                                                 $response->html .= '
                                             </select>
@@ -130,7 +132,7 @@ if(!$accessObject->hasAccess("reports", "fees")) {
 
                                         <div class="col-xl-2 col-md-2 col-12 form-group">
                                             <label for="">&nbsp;</label>
-                                            <button id="filter_Fees_Report" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+                                            <button id="filter_Fees_Report"  class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
                                         </div>
                             
                                         <div class="col-12 col-sm-12 col-lg-12">
@@ -138,7 +140,7 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                                             <div class="row">
 
                                                 <div class="col-lg-3 col-md-4">
-                                                    <div class="card">
+                                                    <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-blue">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col pr-0">
@@ -156,7 +158,7 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                                                 </div>
                                 
                                                 <div class="col-lg-3 col-md-4">
-                                                    <div class="card">
+                                                    <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-success">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col">
@@ -174,7 +176,7 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                                                 </div>
                                 
                                                 <div class="col-lg-3 col-md-4">
-                                                    <div class="card">
+                                                    <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-danger">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col">
@@ -192,7 +194,7 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                                                 </div>
 
                                                 <div class="col-lg-3 col-md-4">
-                                                    <div class="card">
+                                                    <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-warning">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
                                                                 <div class="col">
@@ -298,17 +300,16 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                                                     <div class="card">
                                                         <div class="card-header pr-0">
                                                             <div class="row width-100">
-                                                                <div class="col-md-4">
-                                                                    <h4>Fees + Arrears Payments Flow Chart</h4>
+                                                                <div class="col-md-5">
+                                                                    <h4>Current Fees + Arrears Payments Flow Chart</h4>
                                                                 </div>
-                                                                <div align="right" class="col-md-8">
+                                                                <div align="right" class="col-md-7">
                                                                     <div class="btn-group" data-filter="quick_revenue_filter" role="group" aria-label="Filter Attendance">
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="today" class="btn '.($session->reportPeriod == "today" ? "active" : null).' btn-info">Today</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="last_week" class="btn '.($session->reportPeriod == "last_week" ? "active" : null).' btn-info">Last Week</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="this_week" class="btn '.($session->reportPeriod == "this_week" ? "active" : null).'  btn-info">This Week</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="this_month" class="btn '.($session->reportPeriod == "this_month" ? "active" : null).' btn-info">This Month</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="last_month" class="btn '.($session->reportPeriod == "last_month" ? "active" : null).' btn-info">Last Month</button>
-                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="this_term" class="btn '.($session->reportPeriod == "this_term" ? "active" : null).' btn-info">This Term</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="this_year" class="btn '.($session->reportPeriod == "this_year" ? "active" : null).' btn-info">This Year</button>
                                                                     </div>
                                                                 </div>
@@ -327,9 +328,25 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                                                     </div>
                                                 </div>
 
-                                                <div class="col-lg-12 col-md-12">
-                                                    <div class="row">
-                                                        <div class="col-lg-12" id="revenue_category_counts"></div>
+                                                <div class="col-lg-12">
+                                                    <div class="card">
+                                                        <div class="card-header pr-0">
+                                                            <div class="row width-100">
+                                                                <div class="col-md-5">
+                                                                    <h4>Fees Payment by Class</h4>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="card-body pb-0 quick_loader">
+                                                            <div class="form-content-loader" style="display: flex; position: absolute">
+                                                                <div class="offline-content text-center">
+                                                                    <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                                                </div>
+                                                            </div>
+                                                            <div data-chart="class_fees_payment_chart">
+                                                                <div id="class_fees_payment_chart" style="width:100%;max-height:420px;height:420px;"></div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                             
@@ -347,11 +364,11 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                                         
                                         <div class="col-md-3 mb-1">
                                             <label>Start Date</label>                                
-                                            <input value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-d").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
                                         </div>
                                         <div class="col-md-3 mb-1">
                                             <label>End Date</label>
-                                            <input value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
                                         </div>
                                         <div class="col-md-6 mb-1"></div>
                                         <div class="col-md-3 form-group">
@@ -366,7 +383,7 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                                             <select data-width="100%" class="form-control selectpicker" name="class_id">
                                                 <option value="">Please Select Class</option>';
                                                 foreach($class_list as $each) {
-                                                    $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                                                    $response->html .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">".strtoupper($each->name)."</option>";
                                                 }
                                                 $response->html .= '
                                             </select>
@@ -376,14 +393,14 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                                             <select data-width="100%" class="form-control selectpicker" name="student_id">
                                                 <option value="">Please Select Student</option>';
                                                 foreach($students_list as $each) {
-                                                    $response->html .= "<option ".(($student_id == $each->user_id) ? "selected" : "")." value=\"{$each->user_id}\">{$each->name}</option>";
+                                                    $response->html .= "<option ".(($student_id == $each->user_id) ? "selected" : "")." value=\"{$each->user_id}\">".strtoupper($each->name)."</option>";
                                                 }
                                                 $response->html .= '
                                             </select>
                                         </div>
                                         <div class="'.(!$hasFiltering ? 'hidden': '').' col-md-2 col-12 form-group">
                                             <label for="">&nbsp;</label>
-                                            <button id="generate_Fees_Report" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> Generate Report</button>
+                                            <button id="generate_Fees_Report"  class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> Generate Report</button>
                                         </div>
                                         
                                     </div>
@@ -394,11 +411,9 @@ if(!$accessObject->hasAccess("reports", "fees")) {
                     </div>
                 </div>
             </div>
-            
         </div>
     </section>';
-
-}
+    
 // print out the response
 echo json_encode($response);
 ?>

@@ -8,17 +8,17 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $disabled_inputs = [];
 $pageTitle = "Allocate Timetable";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 $response->scripts = [];
 $response->timer = 350;
 
@@ -168,7 +168,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                                         $response->html .= "<div class='course p-2' id='{$value->item_id}'>{$value->name} ({$value->course_code})</div>";
                                                     }
                                                 } else {
-                                                    $response->html .= '<div class="text-warning">You have not started offering any courses.<br>Visit the <b>Lesson Planner</b> section to Add Subjects</div>';
+                                                    $response->html .= '<div class="text-warning">You have not started offering any courses.<br>Visit the <b>Lesson Planner</b> section to add courses</div>';
                                                 }
                                                 $response->html .= '
                                             </div>

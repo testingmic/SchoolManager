@@ -8,16 +8,16 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Upload E-Learning Material";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 $response->scripts = ["assets/js/resources.js", "assets/js/upload.js"];
 
 $params = (object)[
@@ -31,7 +31,7 @@ $the_form = load_class("forms", "controllers")->elearning_form($params);
 $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>'.$pageTitle.'</h1>
+            <h1><i class="fa fa-upload"></i> '.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'e-learning">E-Learning</a></div>

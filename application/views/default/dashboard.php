@@ -5,31 +5,33 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
+// global 
+global $myClass, $accessObject, $defaultClientData, $defaultUser, $isWardTutorParent, $isEmployee;
+
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
+
+// init values
+$timetable = "<div class='text-center'>No timetable record for today was found in the database.</div>";
+$wards_list = "";
+$assigments_list = "";
+$upcoming_events_list = "";
+$upcoming_birthday_list = "";
 
 // if no referer was parsed OR the request_method is not POST
 jump_to_main($baseUrl);
 
-// initial variables
-global $accessObject, $defaultUser, $defaultCurrency, $isAccountant, $isAdminAccountant, $isTutor,
-    $isTutorStudent, $isParent, $isStudent, $isSupport, $clientFeatures, $defaultClientData, $clientPrefs;
-    
-$appName = config_item("site_name");
-
-// confirm that user id has been parsed
-global $SITEURL, $usersClass;
 $clientId = $session->clientId;
 $loggedUserId = $session->userId;
 $cur_user_id = (confirm_url_id(1)) ? xss_clean($SITEURL[1]) : $loggedUserId;
 
 // filters
-$response = (object) [];
-$response->title = "Dashboard : {$appName}";
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$response->title = "Dashboard ";
 
-// create a new events object
-$eventClass = load_class("events", "controllers");
+// the default data to stream
+$data_stream = 'id="data-report_stream" data-report_stream="attendance_report"';
 
 // set the parameters
 $userData = $defaultUser;
@@ -38,255 +40,125 @@ $userData->client_id = $clientId;
 $userData->mini_description = true;
 $userData->the_user_type = $defaultUser->user_type;
 
-// if not booking set
-if($isSupport) {
+// set the date to load
+$global_period = $isWardParent ? "this_term" : "this_week";
 
-    // init values
-    $counter = [
-        'Expired' => 0,
-        'Pending' => 0,
-        'Activated' => 0,
-        'Suspended' => 0,
-        'Active' => 0,
-        'Propagation' => 0,
-        'Complete' => 0
-    ];
-    $schools_list = "";
-    $load_schools_list = $myClass->pushQuery("*", "clients_accounts");
+// global params
+$global_params = (object) ["client_data" => $defaultUser->client];
 
-    // loop through the list of schools
-    foreach($load_schools_list as $key => $school) {
-        
-        $counter[$school->client_state] += 1;
+// confirm if the account has been suspended or expired
+if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
+    // set the content of the message
+    $client_state = $defaultClientData->client_state;
+    $timer = $client_state == "Expired" ? $clientPrefs->account->expiry : null;
 
-        $action = null;
-        if($school->client_id !== "MSGH0001") {
-            $action = "<button onclick='return loadPage(\"{$baseUrl}schools/{$school->client_id}\")' class='btn btn-outline-success btn-sm'><i class='fa fa-edit'></i> Manage</button>";
-        }
-
-        $schools_list .= "
-            <tr>
-                <td>".($key + 1)."</td>
-                <td>
-                    <span class='text-primary hover cursor text-uppercase font-bold' ".(!empty($action) ? "onclick='return loadPage(\"{$baseUrl}schools/{$school->client_id}\")'" : null).">{$school->client_name}</span>
-                    <br> <strong>{$school->client_id}</strong>
-                    <br> {$myClass->the_status_label($school->client_state)}
-                </td>
-                <td>{$school->client_contact}<br>{$school->client_secondary_contact}</td>
-                <td>{$school->client_address}</td>
-                <td>{$school->client_email}</td>
-                <td>{$school->client_name}</td>
-                <td align='center'>{$action}</td>
-            </tr>";
-    }
-
-    // set the html string
-    $response->html = '
-    <section class="section">
-        <div class="d-flex mt-3 justify-content-between"></div>
-        <div class="row">
-            
-            <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card">
-                    <div class="card-body pr-3 pl-3 card-type-3">
-                        <div class="row">
-                            <div class="col">
-                                <h6 class="font-14 text-uppercase font-bold mb-0">REGISTERED SCHOOLS</h6>
-                                <span class="font-bold font-20 mb-0">'.count($load_schools_list).'</span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="card-circle l-bg-orange text-white">
-                                    <i class="fas fa-book-open"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card">
-                    <div class="card-body card-type-3">
-                        <div class="row">
-                            <div class="col">
-                                <h6 class="font-14 text-uppercase font-bold mb-0">ACTIVE SCHOOLS</h6>
-                                <span class="font-bold font-20 mb-0">'.($counter["Active"] + $counter["Propagation"] + $counter["Complete"] + $counter["Activated"]).'</span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="card-circle l-bg-green text-white">
-                                    <i class="fas fa-landmark"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card">
-                    <div class="card-body card-type-3">
-                        <div class="row">
-                            <div class="col">
-                                <h6 class="font-14 text-uppercase font-bold mb-0">INACTIVE SCHOOLS</h6>
-                                <span class="font-bold font-20 mb-0">'.
-                                    ($counter["Expired"] + $counter["Pending"] + $counter["Suspended"])
-                                .'</span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="card-circle l-bg-orange text-white">
-                                    <i class="fas fa-home"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-3 col-lg-6 col-md-6">
-                <div class="card">
-                    <div class="card-body card-type-3">
-                        <div class="row">
-                            <div class="col">
-                                <h6 class="font-14 text-uppercase font-bold mb-0">SUPPORT USERS</h6>
-                                <span class="font-bold font-20 mb-0">0</span>
-                            </div>
-                            <div class="col-auto">
-                                <div class="card-circle l-bg-orange text-white">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xl-12">
-                <div class="card">
-                    <div class="card-header">SCHOOLS LIST</div>
-                    <div class="card-body">
-                        <div class="table-responsive table-student_staff_list">
-                            <table class="table table-bordered table-striped raw_datatable">
-                                <thead>
-                                    <tr>
-                                        <th width="6%" class="text-center">#</th>
-                                        <th>SCHOOL NAME</th>
-                                        <th>CONTACTS</th>
-                                        <th>ADDRESS</th>
-                                        <th>EMAIL ADDRESS</th>
-                                        <th>STATUS</th>
-                                        <th width="10%"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>'.$schools_list.'</tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-
-    </section>';
+    // message to share
+    $response->html = access_denied($client_state, $timer);
 
 } else {
 
-    // confirm if the account has been suspended or expired
-    if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
-        // message to share
-        $response->html = '
-        <div class="card">
-            <div class="card-body">
-                <h1 class="text-center text-info text-uppercase">'.$defaultClientData->client_name.'</h1>
-                <section class="section">
-                    <div class="container">
-                        <div class="mt-3 text-center font-18">
-                            <div class="page-inner">
-                                <div class="page-description">
-                                    <h3>Account '.$defaultClientData->client_state.'</h3>
-                                </div>
-                                <div class="text-danger">
-                                    Your Account '.(in_array($defaultClientData->client_state, ["Suspended"]) ? "is Suspended" : "Expired on <strong>{$clientPrefs->account->expiry}</strong>").'.
-                                    Please contact the <a href="#" onclick="loadPage(\''.$baseUrl.'support\')"><strong>Support Section</strong></a> to rectify the issue.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </div>';
-    } else {
-
-    // append more values for loading
-    $userData->date_range = date("Y-m-d", strtotime("-20 days")).':'.date("Y-m-t", strtotime("+20 days"));
-    $userData->events_date_range = date("Y-m-d", strtotime("-120 days")).':'.date("Y-m-t", strtotime("+120 days"));
-
-    // load the events list
-    $events_list = $eventClass->events_list($userData);
-
-    $wards_list = "";
-    $assigments_list = "";
-    $upcoming_events_list = "";
-    $upcoming_birthday_list = "";
-
-    // create an init array to use
-    $event_array = ["holidays_list", "calendar_events_list"];
-
-    // merge the two array sets
-    $events_array_list = array_merge($events_list->holidays_list, $events_list->calendar_events_list);
-
-    // sort the array
-    function sort_date($a, $b) {
-        return strtotime($a["start"]) - strtotime($b["start"]);
-    }
-
-    // order the array set using the date of the event
-    usort($events_array_list, "sort_date");
-    $reversed_array_list = array_reverse($events_array_list);
-
-    // loop through the array list
-    foreach($reversed_array_list as $event) {
-        // append to the events list
-        $upcoming_events_list .= "
-            <li class='media'>
-                <div class='media-body' style='flex: 2;'>
-                    <div class='media-title'>
-                        {$event["title"]} ".($event["event_group"] === "holidays_list" ? "<span class='badge p-1 badge-success'>Holiday</span>" : "")."
-                    </div>
-                    <div class='text-job text-muted'>{$event["event_type"]}</div>
-                </div>
-                <div class='media-progressbar'>
-                    <div class='progress-text'>".date("jS M Y", strtotime($event["start"]))."</div>
-                </div>
-                <div>
-                    <span onclick='return view_Event_Details(\"{$event["event_group"]}\", \"{$event["item_id"]}\")' class='badge cursor badge-primary'>Detail</span>
-                </div>
-            </li>";
-    }
-
-    // if the birthday array is not empty
-    if(!empty($events_list->birthday_list) && $isAdminAccountant) {
+    // set the data to stream for an admin user
+    if($isAdminAccountant) {
         
-        // loop through the array list
-        foreach($events_list->birthday_list as $event) {
-            
-            // format the date of birth
-            $clean_date = date("Y").'-'.$event["description"]->the_month.'-'.$event["description"]->the_day;
+        // create a new events object
+        $eventClass = load_class("events", "controllers");
 
-            $upcoming_birthday_list .= "
+        if($isAdmin) {
+            // set the stream
+            $data_stream = 'id="data-report_stream" data-report_stream="attendance_report,summary_report,transaction_revenue_flow"';
+        } else {
+            $data_stream = 'id="data-report_stream" data-report_stream="summary_report,transaction_revenue_flow"';
+        }
+        // load the events list
+        $events_list = $eventClass->events_list($userData);
+
+        // list of summary content
+        $summary_list = [
+            ["label" => "This week", "title" => "Overall Income", "favicon" => "fa-money-bill", "border" => "success", "sum_tag" => "total_income_received", "left-border" => "border-green"],
+            ["label" => "This week", "title" => "Expenditure", "favicon" => "fa-money-bill-alt", "border" => "danger", "sum_tag" => "total_expenditure", "left-border" => "border-danger"],
+            ["label" => "This week", "title" => "Bank Deposits", "favicon" => "fa-desktop", "border" => "info", "sum_tag" => "Bank_Deposit", "left-border" => "border-blue"],
+            ["label" => "This week", "title" => "Bank Withdrawals", "favicon" => "fa-wind", "border" => "warning", "sum_tag" => "Bank_Withdrawal", "left-border" => "border-orange"],
+            ["label" => "This week", "title" => "Bank Reconciliation", "favicon" => "fa-balance-scale", "border" => "dark", "sum_tag" => "Bank_Recons", "left-border" => "border-black"],
+            ["label" => "Overall", "title" => "Account Balance", "favicon" => "fa-balance-scale", "border" => "primary", "sum_tag" => "account_balance", "left-border" => "border-purple"]
+        ];
+
+        // include the scripts to load
+        $response->scripts = ["assets/js/analitics.js", "assets/js/clock.js"];
+
+        // create an init array to use
+        $event_array = ["holidays_list", "calendar_events_list"];
+
+        // merge the two array sets
+        $events_array_list = array_merge($events_list->holidays_list, $events_list->calendar_events_list);
+
+        // sort the array
+        function sort_date($a, $b) {
+            return strtotime($a["start"]) - strtotime($b["start"]);
+        }
+
+        // order the array set using the date of the event
+        usort($events_array_list, "sort_date");
+        $reversed_array_list = array_reverse($events_array_list);
+
+        // loop through the array list
+        foreach($reversed_array_list as $event) {
+            // append to the events list
+            $upcoming_events_list .= "
                 <li class='media'>
-                    <img title='Click to view student details' class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$event["description"]->image}\">
-                    <div class='media-body ml-2' style='flex: 2;'>
+                    <div class='media-body' style='flex: 2;'>
                         <div class='media-title'>
-                            {$event["description"]->name}<br>
-                        </div>                    
+                            {$event["title"]} ".($event["event_group"] === "holidays_list" ? "<span class='badge p-1 badge-success'>Holiday</span>" : "")."
+                        </div>
+                        <div class='text-job text-muted'>{$event["event_type"]}</div>
                     </div>
                     <div class='media-progressbar'>
-                        <div class='progress-text'>".date("D, jS M Y", strtotime($clean_date))."</div>
+                        <div class='progress-text'>".date("jS M Y", strtotime($event["start"]))."</div>
+                    </div>
+                    <div>
+                        <span onclick='return view_Event_Details(\"{$event["event_group"]}\", \"{$event["item_id"]}\")' class='badge cursor badge-primary'>Detail</span>
                     </div>
                 </li>";
         }
 
+        // if the birthday array is not empty
+        if(!empty($events_list->birthday_list) && $isAdminAccountant) {
+
+            // loop through the array list
+            foreach($events_list->birthday_list as $event) {
+                
+                // format the date of birth
+                $clean_date = date("Y").'-'.$event["description"]->the_month.'-'.$event["description"]->the_day;
+
+                // format the upcoming birthday list
+                $upcoming_birthday_list .= "
+                    <li class='media'>
+                        <img title='Click to view student details' class='rounded-circle cursor author-box-picture' width='40px' src=\"{$baseUrl}{$event["description"]->image}\">
+                        <div class='media-body ml-2' style='flex: 2;'>
+                            <div class='media-title'>
+                                <span class='user_name' onclick='return load(\"{$event["link"]}/{$event["description"]->item_id}\");'>
+                                ".strtoupper($event["description"]->name)."</span><br>
+                                ".(
+                                    !empty($event["description"]->class_name) ? 
+                                        "<small>".strtoupper($event["description"]->class_name)."</small><br>" : null
+                                )."
+                                <span class='badge badge-{$myClass->user_colors[$event["description"]->user_type]} p-1'>".strtoupper($event["description"]->user_type)."</span>
+                            </div>                    
+                        </div>
+                        <div class='media-progressbar'>
+                            <div class='progress-text md-right text-uppercase'>".date("D, jS M", strtotime($clean_date))."</div>
+                        </div>
+                    </li>";
+            }
+
+        }
+
+        // append the events list as part of the results
+        $response->array_stream["events_array_list"] = $events_list;
+
     }
 
-    // load the assignments list
-    else if($isTutorStudent) {
+    // if the user logged in is a tutor or an student
+    elseif($isTutorStudent) {
         // unset the session
         $session->remove("assignment_uploadID");
 
@@ -300,11 +172,11 @@ if($isSupport) {
         // unset the sessions if $session->currentQuestionId is not empty
         foreach($assignments_array_list["data"] as $key => $each) {
             
-            $action = "<a  href='#' onclick='return loadPage(\"{$baseUrl}assessment/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a  href='#' onclick='return load(\"assessment/{$each->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
             $assigments_list .= "<tr data-row_id=\"{$each->id}\">";
             $assigments_list .= "<td>".($key+1)."</td>";
-            $assigments_list .= "<td><a  href='#' onclick='return loadPage(\"{$baseUrl}assessment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
+            $assigments_list .= "<td><a  href='#' onclick='return load(\"assessment/{$each->item_id}/view\");'>{$each->assignment_title}</a> ".(
                 $can_Update_Assign ? 
                     "<br>Class: <strong>{$each->class_name}</strong>
                     <br>Course: <strong>{$each->course_name}</strong>" : 
@@ -331,30 +203,15 @@ if($isSupport) {
         
     }
 
-    // append the events list as part of the results
-    $response->array_stream["events_array_list"] = $events_list;
-
-    // the default data to stream
-    $data_stream = 'id="data-report_stream" data-report_stream="attendance_report"';
-
-    // set the data to stream for an admin user
-    if($isAdminAccountant) {
-        $data_stream = 'id="data-report_stream" data-report_stream="summary_report,transaction_revenue_flow"';
-    }
-
-    // append the scripts to the page
-    $response->scripts = ["assets/js/analitics.js"];
-    $timetable = "<div class='text-center'>No timetable record for today was found in the database.</div>";
-
-    // global params
-    $global_params = (object) ["client_data" => $defaultUser->client];
+    // set the data
+    $data = $defaultUser;
+    $admission_enquiry = null;
 
     // if ward/parent/tutor
     if($isWardTutorParent) {
 
         // load the use information
         $expenses_list = null;
-        $data = $defaultUser;
         $timetableClass = load_class("timetable", "controllers", $global_params);
 
         // load the wards list
@@ -367,7 +224,7 @@ if($isSupport) {
             // stream nothing if the student id has not been set yet
             if(!empty($session->student_id)) {
                 // load the class timetable for student / parent & The lessons if a teacher is logged in
-                $timetable = $timetableClass->class_timetable($session->student_class_id, $clientId, "today");    
+                $timetable = $timetableClass->class_timetable($session->student_class_id, $clientId, "today", null, "yes");    
             } else {
                 // set parameters
                 $data_stream = "";
@@ -392,10 +249,10 @@ if($isSupport) {
                     $wards_list .= "
                     <div class='mb-3 border-bottom'>
                         <div class='row'>
-                            <div class='col-lg-3 text-center'>
-                                <img src='{$baseUrl}{$ward->image}' width='80px' class='rounded-circle author-box-picture'>
+                            <div class='col-lg-2 text-center'>
+                                <img title='Click to view full details of {$ward->name}' onclick='load(\"student/{$ward->student_guid}\");' src='{$baseUrl}{$ward->image}' width='80px' class='author-box-picture cursor'>
                             </div>
-                            <div class='col-lg-9'>
+                            <div class='col-lg-10'>
                                 <table width='100%'>
                                     <tr>
                                         <td class='font-bold p-1' align='right'>Name</td>
@@ -419,7 +276,8 @@ if($isSupport) {
                                     </tr>
                                     <tr>
                                         <td colspan='2' align='right'>
-                                            ".($isCurrent ? "<span class='badge mb-2 badge-success'>Selected</span>" : "<button onclick='return set_default_Student(\"{$ward->student_guid}\")' class='btn btn-sm btn-outline-primary mb-2'>Select Student</button>")."
+                                            <button onclick='return load(\"student/{$ward->student_guid}\")' class='btn btn-sm btn-outline-success mb-2'><i class='fa fa-eye'></i> View Record</button>
+                                            ".($isCurrent ? "<span class='badge mb-2 badge-success'>SELECTED</span>" : "<button onclick='return set_default_Student(\"{$ward->student_guid}\")' class='btn btn-sm btn-outline-primary mb-2'>Select Student</button>")."
                                         </td>
                                     </tr>
                                 </table>
@@ -432,6 +290,8 @@ if($isSupport) {
                 $fees_params = (object) [
                     "clientId" => $clientId,
                     "userData" => $defaultUser,
+                    "academic_year" => $defaultAcademics->academic_year ?? null,
+                    "academic_term" => $defaultAcademics->academic_term ?? null,
                     "client_data" => $defaultUser->client,
                     "student_array_ids" => $defaultUser->wards_list_ids,
                     "group_by" => "GROUP BY a.payment_id"
@@ -465,7 +325,7 @@ if($isSupport) {
                                 ".(!empty($each->student_info->image) ? "
                                 <div class='mr-2'><img src='{$baseUrl}{$each->student_info->image}' width='40px' height='40px'></div>" : "")."
                                 <div>
-                                    <a  href='#' onclick='return loadPage(\"{$baseUrl}student/{$each->student_info->user_id}\");'>{$each->student_info->name}</a> <br>
+                                    <a  href='#' onclick='return load(\"student/{$each->student_info->user_id}\");'>{$each->student_info->name}</a> <br>
                                     
                                     {$each->class_name}
                                 </div>
@@ -509,9 +369,9 @@ if($isSupport) {
 
             // load the class timetable for student / parent & The lessons if a teacher is logged in
             if($isStudent) {
-                $timetable = $timetableClass->class_timetable($defaultUser->class_guid, $clientId, "today", 90);    
+                $timetable = $timetableClass->class_timetable($defaultUser->class_guid, $clientId, "today", 90, "yes");    
             } else {
-                $timetable = $timetableClass->teacher_timetable($defaultUser->course_ids, $clientId);
+                $timetable = $timetableClass->teacher_timetable($defaultUser->user_id, $clientId, "today");
             }
 
             // assign the assignments list
@@ -519,7 +379,7 @@ if($isSupport) {
             <div class="col-lg-12 col-md-12 col-12 col-sm-12">
                 <div class="card">
                     <div class="card-header text-uppercase">
-                        <h4>Assignments</h4>
+                        <h4>Class Assessments</h4>
                     </div>
                     <div class="card-body trix-slim-scroll" style="max-height:565px;height:565px;overflow-y:auto;">
                         <div class="table-responsive">
@@ -545,19 +405,88 @@ if($isSupport) {
             </div>';
         }
 
+        // include the scripts to load
+        $response->scripts = ["assets/js/analitics.js"];
+
     }
 
-    $global_period = $isWardParent ? "this_term" : "this_week";
+    // if the user is an employee
+    elseif($isEmployee) {
+        // load the leave applications
+        $param = (object) [
+            "userData" => $defaultUser,
+            "clientId" => $clientId,
+            "section" => "admission_enquiry",
+            "user_id" => $defaultUser->user_id
+        ];
 
-    // set the date
-    $start_date = date("Y-m-d", strtotime("monday this week"));
-    $end_date = date("Y-m-d", strtotime("sunday this week"));
+        // get the reports list
+        $frontObj = load_class("frontoffice", "controllers");
+        $results_array = $frontObj->list($param)["data"];
 
-    // set the response dataset
-    $response->html = '
-        <section class="section">
-            <div class="d-flex mt-3 justify-content-between" '.$data_stream.'></div>
-            '.($isAdminAccountant ?
+        // results list
+        $results_list = "";
+
+        // loop through the results array list
+        foreach($results_array as $key => $each) {
+    
+            $action = "<button title='View Record Details' onclick='return load(\"office_enquiry/{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></button>";
+            
+            $results_list .= "<tr data-row_id=\"{$each->id}\">";
+            $results_list .= "<td>".($key+1)."</td>";
+            $results_list .= "<td><span class='user_name' onclick='return load(\"office_enquiry/{$each->item_id}\");'>{$each->content->fullname}</span></td>";
+            $results_list .= "<td>{$each->content->phone_number}</td>";
+            $results_list .= "<td>{$each->source}</td>";
+            $results_list .= "<td>{$each->content->date}</td>";
+            $results_list .= "<td>".$myClass->the_status_label($each->state)."</td>";
+            $results_list .= "<td align='center'>{$action}</td>";
+            $results_list .= "</tr>";
+        }
+
+        // list the admission enquiry
+        $admission_enquiry = '
+            <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                
+                <div class="card">
+                    <div class="card-header text-uppercase">
+                        <h4>Admission Enquiry</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive table-student_staff_list">
+                            <table class="table table-bordered table-sm table-striped datatable">
+                                <thead>
+                                    <tr>
+                                        <th width="5%" class="text-center">#</th>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Source</th>
+                                        <th>Enquiry Date</th>
+                                        <th>Status</th>
+                                        <th width="12%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>'.$results_list.'</tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>';
+    }
+
+    $response->html = $myClass->async_notification().'
+    <section class="section">
+        <div class="default_period" data-current_period="'.$global_period.'">
+        <div class="d-flex mt-3 justify-content-between" '.$data_stream.'></div>
+        <h4 class="border-bottom border-primary mb-2">Hello '.trim($defaultUser->name).', </h4>';
+        
+        // load this section for admins and accountants
+        if($isAdminAccountant) {
+
+            // if an admin is logged in
+            if($isAdmin) {
+                $response->html .=
                 '<div class="row">
                     <div class="col-xl-3 col-lg-6 col-md-6">
                         <div class="card">
@@ -615,76 +544,300 @@ if($isSupport) {
                             <div class="card-body pb-1 pt-3">
                                 <div align="center">
                                     <h6 class="border-bottom font-13 text-uppercase font-bold p-0 pb-2 mb-2 m-0">'.date("l, F d, Y").'</h6>
-                                    <h3 class="p-0 m-0">'.date("h:i A").'</h3>
+                                    <h3 class="p-0 m-0"><div class="plugin-clock">'.date("h:i A").'</div></h3>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>' : ''
-            ).'
-            '.($isAdminAccountant ?
-            '<div class="row">
-                <div class="col-lg-8 col-md-12">
-                    <div class="card">
-                        <div class="card-body" style="min-height:235px">
-                            <div class="row">
-                                <div align="center" class="col-sm-3">
-                                    <img width="180px" src="'.$baseUrl.''.$defaultClientData->client_logo.'">
-                                </div>
-                                <div align="center" class="p-1 col-sm-9">
-                                    <div style="align-items:center;">
-                                        <h1 class="text-uppercase client_name text-info">'.$defaultClientData->client_name.'</h1>
-                                        <div class="'.(!empty($defaultClientData->client_slogan) ? "mb-1" : null).' text-uppercase text-primary font-15">'.$defaultClientData->client_slogan.'</div>
-                                        <div class="font-15">'.$defaultClientData->client_email.'</div>
-                                        <div class="mt-2 font-13">'.($defaultClientData->client_website ?  $defaultClientData->client_website : "-").'</div>
-                                        <div class="text-uppercase mt-2 font-17">'.($defaultClientData->client_location ?  $defaultClientData->client_location : "-").'</div>
-                                        <div class="text-uppercase mt-2 font-17">
-                                            '.$defaultClientData->client_contact.'
-                                            '.(!empty($defaultClientData->client_secondary_contact) ? " / {$defaultClientData->client_secondary_contact}" : null).'
+                </div>';
+            }
+
+            $response->html .= '<div class="row">';
+            
+            // if the user is an admin
+            if($isAdmin) {
+                $response->html .= '
+                <div class="col-lg-12">
+                    <div class="row">
+                    <div class="col-lg-8 col-md-7">
+                        <div class="card">
+                            <div class="card-body school-details" style="min-height:235px">
+                                <div class="row">
+                                    <div align="center" class="col-sm-3">
+                                        <img width="100%" class="school-logo" src="'.$baseUrl.''.$defaultClientData->client_logo.'">
+                                    </div>
+                                    <div align="center" class="p-1 col-sm-9">
+                                        <div style="align-items:center;">
+                                            <h3 class="text-uppercase">'.$defaultClientData->client_name.'</h3>
+                                            <div class="'.(!empty($defaultClientData->client_slogan) ? "mb-1" : null).' text-uppercase font-15">'.$defaultClientData->client_slogan.'</div>
+                                            <div class="font-15">'.$defaultClientData->client_email.'</div>
+                                            <div class="text-uppercase mt-2 font-17">'.$defaultClientData->client_location.'</div>
+                                            <div class="text-uppercase mt-2 font-17">
+                                                '.$defaultClientData->client_contact.'
+                                                '.(!empty($defaultClientData->client_secondary_contact) ? " / {$defaultClientData->client_secondary_contact}" : null).'
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-4 col-md-12">
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-body pl-2 pr-2 pb-2" align="center">
-                                    <p class="font-16 p-0 m-0 text-primary">Academic Year</p>
-                                    <h5 class="mt-2 pt-0">'.$clientPrefs->academics->academic_year.'</h5>
-                                    <span class="font-16 font-bold">
-                                        '.date("F d, Y", strtotime($clientPrefs->academics->year_starts)).' 
-                                            &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
-                                        '.date("F d, Y", strtotime($clientPrefs->academics->year_ends)).'
-                                    </span>
-                                    <hr>
-                                    <p class="font-16 p-0 m-0 text-primary">Term</p>
-                                    <h5 class="mt-0 pt-0 text-uppercase">'.$clientPrefs->academics->academic_term.'</h5>
-                                    <span class="font-16 font-bold">
-                                        '.date("F d, Y", strtotime($clientPrefs->academics->term_starts)).' 
-                                            &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
-                                        '.date("F d, Y", strtotime($clientPrefs->academics->term_ends)).'
-                                    </span>
+                    <div class="col-lg-4 col-md-5">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-body mb-2 pl-2 pr-2 pb-2" align="center">
+                                        <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
+                                        <h5 class="mt-2 pt-0">'.$defaultAcademics->academic_year.'</h5>
+                                        <span class="font-16 font-bold">
+                                            '.date("F d, Y", strtotime($defaultAcademics->year_starts)).' 
+                                                &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
+                                            '.date("F d, Y", strtotime($defaultAcademics->year_ends)).'
+                                        </span>
+                                        <hr>
+                                        <p class="font-16 p-0 m-0 text-primary text-uppercase">'.$academicSession.'</p>
+                                        <h5 class="mt-0 pt-0 text-uppercase">'.$defaultAcademics->academic_term.'</h5>
+                                        <span class="font-16 font-bold">
+                                            '.date("F d, Y", strtotime($defaultAcademics->term_starts)).' 
+                                                &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
+                                            '.date("F d, Y", strtotime($defaultAcademics->term_ends)).'
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>';
+            }
+
+            // if an account is logged in
+            if($isAccountant) {
+                // loop through the summary array listing
+                foreach($summary_list as $item) {
+                    $response->html .= '
+                    <div class="col-lg-2 col-sm-2 col-md-3">
+                        <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid '.$item["left-border"].'">
+                            <div class="card-header border-'.($item["border"] ?? null).' p-2">
+                                <i class="fa text-'.($item["border"] ?? null).' '.$item["favicon"].'"></i> 
+                                &nbsp; '.$item["title"].'
+                            </div>
+                            <div class="card-body pl-2 p-0 font-25"><span data-count="'.$item["sum_tag"].'">0.00</span></div>
+                            <div class="card-footer pl-2 pt-0 p-0">
+                                <em><span class="text-primary font-14" '.($item["label"] !== "Overall" ? 'data-filter="current_period"' : null).'>
+                                    '.$item["label"].'
+                                </span></em>
+                            </div>
+                        </div>
+                    </div>';
+                }
+            }
+
+            $response->html .= '
+                <div class="col-lg-4 col-md-12 col-12 col-sm-12">
+                    <div class="card">
+                        <div class="card-header pr-2">
+                            <div class="row width-per-100">
+                                <div class="col-md-9">
+                                    <h4 class="text-uppercase font-13">Students Per Class Count</h4>
+                                </div>
+                                <div class="col-md-3 text-success text-right p-0">
+                                    Total: <span data-count="total_students_count" class="font-bold font-20 mb-0">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body trix-slim-scroll quick_loader" id="class_count_list" style="max-height:465px;height:465px;overflow-y:auto;">
+                            <div class="form-content-loader" style="display: flex; position: absolute">
+                                <div class="offline-content text-center">
+                                    <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            ' : 
-            null).'
-            <div class="row default_period" data-current_period="'.$global_period.'">
-
+                <div class="col-lg-8 col-md-8">
+                    <div class="card">
+                        <div class="card-header pr-0">
+                            <div class="row width-100">
+                                <div class="col-md-2">
+                                    <h4 class="text-uppercase font-13">Revenue</h4>
+                                </div>
+                                <div align="right" class="col-md-10">
+                                    <div class="btn-group" data-filter="quick_summary_filter" role="group" aria-label="Filter Revenue">
+                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="yesterday" class="btn sm-hide btn-info">Yesterday</button>
+                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="today" class="btn btn-info">Today</button>
+                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_week" class="btn active btn-info">This Week</button>
+                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="last_week" class="btn sm-hide btn-info">Last Week</button>
+                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_month" class="btn btn-info">This Month</button>
+                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_term" class="btn btn-info">This '.$academicSession.'</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body quick_loader dashboard_revenue" style="min-height:465px;">
+                            <div class="table-responsive">
+                                <div class="form-content-loader" style="display: flex; position: absolute">
+                                    <div class="offline-content text-center">
+                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between border-bottom pb-2">
+                                    <div class="mb-1 amount text-center">
+                                        <h4 class="text-primary">
+                                            <span data-summary="amount_due">0.00</span>
+                                        </h4>
+                                        <label>Fees Due</label>
+                                    </div>
+                                    <div class="mb-1 amount text-center">
+                                        <h4 class="text-success">
+                                            <span data-summary="amount_paid">0.00</span>
+                                        </h4>
+                                        <label>Fees Paid</label>
+                                    </div>
+                                    <div class="mb-1 amount text-center">
+                                        <h4 class="text-danger">
+                                            <span data-count="total_balance">0.00</span>
+                                        </h4>
+                                        <label>Fees Balance</label>
+                                    </div>
+                                    <div class="mb-1 amount text-center">
+                                        <h4 class="text-success">
+                                            <span '.($isAdmin ? 'data-count="total_expenditure"' : 'data-summary="arrears_paid"').'>0.00</span>
+                                        </h4>
+                                        <label>'.($isAdmin ? 'Total Expenses' : 'Arrears Paid').'</label>
+                                    </div>
+                                    <div class="mb-1 amount text-center">
+                                        <h4 class="text-warning">
+                                            <span data-count="arrears_total">0.00</span>
+                                        </h4>
+                                        <label>Arrears Balance</label>
+                                    </div>
+                                </div>
+                                <div class="card-body mt-0 pt-2" data-chart="revenue_category_chart">
+                                    <div id="revenue_category_chart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 '.(
-                    $isTutorStudent ?
+                    $isAdmin ?
+                    '<div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                        <div class="card">
+                            <div class="card-header pr-0">
+                                <div class="row width-100">
+                                    <div class="col-md-7">
+                                        <h4 class="text-uppercase font-13">Attendance Logs</h4>
+                                    </div>
+                                    <div align="right" class="col-md-5">
+                                        <div class="btn-group" data-filter="quick_attendance_filter" role="group" aria-label="Filter Attendance">
+                                            <button type="button" data-stream="attendance_report" data-period="last_week" class="btn btn-info">Last Week</button>
+                                            <button type="button" data-stream="attendance_report" data-period="this_week" class="btn active btn-info">This Week</button>
+                                            <button type="button" data-stream="attendance_report" data-period="this_month" class="btn btn-info">This Month</button>
+                                            <button type="button" data-stream="attendance_report" data-period="last_month" class="btn btn-info">Last Month</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body pb-0">
+                                <div data-chart_container="attendance_log_chart">
+                                    <div id="attendance_log_chart" style="min-height:350px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>' : null
+                );
+            
+            // load the class payment information by class only
+            if($isAccountant) {
+                $response->html .= '
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header pr-0">
+                            <div class="row width-100">
+                                <div class="col-md-5">
+                                    <h4>Fees Payment by Class</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body pb-0 quick_loader">
+                            <div class="form-content-loader" style="display: flex; position: absolute">
+                                <div class="offline-content text-center">
+                                    <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
+                                </div>
+                            </div>
+                            <div data-chart="class_fees_payment_chart">
+                                <div id="class_fees_payment_chart" style="width:100%;max-height:420px;height:420px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>';
+            }
+
+            // if the user logged in is an admin
+            if($isAdminAccountant) {
+                // append the data
+                $response->html .= '
+                    <div class="col-lg-4 col-md-6 col-12 col-sm-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="text-uppercase font-13">Students</h4>
+                            </div>
+                            <div class="card-body" data-chart="male_female_comparison">
+                                <canvas style="max-height:225px;height:225px;" id="male_female_comparison"></canvas>
+                            </div>
+                            <div class="card-footer">
+                                <div class="student-report">
+                                    <div class="student-count pseudo-bg-blue">
+                                        <h4 class="item-title">Female Students</h4>
+                                        <div class="item-number" data-sex_count="Female"></div>
+                                    </div>
+                                    <div class="student-count pseudo-bg-yellow">
+                                        <h4 class="item-title">Male Students</h4>
+                                        <div class="item-number" data-sex_count="Male"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-12 col-sm-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="text-uppercase font-13">Upcoming Events</h4>
+                            </div>
+                            <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
+                                <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
+                                    '.$upcoming_events_list.'
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-12 col-sm-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="text-uppercase font-13">Upcoming Birthdays</h4>
+                            </div>
+                            <div class="pl-1 pr-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
+                                <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
+                                    '.$upcoming_birthday_list.'
+                                </ul>
+                            </div>
+                        </div>
+                    </div>';
+            }
+
+        } elseif($isWardTutorParent || $isEmployee) {
+
+            // if the user logged in is a tutor or student
+            $response->html .= '
+            <div class="row default_period" data-current_period="'.$global_period.'">
+                '.(
+                    $isTutorStudent || $isEmployee ?
                     '<div class="col-lg-12">
                         '.($data_stream ? 
                             '<div class="row">
                                 <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1">
+                                    <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid">
                                         <i class="fas fa-user-check card-icon col-green"></i>
                                         <div class="card-wrap">
                                             <div class="padding-20">
@@ -697,7 +850,7 @@ if($isSupport) {
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1">
+                                    <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-danger border-left-solid">
                                         <i class="fas fa-user-alt-slash card-icon col-red"></i>
                                         <div class="card-wrap">
                                             <div class="padding-20">
@@ -710,8 +863,8 @@ if($isSupport) {
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1">
-                                        <i class="fas fa-user-edit card-icon col-blue"></i>
+                                    <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-purple border-left-solid">
+                                        <i class="fas fa-user-edit card-icon col-purple"></i>
                                         <div class="card-wrap">
                                             <div class="padding-20">
                                                 <div class="text-right">
@@ -723,13 +876,13 @@ if($isSupport) {
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-sm-12">
-                                    <div class="card card-statistic-1">
+                                    <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-blue border-left-solid">
                                         <i class="fas fa-list card-icon col-blue"></i>
                                         <div class="card-wrap">
                                             <div class="padding-20">
                                                 <div class="text-right">
                                                     <h3 data-attendance_count="Term" class="font-light mb-0">0</h3>
-                                                    <span class="text-muted">Term Days</span>
+                                                    <span class="text-muted">'.$academicSession.' Days</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -739,13 +892,12 @@ if($isSupport) {
                         ).'
                     </div>' : null
                 ).'
-
-                '.($isWardTutorParent ?
+                '.($isWardTutorParent || $isEmployee ?
                 '<div class="col-lg-4 col-md-12">
                     <div class="card">
-                        '.($isTutorStudent ?
+                        '.($isTutorStudent || $isEmployee ?
                             '<div class="card-header">
-                                <h5 class="pb-0 mb-0 text-uppercase">About Me</h5>
+                                <h4>ABOUT ME</h4>
                             </div>
                             <div class="card-body mt-0 pt-0 pb-0">
                                 <div class="py-4">
@@ -823,7 +975,7 @@ if($isSupport) {
                     '<div>
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="text-uppercase">Upcoming Events</h4>
+                                <h4 class="text-uppercase font-13">Upcoming Events</h4>
                             </div>
                             <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
@@ -835,17 +987,17 @@ if($isSupport) {
                 </div>
                 <div class="col-lg-8 p-0 col-md-12">
                     <div class="row">
-                        '.($isTutorStudent ? null : '
-                            <div class="col-lg-4 col-md-6 col-sm-6 col-12">
+                        '.($isParent ?                             
+                            '<div class="col-lg-4 col-md-6 col-sm-6 col-12">
                                 <div class="card card-statistic-1">
                                     <i class="fas fa-users card-icon col-red"></i>
                                     <div class="card-wrap">
-                                    <div class="padding-20">
-                                        <div class="text-right">
-                                            <h3 class="font-light mb-0">'.$wards_count.'</h3>
-                                            <span class="text-muted">Wards</span>
+                                        <div class="padding-20">
+                                            <div class="text-right">
+                                                <h3 class="font-light mb-0">'.$wards_count.'</h3>
+                                                <span class="text-muted">Wards</span>
+                                            </div>
                                         </div>
-                                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -860,142 +1012,20 @@ if($isSupport) {
                                         </div>
                                     </div>
                                     </div>
-                                </div>'
-                            ).'
-                        </div>
-                        '.($isTutorStudent ? $assignment_list : $expenses_list).'
+                                </div>
+                            </div>' : null
+                        ).'
+                        '.($isTutorStudent ? $assignment_list : ($expenses_list ?? $admission_enquiry)).'
                     </div>
                 </div>
                 ' : '').'
             </div>
             <div class="row">
-                '.($isAdminAccountant ? 
-                    '<div class="col-lg-12 col-md-12 col-12 col-sm-12">
-                        <div class="card">
-                            <div class="card-header pr-0">
-                                <div class="row width-100">
-                                    <div class="col-lg-2 col-md-2">
-                                        <h4 class="text-uppercase font-13">Revenue</h4>
-                                    </div>
-                                    <div align="right" class="col-lg-10 col-md-10">
-                                        <div class="btn-group mb-2" data-filter="quick_summary_filter" role="group" aria-label="Filter Revenue">
-                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="yesterday" class="btn sm-hide btn-info">Yesterday</button>
-                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="today" class="btn btn-info">Today</button>
-                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="last_week" class="btn btn-info">Last Week</button>
-                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_week" class="btn active btn-info">This Week</button>
-                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_month" class="btn btn-info">This Month</button>
-                                            <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_term" class="btn btn-info">This Term</button>
-                                            
-                                            <input value="'.$start_date.'" style="max-width:110px;" type="text" class="form-control sm-hide text-center ml-2 mr-2 datepicker" name="d_start" id="d_start">
-                                            <input value="'.$end_date.'" type="text" style="max-width:110px;" class="form-control sm-hide text-center ml-2 mr-2 datepicker" name="d_end" id="d_end">
-                                            <button onclick="return filter_Transaction_Summary(\'summary_report,transaction_revenue_flow\');" type="filter" class="btn sm-hide btn-success"><i class="fa fa-filter"></i> Filter</button>
-                                            <a data-href="summary_link" target="_blank" href="'.$baseUrl.'download/accounting?display=notes&item=summary&start_date='.$start_date.'&end_date='.$end_date.'&group_by=day&breakdown=true" class="btn btn-outline-primary ml-2"><i class="fa fa-print"></i> Print</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body quick_loader dashboard_revenue" style="min-height:465px;">
-                                <div class="table-responsive">
-                                    <div class="form-content-loader" style="display: flex; position: absolute">
-                                        <div class="offline-content text-center">
-                                            <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-between border-bottom pb-2">
-                                        <div class="mb-1 amount text-center">
-                                            <h4 class="text-primary">
-                                                <span data-count="total_balance">0.00</span>
-                                            </h4>
-                                            <label>Current Fees Balance</label>
-                                        </div>
-                                        <div class="mb-1 amount text-center">
-                                            <h4 class="text-success">
-                                                <span data-summary="amount_paid">0.00</span>
-                                            </h4>
-                                            <label>Fees Paid</label>  <small data-filter="current_period" class="text-info font-bold">(This Week)</small>
-                                        </div>
-                                        <div class="mb-1 amount text-center">
-                                            <h4 class="text-info">
-                                                <span data-count="total_income_received">0.00</span>
-                                            </h4>
-                                            <label>Overall Income</label>  <small data-filter="current_period" class="text-info font-bold">(This Week)</small>
-                                        </div>
-                                        <div class="mb-1 amount text-center">
-                                            <h4 class="text-danger">
-                                                <span data-count="total_expenditure">0.00</span>
-                                            </h4>
-                                            <label>Total Expenses</label> <small data-filter="current_period" class="text-info font-bold">(This Week)</small>
-                                        </div>
-                                        <div class="mb-1 amount text-center">
-                                            <h4 class="text-success">
-                                                <span data-summary="arrears_paid">0.00</span>
-                                            </h4>
-                                            <label>Arrears Paid</label>  <small data-filter="current_period" class="text-info font-bold">(This Week)</small>
-                                        </div>
-                                        <div class="mb-1 amount text-center">
-                                            <h4 class="text-warning">
-                                                <span data-count="arrears_total">0.00</span>
-                                            </h4>
-                                            <label>Arrears Balance</label>
-                                        </div>
-                                    </div>
-                                    <div class="card-body mt-0 pt-2" data-chart="revenue_category_chart">
-                                        <div id="revenue_category_chart"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-lg-12 col-md-12 col-12 col-sm-12">
-
-                        <div class="card">
-                            <div class="card-header pr-0">
-                                <div class="row width-100">
-                                    <div class="col-md-5">
-                                        <h4 class="text-uppercase font-13">Income & Expenditure Summary</h4>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-body mb-0 p-0 pb-3" style="min-height:250px" id="trasaction_container">
-                                <div class="form-content-loader" style="display: none; position: absolute">
-                                    <div class="offline-content text-center">
-                                        <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
-                                    </div>
-                                </div>
-                                <table class="table table-bordered table-md" id="transaction_summary" width="100"></table>
-                            </div>
-                        </div>                            
-                    </div>
-
-                    <div class="col-lg-4 col-md-6 col-12 col-sm-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="text-uppercase font-13">Students</h4>
-                            </div>
-                            <div class="card-body" data-chart="male_female_comparison">
-                                <canvas style="max-height:225px;height:225px;" id="male_female_comparison"></canvas>
-                            </div>
-                            <div class="card-footer">
-                                <div class="student-report">
-                                    <div class="student-count pseudo-bg-blue">
-                                        <h4 class="item-title">Female Students</h4>
-                                        <div class="item-number" data-sex_count="Female"></div>
-                                    </div>
-                                    <div class="student-count pseudo-bg-yellow">
-                                        <h4 class="item-title">Male Students</h4>
-                                        <div class="item-number" data-sex_count="Male"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>' : ''
-                ).'
-                '.(!$isParent && !$isTutor ? 
+                '.(!$isWardTutorParent && !$isEmployee ? 
                     '<div class="col-lg-4 col-md-6 col-12 col-sm-12">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="text-uppercase">Upcoming Events</h4>
+                                <h4 class="text-uppercase font-13">Upcoming Events</h4>
                             </div>
                             <div class="card-body pr-2 pl-2 trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
                                 <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
@@ -1004,23 +1034,18 @@ if($isSupport) {
                             </div>
                         </div>
                     </div>' : null).'
-                '.($isAdminAccountant ? 
-                    '<div class="col-lg-4 col-md-6 col-12 col-sm-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="text-uppercase font-13">Upcoming Birthdays</h4>
-                            </div>
-                            <div class="card-body trix-slim-scroll" style="max-height:345px;height:345px;overflow-y:auto;">
-                                <ul class="list-unstyled user-progress list-unstyled-border list-unstyled-noborder">
-                                    '.$upcoming_birthday_list.'
-                                </ul>
-                            </div>
-                        </div>
-                    </div>' : '
+                '.($isAdminAccountant || $isEmployee ? null : '
                     <div class="col-lg-12 col-sm-12">
                         <div class="card">
-                            <div class="card-header text-uppercase">
-                                <h4>'.($isWardParent ? "Today's Timetable": "Today's Lessons to Teach").'</h4>
+                            <div class="card-header width-100-per pr-0 text-uppercase">
+                                <div class="row width-per-100">
+                                    <div class="col-md-9">
+                                        <h4>'.($isWardParent ? "Today's Timetable": "Today's Lessons to Teach").'</h4>
+                                    </div>
+                                    <div class="col-md-3 p-0">
+                                        '.(($isWardParent && $session->student_id) || $isTutor ? '<button onclick="load(\'gradebook\');" class="btn btn-block btn-primary"><i class="fa fa-book-open"></i> LESSON MANAGER</button>' : null).'
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-body pt-2 trix-slim-scroll table-responsive">
                                 '.$timetable.'
@@ -1028,12 +1053,157 @@ if($isSupport) {
                         </div>
                     </div>'
                 ).'
-            </div>
-        </section>';
+            </div>';
+        }
 
-    }
+        // if a support personnel has been logged in
+        else if($isSupport) {
+
+            // init values
+            $counter = [
+                'Expired' => 0,
+                'Pending' => 0,
+                'Activated' => 0,
+                'Suspended' => 0,
+                'Active' => 0,
+                'Propagation' => 0,
+                'Complete' => 0
+            ];
+            $schools_list = "";
+            $load_schools_list = $myClass->pushQuery("*", "clients_accounts");
+
+            // loop through the list of schools
+            foreach($load_schools_list as $key => $school) {
+                
+                $counter[$school->client_state] += 1;
+
+                $action = null;
+                if($school->client_id !== "MSGH0001") {
+                    $action = "<button title='Manage {$school->client_name} Account Information' onclick='return load(\"schools/{$school->client_id}\")' class='btn btn-outline-success btn-sm'><i class='fa fa-edit'></i></button>";
+                    $action .= " <button title='View Update History of {$school->client_name} Account' onclick='return load(\"schools/history/{$school->client_id}\")' class='btn btn-outline-primary btn-sm'><i class='fa fa-comments'></i></button>";
+                }
+
+                $schools_list .= "
+                    <tr>
+                        <td>".($key + 1)."</td>
+                        <td>
+                            <span class='text-primary hover cursor text-uppercase font-bold' ".(!empty($action) ? "onclick='return load(\"schools/{$school->client_id}\")'" : null).">{$school->client_name}</span>
+                            <br> <strong>{$school->client_id}</strong>
+                        </td>
+                        <td>{$school->client_email}
+                        <br>{$school->client_contact}
+                        <br>{$school->client_secondary_contact}</td>
+                        <td>{$school->client_address}</td>
+                        <td>{$myClass->the_status_label($school->client_state)}</td>
+                        <td align='center'>{$action}</td>
+                    </tr>";
+            }
+
+            // set the html string
+            $response->html = '
+                <div class="row">
+                    <div class="col-xl-3 col-lg-6 col-md-6">
+                        <div class="card">
+                            <div class="card-body pr-3 pl-3 card-type-3">
+                                <div class="row">
+                                    <div class="col">
+                                        <h6 class="font-14 text-uppercase font-bold mb-0">REGISTERED SCHOOLS</h6>
+                                        <span class="font-bold font-20 mb-0">'.count($load_schools_list).'</span>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="card-circle l-bg-orange text-white">
+                                            <i class="fas fa-book-open"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-6">
+                        <div class="card">
+                            <div class="card-body card-type-3">
+                                <div class="row">
+                                    <div class="col">
+                                        <h6 class="font-14 text-uppercase font-bold mb-0">ACTIVE SCHOOLS</h6>
+                                        <span class="font-bold font-20 mb-0">'.($counter["Active"] + $counter["Propagation"] + $counter["Complete"] + $counter["Activated"]).'</span>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="card-circle l-bg-green text-white">
+                                            <i class="fas fa-landmark"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-6">
+                        <div class="card">
+                            <div class="card-body card-type-3">
+                                <div class="row">
+                                    <div class="col">
+                                        <h6 class="font-14 text-uppercase font-bold mb-0">INACTIVE SCHOOLS</h6>
+                                        <span class="font-bold font-20 mb-0">'.
+                                            ($counter["Expired"] + $counter["Pending"] + $counter["Suspended"])
+                                        .'</span>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="card-circle l-bg-orange text-white">
+                                            <i class="fas fa-home"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-6">
+                        <div class="card">
+                            <div class="card-body card-type-3">
+                                <div class="row">
+                                    <div class="col">
+                                        <h6 class="font-14 text-uppercase font-bold mb-0">SUPPORT USERS</h6>
+                                        <span class="font-bold font-20 mb-0">0</span>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="card-circle l-bg-orange text-white">
+                                            <i class="fas fa-users"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-12">
+                        <div class="card">
+                            <div class="card-header">SCHOOLS LIST</div>
+                            <div class="card-body">
+                                <div class="table-responsive table-student_staff_list">
+                                    <table class="table table-bordered table-sm table-striped raw_datatable">
+                                        <thead>
+                                            <tr>
+                                                <th width="6%" class="text-center">#</th>
+                                                <th>SCHOOL NAME</th>
+                                                <th>PHONE / EMAIL</th>
+                                                <th>ADDRESS</th>
+                                                <th>STATUS</th>
+                                                <th width="10%"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>'.$schools_list.'</tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>';
+        }
+        
+        $response->html .= '
+        </div>
+    </section>';
 
 }
+
 // print out the response
 echo json_encode($response);
 ?>

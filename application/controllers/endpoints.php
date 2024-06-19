@@ -24,11 +24,11 @@ class Endpoints extends Myschoolgh {
 
         // filters
         $params->query = "1";
-        $params->query .= (isset($params->resource) && !empty($params->resource)) ? " AND `resource`='".strtolower($params->resource)."'" : null;
-        $params->query .= (isset($params->status) && !empty($params->status)) ? " AND `status`='".strtolower($params->status)."'" : null;
-        $params->query .= (isset($params->version) && !empty($params->version)) ? " AND `version`='".strtolower($params->version)."'" : null;
-        $params->query .= (isset($params->method) && !empty($params->method)) ? " AND `method`='".strtoupper($params->method)."'" : null;
-        $params->query .= (isset($params->endpoint_id) && !empty($params->endpoint_id)) ? " AND `item_id`='{$params->endpoint_id}'" : null;
+        $params->query .= !empty($params->resource) ? " AND `resource`='".strtolower($params->resource)."'" : null;
+        $params->query .= !empty($params->status) ? " AND `status`='".strtolower($params->status)."'" : null;
+        $params->query .= !empty($params->version) ? " AND `version`='".strtolower($params->version)."'" : null;
+        $params->query .= !empty($params->method) ? " AND `method`='".strtoupper($params->method)."'" : null;
+        $params->query .= !empty($params->endpoint_id) ? " AND `item_id`='{$params->endpoint_id}'" : null;
         $params->limit = isset($params->limit) ? (int) $params->limit : 1000;
 
         $params->resource = isset($params->resource_only) ? " GROUP BY resource" : null;
@@ -46,10 +46,18 @@ class Endpoints extends Myschoolgh {
             ");
             $stmt->execute();
 
+            // group by method or resource
+            $groupBy = isset($params->group) ? (in_array($params->group, ['method', 'resource']) ? 1 : (in_array($params->group, ['resource_method']) ? 2 : 0)) : 3;
+            
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                $result->object_params = json_decode($result->parameter);
-                $data[$result->item_id] = $result;
+                if($groupBy == 1) {
+                    $data[$result->{$params->group}][] = $result;
+                } elseif($groupBy == 2) {
+                    $data[$result->resource][$result->method][] = $result;
+                } else {
+                    $data[$result->item_id] = $result;
+                }
             }
 
             // return the data
@@ -113,6 +121,7 @@ class Endpoints extends Myschoolgh {
             }
 
             // clean the endpoint
+            $params->resource = strtolower($params->resource);
             $params->endpoint = trim(strtolower($params->endpoint), "/");
 
             // convert the status to a lowercase
@@ -131,7 +140,7 @@ class Endpoints extends Myschoolgh {
             }
 
             // create a new item id of 32 alphanumeric characters
-            $params->_item_id  = random_string("alnum", 16);
+            $params->_item_id  = random_string("alnum", RANDOM_STRING);
 
             // insert the record
             $stmt = $this->db->prepare("
@@ -186,6 +195,8 @@ class Endpoints extends Myschoolgh {
             }
 
             // convert the method to an uppercase
+            $params->resource = strtolower($params->resource);
+            $params->endpoint = strtolower($params->endpoint);
             $params->method = isset($params->method) ? strtoupper($params->method) : null;
             
             $data = "";
@@ -221,6 +232,103 @@ class Endpoints extends Myschoolgh {
         } catch(PDOException $e) {
             return $e->getMessage();
         }
+
+    }
+
+    /**
+     * Since v1.0
+     * 
+     * Update an Api Key
+     * 
+     * @param \stdClass $params
+     * 
+     * @return Object
+     */
+    public function api(stdClass $params) {
+
+        try {
+
+            global $isSupport, $isAdmin, $defaultUser;
+
+            // if the user is neither an admin or support personnel
+            if(!$isAdmin && !$isSupport) {
+                return ["code" => 203, "data" => $this->permission_denied];
+            }
+
+            // if the action was submitted
+            if(!isset($params->data["action"])) {
+                return ["code" => 203, "data" => "Ensure all required parameters were parsed."];
+            }
+
+            // set the date
+            if(in_array($params->data["action"], ["extend_date", "delete"])) {
+
+                // if the request is to extend the date
+                if(in_array($params->data["action"], ["extend_date"])) {
+
+                    // if the expiry date or the api id was not parsed
+                    if(!isset($params->data["expiry_date"]) || !isset($params->data["api_id"])) {
+                        return ["code" => 203, "data" => "Ensure all required parameters were parsed."];                
+                    }
+
+                    // set the date
+                    $date = $params->data["expiry_date"];
+                }
+
+                // set the id
+                $api_id = $params->data["api_id"];
+
+                // confirm the api key id
+                if(empty($this->pushQuery("*", "users_api_keys", "id='{$api_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
+                    // log the attempt to bypass the system security
+                    $this->db->query("INSERT INTO security_logs SET client_id='{$params->clientId}', created_by='{$params->userId}', section='Update API Key', description='The user attempted to update an <strong>API Key Expiry Date</strong> which does not belong to the user.'
+                    ");
+                    // return a warning to the user.
+                    return ["code" => 203, "data" => "Sorry! You attempted to update a non existent api key."];
+                }
+                
+                // if the request is to update the date
+                if(in_array($params->data["action"], ["extend_date"])) {
+                    // confirm the validity of the date
+                    if(!$this->validDate($params->data["expiry_date"])) {
+                        return ["code" => 203, "data" => "Sorry! An invalid date was submitted."];   
+                    }
+
+                    // update the information
+                    $this->db->query("UPDATE users_api_keys SET expiry_date='{$date}', expiry_timestamp='{$date} 11:59:00', access_type = 'permanent' WHERE id='{$api_id}' LIMIT 1");
+                } 
+                // delete the api key
+                elseif(in_array($params->data["action"], ["delete"])) {
+                    // update the information
+                    $this->db->query("UPDATE users_api_keys SET expiry_date=now(), expiry_timestamp=now(), status='0'
+                        WHERE id='{$api_id}' LIMIT 1");
+                }
+
+                // return success message
+                return ["code" => 200, "data" => "Api Key expiry date successfully updated."];
+
+            } elseif($params->data["action"] == "create") {
+
+                // set the token
+                $token = random_string("alnum", 32);
+
+                // create the temporary token
+                $this->db->query("INSERT INTO users_api_keys 
+                    SET user_id = '{$params->userId}', username = '{$defaultUser->username}', 
+                    access_token = '".password_hash($token, PASSWORD_DEFAULT)."', access_type = 'permanent', 
+                    expiry_date = '".date("Y-m-d", strtotime("+6 month"))."', 
+                    expiry_timestamp = '".date("Y-m-d H:i:s", strtotime("+6 month"))."', 
+                    requests_limit = '5000', access_key = '{$token}', client_id = '{$params->clientId}'
+                ");
+
+                return ["code" => 200, "data" => "Api Key successfully created."];
+
+            } else {
+                return ["code" => 203, "data" => "Sorry! An unknown request was parsed."];
+            }
+
+
+        } catch(PDOException $e) {}
 
     }
 

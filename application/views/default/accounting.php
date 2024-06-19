@@ -8,16 +8,16 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $myschoolgh, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Accounting Reports";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 
 // confirm that the user has the required permissions
@@ -92,8 +92,8 @@ if(!$accessObject->hasAccess("reports", "accounting")) {
                                                     </div>
                                                     <div align="right" class="col-lg-7 pr-0">
                                                         <div class="btn-group mb-2" role="group" aria-label="Filter Revenue">
-                                                            <input value="'.$start_date.'" style="max-width:150px" type="text" class="form-control text-center ml-2 mr-2 datepicker" name="d_start" id="d_start">
-                                                            <input value="'.$end_date.'" type="text" style="max-width:150px" class="form-control text-center ml-2 mr-2 datepicker" name="d_end" id="d_end">
+                                                            <input data-maxdate="'.date("Y-m-d", strtotime("+2 year")).'" value="'.$start_date.'" style="max-width:150px" type="text" class="form-control text-center ml-2 mr-2 datepicker" name="d_start" id="d_start">
+                                                            <input data-maxdate="'.date("Y-m-d", strtotime("+2 year")).'" value="'.$end_date.'" type="text" style="max-width:150px" class="form-control text-center ml-2 mr-2 datepicker" name="d_end" id="d_end">
                                                             <button onclick="return filter_Transaction_Summary(\'summary_report,transaction_revenue_flow\')" type="button" class="btn btn-success"><i class="fa fa-filter"></i> Filter</button>
                                                             <a data-href="summary_link" target="_blank" href="'.$baseUrl.'download/accounting?display=notes&item=summary&start_date='.$start_date.'&end_date='.$end_date.'&group_by=day&breakdown=true" class="btn btn-outline-primary ml-2"><i class="fa fa-print"></i> Print Report</a>
                                                         </div>
@@ -101,7 +101,7 @@ if(!$accessObject->hasAccess("reports", "accounting")) {
                                                 </div>
                                             </div>
                                             <div class="card-body mb-0 p-0 pb-3" style="min-height:250px" id="trasaction_container">
-                                                <div class="form-content-loader" style="display: none; position: absolute">
+                                                <div class="form-content-loader" style="display: flex; position: absolute">
                                                     <div class="offline-content text-center">
                                                         <p><i class="fa fa-spin fa-spinner fa-3x"></i></p>
                                                     </div>
@@ -134,11 +134,11 @@ if(!$accessObject->hasAccess("reports", "accounting")) {
                                         </div>
                                         <div class="col-md-3 mb-1">
                                             <label>Start Date</label>                                
-                                            <input value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
                                         </div>
                                         <div class="col-md-3 mb-1">
                                             <label>End Date</label>
-                                            <input value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
                                         </div>
                                         <div class="col-md-2 col-12 form-group">
                                             <label for="">&nbsp;</label>
@@ -157,11 +157,11 @@ if(!$accessObject->hasAccess("reports", "accounting")) {
                                         </div>
                                         <div class="col-md-3 mb-1">
                                             <label>Start Date</label>                                
-                                            <input value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
                                         </div>
                                         <div class="col-md-3 mb-1">
                                             <label>End Date</label>
-                                            <input value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
                                         </div>
                                         <div class="col-md-2 col-12 form-group">
                                             <label for="">&nbsp;</label>
@@ -187,11 +187,11 @@ if(!$accessObject->hasAccess("reports", "accounting")) {
                                         </div>
                                         <div class="col-md-2 mb-1">
                                             <label>Start Date</label>                                
-                                            <input value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-01").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="start_date" id="start_date">
                                         </div>
                                         <div class="col-md-2 mb-1">
                                             <label>End Date</label>
-                                            <input value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
+                                            <input data-maxdate="'.date("Y-m-d", strtotime("+1 year")).'" value="'.date("Y-m-t").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="end_date" id="end_date">
                                         </div>
                                         <div class="col-md-2 col-12 form-group">
                                             <label for="">&nbsp;</label>

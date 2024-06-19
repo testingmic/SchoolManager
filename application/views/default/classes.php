@@ -9,14 +9,14 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultClientData, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
-$response->title = "Classes List : {$appName}";
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$response->title = "Class List";
 $response->scripts = [];
 
 $classes_param = (object) [
@@ -29,11 +29,16 @@ $item_list = load_class("classes", "controllers", $classes_param)->list($classes
 
 $hasDelete = $accessObject->hasAccess("delete", "class");
 $hasUpdate = $accessObject->hasAccess("update", "class");
+$viewAllocation = $accessObject->hasAccess("view_allocation", "fees");
 $classes = "";
 
 foreach($item_list["data"] as $key => $each) {
     
-    $action = "<a title='View Class record' href='#' onclick='return load(\"class/{$each->id}\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a title='View Class record' href='#' onclick='return load(\"class/{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    
+    if($viewAllocation) {
+        $action .= "&nbsp;<a target='_blank' href='{$baseUrl}download/student_bill?class_id={$each->id}&isPDF=true' title='Download Class Bill' class='btn btn-sm mb-1 btn-outline-warning'><i class='fa fa-download'></i></a>";
+    }
 
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Delete this Class' onclick='return delete_record(\"{$each->id}\", \"class\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
@@ -41,12 +46,12 @@ foreach($item_list["data"] as $key => $each) {
 
     $classes .= "<tr data-row_id=\"{$each->id}\">";
     $classes .= "<td>".($key+1)."</td>";
-    $classes .= "<td><span class='bold_cursor text-uppercase underline text-info' onclick='return load(\"class/{$each->id}\");'>{$each->name}</span></td>";
+    $classes .= "<td><span class='bold_cursor text-uppercase underline text-info' onclick='return load(\"class/{$each->item_id}\");'>{$each->name}</span></td>";
     $classes .= "<td>{$each->class_code}</td>";
     $classes .= "<td>{$each->class_size}</td>";
     $classes .= "<td>{$each->students_count}</td>";
-    $classes .= "<td><span class='underline'>".($each->class_teacher_info->name ?? null)."</span></td>";
-    $classes .= "<td><span class='underline'>".($each->class_assistant_info->name ?? null)."</span></td>";
+    $classes .= "<td><span class='user_name'>".($each->class_teacher_info->name ?? null)."</span></td>";
+    $classes .= "<td><span class='user_name'>".($each->class_assistant_info->name ?? null)."</span></td>";
     $classes .= "<td align='center'>{$action}</td>";
     $classes .= "</tr>";
 }
@@ -65,7 +70,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
+                            <table data-empty="" class="table table-sm table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
@@ -74,7 +79,7 @@ $response->html = '
                                         <th>Class Size</th>
                                         <th width="15%">Students Count</th>
                                         <th>Class Teacher</th>
-                                        <th>Class Assistant</th>
+                                        <th>Class Prefect</th>
                                         <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>

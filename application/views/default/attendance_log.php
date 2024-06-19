@@ -5,20 +5,27 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser;
+global $myClass, $SITEURL, $defaultUser, $isReadOnly, $isTutorAdmin;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Attendance Log Summary";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
+
+// If the user is not a teacher, employee, accountant or admin then end the request
+if(!$isTutorAdmin) {
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
 
 // permissive users to be created by each access level
 $permissions = [
@@ -40,7 +47,9 @@ $permissions = [
     ]
 ];
 
+// get the permissions list
 $permissions = [
+    "student" => [],
     "teacher" => [
         "student" => "Students"
     ],
@@ -61,7 +70,6 @@ $academics = $defaultUser->client->client_preferences->academics;
 if($defaultUser->appPrefs->termEnded) {
     // found
     $response->html = page_not_found("not_found", "Sorry! The Current Academic Term Ended on <strong>{$academics->term_ends}</strong>.");
-
 } else {
     // convert to lowercase
     $client_id = strtolower($session->clientId);
@@ -92,15 +100,22 @@ if($defaultUser->appPrefs->termEnded) {
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-sm-12 col-lg-12">
-                    <div class="card">
-                        <div class="card-body">
+                <div class="col-12 col-sm-12 col-lg-12">';
+                    // set the content
+                    if($isReadOnly) {
+                        $response->html .= notification_modal("Readonly Mode", $myClass->error_logs["readonly_mode"]["msg"], $myClass->error_logs["readonly_mode"]["link"]);
+                    } else {
+                     $response->html .= '
+                     <div class="card">
+                        <div class="card-body pr-3">
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Selected Date</label>
                                         <input type="text" value="'.$selected_date.'" class="att_datepicker form-control" name="attendance_date" id="attendance_date">
                                     </div>
+                                </div>
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label>Select Category</label>
                                         <select data-width="100%" class="form-control selectpicker" name="attendance_category" id="attendance_category">
@@ -110,17 +125,22 @@ if($defaultUser->appPrefs->termEnded) {
                                             }
                                         $response->html .= '</select>
                                     </div>
-                                    <div class="form-group attendance_category_list hidden">
-                                        <label>Select Class</label>
-                                        <select data-width="100%" class="form-control selectpicker" name="attendance_class" id="attendance_class">
-                                            <option value="">Please select Class</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group refresh_attendance_list text-right hidden">
-                                        <button onclick="return refresh_AttendanceLog()" class="btn refresh btn-sm btn-outline-primary"><i class="fa fa-circle-notch"></i> Refresh</button>
+                                </div>
+                                <div class="col-md-3 form-group attendance_category_list hidden">
+                                    <label>Select Class</label>
+                                    <select data-width="100%" class="form-control selectpicker" name="attendance_class" id="attendance_class">
+                                        <option value="">Please select Class</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group refresh_attendance_list hidden">
+                                        <label class="text-white">Select Class</label>
+                                        <button onclick="return refresh_AttendanceLog()" class="btn btn-block refresh btn-primary"><i class="fa fa-circle-notch"></i> Refresh</button>
                                     </div>
                                 </div>
-                                <div class="col-md-9" id="attendance">
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12" id="attendance">
                                     '.form_loader().'
                                     <div id="attendance_log_list">
                                         <div class="text-center font-italic">Users list is displayed here.</div>
@@ -129,8 +149,9 @@ if($defaultUser->appPrefs->termEnded) {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </div>';
+                    }
+    $response->html .= '</div>
             </div>
         </section>';
 

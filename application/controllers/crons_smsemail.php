@@ -3,23 +3,22 @@
 class SMS_CronJOB {
 
 	private $db;
+	private $ini_data;
+	private $baseUrl;
+	private $rootUrl;
 	private $sms_sender = "MySchoolGH";
 	private $mailAttachment = array();
-	private $sender_email = "noreply@myschoolgh.com";
-	private $sender_password = "C30C5aamUl";
-	private $sender_client = "school.mineconrsl.com";
 	private $siteName = "MySchoolGH - EmmallexTech.Com";
 	private $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
 
-	private $baseUrl;
-	private $rootUrl;
-
 	public function __construct() {
-		$this->baseUrl = "https://app.myschoolgh.com/";
-		$this->rootUrl = "/home/mineconr/app.myschoolgh.com/";
+		// INI FILE
+		$this->ini_data = parse_ini_file("db.ini");
+
+		// set some more variables
+		$this->baseUrl = $this->ini_data["base_url"];
+		$this->rootUrl = $this->ini_data["root_url"];
 		$this->dbConn();
-		
-		$this->rootUrl = "/var/www/html/myschool_gh/";
 
 		require $this->rootUrl."system/libraries/phpmailer.php";
 		require $this->rootUrl."system/libraries/smtp.php";
@@ -34,19 +33,12 @@ class SMS_CronJOB {
 		
 		// CONNECT TO THE DATABASE
 		$connectionArray = array(
-			'hostname' => "localhost",
-			'database' => "mineconr_school",
-			'username' => "mineconr_school",
-			'password' => "YdwQLVx4vKU_"
+			'hostname' => $this->ini_data['hostname'],
+			'database' => $this->ini_data['database'],
+			'username' => $this->ini_data['username'],
+			'password' => $this->ini_data['password']
 		);
 
-		$connectionArray = array(
-			'hostname' => "localhost",
-			'database' => "myschoolgh",
-			'username' => "newuser",
-			'password' => "password"
-		);
-		
 		// run the database connection
 		try {
 			$conn = "mysql:host={$connectionArray['hostname']}; dbname={$connectionArray['database']}; charset=utf8";			
@@ -97,7 +89,7 @@ class SMS_CronJOB {
 					if(!empty($response)) {
 						$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered', sent_time=now() WHERE item_id='{$key}' LIMIT 1");
 					} else {
-						print "Sorry! The message could not be delivered to the purported users.\n";
+						print "Sorry! The sms message could not be delivered to the purported users.\n";
 					}
 				} elseif($value->type === "email") {
 
@@ -108,15 +100,67 @@ class SMS_CronJOB {
 					if(!empty($response)) {
 						$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered', sent_time=now() WHERE item_id='{$key}' LIMIT 1");
 					} else {
-						print "Sorry! The message could not be delivered to the purported users.\n";
+						print "Sorry! The email message could not be delivered to the purported users.\n";
 					}
 
+				} elseif($value->type === "reminder") {
+					// open up the send_mode column
+					$send_mode = json_decode($value->send_mode, true);
+
+					// if the message must be sent via sms.
+					if(in_array("sms", $send_mode)) {
+						// get the response of the request
+						$response = $this->mnotify_send($key, $value->message, $value->recipient_list, $value->sms_sender);						
+					}
+
+					// save the  reponse
+					if(!empty($response)) {
+						$this->db->query("UPDATE smsemail_send_list SET sent_status='Delivered', sent_time=now() WHERE item_id='{$key}' LIMIT 1");
+					} else {
+						print "Sorry! The message could not be delivered to the purported users.\n";
+					}
 				}
 
 			}
         }
 
     }
+
+	/**
+	 * Load the student bill and send via Email
+	 * 
+	 * 
+	 * @return Bool
+	 */
+	public function send_student_bill() {
+
+		try {
+
+			// send 50 mails at a time
+			$stmt = $this->db->prepare("SELECT id, recipient_list, bill FROM users_bills WHERE sent_status='0' LIMIT 50");
+		    $stmt->execute();
+
+		    // loop through the results list
+		    while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+		    	// convert the list to array
+		    	$list = json_decode($result->recipient_list, true);
+		    	foreach($list as $key => $value) {
+		    		$user = ["name" => $key, "email" => $value];
+		    	}
+		    	// send the mail
+		    	$send = $this->phpmailer_send(true, $result->bill, $user, "Student Bill");
+
+		    	// update the status
+		    	if($send) {
+		    		$this->db->query("UPDATE users_bills SET sent_status='1', sent_date=now() WHERE id='{$result->id}' LIMIT 1");
+		    	}
+		    }
+
+		} catch(PDOException $e) {
+			print $e->getMessage() . "\n";
+		}
+
+	}
 
 	/**
 	 * Send Message with MNotify Api
@@ -192,18 +236,18 @@ class SMS_CronJOB {
 		// configuration settings
 		$config = (Object) array(
 			'subject' => $subject,
-			'headers' => "From: {$this->siteName} - MySchoolGH.Com<noreply@myschoolgh.com> \r\n Content-type: text/html; charset=utf-8",
+			'headers' => "From: {$this->siteName} - MySchoolGH.Com<{$this->ini_data["smtp_user"]}> \r\n Content-type: text/html; charset=utf-8",
 			'Smtp' => true,
-			'SmtpHost' => $this->sender_client,
+			'SmtpHost' => $this->ini_data["smtp_host"],
 			'SmtpPort' => '465',
-			'SmtpUser' => $this->sender_email,
-			'SmtpPass' => $this->sender_password,
+			'SmtpUser' => $this->ini_data["smtp_user"],
+			'SmtpPass' => $this->ini_data["smtp_password"],
 			'SmtpSecure' => 'ssl'
 		);
 
 		// additional settings
 		$mail->isSMTP();
-		$mail->SMTPDebug = 0;
+		$mail->SMTPDebug = 1;
 		$mail->Host = $config->SmtpHost;
 		$mail->SMTPAuth = true;
 		$mail->Username = $config->SmtpUser;
@@ -224,14 +268,17 @@ class SMS_CronJOB {
 		}
 
 		// set the user from which the email is been sent
-		$mail->setFrom('noreply@myschoolgh.com', $this->siteName);
+		$mail->setFrom($this->ini_data["smtp_from"], $this->siteName);
 
 		// loop through the list of recipients for this mail
         foreach($recipient_list as $emailRecipient) {
-			// user fullname
-			$fullname = isset($emailRecipient['name']) ? $emailRecipient['name'] : $emailRecipient['name'];
-			// append the email address
-			$mail->addAddress($emailRecipient['email'], $fullname);
+        	// if the email was parsed
+        	if(isset($emailRecipient['name'])) {
+				// user fullname
+				$fullname = $emailRecipient['name'];
+				// append the email address
+				$mail->addAddress($emailRecipient['email'], $fullname);
+			}
 		}
 
 		// loop through the list of cc if not empty
@@ -276,5 +323,6 @@ class SMS_CronJOB {
 
 // create new object
 $jobs = new SMS_CronJOB;
-$jobs->send_smsemail();
+// $jobs->send_smsemail();
+$jobs->send_student_bill();
 ?>

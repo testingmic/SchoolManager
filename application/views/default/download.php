@@ -1,6 +1,6 @@
 <?php
 // global variable
-global $defaultUser, $isSupport;
+global $defaultUser, $isSupport, $usersClass, $defaultClientData;
 
 // stylesheet
 $pages_content = "<style>@page { margin: 5px; } body { margin: 5px; } .page_break { page-break-before: always; } div.page_break+div.page_break { page-break-before: always; }</style>";
@@ -30,7 +30,7 @@ $file_name = "Test Document";
 // run this section if not a support user
 if(!$isSupport) {
     
-    // check if the file to download has been parsed
+    /** check if the file to download has been parsed */
     if((isset($_GET["file"]) && !empty($_GET["file"])) || (isset($_GET["file_id"], $_GET["file_uid"]))) {
         
         // if the file was parsed in the query parameter
@@ -43,7 +43,7 @@ if(!$isSupport) {
 
             // if no record id is parsed
             if(!isset($name[1]) || empty(($name[1]))) {
-                print "Access Denied!";
+                print "File not found.";
                 return;
             }
             // continue processing
@@ -53,79 +53,70 @@ if(!$isSupport) {
             $record_id = xss_clean($_GET["file_id"]);
         }
 
-        // If the user wants to download a note
-        if(isset($_GET["file_uid"]) && ($_GET["file_uid"] == "note")) {
-            // item id
-            $item_id = $name[0];
-            // get the record from the database
-            $attachment_record =  $myClass->columnValue(
-                "a.title, a.content, a.company_id, a.tags, a.date_created", 
-                "companies_notes a", "a.item_id='{$item_id}' AND a.company_id='{$record_id}'"
-            );
-            // if no record found
-            if(empty($attachment_record)) {
-                print "Access Denied!";
-                return;
-            }
-
-            print "Feature coming soon!";
-
+        // get the record information
+        $attachment_record =  $myClass->columnValue("resource, client_id, resource_id, description", "files_attachment", "record_id='{$record_id}'");
+        
+        // if no record found
+        if(empty($attachment_record)) {
+            print "File not found.";
             return;
-        } else {
-            // get the record information
-            $attachment_record =  $myClass->columnValue("resource, resource_id, description", "files_attachment", "record_id='{$record_id}'");
-            
-            // if no record found
-            if(empty($attachment_record)) {
-                print "Access Denied!";
+        }
+
+        // set the file to download
+        $file_to_download = isset($_GET["file_uid"]) ? xss_clean($_GET["file_uid"]) : $name[0];
+
+        // if the file_uid was parsed then get the file name
+        if(isset($_GET["file_uid"])) {
+
+            // convert the string into an object
+            $file_ref_id = xss_clean($_GET["file_uid"]);
+            $file_list = json_decode($attachment_record->description);
+
+            // found
+            $found = false;
+
+            // loop through each file
+            foreach($file_list->files as $key => $eachFile) {
+                
+                // check if the id matches what has been parsed in the url
+                if($eachFile->unique_id == $file_to_download) {
+                    $file_to_download = $eachFile->path;
+                    $found = true;
+                    break;
+                }
+            }
+
+            if(!$found) {
+                print "File not found.";
                 return;
             }
-
-            // set the file to download
-            $file_to_download = isset($_GET["file_uid"]) ? xss_clean($_GET["file_uid"]) : $name[0];
-
-            // if the file_uid was parsed then get the file name
-            if(isset($_GET["file_uid"])) {
-
-                // convert the string into an object
-                $file_list = json_decode($attachment_record->description);
-
-                // found
-                $found = false;
-
-                // loop through each file
-                foreach($file_list->files as $key => $eachFile) {
-                    
-                    // check if the id matches what has been parsed in the url
-                    if($eachFile->unique_id == $file_to_download) {
-                        $file_to_download = $eachFile->path;
-                        $found = true;
-                        break;
-                    }
-                }
-
-                if(!$found) {
-                    print "Access Denied!";
-                    return;
-                }
-            }
-
-            // confirm that the file really exists
-            if(is_file($file_to_download) && file_exists($file_to_download)) {
-                // force the file download
-                header('Content-Description: File Transfer');
-                header('Content-Type: application/octet-stream');
-                header('Content-Disposition: attachment; filename="' . basename($file_to_download) . '"');
-                header('Content-Transfer-Encoding: binary');
-                header('Connection: Keep-Alive');
-                header('Expires: 0');
-                header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-                header('Pragma: public');
-                header('Content-Length: ' . filesize($file_to_download));
-                readfile($file_to_download);
-                exit;
+            
+            // if the reference is documents
+            if(isset($_GET["ref"]) && ($_GET["ref"] === "docs")) {
+                // update the file downloads count
+                $myClass->_save("documents", 
+                    ["column_value" => "downloads_count=(downloads_count+1)", "last_updated" => "now()"], 
+                    ["file_ref_id" => $file_ref_id, "client_id" => $attachment_record->client_id]
+                );
             }
         }
+
+        // confirm that the file really exists
+        if(is_file($file_to_download) && file_exists($file_to_download)) {
+            // force the file download
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . basename($file_to_download) . '"');
+            header('Content-Transfer-Encoding: binary');
+            header('Connection: Keep-Alive');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($file_to_download));
+            readfile($file_to_download);
+            exit;
+        }
+    
         
     }
 
@@ -296,9 +287,10 @@ if(!$isSupport) {
 
         // create an object
         $orientation = "landscape";
-        $file_name = "Attendance_Log";
+        $file_name = "Attendance_Log.pdf";
         $attendanceObject = load_class("attendance", "controllers", $getObject);
         $pages_content .= $attendanceObject->attendance_report($getObject)["data"]["table_content"];
+
     }
 
     /** Download The Terminal Report */
@@ -308,6 +300,7 @@ if(!$isSupport) {
         $params->client_data = $defaultUser->client ?? null;
 
         // set the class
+        $file_name = "Terminal_Report.pdf";
         $reportObj = load_class("terminal_reports", "controllers", $params);
 
         // generate the report
@@ -339,6 +332,7 @@ if(!$isSupport) {
         $params->client_data = $defaultUser->client ?? null;
 
         // set the class
+        $file_name = "Incident_Log.pdf";
         $incidentObj = load_class("incidents", "controllers", $params);
         $incidentItem = $incidentObj->list($params)["data"];
 
@@ -357,9 +351,18 @@ if(!$isSupport) {
         $date_range .= isset($getObject->start_date) && !empty($getObject->start_date) ? $getObject->start_date : null;
         $date_range .= isset($getObject->end_date) && !empty($getObject->end_date) ? ":" . $getObject->end_date : null;
 
+        // set the date range
+        if(!empty($getObject->date_range)) {
+            $break = $myClass->dateRange($getObject->date_range, "rparts");
+            $getObject->start_date = $break["start_date"];
+            $getObject->end_date = $break["end_date"];
+            $date_range = $getObject->date_range;
+        }
+
         // set the parameters
         $item_param = (object) [
             "order_by" => "ORDER BY a.id ASC",
+            "group_by" => "GROUP BY a.payment_id",
             "category_id" => $getObject->category_id ?? null,
             "student_id" => $getObject->student_id ?? null,
             "item_id" => $getObject->receipt_id ?? null,
@@ -371,6 +374,7 @@ if(!$isSupport) {
         ];
 
         // create a new object
+        $file_name = "Fees_Log.pdf";
         $feesObject = load_class("fees", "controllers", $item_param);
 
         // load the receipt data
@@ -395,9 +399,8 @@ if(!$isSupport) {
             ];
             
             // load the receipt 
-            $pages_content .= $feesObject->receipt($param);
+            $pages_content .= $feesObject->receipt($param, "bold;font-size:20px");
         }
-
     }
 
     /** Account Statement Reports */
@@ -409,6 +412,9 @@ if(!$isSupport) {
         $orientation = (isset($getObject->display) && ($getObject->display == "notes"))  ? "landscape" : "portrait";
         $getObject->client_data = $defaultUser->client;
         $getObject->clientId = $defaultUser->client_id;
+
+        // set the file name
+        $file_name = "Accounting_Report.pdf";
 
         $accountsObj = load_class("accounting", "controllers");
         $pages_content .= $accountsObj->statement($getObject);
@@ -428,6 +434,7 @@ if(!$isSupport) {
             "clientId" => $defaultUser->client_id,
             "client_data" => $defaultUser->client,
             "class_id" => $getObject->class_id ?? null,
+            "current_bal" => $getObject->current_bal ?? null,
             "student_ids" => $getObject->student_ids ?? null,
             "academic_year" => $getObject->academic_year ?? null,
             "academic_term" => $getObject->academic_term ?? null
@@ -444,7 +451,9 @@ if(!$isSupport) {
         $feesObject = load_class("fees", "controllers", $item_param);
 
         $orientation = "P";
-        $pages_content .= $feesObject->bill($item_param);
+        $file_name = "Student_Bill.pdf";
+        $bill_record = $feesObject->bill($item_param);
+        $pages_content .= is_array($bill_record) ? $bill_record["student_bill"] : $bill_record;
 
         // if the user wants to print it out
         if(isset($item_param->print)) {
@@ -452,7 +461,37 @@ if(!$isSupport) {
         }
     }
 
+    /** Export Staff / Student Information */
+    elseif(confirm_url_id(1, "export")) {
+        // if no record id is parsed
+        if(!confirm_url_id(3)) {
+            print "Access Denied!";
+            return;
+        }
+        // url item
+        $item = $SITEURL[2];
+        $user_id = $SITEURL[3];
+        $orientation = "portrait";
+        $clientId = $SITEURL[4] ?? null;
+
+        // items to query
+        if(!in_array($item, ["users"])) {
+            print "Access Denied!";
+            return;
+        }
+        // set the params
+        $param = (object) [
+            "user_id" => $user_id,
+            "clientId" => $clientId,
+            "client_data" => $defaultClientData
+        ];
+        // get the user data to export
+        $file_name = "Export_Student_Data.pdf";
+        $pages_content = $usersClass->export($param);
+    }
+
 }
+
 // load the html content
 $dompdf->loadHtml($pages_content);
 

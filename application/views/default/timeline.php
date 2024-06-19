@@ -8,8 +8,8 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
@@ -18,9 +18,12 @@ $userId = $session->userId;
 $clientId = $session->clientId;
 
 // specify some variables
-$response = (object) [];
+$limit = 300;
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$filter = (object) array_map("xss_clean", $_POST);
+
 $pageTitle = "User Activity Timelines";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // if the user has no permissions
 if(!$accessObject->hasAccess("activities", "settings")) {
@@ -28,13 +31,23 @@ if(!$accessObject->hasAccess("activities", "settings")) {
     $response->html = page_not_found("permission_denied");
 } else {
 
+    // set the dates
+    $start_date = $filter->start_date ?? date("Y-m-d", strtotime("yesterday"));
+    $end_date = $filter->end_date ?? date("Y-m-d");
+    $activity_type = $filter->activity_type ?? null;
+
+    // include the script to be executed on the page.
     $response->scripts = ["assets/js/timeline.js"];
 
     // get the array list of values
     $activity_list = $myClass->pushQuery("a.*, u.name AS fullname, u.unique_id, u.email, 
         u.phone_number, u.image, u.description AS user_description", 
         "users_activity_logs a LEFT JOIN users u ON u.item_id = a.user_id",
-        "(a.client_id='{$clientId}' OR a.user_id='{$userId}') AND a.status = '1' AND a.subject NOT IN ('endpoints') ORDER BY a.id DESC");
+        "(a.client_id='{$clientId}' OR a.user_id='{$userId}') AND a.status = '1' 
+        AND DATE(a.date_recorded) >= '{$start_date}' AND DATE(a.date_recorded) <= '{$end_date}' 
+        AND a.subject NOT IN ('endpoints') 
+        ".(!empty($activity_type) ? "AND a.subject = '{$activity_type}'" : null)."
+        ORDER BY a.id DESC LIMIT {$limit}");
 
     $activities = "";
     $activity_list_array = [];
@@ -51,6 +64,8 @@ if(!$accessObject->hasAccess("activities", "settings")) {
         "teacher_account" => "fa-user-tie",
         "admin_account" => "fa-user-cog"
     ];
+
+    // loop through the results list
     foreach($activity_list as $activity) {
         
         $activity_list_array[$activity->id] = $activity;
@@ -92,10 +107,6 @@ if(!$accessObject->hasAccess("activities", "settings")) {
         $activities = "No activity has been logged for now. Please check back for more detailed activity logged";
     }
 
-    // set the dates
-    $start_date = date("Y-m-d", strtotime("yesterday"));
-    $end_date = date("Y-m-d");
-
     $sections = [
         "admin_account" => "Account Modification",
         "assignments" => "Assignments",
@@ -133,10 +144,10 @@ if(!$accessObject->hasAccess("activities", "settings")) {
                 </div>
                 <div class="col-lg-3 col-md-3">
                     <label>Section</label>
-                    <select class="form-control selectpicker" name="section">
+                    <select class="form-control selectpicker" name="activity_type">
                         <option>All Sections</option>';
                         foreach($sections as $key => $section) {
-                            $response->html .= "<option value='{$key}'>{$section}</option>";
+                            $response->html .= "<option ".($activity_type == $key ? "selected" : null)." value='{$key}'>{$section}</option>";
                         }
                         $response->html .= '
                     </select>
@@ -144,7 +155,7 @@ if(!$accessObject->hasAccess("activities", "settings")) {
                 <div class="col-lg-2 col-md-3">
                     <div class="form-group">
                         <label>&nbsp;</label>
-                        <button class="btn btn-primary btn-block"><i class="fa fa-filter"></i> Filter</button>
+                        <button id="filter_User_Activities" class="btn btn-primary btn-block"><i class="fa fa-filter"></i> Filter</button>
                     </div>
                 </div>
                 <div class="col-12 col-sm-12 col-lg-12 mt-2">

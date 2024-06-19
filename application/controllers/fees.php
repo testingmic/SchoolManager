@@ -2,7 +2,7 @@
 
 class Fees extends Myschoolgh {
 
-    
+    private $iclient = [];
 
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
@@ -26,39 +26,48 @@ class Fees extends Myschoolgh {
 	 **/
 	public function list(stdClass $params) {
 
-        global $usersClass;
+        global $usersClass, $isSupport;
 
+        // set the limit parameter
         $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
 
-        /** Init the user type */
-        $student_id = $params->student_id ?? $params->userData->user_id;
+        /** the group by query */
         $group_by = $params->group_by ?? null;
         
-        /** The user id algorithm */
-        if(!isset($params->student_id) && in_array($params->userData->user_type, ["accountant", "admin"])) {
-            $student_id = "";
-        } else if(!isset($params->student_id) && in_array($params->userData->user_type, ["parent"])) {
-            // if the user is a parent
-			$student_id = isset($params->student_array_ids) ? $params->student_array_ids : $this->session->student_id;
+        // run this section if the user is not a support staff
+        if(!$isSupport) {
+            // set the student id
+            $student_id = $params->student_id ?? $params->userData->user_id;
+
+            /** The user id algorithm */
+            if(!isset($params->student_id) && in_array($params->userData->user_type, ["accountant", "admin"])) {
+                $student_id = "";
+            } else if(!isset($params->student_id) && in_array($params->userData->user_type, ["parent"])) {
+                // if the user is a parent
+    			$student_id = isset($params->student_array_ids) ? $params->student_array_ids : $this->session->student_id;
+            }
         }
 
         $filters = "a.status='1'";
-		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND a.class_id IN {$this->inList($params->class_id)}" : "";
-        $filters .= isset($params->department_id) && !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : "";
+		$filters .= !empty($params->class_id) ? " AND a.class_id IN {$this->inList($params->class_id)}" : "";
+        $filters .= !empty($params->department_id) ? " AND a.department_id='{$params->department_id}'" : "";
         $filters .= !empty($student_id) ? " AND a.student_id IN {$this->inList($student_id)}" : "";
-        $filters .= isset($params->item_id) && !isset($params->payment_id) && !empty($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";
-        $filters .= isset($params->query) && !empty($params->query) ? " AND {$params->query}" : "";
-        $filters .= isset($params->reversed) ? " AND a.reversed='{$params->reversed}'" : "";
-        $filters .= isset($params->programme_id) && !empty($params->programme_id) ? " AND a.programme_id='{$params->programme_id}'" : "";
-        $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND a.category_id IN {$this->inList($params->category_id)}" : "";
-        $filters .= isset($params->date) && !empty($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";
-        $filters .= (isset($params->date_range) && !empty($params->date_range)) ? $this->dateRange($params->date_range, "a", "recorded_date") : null;
-        $filters .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : null;
-        $filters .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : null;
-        
+        $filters .= !empty($params->payment_id) ? " AND a.payment_id='{$params->payment_id}'" : "";
+        $filters .= !empty($params->item_id) ? " AND a.item_id='{$params->item_id}'" : "";
+        $filters .= !empty($params->query) ? " AND {$params->query}" : "";
+        $filters .= !empty($params->reversed) ? " AND a.reversed='{$params->reversed}'" : "";
+        $filters .= !empty($params->programme_id) ? " AND a.programme_id='{$params->programme_id}'" : "";
+        $filters .= !empty($params->receipt_id) ? " AND a.receipt_id IN {$this->inList($params->receipt_id)}" : "";
+        $filters .= !empty($params->category_id) ? " AND a.category_id IN {$this->inList($params->category_id)}" : "";
+        $filters .= !empty($params->date) ? " AND DATE(a.recorded_date='{$params->date}')" : "";
+        $filters .= !empty($params->date_range) ? $this->dateRange($params->date_range, "a", "recorded_date") : null;
+        $filters .= !empty($params->reference_id) ? " AND a.reference_id='{$params->reference_id}'" : null;
+        $filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : null;
+        $filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : null;
+
         // set the payment id
         if(isset($params->payment_id)) {
-            $filters .= isset($params->payment_id) && !empty($params->payment_id) ? " AND (a.item_id='{$params->payment_id}' OR a.payment_id='{$params->payment_id}')" : "";
+            $filters .= !empty($params->payment_id) ? " AND (a.item_id='{$params->payment_id}' OR a.payment_id='{$params->payment_id}')" : "";
         }
 
         // if the return_where_clause was parsed
@@ -71,18 +80,38 @@ class Fees extends Myschoolgh {
 
 		try {
 
+            // add query
+            $add_query = ($group_by ? "
+                SUM(a.amount) AS amount_paid,
+                (
+                    SELECT 
+                        GROUP_CONCAT(
+                            (
+                                SELECT c.name FROM fees_category c 
+                                WHERE c.id = b.category_id
+                            ) SEPARATOR ', '
+                        )
+                    FROM fees_collection b 
+                    WHERE b.payment_id = a.payment_id AND b.academic_year = a.academic_year 
+                        AND b.academic_term = a.academic_term 
+                    LIMIT {$this->temporal_maximum}
+                ) AS category_name,
+
+            " : null);
+
+            // run the query
 			$stmt = $this->db->prepare("
-				SELECT a.*, fc.name AS category_name, ".($group_by ? "SUM(a.amount) AS amount_paid," : null)."
+				SELECT a.*, fc.name AS category_name, {$add_query}
                     (SELECT b.name FROM departments b WHERE b.id = a.department_id LIMIT 1) AS department_name,
                     (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
-                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type,'|',COALESCE(b.phone_number,'NULL'),'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
+                    (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type,'|', COALESCE(b.phone_number,'NULL'),'|',b.email) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.guardian_id,'NULL')) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info
                 FROM fees_collection a
                 LEFT JOIN users u ON u.item_id = a.student_id
                 LEFT JOIN fees_category fc ON fc.id = a.category_id
-				WHERE {$filters} AND a.client_id = ? {$group_by} {$order_by} LIMIT {$params->limit}
+				WHERE {$filters} ".(!empty($params->clientId) ? " AND a.client_id = '{$params->clientId}'" : null)." {$group_by} {$order_by} LIMIT {$params->limit}
             ");
-			$stmt->execute([$params->clientId]);
+			$stmt->execute();
             
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
@@ -102,7 +131,7 @@ class Fees extends Myschoolgh {
             ];
 
 		} catch(PDOException $e) {
-			return [];
+			return $e->getMessage();
 		}
 	}
 
@@ -166,7 +195,7 @@ class Fees extends Myschoolgh {
                 SELECT a.*, 
                     (SELECT COUNT(*) FROM fees_allocations b WHERE a.id = b.category_id AND b.client_id = a.client_id) AS fees_count
                 FROM fees_category a
-                WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
+                WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$this->temporal_maximum}
             ");
             $stmt->execute([1]);
 
@@ -214,7 +243,6 @@ class Fees extends Myschoolgh {
         }
 
         $params->query .= !empty($class_id) ? " AND a.class_id='{$class_id}'" : null;
-        $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
         $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
         $params->query .= (isset($params->category_id)) ? " AND a.id='{$params->category_id}'" : null;
         $params->query .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
@@ -223,23 +251,35 @@ class Fees extends Myschoolgh {
         try {
 
             $stmt = $this->db->prepare("
-                SELECT a.*,
-                    (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
-                    (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name
+                SELECT a.*, SUM(a.amount) AS amount,
+                    (
+                        SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1
+                    ) AS class_name,
+                    (
+                        SELECT 
+                            GROUP_CONCAT(
+                                (
+                                    SELECT c.name FROM fees_category c 
+                                    WHERE c.id = b.category_id
+                                ) SEPARATOR ', '
+                            )
+                        FROM fees_allocations b 
+                        WHERE b.class_id = a.class_id AND b.academic_year = a.academic_year 
+                            AND b.academic_term = a.academic_term 
+                        LIMIT {$this->temporal_maximum}
+                    ) AS category_list
                 FROM fees_allocations a
-                WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
+                WHERE {$params->query} AND a.status = ? GROUP BY a.class_id ORDER BY a.id LIMIT {$this->temporal_maximum}
             ");
             $stmt->execute([1]);
 
             $data = [];
+            $counter = 0;
             $setCategoryAsKey = (bool) isset($params->set_category_key);
 
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                if($setCategoryAsKey) {
-                    $data[$result->category_id] = $result;
-                } else {
-                    $data[] = $result;
-                }
+                $data[($setCategoryAsKey ? $result->category_id : $counter)] = $result;
+                $counter++;
             }
 
             return [
@@ -297,8 +337,10 @@ class Fees extends Myschoolgh {
 
         try {
 
+            $sub_query = ($groupBy ? "SUM(a.amount_due) AS total_amount_due, 
+                    SUM(a.amount_paid) AS total_amount_paid, SUM(a.balance) AS total_balance," : null);
             $stmt = $this->db->prepare("
-                SELECT a.*, ".($groupBy ? "SUM(a.amount_due) AS total_amount_due, SUM(a.amount_paid) AS total_amount_paid, SUM(a.balance) AS total_balance," : null)."
+                SELECT a.*, a.payment_module, a.payment_month, {$sub_query}
                     (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
                     (SELECT b.name FROM fees_category b WHERE b.id = a.category_id LIMIT 1) AS category_name,
                     (SELECT CONCAT(b.unique_id,'|',b.item_id,'|',b.name,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.student_id LIMIT 1) AS student_info,
@@ -345,7 +387,10 @@ class Fees extends Myschoolgh {
     /**
      * List the Class Fees Allocation Array
      * 
-     * @param String $params->clientId
+     * This method only runs a loop through the data loaded by the method class_fees_allocation
+     * 
+     * 
+     * @param stdClass $params
      * 
      * @return Array
      */
@@ -356,14 +401,15 @@ class Fees extends Myschoolgh {
         $class_allocation_array = $this->class_fees_allocation($params)["data"];
 
         // if the result is not empty
-        if(!empty($class_allocation_array)) {
+        if(!empty($class_allocation_array) && is_array($class_allocation_array)) {
             // loop through the results list
             foreach($class_allocation_array as $key => $each) {
                 $class_allocation_list .= "<tr data-row_id=\"{$each->id}\">";
                 $class_allocation_list .= "<td width='7%'>".($key+1)."</td>";
-                $class_allocation_list .= "<td>{$each->class_name}</td>";
-                $class_allocation_list .= "<td>{$each->category_name}</td>";
+                $class_allocation_list .= "<td>".strtoupper($each->class_name)."</td>";
+                $class_allocation_list .= "<td>".($each->category_name ?? $each->category_list)."</td>";
                 $class_allocation_list .= "<td>{$each->currency} {$each->amount}</td>";
+                $class_allocation_list .= "<td align='center'><a class='btn btn-sm btn-primary' target='_blank' href='{$this->baseUrl}download/student_bill?class_id={$each->class_id}&academic_year={$params->academic_year}&academic_term={$params->academic_term}'><i class='fa fa-print'></i> Print Bill</a></td>";
                 $class_allocation_list .= "</tr>";
             }
         }
@@ -395,6 +441,7 @@ class Fees extends Myschoolgh {
             $allocated = true;
             $showStudentData = (bool) !isset($params->show_student);
             $showPrintButton = (bool) isset($params->showPrintButton);
+            $add_current_term = (bool) isset($params->currentTerm);
             $groupBy = (bool) isset($params->group_by_student) && ($params->group_by_student == "group_by");
 
             // init values
@@ -419,9 +466,11 @@ class Fees extends Myschoolgh {
 
                 // assign variable
                 $isPaid = (bool) ($student->amount_due < $student->amount_paid) || ($student->amount_due === $student->amount_paid);
-
+                
                 // label
                 $label = "<br><span class='badge p-1 badge-success'>Paid</span>";
+                $payment_module = ($student->payment_module === "Monthly") ? "<br><span class='font-bold'>{$student->payment_month}</span>" : null;
+                $payment_month = ($student->payment_module === "Monthly") ? (!empty($student->payment_month) ? $student->payment_month : "NULL") : null;
 
                 // set the group by
                 if($groupBy) {
@@ -451,15 +500,20 @@ class Fees extends Myschoolgh {
                     // set the student name, image and registration id
                     $student_allocation_list .= "<td>
                         <div class='d-flex justify-content-start'>
-                            <div class='text-uppercase'>
-                                <span onclick='return load(\"student/{$student->student_info->user_id}\");' class='bold_cursor text-primary'>{$student->student_info->name}</span><br>
-                                <a class='bold_cursor' onclick='return load(\"student/{$student->student_info->user_id}\");'>{$student->student_info->unique_id}</a>
+                            <div class='text-uppercase bold'>
+                                <span onclick='return load(\"student/{$student->student_info->user_id}\");' class='user_name'>{$student->student_info->name}</span><br>
+                                <span>{$student->class_name}</span><br>
+                                <span onclick='return load(\"student/{$student->student_info->user_id}\");'>
+                                    {$student->student_info->unique_id}
+                                </span>
                             </div>
                         </div>
                     </td>";
                 }
 
-                $student_allocation_list .= $groupBy ? null : "<td>{$student->category_name} ".(!$showStudentData ? $label : null)."</td>";
+                $student_allocation_list .= $groupBy ? null : "<td>
+                    {$student->category_name} {$payment_module} ".(!$showStudentData ? $label : null)."
+                </td>";
                 $student_allocation_list .= "<td width='17%'>{$student->currency} ".($groupBy ? $student->total_amount_due : $student->amount_due)."</td>";
                 $student_allocation_list .= "<td>{$student->currency} ".($groupBy ? $student->total_amount_paid : $student->amount_paid)."</td>";
                 $student_allocation_list .= "<td>{$student->currency} ".($groupBy ? $student->total_balance : $student->balance)."</td>";
@@ -469,9 +523,13 @@ class Fees extends Myschoolgh {
                     $owning = true;
                 }
                 
+                
+                $student_allocation_list .= "<td align='center' class='pl-2'>";
                 // confirm if the user has the permission to make payment
                 if(!empty($params->receivePayment)) {
-                    $student_allocation_list .= "<td align='center' class='pl-2'>";
+                    // url
+                    $url = !empty($payment_month) ? "&payment_month={$payment_month}" : null;
+
                     // confirm if the fee has been paid
                     if(!$student->exempted) {
                         // if the fee is fully paid
@@ -482,7 +540,7 @@ class Fees extends Myschoolgh {
                             $_class = "class='btn mb-1 btn-sm text-uppercase btn-outline-success'";
                             $student_allocation_list .= $isParent ? "
                                 <a {$_class} href='{$this->baseUrl}pay/{$defaultUser->client_id}/fees/{$student->checkout_url}/checkout' target='_blank'>Pay Fee</a>
-                            " : "<button onclick='return load(\"fees-payment?".($groupBy ? "student_id={$student->student_id}&class_id={$student->class_id}" : "checkout_url={$student->checkout_url}")."\");' {$_class}>Pay Fee</button>";
+                            " : "<button onclick='return load(\"fees-payment?".($groupBy ? "student_id={$student->student_id}&class_id={$student->class_id}{$url}" : "checkout_url={$student->checkout_url}{$url}")."\");' {$_class}>Pay</button>";
                         }
                         // delete the record if possible => that is allowed only if the student has not already made an payment
                         if(!empty($params->canAllocate) && empty($student->amount_paid)) {
@@ -491,12 +549,13 @@ class Fees extends Myschoolgh {
                     } else {
                         $student_allocation_list .= "<span class='badge badge-dark'>Exempted</span>";
                     }
-                    // if the show print button was parsed
-                    if($showPrintButton) {
-                        $student_allocation_list .= '&nbsp;<span><a href="'.$this->baseUrl.'download/student_bill/'.$student->student_id.'?print=1" target="_blank" class="btn mb-1 btn-sm btn-outline-warning text-uppercase"><i class="fa fa-print"></i> Print Bill</a></span>';
-                    }
-                    $student_allocation_list .= "</td>";
                 }
+                // if the show print button was parsed
+                if($showPrintButton) {
+                    $add_current_term = $add_current_term ? "&current_bal=true" : null;
+                    $student_allocation_list .= '&nbsp;<span><a href="'.$this->baseUrl.'download/student_bill/'.$student->student_id.'?print=1&academic_year='.$params->academic_year.'&academic_term='.$params->academic_term.''.$add_current_term.'" target="_blank" class="btn mb-1 btn-sm btn-primary text-uppercase"><i class="fa fa-print"></i> Print Bill</a></span>';
+                }
+                $student_allocation_list .= "</td>";
 
                 $student_allocation_list .= "</tr>";
 
@@ -552,6 +611,7 @@ class Fees extends Myschoolgh {
             // only receive payment that has been allocated to the student
             return ["code" => 203, "data" => "Sorry! The selected fee item has not yet been allocated to this Student."];
 
+            // get the category item name
             $category_item = $this->pushQuery("amount, name", "fees_category", "id='{$params->category_id}' AND client_id='{$params->clientId}' LIMIT 1");
             $allocation = (object) [
                 "checkout_url" => random_string("alnum",  16),
@@ -671,10 +731,15 @@ class Fees extends Myschoolgh {
                         "payment_method","cheque_bank", "cheque_number", "paidin_by", "paidin_contact", "payment_uid"
                     ]
                 );
+
+                // check the payment module
+                $append_string = ($fees->payment_module === "Monthly") ? "<div>{$fees->payment_month}</div>" : null; 
                 
                 // append to the owings list
                 $owings_list .= "<tr>
-                    <td class='font-weight-bold'>{$fees->category_name}</td>
+                    <td class='font-weight-bold'>
+                        {$fees->category_name} {$append_string}
+                    </td>
                     <td>{$fees->amount_due}</td>
                     <td>{$fees->amount_paid}</td>
                     <td class='font-weight-bold'>{$fees->balance}</td>";
@@ -861,6 +926,7 @@ class Fees extends Myschoolgh {
         $html_form .= "</div>";
 
         $response["form"] = $html_form;
+        $response["student_details"] = is_array($allocation) ? $allocation[0]->student_details : ($allocation->student_details ?? []);
 
         return ["data" => $response];
 
@@ -880,16 +946,16 @@ class Fees extends Myschoolgh {
         global $myschoolgh;
 
         /** Insert the existing record */
-        $stmt = $myschoolgh->prepare("INSERT INTO fees_payments SET 
+        $stmt = $myschoolgh->prepare("INSERT INTO fees_payments SET payment_module = ?, payment_month = ?,
             amount_due = ?, balance = ?, category_id = ?, student_id = ?, checkout_url = ?, client_id = ?,
             academic_year = ?, academic_term = ?, class_id = ?, created_by = ?, currency = ?
         ");
 
         /** Execute the prepared statement */
         return $stmt->execute([
-            $params->amount, $params->amount, $params->category_id, $params->student_id, 
-            random_string("alnum", 16), $params->clientId, 
-            $params->academic_year, $params->academic_term, $params->class_id, 
+            $params->payment_module ?? "Termly", $params->payment_month ?? null, $params->amount, $params->amount, 
+            $params->category_id, $params->student_id, random_string("alnum", RANDOM_STRING), 
+            $params->clientId, $params->academic_year, $params->academic_term, $params->class_id, 
             $params->userId, $params->currency
         ]);
 
@@ -917,178 +983,27 @@ class Fees extends Myschoolgh {
 
         /** Update the existing record */
         $stmt = $myschoolgh->prepare("UPDATE fees_payments SET 
-                amount_due = ? {$query_balance}
+                amount_due = ?, payment_module = ? {$query_balance}
             WHERE category_id = ? AND student_id = ? AND client_id = ? 
-                AND academic_year = ? AND academic_term = ? AND editable = ? LIMIT 1");
+                AND academic_year = ? AND academic_term = ? 
+                AND editable = ? ".(!empty($params->payment_month) ? "AND payment_month='{$params->payment_month}'" : null)." LIMIT 1
+            ");
 
         /** Execute the prepared statement */
         return $stmt->execute([
-            $params->amount, $params->category_id, $params->student_id, $params->clientId, 
-            $params->academic_year, $params->academic_term, 1
+            $params->amount, $params->payment_module, $params->category_id, 
+            $params->student_id, $params->clientId, $params->academic_year, $params->academic_term, 1
         ]);
     }
 
     /**
      * Allocate Fees to Class/Student
      * 
-     * @param stdClass $params
-     *  
-     * @return Array
-     */
-    public function allocate_fees_old(stdClass $params) {
-
-        global $defaultUser, $clientPrefs;
-
-        $params->currency = $clientPrefs->labels->currency ?? null;
-
-        try {
-
-             /** Check if the class id is valid */
-            $class_check = $this->pushQuery("a.id, (SELECT b.name FROM fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", 
-                "classes a", 
-                "a.id='{$params->class_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1");
-
-            if(empty($class_check)) {
-                return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
-            }
-
-            /** Start a transaction */
-            $this->db->beginTransaction();
-
-            /** Confirm if the allocate to is student */
-            if($params->allocate_to === "student") {
-
-                /** Return false if the student id was not parsed */
-                if(empty($params->student_id)) {
-                    return ["code" => 203, "data" => "Sorry! The student id cannot be left empty"];
-                }
-
-                /** Check if the student id is valid */
-                $student_check = $this->pushQuery(
-                    "a.id, a.name, 
-                    (SELECT b.name FROM fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", 
-                    "users a", 
-                    "a.item_id='{$params->student_id}' AND a.client_id='{$params->clientId}' 
-                        AND a.status='1' AND a.deleted='0' AND a.academic_year = '{$params->academic_year}' 
-                        AND a.academic_term = '{$params->academic_term}' LIMIT 1");
-                
-                // return error if the student was not found
-                if(empty($student_check)) {
-                    return ["code" => 203, "data" => "Sorry! An invalid student id was supplied."];
-                }
-
-                // get the payment record
-                $paymentRecord = $this->confirm_student_payment_record($params, "simple_load");
-
-                // if the payment status is true then return error
-                if(!empty($paymentRecord) && ($paymentRecord->paid_status == 1)) {
-                    return ["code" => 203, "data" => "Sorry! {$student_check[0]->name} has fully paid the {$student_check[0]->category_name} therefore cannot be changed."];
-                }
-
-                /** Confirm if a record already exist */
-                if($paymentRecord) {
-
-                    // update the user information
-                    $this->update_student_fees($params);
-                    
-                    // log the user activity
-                    $this->userLogs("fees_allocation", $params->student_id, null, 
-                        "{$params->userData->name} updated the fee allocation for <strong>{$student_check[0]->category_name}</strong> to: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
-
-                } else {
-                    /** Insert a new record */
-                    $this->insert_student_fees($params);
-
-                    // log the user activity
-                    $this->userLogs("fees_allocation", $params->student_id, null, 
-                        "{$params->userData->name} added the fee allocation for <strong>{$student_check[0]->category_name}</strong> of: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
-                }
-
-                $this->db->commit();
-
-                return ["data" => "Fees Allocation was successfully executed."];
-
-            } elseif($params->allocate_to === "class") {
-
-                return;
-
-                /** Fetch all students that fall under this category */
-                $student_param = (object) ["clientId" => $params->clientId, "class_id" => $params->class_id, "user_type" => "student", "minified" => "simplified"];
-                $student_list = load_class("users", "controllers")->list($student_param);
-
-                /** Confirm if a record already exist */
-                if($this->confirm_class_payment_record($params)) {
-
-                    /** Update the existing record */
-                    $stmt = $this->db->prepare("UPDATE fees_allocations SET 
-                        amount = ? WHERE category_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND class_id = ?
-                    ");
-                    
-                    /** Execute the prepared statement */
-                    $stmt->execute([
-                        $params->amount, $params->category_id, $params->clientId, 
-                        $params->academic_year, $params->academic_term, $params->class_id
-                    ]);
-
-                     // log the user activity
-                    $this->userLogs("fees_allocation", $params->student_id ?? $params->class_id, null, 
-                        "{$params->userData->name} updated the fee allocation for <strong>{$class_check[0]->category_name}</strong> to: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
-
-                } else {
-
-                    /** Insert the Record */
-                    $stmt = $this->db->prepare("INSERT INTO fees_allocations SET 
-                        amount = ?, category_id = ?, client_id = ?, academic_year = ?, 
-                        academic_term = ?, class_id = ?, created_by = ?, currency = ?
-                    ");
-                    
-                    /** Execute the prepared statement */
-                    $stmt->execute([
-                        $params->amount, $params->category_id, $params->clientId, 
-                        $params->academic_year, $params->academic_term, $params->class_id,
-                        $params->userId, $params->currency
-                    ]);
-
-                    // log the user activity
-                    $this->userLogs("fees_allocation", $params->class_id ?? $params->student_id, null, 
-                        "{$params->userData->name} added the fee allocation for <strong>{$class_check[0]->category_name}</strong> of: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
-                }
-
-                // remove some unimportant keys
-                unset($params->userData);
-                
-                // loop through the students list
-                foreach($student_list["data"] as $key => $student) {
-                    
-                    /** Append the student id as the current user id */
-                    $params->student_id = $student->user_id;
-
-                    // get the payment record
-                    $paymentRecord = $this->confirm_student_payment_record($params, "simple_load");
-
-                    // If the student payment fees record already exists however the paid status still remains 0
-                    if(!empty($paymentRecord) && ($paymentRecord->paid_status !== 1)) {
-                       $this->update_student_fees($params);
-                    } elseif(empty($paymentRecord)) {
-                        /** Insert a new record */
-                        $this->insert_student_fees($params);
-                    }
-
-                }
-
-                $this->db->commit();
-
-                return ["data" => "Fees Allocation was successfully executed."];
-
-            }
-
-        } catch(PDOException $e) {
-            return $this->unexpected_error;
-        }
-    }
-
-    /**
-     * Allocate Fees to Class/Student
+     * First confirm if the fees item has already been logged
+     * If true then update the existing record, if not then insert a new record for the academic year and term.
+     * 
+     * Afterwards, check if the students list was parsed. If true, then assign the fees set together with the 
+     * category id and set for the student as well.
      * 
      * @param stdClass $params
      *  
@@ -1096,15 +1011,24 @@ class Fees extends Myschoolgh {
      */
     public function allocate_fees(stdClass $params) {
 
-        global $defaultUser;
+        global $defaultUser, $accessObject;
 
         $params->currency = $defaultUser->client->client_preferences->labels->currency ?? null;
 
         try {
 
+            // confirm that the user has the required permissions
+            if(!$accessObject->hasAccess("allocation", "fees")) {
+                return $this->permission_denied;
+            }
+
+            // readonly mode session
+            if(!empty($this->session->is_only_readable_app)) {
+                return $this->readonly_mode;
+            }
+
              /** Check if the class id is valid */
-            $class_check = $this->pushQuery("a.id, (SELECT b.name FROM fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", 
-                "classes a", 
+            $class_check = $this->pushQuery("a.id, (SELECT b.name FROM fees_category b WHERE b.id = '{$params->category_id}' LIMIT 1) AS category_name", "classes a", 
                 "a.id='{$params->class_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1");
 
             if(empty($class_check)) {
@@ -1118,7 +1042,8 @@ class Fees extends Myschoolgh {
             if($this->confirm_class_payment_record($params)) {
 
                 /** Update the existing record */
-                $stmt = $this->db->prepare("UPDATE fees_allocations SET amount = ?, date_updated = now() 
+                $stmt = $this->db->prepare("UPDATE fees_allocations 
+                    SET amount = ?, date_updated = now(), payment_module = ?, payment_month = ?
                     WHERE 
                         category_id = ? AND client_id = ? AND academic_year = ? AND 
                         academic_term = ? AND class_id = ? AND status = ? 
@@ -1127,8 +1052,9 @@ class Fees extends Myschoolgh {
                 
                 /** Execute the prepared statement */
                 $stmt->execute([
-                    $params->amount, $params->category_id, $params->clientId, 
-                    $params->academic_year, $params->academic_term, $params->class_id, 1
+                    $params->amount, $params->payment_module, $params->payment_month ?? null, 
+                    $params->category_id, $params->clientId, $params->academic_year, 
+                    $params->academic_term, $params->class_id, 1
                 ]);
 
                     // log the user activity
@@ -1139,21 +1065,22 @@ class Fees extends Myschoolgh {
 
                 /** Insert the Record */
                 $stmt = $this->db->prepare("INSERT INTO fees_allocations SET 
-                    amount = ?, category_id = ?, client_id = ?, academic_year = ?, 
+                    amount = ?, category_id = ?, client_id = ?, academic_year = ?, payment_module = ?, payment_month = ?, 
                     academic_term = ?, class_id = ?, created_by = ?, currency = ?, date_updated = now()
                 ");
-                
+
                 /** Execute the prepared statement */
                 $stmt->execute([
                     $params->amount, $params->category_id, $params->clientId, 
-                    $params->academic_year, $params->academic_term, $params->class_id,
-                    $params->userId, $params->currency
+                    $params->academic_year, $params->payment_module, $params->payment_month ?? null, 
+                    $params->academic_term, $params->class_id, $params->userId, $params->currency
                 ]);
 
                 // log the user activity
                 $this->userLogs("fees_allocation", $params->class_id, null, 
                     "{$params->userData->name} added the fee allocation for <strong>{$class_check[0]->category_name}</strong> of: <strong>{$params->currency} {$params->amount}</strong>", $params->userId);
             }
+
             // remove some unimportant keys
             unset($params->userData);
             
@@ -1170,6 +1097,8 @@ class Fees extends Myschoolgh {
                         "paid_status, exempted, amount_due, amount_paid, balance",
                         "fees_payments", 
                         "student_id='{$student_id}' AND academic_year='{$params->academic_year}'
+                            ".(!empty($params->payment_month) ? " AND payment_month='{$params->payment_month}' " : null)."
+                            ".(!empty($params->payment_module) ? " AND payment_module='{$params->payment_module}' " : null)."
                         AND academic_term='{$params->academic_term}' AND category_id='{$params->category_id}'
                     ");
 
@@ -1215,9 +1144,36 @@ class Fees extends Myschoolgh {
     public function allocated_fees_amount(stdClass $params) {
 
         /** Check if the student id is valid */
-        $class_check = $this->pushQuery("id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        $class_check = $this->pushQuery("id, payment_module", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         if(empty($class_check)) {
             return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+        }
+
+        // set the additional query if the academic year and term were parsed
+        $additional_query = null;
+        $additional_query .= (isset($params->academic_year) && !empty($params->academic_year)) ? " AND academic_year = '{$params->academic_year}'" : null;
+        $additional_query .= (isset($params->academic_term) && !empty($params->academic_term)) ? " AND academic_term = '{$params->academic_term}'" : null;
+
+        // add query
+        $class_query = null;
+
+        // set the payment month
+        if(isset($params->payment_month, $params->payment_module)) {
+            // set the payment module
+            if(!empty($params->payment_module) && ($params->payment_module !== "Termly")) {
+                // append the payemnt module style
+                $additional_query .= " AND payment_module = '{$params->payment_module}' ";
+                $class_query = " AND b.payment_module = '{$params->payment_module}' ";
+
+                // set the payment month and year
+                if(!empty($params->payment_month)) {
+                    $additional_query .= " AND payment_month = '{$params->payment_month}' ";
+                    $class_query = " AND b.payment_month = '{$params->payment_month}' ";
+                } else {
+                    $additional_query .= " AND payment_month IS NULL ";
+                    $class_query = " AND b.payment_month IS NULL ";
+                }
+            }
         }
 
         /** Confirm if the allocate to is student */
@@ -1229,10 +1185,14 @@ class Fees extends Myschoolgh {
             }
 
             /** Confirm if a record already exist */
-            $query = $this->pushQuery("amount_due AS default_amount", "fees_payments", "student_id='{$params->student_id}' AND category_id='{$params->category_id}' AND class_id='{$params->class_id}' AND status='1' AND client_id='{$params->clientId}' ORDER BY id DESC LIMIT 1");
+            $query = $this->pushQuery("amount_due AS default_amount, payment_module, payment_month", 
+                "fees_payments", 
+                "student_id='{$params->student_id}' AND category_id='{$params->category_id}' AND 
+                    class_id='{$params->class_id}' AND status='1' AND client_id='{$params->clientId}'
+                    {$additional_query} ORDER BY id DESC LIMIT 1");
             
             // run this query if the init is empty
-            if(empty($query)) {
+            if(empty($query) && empty($class_query)) {
                 // default amount
                 $query = $this->pushQuery(
                     "b.amount AS default_amount", 
@@ -1247,7 +1207,8 @@ class Fees extends Myschoolgh {
             // return the amount
             return [
                 "data" => [
-                    "amount" => $amount
+                    "amount" => $amount,
+                    "payment_module" => $query[0]->payment_module ?? $class_check[0]->payment_module
                 ]
             ];
 
@@ -1255,13 +1216,15 @@ class Fees extends Myschoolgh {
 
             /** Confirm if a record already exist */
             $query = $this->pushQuery(
-                "a.amount as default_amount",
-                "fees_allocations a", 
-                "a.class_id='{$params->class_id}' AND a.category_id='{$params->category_id}' AND a.client_id='{$params->clientId}' AND a.status='1' ORDER BY a.id DESC LIMIT 1"
+                "amount as default_amount, payment_module, payment_month",
+                "fees_allocations", 
+                "class_id='{$params->class_id}' AND category_id='{$params->category_id}' 
+                AND client_id='{$params->clientId}' AND status='1' {$additional_query}
+                ORDER BY id DESC LIMIT 1"
             );
 
             // run this query if the init is empty
-            if(empty($query)) {
+            if(empty($query) && empty($class_query)) {
                 // default amount
                 $query = $this->pushQuery(
                     "b.amount AS default_amount", 
@@ -1278,7 +1241,7 @@ class Fees extends Myschoolgh {
                 "users a LEFT JOIN fees_payments b ON b.student_id = a.item_id
                     AND b.academic_year = '{$params->academic_year}'
                     AND b.academic_term = '{$params->academic_term}'
-                    AND b.category_id='{$params->category_id}'", 
+                    AND b.category_id='{$params->category_id}' {$class_query}", 
                 "a.class_id='{$params->class_id}' 
                     AND a.client_id='{$params->clientId}' 
                 LIMIT {$this->global_limit}");
@@ -1304,7 +1267,9 @@ class Fees extends Myschoolgh {
             return [
                 "data" => [
                     "amount" => $amount,
-                    "students_allocation" => $students_allocation
+                    "payment_module" => $query[0]->payment_module ?? $class_check[0]->payment_module,
+                    "payment_month" => $query ?? null,
+                    "students_allocation" => $students_allocation,
                 ]
             ];
 
@@ -1313,6 +1278,9 @@ class Fees extends Myschoolgh {
 
 	/**
 	 * @method confirm_class_payment_record
+     * 
+     * Verify if the the class fees allocation has been set the specified academic year and term
+     * 
 	 * @param String $params->student_id 	    This is the unique id of the student
 	 * @param String $params->category_id		This is the fees type (tuition, ict, pta, or any other)
 	 * @param String $params->academic_year	    This specifies the academic year to fetch the record
@@ -1325,7 +1293,11 @@ class Fees extends Myschoolgh {
 			$stmt = $this->db->prepare("
 				SELECT amount 
 				FROM fees_allocations 
-				WHERE client_id = ? AND class_id = ? AND category_id = ? AND academic_year = ? AND academic_term = ? AND status = '1' LIMIT 1
+				WHERE client_id = ? AND class_id = ? AND category_id = ? 
+                    AND academic_year = ? AND academic_term = ? AND status = '1' 
+                    ".(!empty($params->payment_month) ? " AND payment_month='{$params->payment_month}' " : null)."
+                    ".(!empty($params->payment_module) ? " AND payment_module='{$params->payment_module}' " : null)."
+                LIMIT 1
 			");
 			$stmt->execute([$params->clientId, $params->class_id, $params->category_id, $params->academic_year, $params->academic_term]);
 			
@@ -1369,11 +1341,11 @@ class Fees extends Myschoolgh {
 				SELECT 
                     a.checkout_url, a.student_id, a.class_id, a.category_id, a.amount_due, a.amount_paid, 
                     a.balance, a.paid_status, a.last_payment_id, a.academic_year, a.academic_term, a.date_created, 
-                    a.last_payment_date, a.currency, a.exempted, c.name AS class_name,
+                    a.last_payment_date, a.currency, a.exempted, c.name AS class_name, a.payment_module, a.payment_month,
                     (
-                        SELECT sum(b.balance) FROM fees_payments b 
+                        SELECT SUM(b.balance) FROM fees_payments b 
                         WHERE b.student_id = a.student_id AND b.academic_term = '{$academic_term}'
-                            AND b.academic_year = '{$academic_year}'
+                            AND b.academic_year = '{$academic_year}' LIMIT 30
                     ) AS debt, ar.arrears_total AS arrears,
                     (
                         SELECT 
@@ -1407,17 +1379,23 @@ class Fees extends Myschoolgh {
                     ".(!empty($category_id) ? " AND a.category_id = '{$params->category_id}'" : null)."")." AND 
                     a.academic_year = '{$academic_year}' AND a.academic_term = '{$academic_term}'
                     ".($removeExemptions ? " AND exempted = '0'" : null)."
-                    AND a.client_id = '{$params->clientId}' AND a.status = '1' LIMIT ".(!empty($category_id) ? 1 : 30)."
+                    ".(!empty($params->payment_month) ? " AND a.payment_month = '{$params->payment_month}'" : null)."
+                    AND a.client_id = '{$params->clientId}' AND a.status = '1' LIMIT ".(!empty($category_id) ? 12 : 30)."
 			");
 			$stmt->execute([1]);
 
             // count the number of rows found
+            $payment_module = null;
             $showInfo = (bool) isset($params->clean_payment_info);
 
-            // if clean_payment_info was parsed then query below
+            // print_r($stmt->fetchAll(PDO::FETCH_OBJ));
+            // exit;
+            // // if clean_payment_info was parsed then query below
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-                
+                // set the payment_module
+                $payment_module = $result->payment_module;
+
                 // payment information
                 $result->student_details = $this->stringToArray($result->student_details, "|", ["student_name", "department_id", "account_balance", "unique_id", "phone_number", "email", "image"], true);
                 $result->student_details["arrears"] = $result->arrears;
@@ -1439,12 +1417,71 @@ class Fees extends Myschoolgh {
                 $data[] = $result;
             }
 
-            return !empty($data) && $category_id ? $data[0] : $data;
+            return !empty($data) && ($category_id && $payment_module !== "Monthly") ? $data[0] : $data;
 
 		} catch(PDOException $e) {
             return false;
 		}
 	}
+
+    /**
+     * Get the Student Payment Summary
+     * 
+     * @param String        $params->student_id
+     * @param String        $params->academic_year
+     * @param String        $params->academic_term
+     *
+     * @return Array
+     **/
+    public function student_payment_summary(stdClass $params) {
+
+        try {
+
+            // set the columns to load
+            $params->columns = "a.id, a.client_id, a.unique_id, a.item_id AS user_id, a.name, 
+                a.user_type, a.phone_number, a.class_id, a.email, a.image, a.gender, cl.name class_name, (
+                SELECT CONCAT(
+                    COALESCE(SUM(b.amount_paid), '0'), '|',
+                    COALESCE(SUM(b.balance), '0')
+                )
+                FROM fees_payments b 
+                WHERE b.student_id = '{$params->student_id}' AND b.academic_term = '{$params->academic_term}'
+                    AND b.academic_year = '{$params->academic_year}' AND b.exempted = '0'
+            ) AS payments_data, ar.arrears_total AS arrears";
+            
+            
+            // prepare and execute the statement
+            $sql = $this->db->prepare("SELECT {$params->columns} 
+                FROM users a
+                LEFT JOIN classes cl ON cl.id = a.class_id
+                LEFT JOIN users_arrears ar ON ar.student_id = a.item_id
+                WHERE a.item_id='{$params->student_id}' AND a.client_id='{$params->clientId}' AND 
+                    a.deleted = '0' AND a.status = '1' ORDER BY a.name LIMIT 1
+            ");
+            $sql->execute();
+
+            $data = [];
+
+            while($result = $sql->fetch(PDO::FETCH_OBJ)) {
+                $payments = explode("|", $result->payments_data);
+                $result->debt = $payments[1];
+                $result->amount_paid = $payments[0];
+                $result->term_bill = $payments[0] + $payments[1];
+                $result->debt_formated = number_format($result->debt, 2);
+                $result->arrears_formated = number_format($result->arrears, 2);
+                $result->total_debt_formated = number_format(($result->debt + $result->arrears), 2);
+
+                unset($result->payments_data);
+                
+                $data = $result;
+            }
+
+            // return the data"Sorry! There was an error while processing the request."
+            return $data;
+
+        } catch(PDOException $e) {}
+
+    }
 
     /**
      * Make payment for the fees
@@ -1458,7 +1495,12 @@ class Fees extends Myschoolgh {
 
         try {
 
-            global $defaultUser, $clientPrefs, $defaultCurrency;
+            global $defaultUser, $clientPrefs, $defaultCurrency, $defaultClientData;
+
+            // readonly mode session
+            if(!empty($this->session->is_only_readable_app)) {
+                return $this->readonly_mode;
+            }
             
             // get the preference of the client
             $preference = $this->iclient->client_preferences->labels;
@@ -1486,37 +1528,6 @@ class Fees extends Myschoolgh {
 
                 return ["code" => 203, "data" => "Sorry! No fees allocation for this selected category found."];
 
-                // $category_item = $this->pushQuery("amount, name", "fees_category", "id='{$params->category_id}' AND client_id='{$params->clientId}' LIMIT 1");
-                
-                // if(empty($category_item)) {
-                //     return ["code" => 203, "data" => "Sorry! An invalid checkout url was parsed for processing."];
-                // }
-                
-                // // get the student name
-                // $student = $this->pushQuery("name AS student_name, class_id", "users", "item_id = '{$params->student_id}' AND user_type='student' AND client_id = '{$params->clientId}' LIMIT 1");
-                
-                // payment record
-                // $paymentRecord = (object) [
-                //     "checkout_url" => random_string("alnum",  16),
-                //     "student_id" => $params->student_id,
-                //     "class_id" => $student[0]->class_id ?? null,
-                //     "category_id" => $params->category_id,
-                //     "amount_due" => $category_item[0]->amount ?? null,
-                //     "amount_paid" => 0,
-                //     "balance" => $category_item[0]->amount ?? null,
-                //     "last_payment_id" => null, 
-                //     "academic_year" => $params->academic_year,
-                //     "academic_term" => $params->academic_term,
-                //     "currency" => $defaultCurrency,
-                //     "exempted" => 0,
-                //     "category_name" => $category_item[0]->name ?? null,
-                //     "last_payment_info" => null,
-                //     "account_balance" => 0,
-                //     "paid_status" => 0,
-                //     "student_details" => [
-                //         "student_name" => $student[0]->student_name ?? null
-                //     ]
-                // ];
             }
 
             /** Validate email address */
@@ -1540,29 +1551,59 @@ class Fees extends Myschoolgh {
                 foreach($paymentRecord as $fee) {
 
                     // add up to the values
+                    $append_month = false;
                     $balance += $fee->balance;
                     $amount_due += $fee->amount_due;
                     $total_amount_paid += $fee->amount_paid;
 
+                    // set the payment month
+                    if(($fee->payment_module === "Monthly") && !empty($fee->payment_month)) {
+                        $append_month = true;
+                    }
+
                     // algorithm to get the items being paid for
                     if($paying > 0) {
-                        if(($fee->balance < $paying) || ($fee->balance == $paying)) {
-                            $paying = $paying - $fee->balance;
-                            $fees_list[$fee->category_id] = 0;
-                            // if the paid status is not equal to one
-                            if($fee->balance != 0.00) {
-                                $amount_paid[$fee->category_id] = $fee->balance;
+                        if(!$fee->exempted) {
+                            if(($fee->balance < $paying) || ($fee->balance == $paying)) {
+                                $paying = (float) ($paying - $fee->balance);
+                                if($append_month) {
+                                    $fees_list[$fee->category_id][$fee->payment_month] = 0;
+                                    // if the paid status is not equal to one
+                                    if($fee->balance != 0.00) {
+                                        $amount_paid[$fee->category_id][$fee->payment_month] = $fee->balance;
+                                    }
+                                } else {
+                                    $fees_list[$fee->category_id] = 0;
+                                    // if the paid status is not equal to one
+                                    if($fee->balance != 0.00) {
+                                        $amount_paid[$fee->category_id] = $fee->balance;
+                                    }
+                                }
+                            } elseif($fee->balance > $paying) {
+                                if($append_month) {
+                                    $n_value = (float) ($fee->balance - $paying);
+                                    $amount_paid[$fee->category_id][$fee->payment_month] = $paying;
+                                    $fees_list[$fee->category_id][$fee->payment_month] = $n_value;
+                                    $paying = 0;
+                                } else {
+                                    $n_value = (float) ($fee->balance - $paying);
+                                    $amount_paid[$fee->category_id] = $paying;
+                                    $fees_list[$fee->category_id] = $n_value;
+                                    $paying = 0;
+                                }
+                            } else {
+                                if($append_month) {
+                                    $n_value = (float) ($fee->balance - $paying);
+                                    $amount_paid[$fee->category_id][$fee->payment_month] = $paying;
+                                    $fees_list[$fee->category_id][$fee->payment_month] = $n_value;
+                                    $paying -= $fee->balance; 
+                                } else {
+                                    $n_value = (float) ($fee->balance - $paying);
+                                    $amount_paid[$fee->category_id] = $paying;
+                                    $fees_list[$fee->category_id] = $n_value;
+                                    $paying -= $fee->balance;
+                                }
                             }
-                        } elseif($fee->balance > $paying) {
-                            $n_value = $fee->balance - $paying;
-                            $amount_paid[$fee->category_id] = $paying;
-                            $fees_list[$fee->category_id] = $n_value;
-                            $paying = 0;
-                        } else {
-                            $n_value = $fee->balance - $paying;
-                            $amount_paid[$fee->category_id] = $paying;
-                            $fees_list[$fee->category_id] = $n_value;
-                            $paying -= $fee->balance; 
                         }
                     }
                 }
@@ -1612,14 +1653,17 @@ class Fees extends Myschoolgh {
             // if the payment method is momo or card payment
             $append_sql .= ", paidin_by='".($params->email_address ?? null)."', paidin_contact='".($params->contact_number ?? null)."'";
 
+            // append the $this->session->e_payment_transaction_id
+            $append_sql .= !empty($this->session->e_payment_transaction_id) ? ", reference_id='{$this->session->e_payment_transaction_id}'" : null;
+
             // log the data in the statement account
-            $check_account = $this->pushQuery("item_id, balance", "accounts", "client_id='{$params->clientId}' AND status='1' AND default_account='1' LIMIT 1");
+            $check_account = $this->default_payment_account($params->clientId);
 
             /* Record the payment made by the user */
             if(!is_array($paymentRecord)) {
 
                 // generate a unique id for the payment record
-                $uniqueId = random_string('alnum', 15);
+                $uniqueId = random_string("alnum", RANDOM_STRING);
                 $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
                 $receiptId = $this->iclient->client_preferences->labels->receipt_label.$counter;
                 $receiptId = strtoupper($receiptId);
@@ -1637,7 +1681,8 @@ class Fees extends Myschoolgh {
                     $params->clientId, $uniqueId, $paymentRecord->student_id, $paymentRecord->department_id ?? null, 
                     $paymentRecord->class_id, $paymentRecord->category_id, $params->amount, $params->userId, 
                     $paymentRecord->academic_year, $paymentRecord->academic_term, 
-                    $params->description ?? "Payment of {$paymentRecord->category_name}", $currency, $receiptId, $params->payment_method, $payment_id
+                    $params->description ?? "Payment of {$paymentRecord->category_name}", $currency, 
+                    $receiptId, $params->payment_method, $payment_id
                 ]);
                 /* Update the user payment record */
                 $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
@@ -1651,19 +1696,22 @@ class Fees extends Myschoolgh {
                 
                 // set the student name
                 $student_name = $paymentRecord->student_details["student_name"];
+                $student_contact = $paymentRecord->student_details["phone_number"];
 
                 // additional data
-                $additional["payment"] = $this->confirm_student_payment_record($params);
+                $additional["payment"] = $this->student_payment_summary($params);
                 $additional["uniqueId"] = $uniqueId;
 
             } else {
 
                 // generate a new payment_id
-                $payment_id = random_string('alnum', 16);
+                $payment_id = random_string("alnum", RANDOM_STRING);
 
                 // get the student name
-                $student = $this->pushQuery("name AS student_name", "users", "item_id = '{$params->student_id}' AND user_type='student' AND client_id = '{$params->clientId}' LIMIT 1");
+                $student = $this->pushQuery("name AS student_name, phone_number, phone_number_2", "users", "item_id = '{$params->student_id}' AND user_type='student' AND client_id = '{$params->clientId}' LIMIT 1");
+
                 $student_name = !empty($student) ? $student[0]->student_name : "Unknown";
+                $student_contact = !empty($student) ? $student[0]->phone_number : null;
 
                 // loop through the payment record
                 foreach($paymentRecord as $record) {
@@ -1673,50 +1721,104 @@ class Fees extends Myschoolgh {
 
                         // get the total amount paid
                         $total_paid = $amount_paid[$record->category_id];
-                        $total_balance = ($record->balance - $total_paid);
-                        $totalPayment = ($record->amount_paid + $total_paid);
 
-                        // set the paid status
-                        $paid_status = ((round($totalPayment) === round($record->amount_due)) || (round($totalPayment) > round($record->amount_due))) ? 1 : 2;
+                        // loop through the payment information
+                        if(is_array($total_paid)) {
 
-                        // generate a unique id for the payment record
-                        $uniqueId = random_string('alnum', 15);
-                        $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
-                        $receiptId = $clientPrefs->labels->receipt_label.$counter;
-                        $receiptId = strtoupper($receiptId);
+                            // loop through the payment months list
+                            foreach($total_paid as $the_payment_month => $the_amount) {
 
-                        // insert the new record into the database
-                        $stmt = $this->db->prepare("INSERT INTO fees_collection
-                            SET client_id = ?, item_id = ?, student_id = ?, payment_id = ?, department_id = ?, class_id = ?, 
-                            category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
-                            description = ?, currency = ?, receipt_id = ?, payment_method = ? {$append_sql}
-                        ");
-                        $stmt->execute([
-                            $params->clientId, $uniqueId, $record->student_id, $payment_id,
-                            $record->department_id ?? null, $record->class_id, $record->category_id, 
-                            $total_paid, $params->userId, $record->academic_year, $record->academic_term, 
-                            $params->description ?? "Payment of {$record->category_name}", $currency, $receiptId, $params->payment_method
-                        ]);
+                                // only update the section for the current month
+                                if($record->payment_month == $the_payment_month) {
 
-                        /* Update the user payment record */
-                        $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
-                            last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", 
-                            paid_status='{$paid_status}'" : "")." WHERE checkout_url = ? AND client_id = ? LIMIT 1
-                        ");
-                        $stmt->execute([($record->amount_paid + $total_paid), $total_balance, $record->checkout_url, $params->clientId]);
+                                    // set the parameters
+                                    $total_balance = ($record->balance - $the_amount);
+                                    $totalPayment = ($record->amount_paid + $the_amount);
 
-                        /* Record the user activity log */
-                        $this->userLogs("fees_payment", $record->checkout_url, null, "{$params->userData->name} received an amount of <strong>{$total_paid}</strong> as Payment for <strong>{$record->category_name}</strong> from <strong>{$student_name}</strong>. Outstanding Balance is <strong>{$total_balance}</strong>", $params->userId);
-                        
-                        // set a new parameter for the checkout and category id
-                        $params->checkout_url = $record->checkout_url;
+                                    // set the paid status
+                                    $paid_status = ((round($totalPayment) === round($record->amount_due)) || (round($totalPayment) > round($record->amount_due))) ? 1 : 2;
+
+                                    // generate a unique id for the payment record
+                                    $uniqueId = random_string("alnum", RANDOM_STRING);
+                                    $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+                                    $receiptId = $clientPrefs->labels->receipt_label.$counter;
+                                    $receiptId = strtoupper($receiptId);
+
+                                    // insert the new record into the database
+                                    $stmt = $this->db->prepare("INSERT INTO fees_collection
+                                        SET client_id = ?, item_id = ?, student_id = ?, payment_id = ?, department_id = ?, class_id = ?, 
+                                        category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
+                                        description = ?, currency = ?, receipt_id = ?, payment_method = ?, payment_month = ? {$append_sql}
+                                    ");
+                                    $stmt->execute([
+                                        $params->clientId, $uniqueId, $record->student_id, $payment_id,
+                                        $record->department_id ?? null, $record->class_id, $record->category_id, 
+                                        $the_amount, $params->userId, $record->academic_year, $record->academic_term, 
+                                        $params->description ?? "Payment of {$record->category_name}", $currency, 
+                                        $receiptId, $params->payment_method, $the_payment_month
+                                    ]);
+
+                                    /* Update the user payment record */
+                                    $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
+                                        last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", 
+                                        paid_status='{$paid_status}'" : "")." WHERE checkout_url = ? AND client_id = ? AND payment_month = ? LIMIT 1
+                                    ");
+                                    $stmt->execute([($record->amount_paid + $the_amount), $total_balance, $record->checkout_url, $params->clientId, $the_payment_month]);
+
+                                    /* Record the user activity log */
+                                    $this->userLogs("fees_payment", $record->checkout_url, null, "{$params->userData->name} received an amount of <strong>{$the_amount}</strong> as Payment for <strong>{$record->category_name}</strong> from <strong>{$student_name}</strong>. Outstanding Balance is <strong>{$total_balance}</strong>", $params->userId);
+                                    
+                                    // set a new parameter for the checkout and category id
+                                    $params->checkout_url = $record->checkout_url;
+                                }
+
+                            }
+
+                        } else {
+                            $total_balance = ($record->balance - $total_paid);
+                            $totalPayment = ($record->amount_paid + $total_paid);
+
+                            // set the paid status
+                            $paid_status = ((round($totalPayment) === round($record->amount_due)) || (round($totalPayment) > round($record->amount_due))) ? 1 : 2;
+
+                            // generate a unique id for the payment record
+                            $uniqueId = random_string("alnum", RANDOM_STRING);
+                            $counter = $this->append_zeros(($this->itemsCount("fees_collection", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
+                            $receiptId = $clientPrefs->labels->receipt_label.$counter;
+                            $receiptId = strtoupper($receiptId);
+
+                            // insert the new record into the database
+                            $stmt = $this->db->prepare("INSERT INTO fees_collection
+                                SET client_id = ?, item_id = ?, student_id = ?, payment_id = ?, department_id = ?, class_id = ?, 
+                                category_id = ?, amount = ?, created_by = ?, academic_year = ?, academic_term = ?, 
+                                description = ?, currency = ?, receipt_id = ?, payment_method = ? {$append_sql}
+                            ");
+                            $stmt->execute([
+                                $params->clientId, $uniqueId, $record->student_id, $payment_id,
+                                $record->department_id ?? null, $record->class_id, $record->category_id, 
+                                $total_paid, $params->userId, $record->academic_year, $record->academic_term, 
+                                $params->description ?? "Payment of {$record->category_name}", $currency, $receiptId, $params->payment_method
+                            ]);
+
+                            /* Update the user payment record */
+                            $stmt = $this->db->prepare("UPDATE fees_payments SET amount_paid = ?, balance = ?, 
+                                last_payment_date = now(), last_payment_id = '{$uniqueId}' ".($paid_status ? ", 
+                                paid_status='{$paid_status}'" : "")." WHERE checkout_url = ? AND client_id = ? LIMIT 1
+                            ");
+                            $stmt->execute([($record->amount_paid + $total_paid), $total_balance, $record->checkout_url, $params->clientId]);
+
+                            /* Record the user activity log */
+                            $this->userLogs("fees_payment", $record->checkout_url, null, "{$params->userData->name} received an amount of <strong>{$total_paid}</strong> as Payment for <strong>{$record->category_name}</strong> from <strong>{$student_name}</strong>. Outstanding Balance is <strong>{$total_balance}</strong>", $params->userId);
+                            
+                            // set a new parameter for the checkout and category id
+                            $params->checkout_url = $record->checkout_url;
+                        }
 
                     }
 
                 }
 
-                $last_info = $this->confirm_student_payment_record($params);
-                $additional["payment"] = $last_info[count($last_info)-1];
+                $additional["payment"] = $this->student_payment_summary($params);
                 $additional["uniqueId"] = $payment_id;
 
             }
@@ -1752,20 +1854,30 @@ class Fees extends Myschoolgh {
 
             // Log the transaction information
             if(isset($params->transaction_id) && isset($params->reference_id)) {
-                // Insert the transaction
-                $this->db->query("INSERT INTO transaction_logs SET client_id = '{$params->clientId}',
-                    transaction_id = '{$params->transaction_id}', endpoint = 'fees', reference_id = '{$params->reference_id}', amount='{$params->amount}'
-                ");
+                // update the status of the logged data
+                if(!empty($this->session->e_payment_transaction_id)) {
+                    $this->db->query("UPDATE transaction_logs SET state='Processed',
+                        payment_data='".json_encode($params->paystack_data["data"])."' WHERE
+                        transaction_id = '{$this->session->e_payment_transaction_id}' LIMIT 1
+                    ");
+                } else {
+                    // Insert the transaction
+                    $this->db->query("INSERT INTO transaction_logs SET client_id = '{$params->clientId}',
+                        transaction_id = '{$params->transaction_id}', endpoint = 'fees', 
+                        reference_id = '{$params->reference_id}', amount='{$params->amount}', 
+                        payment_data='".json_encode($params->paystack_data["data"])."', created_by = '{$params->userId}'
+                    ");
+                }
             }
 
             // send the receipt via sms
-            if(isset($preference->send_receipt) && isset($params->contact_number)){
+            if(isset($preference->send_receipt) && isset($student_contact)){
                 
                 // if the contact number is not empty
-                if(strlen($params->contact_number) > 9 && preg_match("/^[0-9+]+$/", $params->contact_number)) {
+                if(strlen($student_contact) > 9 && preg_match("/^[0-9+]+$/", $student_contact)) {
                     
                     // append the message
-                    $message = "Hello {$student_name},\nFees Payment was successfully processed.\nAmount Paid: {$currency} {$params->amount}\nBalance: {$currency} {$outstandingBalance}\n";
+                    $message = "Hello {$student_name},\nFees Payment of {$currency} {$params->amount} was successfully processed.\nBalance Is: {$currency} {$outstandingBalance}\n";
                     
                     // calculate the message text count
                     $chars = strlen($message);
@@ -1784,7 +1896,7 @@ class Fees extends Myschoolgh {
                         // set the field parameters
                         $fields_string = [
                             "key" => $this->mnotify_key,
-                            "recipient" => [$params->contact_number],
+                            "recipient" => [$student_contact],
                             "sender" => !empty($this->iclient->sms_sender) ? $this->iclient->sms_sender : $this->sms_sender,
                             "message" => $message
                         ];
@@ -1825,6 +1937,9 @@ class Fees extends Myschoolgh {
             // commit the statements
             $this->db->commit();
 
+            // unset the sessions
+            $this->session->remove(["e_payment_transaction_id"]);
+
             // return the success message
             return [
                 "data" => "Fee payment was successfully recorded.",
@@ -1851,7 +1966,10 @@ class Fees extends Myschoolgh {
         try {
             
             // check if the transaction id already exits
-            $transaction = $this->pushQuery("id", "transaction_logs", "transaction_id='{$params->transaction_id}' LIMIT 1");
+            $transaction = $this->pushQuery("id", 
+                "transaction_logs", 
+                "transaction_id='{$params->transaction_id}' AND state='Processed' LIMIT 1"
+            );
             if(!empty($transaction)) {
                 return ["code" => 203, "data" => "Sorry! This transaction has already been processed."];
             }
@@ -1875,8 +1993,9 @@ class Fees extends Myschoolgh {
             
             // if payment status is true
             if(!empty($payment_check["data"]) && isset($payment_check["data"]->status) && ($payment_check["data"]->status === true)) {
-                // 
+                // set additional parameters
                 $params->payment_method = "MoMo_Card";
+                $params->paystack_data = $payment_check;
 
                 // process the payment
                 return $this->make_payment($params);
@@ -1950,13 +2069,14 @@ class Fees extends Myschoolgh {
      * 
      * @return Array
      */
-    public function receipt(stdClass $params) {
+    public function receipt(stdClass $params, $font_weight = "normal") {
         
         // global variable
-        global $defaultClientData, $defaultCurrency;
+        global $defaultClientData, $defaultCurrency, $academicSession, $isSupport;
 
         // init variable
-        $student_data = [];
+        $student_data = (object) [];
+        $student_data->category_id = $student_data->category_id ?? null;
         $studentIsset = (bool) isset($params->getObject->student_id) && !empty($params->getObject->student_id);
 
         // if the receipt id was parsed
@@ -1970,9 +2090,18 @@ class Fees extends Myschoolgh {
 
         // get the client data
         $amount = 0;
+        $_reversed = 0;
         $data = $params->data;
-        $client = $defaultClientData;
-        $clientPrefs = $client->client_preferences;
+
+        // if support personnel then get the client information
+        if($isSupport) {
+            // get the client data
+            $client = $this->client_data($student_data->client_id, true);
+            $clientPrefs = $client->client_preferences;
+        } else {
+            $client = $defaultClientData;
+            $clientPrefs = $client->client_preferences;
+        }
 
         // get the client logo content
         if(!empty($client->client_logo)) {
@@ -1991,7 +2120,7 @@ class Fees extends Myschoolgh {
         $cur_arreas = 0;
         $prev_arrears = 0;
         $outstanding_balance = 0;
-        $isArrears = (bool) ($student_data->category_id == "Arrears");
+        $isArrears = isset($student_data->category_id) ? (bool) ($student_data->category_id == "Arrears") : null;
 
         // if the fee payment record was found
         if(!empty($student_data)) {
@@ -2001,7 +2130,7 @@ class Fees extends Myschoolgh {
 
             $out_fees = $this->pushQuery("(SUM(amount_due) - SUM(amount_paid)) AS balance", "fees_payments",
                 "academic_year='{$student_data->academic_year}' AND academic_term='{$student_data->academic_term}'
-                AND client_id='{$student_data->client_id}' AND student_id='{$student_data->student_id}' LIMIT 40");
+                AND client_id='{$student_data->client_id}' AND student_id='{$student_data->student_id}' LIMIT {$this->temporal_maximum}");
 
             // set more variables
             $prev_arrears = $out_arrears[0]->balance ?? 0;
@@ -2016,19 +2145,37 @@ class Fees extends Myschoolgh {
 
         // append the data
         $receipt = '
-        <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/app.min.css">
-        <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/style.css">
+        '.(!$isPDF ? '
+            <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/app.min.css">
+            <link rel="stylesheet" href="'.$this->baseUrl.'assets/css/style.css">' : 
+            '<style>
+            .badge-danger {
+                background-color: #fc544b;
+                vertical-align: middle;
+                color:#fff;
+                border-radius:7px;
+                padding: 7px;
+                font-size: 13px;
+            }
+            </style>'
+        ).'
         <div style="margin:auto auto; '.($isPDF ? '' : "max-width:950px;").'">
             <div class="row mb-3">
                 <div class="text-dark bg-white col-md-12" style="padding:30px">
-                    <div align="center">
-                        '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
-                        <h2 style="color:#6777ef;font-family:helvetica;padding:0px;margin:0px;">'.strtoupper($client->client_name).'</h2>
-                        <div>'.$client->client_address.'</div>
-                        '.(!empty($client->client_contact) ? "<div><strong>Tel:</strong> {$client->client_contact} / {$client->client_secondary_contact}</div>" : "").'
-                        '.(!empty($client->client_email) ? "<div><strong>Email:</strong> {$client->client_email}</div>" : "").'
-                    </div>
-                    <div style="background-color: #2196F3 !important;margin-top:5px;border-bottom: 1px solid #dee2e6 !important;height:3px;" class="pb-1 mb-3"></div>
+                    <table border="0" width="100%">
+                        <thead>
+                        <tr>
+                            '.(!empty($client->client_logo) ? "<td align='center' width='120px'><img width=\"100px\" src=\"{$client_logo}\"></td>" : "").'
+                            <td align="center">
+                                <h2 style="color:#6777ef;font-family:helvetica;padding:0px;margin:0px;">'.strtoupper($client->client_name).'</h2>
+                                <div>'.$client->client_address.'</div>
+                                '.(!empty($client->client_contact) ? "<div><strong>Tel:</strong> {$client->client_contact} / {$client->client_secondary_contact}</div>" : "").'
+                                '.(!empty($client->client_email) ? "<div><strong>Email:</strong> {$client->client_email}</div>" : "").'
+                            </td>
+                        </tr>
+                        </thead>
+                    </table>
+                    <div style="background-color: #2196F3 !important;margin-top:5px;border-bottom: 1px solid #dee2e6 !important;height:3px;" class="pb-1 mb-0"></div>
                     <div class="invoice">
                         <div class="invoice-print">
                             <div class="row">
@@ -2043,9 +2190,9 @@ class Fees extends Myschoolgh {
                                     </td>
                                     <td align="right">
                                         '.(!empty($student_data) && !empty($client->client_preferences) ? 
-                                            "<strong>Academic Year & Term:</strong><br>{$student_data->academic_year} :: {$student_data->academic_term}<br>" : 
+                                            "<strong>Academic Year & {$academicSession}:</strong><br>{$student_data->academic_year} :: {$student_data->academic_term}<br>" : 
                                             (
-                                                !empty($client->client_preferences) ? "<strong>Academic Year & Term:</strong><br>{$client->client_preferences->academics->academic_year} :: {$client->client_preferences->academics->academic_term}<br>" : null
+                                                !empty($client->client_preferences) ? "<strong>Academic Year & {$academicSession}:</strong><br>{$client->client_preferences->academics->academic_year} :: {$client->client_preferences->academics->academic_term}<br>" : null
                                             )
                                             ).'
                                         '.(count($data) == 1 && !empty($student_data->receipt_id) ? "Receipt ID: <strong>{$student_data->receipt_id}</strong><br>" : null).'
@@ -2056,26 +2203,30 @@ class Fees extends Myschoolgh {
                                     '.(!empty($student_data) && $isPDF ?
                                         '<table border="0" width="100%">
                                             <tr>
-                                                <td width="50%">
-                                                    <address style="font-size:16px">
-                                                        <strong>To:</strong><br>
-                                                        '.($student_name ?? null).'<br>
-                                                        '.($student_data->student_info->unique_id ?? null).'<br>
-                                                        '.($student_data->class_name ?? null).'<br>
-                                                        '.($student_data->department_name ?? null).'<br>
-                                                    </address>
-                                                </td>
-                                                <td align="right">
-                                                '.(!empty($student_data->student_info->guardian_id) ? 
-                                                    '<address style="font-size:16px">
-                                                    <strong>Billed To:</strong><br>
-                                                    '.(!empty($student_data->student_info->guardian_id[0]->fullname) ? $student_data->student_info->guardian_id[0]->fullname : null).'
-                                                    '.(!empty($student_data->student_info->guardian_id[0]->address) ? "<br>" . $student_data->student_info->guardian_id[0]->address : null).'
-                                                    '.(!empty($student_data->student_info->guardian_id[0]->contact) ? "<br>" . $student_data->student_info->guardian_id[0]->contact : null).'
-                                                    '.(!empty($student_data->student_info->guardian_id[0]->email) ? "<br>" . $student_data->student_info->guardian_id[0]->email : null).'
-                                                    </address>' : ''
+                                                '.($studentIsset ?
+                                                    '<td width="50%">
+                                                        <address style="font-size:16px">
+                                                            <strong>To:</strong>
+                                                            '.(!empty($student_name) ? "{$student_name}<br>" : null).'
+                                                            '.(!empty($student_data->student_info->unique_id) ? "{$student_data->student_info->unique_id}<br>" : null).'
+                                                            '.(!empty($student_data->class_name) ? "{$student_data->class_name}<br>" : null).'
+                                                            '.(!empty($student_data->department_name) ? "{$student_data->department_name}" : null).'
+                                                        </address>
+                                                    </td>': null
                                                 ).'
-                                                </td>
+                                                '.($studentIsset ?
+                                                    '<td align="right">
+                                                    '.(!empty($student_data->student_info->guardian_id) ? 
+                                                        '<address style="font-size:16px">
+                                                        <strong>Billed To:</strong><br>
+                                                        '.(!empty($student_data->student_info->guardian_id[0]->fullname) ? $student_data->student_info->guardian_id[0]->fullname : null).'
+                                                        '.(!empty($student_data->student_info->guardian_id[0]->address) ? "<br>" . $student_data->student_info->guardian_id[0]->address : null).'
+                                                        '.(!empty($student_data->student_info->guardian_id[0]->contact) ? "<br>" . $student_data->student_info->guardian_id[0]->contact : null).'
+                                                        '.(!empty($student_data->student_info->guardian_id[0]->email) ? "<br>" . $student_data->student_info->guardian_id[0]->email : null).'
+                                                        </address>' : ''
+                                                    ).'
+                                                    </td>': null
+                                                ).'
                                             </tr>                                        
                                         </table>'
                                         : null
@@ -2084,11 +2235,11 @@ class Fees extends Myschoolgh {
                                     '<div class="row">
                                         <div class="col-md-6" '.($isPDF ? "style='text-align:left'" : null).'>
                                             <address style="font-size:16px">
-                                                <strong>To:</strong><br>
-                                                '.($student_name ?? null).'<br>
-                                                '.($student_data->student_info->unique_id ?? null).'<br>
-                                                '.($student_data->class_name ?? null).'<br>
-                                                '.($student_data->department_name ?? null).'<br>
+                                                <strong>To:</strong>
+                                                '.(!empty($student_name) ? "{$student_name}<br>" : null).'
+                                                '.(!empty($student_data->student_info->unique_id) ? "{$student_data->student_info->unique_id}<br>" : null).'
+                                                '.(!empty($student_data->class_name) ? "{$student_data->class_name}<br>" : null).'
+                                                '.(!empty($student_data->department_name) ? "{$student_data->department_name}" : null).'
                                             </address>
                                         </div>
                                         '.(!empty($student_data->student_info->guardian_id) ?
@@ -2096,9 +2247,7 @@ class Fees extends Myschoolgh {
                                             <address style="font-size:16px">
                                             <strong>Billed To:</strong><br>
                                             '.(!empty($student_data->student_info->guardian_id[0]->fullname) ? $student_data->student_info->guardian_id[0]->fullname : null).'
-                                            '.(!empty($student_data->student_info->guardian_id[0]->address) ? "<br>" . $student_data->student_info->guardian_id[0]->address : null).'
                                             '.(!empty($student_data->student_info->guardian_id[0]->contact) ? "<br>" . $student_data->student_info->guardian_id[0]->contact : null).'
-                                            '.(!empty($student_data->student_info->guardian_id[0]->email) ? "<br>" . $student_data->student_info->guardian_id[0]->email : null).'
                                             </address>
                                         </div>': '').'
                                     </div>': '').'
@@ -2118,25 +2267,41 @@ class Fees extends Myschoolgh {
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="table-responsive">
-                                        <table width="100%" '.($isPDF ? "cellpadding='5px'" : null).' class="table table-striped table-hover table-md" style="border: 1px solid #dee2e6; font-size:14px;">
+                                        <table width="100%" '.($isPDF ? "cellpadding='5px'" : null).' class="table table-striped table-hover table-sm" style="border: 1px solid #dee2e6; font-size:14px;">
                                             <tbody>
                                             <tr align="left">
                                                 <th '.(!$isPDF ? 'style="width: 40px;"' : null).'>#</th>
-                                                '.(empty($student_data) ? '<th>Name</th>' : '').'
+                                                '.(empty($student_data) || (!$studentIsset && $isPDF) ? '<th>Name</th>' : '').'
                                                 <th>Item</th>
                                                 <th>Payment Method</th>
                                                 <th>Description</th>
                                                 <th>Record Date</th>
-                                                <th align="right">Amount</th>
+                                                <td align="right"><strong>Amount</strong></td>
                                             </tr>';
                                             if(!empty($data)) {
+                                                // loop through the records list
                                                 foreach($data as $key => $record) {
-                                                    $amount += $record->amount;
+                                                    // set the amount paid
+                                                    $record->amount_paid = $record->amount_paid ?? $record->amount;
+                                                    
+                                                    // add up to the total amount paid
+                                                    $amount += $record->amount_paid;
+
+                                                    // set the amount paid
+                                                    $_reversed += $record->reversed ? $record->amount_paid : 0;
+
+                                                    // confirm is reversed
+                                                    $isReversed = (bool) $record->reversed;
+
+                                                    // apend to the rows list
                                                     $receipt .='<tr style="font-size:16px">
                                                         <td width="6%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.($key+1).'</td>
-                                                        '.(empty($student_data) ? '<td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
-                                                            '.$record->student_info->name.'
-                                                        </td>' : '').'
+                                                        '.(empty($student_data) || (!$studentIsset && $isPDF) ? '
+                                                            <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
+                                                                '.strtoupper($record->student_info->name).'
+                                                                '.($isPDF ? "<br>- {$record->class_name}" : null).'
+                                                            </td>' : ''
+                                                        ).'
                                                         <td width="15%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.($record->category_name ? $record->category_name : $record->category_id).'</td>
                                                         <td width="15%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
                                                             <strong>'.$record->payment_method.'</strong>
@@ -2146,14 +2311,18 @@ class Fees extends Myschoolgh {
                                                                 ".(!empty($record->cheque_number) ? "<br><strong>#{$record->cheque_number}</strong>" : null)."" : ""    
                                                             ).'
                                                         </td>
-                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.($record->description ? $record->description : null).'</td>
-                                                        <td width="15%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.$record->recorded_date.'</td>
-                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).' width="10%" align="right"><strong>'.number_format($record->amount, 2).'</strong></td>
+                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>
+                                                            '.($record->description ? $record->description : null).'
+                                                            '.($isReversed ? "<span class='badge p-1 badge-danger'>Reversed</span>" : null).'
+                                                        </td>
+                                                        <td width="18%" '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).'>'.date("jS M, Y h:iA", strtotime($record->recorded_date)).'</td>
+                                                        <td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).' width="10%" align="right"><strong>'.number_format($record->amount_paid, 2).'</strong></td>
                                                     </tr>';
                                                 }
                                             } else {
                                                 $receipt .= '<tr><td '.($isPDF ? 'style="border: 1px solid #dee2e6;"' : null).' align="center" colspan="'.(empty($receipt_id) ? 7 : 6).'">No Record Found</td></tr>';
                                             }
+                                            $total_amount = $amount;
                                         $receipt .= '
                                             </tbody>
                                         </table>
@@ -2162,32 +2331,44 @@ class Fees extends Myschoolgh {
                                         <div class="col-lg-12">
                                             <table style="font-size:16px" class="border table-bordered" cellpadding="5px" width="100%">
                                                 <tr>
-                                                    <td align="right" width="70%"><strong>Amount Paid</strong></td>
-                                                    <td align="right">'.$defaultCurrency.''.number_format($amount, 2).'</td>
+                                                    <td align="right" width="60%"><strong>Amount Paid</strong></td>
+                                                    <td align="right" style="font-weight:'.$font_weight.'">'.$defaultCurrency.''.number_format($amount, 2).'</td>
                                                 </tr>
                                                 <tr>
-                                                    <td align="right" width="70%"><strong>Amount Paid in Words</strong></td>
-                                                    <td align="right">'.$this->amount_to_words($amount).'</td>
+                                                    <td align="right" width="60%"><strong>Amount Paid in Words</strong></td>
+                                                    <td align="right">'.$this->amount_to_words($total_amount).'</td>
                                                 </tr>
+                                                '.($_reversed ? 
+                                                    '<tr>
+                                                        <td align="right" width="60%"><strong>Total Amount Reversed</strong></td>
+                                                        <td align="right">'.$defaultCurrency.''.number_format($_reversed, 2).'</td>
+                                                    </tr>' : null
+                                                ).'
                                                 '.($isArrears && !$isPDF ?
                                                     '<tr>
-                                                        <td align="right" width="70%"><strong>This Terms Fees Balance</strong></td>
+                                                        <td align="right" width="60%"><strong>This Terms Fees Balance</strong></td>
                                                         <td align="right">'.$defaultCurrency.''.number_format($cur_arreas, 2).'</td>
                                                     </tr>
                                                     <tr>
-                                                        <td align="right" width="70%"><strong>Oustanding Fees Arrears</strong></td>
+                                                        <td align="right" width="60%"><strong>Oustanding Fees Arrears</strong></td>
                                                         <td align="right">'.$defaultCurrency.''.number_format($prev_arrears, 2).'</td>
                                                     </tr>' : (
                                                         !$isPDF ? '
                                                             <tr>
-                                                                <td align="right" width="70%"><strong>Oustanding Fees Arrears</strong></td>
+                                                                <td align="right" width="60%"><strong>Oustanding Fees Arrears</strong></td>
                                                                 <td align="right">'.$defaultCurrency.''.number_format($prev_arrears, 2).'</td>
                                                             </tr>' : ''
                                                         )
                                                 ).'
+                                                '.($_reversed ? 
+                                                    '<tr>
+                                                        <td align="right" width="60%"><strong>Actual Amount Paid</strong></td>
+                                                        <td align="right">'.$defaultCurrency.''.number_format(($total_amount-$_reversed), 2).'</td>
+                                                    </tr>' : null
+                                                ).'
                                                 '.(!$isPDF ?
                                                     '<tr>
-                                                        <td align="right" width="70%"><strong>Total Outstanding Fees Balance</strong></td>
+                                                        <td align="right" width="60%"><strong>Total Outstanding Fees Balance</strong></td>
                                                         <td align="right">'.$defaultCurrency.''.number_format($outstanding_balance, 2).'</td>
                                                     </tr>' : ''
                                                 ).'
@@ -2198,7 +2379,6 @@ class Fees extends Myschoolgh {
                             </div>
                         </div>
                     </div>
-                    <div class="border-bottom" style="border: 2px solid #2196F3; margin-top:10px"></div>
                     <div align="center" style="font-size:12px;padding-top:10px;">
                         <strong>Slogan: </strong>'.$client->client_slogan.'
                     </div>
@@ -2223,24 +2403,102 @@ class Fees extends Myschoolgh {
     }
 
     /**
-     * Student Bill
+     * Quick Load the Current Fees Payment of the Student for the Current Academic Year and Term
+     * 
+     * @param Global        $this->academic_year
+     * @param Global        $this->academic_term
+     * @param String        $studentId
      * 
      * @return Array
+     */
+    public function student_current_bill($studentId) {
+        global $defaultAcademics;
+
+        // set the academic year and term
+        $academic_year = $defaultAcademics->academic_year ?? $this->academic_year;
+        $academic_term = $defaultAcademics->academic_term ?? $this->academic_term;        
+        
+        // prepare and execute the statement
+        $sql = $this->db->prepare("SELECT a.name,
+                (
+                    SELECT CONCAT(
+                        COALESCE(SUM(b.amount_paid), '0'), '|',
+                        COALESCE(SUM(b.balance), '0')
+                    )
+                FROM fees_payments b 
+                WHERE b.student_id = a.item_id AND b.academic_term = '{$academic_term}'
+                    AND b.academic_year = '{$academic_year}' AND b.exempted = '0'
+            ) AS payments_data
+            FROM users a
+            WHERE a.item_id = ? AND a.deleted = '0' AND a.status = '1' ORDER BY a.name LIMIT 1
+        ");
+        $sql->execute([$studentId]);
+        $result = $sql->fetch(PDO::FETCH_OBJ);
+
+        // split the record
+        $payments = explode("|", $result->payments_data);
+
+        // get the balance outstanding
+        $result->debt = $payments[1];
+
+        // get the amount paid
+        $result->amount_paid = $payments[0];
+
+        // get the term bill by adding the amount paid and the balance
+        $result->term_bill = $payments[0] + $payments[1];
+        unset($result->payments_data);
+        
+        // return the results
+        return $result;
+        
+    }
+
+    /**
+     * Student Bill
+     * 
+     * Prepare the bill using the Academic Year and Term Parsed
+     * Also if the student_id was parsed, then load the bill of that particular student
+     * If the class_id was parsed, then load the bill of that class.
+     * 
+     * In generation of the bill, the arrears owings of the student will automatically be added to the it.
+     * 
+     * The variable current_bal indicates, also add the arrears of the current academic year and term
+     * 
+     * The result and values are pushed into the variable $student_bills_record_list to be used by the 
+     * Terminal Reports Class during report generation.
+     * 
+     * @param String        $params->student_id
+     * @param String        $params->class_id
+     * @param String        $params->academic_year
+     * @param String        $params->academic_term
+     * @param Bool          $params->current_bal
+     * 
+     * @return String
      */
     public function bill(stdClass $params) {
 
         try {
 
-            global $defaultClientData, $defaultCurrency;
+            // global variable
+            global $defaultClientData, $defaultCurrency, $academicSession, $defaultAcademics;
             
+            // set the maximum number of students in a class
+            $class_limit = 200;
+
+            // if the student and class id are all empty
+            if(empty($params->student_id) && empty($params->class_id)) {
+                return "Sorry! Please ensure at least the class_id or student_id has been parsed.";
+            }
+
             // get the student information
             $students_list = $this->pushQuery("
                 a.class_id, a.item_id, a.name, a.image, a.unique_id, a.enrollment_date, a.gender, a.email, a.phone_number,
-                (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name",
-                "users a", "a.client_id='{$params->clientId}' AND a.user_type='student' AND a.status = '1'
+                (SELECT b.name FROM classes b WHERE b.id = a.class_id LIMIT 1) AS class_name,
+                us.arrears_details, us.arrears_category, us.fees_category_log, us.arrears_total",
+                "users a LEFT JOIN users_arrears us ON us.student_id = a.item_id", "a.client_id='{$params->clientId}' AND a.user_type='student' AND a.status = '1'
                 ".(!empty($params->student_id) ? "AND a.item_id='{$params->student_id}'" : null)." 
                 ".(!empty($params->class_id) ? "AND a.class_id='{$params->class_id}'" : null)." 
-                LIMIT ".(!empty($params->student_id) ? 1 : 1000)
+                LIMIT ".(!empty($params->student_id) ? 1 : $class_limit)
             );
 
             // confirm that student id is valid
@@ -2248,11 +2506,21 @@ class Fees extends Myschoolgh {
                 return "An invalid student id was submitted for processing.";
             }
 
+            // academic year and term
+            $params->academic_year = $params->academic_year ?? $this->academic_year;
+            $params->academic_term = $params->academic_term ?? $this->academic_term;
+
             // set some variables
             $student_bill = "";
-            $isPDF = (bool) isset($params->isPDF);
             $client = $defaultClientData;
+            $isPDF = (bool) isset($params->isPDF);
             $clientPrefs = $client->client_preferences;
+            $currentBalance = !empty($params->current_bal);
+
+            // reset the academic year and term if the session variables are not empty
+            if(!empty($this->session->is_only_readable_app)) {
+                $currentBalance = null;
+            }
 
             // get the client logo content
             if(!empty($client->client_logo)) {
@@ -2266,26 +2534,36 @@ class Fees extends Myschoolgh {
             $student_fees_arrears = "";
             $fees_arrears = [];
 
+            // students bill record list
+            // to be used when generating the terminal report
+            $student_bills_record_list = [];
+            $saveBill = (bool) !empty($params->save_bill);
+
+            // set the button class
+            $button_class = "font-weight:bold;border-radius:4px;padding:3px;border:solid 1px";
+
             // loop through the students list
             foreach($students_list as $studentRecord) {
 
                 // get the student allocation list
                 $counter_++;
+                $fees_arrears = [];
                 $studentId = $studentRecord->item_id;
                 $params->student_id = $studentId;
                 $allocation_list = $this->students_fees_allocation($params)["data"];
+                $current_term_bill = $currentBalance ? $this->student_current_bill($studentId) : [];
 
-                // get the student fees arrears
-                $arrears_array = $this->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", "users_arrears", "student_id='{$studentId}' AND client_id='{$params->clientId}' LIMIT 1");
-                
                 // get the class and student fees allocation
                 $arrears_total = 0;
             
                 // if the fees arrears not empty
-                if(!empty($arrears_array)) {
-                        
+                if(!empty($studentRecord->arrears_details)) {
+                    // set the student arrears
+                    $arrears_array = (object) [
+                        "arrears_details" => $studentRecord->arrears_details
+                    ];
                     // set a new item for the arrears
-                    $arrears = $arrears_array[0];
+                    $arrears = $arrears_array;
                     $outstanding = 0;
 
                     // convert the item to array
@@ -2294,7 +2572,7 @@ class Fees extends Myschoolgh {
                     foreach($arrears_details as $item => $amount) {
                         // get the academic year and term
                         $split = explode("...", $item);
-                        $year = $split[1] . " Term Of " . str_ireplace("_", "/", $split[0]);
+                        $year = $split[1] . " {$academicSession} Of " . str_ireplace("_", "/", $split[0]);
                         
                         $total = array_sum($amount);
                         $arrears_total += $total;
@@ -2302,12 +2580,13 @@ class Fees extends Myschoolgh {
                         // push it into the array
                         $fees_arrears[$year] = $total;
                     }
+
                 }
+
                 // set the bill form
-                $student_bill .= '
-                <div style="margin:auto auto; '.($isPDF ? '' : "max-width:1050px;").';background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: \'Calibri Regular\'; width:100%;margin-bottom:2px">
+                $student_bill .= '<div style="margin:auto auto; '.($isPDF ? '' : "max-width:1050px;").';background: #ffffff none repeat scroll 0 0;border-bottom: 2px solid #f4f4f4;position: relative;box-shadow: 0 1px 2px #acacac;width:100%;font-family: \'Calibri Regular\'; width:100%;margin-bottom:2px">
                     <div class="row mb-3">
-                        <div class="text-dark bg-white col-md-12" style="padding-top:20px;width:90%;margin:auto auto;">
+                        <div class="text-dark table-responsive bg-white col-md-12" style="padding-top:20px;width:90%;margin:auto auto;">
                             <div align="center">
                                 '.(!empty($client->client_logo) ? "<img width=\"70px\" src=\"{$client_logo}\">" : "").'
                                 <h2 style="color:#6777ef;font-size:25px;font-family:helvetica;padding:0px;margin:0px;"> '.strtoupper($client->client_name).'</h2>
@@ -2332,105 +2611,186 @@ class Fees extends Myschoolgh {
                                     </td>
                                     <td width="50%" align="right">
                                         <h3 style="margin-top:0px;padding:0px;margin-bottom:5px;text-transform:uppercase">Academics</h3>
-                                        <div style="text-transform:uppercase;margin-bottom:5px;">Year: <strong>'.$clientPrefs->academics->academic_year.'</strong></div>
-                                        <div style="text-transform:uppercase;margin-bottom:5px;">Term: <strong>'.$clientPrefs->academics->academic_term.'</strong></div>
+                                        <div style="text-transform:uppercase;margin-bottom:5px;">Year: <strong>'.$params->academic_year.'</strong></div>
+                                        <div style="text-transform:uppercase;margin-bottom:5px;">'.$academicSession.': <strong>'.$params->academic_term.'</strong></div>
                                         <div style="margin-bottom:5px;">'.date("Y-m-d h:ia").'</div>
                                     </td>
                                 </tr>
                             </table>
                             <style>table.table tr td {border:solid 1px #dad7d7;padding:5px;}</style>
                             <div style="background-color: #ccc !important;margin-top:1px;border-bottom: 1px solid #ccc !important;height:0.5px;margin-bottom:5px;"></div>
-                            <table border="0" class="table" width="100%">
+                            <table border="0" class="table table-md" width="100%">
                                 <tr>
                                     <td style="font-weight:bold;">#</td>
-                                    <td style="font-weight:bold;">Fees Type</td>
+                                    <td style="font-weight:bold;">Description</td>
                                     <td style="font-weight:bold;">Status</td>
                                     <td style="font-weight:bold;">Amount</td>
                                     <td style="font-weight:bold;">Discount</td>
                                     <td style="font-weight:bold;">Paid</td>
                                     <td style="font-weight:bold;" align="right">Balance</td>
                                 </tr>';
-                            if(empty($allocation_list)) {
-                                $student_bill .= "
-                                <tr>
-                                    <td colspan='7' align='center'>No fees has been allocated to this student.</td>
-                                </tr>";
-                            } else {
-                                $total_paid = 0;
-                                $total_discount = 0;
-                                $total_balance = 0;
-                                $total_due = 0;
-                                foreach($allocation_list as $key => $fees) {
+                                if(empty($allocation_list)) {
+                                    $student_bill .= "
+                                    <tr>
+                                        <td colspan='7' align='center'>
+                                            No fees has been allocated to this student.
+                                            For this academic year and term.
+                                        </td>
+                                    </tr>";
+                                } else {
 
-                                    $discount = $fees->exempted ? $fees->balance : 0;
-                                    $balance = !$fees->exempted ? $fees->balance : 0;
+                                    // initial amounts
+                                    $total_paid = 0;
+                                    $total_discount = 0;
+                                    $total_balance = 0;
+                                    $total_due = 0;
+                                    $counter = 0;
 
-                                    $total_discount += $discount;
-                                    $total_balance += $balance;
-                                    $total_due += $fees->amount_due;
-                                    $total_paid += $fees->amount_paid;
-                                    
-                                    if($fees->exempted) {
-                                        $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #000;color: #000;'>Exempted</span>";
-                                    } else {
-                                        if($fees->paid_status === 1) {
-                                            $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0aa038;color: #0aa038;'>Paid</span>";
-                                        } elseif($fees->paid_status === 2) {
-                                            $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #0b47d2;color: #0b47d2;'>Partly Paid</span>";
-                                        } elseif($fees->paid_status === 0) {
-                                            $status = "<span style='font-weight:bold;border-radius:4px;padding:3px;border:solid 1px #f13535;color: #f13535;'>Unpaid</span>";
+                                    // loop through the fees allocations list
+                                    foreach($allocation_list as $key => $fees) {
+
+                                        $discount = $fees->exempted ? $fees->balance : 0;
+                                        $balance = !$fees->exempted ? $fees->balance : 0;
+
+                                        $total_discount += $discount;
+                                        $total_balance += $balance;
+                                        $total_due += $fees->amount_due;
+                                        $total_paid += $fees->amount_paid;
+
+                                        $counter++;
+                                        
+                                        if($fees->exempted) {
+                                            $status = "<span style='{$button_class} #000;color: #000;'>Exempted</span>";
+                                        } else {
+                                            if($fees->paid_status === 1) {
+                                                $status = "<span style='{$button_class} #0aa038;color: #0aa038;'>Paid</span>";
+                                            } elseif($fees->paid_status === 2) {
+                                                $status = "<span style='{$button_class} #0b47d2;color: #0b47d2;'>Partly Paid</span>";
+                                            } elseif($fees->paid_status === 0) {
+                                                $status = "<span style='{$button_class} #f13535;color: #f13535;'>Unpaid</span>";
+                                            }
                                         }
+
+                                        $payment_module = ($fees->payment_module === "Monthly") ? 
+                                            (!empty($fees->payment_month) ? "<br><strong>".str_ireplace("_", " ", $fees->payment_month)."</strong>" : null) : null;
+
+                                        // if the student fees has not been exempted
+                                        if(!$fees->exempted) {
+
+                                            $student_bill .= "<tr style='font-size:15px'>";
+                                            $student_bill .= "<td width='8%'>".($counter)."</td>";
+                                            $student_bill .= "<td>{$fees->category_name} {$payment_module}</td>";
+                                            $student_bill .= "<td>{$status}</td>";
+                                            $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_due, 2)."</td>";
+                                            $student_bill .= "<td>{$defaultCurrency} ".number_format($discount, 2)."</td>";
+                                            $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_paid, 2)."</td>";
+                                            $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($balance, 2)."</td>";
+                                            $student_bill .= "</tr>";
+
+                                            // append to the bills informaton
+                                            $student_bills_record_list[$studentId]["bill"][$fees->category_name] = [
+                                                "amount_due" => $fees->amount_due,
+                                                "discount" => $discount,
+                                                "amount_paid" => $fees->amount_paid,
+                                                "balance" => $balance
+                                            ];
+
+                                        }
+
                                     }
 
-                                    if(!$fees->exempted) {
+                                    // loop through the current bill to pay
+                                    if(!empty($current_term_bill) && !empty($current_term_bill->debt)) {
+                                        // auto increment the rows count
+                                        $counter++;
+                                        
+                                        // set the term bill
+                                        if($current_term_bill->amount_paid == $current_term_bill->term_bill) {
+                                            $_state = "<span style='{$button_class} #0aa038;color: #0aa038;'>Paid</span>";
+                                        } elseif($current_term_bill->amount_paid > 1) {
+                                            $_state = "<span style='{$button_class} #0b47d2;color: #0b47d2;'>Partly Paid</span>";
+                                        } else {
+                                            $_state = "<span style='{$button_class} #f13535;color: #f13535;'>Unpaid</span>";
+                                        }
 
+                                        // add up the values
+                                        $total_balance += $current_term_bill->debt;
+                                        $total_due += $current_term_bill->term_bill;
+                                        $total_paid += $current_term_bill->amount_paid;
+
+                                        // append the bill description
+                                        $_bill_description = "Arrears for {$defaultAcademics->academic_term} {$academicSession} of {$defaultAcademics->academic_year} Academic Year";
+
+                                        // loop through the current term bill
                                         $student_bill .= "<tr style='font-size:15px'>";
-                                        $student_bill .= "<td width='8%'>".($key+1)."</td>";
-                                        $student_bill .= "<td>{$fees->category_name}</td>";
-                                        $student_bill .= "<td>{$status}</td>";
-                                        $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_due, 2)."</td>";
-                                        $student_bill .= "<td>{$defaultCurrency} ".number_format($discount, 2)."</td>";
-                                        $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_paid, 2)."</td>";
-                                        $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($balance, 2)."</td>";
+                                        $student_bill .= "<td width='8%'>".($counter)."</td>";
+                                        $student_bill .= "<td>{$_bill_description}</td>";
+                                        $student_bill .= "<td>{$_state}</td>";
+                                        $student_bill .= "<td>{$defaultCurrency} ".number_format($current_term_bill->term_bill, 2)."</td>";
+                                        $student_bill .= "<td>{$defaultCurrency} ".number_format(0, 2)."</td>";
+                                        $student_bill .= "<td>{$defaultCurrency} ".number_format($current_term_bill->amount_paid, 2)."</td>";
+                                        $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($current_term_bill->debt, 2)."</td>";
                                         $student_bill .= "</tr>";
 
+                                        // append to the bills informaton
+                                        $student_bills_record_list[$studentId]["bill"][$_bill_description] = [
+                                            "amount_due" => $current_term_bill->term_bill,
+                                            "discount" => 0,
+                                            "amount_paid" => $current_term_bill->amount_paid,
+                                            "balance" => $current_term_bill->debt
+                                        ];
                                     }
 
+                                    // loop through the fees arrears list
+                                    foreach($fees_arrears as $item => $value) {
+                                        // counter
+                                        $counter++;
+
+                                        // append the bill description
+                                        $_bill_description = "Arrears for {$item} Academic Year";
+
+                                        // append the fees arrears
+                                        $student_bill .= "<tr>";
+                                        $student_bill .= "<td>".($counter)."</td>";
+                                        $student_bill .= "<td colspan='2'>{$_bill_description}</td>";
+                                        $student_bill .= "<td>{$defaultCurrency} ".number_format($value, 2)."</td>";
+                                        $student_bill .= "<td></td>";
+                                        $student_bill .= "<td>{$defaultCurrency} ".number_format(0, 2)."</td>";
+                                        $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($value, 2)."</td>";
+                                        $student_bill .= "</tr>";
+
+                                        // append to the bills informaton
+                                        $student_bills_record_list[$studentId]["bill"][$_bill_description] = [
+                                            "amount_due" => $value,
+                                            "discount" => 0,
+                                            "amount_paid" => 0,
+                                            "balance" => $value
+                                        ];
+                                    }
+                                    $student_bill .= "
+                                    <tr>
+                                        <td colspan='6' align='right'><strong>Grand Total:</strong></td>
+                                        <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_due + $arrears_total), 2)."</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan='6' align='right'><strong>Paid:</strong></td>
+                                        <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_paid, 2)."</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan='6' align='right'><strong>Discount:</strong></td>
+                                        <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_discount, 2)."</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan='6' align='right'><strong>Balance:</strong></td>
+                                        <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_balance + $arrears_total), 2)."</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan='7' align='center'>
+                                            <div style='padding:0px;'><em>{$client->client_slogan}</em></div>
+                                        </td>
+                                    </tr>                           
+                                    ";
                                 }
-                                foreach($fees_arrears as $item => $value) {
-                                    $student_bill .= "<tr>";
-                                    $student_bill .= "<td>".($key+2)."</td>";
-                                    $student_bill .= "<td colspan='2'>Arrears for {$item} Academic Year</td>";
-                                    $student_bill .= "<td>{$defaultCurrency} ".number_format($value, 2)."</td>";
-                                    $student_bill .= "<td></td>";
-                                    $student_bill .= "<td>{$defaultCurrency} ".number_format(0, 2)."</td>";
-                                    $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($value, 2)."</td>";
-                                    $student_bill .= "</tr>";
-                                }
-                                $student_bill .= "
-                                <tr>
-                                    <td colspan='6' align='right'><strong>Grand Total:</strong></td>
-                                    <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_due + $arrears_total), 2)."</td>
-                                </tr>
-                                <tr>
-                                    <td colspan='6' align='right'><strong>Paid:</strong></td>
-                                    <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_paid, 2)."</td>
-                                </tr>
-                                <tr>
-                                    <td colspan='6' align='right'><strong>Discount:</strong></td>
-                                    <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_discount, 2)."</td>
-                                </tr>
-                                <tr>
-                                    <td colspan='6' align='right'><strong>Balance:</strong></td>
-                                    <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_balance + $arrears_total), 2)."</td>
-                                </tr>
-                                <tr>
-                                    <td colspan='7' align='center'>
-                                        <div style='padding:10px;'>{$client->client_slogan}</div>
-                                    </td>
-                                </tr>                           
-                                ";
-                            }
                 $student_bill .= '
                                 </table>
                             </div>
@@ -2439,6 +2799,28 @@ class Fees extends Myschoolgh {
                 </div>';
                             
                 $student_bill .= ($counter_ < $list_count) && $isPDF ? "<div class=\"page_break\"></div>" : null;
+
+                // if the request save bill is true
+                if($saveBill) {
+                    // confirm that there is not existing record
+                    if(empty($this->pushQuery("id", "users_bills", "academic_year='{$params->academic_year}' AND academic_term = '{$params->academic_term}' AND student_id = '{$studentId}'"))) {
+                        // save the student bill in the database
+                        $this->_save("users_bills", [
+                            "client_id" => $params->clientId, "academic_year" => $params->academic_year, "academic_term" => $params->academic_term,
+                            "student_id" => $studentId, "bill" => $student_bill, "recipient_list" => ($params->recipient_list ?? [])
+                        ]);
+
+                        // empty the bill information
+                        $student_bill = null;
+                    } else {
+                        // update the student bill in the database
+                        $this->_save("users_bills", ["bill" => $student_bill, "recipient_list" => ($params->recipient_list ?? [])], [
+                            "academic_year" => $params->academic_year, "academic_term" => $params->academic_term, "student_id" => $studentId
+                        ]);
+                        // empty the bill information
+                        $student_bill = null;
+                    }
+                }
             }
 
             // append this section if download element was not parsed
@@ -2455,11 +2837,12 @@ class Fees extends Myschoolgh {
             }
 
 
-            return $student_bill;
+            return [
+                "student_bill" => $student_bill,
+                "breakdown" => $student_bills_record_list
+            ];
 
-        } catch(PDOException $e) {
-
-        }
+        } catch(PDOException $e) {}
 
     }
 
@@ -2496,6 +2879,11 @@ class Fees extends Myschoolgh {
 
             // get the global variable
             global $defaultUser, $clientPrefs;
+
+            // readonly mode session
+            if(!empty($this->session->is_only_readable_app)) {
+                return $this->readonly_mode;
+            }
 
             // parse the category id
             if(isset($params->category_id) && !is_array($params->category_id)) {
@@ -2582,7 +2970,7 @@ class Fees extends Myschoolgh {
                 }
 
                 // execute the statement
-                $update_stmt = $this->db->prepare("UPDATE fees_payments SET amount_due = ? balance = ?, exempted = ? WHERE category_id = ? AND student_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND editable = ?");
+                $update_stmt = $this->db->prepare("UPDATE fees_payments SET amount_due = ?, balance = ?, exempted = ? WHERE category_id = ? AND student_id = ? AND client_id = ? AND academic_year = ? AND academic_term = ? AND editable = ?");
 
                 // loop through the category list
                 foreach($params->category_id as $category_id => $amount) {
@@ -2637,7 +3025,8 @@ class Fees extends Myschoolgh {
             $this->db->beginTransaction();
 
             // confirm the payment id
-            $payment_check = $this->pushQuery("a.amount, a.student_id, a.category_id,
+            $payment_check = $this->pushQuery("a.amount, a.student_id, a.category_id, a.client_id,
+                    a.academic_term, a.academic_year,
                     (SELECT b.name FROM users b WHERE b.item_id=a.student_id LIMIT 1) AS student_name", 
                 "fees_collection a", "a.reversed='0' AND a.payment_id='{$params->payment_id}' 
                     AND a.client_id='{$params->clientId}' LIMIT 40");
@@ -2655,27 +3044,40 @@ class Fees extends Myschoolgh {
                 $amount_paid += $payment->amount;
             }
 
-            // load the fees allocations category list
-            $allocation_list = $this->pushQuery("category_id, amount", "fees_payments", 
-                "student_id='{$payment_check[0]->student_id} AND client_id = '{$params->clientId}' AND paid_status='2' LIMIT 40");
-
             // if the count is just 1
-            if((count($payment_check) == 1) && ($payment_check[0]->category_id !== "Arrears")) {
-                // update the student fees amount paid and the balance outstanding
-                $this->db->query("UPDATE fees_payments SET amount_paid = (amount_paid - {$amount_paid}), balance = (balance - {$amount_paid})
-                    WHERE student_id='{$payment_check[0]->student_id}' AND client_id = '{$params->clientId}' AND academic_year='{$this->academic_year}'
-                        AND academic_term='{$params->academic_term}' LIMIT 1");
+            if($payment_check[0]->category_id !== "Arrears") {
+                // if a single category id was set
+                if(count($payment_check) == 1) {
+                    // update the student fees amount paid and the balance outstanding
+                    $this->db->query("UPDATE fees_payments SET amount_paid = (amount_paid - {$amount_paid}), 
+                        balance = (balance + {$amount_paid}) WHERE category_id='{$payment_check[0]->category_id}' AND
+                        student_id='{$payment_check[0]->student_id}' AND client_id = '{$payment_check[0]->client_id}' AND 
+                        academic_year='{$payment_check[0]->academic_year}' AND academic_term='{$payment_check[0]->academic_term}' LIMIT 1"
+                    );
+                } else {
+                    // loop through the list of payment item
+                    foreach($payment_check as $r_payment) {
+                        // update the fees payment record for each category id
+                        $this->db->query("UPDATE fees_payments SET amount_paid = (amount_paid - {$r_payment->amount}), 
+                            balance = (balance + {$r_payment->amount}) WHERE category_id='{$r_payment->category_id}' AND
+                            student_id='{$r_payment->student_id}' AND client_id = '{$r_payment->client_id}' AND 
+                            academic_year='{$r_payment->academic_year}' AND academic_term='{$r_payment->academic_term}' LIMIT 1"
+                        );
+                    }
+                }
             }
 
             // if the category id is equal to arreras 
             elseif($payment_check[0]->category_id === "Arrears") {
                 // load the arrears log
-                $arrears = $this->pushQuery("student_id, log_history, previous_log", "users_arrears_log", "payment_id='{$params->payment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+                $arrears = $this->pushQuery("student_id, log_history, previous_log", 
+                    "users_arrears_log", "payment_id='{$params->payment_id}' AND client_id='{$payment_check[0]->client_id}' LIMIT 1");
 
                 // if the query is not empty
                 if(!empty($arrears)) {
                     // get the student arrears history
-                    $arrears_array = $this->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", "users_arrears", "student_id='{$payment_check[0]->student_id}' AND client_id='{$params->clientId}' LIMIT 1");
+                    $arrears_array = $this->pushQuery("arrears_details, arrears_category, fees_category_log, arrears_total", 
+                    "users_arrears", "student_id='{$payment_check[0]->student_id}' AND client_id='{$payment_check[0]->client_id}' LIMIT 1");
 
                     // get the arrears amount paid
                     $_current = [];
@@ -2708,7 +3110,7 @@ class Fees extends Myschoolgh {
 
                         // update the column information
                         $update_query = $this->db->prepare("UPDATE users_arrears SET arrears_details = ?, arrears_category = ?, arrears_total = ?, last_updated = now() WHERE student_id = ? AND client_id = ? LIMIT 1");
-                        $update_query->execute([json_encode($arrears_details), json_encode($arrears_category), $new_arrears_total, $payment_check[0]->student_id, $params->clientId]);
+                        $update_query->execute([json_encode($arrears_details), json_encode($arrears_category), $new_arrears_total, $payment_check[0]->student_id, $payment_check[0]->client_id]);
                         
                     }
 
@@ -2716,21 +3118,38 @@ class Fees extends Myschoolgh {
             }
             
             // proceed to set the reversed state as 1
-            $this->db->query("UPDATE fees_collection SET reversed = '1', has_reversal = '0' WHERE payment_id='{$params->payment_id}' AND client_id='{$params->clientId}' LIMIT 40");
+            $this->db->query("UPDATE fees_collection SET reversed = '1', has_reversal = '0' WHERE payment_id='{$params->payment_id}' AND client_id='{$payment_check[0]->client_id}' LIMIT 40");
 
             // reverse the transaction
-            $this->db->query("UPDATE accounts_transaction SET state='Reversed', reversed='1' WHERE item_id='{$params->payment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            $this->db->query("UPDATE accounts_transaction SET state='Reversed', reversed='1' WHERE item_id='{$params->payment_id}' AND client_id='{$payment_check[0]->client_id}' LIMIT 1");
 
             // get the account id
-            $account_id = $this->pushQuery("account_id", "accounts_transaction", "item_id='{$params->payment_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            $account_id = $this->pushQuery("a.account_id, a.payment_medium, a.academic_year, a.academic_term, b.balance",
+                "accounts_transaction a LEFT JOIN accounts b ON b.item_id = a.account_id", 
+                "a.item_id='{$params->payment_id}' AND a.client_id='{$payment_check[0]->client_id}' LIMIT 1");
 
             // if the account id is not empty
             if(!empty($account_id)) {
                 // reduce the account balance
-                $this->db->query("UPDATE accounts SET total_credit = (total_credit - {$amount_paid}), 
-                    balance = (balance - {$amount_paid})
-                    WHERE item_id = '{$account_id[0]->account_id}' AND client_id = '{$params->clientId}' LIMIT 1
+                $this->db->query("UPDATE accounts SET total_credit = (total_credit - {$amount_paid}), balance = (balance - {$amount_paid})
+                    WHERE item_id = '{$account_id[0]->account_id}' AND client_id = '{$payment_check[0]->client_id}' LIMIT 1
                 ");
+
+                // log the transaction record
+                $stmt = $this->db->prepare("INSERT INTO accounts_transaction SET 
+                    item_id = ?, client_id = ?, account_id = ?, account_type = ?, item_type = ?, 
+                    reference = ?, amount = ?, created_by = ?, record_date = ?, payment_medium = ?, 
+                    description = ?, academic_year = ?, academic_term = ?, balance = ?, 
+                    reversed='1', state = 'Reversed', validated_date = now()
+                ");
+                $stmt->execute([
+                    random_string("alnum", RANDOM_STRING), $payment_check[0]->client_id, $account_id[0]->account_id, "fees", 
+                    "Expense", "Fees Payment Reversal - for <strong>{$payment_check[0]->student_name}</strong>", 
+                    $amount_paid, $params->userId, date("Y-m-d"), $account_id[0]->payment_medium, 
+                    "Fees Payment Reversal - for <strong>{$payment_check[0]->student_name}</strong>",
+                    $account_id[0]->academic_year, $account_id[0]->academic_term, ($account_id[0]->balance - $amount_paid)
+                ]);
+
             }
 
             /* Record the user activity log */
@@ -2755,5 +3174,440 @@ class Fees extends Myschoolgh {
         }
 
     }
+
+    /**
+     * Send A Reminder to the Parent
+     * 
+     * Load the Guardian information of the Student Parsed and end the Message to the parent
+     * If the guardian contact is empty then use the student contact number
+     * 
+     * Else if the guardian contact has been set and also the variable send_to_student was parsed,
+     * then also send the reminder to the student as well
+     * 
+     * @return Array
+     */
+    public function send_reminder(stdClass $params) {
+
+        try {
+
+            // set the client features
+            global $clientFeatures;
+
+            // initial values
+            $pay_urls = [];
+            $emails_list = [];
+            $student_ids = [];
+            $contacts_list = [];
+            $sms_contacts_list = "";
+
+            // return error if the student id is not an array
+            if(!is_array($params->student_id)) {
+                return ["code" => 203, "data" => "Sorry! The student_id variable must be a valid array."];
+            }
+
+            // loop through the students 
+            foreach($params->student_id as $student_id) {
+
+                // get the student information  
+                $student = $this->pushQuery("item_id, phone_number, guardian_id, name, email", "users", "client_id='{$params->clientId}' AND user_type='student' AND item_id='{$student_id}' LIMIT 1");
+
+                if(empty($student)) {
+                    return ["code" => 203, "data" => "Sorry! An invalid student id was parsed"];
+                }
+                // get the guardian information
+                $guardian = $student[0]->guardian_id;
+                $student_ids[] = $student[0]->item_id;
+
+                // if the email is not empty
+                if(!empty($student[0]->email)) {
+                    // set the email
+                    $fullname = $this->remove_quotes($student[0]->email);
+                    $emails_list[$fullname] = strtolower($student[0]->email);
+                }
+
+                // generate the payment checkout url
+                $short_url = random_string("alnum", 5);
+                $checkout_url = "pay/{$params->clientId}/fees/{$student_id}";
+
+                // if the guardian information is empty
+                if(!empty($guardian)) {
+                    // split the guardian list
+                    $split = explode(",", $guardian);
+                    $count = 0;
+                    // loop through the guardian information
+                    foreach($split as $key => $each) {
+                        $count++;
+                        if(!empty($each)) {
+
+                            // fetch the guardian record
+                            $guard = $this->pushQuery("name, phone_number, email", "users", "client_id='{$params->clientId}' AND user_type='parent' AND item_id='{$each}' LIMIT 1");
+
+                            // if the email is not empty
+                            if(!empty($guard[0]->email)) {
+                                // set the email
+                                $fullname = $this->remove_quotes($guard[0]->email);
+                                $emails_list[$fullname] = strtolower($guard[0]->email);
+                            }
+
+                            if(!empty($guard[0]->phone_number)) {
+                                $contacts_list[$each] = $guard[0]->phone_number;
+                                $sms_contacts_list .= $guard[0]->phone_number;
+
+                                // append the payment url
+                                $pay_urls[$each] = [
+                                    "short_url" => $short_url,
+                                    "checkout_url" => $checkout_url
+                                ];
+
+                                // append the comma to the end of contact number loaded
+                                if($count < $key) {
+                                    $sms_contacts_list .= ",";
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // if send to student was parsed or the no guardian contact number was loaded
+                if(!empty($params->send_to_student) || empty($contacts_list)) {
+                    if(!empty($student[0]->phone_number)) {
+                        $contacts_list[$student_id] = $student[0]->phone_number;
+                        $sms_contacts_list .= "," . $student[0]->phone_number;
+
+                        // append the payment url
+                        $pay_urls[$student_id] = [
+                            "short_url" => $short_url,
+                            "checkout_url" => $checkout_url
+                        ];
+                    }
+                }
+
+            }
+
+            // if the contact list is empty
+            if(empty($contacts_list)) {
+                return ["code" => 203, "data" => "Sorry! The contact list is empty."];
+            }
+  
+            // append the message
+            $message = $params->message;
+            
+            // generate a pay url
+            $expiry_date = date("Y-m-d H:i", strtotime("+12 hours"));
+ 
+            // confirm if the school has subscribed to electronic payments
+            if(in_array("e_payments", $clientFeatures)) {
+                // append to the message
+                $message .= " Pay: {$this->baseUrl}p/{$short_url}";
+            }
+            
+            // calculate the message text count
+            $chars = strlen($message);
+            $actual_recipients_array = array_values($contacts_list);
+            $message_count = ceil($chars / $this->sms_text_count);
+            
+            // get the sms balance
+            $balance = $this->pushQuery("sms_balance", "smsemail_balance", "client_id='{$params->clientId}' LIMIT 1");
+            $units = $message_count * count($actual_recipients_array);
+            $balance = $balance[0]->sms_balance ?? 0;
+
+            // return error if the balance is less than the message to send
+            if($balance > $units) {
+
+                //open connection
+                $ch = curl_init();
+
+                // set the field parameters
+                $fields_string = [
+                    "key" => $this->mnotify_key,
+                    "recipient" => $actual_recipients_array,
+                    "sender" => !empty($params->client_data->sms_sender) ? $params->client_data->sms_sender : $this->sms_sender,
+                    "message" => $message
+                ];
+
+                // send the message
+                curl_setopt_array($ch, 
+                    array(
+                        CURLOPT_URL => "https://api.mnotify.com/api/sms/quick",
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_ENCODING => "",
+                        CURLOPT_MAXREDIRS => 10,
+                        CURLOPT_TIMEOUT => 30,
+                        CURLOPT_POST => true,
+                        CURLOPT_SSL_VERIFYPEER => false,
+                        CURLOPT_CAINFO => dirname(__FILE__)."\cacert.pem",
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST => "POST",
+                        CURLOPT_POSTFIELDS => json_encode($fields_string),
+                        CURLOPT_HTTPHEADER => [
+                            "Content-Type: application/json",
+                        ]
+                    )
+                );
+
+                //execute post
+                $result = json_decode(curl_exec($ch));
+
+                // if the sms was successful
+                if(!empty($result)) {
+                    // reduce the SMS balance
+                    $this->db->query("UPDATE smsemail_balance SET sms_balance = (sms_balance - {$message_count}), sms_sent = (sms_sent + {$message_count}) WHERE client_id = '{$params->clientId}' LIMIT 1");
+                }
+            }
+
+            // confirm if the school has subscribed to electronic payments
+            if(in_array("e_payments", $clientFeatures)) {
+                // append to the message
+                $content = $params->message ." Pay: <a target='_blank' href=\"{{APPURL}}p/{$short_url}\">Click Here</a>";
+            } else {
+                // set the content to the raw message.
+                $content = $params->message;
+            }
+
+            // loop through the guardian list
+            foreach($contacts_list as $key => $contact) {
+
+                // set the payment url and 
+                $stmt = $this->db->prepare("INSERT INTO payment_urls SET client_id = ?, user_id = ?, description = ?, short_url = ?, checkout_url = ?, expiry_date = ?");
+                $stmt->execute([$params->clientId, $key, $message, $pay_urls[$key]["short_url"], $pay_urls[$key]["checkout_url"], $expiry_date]);
+                
+                // log a notification
+                $_item_id = random_string("alnum", RANDOM_STRING);
+
+                // insert the record
+                $notif = $this->db->prepare("
+                    INSERT users_notification SET date_created='{$this->current_timestamp}', item_id='{$_item_id}',
+                        user_id='{$key}', subject='Fees Payment', client_id='{$params->clientId}',
+                        notice_type='13', message='{$params->message}',
+                        content='{$content}', initiated_by='system', created_by='{$params->userId}'
+                ");
+                $notif->execute();
+            }
+
+            // if send via email was also parsed
+            if(!empty($params->send_via_email) && ($params->send_via_email === "send")) {
+
+                // loop through the students list
+                foreach($student_ids as $studentId) {
+                    // generate the bill
+                    $fees_param = (object) [
+                        "student_id" => $studentId,
+                        "userData" => $params->userData,
+                        "clientId" => $params->clientId,
+                        "recipient_list" => json_encode($emails_list),
+                        "save_bill" => true
+                    ];
+                    $this->bill($fees_param);
+                }
+            }
+            
+            // send the sms message 
+            return [
+                "code" => 200,
+                "data" => "Payment reminder was successfully sent.",
+                "additional" => [
+                    "clear" => true
+                ]
+            ];
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+    }
     
+    /**
+     * Log the Init E-Payment Transaction Record
+     * 
+     * @param Array $params->data
+     * 
+     * @return Array
+     */
+    public function log(stdClass $params) {
+
+        // global variable
+        global $defaultClientData;
+
+        // end query is the session access_denied_log is not empty
+        if(!empty($this->session->access_denied_warning)) {
+
+            // deactivate the account
+            $this->db->query("UPDATE users SET user_status='Deactivated' WHERE item_id='{$params->userId}' LIMIT 1");
+            
+            // unset the sessions
+            $this->session->remove([
+                "userLoggedIn", "userName", "current_url", "clientId", 
+                "student_courses_id", "student_class_id", "student_id", "e_payment_transaction_id",
+                "userId", "userRole", "activated", "client_subaccount", "recentSQLQuery",
+                "student_csv_file", "course_csv_file", "staff_csv_file", "last_recordUpload"
+            ]);
+
+            // perform any additional query if the need be here
+            $this->session->destroy();
+
+            // return permission denied
+            return ["code" => 203, "data" => $this->permission_denied];
+        }
+
+        try {
+
+            // set the data
+            $data = $params->data;
+            $data["userId"] = $params->userId;
+            $data["clientId"] = $params->clientId;
+            $data["amount"] = number_format(($data["amount"] / 100), 2);
+            $data["userName"] = $params->userData->name ?? null;
+            $data["academic_term"] = $params->academic_term;
+            $data["academic_year"] = $params->academic_year;
+
+            // confirm the subaccount information
+            if(isset($data["subaccount"]) && !empty($data["subaccount"])) {
+                // match the client subaccount with what was parsed
+                if($defaultClientData->client_account !== $data["subaccount"]) {
+                    // end the query if there wasn't a match
+                    $this->db->query("INSERT INTO security_logs SET 
+                        client_id='{$params->clientId}', created_by='{$params->userId}', 
+                        section='e-Payment', category='Serious',
+                        description='The user attempted to receive fees via e-Payment with an incorrect subaccount id. This is a serious incident and must be investigated. The parsed value was <strong>{$data["subaccount"]}</strong> instead of <strong>$defaultClientData->client_account</strong>'
+                    ");
+                    // save a session
+                    $this->session->access_denied_warning = true;
+                    
+                    // return an error
+                    return [
+                        "code" => 203,
+                        "data" => "Attempt to forge subaccount has been detected and logged. You are warned to desist from such action!!! The next attempt will result in your account been deactivated."
+                    ];
+                }
+            }
+
+            // unset the sessions
+            $this->session->remove(["access_denied_warning"]);
+
+            // confirm that the student id was parsed
+            if(!isset($data["student_id"], $data["amount"])) {
+                return ["code" => 203, "data" => "Sorry! Ensure all required parameters were parsed."];
+            }
+
+            // append query
+            $append_sql = "";
+            $append_sql .= isset($data["checkout_url"]) && ($data["checkout_url"] !== "general") ? 
+                " AND b.checkout_url = '{$data["checkout_url"]}'" : null;
+            $append_sql .= isset($data["category_id"]) && (strlen($data["category_id"]) > 0) ? 
+                " AND b.category_id = '{$data["category_id"]}'" : null;
+
+            // get the student actual phone_number and email address again
+            $student_info = $this->pushQuery(
+                "a.phone_number, a.email, (
+                    SELECT COALESCE(SUM(b.balance), '0')
+                    FROM fees_payments b 
+                    WHERE b.student_id = a.item_id AND b.academic_term = '{$params->academic_term}'
+                        AND b.academic_year = '{$params->academic_year}' AND b.exempted = '0' 
+                        {$append_sql} LIMIT 50
+                ) AS arrears", 
+                "users a",
+                "a.item_id = '{$data["student_id"]}' LIMIT 1"
+            );
+
+            // confirm that the student id was parsed
+            if(empty($student_info)) {
+                return ["code" => 203, "data" => "Sorry! The student id is required."];
+            }
+
+            // confirm the amount to be paid
+            if(round($data["amount"]) > round($student_info[0]->arrears)){
+                return ["code" => 203, "data" => "Sorry! You cannot pay more than the outstanding balance of {$student_info[0]->arrears}."];
+            }
+
+            // create a new transaction id
+            $transaction_id = empty($this->session->e_payment_transaction_id) ? "MSG" . random_string("numeric", 15) : $this->session->e_payment_transaction_id;
+            $this->session->e_payment_transaction_id = $transaction_id;
+
+            // confirm if the transaction id already exists
+            if(!empty($this->pushQuery("id", "transaction_logs", "transaction_id='{$transaction_id}' AND state='Pending' LIMIT 1"))) {
+                // log the information
+                $stmt = $this->db->prepare("UPDATE transaction_logs 
+                    SET amount = ?, transaction_data = ? WHERE transaction_id = ? LIMIT 1");
+                $stmt->execute([$data["amount"], json_encode($data), $transaction_id]);
+            } else {
+                // log the information
+                $stmt = $this->db->prepare("INSERT INTO transaction_logs SET 
+                    client_id = ?, transaction_id = ?, reference_id = ?, endpoint = ?, amount = ?, 
+                    transaction_data = ?, state = ?, created_by = ?");
+                $stmt->execute([$params->clientId, $transaction_id, $transaction_id, "fees", $data["amount"], 
+                    json_encode($data), "Pending", $params->userId ?? null
+                ]);
+            }
+
+            return [
+                "code" => 200,
+                "data" => [
+                    "amount" => $data["amount"] * 100,
+                    "reference_id" => $transaction_id,
+                    "subaccount" => $data["subaccount"],
+                    "pk_public_key" => $this->pk_public_key,
+                    "email_address" => !empty($student_info[0]->email) ? $student_info[0]->email : $this->default_pay_email,
+                    "contact_number" => $student_info[0]->phone_number,
+                ]
+            ];
+    
+        } catch(PDOException $e) {}
+
+    }
+
+    /**
+     * Check the payment request status from paystack
+     * 
+     * @return Array
+     */
+    public function epay_validate(stdClass $params) {
+
+        // end query is the session access_denied_log is not empty
+        if(empty($this->session->e_payment_transaction_id)) {
+            // return permission denied
+            return ["code" => 203, "data" => "Payment request cancelled."];
+        }
+
+        // set the transaction id
+        $tid = $this->session->e_payment_transaction_id;
+
+        // get the request log
+        $log = $this->pushQuery("*", "transaction_logs", "transaction_id='{$tid}' LIMIT 1");
+
+        // confirm if a record already exists
+        if(empty($log)) {
+            return ["code" => 203, "data" => "Payment request cancelled."];
+        }
+
+        // get the status
+        if($log[0]->state == "Processed") {
+            return ["code" => 203, "data" => "Payment request already processed."];   
+        }
+
+        // create a new payment object
+        $payObject = load_class("payment", "controllers");
+
+        // set the parameters
+        $data = (object) [
+            "route" => "verify",
+            "reference" => $log[0]->reference_id
+        ];
+
+        // confirm the payment
+        $payment_check = $payObject->get($data);
+        
+        // if payment status is true
+        if(!empty($payment_check["data"]) && isset($payment_check["data"]->status) && ($payment_check["data"]->status === true)) {
+            // convert the data to object
+            $param = json_decode($log[0]->transaction_data);
+            $param->paystack_data = $payment_check;
+            $param->userData = $params->userData;
+
+            // process the payment
+            return $this->make_payment($param);
+        } else {
+            return ["code" => 203, "data" => "Payment request cancelled."];
+        }
+
+    }
+
 }

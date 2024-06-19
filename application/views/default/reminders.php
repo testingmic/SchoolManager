@@ -8,17 +8,17 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $myschoolgh, $defaultUser, $accessObject, $defaultAcademics;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $filters = (object) $_GET;
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Reminders";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // not found
 if(!$accessObject->hasAccess("send", "communication")) {
@@ -28,11 +28,10 @@ if(!$accessObject->hasAccess("send", "communication")) {
     // echo the response
     echo json_encode($response);
     exit;
-
 }
 
 // add the scripts to load
-$response->scripts = ["assets/js/reminders.js"];
+$response->scripts = ["assets/js/communication.js", "assets/js/reminders.js"];
 
 // set the parameters
 $route = "reminder";
@@ -50,7 +49,7 @@ $other_users_list = $myClass->pushQuery("
                 AND b.academic_year = '{$defaultAcademics->academic_year}'
         ) AS student_debt, ar.arrears_total AS arrears", 
     "users a LEFT JOIN users_arrears ar ON ar.student_id = a.item_id", 
-    "a.client_id='{$params->clientId}' AND a.user_status='Active' AND a.user_type = 'student'
+    "a.client_id='{$params->clientId}' AND a.user_status IN {$myClass->inList($myClass->student_statuses)} AND a.user_type = 'student'
         AND a.status='1' ORDER BY a.name LIMIT {$myClass->global_limit}");
 
 // get the list of only students
@@ -59,6 +58,8 @@ $users_array_list = [];
 // get the users list
 foreach($other_users_list as $user) {
     $user->class_id = (int) $user->class_id;
+    $user->student_debt = (float) $user->student_debt;
+    $user->arrears = (float) $user->arrears;
     $users_array_list[] = $user;
 }
 
@@ -74,7 +75,7 @@ $response->array_stream["smsemail_settings"] = $settings;
 // set the classes list
 $classes_list = "";
 foreach($class_array_list as $class) {
-    $classes_list .= "<option ".(!empty($filters->cid) && ($class->id === $filters->cid) ? "selected" : null)." data-class_id='{$class->item_id}' value='{$class->id}'>{$class->name}</option>";
+    $classes_list .= "<option ".(!empty($filters->cid) && ($class->id === $filters->cid) ? "selected" : null)." data-class_id='{$class->item_id}' value='{$class->id}'>".strtoupper($class->name)."</option>";
 }
 // set the html
 $response->html = '
@@ -84,6 +85,13 @@ $response->html = '
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between">
+            <div></div>
+            <div>
+                <span class="p-1 mb-2 font-20 bg-amber" id="sms_balance">'.($settings->sms_balance ?? 0).' SMS Units</span>
+                <button onclick="return topup_sms()" class="btn mb-2 btn-success"><i class="fa fa-database"></i> Top Up</button>
             </div>
         </div>
         '.(confirm_url_id(1, "send") ?
@@ -104,7 +112,7 @@ $response->html = '
                                     <div class="form-group mb-1">
                                         <label>Class <span class="required">*</span></label>
                                         <select data-selectors="'.$route.'" data-route="'.$route.'" name="class_id" class="form-control selectpicker" data-width="100%">
-                                            <option value="">Select</option>
+                                            <option value="">Select Select to Generate</option>
                                             '.$classes_list.'
                                         </select>
                                     </div>
@@ -157,7 +165,7 @@ $response->html = '
                             </div>
                             <div class="form-group">
                                 <label>Reminder Subject <span class="required">*</span></label>
-                                <input type="text" name="reminder_subject" class="form-control">
+                                <input value="Fees Payment" type="text" name="reminder_subject" class="form-control">
                             </div>
                             <div class="form-group">
                                 <label>Mode of Message <span class="required">*</span></label>
@@ -168,7 +176,7 @@ $response->html = '
                             </div>
                             <div class="form-group mb-1">
                                 <label>Message to Attached <span class="required">*</span></label>
-                                <textarea data-route="'.$route.'" maxlength="480" name="message" style="height:200px" class="form-control"></textarea>
+                                <textarea data-route="'.$route.'" maxlength="480" id="reminder_textarea" name="message" style="height:200px" class="form-control"></textarea>
                                 <div class="text-right alert-success p-1"> 
                                     <span class="remaining_count p-1">'.$myClass->sms_text_count.' characters remaining</span>
                                     <span id="messages">0 message</span>

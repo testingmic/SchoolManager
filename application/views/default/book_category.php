@@ -8,17 +8,17 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $SITEURL, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Book Category Details";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 $response->scripts = [
     "assets/js/library.js"
@@ -51,8 +51,7 @@ if(!empty($item_id)) {
         // parameters for the book list
         $_param = (object) [
             "clientId" => $clientId,
-            "category_id" => $data->id,
-            "limit" => 99999
+            "category_id" => $data->id
         ];
         $books_list = load_class("library", "controllers")->list($_param);
         
@@ -63,11 +62,11 @@ if(!empty($item_id)) {
         foreach($books_list["data"] as $key => $book) {
             
             // view link
-            $action = "<a href='#' onclick='return loadPage(\"{$baseUrl}book/{$book->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+            $action = "<a href='#' onclick='return load(\"book/{$book->item_id}/view\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
 
             $category_books_list .= "<tr data-row_id=\"{$book->item_id}\">";
             $category_books_list .= "<td>".($key+1)."</td>";
-            $category_books_list .= "<td><a href='#' onclick='return loadPage(\"{$baseUrl}book/{$book->item_id}\");'>{$book->title}</a></td>";
+            $category_books_list .= "<td><a href='#' onclick='return load(\"book/{$book->item_id}\");'>{$book->title}</a></td>";
             $category_books_list .= "<td>{$book->author}</td>";
             $category_books_list .= "<td>{$book->quantity}</td>";
             $category_books_list .= "<td><span class='underline'>".($book->isbn ?? null)."</span></td>";

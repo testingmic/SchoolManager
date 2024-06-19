@@ -8,19 +8,19 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 
 $hasIssue = $accessObject->hasAccess("issue", "library");
 $pageTitle = $hasIssue ? "Issued Books List" : "My Books List";
 
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // begin the request parameter
 $params = (object) ["clientId" => $session->clientId, "show_list" => true, "limit" => $myClass->global_limit, "userData" => $defaultUser, "client_data" => $defaultUser->client];
@@ -94,7 +94,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
+                            <table data-empty="" class="table table-bordered table-sm table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>

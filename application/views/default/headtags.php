@@ -1,10 +1,11 @@
 <?php
 // global variables
-global $usersClass, $accessObject, $myClass, $isSupport, $defaultClientData, $clientPrefs, $isParent, $defaultUser, $clientFeatures;
+global $usersClass, $accessObject, $myClass, $isSupport, $defaultClientData, 
+    $clientPrefs, $isParent, $defaultUser, $clientFeatures, $isReadOnly, $academicSession;
 
 // base url
 $baseUrl = config_item("base_url");
-$appName = config_item("site_name");
+$appName = $myClass->appName;
 
 // confirm that user id has been parsed
 $clientId = $session->clientId;
@@ -62,6 +63,9 @@ if(!isset($userPrefs->messages)) {
     ];
 }
 
+// check if the current academic year and term has been logged as completed
+$_academic_check = $myClass->pushQuery("academic_year, academic_term", "clients_terminal_log", "client_id='{$clientId}' LIMIT 50");
+
 // if the user has the permission to end the academic term
 $endPermission = $accessObject->hasAccess("close", "settings");
 $changePassword = $accessObject->hasAccess("change_password", "permissions");
@@ -75,7 +79,8 @@ load_helpers(['menu_helper']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><?= $page_title ?? "Dashboard" ?> : <?= $clientName ?></title>
+    <link id="mobile" rel="manifest" href="<?= $baseUrl ?>manifest.json" />
+    <title><?= $page_title ?? "Dashboard" ?> :: <?= $clientName ?></title>
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/components.css">
@@ -87,6 +92,7 @@ load_helpers(['menu_helper']);
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/vendors/trix/trix.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/select2/select2.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/calendar.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/table.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/chosen.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/calculator.css">    
@@ -96,10 +102,13 @@ load_helpers(['menu_helper']);
         <link rel="stylesheet" href="<?= $baseUrl ?><?= $eachCSS ?>">
     <?php } ?>
     <link id="user_current_url" name="user_current_url" value="<?= $user_current_url ?>">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/clients/<?= $clientData->client_id ?>.css">
     <script>
         var myUName = "<?= $session->userName ?>",
+            academicSession = "<?= $academicSession; ?>",
             myPrefs = <?= json_encode($userData->client->client_preferences) ?>;
     </script>
+    <?= $myClass->google_analytics_code ?>
 </head>
 <body class="bg">
 	<div class="loader"></div>
@@ -149,9 +158,9 @@ load_helpers(['menu_helper']);
             <nav class="navbar navbar-expand-lg main-navbar">
                 <div class="form-inline mr-auto">
                 <ul class="navbar-nav mr-3">
-                    <li><a href="#" data-toggle="sidebar" title="Hide/Display the Side Menubar" class="nav-link nav-link-lg collapse-btn"><i class="fas fa-bars"></i></a></li>
-                    <li><a href="#" class="nav-link nav-link-lg fullscreen-btn" title="Maximize to Fullscreen Mode"><i class="fas fa-expand"></i></a></li>
-                    <li><a href="#" class="nav-link nav-link-lg hidden" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
+                    <li><a href="#" data-toggle="sidebar" title="Hide/Display the Side Menubar" class="nav-link mt-2 nav-link-lg collapse-btn"><i class="fas fa-bars"></i></a></li>
+                    <!-- <li><a href="#" class="nav-link nav-link-lg mt-2 fullscreen-btn" title="Maximize to Fullscreen Mode"><i class="fas fa-expand"></i></a></li> -->
+                    <li><a href="#" class="nav-link nav-link-lg mt-2 hidden" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
                     <?php if($isActiveAccount) { ?>
                     <li class="border-left text-white d-none d-md-block">
                         <?php if(!$isSupport) { ?>
@@ -159,9 +168,10 @@ load_helpers(['menu_helper']);
                             <strong class="font-18px">
                                 <span><?= $clientPrefs->academics->academic_year ?></span> 
                                 <span>|</span>
-                                <span><?= $clientPrefs->academics->academic_term ?> Term</span>
+                                <span class="text-uppercase"><?= $clientPrefs->academics->academic_term ?> <?= $academicSession; ?></span>
+                                <?= ($endPermission && $defaultUser->appPrefs->termEnded ? "<span class='badge badge-danger notification'>Already Ended</span>" : ($endPermission ? "<span class='badge badge-success'>Active</span>" : null)); ?>
+                                <br><span class="font-weight-light font-17 text-uppercase"><?= $defaultUser->name; ?> / <?= ucwords($defaultUser->user_type); ?></span>
                             </strong>
-                            <?= ($endPermission && $defaultUser->appPrefs->termEnded ? "<span class='badge badge-danger notification'>Already Ended</span>" : "<span class='badge badge-success'>Active</span>"); ?>
                         </a>
                         <?php } else { ?>
                             <a href="#" class="nav-link text-white nav-link-lg">
@@ -173,16 +183,51 @@ load_helpers(['menu_helper']);
                 </ul>
                 </div>
                 <ul class="navbar-nav navbar-right">
-                <li class="dropdown dropdown-list-toggle"><a title="Notifications List" href="#" data-toggle="dropdown" class="nav-link notification-toggle nav-link-lg"><i class="far fa-bell"></i></a>
-                    <div class="dropdown-menu dropdown-list dropdown-menu-right">
-                        <div class="dropdown-header">Notifications
-                            <div class="float-right mark_all_as_read">
-                                <span onclick="return mark_all_notification_as_read()" class="underline text-blue">Mark All As Read</span>
+                <?php if($isActiveAccount) { ?>
+                    <li class="dropdown dropdown-list-toggle"><a title="Notifications List" href="#" data-toggle="dropdown" class="nav-link notification-toggle nav-link-lg"><i class="far fa-bell"></i></a>
+                        <div class="dropdown-menu dropdown-list dropdown-menu-right">
+                            <div class="dropdown-header">Notifications
+                                <div class="float-right mark_all_as_read">
+                                    <span onclick="return mark_all_notification_as_read()" class="underline text-blue">Mark All As Read</span>
+                                </div>
+                            </div>
+                            <div id="notifications_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-icons"></div>
+                        </div>
+                    </li>
+                    <?php
+                    // show this section if the record is not empty
+                    if(!empty($_academic_check) && $isAdmin) {
+                    ?>
+                    <li hidden class="dropdown switch-academic_year dropdown-list-toggle"><a href="#" title="Switch Academic Year/Term" data-toggle="dropdown" class="nav-link academic_years-toggle nav-link-lg"><i class="far fa-calendar"></i></a>
+                        <div class="dropdown-menu dropdown-list dropdown-menu-right" style="width:250px">
+                            <div class="dropdown-header mb-0 pb-0">Academic Years List</div>
+                            <div class="dropdown-list-content pt-0 slim-scroll" style="overflow-y:auto">
+                                <?php
+                                // loop through the academic years and term
+                                foreach($_academic_check as $_acc_years) {
+                                ?>
+                                    <div class="p-2 pl-3 border">
+                                        <a href="#" onclick="return set_academic_year_term('<?= $_acc_years->academic_year; ?>','<?= $_acc_years->academic_term; ?>');" class="user_name">
+                                            <?= $_acc_years->academic_year; ?>: <?= $_acc_years->academic_term; ?> <?= $academicSession; ?>
+                                        </a>
+                                        <?= ("{$_acc_years->academic_year}_{$_acc_years->academic_term}" == "{$session->is_readonly_academic_year}_{$session->is_readonly_academic_term}") ? "<i class='fa text-success fa-check-circle'></i>" : null; ?>
+                                    </div>
+                                <?php
+                                }
+                                ?>
+                                <?php if(!empty($session->is_only_readable_app)) { ?>
+                                    <div class="exit_review" onclick="return set_academic_year_term('revert','revert');">EXIT REVIEW MODE</div>
+                                <?php } ?>
                             </div>
                         </div>
-                        <div id="notifications_list" data-user_id="<?= $loggedUserId ?>" class="dropdown-list-content dropdown-list-icons"></div>
-                    </div>
-                </li>
+                    </li>
+                    <?php } ?>
+                    <?php if($accessObject->hasAccess("support", "settings")) { ?>
+                    <li class="dropdown dropdown-list-toggle">
+                        <a title="Support Tickets List" href="<?= $baseUrl ?>support" class="nav-link nav-link-lg"><i class="fa fa-user-cog"></i></a>
+                    </li>
+                    <?php } ?>
+                <?php } ?>
                 <li class="dropdown">
                     <a href="#" data-toggle="dropdown"
                         class="nav-link dropdown-toggle nav-link-lg nav-link-user">
@@ -215,18 +260,13 @@ load_helpers(['menu_helper']);
                             <i class="fas fa-key"></i> Password Manager
                         </a>
                         <?php } ?>
-                        <?php if($accessObject->hasAccess("close", "settings") && !$isSupport && $defaultUser->appPrefs->termEnded) { ?>
-                        <a href="<?= $baseUrl ?>manager" class="dropdown-item has-icon">
-                            <i class="fas fa-bolt"></i> <span class="mr-3">Manage Calendar</span> <?= $endPermission && $defaultUser->appPrefs->termEnded ? '<span class="notification beep"></span>' : null ?>
-                        </a>
-                        <?php } ?>
                     <?php } ?>
                     <a title="Knowledge Base" href="<?= $baseUrl ?>knowledgebase" class="dropdown-item has-icon">
                         <i class="fa fa-book-open"></i> Knowledge Base
                     </a>
                     <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
                         <a href="<?= $baseUrl ?>schools" class="dropdown-item has-icon">
-                            <i class="fas fa-wrench"></i> Account Setup
+                            <i class="fas fa-wrench"></i> <span class="mr-3">Account Setup</span> <?= $endPermission && $defaultUser->appPrefs->termEnded ? '<span class="notification beep"></span>' : null ?>
                         </a>
                     <?php } ?>
                     <div class="dropdown-divider"></div>
@@ -237,6 +277,12 @@ load_helpers(['menu_helper']);
                 </li>
                 </ul>
             </nav>
+            <?php if(!empty($session->is_readonly_academic_year)) { ?>
+                <div class="review-note">
+                    YOU ARE REVIEWING <strong><?= $session->is_readonly_academic_term; ?> <?= $academicSession; ?></strong> OF 
+                    <strong><?= $session->is_readonly_academic_year; ?></strong>
+                </div>
+            <?php } ?>
             <div class="main-sidebar sidebar-style-2 sidebar-bg">
                 <aside id="sidebar-wrapper">
 

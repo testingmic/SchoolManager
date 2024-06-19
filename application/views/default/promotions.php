@@ -6,45 +6,44 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $academicSession;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
-$filter = (object) $_POST;
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$filter = (object) array_map("xss_clean", $_POST);
 
-$response->title = "Promote Students : {$appName}";
+$response->title = "Promote Students ";
 $response->scripts = ["assets/js/filters.js", "assets/js/promotion.js"];
 
 $clientId = $session->clientId;
 $hasFiltering = $accessObject->hasAccess("filters", "settings");
-
-// default class_list
-$classes_param = (object) [
-    "clientId" => $clientId,
-    "userId" => $defaultUser->user_id,
-    "user_type" => $defaultUser->user_type,
-    "columns" => "id, name, slug, item_id"
-];
-// if the class_id is not empty
-$classes_param->department_id = !empty($filter->department_id) ? $filter->department_id : null;
-$class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
 // if the user has the requisite permotions
 if(!$accessObject->hasAccess("promote", "promotion")) {
     $response->html = page_not_found("permission_denied");
 } else {
 
+    // default class_list
+    $classes_param = (object) [
+        "clientId" => $clientId,
+        "userId" => $defaultUser->user_id,
+        "user_type" => $defaultUser->user_type,
+        "columns" => "id, name, slug, item_id"
+    ];
+    // if the class_id is not empty
+    $classes_param->department_id = !empty($filter->department_id) ? $filter->department_id : null;
+    $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
+
     // promotion params
     $promotion_params = (object) [
         "client_data" => $defaultUser->client,
-        "clientId" => $clientId,
-        "append_log" => true,
+        "clientId" => $clientId
     ];
     $promotion_array_list = load_class("promotion", "controllers")->history($promotion_params)["data"];
     
@@ -59,28 +58,18 @@ if(!$accessObject->hasAccess("promote", "promotion")) {
     // loop through the list of data
     foreach($promotion_array_list as $key => $each) {
 
-        // append to the array list
-        $promotion_array[$each->history_log_id] = $each;
-
-        $status = ($validatePromotion && $each->status === "Pending") ? 
-            "<button title='Click to Validate this Promotion Log' onclick='return validate_Promotion_Log(\"{$each->history_log_id}\")' class='btn btn-outline-success'>Validate</button>
-            <button title='Click to Cancel this Promotion Log' onclick='return cancel_Promotion_Log(\"{$each->history_log_id}\")' class='btn btn-outline-danger'><i class='fa fa-trash'></i></button>" : null;
-
         // append to the table list
         $promotion_list .= "<tr data-row_id=\"{$each->history_log_id}\">";
         $promotion_list .= "<td>".($key+1)."</td>";
-        $promotion_list .= "<td>{$each->academic_year}</td>";
+        $promotion_list .= "<td>{$each->academic_term} {$academicSession} - {$each->academic_year}</td>";
         $promotion_list .= "<td>{$each->from_class_name}</td>";
         $promotion_list .= "<td>{$each->to_class_name}</td>";
-        $promotion_list .= "<td>{$each->logged_by_data->name}<br> <strong>{$each->logged_by_data->unique_id}</strong></td>";
         $promotion_list .= "<td align='center'>{$each->students_count}</td>";
-        $promotion_list .= "<td>{$each->date_log}</td>";
-        $promotion_list .= "<td>{$myClass->the_status_label($each->status)}</td>";
-        $promotion_list .= "<td align='center'><button title='Click to View this Promotion Log' onclick='return view_Promotion_Log(\"{$each->history_log_id}\")' class='btn btn-outline-primary'><i class='fa fa-eye'></i></button> {$status}</td>";
+        $promotion_list .= "<td>{$each->date_created}</td>";
+        $promotion_list .= "<td width='10%'>{$myClass->the_status_label($each->status)}</td>";
+        $promotion_list .= "<td  width='15%' align='center'><button title='Click to View this Promotion Log' onclick='return load(\"promotion/{$each->history_log_id}\")' onthisone='return view_Promotion_Log(\"{$each->history_log_id}\")' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i> View</button></td>";
         $promotion_list .= "</tr>";
     }
-    $response->array_stream["promotion_list"] = $promotion_array;
-
 
     // set the data
     $response->html = '
@@ -114,7 +103,7 @@ if(!$accessObject->hasAccess("promote", "promotion")) {
                                         <select data-width="100%" class="form-control selectpicker" id="department_id" name="department_id">
                                             <option value="">Please Select Department</option>';
                                             foreach($myClass->pushQuery("id, name", "departments", "status='1' AND client_id='{$clientId}'") as $each) {
-                                                $response->html .= "<option ".(isset($filter->department_id) && ($filter->department_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">{$each->name}</option>";
+                                                $response->html .= "<option ".(isset($filter->department_id) && ($filter->department_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">".strtoupper($each->name)."</option>";
                                             }
                                             $response->html .= '
                                         </select>
@@ -124,7 +113,7 @@ if(!$accessObject->hasAccess("promote", "promotion")) {
                                         <select data-width="100%" class="form-control selectpicker" name="class_id">
                                             <option value="">Please Select Class</option>';
                                             foreach($class_list as $each) {
-                                                $response->html .= "<option value=\"{$each->item_id}\">{$each->name}</option>";
+                                                $response->html .= "<option value=\"{$each->item_id}\">".strtoupper($each->name)."</option>";
                                             }
                                             $response->html .= '
                                         </select>
@@ -134,14 +123,14 @@ if(!$accessObject->hasAccess("promote", "promotion")) {
                                         <select data-width="100%" disabled class="form-control selectpicker" name="promote_to">
                                             <option value="">Promote To</option>';
                                             foreach($class_list as $each) {
-                                                $response->html .= "<option value=\"{$each->item_id}\">{$each->name}</option>";
+                                                $response->html .= "<option value=\"{$each->item_id}\">".strtoupper($each->name)."</option>";
                                             }
                                             $response->html .= '
                                         </select>
                                     </div>
                                     <div class="col-xl-2 '.(!$hasFiltering ? 'hidden': '').' col-md-2 col-12 form-group">
                                         <label for="">&nbsp;</label>
-                                        <button id="filter_Promotion_Students_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+                                        <button id="filter_Promotion_Students_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> Generate List</button>
                                     </div>
                                 </div>
 
@@ -151,14 +140,13 @@ if(!$accessObject->hasAccess("promote", "promotion")) {
 
                             <div class="tab-pane fade" id="promotion_history" role="tabpanel" aria-labelledby="promotion_history-tab2">
                                 <div class="table-responsive table-student_staff_list">
-                                    <table data-empty="" class="table table-bordered table-striped datatable">
+                                    <table data-empty="" class="table table-sm table-bordered table-striped datatable">
                                         <thead>
                                             <tr>
                                                 <th width="5%" class="text-center">#</th>
                                                 <th>Academic Year</th>
                                                 <th>Promoted From</th>
                                                 <th>Promoted To</th>
-                                                <th>Performed By</th>
                                                 <th class="text-center">Students Count</th>
                                                 <th>Date of Promotion</th>
                                                 <th>Status</th>

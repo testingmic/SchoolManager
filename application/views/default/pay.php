@@ -1,7 +1,10 @@
 <?php 
+// global
+global $myClass;
+
 // default variables
-$appName = config_item("site_name");
-$baseUrl = config_item("base_url");
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // global variables
 global $defaultClientData, $myClass;
@@ -64,6 +67,7 @@ if(!empty($client_id)) {
         if(confirm_url_id(3) && !confirm_url_id(4)) {
             $getObject->student_id = $SITEURL[3];
         }
+        $session->remove("payment_check_data");
     }
 }
 ?>
@@ -101,10 +105,10 @@ if(!empty($client_id)) {
                             </div>
                             <div class="client-info border-bottom border-primary bg-whitesmoke p-2">
                                 <div class="text-center client-name">
-                                    <span class="font-18"><?= $client->client_name ?></span>
+                                    <span class="font-20 text-uppercase font-bold"><?= $client->client_name ?></span>
                                 </div>
-                                <div class="pay-info text-center">
-                                    Make Payment for your <strong><?= ucfirst($SITEURL[2]) ?></strong>
+                                <div class="pay-info font-17 text-center">
+                                    Make Payment for your ward <strong><?= ucfirst($SITEURL[2]) ?></strong>
                                 </div>
                             </div>
                         </div>

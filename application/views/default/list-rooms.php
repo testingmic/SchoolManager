@@ -9,43 +9,46 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Class Rooms";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 $params = (object) [
     "clientId" => $session->clientId,
-    "limit" => 9999
+    "load_classes" => true,
+    "limit" => $myClass->global_limit
 ];
 
 $item_list = load_class("rooms", "controllers")->list($params);
 
-$hasAdd = $accessObject->hasAccess("add", "library");
-$hasDelete = $accessObject->hasAccess("delete", "library");
-$hasUpdate = $accessObject->hasAccess("update", "library");
+$hasAdd = $accessObject->hasAccess("add", "class");
+$hasDelete = $accessObject->hasAccess("delete", "class");
+$hasUpdate = $accessObject->hasAccess("update", "class");
 
+$count = 0;
 $rooms_list = "";
 foreach($item_list["data"] as $key => $each) {
 
     $action = "";
     
     if($hasUpdate) {
-        $action .= "&nbsp;<a title='Click to update class room record' href='#' onclick='return loadPage(\"{$baseUrl}update-room/{$each->item_id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+        $action .= "&nbsp;<a title='Click to update class room record' href='#' onclick='return load(\"update-room/{$each->item_id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Click to delete this class room' onclick='return delete_record(\"{$each->item_id}\", \"class_room\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
-
+    $count++;
     $rooms_list .= "<tr data-row_id=\"{$each->item_id}\">";
-    $rooms_list .= "<td>".($key+1)."</td>";
-    $rooms_list .= "<td>{$each->name}</td>";
+    $rooms_list .= "<td>".($count)."</td>";
+    $rooms_list .= "<td><a title='Click to update class room record' href='#' onclick='return load(\"update-room/{$each->item_id}/update\");'>{$each->name}</a></td>";
     $rooms_list .= "<td>{$each->code}</td>";
+    $rooms_list .= "<td>{$each->room_classes}</td>";
     $rooms_list .= "<td>{$each->capacity}</td>";
     $rooms_list .= "<td align='center'>{$action}</td>";
     $rooms_list .= "</tr>";
@@ -70,14 +73,15 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
+                            <table data-empty="" class="table table-sm table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
-                                        <th width="40%">Name</th>
+                                        <th width="30%">Name</th>
                                         <th>Code</th>
+                                        <th>Classes</th>
                                         <th width="15%">Capacity</th>
-                                        <th align="center" width="13%"></th>
+                                        <th align="center" width="10%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$rooms_list.'</tbody>

@@ -1,36 +1,30 @@
-<?php 
-$fees = [
-    "dinning" => 200,
-    "transport" => 150,
-    "tuition" => 500,
-    "ict_dues" => 75,
-    "project" => 170
-];
+<?php
+// if the user is not loggedin then show the login form
+if(!loggedIn()) { require "login.php"; exit(-1); }
 
-$fees_list = [];
-$paying = 1050;
-$init_paying = $paying;
+// end page if not a support personnel logged in
+if(!$isSupport) { invalid_route(); exit; }
 
-foreach($fees as $key => $value) {
-    if($paying === 0) {
-        break;
-    }
-    if(($value < $paying) || ($value === $paying)) {
-        $paying = $paying - $value;
-        $fees_list[$key] = 0;
-    } elseif($value > $paying) {
-        $n_value = $value - $paying;
-        $fees_list[$key] = $n_value;
-        $paying = 0;
-    }
+// global variables
+global $myschoolgh, $myClass;
+
+$counter = $myClass->itemsCount("users", "client_id = 'MSGH00014' AND user_type='student' LIMIT 1");
+
+$myfile = fopen("test.txt", "r") or die("Unable to open file!");
+
+// get the last user id
+$last_id = $myClass->lastRowId("users") + 1;
+
+print "Running code at ".date("Y-m-d H:i:s")."<br><br>";
+
+$row = 0;
+while(!feof($myfile)) {
+  $row++;
+  $name = fgets($myfile);
+  
+  // print "{$row}." . $name."<br>";
 }
-$fees_list = array_merge($fees, $fees_list);
 
-print_r([
-    "fees" => $fees,
-    "fees_list" => $fees_list,
-    "owing" => array_sum($fees),
-    "paid" => $init_paying,
-    "arrears" => array_sum($fees_list)
-]);
+print "<br>Ended at ".date("Y-m-d H:i:s")."<br><br>";
+fclose($myfile);
 ?>

@@ -2,7 +2,7 @@
 
 class Library extends Myschoolgh {
 
-	
+	private $iclient = [];
 
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
@@ -26,12 +26,14 @@ class Library extends Myschoolgh {
 
         // set the filters
         $filters = "";
-        $filters .= isset($params->q) ? " AND bk.title LIKE '%{$params->q}%'" : "";
-		$filters .= isset($params->class_id) && !empty($params->class_id) ? " AND bk.class_id='{$params->class_id}'" : "";
-        $filters .= isset($params->book_id) && !empty($params->book_id) ? " AND bk.item_id='{$params->book_id}'" : "";
-        $filters .= isset($params->category_id) && !empty($params->category_id) ? " AND bk.category_id='{$params->category_id}'" : "";
-        $filters .= isset($params->department_id) && !empty($params->department_id) ? " AND bk.department_id='{$params->department_id}'" : "";
-        $filters .= isset($params->isbn) && !empty($params->isbn) ? " AND bk.isbn='{$params->isbn}'" : "";
+        $filters .= !empty($params->q) ? " AND bk.title LIKE '%{$params->q}%'" : "";
+        $filters .= !empty($params->book_id) ? " AND bk.item_id='{$params->book_id}'" : "";
+        $filters .= !empty($params->title) ? " AND bk.title LIKE '%{$params->title}%'" : "";
+        $filters .= !empty($params->lookup) ? " AND bk.title LIKE '%{$params->lookup}%'" : "";
+		$filters .= !empty($params->class_id) ? " AND bk.class_id='{$params->class_id}'" : "";
+		$filters .= !empty($params->isbn) ? " AND bk.isbn IN {$this->inList($params->isbn)}" : "";
+        $filters .= !empty($params->category_id) ? " AND bk.category_id='{$params->category_id}'" : "";
+        $filters .= !empty($params->department_id) ? " AND bk.department_id='{$params->department_id}'" : "";
 
 		try {
 			
@@ -315,7 +317,7 @@ class Library extends Myschoolgh {
 		try {
 
 			# create a new unique id
-			$item_id = random_string("alnum", 16);
+			$item_id = random_string("alnum", RANDOM_STRING);
 
             # execute the statement
             $stmt = $this->db->prepare("
@@ -529,7 +531,10 @@ class Library extends Myschoolgh {
 			return [
 				"code" => is_array($request) ? $request["code"] : 200,
 				"data" => !is_array($request) && $request ? "The request successfully processed." : 
-					(is_array($request) ? $request["data"] : "Sorry! There was an error while processing the request")
+					(is_array($request) ? $request["data"] : "Sorry! There was an error while processing the request"),
+				"additional" => [
+					"href" => ($request && !is_array($request)) ? $request : null
+				]
 			];
 		}
 
@@ -734,13 +739,13 @@ class Library extends Myschoolgh {
 	 *
 	 * This handles the issuance of a book to the student
 	 *
-	 * @param $issueDate 	The date that the book is been given out
-	 * @param $return_date 	The date that the student is supposed to return the book
-	 * @param $studentId 	The Student ID Number
-	 * @param $overdueRate	This is the fine for overdue
-	 * @param $overdueApply	This is to check whether fine applies to all books or just the order
+	 * @param String $issueDate 	The date that the book is been given out
+	 * @param String $return_date 	The date that the student is supposed to return the book
+	 * @param String $studentId 	The Student ID Number
+	 * @param Float $overdueRate	This is the fine for overdue
+	 * @param String $overdueApply	This is to check whether fine applies to all books or just the order
 	 *
-	 * @return bookName
+	 * @return Mixed $requestId
 	 **/
 	public function issue_book_to_user($params, $the_session, $userId) {
 		
@@ -783,7 +788,7 @@ class Library extends Myschoolgh {
 		
 		try {
 
-			$item_id = random_string("alnum", 16);
+			$item_id = random_string("alnum", RANDOM_STRING);
 			$fine = !empty($data->overdue_rate) ? $data->overdue_rate : 0;
 			$eachBookRate = !empty($eachBookRate) ? $eachBookRate : 0;
 
@@ -804,9 +809,9 @@ class Library extends Myschoolgh {
 				
 				// prepare and execute the statement
 				$stmt = $this->db->prepare("INSERT INTO books_borrowed_details SET
-					borrowed_id = ?, book_id = ?, quantity = ?,	return_date = ?, fine = ?, issued_by = ?, received_by = ?
+					client_id = ?, borrowed_id = ?, book_id = ?, quantity = ?,	return_date = ?, fine = ?, issued_by = ?, received_by = ?
 				");
-				$stmt->execute([$item_id, $key, $value, $data->return_date, $eachBookRate, $userId, $data->user_id]);
+				$stmt->execute([$data->clientId, $item_id, $key, $value, $data->return_date, $eachBookRate, $userId, $data->user_id]);
 
 				// reduce the books stock quantity
 				$this->db->query("UPDATE books_stock SET quantity = (quantity - {$value}) WHERE books_id = '{$key}' LIMIT 1");
@@ -822,7 +827,7 @@ class Library extends Myschoolgh {
 
 			$this->db->commit();
 
-			return true;
+			return $item_id;
 		} catch(PDOException $e) {
 			return false;
 		}
@@ -964,7 +969,7 @@ class Library extends Myschoolgh {
 		}
 
 		/** Remove the file from the list */
-		$this->db->query("UPDATE books_borrowed SET status='Approved', issued_date=now() WHERE item_id='{$params->borrowed_id}' LIMIT 1");
+		$this->db->query("UPDATE books_borrowed SET status='Approved', issued_date='{$this->current_timestamp}' WHERE item_id='{$params->borrowed_id}' LIMIT 1");
 
 		/** Log the user activity */
 		$this->userLogs("books_borrowed", $params->borrowed_id, null, "{$params->fullname} changed the Request Status from {$data[0]->status} to Approved.", $params->userId);
@@ -1074,14 +1079,14 @@ class Library extends Myschoolgh {
 			}
 
 			/** Execute the status */
-			$this->db->query("UPDATE books_borrowed SET status='Returned', actual_date_returned=now(), actual_paid = (fine + 0), fine_paid='1' WHERE item_id='{$borrowed_id}' LIMIT 1");
-			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned=now() WHERE borrowed_id='{$borrowed_id}' LIMIT 100");
+			$this->db->query("UPDATE books_borrowed SET status='Returned', actual_date_returned='{$this->current_timestamp}', actual_paid = (fine + 0), fine_paid='1' WHERE item_id='{$borrowed_id}' LIMIT 1");
+			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned='{$this->current_timestamp}' WHERE borrowed_id='{$borrowed_id}' LIMIT {$this->temporal_maximum}");
 
 			/** Log the user activity */
 			$this->userLogs("books_borrowed", $borrowed_id, null, "{$params->fullname} returned the Books Borrowed.", $params->userId);
 		} else {
 			/** Execute the status */
-			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned=now(), actual_paid = (fine + 0), fine_paid='1' WHERE borrowed_id='{$borrowed_id}' AND book_id='{$expl[1]}' LIMIT 1");
+			$this->db->query("UPDATE books_borrowed_details SET status='Returned', actual_date_returned='{$this->current_timestamp}', actual_paid = (fine + 0), fine_paid='1' WHERE borrowed_id='{$borrowed_id}' AND book_id='{$expl[1]}' LIMIT 1");
 
 			/** increase the books stock quantity */
 			$this->db->query("UPDATE books_stock SET quantity = (quantity + {$data[0]->quantity}) WHERE books_id = '{$expl[1]}' LIMIT 1");
@@ -1195,7 +1200,7 @@ class Library extends Myschoolgh {
 	public function add_book(stdClass $params) {
 
         // generate a random string for the book
-        $item_id = random_string("alnum", 16);
+        $item_id = random_string("alnum", RANDOM_STRING);
 		
 		$counter = $this->append_zeros(($this->itemsCount("books", "client_id = '{$params->clientId}'") + 1), $this->append_zeros);
         $code = $this->iclient->client_preferences->labels->book_label.$counter;
@@ -1297,8 +1302,8 @@ class Library extends Myschoolgh {
             $files->execute([json_encode($attachments), $attachments["raw_size_mb"], $params->book_id, "library_book"]);
         } else {
             // insert the record if not already existing
-            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
-            $files->execute(["library_book", $params->book_id, json_encode($attachments), $params->book_id, $params->userId, $attachments["raw_size_mb"]]);
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");
+            $files->execute(["library_book", $params->book_id, json_encode($attachments), $params->book_id, $params->userId, $attachments["raw_size_mb"], $params->clientId]);
         }
         
         // fetch the files again
@@ -1321,6 +1326,15 @@ class Library extends Myschoolgh {
 
 	/**
 	 * Update Book Stock
+	 * 
+	 * This method is used to update the stock quantities available for each book
+	 * It first checks if the parameter parsed is an array and also checks for repetition of book ids
+	 * Proceeds to confirm if the same query has just been parsed.
+	 * 
+	 * It finally loops through the books list and updates the count. It also inserts a log of the stock update
+	 * this is to help when the admin wants to reverse the action. 
+	 * 
+	 * @param Array $params->stock_quantities
 	 * 
 	 * @return Array
 	 */
@@ -1349,7 +1363,7 @@ class Library extends Myschoolgh {
 			}
 
 			// compare the current query to the previous
-			if(json_encode($quantities) === $this->session->previousData) {
+			if(json_encode($quantities) === $this->session->recentSQLQuery) {
 				return ["code" => 203, "data" => "Sorry! You are parsing the same query already processed."];
 			}
 
@@ -1365,10 +1379,10 @@ class Library extends Myschoolgh {
 			}
 
 			/** Create a new stock update id */
-			$item_id = random_string("alnum", 16);
+			$item_id = random_string("alnum", RANDOM_STRING);
 
 			/** Insert the Stock Details */
-			$this->db->query("INSERT INTO books_stock_history SET client_id = '{$params->clientId}', stock_id='{$item_id}', books_data = '".json_encode($quantities)."'");
+			$this->db->query("INSERT INTO books_stock_history SET created_by='{$params->userId}', client_id = '{$params->clientId}', stock_id='{$item_id}', books_data = '".json_encode($quantities)."'");
 
 			/** Record the user activity **/
 			$this->userLogs("library_book_stock", $item_id, null, "{$params->userData->name} updated the books Stock", $params->userId);
@@ -1378,12 +1392,78 @@ class Library extends Myschoolgh {
 			$return["additional"] = ["href" => "{$this->baseUrl}bookss", "clear" => true];
 
 			// set the previous data
-			$this->session->previousData = json_encode($quantities);
+			$this->session->recentSQLQuery = json_encode($quantities);
 
 			return $return;
 			
 		} catch(PDOException $e) {}
 
+	}
+
+	/**
+	 * List the stock update history
+	 * 
+	 * @param Int		$params->limit
+	 * @param String	$params->stock_id
+	 * 
+	 * @return Array
+	 */
+	public function stock_update_list(stdClass $params) {
+		
+		$filter = "1";
+
+        $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+        $filter .= (isset($params->stock_id) && !empty($params->stock_id)) ? " AND a.stock_id='{$params->stock_id}'" : null;
+        $filter .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+
+        try {
+
+            $stmt = $this->db->prepare("
+                SELECT a.*
+                FROM books_stock_history a
+                WHERE {$filter} ORDER BY a.id LIMIT {$params->limit}
+            ");
+            $stmt->execute([1]);
+
+            $data = [];
+
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+				
+				// if the minified is true
+				$result->books_data = json_decode($result->books_data);
+				$result->books_list = $this->get_books_list($result->books_data);
+                $data[] = $result;
+            }
+			
+			return [ "code" => 200, "data" => $data ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+	}
+
+	/**
+	 * Get the books record using the book id
+	 * 
+	 * @return Array
+	 */
+	public function get_books_list($books_data) {
+
+		if(empty($books_data)) {
+			return [];
+		}
+		$books = [];
+		foreach($books_data as $book) {
+			$data = $this->pushQuery("title, isbn, code, author, book_image", "books", "item_id='{$book->book_id}' LIMIT 1");
+			$book_record = [
+				"data" => $data[0] ?? [],
+				"stock" => $book
+			];
+			$books[] = $book_record;
+		}
+		return $books;
 	}
 
 }

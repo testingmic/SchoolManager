@@ -9,19 +9,18 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
-$response->title = "Books List : {$appName}";
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$response->title = "Books List ";
 
 $params = (object) [
     "clientId" => $session->clientId,
-    "client_data" => $defaultUser->client,
-    "limit" => 99999
+    "client_data" => $defaultUser->client
 ];
 
 $item_list = load_class("library", "controllers", $params)->list($params);
@@ -63,14 +62,14 @@ $response->html = '
             <div class="col-12 col-sm-12 col-lg-12">
                 '.($hasAdd ? '
                     <div class="text-right mb-2">
-                        <a class="btn btn-outline-success" href="'.$baseUrl.'books_stock"><i class="fa fa-book"></i> Update Books Stock</a>
+                        <a class="btn btn-outline-success" href="'.$baseUrl.'books_stock/add"><i class="fa fa-book"></i> Update Books Stock</a>
                         <a class="btn btn-outline-primary" href="'.$baseUrl.'book_add"><i class="fa fa-plus"></i> Add Book</a>
                     </div>' : ''
                 ).'
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-bordered table-striped datatable">
+                            <table data-empty="" class="table table-sm table-bordered table-striped datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>

@@ -10,52 +10,30 @@ class Analitics extends Myschoolgh {
     public $current_title = "Today";
     public $previous_title = "Yesterday";
 
+    private $_academics;
     private $period_counter;
     private $class_id_query;
     private $class_idm_query;
     private $employee_id_query;
 
-    public $academic_term;
-    public $academic_year;
-    public $this_term_starts;
-    public $this_term_ends;
-    public $last_term_starts;
-    public $last_term_ends;
-
     public function __construct(stdClass $params) {
 
         parent::__construct();
-
-        $this->default_stream = [
-            "summary_report", "students_report", "fees_revenue_flow", "library_report", 
-            "departments_report", "attendance_report", "class_attendance_report",
-            "salary_report", "transaction_revenue_flow"
-        ];
-
-        $this->error_codes = [
-            "invalid-date" => "Sorry! An invalid date was parsed for the start date.",
-            "invalid-range" => "Sorry! An invalid date was parsed for the end date.",
-            "exceeds-today" => "Sorry! The date date must not exceed today's date",
-            "exceeds-count" => "Sorry! The days between the two ranges must not exceed 366 days",
-            "invalid-prevdate" => "Sorry! The start date must not exceed the end date.",
-        ];
 
         // get the client data
         $client_data = $params->client_data;
 
         // run this query
-        $academics = $client_data->client_preferences->academics;
+        $this->_academics = $client_data->client_preferences->academics;
         
         $this->iclient = $params;
         $this->iclient_id = $client_data->client_id;
-        $this->academic_term = $academics->academic_term;
-        $this->academic_year = $academics->academic_year;
 
-        $this->this_term_starts = $academics->term_starts;
-        $this->this_term_ends = $academics->term_ends;
+        $this->this_term_starts = $this->_academics->term_starts;
+        $this->this_term_ends = $this->_academics->term_ends;
 
-        $this->last_term_starts = $academics->last_term_starts ?? $academics->term_starts;
-        $this->last_term_ends = $academics->last_term_ends ?? $academics->term_ends;
+        $this->last_term_starts = $this->_academics->last_term_starts ?? $this->_academics->term_starts;
+        $this->last_term_ends = $this->_academics->last_term_ends ?? $this->_academics->term_ends;
     }
 
     /**
@@ -67,13 +45,27 @@ class Analitics extends Myschoolgh {
      */
     public function generate(stdClass $params) {
 
+        // initiate the global variable
+        global $academicSession;
+        
+        // call the accepted period method and set the session name to use
+        $this->accepted_period($academicSession);
+
+        // set the parameters
+        $params->academic_year = $params->academic_year ?? $this->_academics->academic_year;
+        $params->academic_term = $params->academic_term ?? $this->_academics->academic_term;
+
+        // set the academic year and term
+        $this->academic_term = $params->academic_term;
+        $this->academic_year = $params->academic_year;
+
         /** set the date period */
         $params->period = $params->period ?? "last_14days";
         $params->period = empty($params->period) ? "academic_term" : $params->period;
         
         /** Convert the stream into an array list */
         $params->stream = isset($params->label["stream"]) && !empty($params->label["stream"]) ? $this->stringToArray($params->label["stream"]) : $this->default_stream;
-        $info_to_stream = $params->stream;
+        $this->info_to_stream = $params->stream;
 
         /** Preformat date */
         if(in_array($params->period, array_keys($this->accepted_period))) {
@@ -126,7 +118,7 @@ class Analitics extends Myschoolgh {
         ];
 
         // confirm if the user pushed a query set
-        $this->user_status = isset($params->label["user_status"]) ? $params->label["user_status"] : "Active";
+        $this->user_status = isset($params->label["user_status"]) ? $params->label["user_status"] : $this->default_allowed_status_users_array;
         $this->class_id_query = (isset($params->label["class_id"]) && !empty($params->label["class_id"])) ? $params->label["class_id"] : null;
         $this->class_idm_query = (isset($params->label["class_id"]) && !empty($params->label["class_id"])) ? " AND a.class_id IN {$this->inList($params->label["class_id"])}" : null;
         $this->class_idd_query = (isset($params->label["class_id"]) && !empty($params->label["class_id"])) ? " AND a.id IN {$this->inList($params->label["class_id"])}" : null;
@@ -189,7 +181,7 @@ class Analitics extends Myschoolgh {
         }
 
         // get the class attendance information if not parsed in the stream
-        if(in_array("class_attendance_report", $info_to_stream)) {
+        if(in_array("class_attendance_report", $this->info_to_stream)) {
             // query the class attendance data
             $this->final_report["attendance_report"] = $this->attendance_report($params);
         }
@@ -235,7 +227,7 @@ class Analitics extends Myschoolgh {
             $value_count = "total_{$role}s_count";
 
             $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause} AND status='1'");
-            $query->execute([$this->user_status]);
+            $query->execute();
             $result["users_record_count"]["count"][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
 
             // set the sex
@@ -249,7 +241,7 @@ class Analitics extends Myschoolgh {
 
                 // run a query for the user count
                 $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause} AND status='1'");
-                $query->execute([$this->user_status]);
+                $query->execute();
 
                 // append to the result array
                 $result["users_record_count"]["gender_count"][$gender][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
@@ -268,7 +260,7 @@ class Analitics extends Myschoolgh {
 
                 // run a query for the user count
                 $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause}");
-                $query->execute([$this->user_status]);
+                $query->execute();
 
                 // append to the result array
                 $result["users_record_count"]["comparison"][$range_key][$value_count] = $query->fetch(PDO::FETCH_OBJ)->{$value_count} ?? 0;
@@ -284,7 +276,7 @@ class Analitics extends Myschoolgh {
          * Run a comparison between the current and previous record set
          */
         // get the fees categories
-        $class_list = $this->pushQuery("a.id, a.name", "classes a", "a.status='1' AND a.client_id='{$params->clientId}' {$this->class_idd_query}");
+        $class_list = $this->pushQuery("a.id, a.name", "classes a", "a.status='1' AND a.client_id='{$params->clientId}' {$this->class_idd_query} LIMIT {$this->temporal_maximum}");
         $result["students_class_record_count"]["total_classes_count"] = count($class_list);
 
         // load the fees records
@@ -302,12 +294,43 @@ class Analitics extends Myschoolgh {
             ];
             $where_clause = $usersClass->list($client_param);
 
+            // get the fees payment made by each class
+            $c_query = $this->db->prepare("SELECT
+                SUM(a.amount_due) AS amount_due, 
+                SUM(a.amount_paid) AS amount_paid,
+                (
+                    SELECT SUM(b.amount) FROM fees_collection b WHERE b.reversed='0' AND
+                    b.class_id='{$value->id}' AND b.reversed='0' AND b.client_id='{$params->clientId}' AND
+                    DATE(b.recorded_date) >= '{$this->start_date}' AND DATE(b.recorded_date) <= '{$this->end_date}'
+                ) AS actual_total_paid,
+                (
+                    SELECT SUM(b.amount) FROM fees_collection b WHERE b.reversed='0' AND b.category_id != 'Arrears'
+                    AND b.class_id='{$value->id}' AND b.reversed='0' AND b.client_id='{$params->clientId}' AND
+                    DATE(b.recorded_date) >= '{$this->start_date}' AND DATE(b.recorded_date) <= '{$this->end_date}'
+                ) AS actual_fees_paid,
+                (
+                    SELECT SUM(b.amount) FROM fees_collection b WHERE b.reversed='0' AND b.category_id = 'Arrears'
+                    AND b.class_id='{$value->id}' AND b.reversed='0' AND b.client_id='{$params->clientId}' AND
+                    DATE(b.recorded_date) >= '{$this->start_date}' AND DATE(b.recorded_date) <= '{$this->end_date}'
+                ) AS actual_arrears_paid,
+                SUM(a.balance) AS balance
+                FROM fees_payments a
+                WHERE a.status='1' AND a.client_id='{$params->clientId}' 
+                    AND a.exempted='0' AND a.class_id='{$value->id}'
+                    AND a.academic_year='{$this->academic_year}' AND a.academic_term='{$this->academic_term}'
+                    GROUP BY a.class_id
+            ");
+            $c_query->execute();
+            $_c_result = $c_query->fetch(PDO::FETCH_OBJ);
+
+            $result["students_class_fees_payment"][$value->name] = $_c_result;
+
             // value_name
             $class_name = create_slug($value->name, "_");
             $value_count = "{$class_name}_total_count";
 
             $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause}");
-            $query->execute([$this->user_status]);
+            $query->execute();
             $_q_result = $query->fetch(PDO::FETCH_OBJ);
 
             $result["students_class_record_count"]["count"][$value_count] = [
@@ -327,7 +350,7 @@ class Analitics extends Myschoolgh {
 
                 // run a query for the user count
                 $query = $this->db->prepare("SELECT COUNT(*) AS {$value_count} FROM users a WHERE {$where_clause}");
-                $query->execute([$this->user_status]);
+                $query->execute();
                 $_q_result = $query->fetch(PDO::FETCH_OBJ);
 
                 // append to the result array
@@ -348,11 +371,11 @@ class Analitics extends Myschoolgh {
         $feesClass = load_class("fees", "controllers", $this->iclient);
 
         // get the fees categories
-        $fees_category_list = $this->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$params->clientId}'");
+        $fees_category_list = $this->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$params->clientId}' LIMIT {$this->temporal_maximum}");
         $result["fees_record_count"]["total_count"] = count($fees_category_list);
 
         // get the fees categories
-        $summation = $this->pushQuery("SUM(a.amount_due) AS amount_due,
+        $summation = $this->pushQuery("SUM(a.amount_due) AS amount_due, SUM(a.balance) AS balance,
             (
                 SELECT SUM(b.amount) FROM fees_collection b WHERE b.client_id='{$params->clientId}'
                 AND (
@@ -365,12 +388,13 @@ class Analitics extends Myschoolgh {
                     DATE(b.recorded_date) >= '{$this->start_date}' AND DATE(b.recorded_date) <= '{$this->end_date}'
                 ) AND b.category_id = 'Arrears' AND b.reversed = '0' AND status = '1'
             ) AS arrears_paid,
-            SUM(a.balance) AS balance, 
             (
                 SELECT SUM(arrears_total) FROM users_arrears WHERE client_id='{$params->clientId}'
             ) AS arrears_total", 
-            "fees_payments a", "a.status='1' AND a.client_id='{$params->clientId}' AND 
-            a.academic_year='{$this->academic_year}' AND a.academic_term='{$this->academic_term}'
+            "fees_payments a LEFT JOIN users u ON u.item_id = a.student_id", 
+            "a.status='1' AND a.client_id='{$params->clientId}' AND a.exempted='0'
+            AND u.status='1' AND u.user_status IN ({$this->default_allowed_status_users_list}) AND
+            a.academic_year='{$this->academic_year}' AND a.academic_term='{$this->academic_term}' LIMIT {$this->extreme_maximum}
         ");
         $result["fees_record_count"]["summation"] = $summation[0] ?? [];
 
@@ -402,7 +426,7 @@ class Analitics extends Myschoolgh {
                 LEFT JOIN users u ON u.item_id = a.student_id
                 WHERE {$where_clause}
             ");
-            $query->execute([$this->user_status]);
+            $query->execute();
             $q_result = $query->fetch(PDO::FETCH_OBJ);
             
             // append the result values
@@ -426,7 +450,7 @@ class Analitics extends Myschoolgh {
                     LEFT JOIN users u ON u.item_id = a.student_id
                     WHERE {$_where_clause}
                 ");
-                $_query->execute([$this->user_status]);
+                $_query->execute();
                 $_q_result = $_query->fetch(PDO::FETCH_OBJ);
                 
                 // append to the result array
@@ -448,7 +472,7 @@ class Analitics extends Myschoolgh {
         $transactionClass = load_class("accounting", "controllers", $this->iclient);
 
         // get the fees categories
-        $transaction_type_head = $this->pushQuery("id, name, item_id", "accounts_type_head", "status='1' AND client_id='{$params->clientId}'");
+        $transaction_type_head = $this->pushQuery("id, name, item_id", "accounts_type_head", "status='1' AND client_id='{$params->clientId}' LIMIT 100");
         $result["transaction_revenue_flow"]["typehead_count"] = count($transaction_type_head);
 
         // loop through the date ranges for the current and previous
@@ -466,6 +490,22 @@ class Analitics extends Myschoolgh {
                 );
                 $result["transaction_revenue_flow"]["category_total"][$range_key][$category] = $category_total[0]->total_amount ?? 0;
             }
+
+            // loop through the record type
+            foreach(["Deposit", "Withdrawal"] as $category) {
+                // get the fees categories
+                $category_total = $this->pushQuery(
+                    "SUM(a.amount) AS total_amount", "bank_transactions a", 
+                    "a.status='1' AND a.client_id='{$params->clientId}' AND a.transaction_type='{$category}'
+                    AND a.reversed = '0' AND (
+                        DATE(a.date_created) >= '{$range_value["start"]}' AND DATE(a.date_created) <= '{$range_value["end"]}'
+                    )"
+                );
+                $result["transaction_revenue_flow"]["category_total"][$range_key]["Bank_{$category}"] = $category_total[0]->total_amount ?? 0;
+            }
+
+            // get the bank difference
+            $result["transaction_revenue_flow"]["category_total"][$range_key]["Bank_Recons"] = $result["transaction_revenue_flow"]["category_total"][$range_key]["Bank_Deposit"] - $result["transaction_revenue_flow"]["category_total"][$range_key]["Bank_Withdrawal"];
 
 
         }
@@ -517,7 +557,7 @@ class Analitics extends Myschoolgh {
                     FROM accounts_transaction a 
                     WHERE {$_where_clause}
                 ");
-                $_query->execute([$this->user_status]);
+                $_query->execute();
                 $_q_result = $_query->fetch(PDO::FETCH_OBJ);
                 
                 // append to the result array
@@ -532,6 +572,10 @@ class Analitics extends Myschoolgh {
             }
 
         }
+
+        // get the account balance value
+        $account_balance = $this->pushQuery("SUM(balance) AS balance", "accounts", "default_account='1' AND status='1' AND client_id='{$params->clientId}' LIMIT 1");
+        $result["transaction_revenue_flow"]["account_balance"] = $account_balance[0]->balance ?? 0;
 
         return $result;
     }
@@ -615,7 +659,7 @@ class Analitics extends Myschoolgh {
      * 
      * @return Array
      */
-    public function attendance_report(stdClass $params) {
+    public function attendance_report(stdClass $_params) {
 
         try {
             
@@ -626,41 +670,67 @@ class Analitics extends Myschoolgh {
             $attendClass = load_class("attendance", "controllers");
 
             // if finalized record is requested
-            $params->is_finalized = true;
+            $_params->is_finalized = true;
+
+            // set the student id
+            $filter_student_id = isset($_params->label["student_id"]) && !empty($_params->label["student_id"]) ? $_params->label["student_id"] : null;
+
+            // set the staff id
+            $filter_staff_id = isset($_params->label["staff_id"]) && !empty($_params->label["staff_id"]) ? $_params->label["staff_id"] : null;
 
             // if the summary load was parsed
-            if(isset($params->load_summary_info)) {
+            if(isset($_params->load_summary_info)) {
                 
                 // set additional parameters
-                $params->start_date = isset($params->label["start_date"]) ? $params->label["start_date"] : $this->start_date;
-                $params->end_date = isset($params->label["end_date"]) ? $params->label["end_date"] : $this->end_date;
+                $_params->start_date = isset($_params->label["start_date"]) ? $_params->label["start_date"] : $this->start_date;
+                $_params->end_date = isset($_params->label["end_date"]) ? $_params->label["end_date"] : $this->end_date;
 
                 // set the quick information
-                $user_type = $params->userData->user_type;
-                $params->the_user_type = $user_type;
+                $user_type = $_params->userData->user_type;
+                $_params->the_user_type = $user_type;
                 
                 // set the user types that each person can view
-                if(in_array($user_type, ["admin", "accountant"])) {
-                    $params->user_types_list = ["staff", "student"];
+                if(in_array($user_type, ["admin", "accountant"]) && empty($filter_student_id) && empty($filter_staff_id)) {
+                    $_params->user_types_list = ["staff", "student"];
+                    $_params->the_current_user_id = null;
                 } else {
-                    $params->is_present_check = true;
-                    $params->user_types_list = ($user_type === "parent") ? ["student"] : ($user_type === "student" ? ["student"] : ["staff"]);
-                    $params->the_current_user_id = ($user_type === "parent") ? $this->session->student_id : $params->userId;
+
+                    // set the student id to use
+                    $_student_id = !empty($this->session->student_id) ? $this->session->student_id : $filter_student_id;
+
+                    // set additional parameters
+                    $_params->is_present_check = true;
+                    $_params->user_types_list = ($user_type === "parent") ? ["student"] : ($user_type === "student" ? ["student"] : ["staff"]);
+                    $_params->the_current_user_id = $_student_id;
+
+                    // set new user type list if the filter student id is not empty
+                    if(!empty($filter_student_id)) {
+                        $_params->end_date = ($_params->period == "this_month") ? date("Y-m-d") : $_params->end_date;
+                        $_params->user_types_list = ["student"];
+                    } elseif(!empty($filter_staff_id)) {
+
+                        // set the user id to use
+                        $_params->the_current_user_id = $filter_staff_id;
+
+                        // set the period for the data to load
+                        $_params->end_date = ($_params->period == "this_month") ? date("Y-m-d") : $_params->end_date;
+                        $_params->user_types_list = ["staff"];
+                    }
                 }
                 
                 // load the attendance summary
-                $result["attendance"] = $attendClass->range_summary($params);
+                $result["attendance"] = $attendClass->range_summary($_params);
 
             }
 
             // if class summary was also requested
-            if(in_array("class_attendance_report", $params->stream)) {
+            if(in_array("class_attendance_report", $_params->stream)) {
 
                 // load the attendance summary
-                $params->load_date = isset($params->label["load_date"]) ? $params->label["load_date"] : date("Y-m-d");
+                $_params->load_date = isset($_params->label["load_date"]) ? $_params->label["load_date"] : date("Y-m-d");
                 
                 // load the class summary
-                $result["class_summary"] = $attendClass->class_summary($params);
+                $result["class_summary"] = $attendClass->class_summary($_params);
             }
 
             // return the result
@@ -703,7 +773,8 @@ class Analitics extends Myschoolgh {
                             COUNT(*) AS value, {$this->group_by}(a.recorded_date) AS value_date, SUM(a.amount) AS amount_value
                         FROM fees_collection a 
                         WHERE 
-                            a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
+                            a.status = '1' AND a.client_id = '{$params->clientId}' AND a.reversed='0' 
+                            {$this->student_id_query} {$this->fees_category_id}
                             AND (
                                 DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
                             ) {$this->class_idm_query}
@@ -729,7 +800,8 @@ class Analitics extends Myschoolgh {
                         SELECT {$this->group_by}(a.recorded_date) AS value_date, SUM(a.amount) AS value 
                         FROM fees_collection a
                         WHERE 
-                            a.status = '1' AND a.reversed = '0' {$this->student_id_query} {$this->fees_category_id}
+                            a.status = '1' AND a.client_id = '{$params->clientId}' AND a.reversed = '0' 
+                            {$this->student_id_query} {$this->fees_category_id}
                         AND (
                             DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
                         ) {$this->class_idm_query}
@@ -809,7 +881,8 @@ class Analitics extends Myschoolgh {
                             COUNT(*) AS value, a.class_id, SUM(a.amount) AS amount_value
                         FROM fees_collection a 
                         WHERE 
-                            a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
+                            a.status = '1' AND a.client_id = '{$params->clientId}' AND a.reversed='0' 
+                            {$this->student_id_query} {$this->fees_category_id}
                             AND (
                                 DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
                             ) {$this->class_idm_query}
@@ -838,7 +911,8 @@ class Analitics extends Myschoolgh {
                             COUNT(*) AS value, a.payment_method, SUM(a.amount) AS amount_value
                         FROM fees_collection a 
                         WHERE 
-                            a.status = '1' AND a.reversed='0' {$this->student_id_query} {$this->fees_category_id}
+                            a.status = '1' AND a.client_id = '{$params->clientId}' AND a.reversed='0' 
+                            {$this->student_id_query} {$this->fees_category_id}
                             AND (
                                 DATE(a.recorded_date) >= '{$range_value["start"]}' AND DATE(a.recorded_date) <= '{$range_value["end"]}'
                             ) {$this->class_idm_query}
@@ -1163,7 +1237,7 @@ class Analitics extends Myschoolgh {
 
     }
 
-	/**
+    /**
      * This formats the correct date range
      *  
      * @param String    $datePeriod      This is the date period that was parsed
@@ -1295,7 +1369,7 @@ class Analitics extends Myschoolgh {
                 $prevTo = date("Y-m-d", strtotime("today -2 days"));
                 break;
             default:
-				$groupBy = "HOUR";
+                $groupBy = "HOUR";
                 $format = "jS M Y";
                 $currentTitle = "Today";
                 $previousTitle = "Yesterday";
@@ -1329,100 +1403,62 @@ class Analitics extends Myschoolgh {
      * @return Array
      */
     public function value_replacer($rangeSet, $dataSet, $dateRange = [], $weekDays = null) {
-		// return data set
-		$returnDataSet = [];
+        // return data set
+        $returnDataSet = [];
 
-		if($rangeSet == "list-days") {
-			// set the dates
-			$dates = array();
-			
-			// get the list of days
-			$datesList = $this->listDays($dateRange[0], $dateRange[1]);
-			
-			$notFoundDays = array_diff($datesList, $dataSet);
-			$dataSet = [];
+        if($rangeSet == "list-days") {
+            // set the dates
+            $dates = array();
+            
+            // get the list of days
+            $datesList = $this->listDays($dateRange[0], $dateRange[1]);
+            
+            $notFoundDays = array_diff($datesList, $dataSet);
+            $dataSet = [];
 
-			foreach($notFoundDays as $value) {
-				$dataSet[$value] = 0;
-			}
-			// check the rangeset that has been parsed
-		} elseif($rangeSet == "hour") {
-			// set the first parameter for the hours
-			$hourOfDay = array();
+            foreach($notFoundDays as $value) {
+                $dataSet[$value] = 0;
+            }
+            // check the rangeset that has been parsed
+        } elseif($rangeSet == "hour") {
+            // set the first parameter for the hours
+            $hourOfDay = array();
 
-			// get the hours for the day
-			$hours = range(0, 23, 1);
-			
-			// loop through the hours
-			foreach ($hours as $hr) {
-				$hourOfDay[] = $hr;
-			}
-			
-			// find the difference in the two array set
-			$notFoundHours = array_diff($hourOfDay, $dataSet);
-			$dataSet = [];
-			
-			foreach($notFoundHours as $value) {
-				$dataSet[$value] = 0.00;
-			}
-		} elseif($rangeSet == "year-to-months") {
-			// set the first parameter for the hours
-			$monthsOfYear = array();
+            // get the hours for the day
+            $hours = range(0, 23, 1);
+            
+            // loop through the hours
+            foreach ($hours as $hr) {
+                $hourOfDay[] = $hr;
+            }
+            
+            // find the difference in the two array set
+            $notFoundHours = array_diff($hourOfDay, $dataSet);
+            $dataSet = [];
+            
+            foreach($notFoundHours as $value) {
+                $dataSet[$value] = 0.00;
+            }
+        } elseif($rangeSet == "year-to-months") {
+            // set the first parameter for the hours
+            $monthsOfYear = array();
 
-			// loop through the hours
-			for($i=1; $i <= 12; $i++) {
-				$monthsOfYear[] = $i;
-			}
+            // loop through the hours
+            for($i=1; $i <= 12; $i++) {
+                $monthsOfYear[] = $i;
+            }
 
-			// find the difference in the two array set
-			$notFoundMonths = array_diff($monthsOfYear, $dataSet);
-			
-			$dataSet = [];
-			foreach($notFoundMonths as $value) {
-				$dataSet[$value] = 0.00;
-			}
-		}
+            // find the difference in the two array set
+            $notFoundMonths = array_diff($monthsOfYear, $dataSet);
+            
+            $dataSet = [];
+            foreach($notFoundMonths as $value) {
+                $dataSet[$value] = 0.00;
+            }
+        }
 
-		return $dataSet;
-	}
-
-    /**
-     * Convert to string to a valid date form
-     * 
-     * @param String $timeFrame
-     * @param String $period
-     * @param String $format
-     * 
-     * @return String
-     */
-    public function convertToPeriod($timeFrame, $period, $format='Y-m-01') {
-		// Check the time frame hourly
-		if($timeFrame == "hour") {
-			// get the hours for the day
-			$hours = range(0, 23, 1);
-			// loop through the hours
-			foreach ($hours as $hr) {
-				if($hr == $period) {
-					return date('hA', strtotime("today +$hr hours"));
-					break;
-				}
-			}
-		}
-		// Check the time frame monthly
-		elseif($timeFrame == "month") {
-			// get the months for the day
-			$months = range(0, 11, 1);
-			// loop through the months
-			foreach ($months as $hr) {
-				if($hr == ($period-1)) {
-					return date($format, strtotime("January +$hr month"));
-					break;
-				}
-			}
-		} else {
-			//return $period;
-		}
-	}
+        return $dataSet;
+    }
 
     /**
      * Calculate Percentages
@@ -1452,7 +1488,7 @@ class Analitics extends Myschoolgh {
         $total_value = array_sum(array_column($array_list, "value"));
 
         foreach($array_list as $key => $value) {
-            $percentage = $value["value"] > 0 ? (($value["value"] / $total_value) * 100) : 0;
+            $percentage = $value["value"] > 0 ? round((($value["value"] / $total_value) * 100), 2) : 0;
             $array_data[$section[0]][$section[1]][$section[2]][$key]["percentage"] = round($percentage, 2);
         }
 
@@ -1501,7 +1537,7 @@ class Analitics extends Myschoolgh {
 
                         // find the difference
                         $difference[$kkey] = [
-                            "percentage" => $percentage,
+                            "percentage" => round($percentage, 2),
                             "value" => $raw_value,
                         ];
 
@@ -1517,58 +1553,58 @@ class Analitics extends Myschoolgh {
 
     }
     
-	/**
-	 * percentage_diff
-	 * 
-	 * Find the percentage difference between two values
-	 * 
-	 * @return String
-	 */
-	public function percentage_diff($current_value, $previous_value, $rate=null) {
+    /**
+     * percentage_diff
+     * 
+     * Find the percentage difference between two values
+     * 
+     * @return String
+     */
+    public function percentage_diff($current_value, $previous_value, $rate=null) {
 
-		$percentage = 0;
+        $percentage = 0;
 
-		if(strlen($previous_value) > 0) {
+        if(strlen($previous_value) > 0) {
 
-			// confirm that each value is a valid integer number
-			if(!preg_match("/^[0-9.]+$/", $current_value) || !preg_match("/^[0-9.]+$/", $previous_value)) {
-				return;
-			}
-			
+            // confirm that each value is a valid integer number
+            if(!preg_match("/^[0-9.]+$/", $current_value) || !preg_match("/^[0-9.]+$/", $previous_value)) {
+                return;
+            }
+            
 
-			$difference = ($current_value - $previous_value);
+            $difference = ($current_value - $previous_value);
 
-			if($current_value != 0){
-				$percentage = ( ($current_value - $previous_value) / ($current_value + $previous_value) ) * 100;
-			}
+            if($current_value != 0){
+                $percentage = ( ($current_value - $previous_value) / ($current_value + $previous_value) ) * 100;
+            }
 
-			$percentage = ($percentage < 0) ? ($percentage * -1) : $percentage;
+            $percentage = ($percentage < 0) ? ($percentage * -1) : $percentage;
 
-			if($previous_value > $current_value) {
-				$class = "text-danger";
-				$prefix = '<i class="fa fa-arrow-down"></i>';
-			} else {
-				$class = "text-success";
-				$prefix = '<i class="fa fa-arrow-up"></i>';
-			}
+            if($previous_value > $current_value) {
+                $class = "text-danger";
+                $prefix = '<i class="fa fa-arrow-down"></i>';
+            } else {
+                $class = "text-success";
+                $prefix = '<i class="fa fa-arrow-up"></i>';
+            }
 
-			if($current_value == 0){
-				$percentile = 100;
-			} else {
-				$percentile = number_format(round($percentage), 0);
-			}
+            if($current_value == 0){
+                $percentile = 100;
+            } else {
+                $percentile = number_format(round($percentage), 0);
+            }
 
-			$money = ($rate) ? number_format($difference, 2) : number_format($difference, 0);
+            $money = ($rate) ? number_format($difference, 2) : number_format($difference, 0);
 
-			return [
-				"class" => $class,
-				"value" => $percentile,
-				"text" => ' <span class="bold">'. $percentile . "%</span> " . $prefix
-			];
+            return [
+                "class" => $class,
+                "value" => $percentile,
+                "text" => ' <span class="bold">'. $percentile . "%</span> " . $prefix
+            ];
 
-		} else {
-			return '<i class="fa fa-arrow-circle-up fa-2x text-success"></i><span class="bold">0.00 (0%)</span>';
-		}
-	}
+        } else {
+            return '<i class="fa fa-arrow-circle-up fa-2x text-success"></i><span class="bold">0.00 (0%)</span>';
+        }
+    }
 
 }

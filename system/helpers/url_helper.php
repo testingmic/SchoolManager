@@ -7,7 +7,7 @@
  * @package		Helpers
  * @subpackage	URL Helper Functions
  * @category	Core Functions
- * @author		Analitica Innovare Dev Team
+ * @author		Emmallex Technologies Dev. Team
  */
 
 defined('BASEPATH') OR exit('No direct script access allowed');
@@ -142,7 +142,7 @@ if ( ! function_exists('anchor'))
 }
 
 function safe_mailto() {
-	return;
+	return [];
 }
 
 // ------------------------------------------------------------------------
@@ -162,43 +162,38 @@ if ( ! function_exists('auto_link'))
 	 * @param	bool	whether to create pop-up links
 	 * @return	string
 	 */
-	function auto_link($str, $type = 'both', $popup = FALSE)
-	{
-		// Find and replace any URLs.
-		if ($type !== 'email' && preg_match_all('#(\w*://|www\.)[a-z0-9]+(-+[a-z0-9]+)*(\.[a-z0-9]+(-+[a-z0-9]+)*)+(/([^\s()<>;]+\w)?/?)?#i', $str, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER))
-		{
-			// Set our target HTML if using popup links.
-			$target = ($popup) ? ' target="_blank" rel="noopener"' : '';
+	function auto_link(string $str, string $type = 'both', bool $popup = false, $class = ""): string
+    {
+        // Find and replace any URLs.
+        if ($type !== 'email' && preg_match_all('#(\w*://|www\.)[^\s()<>;]+\w#i', $str, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER)) {
+            // Set our target HTML if using popup links.
+            $target = ($popup) ? ' target="_blank"' : '';
 
-			// We process the links in reverse order (last -> first) so that
-			// the returned string offsets from preg_match_all() are not
-			// moved as we add more HTML.
-			foreach (array_reverse($matches) as $match)
-			{
-				// $match[0] is the matched string/link
-				// $match[1] is either a protocol prefix or 'www.'
-				//
-				// With PREG_OFFSET_CAPTURE, both of the above is an array,
-				// where the actual value is held in [0] and its offset at the [1] index.
-				$a = '<a href="'.(strpos($match[1][0], '/') ? '' : 'http://').$match[0][0].'"'.$target.'>'.$match[0][0].'</a>';
-				$str = substr_replace($str, $a, $match[0][1], strlen($match[0][0]));
-			}
-		}
+            // We process the links in reverse order (last -> first) so that
+            // the returned string offsets from preg_match_all() are not
+            // moved as we add more HTML.
+            foreach (array_reverse($matches) as $match) {
+                // $match[0] is the matched string/link
+                // $match[1] is either a protocol prefix or 'www.'
+                //
+                // With PREG_OFFSET_CAPTURE, both of the above is an array,
+                // where the actual value is held in [0] and its offset at the [1] index.
+                $a   = '<a href="' . (strpos($match[1][0], '/') ? '' : 'http://') . $match[0][0] . '"' . $target . '>' . $match[0][0] . '</a>';
+                $str = substr_replace($str, $a, $match[0][1], strlen($match[0][0]));
+            }
+        }
 
-		// Find and replace any emails.
-		if ($type !== 'url' && preg_match_all('#([\w\.\-\+]+@[a-z0-9\-]+\.[a-z0-9\-\.]+[^[:punct:]\s])#i', $str, $matches, PREG_OFFSET_CAPTURE))
-		{
-			foreach (array_reverse($matches[0]) as $match)
-			{
-				if (filter_var($match[0], FILTER_VALIDATE_EMAIL) !== FALSE)
-				{
-					$str = substr_replace($str, safe_mailto($match[0]), $match[1], strlen($match[0]));
-				}
-			}
-		}
+        // Find and replace any emails.
+        if ($type !== 'url' && preg_match_all('#([\w\.\-\+]+@[a-z0-9\-]+\.[a-z0-9\-\.]+[^[:punct:]\s])#i', $str, $matches, PREG_OFFSET_CAPTURE)) {
+            foreach (array_reverse($matches[0]) as $match) {
+                if (filter_var($match[0], FILTER_VALIDATE_EMAIL) !== false) {
+                    $str = substr_replace($str, safe_mailto($match[0]), $match[1], strlen($match[0]));
+                }
+            }
+        }
 
-		return $str;
-	}
+        return $str;
+    }
 }
 
 // ------------------------------------------------------------------------
@@ -332,7 +327,7 @@ if ( ! function_exists('redirect'))
 		if (!$use_refresh)
 		{
 			# redirect the page for the user using javascript window.location.href
-			die("<script>window.location.href='$uri'</script>");
+			// die("<script>window.location.href='$uri'</script>");
 			exit;
 		}
 		
@@ -395,7 +390,7 @@ if ( ! function_exists('create_slug')) {
 	 *
 	 * @param	string	$str	String to check
 	 * @param	extension	$ext	Extension to add to the string
-	 * @return	text
+	 * @return	string|mixed
 	 */
 	function create_slug($str, $replace = '-', $ext=''){
 		$str = strtolower($str);     
@@ -437,9 +432,14 @@ if ( ! function_exists('jump_to_main')) {
 	 * @return header
 	 */
 	function jump_to_main($baseUrl = null) {
-		global $_SERVER, $session, $myschoolgh;
+
+		// global variables
+		global $_SERVER, $session, $myschoolgh, $SITEURL, $defaultUser, $isSupport;
+
 		// set the current url in session
 		$session->user_current_url = current_url();
+
+		//if the user session has expired
 		if(!$session->clientId) {
 			$response = (object) [
 				"title" => "Session Expired!",
@@ -452,19 +452,50 @@ if ( ! function_exists('jump_to_main')) {
 			echo json_encode($response);
 			exit;
 		}
+
 		// redirect the page to the appropriate one
 		if(!isset($_SERVER["HTTP_REFERER"]) || $_SERVER["REQUEST_METHOD"] !== "POST") {
 			// get the default user information
 			header("location: {$baseUrl}main");
 			exit;
 		}
+
 		// get the current url
-		$current_url = current_url();
+		$current_url = $session->user_current_url;
 		$current_url = str_ireplace([$baseUrl], ["{{APPURL}}"], $current_url);
 
-		// save the current url and attach to the user information
-		$stmt = $myschoolgh->prepare("UPDATE users SET last_visited_page = ? WHERE item_id = ? LIMIT 1");
-		return $stmt->execute([$current_url, $session->userId]);
+		// confirm if the user has been suspended
+		if(!empty($session->defaultClientData) && isset($session->defaultClientData["data"])) {
+			
+			// check if the user has changed the password
+			if(!$defaultUser->changed_password) {
+				$response = (object) [
+					"title" => "Change Default Password!",
+					"html" => changed_password("Change Default Password!")
+				];
+				echo json_encode($response);
+				exit;
+			}
+		
+			// set the state
+			$state = $session->defaultClientData["data"]->client_state;
+
+			// if the account has been suspended or expired
+			if(in_array($state, ["Suspended", "Expired"])) {
+				$response = (object) [
+					"title" => "Account {$state}!",
+					"html" => access_denied($state)
+				];
+				echo json_encode($response);
+				exit;
+			}
+
+			// save the current url and attach to the user information
+			$stmt = $myschoolgh->prepare("UPDATE users SET last_visited_page = ? WHERE item_id = ? LIMIT 1");
+			return $stmt->execute([$current_url, $session->userId]);
+			
+		}
+
 	}
 
 }

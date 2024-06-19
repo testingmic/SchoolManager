@@ -6,23 +6,30 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $defaultClientData;
+global $myClass, $accessObject, $defaultUser, $defaultClientData, $isPayableStaff;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
-$filter = (object) $_POST;
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$filter = (object) array_map("xss_clean", $_POST);
 
 $response->title = "Staff Payslips: {$appName}";
 $response->scripts = ["assets/js/filters.js"];
 
 $userId = $session->userId;
 $clientId = $session->clientId;
+
+// If the user is not a teacher, employee, accountant or admin then end the request
+if(!$isPayableStaff) {
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
 
 $generatePermission = $accessObject->hasAccess("generate", "payslip");
 $validatePayslip = $accessObject->hasAccess("validate", "payslip");
@@ -89,7 +96,7 @@ foreach($payslips_array["data"] as $key => $each) {
                     <!--".(!$validated ? "<input name='selected' type='checkbox' value='{$each->id}' class='form-control cursor' style='height:20px'>" : "")."-->
                     <img class='rounded-circle author-box-picture' width='40px' src=\"{$baseUrl}{$each->employee_info->image}\"></div>
                 <div>
-                    <a class='text-uppercase' title='Click to view the details of this employee' href='#' onclick='return loadPage(\"{$baseUrl}payroll-view/{$each->employee_id}\");'>{$each->employee_info->name}</a> 
+                    <a class='text-uppercase' title='Click to view the details of this employee' href='#' onclick='return load(\"payroll-view/{$each->employee_id}\");'>{$each->employee_info->name}</a> 
                     <span class='text-uppercase badge badge-{$color[$each->employee_info->user_type]} p-1'>{$each->employee_info->user_type}</span>
                     <br><span class='p-2'><i class='fa fa-phone'></i> {$each->employee_info->phone_number}</span>
                     <br><span class='p-2'><i class='fa fa-envelope'></i> {$each->employee_info->email}</span>

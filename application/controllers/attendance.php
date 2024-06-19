@@ -73,7 +73,10 @@ class Attendance extends Myschoolgh {
             $the_user_type = $params->user_type == "staff" ? ["teacher","employee","admin","accountant"] : [$params->user_type];
 
             // loop through the array list
-            foreach($params->attendance as $key => $value) {
+            foreach($params->attendance as $key => $eachInfo) {
+
+                // set the value
+                $value = $eachInfo["status"];
 
                 // append to the list of present users array
                 if($value == "present") {
@@ -90,9 +93,10 @@ class Attendance extends Myschoolgh {
 
                 // append the attendance status to the query
                 $data[0]->state = $value;
+                $data[0]->comments = $eachInfo["comments"];
 
                 // append to the array list
-                $user_data[] = $data[0];
+                $user_data[$key] = $data[0];
             }
 
         }
@@ -216,22 +220,27 @@ class Attendance extends Myschoolgh {
      * Loop through the attendance log and get the value for the user
      * 
      * @param String    $userId
-     * @param Array     $attendance_log
+     * @param mixed     $attendance_log
      */
     public function the_user_state($userId, $attendance_log) {
         
         // init the state
         $state = "";
+        $comments = "";
 
         // loop through the list
         foreach($attendance_log as $key => $student) {
             if($student->item_id == $userId) {
-                $state = $attendance_log[$key]->state;
+                $state = $attendance_log->{$student->item_id}->state ?? "absent";
+                $comments = $attendance_log->{$student->item_id}->comments ?? null;
                 break;
             }
         }
         // return the state
-        return $state;
+        return [
+            "state" => $state,
+            "comments" => $comments
+        ];
     }
 
     /**
@@ -277,7 +286,7 @@ class Attendance extends Myschoolgh {
         $table_content = "<div class=\"table-responsive\">\n";
 
         // width for each column
-        $width = number_format((90/count($array_list["days_range_list"])), 2);
+        $width = number_format((85/count($array_list["days_range_list"])), 2);
 
         // if the document is downloadable
         if($isDownloadable) {
@@ -343,7 +352,7 @@ class Attendance extends Myschoolgh {
                 ".($isDownloadable ?
                     "<tr>
                         <td colspan='3' align='center'>
-                            <div style='margin-top:10px;font-size:18px;margin-bottom:10px'><strong>ATTENDANCE LOG</strong></div>
+                            <div style='color:#0d5e9f;margin-top:10px;font-size:18px;margin-bottom:10px'><strong>ATTENDANCE LOG</strong></div>
                         </td>
                     </tr>"
                 : "")."
@@ -352,7 +361,7 @@ class Attendance extends Myschoolgh {
         }
 
         // populate the information
-        $table_content .= "<table width=\"100%\" data-rows_count=\"20\" cellpadding=\"2px\" style=\"border: 1px solid #dee2e6;\" class=\"table table-striped table-bordered datatable\">\n";
+        $table_content .= "<table width=\"100%\" data-rows_count=\"20\" cellpadding=\"2px\" style=\"border: 1px solid #dee2e6;\" class=\"table table-sm table-striped table-bordered datatable\">\n";
 
         // rearrange the users list
         function rearrange_list($users_list) {
@@ -375,8 +384,11 @@ class Attendance extends Myschoolgh {
                 $table_content .= "<th ".($isDownloadable ? "style='border: 1px solid #dee2e6;'" : "")." width=\"10%\" align=\"left\">".($isDownloadable ? "<strong>Name</strong>" : "Student Name")."</th>\n";
                 foreach($data as $key => $value) {
                     $new_array_list[$value["record"]["date"]["raw"]] = rearrange_list($value["record"]["users_data"]);
-                    $table_content .= "<th ".($isDownloadable ? "style='border: 1px solid #dee2e6;'" : "")." width=\"{$width}%\" align=\"center\"><strong>{$value["record"]["date"]["day"]}</strong></th>\n";
+                    $table_content .= "<th ".($isDownloadable ? "style='font-size:12px;border: 1px solid #dee2e6;'" : "")." width=\"{$width}%\" align=\"center\">
+                            <strong>".strtoupper($value["record"]["date"]["day"])."</strong>
+                        </th>\n";
                 }
+                $table_content .= "<th style='border: 1px solid #dee2e6;' width=\"5%\" align=\"center\"><strong>TOT.</strong></th>\n";
                 $table_content .= "</tr>\n";
             }
         }
@@ -416,7 +428,7 @@ class Attendance extends Myschoolgh {
         $query .= !empty($class_id) ? " AND class_id='{$params->class_id}'" : null;
         
         // get the list of students
-        $names_array = $this->pushQuery("name, item_id, user_type", "users", "1 {$query} AND client_id='{$params->clientId}' AND status='1'");
+        $names_array = $this->pushQuery("name, item_id, user_type", "users", "1 {$query} AND client_id='{$params->clientId}' AND status='1' AND user_status IN ({$this->default_allowed_status_users_list})");
         
         // set the table body
         $table_content .= "<tbody>";
@@ -445,10 +457,13 @@ class Attendance extends Myschoolgh {
             ]
         ];
 
+        // student items log count
+        $student_log_count = [];
+
         // list the users
         foreach($names_array as $user) {
             $table_content .= "<tr>\n";
-            $table_content .= "<td width=\"10%\" ".($isDownloadable ? "style='border: 1px solid #dee2e6;'" : "").">{$user->name}</td>\n";
+            $table_content .= "<td width=\"10%\" ".($isDownloadable ? "style='font-size:12px;border: 1px solid #dee2e6;'" : "").">{$user->name}</td>\n";
 
             // check the user status
             foreach($new_array_list as $key => $attendance) {
@@ -457,11 +472,20 @@ class Attendance extends Myschoolgh {
                 } else {
                     $status = $attendance[$user->item_id]["state"] ?? "nothing";
                     
-                    $the_status = $isDownloadable ? "<span style='font-weight:bold;color:{$colors[$statuses[$status]["title"]]["color"]}'>{$statuses[$status]["title"]}</span>" : $statuses[$status]["icon"];
+                    $the_status = $isDownloadable ? "<span style='font-weight:bold;font-size:11px;color:{$colors[$statuses[$status]["title"]]["color"]}'>{$statuses[$status]["title"]}</span>" : $statuses[$status]["icon"];
+
+                    // add the student marks
+                    $student_log_count[$user->item_id][$status] = isset($student_log_count[$user->item_id][$status]) ? ($student_log_count[$user->item_id][$status] + 1) : 1;
                     
                     $table_content .= "<td ".($isDownloadable ? "style='border: 1px solid #dee2e6;'" : "")." width=\"{$width}%\" align=\"center\">{$the_status}</td>\n";
                 }
             }
+
+            // append the student marks
+            $table_content .= "
+            <td style='".(!$isDownloadable ? "font-size:14px;" : null)." color:#0d5e9f; border: 1px solid #dee2e6;' align=\"center\">
+                <strong>".($student_log_count[$user->item_id]["present"] ?? null)."</strong>
+            </td>\n";
 
             $table_content .= "</tr>\n";
         }
@@ -518,7 +542,7 @@ class Attendance extends Myschoolgh {
         $appendUsersList = (bool) !isset($params->no_list);
 
         // global items
-        global $accessObject;
+        global $accessObject, $usersClass;
 
         // date range mechanism
         $this_date = isset($params->date_range) ? $params->date_range : date("Y-m-d");
@@ -566,6 +590,7 @@ class Attendance extends Myschoolgh {
         $query = !empty($params->user_type) ? " AND a.user_type = '{$params->user_type}'" : null;
         $query .= !empty($class_id) ? " AND a.class_id='{$params->class_id}'" : null;
         $query .= isset($params->is_finalized) ? " AND a.finalize='1'" : null;
+        $params->user_status = ['Active'];
         
         // counter loop
         $counter = 0;
@@ -574,7 +599,10 @@ class Attendance extends Myschoolgh {
         foreach($list_days as $each_day) {
 
             // get the attendance log for the day
-            $check = $this->pushQuery("a.users_list, a.users_data, a.user_type, a.class_id", "users_attendance_log a", "a.log_date='{$each_day}' {$query} LIMIT 1");
+            $check = $this->pushQuery(
+                "a.users_list, a.users_data, a.user_type, a.class_id", 
+                "users_attendance_log a", "a.log_date='{$each_day}' {$query} LIMIT 1"
+            );
             
             // append the user type is there is a record but the user_type was not initially appended
             if(!empty($check)) {
@@ -590,7 +618,7 @@ class Attendance extends Myschoolgh {
             if($appendUsersList) {
 
                 // get the users list
-                $users_list = load_class("users", "controllers")->list($params)["data"];
+                $users_list = $usersClass->quick_list($params)["data"];
             
                 // get the total count
                 $total_count = count($users_list);
@@ -682,11 +710,11 @@ class Attendance extends Myschoolgh {
             <div class='row'>
                 <div class='col-md-8' id='attendance_search_input'>
                     <label>Filter by Name or Registration ID</label>
-                    <input type='text' placeholder='Search by fullname' name='attendance_fullname' class='form-control'>
+                    <input type='search' autocomplete='Off' placeholder='Search by fullname' name='attendance_fullname' class='form-control'>
                 </div>
-                <div class='col-md-4 pr-4 text-right attendance_control_buttons'>
+                <div class='col-md-4 pr-4 attendance_control_buttons'>
                     <div class='form-group'>
-                        <label>Select for Everyone</label>
+                        <label class='font-bold'>Select for Everyone</label>
                         <select data-width='100%' class='form-control cursor selectpicker' id='select_for_all'>
                             <option value='null'>Not Selected</option>
                             <option value='present'>Present</option>
@@ -697,14 +725,16 @@ class Attendance extends Myschoolgh {
                     </div>
                 </div>
             </div>" : "")."
+            <div class='table-responsive'>
             <table border='1' class='table table-bordered mt-0' style='width:98%'>
             <thead>
                 <th width='5%'>&#8470;</th>
-                <th width='35%'>Name</th>
-                <th width='15%'>Unique ID</th>
-                <th><span class='float-left'>Status</span></th>
+                <th width='25%'>Name</th>
+                <th align='left'><span class='float-left'>Status</span></th>
+                <th><div>Comments</div></th>
             </thead>
             </table>
+            </div>
             <div class='table-responsive'>
             <table border='1' class='table table-bordered mt-2' style='width:98%' id='attendance_logger'>
             <tbody>";
@@ -744,19 +774,34 @@ class Attendance extends Myschoolgh {
                     foreach ($item["record"]["users_list"] as $user){
                         $numb++;
                         // get the user state
-                        $user_state = $this->the_user_state($user->user_id, $attendance_log);
+                        $_each_data = $this->the_user_state($user->user_id, $attendance_log);
+                        $user_state = $_each_data["state"];
+                        $user_comments = $_each_data["comments"];
 
                         // append to the list
                         $table_content .= "
                         <tr data-row_search='name' data-attandance_fullname='{$user->name}' data-attendance_unique_id='{$user->unique_id}'>
                             <td width='5%'>{$numb}</td>
-                            <td width='35%' class='text-uppercase'>
-                                <img src=\"{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\">
-                                {$user->name} ".($user->user_type !== "student" ? 
-                                "<span class='text-uppercase font-9 badge badge-{$color[$user->user_type]}'>{$user->user_type}</span>" : null)."
+                            <td width='22%' class='text-uppercase'>
+                                <div class='d-flex justify-content-start'>
+                                    <div class='hidden mr-2'>
+                                        <img src=\"{$this->baseUrl}{$user->image}\" width=\"28\" class=\"rounded-circle author-box-picture\" alt=\"User Image\">
+                                    </div>
+                                    <div style='line-height:30px'>
+                                        <span ".($final ? "class='user_name' onclick='load(\"".($user->user_type== "student" ? "student" : "staff")."/{$user->user_id}/attendance\")'" : "class='text-primary'").">{$user->name}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <strong class='hidden'>{$user->unique_id}</strong>
+                                    ".($user->user_type !== "student" ? 
+                                        "<span class='text-uppercase font-11 p-1 badge badge-{$color[$user->user_type]}'>
+                                            {$user->user_type}
+                                        </span>" : null
+                                    )."
+                                </div>
                             </td>
-                            <td width='15%'>{$user->unique_id}</td>
-                            <td>".$this->attendance_radios($user->user_id, $user_state, $final, "")."</td>
+                            <td width='35%'>".$this->attendance_radios($user->user_id, $user_state, $final, "")."</td>
+                            <td><input ".($final ? "readonly title='{$user_comments}'" : "data-user_id='{$user->user_id}' id='comments' autocomplete='Off'")." value='{$user_comments}' class='form-control' type='text'></td>
                         </tr>";
                     }
                 }
@@ -782,6 +827,7 @@ class Attendance extends Myschoolgh {
 
             // append to this list if students were found for this class
             if(!empty($attendance["attendance"][0]["record"]["users_list"])) {
+                $bottom_data .= "<div class='table-responsive'>";
                 $bottom_data .= "<table border='1' width='100%' class='table table-bordered mt-2'>";
                 $bottom_data .= "<tbody>";
                 // show this section if the finalize is empty
@@ -840,7 +886,7 @@ class Attendance extends Myschoolgh {
                 }
                 $bottom_data .= "</tbody>";
                 $bottom_data .= "</table>";
-                
+                $bottom_data .= "</div>";                
             }
             
             // append the users list to the results to display
@@ -939,10 +985,16 @@ class Attendance extends Myschoolgh {
     public function range_summary(stdClass $params) {
 
         // global variable
-        global $defaultAcademics;
+        global $defaultAcademics, $isWardParent, $isStudent, $defaultUser;
 
         // get the attendance log for the day
         $days = $this->listDays($params->start_date, $params->end_date, 'Y-m-d');
+        $isThisTerm = (isset($params->period) && ($params->period == "this_term")); 
+
+        // prompt error if the days is more than 31 days
+        if(count($days) > 31 && !$isThisTerm) {
+            return ["code" => 203, "data" => "Sorry! The period should not exceed 31 days"];
+        }
 
         // group the user types
         $users = $params->user_types_list;
@@ -951,6 +1003,12 @@ class Attendance extends Myschoolgh {
         $users_count = [];
         $query = isset($params->is_finalized) ? " AND finalize='1'" : null;
         $checkPresent = (bool) isset($params->is_present_check);
+
+        // append the class information there
+        if($isWardParent) {
+            // append the student id to the query information
+            $query .= $isStudent ? " AND class_id='{$defaultUser->class_id}'" : " AND class_id='{$this->session->student_class_row_id}'";
+        }
 
         // attendance log algo
         $logged_count = 0;
@@ -962,8 +1020,8 @@ class Attendance extends Myschoolgh {
             foreach($users as $user) {
 
                 // run a query for the information
-                $theQuery = $this->pushQuery("user_type, users_list", "users_attendance_log", 
-                    "log_date='{$day}' AND user_type IN ('{$user}') AND status='1' AND client_id='{$params->clientId}' {$query} LIMIT {$this->global_limit}");
+                $theQuery = $this->pushQuery("user_type, users_list, users_data, date_created, date_finalized", 
+                    "users_attendance_log", "log_date='{$day}' AND user_type IN ('{$user}') AND status='1' AND client_id='{$params->clientId}' {$query} LIMIT ".($isWardParent ? 1 : 20));
 
                 // set a new variable for the day
                 $the_day = date("Y-m-d", strtotime($day));
@@ -982,9 +1040,7 @@ class Attendance extends Myschoolgh {
                         
                         // convert the users list into an array
                         $present = json_decode($today->users_list, true);
-
-                        // print_r($present);
-                        // print_r($today);
+                        $_user_data = json_decode($today->users_data, true);
 
                         // if the user is not an admin/accountant then verify if the user was present or absent
                         if($checkPresent) {
@@ -995,19 +1051,16 @@ class Attendance extends Myschoolgh {
                             // set the label for the day
                             $the_state = $is_present ? "present" : "absent";
                             $users_count["days_list"][$the_day] = $the_state;
+                            $users_count["days_comments"][$the_day] = $_user_data[$params->the_current_user_id]["comments"] ?? "";
+                            $users_count["days_log_time"][$the_day] = $today->date_finalized;
 
                         } else {
-                           
-                            // set a new label to be used
-                            if(in_array($params->the_user_type, ["admin", "accountant", "teacher", "employee", "staff"])) { 
-                                // $n_label = ucfirst($params->the_user_type);
-                                // $users_count["summary"][$n_label] = isset($users_count["summary"][$n_label]) ? ($users_count["summary"][$n_label] + count($present)) : count($present);
-                                // $users_count["days_list"][$the_day][$n_label] = isset($users_count["days_list"][$the_day][$n_label]) ? ($users_count["days_list"][$the_day][$n_label] + count($present)) : count($present);
-                            }
-
+                            
                             // append to the summary
                             $users_count["summary"][$the_label] = isset($users_count["summary"][$the_label]) ? ($users_count["summary"][$the_label] + count($present)) : count($present);
                             $users_count["days_list"][$the_day][$the_label] = isset($users_count["days_list"][$the_day][$the_label]) ? ($users_count["days_list"][$the_day][$the_label] + count($present)) : count($present);
+                            $users_count["days_comments"][$the_day] = $_user_data[$params->the_current_user_id]["comments"] ?? "";
+                            $users_count["days_log_time"][$the_day] = count($present);
                         }
 
                     }
@@ -1018,8 +1071,10 @@ class Attendance extends Myschoolgh {
                         // append the absent log to it.
                         $users_count["days_list"][$the_day][$the_label] = 0;
                     } else {
-                        $users_count["days_list"][$the_day] = "Not Logged";
+                        $users_count["days_list"][$the_day] = "Not_Logged";
                     }
+                    $users_count["days_comments"][$the_day] = "";
+                    $users_count["days_log_time"][$the_day] = "";
                 }
 
             }

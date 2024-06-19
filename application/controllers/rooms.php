@@ -45,11 +45,13 @@ class Rooms extends Myschoolgh {
 
                 // if the user also requested to load the courses
                 if($loadClasses) {
+                    $result->room_classes = "";
                     // loop through the array list
                     foreach($result->class_ids as $class) {
                         // get the class room information
                         $room_info = $this->pushQuery("item_id, name, class_code, class_size", "classes", "item_id='{$class}' AND status='1' LIMIT 1");
                         if(!empty($room_info)) {
+                            $result->room_classes .= "<div class='mb-1'>{$room_info[0]->name}</div>";
                             $result->room_classes_list[] = $room_info[0];
                         }
                     }
@@ -94,7 +96,7 @@ class Rooms extends Myschoolgh {
 
             // init
 			$class_ids = [];
-            $item_id = random_string("alnum", 16);
+            $item_id = random_string("alnum", RANDOM_STRING);
 
             // append
             if(isset($params->class_id)) {
@@ -153,7 +155,7 @@ class Rooms extends Myschoolgh {
                 // replace any empty space with 
                 $params->code = str_replace("/^[\s]+$/", "", $params->code);
                 // confirm if the class code already exist
-                if(!empty($this->pushQuery("item_id, name", "classes_rooms", "status='1' AND client_id='{$params->clientId}' AND code='{$params->code}'"))) {
+                if(!empty($this->pushQuery("item_id, name", "classes_rooms", "status='1' AND client_id='{$params->clientId}' AND code='{$params->code}' LIMIT 1"))) {
                     return ["code" => 203, "data" => "Sorry! There is an existing Classroom with the same code."];
                 }
             } elseif(empty($prevData[0]->code) || !isset($params->code)) {
@@ -195,7 +197,7 @@ class Rooms extends Myschoolgh {
                     ".(isset($params->code) ? ", code = '{$params->code}'" : null)."
                     ".(isset($params->capacity) ? ", capacity = '{$params->capacity}'" : null)."
                     ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
-                WHERE item_id = ? AND client_id = ?
+                WHERE item_id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([json_encode($class_ids), $params->class_room_id, $params->clientId]);
             
@@ -227,7 +229,7 @@ class Rooms extends Myschoolgh {
 	 */
 	public function remove_all_class_rooms(stdClass $params, $item_id) {
 
-		$room_ids = $this->pushQuery("rooms_list, id", "classes", "client_id='{$params->clientId}' AND status='1' LIMIT 100");
+		$room_ids = $this->pushQuery("rooms_list, id", "classes", "client_id='{$params->clientId}' AND status='1' LIMIT {$this->temporal_maximum}");
 
 		foreach($room_ids as $class) {
 			if(!empty($class->rooms_list)) {

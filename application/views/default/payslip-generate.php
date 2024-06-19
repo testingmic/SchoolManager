@@ -8,8 +8,8 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
@@ -17,18 +17,28 @@ jump_to_main($baseUrl);
 $userId = $SITEURL[1] ?? $session->userId;
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Payslip Generation";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 $response->scripts = ["assets/js/payroll.js"];
 
 // access permissions check
 if(!$accessObject->hasAccess("generate", "payslip")) {
     $response->html = page_not_found("permission_denied");
-} else {
+} else {    
 
-    // load the form
-    $payslip_form = load_class("forms", "controllers")->payslip_form($clientId);
+    // confirm if the account check is empty
+    if(empty($defaultClientData->default_account_id)) {
+        // limit
+        $limit = 0;
+        // message to share
+        $payslip_form = notification_modal("Payment Account Not Set", $myClass->error_logs["account_not_set"]["msg"], $myClass->error_logs["account_not_set"]["link"]);
+    } else {
+        // limit
+        $limit = 1000;
+        // load the form
+        $payslip_form = load_class("forms", "controllers")->payslip_form($clientId);
+    }
 
     $response->html = '
         <section class="section">
@@ -42,14 +52,15 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
             </div>
             <div class="row">
                 <div class="col-12 col-sm-12 col-lg-12">
+
                     <div class="card">
                         <div class="card-body">
                             <div class="row" id="payslip_container">
                                 <div class="col-lg-4 col-md-6 mb-2">
                                     <label>Select Employee</label>
-                                    <select data-width="100%" class="form-control selectpicker" name="employee_id">
+                                    <select '.(!$limit ? "disabled" : 'name="employee_id"').' data-width="100%" class="form-control selectpicker">
                                         <option value="">Please Select </option>';
-                                        foreach($myClass->pushQuery("name, unique_id, item_id", "users", "user_type NOT IN('parent','student') AND user_status='Active' AND client_id='{$clientId}' ORDER BY name") as $each) {
+                                        foreach($myClass->pushQuery("name, unique_id, item_id", "users", "user_type NOT IN('parent','student') AND user_status IN ({$myClass->default_allowed_status_users_list}) AND client_id='{$clientId}' ORDER BY name LIMIT {$limit}") as $each) {
                                             $response->html .= "<option ".(($userId == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";                            
                                         }
                                         $response->html .= '
@@ -57,7 +68,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
                                     <label>Select Year</label>
-                                    <select data-width="100%" class="form-control selectpicker" name="year_id">
+                                    <select '.(!$limit ? "disabled" : 'name="year_id"').' data-width="100%" class="form-control selectpicker">
                                         <option value="">Please Select </option>';
                                         for($i = date("Y")-2; $i < date("Y")+3; $i++) {
                                             $response->html .= "<option ".(($i == date("Y")) ? "selected" : "")." value=\"{$i}\">{$i}</option>";                            
@@ -67,7 +78,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                 </div>
                                 <div class="col-lg-3 col-md-6 mb-2">
                                     <label>Select Month</label>
-                                    <select data-width="100%" class="form-control selectpicker" name="month_id">
+                                    <select '.(!$limit ? "disabled" : 'name="month_id"').' data-width="100%" class="form-control selectpicker">
                                         <option value="">Please Select </option>';
                                         for($i = 0; $i < 12; $i++) {
                                             $month = date("F", strtotime("December +{$i} month 3 day"));
@@ -79,7 +90,7 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                 <div class="col-lg-2 col-md-6 mb-2">
                                     <div class="form-group">
                                         <label for="submit">&nbsp;</label>
-                                        <button onclick="return load_employee_payslip()" class="btn-block btn btn-outline-success">Load Record</button>
+                                        <button '.(!$limit ? "disabled" : 'onclick="return load_employee_payslip()"').' class="btn-block btn btn-outline-success">Load Record</button>
                                     </div>
                                 </div>
                             </div>

@@ -119,6 +119,12 @@ class Records extends Myschoolgh {
                 "where" => "item_id='{$record_id}' AND user_status='Active'",
                 "query" => "SELECT id FROM users WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' AND user_status='Active' LIMIT 1"
             ],
+            "leave" => [
+                "table" => "leave_requests",
+                "update" => "status='Cancelled'",
+                "where" => "item_id='{$record_id}' AND status='Pending'",
+                "query" => "SELECT id FROM leave_requests WHERE item_id='{$record_id}' AND status ='Pending' AND client_id='{$userData->client_id}' LIMIT 1"
+            ],
             "guardian" => [
                 "table" => "users",
                 "update" => "status='0', deleted='1'",
@@ -130,6 +136,12 @@ class Records extends Myschoolgh {
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}' AND status='1'",
                 "query" => "SELECT name FROM accounts_type_head WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
+            ],
+            "daily_report" => [
+                "table" => "daily_reports",
+                "update" => "deleted='1'",
+                "where" => "item_id='{$record_id}' AND is_seen='0'",
+                "query" => "SELECT id FROM daily_reports WHERE item_id='{$record_id}' AND is_seen ='0' AND client_id='{$userData->client_id}' LIMIT 1"
             ],
             "template" => [
                 "table" => "smsemail_templates",

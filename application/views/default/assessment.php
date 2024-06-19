@@ -8,17 +8,17 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $SITEURL, $defaultUser, $isTutorAdmin, $isWardParent, $isAdmin;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Assignment Details";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 $response->scripts = [
     "assets/js/assignments.js",
@@ -64,7 +64,7 @@ if(!empty($item_id)) {
         $data->hasUpdate = $hasUpdate;
 
         // is manual or auto insertion
-        $isAuto = (bool) ($data->insertion_mode === "Auto");
+        $isAuto = (bool) (in_array($data->insertion_mode, ["Auto", "Manual"]));
 
         // get the assignment form
         $the_form = $hasUpdate ? load_class("forms", "controllers")->create_assignment($item_param, "update_assignment") : null;
@@ -123,11 +123,11 @@ if(!empty($item_id)) {
                             <td>{$question->question}</td>
                             <td>{$question->marks}</td>
                             <td align='center'>";
-                                if(!$isActive) {
+                                if(!$isActive && !$isClosed) {
                                     $questions_list .= "<a href='{$baseUrl}add-assessment/add_question?qid={$item_id}&q_id={$question->item_id}' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>&nbsp;";
                                 }
                                 $questions_list .= "<button class='btn btn-outline-primary btn-sm' onclick='return view_AssignmentQuestion(\"{$question->item_id}\")'><i class='fa fa-eye'></i></button>&nbsp;";
-                                if(!$isActive) {
+                                if(!$isActive && !$isClosed) {
                                     $questions_list .= "<button class='btn btn-outline-danger btn-sm' onclick='return remove_AssignmentQuestion(\"{$item_id}\",\"{$question->item_id}\")'><i class='fa fa-trash'></i></button>";
                                 }
                             $questions_list .= "</td>
@@ -156,7 +156,7 @@ if(!empty($item_id)) {
                     $myClass->pushQuery(
                         "a.item_id, a.unique_id, a.name, a.email, a.phone_number, a.gender", 
                         "users a LEFT JOIN classes c ON c.id = a.class_id", 
-                        "a.client_id='{$clientId}' AND c.item_id='{$data->class_id}' AND a.user_type='student' AND a.user_status='Active' AND a.status='1'"
+                        "a.client_id='{$clientId}' AND c.item_id='{$data->class_id}' AND a.user_type='student' AND a.user_status IN ({$myClass->default_allowed_status_users_list}) AND a.status='1'"
                 ), "item_id");
 
             /**
@@ -167,12 +167,12 @@ if(!empty($item_id)) {
              * @return Array
              */
             $the_students_list = $myschoolgh->prepare("
-				SELECT item_id, unique_id, name, email, phone_number, gender, image,
+				SELECT id, item_id, unique_id, name, email, phone_number, gender, image,
                 (SELECT score FROM assignments_submitted WHERE assignment_id = '{$data->item_id}' AND student_id = users.item_id LIMIT 1) AS score,
-                (SELECT b.handed_in FROM assignments_submitted b WHERE b.assignment_id = '{$data->item_id}' AND b.student_id = users.item_id LIMIT 1) AS handed_in
-                FROM users WHERE 
-                client_id='{$clientId}' AND user_type='student' 
-                AND user_status='Active' AND status='1' AND item_id IN ('".implode("', '", $students_list)."') ORDER BY name ASC
+                (SELECT CONCAT(b.handed_in,'|',b.is_submitted) FROM assignments_submitted b WHERE b.assignment_id = '{$data->item_id}' AND b.student_id = users.item_id LIMIT 1) AS handed_in_submitted
+                FROM users 
+                WHERE client_id='{$clientId}' AND user_type='student' 
+                AND user_status IN ({$myClass->default_allowed_status_users_list}) AND status='1' AND item_id IN ('".implode("', '", $students_list)."') ORDER BY name ASC
 			");
 			$the_students_list->execute();
             $result = $the_students_list->fetchAll(PDO::FETCH_OBJ);
@@ -184,7 +184,7 @@ if(!empty($item_id)) {
                 $function = $isMultipleChoice ? "review_QuizAssignment" : "load_singleStudentData";
 
                 $grading_info .= '
-                <div class="col-lg-'.($isAuto && !$isMultipleChoice ? 7 : ($isUnassigned ? 12 : 9)).'" id="assignment-content">
+                <div class="col-lg-'.($isAuto && !$isMultipleChoice ? 9 : ($isUnassigned ? 12 : 10)).'" id="assignment-content">
                     '.( $isActive ?
                         '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
                             <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
@@ -195,13 +195,10 @@ if(!empty($item_id)) {
                             ' : ''
                         )
                     ).'
-                    <div class="mb-3" id="student_search_input">
-                        <label>Filter by Student Name or Reg. ID</label>
-                        <input type="search" placeholder="Search by fullname" name="student_fullname" class="form-control">
-                        <input type="hidden" value="true" name="auto_search">
-                    </div>
+                    '.$myClass->quick_student_search_form.'
                     <table width="100%" class="table-hover table mb-0">
                         <thead>
+                            '.($isUnassigned || $isMultipleChoice ? "<th>#</th>" : null).'
                             <th>Assigned Students List</th>
                             <th></th>
                         </thead>
@@ -209,15 +206,27 @@ if(!empty($item_id)) {
                     <div class="table-responsive">
                         <table width="100%" class="table-bordered table-striped table mt-0">
                         <tbody>';
+                        $counter = 0;
                         // loop through the list of students
                         foreach($result as $student) {
                             
+                            $counter++;
+                            // split the varible
+                            $split = explode("|", $student->handed_in_submitted);
+
+                            // set a new variable for the handed in
+                            $student->handed_in = $split[0];
+
+                            // set a new variable for the submitted 
+                            $student->is_submitted = $split[1] ?? 0;
+
                             $student->handed_in = !empty($student->handed_in) ? $student->handed_in : "Pending";
-                            $isSubmitted = (bool) ($student->handed_in == "Submitted");
+                            $isSubmitted = (bool) (in_array($student->handed_in, ["Submitted", "Graded"]) && $student->is_submitted);
 
                             $grading_info .= '
                                 <tr data-row_search="name" data-student_fullname="'.trim($student->name).'" data-student_unique_id="'.$student->unique_id.'">
-                                    <td width="60%">
+                                    '.($isUnassigned || $isMultipleChoice ? "<td width='5%'>{$counter}</td>" : null).'
+                                    <td width="70%">
                                         <div class="d-flex justify-content-start">
                                             <div class="mr-2">
                                                 '.($isSubmitted ?
@@ -229,7 +238,7 @@ if(!empty($item_id)) {
                                             </div>
                                             <div>
                                                 <p class="p-0 text-uppercase m-0">
-                                                    '.($isSubmitted ? '<a style="text-decoration:none" class="anchor" href="javascript:void(0)" '.($isAuto ? 'onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')"' : null).' data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'"><strong>'.$student->name.'</strong></a>' : "<strong>{$student->name}</strong>").'
+                                                    '.($isSubmitted ? '<a title="Click to view document submitted by '.$student->name.'" style="text-decoration:none" class="anchor" href="javascript:void(0)" '.($isAuto ? 'onclick="return '.$function.'(\''.$student->item_id.'\',\''.$data->grading.'\',\''.$data->item_id.'\')"' : null).' data-assignment_id="'.$data->item_id.'" data-function="single-view" data-student_id="'.$student->item_id.'"  data-name="'.$student->name.'" data-score="'.round($student->score,0).'"><strong>'.$student->name.'</strong></a>' : "<strong>{$student->name}</strong>").'
                                                 </p>
                                                 <p class="p-0 m-0">'.$myClass->the_status_label($student->handed_in).'</p>
                                             </div>
@@ -237,7 +246,7 @@ if(!empty($item_id)) {
                                     </td>
                                     <td>
                                         <div class="input-group">
-                                            <input '.(!$isActive || $isMultipleChoice ? 'disabled="disabled"' : 'name="test_grading" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" style="max-width:120px" class="form-control text-center font-20"> &nbsp; <span class="font-25">/ '.$data->grading.'</span>
+                                            <input '.(!$isActive || $isMultipleChoice ? 'disabled="disabled"' : 'name="test_grading" data-rvalue="'.$student->id.'" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" style="max-width:120px" class="form-control text-center font-20"> &nbsp; <span class="font-25">/ '.$data->grading.'</span>
                                         </div>
                                     </td>
                                 </tr>';
@@ -293,44 +302,60 @@ if(!empty($item_id)) {
             // module
             $module = "assignments_handin_{$item_id}";
 
-            // file upload parameter
-            $file_params = (object) [
-                "module" => $module,
-                "userData" => $defaultUser,
-                "item_id" => $item_id,
-            ];
-
             // check if the use has handed in the assignment
             $nothanded_in = (bool) (($data->handed_in === "Pending") || empty($data->handed_in));
 
             if($nothanded_in) {
                 // append the upload script
                 $response->scripts[] = "assets/js/upload.js";
+
+                // file upload parameter
+                $file_params = (object) [
+                    "module" => $module,
+                    "item_id" => $item_id,
+                    "userData" => $defaultUser,
+                    "accept" => ".doc,.docx,.pdf,.png,.jpg,jpeg",
+                    "is_deletable" => $nothanded_in,
+                    "attachments_list" => $data->attached_document ?? []
+                ];
             }
             
             // display the content if the assignment type is a file_attachment
-            if(!$isMultipleChoice && $isActive && $isAuto) {
+            if((!$isMultipleChoice && $isActive && $isAuto) || (!$isMultipleChoice && $isClosed)) {
                 
                 // display the file upload option
                 $grading_info .= 
                 ($nothanded_in ?
-                    '<div class="col-lg-'.($nothanded_in ? 12 : 4).'" id="handin_upload">
-                        <div><h5 class="text-uppercase">Upload Assignment Answer</h5></div>
-                        <div class="col-lg-12" id="upload_question_set_template">
+                    '<div class="col-lg-12" id="handin_upload">
+                        <div><h6 class="text-uppercase">Type your answer in the field provided below.</h6></div>
+                        <input type="hidden" hidden id="handin_assignment" value="'.($data->content ?? null).'">
+                        <trix-editor class="small-expand-height trix-slim-scroll" input="handin_assignment" id="handin_assignment" name="handin_assignment"></trix-editor>
+                        <div class="mt-4"><h6 class="text-uppercase">alt: Upload Assignment Answer</h6></div>
+                        <div class="col-lg-12 p-0" id="upload_question_set_template">
                             <div class="form-group text-center mb-1">
-                                <div class="row">'.load_class("forms", "controllers")->form_attachment_placeholder($file_params).'</div>
+                                <div class="row">
+                                    '.load_class("forms", "controllers")->form_attachment_placeholder($file_params).'
+                                </div>
                             </div>
                         </div>
-                        <div class="text-right mb-3">
-                            <a href="javascript:void(0)" onclick="return submit_Answers(\''.$item_id.'\');" class="btn anchor btn-outline-primary">
-                                <i class="fa fa-save"></i> Submit Answer
-                            </a>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="javascript:void(0)" onclick="return submit_Answers(\''.$item_id.'\', \'Pending\');" class="btn anchor btn-outline-success">
+                                    <i class="fa fa-save"></i> Save Answer
+                                </a>
+                            </div>
+                            <div>
+                                <a href="javascript:void(0)" onclick="return submit_Answers(\''.$item_id.'\', \'Submitted\');" class="btn anchor btn-outline-primary">
+                                    <i class="fa fa-save"></i> Submit Answer
+                                </a>
+                            </div>
                         </div>
-                    </div>' : ''
-                ).'
-                <div class="col-lg-'.($nothanded_in ? 4 : 12).'" id="handin_documents">
-                    '.($data->attached_attachment_html ?? null).'
-                </div>';
+                    </div>' : '
+                    <div class="col-lg-12" id="handin_documents">
+                        '.(!empty($data->content) ? "<div class='mb-3 border-bottom pb-3'>".htmlspecialchars_decode($data->content)."</div>" : null).'
+                        '.($data->attached_attachment_html ?? null).'
+                    </div>'
+                );
             }
 
             // display the questions using an algorithm specified in the assignment class
@@ -374,7 +399,6 @@ if(!empty($item_id)) {
                     $params->show_correct_answer = true;
                     $params->student_id = $session->student_id;
                     $grading_info .= $assignmentClass->review_answers($params, "p-2")["data"];
-
                 }
 
             }
@@ -386,11 +410,14 @@ if(!empty($item_id)) {
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
 
+        // set the url
+        $url_link = $SITEURL[1] ?? null;
+
         // append the html content
         $response->html = '
         <section class="section">
             <div class="section-header">
-                <h1><i class="fa fa-book-reader"></i> '.$pageTitle.'</h1>
+                <h1><i class="fa fa-book-reader"></i> '.$data->assignment_type.' Details</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'assessments">Assessments List</a></div>
@@ -412,7 +439,7 @@ if(!empty($item_id)) {
                 </div>
                 <div class="card">
                     <div class="card-header">
-                        <h4>Assignment Details</h4>
+                        <h4>'.$data->assignment_type.' Details</h4>
                     </div>
                     '.$assignmentClass->quick_data($data).'
                 </div>
@@ -447,7 +474,7 @@ if(!empty($item_id)) {
                 <div class="card">
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
-                    '.($isAuto ?
+                    '.($isAuto  ?
                         ($isTutorAdmin && $isMultipleChoice ? 
                             '<li class="nav-item">
                                 <a class="nav-link '.(!$updateItem ? "active" : null).'" id="questions-tab2" data-toggle="tab" href="#questions" role="tab" aria-selected="true">
@@ -455,14 +482,14 @@ if(!empty($item_id)) {
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
-                                    Additional Details
+                                <a class="nav-link '.($url_link === "_grading" ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
+                                    Question Details
                                 </a>
                             </li>
                             ' : '
                             <li class="nav-item">
                                 <a class="nav-link '.(!$updateItem ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
-                                    Additional Details
+                                    Question Details
                                 </a>
                             </li>
                             '    
@@ -470,7 +497,7 @@ if(!empty($item_id)) {
                     ).'
                     <li class="nav-item">
                         <a class="nav-link '.(!$isAuto ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
-                            '.($isTutorAdmin ? "Grade Students" : "Handin Assignment").'
+                            '.($isTutorAdmin ? "Grading" : "Handin Assignment").'
                         </a>
                     </li>';
 
@@ -496,7 +523,7 @@ if(!empty($item_id)) {
                         '.($isTutorAdmin && $isMultipleChoice ? 
                             '<div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="questions" role="tabpanel" aria-labelledby="questions-tab2">
                                 <div class="pt-0">
-                                    '.(!$isActive ? '
+                                    '.(!$isActive && !$isClosed ? '
                                     <div class="mb-2 text-right">
                                         '.(!empty($questions_query) ? '<a href="#" onclick="return publish_AssignmentQuestion(\''.$item_id.'\',\''.count($questions_query).'\');" class="anchor btn btn-outline-success"><i class="fa fa-send"></i> Publish Assignment</a>' : null).'
                                         <a href="'.$baseUrl.'add-assessment/add_question?qid='.$item_id.'" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Add Question</a>

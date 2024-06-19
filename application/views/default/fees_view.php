@@ -8,17 +8,17 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $SITEURL, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Fees Payment Details";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 $accessObject->userId = $session->userId;
 $accessObject->clientId = $session->clientId;
@@ -130,106 +130,9 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         <div class="tab-pane fade show active" id="settings" role="tabpanel" aria-labelledby="profile-tab2">';
-                        
-                        // initial variables
-                        $total_amount = 0;
-                        $items_list = null;
 
                         // set the items paid for
-                        $response->html .= '
-                        <div class="invoice">
-                            <div class="invoice-print">
-                                <div class="row">
-                                    <div class="col-lg-12">
-                                        <div class="invoice-title">
-                                            <h2>Receipt</h2>
-                                            <div class="invoice-number">#'.$record->receipt_id.'</div>
-                                        </div>
-                                        <hr class="pb-0 mb-2 mt-0">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <address>
-                                                    <strong>Student Details:</strong><br>
-                                                    '.$record->student_info->name.'<br>
-                                                    '.$record->student_info->unique_id.'<br>
-                                                    '.$record->class_name.'<br>
-                                                    '.$record->department_name.'<br>
-                                                </address>
-                                            </div>
-                                            <div class="col-md-6 text-md-right">
-                                                <address>
-                                                <strong>Billed To:</strong><br>
-                                                '.(!empty($record->student_info->guardian_id[0]->fullname) ? $record->student_info->guardian_id[0]->fullname : null).'
-                                                '.(!empty($record->student_info->guardian_id[0]->address) ? "<br>" . $record->student_info->guardian_id[0]->address : null).'
-                                                '.(!empty($record->student_info->guardian_id[0]->contact) ? "<br>" . $record->student_info->guardian_id[0]->contact : null).'
-                                                '.(!empty($record->student_info->guardian_id[0]->email) ? "<br>" . $record->student_info->guardian_id[0]->email : null).'
-                                                </address>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <address>
-                                                <strong>Payment Method:</strong><br>
-                                                <strong>'.$record->payment_method.'</strong><br>
-                                                '.(
-                                                    $record->payment_method === "Cheque" ? 
-                                                    "<strong>".explode("::", $record->cheque_bank)[0]."</strong><br>
-                                                    <strong>#{$record->cheque_number}</strong>" : ""    
-                                                ).'
-                                                </address>
-                                            </div>
-                                            <div class="col-md-6 text-md-right">
-                                                <address>
-                                                <strong>Payment Date:</strong><br>
-                                                '.$record->recorded_date.'<br><br>
-                                                </address>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mt-4">
-                                    <div class="col-md-12">
-                                        <div class="section-title">Payment Summary</div>
-                                        <div class="table-responsive">
-                                            <table class="table table-striped table-hover table-md">
-                                                <tbody>
-                                                    <tr>
-                                                        <th data-width="40" style="width: 40px;">#</th>
-                                                        <th>Item</th>
-                                                        <th class="text-right">Amount</th>
-                                                    </tr>';
-                                                    foreach($data as $key => $fee) {
-                                                        $key++;
-                                                        $total_amount += $fee->amount;
-
-                                                        $response->html .= "
-                                                        <tr>
-                                                            <td data-width=\"40\" style=\"width: 40px;\">{$key}</td>
-                                                            <td>{$fee->category_name}</td>
-                                                            <td class=\"text-right\">{$fee->amount}</td>
-                                                        </tr>";
-                                                    }
-                                                $response->html .= '
-                                                    </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="row mt-4">
-                                            <div class="col-lg-8"></div>
-                                            <div class="col-lg-4 text-right">
-                                                <div class="invoice-detail-item">
-                                                    <div class="invoice-detail-name">Total</div>
-                                                    <div class="invoice-detail-value invoice-detail-value-lg">'.number_format($total_amount, 2).'</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="text-md-right">
-                                <button onclick="return print_receipt(\''.$item_id.'\')" class="btn btn-warning btn-icon icon-left"><i class="fas fa-print"></i> Print Receipt</button>
-                            </div>
-                        </div>';
+                        $response->html .= fees_receipt_data($data, $record, $item_id);
                         
                         $response->html .= '
                         </div>

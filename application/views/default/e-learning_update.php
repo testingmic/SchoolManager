@@ -8,17 +8,17 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $userId = $session->userId;
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Upload E-Learning Material";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // load the resource
 $item_id = $SITEURL[1] ?? null;

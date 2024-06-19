@@ -3,6 +3,7 @@
 class Account extends Myschoolgh {
 
     public $accepted_column;
+    public $readonly_mode;
 
 	public function __construct(stdClass $params = null) {
 		parent::__construct();
@@ -67,7 +68,7 @@ class Account extends Myschoolgh {
                 (SELECT COUNT(DISTINCT b.item_id) FROM classes b WHERE b.client_id = a.client_id AND b.status='1') AS classes_count,
                 (SELECT COUNT(DISTINCT b.id) FROM departments b WHERE b.client_id = a.client_id AND b.status='1') AS departments_count,
                 (SELECT COUNT(DISTINCT b.id) FROM sections b WHERE b.client_id = a.client_id AND b.status='1') AS sections_count,
-                (SELECT b.sms_balance FROM smsemail_balance b WHERE b.client_id = a.client_id) AS sms_balance
+                (SELECT b.sms_balance FROM smsemail_balance b WHERE b.client_id = a.client_id LIMIT 1) AS sms_balance
                 FROM clients_accounts a WHERE a.client_id = ? LIMIT 1
             ");
             $stmt->execute([$params->clientId]);
@@ -78,6 +79,46 @@ class Account extends Myschoolgh {
         } catch(PDOException $e) {
             return [];
         }
+
+    }
+
+    /**
+     * Save the Grade Remarks List
+     * 
+     * @param Array     $params->remarks_list
+     * 
+     * @return Array
+     */
+    public function remarks(stdClass $params) {
+
+        try {
+
+            // if the remarks_list is empty or not an array
+            if(empty($params->remarks_list) || !is_array($params->remarks_list)) {
+                return ["code" => 203, "data" => "Sorry! An array data is expected in the request"];
+            }
+
+            // set the remarks
+            $remarks = $params->remarks_list;
+
+            // confirm if the record already exists
+            if(!empty($this->pushQuery("id", "grading_remarks_list", "client_id='{$params->clientId}' LIMIT 1"))) {
+                // insert the new record
+                $stmt = $this->db->prepare("UPDATE grading_remarks_list SET remarks=? WHERE client_id= ? LIMIT 1");
+                $stmt->execute([json_encode($remarks), $params->clientId]);
+            } else {
+                // update the existing record
+                $stmt = $this->db->prepare("INSERT INTO grading_remarks_list SET remarks=?, client_id= ?");
+                $stmt->execute([json_encode($remarks), $params->clientId]);
+            }
+
+            // return success message
+            return [
+                "code" => 200,
+                "data" => "Grade remarks successfully saved"
+            ];
+
+        } catch(PDOException $e) {}
 
     }
 
@@ -157,18 +198,48 @@ class Account extends Myschoolgh {
                 }
             }
 
+
             // get teh client data
             $additional = [];
             $prefs = json_decode($check[0]->client_preferences);
+
+            // if the package is not the same as the previous
+            if($data["account_package"] !== $prefs->account->package){
+                // append to the account parameter
+                $package = $this->pushQuery("*", "clients_packages", "package='{$data["account_package"]}' LIMIT 1");
+                
+                // return error if the package was not found
+                if(empty($package)) {
+                    // log the attempt to bypass the system security
+                    $this->db->query("INSERT INTO security_logs SET 
+                        client_id='{$params->clientId}', created_by='{$params->userId}', section='Account Package',
+                        description='The user attempted to assign a non existent package to {$check[0]->client_name}'
+                    ");
+                    // return a warning to the user.
+                    return ["code" => 203, "data" => "Sorry! You attempted to assign a non existent package to the user."];
+                }
+
+                // continue with the processing
+                $package = (array) $package[0];
+                unset($package["id"]);
+
+                $account = (array) $prefs->account;
+                $account = array_merge($account, $package);
+
+                $prefs->account = (object) $account;
+
+            }
+
+            // set the package information
             $prefs->account->package = $data["account_package"];
             $prefs->account->expiry = $data["account_expiry"];
 
             // if the expiry datetime is greater than the current time the set the client state to active
             if(strtotime($data["account_expiry"]) > time()) {
-                $data["client_state"] = "Active";
+                $data["client_state"] = $data["client_state"] ?? "Active";
             } else {
                 // set the client state to have expired
-                $data["client_state"] = "Expired"; 
+                $data["client_state"] = $data["client_state"] ?? "Expired"; 
             }
 
             // if the client id was parsed and not empty
@@ -200,7 +271,7 @@ class Account extends Myschoolgh {
         global $defaultUser;
 
         // create a new scheduler id
-        $scheduler_id = strtoupper(random_string("alnum", 16));
+        $scheduler_id = strtoupper(random_string("alnum", RANDOM_STRING));
 
         // assign a new variable
 		$academics = $this->iclient->client_preferences->academics;
@@ -232,8 +303,11 @@ class Account extends Myschoolgh {
         // get the data to import
         $data_to_import = isset($params->data_to_import) ? $this->stringToArray($params->data_to_import) : [];
 
+        // set the current timestamp
+        $current_timestamp = date("Y-m-d H:i:s", strtotime("+15 minutes"));
+
         // insert a new cron job scheduler for this activity
-        $stmt = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = '{$params->clientId}', item_id = ?, user_id = ?, cron_type = ?, subject = ?, active_date = now(), query = ?");
+        $stmt = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = '{$params->clientId}', item_id = ?, user_id = ?, cron_type = ?, subject = ?, active_date = '{$current_timestamp}', query = ?");
         $stmt->execute([$scheduler_id."_".$params->clientId, $params->userId, "end_academic_term", "End Academic Term for {$defaultUser->appPrefs->academics->academic_year}", json_encode($data_to_import)]);
 
         // update the information in the database table
@@ -272,14 +346,7 @@ class Account extends Myschoolgh {
         $stmt->execute(['Active', $params->clientId]);
 
         // confirm that this files already exists
-        if(!in_array($client_state, ["Complete", "Propagation"])) {
-            // generate a new script for this client
-            $filename = "assets/js/scripts/{$params->clientId}_{$params->userData->user_type}_events.js";
-            $data = $this->init_calender();
-            $file = fopen($filename, "w");
-            fwrite($file, $data);
-            fclose($file);
-        } else {
+        if(!in_array($client_state, ["Complete", "Propagation"])) {} else {
             // set the last visited page
             $stmt = $this->db->prepare("UPDATE users SET last_visited_page='{{APPURL}}dashboard' WHERE item_id=? LIMIT 1");
             $stmt->execute([$params->userId]);
@@ -293,62 +360,6 @@ class Account extends Myschoolgh {
             "code" => 200,
             "data" => "Account setup is successfully completed."
         ];
-    }
-
-    /**
-     * Init Calendar
-     * 
-     * This is the initial calendar to be created when a user creates a new account
-     * 
-     * @return String 
-     */
-    public function init_calender() {
-        return "var calendarEvents = {
-    id: 1,
-    backgroundColor: '#136ae3bf',
-    borderColor: '#0168fa',
-    events: []
-};
-var birthdayEvents = {
-    id: 2,
-    backgroundColor: '#128b10d9',
-    borderColor: '#10b759',
-    events: []
-};
-var holidayEvents = {
-    id: 3,
-    backgroundColor: '#f10075b0',
-    borderColor: '#f10075',
-    events: []
-};
-
-function initiateCalendar() {
-    $('#events_management').fullCalendar({
-        header: {
-            left: 'prev,today,next',
-            center: 'title',
-            right: 'month,agendaWeek,agendaDay,listMonth'
-        },
-        editable: true,
-        droppable: false,
-        draggable: false,
-        dragRevertDuration: 0,
-        defaultView: 'month',
-        eventLimit: true,
-        eventSources: [birthdayEvents, holidayEvents, calendarEvents],
-        eventClick: function(event, jsEvent, view) {
-            $('#modalTitle1').html(event.title);
-            $('#modalBody1').html(event.description);
-            $('#eventUrl').attr('href', event.url);
-            $('#fullCalModal').modal();
-        },
-        dayClick: function(date, jsEvent, view) {
-            $(`#createEventModal`).modal(\"show\");
-            $(`#createEventModal input[name=\"date\"]`).val(`\${date.format()}:\${date.format()}`);
-        }
-    });
-}
-initiateCalendar();";
     }
 
     /**
@@ -394,16 +405,16 @@ initiateCalendar();";
             $allowTypes = array('jpg', 'png', 'jpeg','gif');
 
             // check if its a valid image
-            if(!empty($file_name) && in_array($fileType, $allowTypes)){
+            if(!empty($file_name) && validate_image($params->logo["tmp_name"])){
                 // set a new file_name
-                $image = $uploadDir . random_string('alnum', 32).".{$fileType}";
+                $image = $uploadDir . random_string("alnum", RANDOM_STRING).".{$fileType}";
                 // Upload file to the server 
                 if(move_uploaded_file($params->logo["tmp_name"], $image)){
                     // set the redirection
-                    $return["additional"] = ["href" => "{$this->baseUrl}settings"];
+                    $return["additional"] = ["href" => "{$this->baseUrl}settings/_general"];
                 }
             } else {
-                return ["code" => 203, "Sorry! The event file must be a valid image."];
+                return ["code" => 203, "data" => "Sorry! The logo must be a valid image."];
             }
         }
 
@@ -458,14 +469,34 @@ initiateCalendar();";
      */
     public function features(stdClass $params) {
 
-        // get the client data
-        $client_data = $this->iclient;
-        $preference = $client_data->client_preferences;
+        // global parameters
+        global $isSupport;
         
         // ensure an array was parsed
         if(!empty($params->features) && !is_array($params->features)) {
             return ["code" => 203, "data" => "Sorry! Features must be an array."];
         }
+
+        // if the user is an admin
+        if(!$isSupport && ($params->client_id !== $params->clientId)) {
+            return ["code" => 203, "data" => "Sorry! You attempted to update an account that is not yours."];
+        }
+
+        // if a user is a support
+        if($isSupport) {
+            // set the parameters for the data to load
+            $t_data = $this->pushQuery("*", "clients_accounts", "client_id='{$params->client_id}' LIMIT 1");
+            $client_data = $t_data[0];
+            $client_data->client_preferences = json_decode($client_data->client_preferences);
+            $preference = $client_data->client_preferences;
+        } else {
+            // get the client data
+            $client_data = $this->iclient;
+            $preference = $client_data->client_preferences;
+        }
+
+        // append the card_momo_payments
+        $this->features_list["e_payments"] = "Card_MoMo_Payments";
 
         // get the features list
         $accepted_features = array_keys($this->features_list);
@@ -488,8 +519,11 @@ initiateCalendar();";
         // log the user activity
         $this->userLogs("setup_preference", $params->client_id ?? $params->clientId, $preference, "{$params->userData->name} updated the Account Preferences", $params->userId);
 
-        // reset the client data information
-        $this->client_session_data($params->client_id ?? $params->clientId, true);
+        // reset the client data if not a support personnel
+        if($isSupport) {
+            // reset the client data information
+            $this->client_session_data($params->client_id ?? $params->clientId, true);
+        }
 
         // parse success message
         return ["code" => 200, "data" => "Account preference was successfully updated."];
@@ -504,6 +538,14 @@ initiateCalendar();";
      */
     public function calendar(stdClass $params) {
 
+        // global variable
+        global $academicSession;
+
+        // readonly mode session
+        if(!empty($this->session->is_only_readable_app)) {
+            return $this->readonly_mode;
+        }
+
         // return error
         if(!isset($params->general["academics"])) {
             return ["code" => 203, "data" => "Sorry! Ensure academics have been parsed."];
@@ -517,14 +559,73 @@ initiateCalendar();";
         // get the client data
         $client_data = $this->iclient;
 
-        $return = ["data" => "Academic Calendar was successfully updated.", "additional" => ["href" => $this->session->user_current_url]];
+        $return = [
+            "data" => "Academic Calendar was successfully updated.", 
+            "additional" => ["href" => "{$this->baseUrl}settings/_calendar"]
+        ];
 
         // put the preferences together
-        $preference["academics"] = $params->general["academics"];
+        $_academics = $params->general["academics"];
+        $preference["academics"] = $_academics;
+        $n_session = $params->general["sessions"]["session"];
+        $preference["sessions"] = $params->general["sessions"];
         $preference["labels"] = $client_data->client_preferences->labels;
         $preference["opening_days"] = $client_data->client_preferences->opening_days ?? [];
         $preference["account"] = $client_data->client_preferences->account;
         $preference["features_list"] = $client_data->client_preferences->features_list ?? [];
+
+        // get the academic year and term
+        $_academic_year = $_academics["academic_year"];
+        $_academic_term = $_academics["academic_term"];
+        $_next_academic_year = $_academics["next_academic_year"];
+        $_next_academic_term = $_academics["next_academic_term"];
+
+        // confirm if the next academic year and term is equal to the current academic year and term
+        if("{$_next_academic_year}_{$_next_academic_term}" == "{$_academic_year}_{$_academic_term}") {
+            return ["code" => 203, "data" => "Sorry! The next Academic Year and term cannot be the same as the current details."];
+        }
+
+        // check if the next academic year and term is already logged as completed
+        $_check = $this->pushQuery(
+            "year_starts,year_ends,term_starts,term_ends", 
+            "clients_terminal_log", 
+            "client_id='{$params->clientId}' AND academic_year='{$_next_academic_year}' AND academic_term='{$_next_academic_term}' LIMIT 1");
+
+        // confirm that the academic year and term is not empty
+        if(!empty($_check)) {
+            return ["code" => 203, "data" => "Sorry! The selected Next Academic Year & Term began on
+                ".date("jS F Y", strtotime($_check[0]->term_starts))." to 
+                ".date("jS F Y", strtotime($_check[0]->term_ends))." hence cannot be repeated."];
+        }
+
+        // check if the current academic year and term has been logged as completed
+        $_check = $this->pushQuery(
+            "year_starts,year_ends,term_starts,term_ends", 
+            "clients_terminal_log", 
+            "client_id='{$params->clientId}' AND academic_year='{$_academic_year}' AND academic_term='{$_academic_term}' LIMIT 1");
+        
+        // set the session is_only_readable_app if not empty
+        if(!empty($_check)) {
+            // set it as readonly
+            return ["code" => 203, "data" => "Sorry! The selected Academic Year & Term began on
+                ".date("jS F Y", strtotime($_check[0]->term_starts))." to 
+                ".date("jS F Y", strtotime($_check[0]->term_ends))." hence cannot be repeated."];
+        }
+
+        // set a random limit
+        // not sure the academic terms will exceed 10 for any school
+        $rand_limit = 10;
+
+        // change the academic session names if the current doesn't match what we have in the database
+        if($academicSession !== $n_session) {
+            // get the list of all academic terms
+            $list = $this->pushQuery("id, name", "academic_terms", "client_id='{$params->clientId}' LIMIT {$rand_limit}");
+            // loop through the list
+            foreach($list as $item) {
+                // update the record
+                $this->db->query("UPDATE academic_terms SET description='{$item->name} {$n_session}' WHERE id='{$item->id}' LIMIT 1");
+            }
+        }
 
         try {
 
@@ -545,6 +646,49 @@ initiateCalendar();";
     }
 
     /**
+     * Chanage the Current Academic Year/Term
+     *
+     * This method is used to review previous academic year and term.
+     * 
+     * @param String    $params->academic_year
+     * @param String    $params->academic_term
+     *
+     * @return Array
+     **/
+    public function set_default_year(stdClass $params) {
+
+        // check if the current academic year and term has been logged as completed
+        $_check = $this->pushQuery(
+            "year_starts,year_ends,term_starts,term_ends", 
+            "clients_terminal_log", 
+            "client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' LIMIT 1");
+        
+        // set the session is_only_readable_app if not empty
+        if(!empty($_check)) {
+            // set it in an array
+            $this->session->set([
+                "is_only_readable_app" => true,
+                "is_readonly_academic_year" => $params->academic_year,
+                "is_readonly_academic_term" => $params->academic_term,
+                "is_readonly_term_starts" => $_check[0]->term_starts,
+                "is_readonly_term_ends" => $_check[0]->term_ends,
+                "is_readonly_year_starts" => $_check[0]->year_starts,
+                "is_readonly_year_ends" => $_check[0]->year_ends
+            ]);
+        } else {
+            // remove the sessions that has been set
+            $this->session->remove(["is_only_readable_app", "is_readonly_academic_year", "is_readonly_term_starts", 
+                "is_readonly_academic_term", "is_readonly_year_starts", "is_readonly_year_ends", "is_readonly_term_ends"
+            ]);
+            // reset the client data information
+            $this->client_session_data($params->clientId, true);
+        }
+
+        // set it as readonly
+        return ["code" => 200, "data" => "The Academic Session was successfully changed."];
+    }
+
+    /**
      * Save the Academic Grading System
      * 
      * @param stdClass $params
@@ -552,6 +696,11 @@ initiateCalendar();";
      * @return Array
      */
     public function update_grading(stdClass $params) {
+
+        // readonly mode session
+        if(!empty($this->session->is_only_readable_app)) {
+            return $this->readonly_mode;
+        }
 
         // confirm its an array
         if(!is_array($params->grading_values) || !is_array($params->report_columns)) {
@@ -587,14 +736,12 @@ initiateCalendar();";
                 ".(isset($params->report_columns["show_position"]) ? ",show_position='{$params->report_columns["show_position"]}'" : "")."
                 ".(isset($params->report_columns["show_teacher_name"]) ? ",show_teacher_name='{$params->report_columns["show_teacher_name"]}'" : "")."
                 ".(isset($params->report_columns["allow_submission"]) ? ",allow_submission='{$params->report_columns["allow_submission"]}'" : "")."
+                ".(isset($params->grading_sba) ? ",sba='".json_encode($params->grading_sba)."'" : "")."
             ");
             $stmt->execute([$params->clientId, json_encode($params->grading_values), json_encode($params->report_columns), $params->academic_year, $params->academic_term]);
 
             // reset the client data information
             $this->client_session_data($params->clientId, true);
-
-            // return a success messsage
-            return ["data" => "The grading system have successfully been inserted"];
         } else {
 
             // update the values if not already set
@@ -602,15 +749,19 @@ initiateCalendar();";
                 ".(isset($params->report_columns["show_position"]) ? ",show_position='{$params->report_columns["show_position"]}'" : "")."
                 ".(isset($params->report_columns["show_teacher_name"]) ? ",show_teacher_name='{$params->report_columns["show_teacher_name"]}'" : "")."
                 ".(isset($params->report_columns["allow_submission"]) ? ",allow_submission='{$params->report_columns["allow_submission"]}'" : "")."
+                ".(isset($params->grading_sba) ? ",sba='".json_encode($params->grading_sba)."'" : "")."
             WHERE client_id = ? AND academic_year = ? AND academic_term = ? LIMIT 1");
             $stmt->execute([json_encode($params->grading_values), json_encode($params->report_columns), $params->clientId, $params->academic_year, $params->academic_term]);
 
             // reset the client data information
             $this->client_session_data($params->clientId, true);
-
-            // return a success messsage
-            return ["data" => "The grading system have successfully been updated"];
         }
+
+        // return a success messsage
+        return [
+            "data" => "The grading system have successfully been updated", 
+            "additional" => ["href" => "{$this->baseUrl}settings/_grading"]
+        ];
     }
 
     /**
@@ -776,7 +927,7 @@ initiateCalendar();";
             // confirm some uniqueness of the ids supplied
             $unique_id = [];
             $userPermission = null;
-            $upload_id = random_string("alnum", 16);
+            $upload_id = random_string("alnum", RANDOM_STRING);
 
             $isUser = (bool) in_array($params->column, ["student", "staff", "parent"]);
 
@@ -804,7 +955,7 @@ initiateCalendar();";
                 $t_user_type = "";
 
                 // append the customer_id column and value
-                $unqData = random_string('alnum', 16);
+                $unqData = random_string("alnum", RANDOM_STRING);
 
                 // initializing
                 // $sqlQuery .= '("'.$upload_id.'","'.$params->userId.'","'.$unqData.'","'.$params->clientId.'","'.$params->academic_year.'","'.$params->academic_term.'",';
@@ -910,7 +1061,7 @@ initiateCalendar();";
                 // if $t_user_type is not empty
                 if($t_user_type) {
                     // create a new permission data
-                    $userPermission .= "INSERT INTO users_roles SET user_id='{$unqData}', client_id='{$params->clientId}',last_updated=now(), permissions = (SELECT user_permissions FROM users_types WHERE description='{$t_user_type}' LIMIT 1);";
+                    $userPermission .= "INSERT INTO users_roles SET user_id='{$unqData}', client_id='{$params->clientId}',last_updated='{$this->current_timestamp}', permissions = (SELECT user_permissions FROM users_types WHERE description='{$t_user_type}' LIMIT 1);";
                 }
             }
 
@@ -957,7 +1108,7 @@ initiateCalendar();";
                 // set a cron job activity for the users_uploaded
                 if($isUser) {
                     // insert the activity into the cron_scheduler
-                    $query = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = ?, item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
+                    $query = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = ?, item_id = ?, user_id = ?, cron_type = ?, active_date = '{$this->current_timestamp}'");
                     $query->execute([$params->clientId, $upload_id, $params->userId, "users_upload"]);
                     // set the sesssion value
                     $this->session->last_recordUpload = $params->column;
@@ -966,7 +1117,7 @@ initiateCalendar();";
                 // if the upload was for a course
                 if(in_array($params->column, ["course", "staff"])) {
                     // insert the activity into the cron_scheduler
-                    $query = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = ?, item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
+                    $query = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = ?, item_id = ?, user_id = ?, cron_type = ?, active_date = '{$this->current_timestamp}'");
                     $query->execute([$params->clientId, $upload_id, $params->userId, "course_tutor"]);
                     // set the sesssion value
                     $this->session->last_recordUpload = $params->column;
@@ -1102,48 +1253,7 @@ initiateCalendar();";
                         $content .= str_repeat(',', $step)."\n";
                         $content .= str_repeat(',', $step)."\n";
                     }
-
-                    // general queries
-                    $dept_stmt = $this->db->prepare("SELECT {$table["department"]["column"]} FROM departments WHERE client_id = '{$params->clientId}' AND status='1'");
-                    $dept_stmt->execute();
-
-                    // if the row count is not zero
-                    if($dept_stmt->rowCount()) {
-                        // append the header
-                        $content .= str_repeat(',', $step)."DEPARTMENT NAME,,DEPARTMENT CODE\n";
-                        // loop through the list of programmes
-                        while($result = $dept_stmt->fetch(PDO::FETCH_OBJ)) {
-                            // print the course information
-                            $content .= str_repeat(',', $step)."{$result->name},,{$result->department_code}\n";
-                        }
-                    }
-
-                    // load this section for only student
-                    if($file === "student") {
-                        //append some empty fields
-                        $content .= str_repeat(',', $step)."\n";
-                        $content .= str_repeat(',', $step)."\n";
-
-                        //append some empty fields
-                        $content .= str_repeat(',', $step)."\n";
-                        $content .= str_repeat(',', $step)."\n";
-
-                        // general queries
-                        $dept_stmt = $this->db->prepare("SELECT {$table["classes"]["column"]} FROM classes WHERE client_id = '{$params->clientId}' AND status='1'");
-                        $dept_stmt->execute();
-
-                        // if the row count is not zero
-                        if($dept_stmt->rowCount()) {
-                            // append the header
-                            $content .= str_repeat(',', $step)."CLASS ID,CLASS NAME,CLASS CODE\n";
-                            // loop through the list of programmes
-                            while($result = $dept_stmt->fetch(PDO::FETCH_OBJ)) {
-                                // print the course information
-                                $content .= str_repeat(',', $step)."{$result->id},{$result->name},{$result->class_code}\n";
-                            }
-                        }
-
-                    }
+                    
                 }
 
                 // set the file name

@@ -127,6 +127,14 @@ class Accesslevel {
                 return false;
             }
 
+            // check if the session is_only_readable_app as been parsed
+            if(!empty($this->session->is_only_readable_app)) {
+                // then the user has no permission to delete any record
+                if(in_array($role, ["delete"])) {
+                    return false;
+                }
+            }
+
             // confirm that the role exists
             if(isset($permissions->$currentPage->$role)) {
                 return (bool) ($permissions->$currentPage->$role == 1) ? true : false;

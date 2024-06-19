@@ -7,21 +7,6 @@ class Notification extends Myschoolgh {
     public function __construct() {
         parent::__construct();
     }
-	
-    /**
-     * Replace all placeholders in the message content
-     * 
-     * @param String $message
-     * @param String $page 
-     * 
-     * @return String 
-     */
-    public function replace_placeholder($message, $page) {
-
-        $content = str_ireplace(["{{APPURL}}", "{{RESOURCE_PAGE}}"], [$this->baseUrl, $page], $message);
-
-        return $content;
-    }
 
 	/**
 	 * Global function to search for item based on the predefined columns and values parsed
@@ -76,6 +61,7 @@ class Notification extends Myschoolgh {
 
                 // convert the created by string into an object
                 $result->created_by_info = (object) $this->stringToArray($result->created_by_info, "|", ["user_id", "name", "phone_number", "email", "image"]);
+                $result->content = str_ireplace(["{{APPURL}}"], [$this->baseUrl], $result->content);
 
                 // append more
                 $result->status = $this->the_status_label($result->seen_status);
@@ -106,9 +92,10 @@ class Notification extends Myschoolgh {
     public function add(stdClass $params) {
 
         // predefine some variables
-        $params->_item_id = isset($params->_item_id) ? $params->_item_id : random_string("alnum", "32");
+        $params->_item_id = isset($params->_item_id) ? $params->_item_id : random_string("alnum", RANDOM_STRING);
         $params->notice_type = isset($params->notice_type) ? $params->notice_type : 3;
         $params->initiated_by = isset($params->initiated_by) ? $params->initiated_by : "user";
+        $params->content = empty($params->content) ? ($params->message ?? null) : ($params->content ?? null);
         
         try {
             // insert the record
@@ -119,6 +106,7 @@ class Notification extends Myschoolgh {
                 ".(isset($params->subject) ? ", subject='".addslashes($params->subject)."'" : null)."
                 ".(isset($params->clientId) ? ", client_id='{$params->clientId}'" : null)."
                 ".(isset($params->message) ? ", message='".addslashes($params->message)."'" : null)."
+                ".(isset($params->content) ? ", content='".addslashes($params->content)."'" : null)."
                 ".(isset($params->initiated_by) ? ", initiated_by='{$params->initiated_by}'" : null)."
                 ".(isset($params->notice_type) ? ", notice_type='{$params->notice_type}'" : null)."
                 ".(isset($params->userId) ? ", created_by='{$params->userId}'" : null)."
@@ -151,7 +139,7 @@ class Notification extends Myschoolgh {
             if($params->notification_id == "mark_all_as_read") {
                 // prepare and execute the statement
                 $stmt = $this->db->prepare("UPDATE users_notification SET seen_status = ?, seen_date = now() 
-                    WHERE user_id = ? AND client_id = ? AND seen_status = ? LIMIT 100");
+                    WHERE user_id = ? AND client_id = ? AND seen_status = ? LIMIT {$this->temporal_maximum}");
                 $stmt->execute(["Seen", $params->userId, $params->clientId, "Unseen"]);
             } else {
                 // prepare and execute the statement

@@ -5,22 +5,43 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $myschoolgh, $defaultUser;
+global $myClass, $myschoolgh, $defaultUser, $defaultClientData, $isReadOnly;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
-$pageTitle = "Simple Accounting";
-$response->title = "{$pageTitle} : {$appName}";
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$filter = (object) array_map("xss_clean", $_POST);
+$pageTitle = "Simple Accounting - Expenditure";
+$response->title = $pageTitle;
+
+// expenses permission
+$canLogExpenses = $accessObject->hasAccess("expenditure", "accounting");
+
+// if the user does not have the required permissions
+if(!$canLogExpenses) {
+    // unset the page additional information
+    $response->page_programming = [];
+    // permission denied information
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
+
+// permission to modify and validate
+$hasValidate = $accessObject->hasAccess("validate", "accounting");
+$hasModify = $accessObject->hasAccess("modify", "accounting");
 
 // add the scripts to load
-$response->scripts = ["assets/js/accounting.js", "assets/js/reversals.js", "assets/js/upload.js"];
+$response->scripts = ["assets/js/accounting.js", "assets/js/upload.js"];
+
+// date range filter
+$date_range = $filter->date_range ?? date("Y-m-d", strtotime("monday this week")).":".date("Y-m-d", strtotime("sunday this week"));
 
 // get the list of all classes
 $params = (object)[
@@ -28,27 +49,24 @@ $params = (object)[
     "clientId" => $clientId,
     "order_by" => "DESC",
     "item_type" => "Expense",
+    "date_range" => $date_range,
     "userData" => $defaultUser,
     "client_data" => $defaultUser->client,
-    "transaction_id" => $filter->transaction_id ?? null
+    "transaction_id" => $filter->transaction_id ?? null,
+    "account_id" => $filter->account_id ?? null,
+    "account_type" => $filter->account_type ?? null
 ];
 
 // get the transactions list
 $transactions_list = load_class("accounting", "controllers", $params)->list_transactions($params)["data"];
 
-// confirm that the user has the required permissions
-$the_form = load_class("forms", "controllers")->transaction_form($params);
-
-// permission to modify and validate
-$hasValidate = $accessObject->hasAccess("validate", "accounting");
-$hasModify = $accessObject->hasAccess("modify", "accounting");
-$canLogExpenses = $accessObject->hasAccess("expenditure", "accounting");
-
 $count = 0;
+$total_expenses = 0;
 $list_transactions = "";
 $transactions_array_list = [];
 foreach($transactions_list as $key => $transaction) {
     $transactions_array_list[$transaction->item_id] = $transaction;
+    $total_expenses += $transaction->amount;
     $count++;
 
     // view button
@@ -58,7 +76,7 @@ foreach($transactions_list as $key => $transaction) {
     if($transaction->state === "Pending") {
         // validate the transaction
         if($hasValidate) {
-            $action .= "&nbsp;<button onclick='return validate_transaction(\"{$transaction->item_id}\",\"{$baseUrl}expenses\")' class=\"btn btn-sm btn-outline-primary mb-1\" title=\"Validate Transaction\"><i class='fa fa-check'></i></button>";
+            $action .= "&nbsp;<button onclick='return validate_transaction(\"{$transaction->item_id}\",\"expenses\")' class=\"btn btn-sm btn-outline-primary mb-1\" title=\"Validate Transaction\"><i class='fa fa-check'></i></button>";
         }
         // if the user has permission to modify record
         if($hasModify) {
@@ -78,6 +96,24 @@ foreach($transactions_list as $key => $transaction) {
     $list_transactions .= "</tr>";
 }
 
+$response->page_programming["left"] = [
+    "Total Expenses" => number_format($total_expenses, 2),
+    "Average Expense" => $total_expenses > 0 ? number_format(($total_expenses/count($transactions_list)), 2) : 0
+];
+
+// confirm if the account check is empty
+if(empty($defaultClientData->default_account_id) || $isReadOnly) {
+    // set the content
+    $title = $isReadOnly ? "Readonly Mode" : "Payment Account Not Set";
+    $link = $isReadOnly ? "readonly_mode" : "account_not_set";
+
+    // message to share
+    $the_form = notification_modal($title, $myClass->error_logs[$link]["msg"], $myClass->error_logs[$link]["link"]);
+} else {
+    // confirm that the user has the required permissions
+    $the_form = load_class("forms", "controllers")->transaction_form($params);
+}
+
 $response->array_stream["transactions_array_list"] = $transactions_array_list;
 
 $response->html = '
@@ -89,7 +125,38 @@ $response->html = '
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>
-        <div class="row">
+        <div class="row" id="transactions_list">
+
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Filter by Account</label>
+                <select data-width="100%" class="form-control selectpicker" name="account_id">
+                    <option value="">Please Select Account</option>';
+                    foreach($myClass->pushQuery("item_id, account_name, account_bank, state", "accounts", "status='1' AND client_id='{$clientId}' LIMIT 5") as $each) {
+                        $response->html .= "<option ".(isset($filter->account_id) && ($filter->account_id == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">".strtoupper($each->account_name)." ({$each->account_bank})</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-3 col-12 form-group">
+                <label>Filter by Type Head</label>
+                <select data-width="100%" class="form-control selectpicker" name="account_type">
+                    <option value="">Select Type Head</option>
+                    <option '.(isset($filter->account_type) && ($filter->account_type == "payroll") ? "selected" : "").' value="payroll">PAYROLL</option>';
+                    foreach($myClass->pushQuery("item_id, name", "accounts_type_head", "status='1' AND client_id='{$clientId}'") as $each) {
+                        $response->html .= "<option ".(isset($filter->account_type) && ($filter->account_type == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">".strtoupper($each->name)."</option>";
+                    }
+                $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-3 col-md-4 col-12 form-group">
+                <label>Date Range</label>
+                <input type="text" name="date_range" id="date_range" value="'.$date_range.'" class="form-control daterange">
+            </div>
+            <div class="col-xl-2 col-md-2 col-12 form-group">
+                <label class="d-sm-none d-md-block" for="">&nbsp;</label>
+                <button id="filter_Transaction" data-type="expenses" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+            </div>
+
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">
                     <div class="card-body">
@@ -106,7 +173,7 @@ $response->html = '
                             <div class="tab-content tab-bordered" id="myTab3Content">
                                 <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab2">
                                     <div class="table-responsive trix-slim-scroll">
-                                        <table class="table table-bordered table-striped datatable">
+                                        <table class="table table-bordered table-sm table-striped datatable">
                                             <thead>
                                                 <tr>
                                                     <th></th>
@@ -132,6 +199,7 @@ $response->html = '
                     </div>
                 </div>
             </div>
+
         </div>
     </section>';
     

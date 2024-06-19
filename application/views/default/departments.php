@@ -9,19 +9,18 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
-$response = (object) [];
-$response->title = "Departments List : {$appName}";
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$response->title = "Departments List";
 $response->scripts = [];
 
 $department_param = (object) [
-    "clientId" => $session->clientId,
-    "limit" => 99999
+    "clientId" => $session->clientId
 ];
 
 $item_list = load_class("departments", "controllers")->list($department_param);
@@ -62,7 +61,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table data-empty="" data-rows_count="20" class="table table-bordered table-striped datatable">
+                            <table data-empty="" data-rows_count="20" class="table table-bordered table-striped table-sm datatable">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>

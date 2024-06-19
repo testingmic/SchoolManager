@@ -1,5 +1,6 @@
 <?php
-$baseUrl = $config->base_url();
+global $myClass;
+$baseUrl = $myClass->baseUrl;
 $user_current_url = current_url();
 
 if(!empty($session->redirect)) {
@@ -52,14 +53,14 @@ exit;
 }
 
 // set the token variable
-$token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GET["token"]) : null; 
+$token = (isset($_GET["token"]) && strlen($_GET["token"]) > 10) ? xss_clean($_GET["token"]) : null; 
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
-  <title><?= $page_title ?> - <?= config_item("site_name") ?></title>
+  <title><?= $page_title ?> - <?= $myClass->appName ?></title>
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-social/bootstrap-social.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
@@ -75,6 +76,7 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
     background-size: cover;
   }
   </style>
+  <?= $myClass->google_analytics_code ?>
 </head>
 <body class="bg">
   <div class="loader"></div>
@@ -86,7 +88,7 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
             <div class="text-left mb-2 p-2 bg-white">
                 <div><img align="left" alt="image" src="<?= $baseUrl ?>assets/img/logo.png" class="header-logo" width="70px" /></div>
                 <div>
-                    <div class="font-25px text-center font-weight-bold text-dark"><?= config_item('site_name') ?></div> 
+                    <div class="font-25px text-center font-weight-bold text-dark"><?= $myClass->appName ?></div> 
                     <div class="text-dark text-center">Your advanced school management system.</div>
                 </div>
             </div>
@@ -198,7 +200,7 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
                         $user_agent = load_class('user_agent', 'libraries');
 
                         // create the reset password token
-                        $random_string = random_string("alnum", 16);
+                        $random_string = random_string("alnum", RANDOM_STRING);
                         $request_token = random_string('alnum', mt_rand(60, 75));
 
                         // the agent
@@ -206,7 +208,7 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
                         $br = $user_agent->browser()." ".$user_agent->platform();
 
                         // set the token expiry time to 2 hour from the moment of request
-                        $expiry_time = time()+(60*60*2);
+                        $expiry_time = time()+(60*60*3);
 
                         // generate the
                         $stmt = $myschoolgh->prepare("INSERT INTO users_reset_request SET
@@ -219,11 +221,9 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
                         // redirect the user to the reset password page
                         redirect("{$baseUrl}verify?dw=password&token={$request_token}","refresh:3000");
                       }
-                  ?>
-
-                <?php
                     } 
                   }
+                  
                 } else { ?>
                 <div class="alert alert-danger text-center">
                   Sorry! An invalid verification code was submitted for processing.
@@ -241,7 +241,7 @@ $token = (isset($_GET["token"]) && strlen($_GET["token"]) > 40) ? xss_clean($_GE
   </div>
   <div class="app-foottag">
     <div class="d-flex justify-content-between">
-        <div>&copy; Copyright <strong><a href="<?= config_item("site_url") ?>"><?= config_item("site_name") ?></a></strong> &bull; All Rights Reserved</div>
+        <div>&copy; Copyright <strong><a href="<?= $myClass->baseUrl ?>"><?= $myClass->appName ?></a></strong> &bull; All Rights Reserved</div>
         <div>By: <strong><?= config_item("developer") ?></strong></div>
     </div>
   </div>

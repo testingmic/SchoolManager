@@ -31,16 +31,16 @@ class Accounting extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
-        $params->query .= (isset($params->q) && !empty($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
-        $params->query .= (isset($params->type) && !empty($params->type)) ? " AND a.type='{$params->type}'" : null;
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->type_id) && !empty($params->type_id)) ? " AND a.item_id='{$params->type_id}'" : null;
+        $params->query .= !empty($params->q) ? " AND a.name LIKE '%{$params->q}%'" : null;
+        $params->query .= !empty($params->type) ? " AND a.type='{$params->type}'" : null;
+        $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= !empty($params->type_id) ? " AND a.item_id='{$params->type_id}'" : null;
 
         try {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info
+                    (SELECT CONCAT(b.name,'|',COALESCE(b.phone_number,'NULL'),'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info
                 FROM accounts_type_head a
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
             ");
@@ -93,7 +93,7 @@ class Accounting extends Myschoolgh {
             }
 
             // create an item_id
-            $item_id = random_string("alnum", 16);
+            $item_id = random_string("alnum", RANDOM_STRING);
 
             // insert the record
             $stmt = $this->db->prepare("INSERT INTO accounts_type_head SET client_id = ?, name = ?, type = ?,
@@ -199,9 +199,9 @@ class Accounting extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info
+                    (SELECT CONCAT(b.name,'|',COALESCE(b.phone_number,'NULL'),'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info
                 FROM accounts a
-                WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
+                WHERE {$params->query} AND a.status = ? ORDER BY a.default_account DESC, a.id ASC LIMIT {$params->limit}
             ");
             $stmt->execute([1]);
 
@@ -243,17 +243,20 @@ class Accounting extends Myschoolgh {
         try {
 
             // create an item_id
-            $item_id = random_string("alnum", 16);
+            $item_id = random_string("alnum", RANDOM_STRING);
 
             // Verify the account id parsed
-            $check = $this->pushQuery("id", "accounts", "client_id='{$params->clientId}' AND status='1'");
+            $check = $this->pushQuery("id", "accounts", "client_id='{$params->clientId}' AND status='1' AND state='Active' LIMIT 5");
+            $accounts_count = count($check);
 
             // if empty, end the query
-            if(count($check) > 9) { return ["code" => 203, "data" => "Maximum Accounts Reached! You cannot create more than 10 accounts."]; }
+            if($accounts_count > 4) { return ["code" => 203, "data" => "Maximum Accounts Reached! You cannot have create more than 5 active accounts at a time."]; }
 
-            // insert the record
+            // insert the new account details
+            // if there isn't any existing account then, auto set the current account as the default account
             $stmt = $this->db->prepare("INSERT INTO accounts SET client_id = ?, account_name = ?, account_number = ?,
-            description = ?, opening_balance = ?, created_by = ?, item_id = ?, balance = ?, total_credit = ?, account_bank = ?");
+            description = ?, opening_balance = ?, created_by = ?, item_id = ?, balance = ?, total_credit = ?, account_bank = ? ".($accounts_count == 0 ? ", default_account='1'" : null)."
+            ");
             $stmt->execute([
                 $params->clientId, $params->account_name, $params->account_number, $params->description ?? null, 
                 $params->opening_balance ?? 0, $params->userId, $item_id, $params->opening_balance ?? 0, 
@@ -362,8 +365,12 @@ class Accounting extends Myschoolgh {
         }
 
         // append the academic year and term
-        $params->query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
-        $params->query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
+        // $params->query .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
+        // $params->query .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
+
+        $params->query .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : null;
+        $params->query .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : null;
+
         $order_by = $params->order_by ?? "ASC";
 
         try {
@@ -416,6 +423,183 @@ class Accounting extends Myschoolgh {
         } 
 
     }
+    
+    /**
+     * List Bank Transactions
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function list_bank_transactions(stdClass $params) {
+
+        $params->query = "1";
+        $params->tranc_id = $params->transaction_id ?? null;
+
+        $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
+        $params->query .= !empty($params->type) ? " AND a.transaction_type='{$params->type}'" : null;
+        $params->query .= !empty($params->bank_id) ? " AND a.bank_id='{$params->bank_id}'" : null;
+        $params->query .= !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
+        $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= !empty($params->tranc_id) ? " AND a.item_id='{$params->tranc_id}'" : null;
+
+        try {
+
+            $filesObject = load_class("forms", "controllers");
+
+            $stmt = $this->db->prepare("
+                SELECT a.*, b.bank_name,
+                    (SELECT CONCAT(b.name,'|',COALESCE(b.phone_number,'NULL'),'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info,
+                (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment
+                FROM bank_transactions a
+                LEFT JOIN banks_list b ON b.id = a.bank_id
+                WHERE {$params->query} AND a.status = ? ORDER BY a.id DESC LIMIT {$params->limit}
+            ");
+            $stmt->execute([1]);
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // loop through the information
+                foreach(["createdby_info"] as $each) {
+                    // convert the created by string into an object
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["name", "phone_number", "email", "image","user_type"]);
+                }
+
+                // if attachment variable was parsed
+                $result->attachment = json_decode($result->attachment);
+
+                $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : "";
+
+                $data[] = $result;
+            }
+
+            return [
+                "code" => 200,
+                "data" => $data
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
+
+    }
+
+    /**
+     * List e-Payment Transactions
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function epayment_transactions(stdClass $params) {
+
+
+        $params->query = "1";
+        $params->tranc_id = $params->transaction_id ?? null;
+
+        $params->limit = !empty($params->limit) ? $params->limit : $this->global_limit;
+        $params->query .= !empty($params->reference_id) ? " AND a.reference_id='{$params->reference_id}'" : null;
+        $params->query .= !empty($params->state) ? " AND a.state='{$params->state}'" : null;
+        $params->query .= !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
+        $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= !empty($params->tranc_id) ? " AND a.transaction_id='{$params->tranc_id}'" : null;
+
+        try {
+
+            $filesObject = load_class("forms", "controllers");
+
+            $stmt = $this->db->prepare("
+                SELECT a.*, b.client_name,
+                    (SELECT CONCAT(b.name,'|',COALESCE(b.phone_number,'NULL'),'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info
+                FROM transaction_logs a
+                LEFT JOIN clients_accounts b ON b.client_id = a.client_id
+                WHERE {$params->query} ORDER BY a.id DESC LIMIT {$params->limit}
+            ");
+            $stmt->execute();
+
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
+                // loop through the information
+                foreach(["createdby_info"] as $each) {
+                    // convert the created by string into an object
+                    $result->{$each} = (object) $this->stringToArray($result->{$each}, "|", ["name", "phone_number", "email", "image","user_type"]);
+                }
+                $result->payment_data = json_decode($result->payment_data);
+
+                $data[] = $result;
+            }
+
+            return [
+                "code" => 200,
+                "data" => $data
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        } 
+    }
+
+    /**
+     * Add Deposit Record
+     * 
+     * @param String $params->transaction_type
+     * @param String $params->bank_id
+     * @param String $params->account_number
+     * @param Float  $params->amount
+     * @param String $params->reference_id
+     *
+     * @return Array
+     */
+    public function add_bank_deposit(stdClass $params) {
+
+        try {
+
+            // create an item_id
+            $item_id = random_string("alnum", RANDOM_STRING);
+
+            // insert the record
+            $stmt = $this->db->prepare("INSERT INTO bank_transactions SET 
+                item_id = ?, client_id = ?, transaction_type = ?, bank_id = ?, 
+                account_number = ?, account_name = ?, amount = ?, created_by = ?, reference_id = ?,
+                description = ?, academic_year = ?, academic_term = ?
+            ");
+            $stmt->execute([
+                $item_id, $params->clientId, "Deposit", $params->bank_id, 
+                $params->account_number, $params->account_name, $params->amount, 
+                $params->userId, $params->reference_id ?? null, $params->description ?? null,
+                $params->academic_year, $params->academic_term
+            ]);
+
+            // create a new object of the files class
+            $filesObj = load_class("files", "controllers");
+
+            // attachments
+            $attachments = $filesObj->prep_attachments("bank_transactions_Deposit", $params->userId, $item_id);
+
+            // insert the record if not already existing
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");
+            $files->execute(["bank_transactions", $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"], $params->clientId]);
+
+            // log the user activity
+            $this->userLogs("bank_transactions", $item_id, null, "{$params->userData->name} added a new deposit", $params->userId);
+
+            // return the success response
+            return [
+                "code" => 200, 
+                "data" => "Account income was successfully recorded.", 
+                "additional" => [
+                    "clear" => true, 
+                    "href" => "{$this->baseUrl}bank_deposits"
+                ]
+            ];
+
+        } catch(PDOException $e) {
+            return $this->unexpected_error;
+        }
+
+    }
 
     /**
      * Add Deposit Record
@@ -433,7 +617,7 @@ class Accounting extends Myschoolgh {
         try {
 
             // create an item_id
-            $item_id = random_string("alnum", 16);
+            $item_id = random_string("alnum", RANDOM_STRING);
 
             // validate the account id
             $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");
@@ -462,22 +646,22 @@ class Accounting extends Myschoolgh {
             $filesObj = load_class("files", "controllers");
 
             // attachments
-            $attachments = $filesObj->prep_attachments("accounts_transaction", $params->userId, $item_id);
+            $attachments = $filesObj->prep_attachments("accounts_transaction_deposit", $params->userId, $item_id);
 
             // insert the record if not already existing
-            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
-            $files->execute(["accounts_transaction", $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");
+            $files->execute(["accounts_transaction", $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"], $params->clientId]);
 
             // log the user activity
-            $this->userLogs("accounts_transaction", $item_id, null, "{$params->userData->name} added a new deposit", $params->userId);
+            $this->userLogs("accounts_transaction", $item_id, null, "{$params->userData->name} added a new income", $params->userId);
 
             // return the success response
             return [
                 "code" => 200, 
-                "data" => "Account deposit was successfully recorded.", 
+                "data" => "Account income was successfully recorded.", 
                 "additional" => [
                     "clear" => true, 
-                    "href" => "{$this->baseUrl}deposits"
+                    "href" => "{$this->baseUrl}incomes"
                 ]
             ];
 
@@ -488,7 +672,7 @@ class Accounting extends Myschoolgh {
     }
 
     /**
-     * Update Deposit Record
+     * Update Income Record
      * 
      * @param String $params->account_id
      * @param String $params->reference
@@ -531,12 +715,12 @@ class Accounting extends Myschoolgh {
             $this->db->query("UPDATE accounts SET total_credit = (total_credit - {$prevData[0]->amount} + {$params->amount}) WHERE item_id = '{$params->account_id}' LIMIT 1");
 
             // log the user activity
-            $this->userLogs("accounts_transaction", $params->transaction_id, $prevData[0], "{$params->userData->name} updated the existing deposit record", $params->userId);
+            $this->userLogs("accounts_transaction_deposit", $params->transaction_id, $prevData[0], "{$params->userData->name} updated the existing income record", $params->userId);
 
             // return the success response
             return [
                 "code" => 200, 
-                "data" => "Deposit record was successfully updated.", 
+                "data" => "Income record was successfully updated.", 
             ];
 
         } catch(PDOException $e) {
@@ -561,7 +745,7 @@ class Accounting extends Myschoolgh {
         try {
 
             // create an item_id
-            $item_id = random_string("alnum", 16);
+            $item_id = random_string("alnum", RANDOM_STRING);
 
             // validate the account id
             $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");
@@ -590,11 +774,11 @@ class Accounting extends Myschoolgh {
             $filesObj = load_class("files", "controllers");
 
             // attachments
-            $attachments = $filesObj->prep_attachments("accounts_transaction", $params->userId, $item_id);
+            $attachments = $filesObj->prep_attachments("accounts_transaction_expense", $params->userId, $item_id);
 
             // insert the record if not already existing
-            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?");
-            $files->execute(["accounts_transaction", $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"]]);
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");
+            $files->execute(["accounts_transaction", $item_id, json_encode($attachments), "{$item_id}", $params->userId, $attachments["raw_size_mb"], $params->clientId]);
 
             // log the user activity
             $this->userLogs("accounts_transaction", $item_id, null, "{$params->userData->name} added a new expense", $params->userId);
@@ -659,7 +843,7 @@ class Accounting extends Myschoolgh {
             $this->db->query("UPDATE accounts SET total_debit = (total_debit - {$prevData[0]->amount} + {$params->amount}) WHERE item_id = '{$params->account_id}' LIMIT 1");
 
             // log the user activity
-            $this->userLogs("accounts_transaction", $params->transaction_id, $prevData[0], "{$params->userData->name} updated the existing expense record", $params->userId);
+            $this->userLogs("accounts_transaction_expense", $params->transaction_id, $prevData[0], "{$params->userData->name} updated the existing expense record", $params->userId);
 
             // return the success response
             return [
@@ -1039,11 +1223,11 @@ class Accounting extends Myschoolgh {
                         <div style='padding:10px'>
                             <table border='0' width='100%' style='border:solid 1px #dee2e6; margin-bottom:10px'>
                                 <tr>
-                                    <td align='center' width='25%'>
+                                    <td align='center' width='15%'>
                                         ".(!empty($params->client_data->client_logo) ? "<img width=\"70px\" src=\"{$this->client_logo}\">" : "")."
-                                        <h4 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($params->client_data->client_name)."</h4>
                                     </td>
                                     <td align='center'>
+                                        <h2 style=\"color:#6777ef;font-family:helvetica;padding:0px;margin:0px;\">".strtoupper($params->client_data->client_name)."</h2>
                                         <div style='padding-bottom:5px;font-size:20px'><strong>NOTES OF ACCOUNT</strong></div>
                                         <div style='padding-bottom:5px;font-size:15px;'><strong>FOR ACCOUNT NUMBER: {$account->account_number}</strong></div>
                                         <div style='padding-bottom:5px;'><strong>{$account->account_name}</strong></div>
@@ -1223,8 +1407,7 @@ class Accounting extends Myschoolgh {
                     if($breakdown) {
 
                         // header for the breakdown
-                        // $html_content .= "<div class=\"page_break\"></div>";
-                        $html_content .= "<br>";
+                        $html_content .= "<div class=\"page_break\"></div>";
                         $html_content .= "<div><strong>Breakdown of Fees Receipt</strong></div>";
                         $filters = "1";
                         $filters .= isset($params->date) && !empty($params->date) ? " AND DATE(a.recorded_date) ='{$params->date}'" : "";

@@ -9,16 +9,16 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $accessObject, $defaultUser, $isSupport;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 
-$response->title = "Support Tickets : {$appName}";
+$response->title = "Support Tickets ";
 $response->scripts = ["assets/js/support.js"];
 
 $support_tickets = "";
@@ -63,7 +63,15 @@ if((count($support_array) > 1) || empty($ticket_id)) {
         // list the support tickets
         $support_tickets .= "<tr class=\"cursor clickable-row\" data-href=\"{$action}\" data-row_id=\"{$ticket->id}\">";
         $support_tickets .= "<td>{$ticket->id}</td>";
-        $support_tickets .= "<td><a class=\"text-success\" href=\"{$action}\">{$ticket->subject}</a></td>";
+        $support_tickets .= "<td class='font-15'>
+            <a class=\"font-weight-bold\" href=\"{$action}\">{$ticket->subject}</a>
+            ".(
+                $isSupport ? "
+                    <div><i class='fa fa-user-graduate'></i> {$ticket->client_name}</div>
+                    <div><i class='fa fa-phone'></i> {$ticket->client_contact}</div>
+                " : null
+            )."
+        </td>";
         $support_tickets .= "<td>{$ticket->department}</td>";
         $support_tickets .= "<td>{$ticket->section}</td>";
         $support_tickets .= "<td>".$myClass->the_status_label($ticket->status)."</td>";
@@ -89,6 +97,9 @@ elseif($ticket_id && !empty($support_array)) {
 
     // set the item found variable to true
     $item_found = true;
+
+    // set the title
+    $response->title = $data->subject;
 
     // replace underscores with space
     $data->department = str_ireplace("_", " ", $data->department);
@@ -123,7 +134,7 @@ $response->html = '
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive table-student_staff_list">
-                        <table data-empty="" data-order_item="desc" class="table table-bordered table-striped raw_datatable">
+                        <table data-empty="" data-order_item="desc" class="table table-bordered table-sm table-striped raw_datatable">
                             <thead>
                                 <tr>
                                     <th width="8%" class="text-center">#</th>
@@ -131,7 +142,7 @@ $response->html = '
                                     <th width="20%">Help Desk</th>
                                     <th width="17%">Section</th>
                                     <th width="10%">Status</th>
-                                    <th width="15%">Last Updated</th>
+                                    <th width="17%">Last Updated</th>
                                 </tr>
                             </thead>
                             <tbody>'.$support_tickets.'</tbody>
@@ -140,11 +151,22 @@ $response->html = '
                 </div>
             </div>
             ' : 
-            '<div class="card mb-2">
-                <div class="card-header bg-teal">
+            '<div class="card mb-2 p-0">
+                <div class="card-header bg-teal" style="line-height:20px;">
                     <div class="row" style="width:100%">
-                        <div class="col-md-8"><h4 class="card-title text-white">Ticket #'.$ticket_id.' - '.$data->subject.'</h4></div>
-                        <div class="col-md-4 p-0 text-right">'.(!empty($data->section) ? "<strong>APP SECTION:</strong> <span class='font-20'>{$data->section}</span>" : null).'</div>
+                        <div class="col-md-4 p-0">
+                            <h4 class="card-title text-white">#'.$ticket_id.' - '.$data->subject.'</h4>
+                        </div>
+                        <div class="'.(!$isSupport ? "col-md-8 p-0 text-right" : "col-md-4 p-0 text-center").'">
+                            '.(!empty($data->section) ? "<strong>SECTION:</strong> <span class='font-16'>{$data->section}</span>" : null).'
+                        </div>
+                        '.($isSupport ? '
+                            <div class="col-md-4 text-right p-0">
+                                <div class="font-14">'.$data->client_name.'</div>
+                                <div class="font-14">'.$data->client_contact.'</div>
+                                <div class="font-14">'.$data->client_email.'</div>
+                            </div>' : null
+                        ).'
                     </div>
                 </div>
                 <div class="card-body">
@@ -153,7 +175,7 @@ $response->html = '
                             <div>
                                 <i class="font-20 fa fa-info-circle text-success"></i> 
                                 <h5 class="t-font-boldest text-15 mt-1 mb-0">
-                                '.$data->status.'
+                                    <span class="text-'.($data->status == "Closed" ? "danger" : ($data->status == "Answered" ? "success" : "primary")).'">'.$data->status.'</span>
                                 </h5>
                                 <span>Status</span>
                             </div>
@@ -189,13 +211,15 @@ $response->html = '
             <div class="mt-4">
                 <div class="activities">
                     <div class="activity">
-                        <div class="activity-icon bg-primary text-white">
-                            <img class="rounded-circle author-box-picture" width="55px" src="'.$baseUrl.''.$data->user_info->image.'">
-                        </div>
+                        '.(!empty($data->user_info->image) ? '
+                            <div class="activity-icon bg-primary text-white">
+                                <img class="rounded-circle author-box-picture" width="55px" src="'.$baseUrl.''.($data->user_info->image ?? "assets/img/avatar.png").'">
+                            </div>' : null
+                        ).'
                         <div class="activity-detail" style="width:100%">
                             <div>
                                 <div class="d-flex justify-content-between">
-                                    <div class="font-weight-bold text-primary">'.$data->user_info->name.'</div>
+                                    <div class="font-weight-bold text-primary">'.($data->user_info->name ?? "Unknown User").'</div>
                                     <div>
                                         <span class="text-job font-13 text-primary">'.$data->date_created.'</span>
                                     </div>
@@ -224,12 +248,12 @@ $response->html = '
                         if($reply->user_type === "user") {
                             $content .= '
                             <div class="activity-icon bg-primary text-white">
-                                <img class="rounded-circle author-box-picture" width="55px" src="'.$baseUrl.''.$reply->user_info->image.'">
+                                <img class="rounded-circle author-box-picture" width="55px" src="'.$baseUrl.''.($reply->user_info->image ?? "assets/img/avatar.png").'">
                             </div>
                             <div class="activity-detail" style="width:100%">
                                 <div class="mb-2">
                                     <div class="d-flex justify-content-between">
-                                        <div class="font-weight-bold text-primary">'.$reply->user_info->name.'</div>
+                                        <div class="font-weight-bold text-primary">'.($reply->user_info->name ?? "Unknown User").'</div>
                                         <div>
                                             <span class="text-job font-13 text-primary">'.$reply->date_created.'</span>
                                         </div>
@@ -237,6 +261,7 @@ $response->html = '
                                 </div>
                                 <div>'.$reply->content.'</div>
                             </div>';
+
                         } else {
                             // if the user_type is an support admin
                             $content .= '
@@ -249,7 +274,7 @@ $response->html = '
                                                 <span class="text-job font-13 text-white">'.$reply->date_created.'</span>
                                             </div>
                                         </div>
-                                        <div class="mt-2">'.$reply->content.'</div>
+                                        <div class="mt-2">'.auto_link($reply->content, "url", true, "text-white").'</div>
                                     </div>
                                 </div>
                                 <div>
@@ -283,6 +308,7 @@ $response->html = '
             </div>
     </div>
 </section>';
+
 // show this section if a ticket id has not been parsed
 if(empty($item_found)) {
     // append the modal window

@@ -57,11 +57,11 @@ class Replies extends Myschoolgh {
         $params->query = "1";
 
         // add some filters
-        $params->query .= (isset($params->resource_id)) ? " AND a.resource_id='{$params->resource_id}'" : null;
-        $params->query .= (isset($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
-        $params->query .= (isset($params->item_id)) ? " AND a.item_id='{$params->item_id}'" : null;
-        $params->query .= (isset($params->feedback_type)) ? " AND a.feedback_type='{$params->feedback_type}'" : null;
-        $params->query .= (isset($params->resource)) ? " AND a.resource='{$params->resource}'" : null;
+        $params->query .= (!empty($params->resource_id)) ? " AND a.resource_id='{$params->resource_id}'" : null;
+        $params->query .= (!empty($params->user_id)) ? " AND a.user_id='{$params->user_id}'" : null;
+        $params->query .= (!empty($params->item_id)) ? " AND a.item_id='{$params->item_id}'" : null;
+        $params->query .= (!empty($params->feedback_type)) ? " AND a.feedback_type='{$params->feedback_type}'" : null;
+        $params->query .= (!empty($params->resource)) ? " AND a.resource='{$params->resource}'" : null;
 
         // the number of rows to limit the query
 		$params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
@@ -76,6 +76,9 @@ class Replies extends Myschoolgh {
             }
         }
 
+        // get the entire comments list counter
+        $comments_count = $this->pushQuery("COUNT(*) AS comments_count", "users_feedback a", "{$params->query} {$where_clause}");
+
         //
         try {
             // set initial results
@@ -89,7 +92,7 @@ class Replies extends Myschoolgh {
 
             // prepare the statement
             $stmt = $this->db->prepare("SELECT a.id, a.item_id, a.resource, a.user_type, a.message, a.user_id, 
-                    a.likes_count, a.comments_count, DATE(a.date_created) AS raw_date,
+                    a.likes_count, a.comments_count, DATE(a.date_created) AS raw_date, a.is_deletable,
                     (
                         SELECT b.description FROM files_attachment b 
                         WHERE b.record_id = CONCAT(a.resource_id,'_',a.item_id) 
@@ -127,12 +130,7 @@ class Replies extends Myschoolgh {
                 // if not a remote request
                 if((isset($params->remote) && !$params->remote) || !isset($params->remote)) {
                     $result->attachment_html = "";
-                    
-                    if($result->resource !== "cancel_policy_comments") {
-                        $result->delete_button = $result->deleted ? "" : $this->is_deletable($result->item_id, $result->user_id, $params->userId, $result->date_created);
-                    } else {
-                        $result->delete_button = "";
-                    }
+                    $result->delete_button = "";
                     
                     if(!empty($result->attachment->files) && !$result->deleted) {
                         $result->attachment_html = $filesObject->list_attachments($result->attachment->files, $result->user_id, "col-lg-6 col-md-6", false, false);
@@ -169,6 +167,7 @@ class Replies extends Myschoolgh {
             
             // last row id record
             return [
+                "comments_count" => $comments_count[0]->comments_count ?? 0,
                 "replies_list" => $data,
                 "replies_resource" => $resource,
                 "first_reply_id" => isset($first_item->first_item) ? $first_item->first_item : 0,
@@ -192,17 +191,16 @@ class Replies extends Myschoolgh {
     public function add(stdClass $params) {
 
         /** Validate the request */
-        if(!in_array($params->resource, [
-            'assignments'
-        ])) {
+        if(!in_array($params->resource, ['assignments', 'document', 'daily_report', 'leave'])) {
             return ["code" => 203, "data" => "Invalid request parsed"];
         }
 
-        /** Process the data parsed */
-        $params->message = addslashes($params->message);
+        // clean the description 
+        $params->message = !empty($params->message) ? custom_clean(htmlspecialchars_decode($params->message)) : null;
+        $params->message = htmlspecialchars($params->message);
 
         /** Create a random string */
-        $params->_item_id = random_string("alnum", 16);
+        $params->_item_id = random_string("alnum", RANDOM_STRING);
 
         // append the attachments
         $filesObj = load_class("files", "controllers");
@@ -306,18 +304,19 @@ class Replies extends Myschoolgh {
      */
     public function comment(stdClass $params) {
 
-        /** Process the data parsed */
-        $params->comment = addslashes(nl2br($params->comment));
+        // clean the description 
+        $params->comment = !empty($params->comment) ? custom_clean(htmlspecialchars_decode($params->comment)) : null;
+        $params->comment = htmlspecialchars($params->comment);
         
         /** Create a random string */
-        $params->_item_id = random_string("alnum", 16);
+        $params->_item_id = random_string("alnum", RANDOM_STRING);
 
         /** The resource */
         $resource = $params->resource;
 
         /** If the resource is not in the array */
-        if(!in_array($resource, ["assignments", "events", "ebook", "books_request"])) {
-            return ["code" => 203, "data" => "Invalid request parsed: assignments|events|ebook|books_request"];
+        if(!in_array($resource, ["assignments", "events", "ebook", "books_request", "document", "bus", "application", "daily_report", "leave", "frontoffice"])) {
+            return ["code" => 203, "data" => "Invalid request parsed"];
         }
 
         // append the attachments
@@ -329,9 +328,21 @@ class Replies extends Myschoolgh {
             "assignments" => [
                 "table" => "assignments",
                 "page" => "assessment"
-            ],"events" => [
+            ], "events" => [
                 "table" => "events",
                 "page" => "update-event"
+            ], "document" => [
+                "table" => "documents",
+                "page" => "document"
+            ], "bus" => [
+                "table" => "buses",
+                "page" => "bus"
+            ], "daily_report" => [
+                "table" => "daily_reports",
+                "page" => "students_daily_reports"
+            ], "frontoffice" => [
+                "table" => "frontoffice",
+                "page" => "frontoffice"
             ]
         ];
         
@@ -351,9 +362,9 @@ class Replies extends Myschoolgh {
                 INSERT INTO users_feedback SET date_created = now(), user_agent = ?, feedback_type = 'comment'
                 ".(isset($params->userId) ? ",user_id='{$params->userId}'" : null)."
                 ".(isset($params->item_id) ? ",resource_id='{$params->item_id}'" : null)."
-                ".(isset($params->_item_id) ? ",item_id='{$params->_item_id}'" : null)."
-                ".(isset($params->resource) ? ",resource='{$params->resource}'" : null)."               
-                ".(isset($params->comment) ? ",message='{$params->comment}'" : null)."
+                ".(isset($params->_item_id) ? ",item_id='{$params->_item_id}'" : null)."         
+                ".(isset($params->resource) ? ',resource="'.$params->resource.'"' : null)."
+                ".(isset($params->comment) ? ',message="'.$params->comment.'"' : null)."
                 ".(isset($params->mentions) ? ",mentions='{$params->mentions}'" : null)."
                 ".(isset($params->userData->user_type) ? ",user_type='{$params->userData->user_type}'" : null)."
             ");
@@ -376,9 +387,7 @@ class Replies extends Myschoolgh {
                 // if the table was found
                 if(isset($table_name[$resource]["table"])) {
 
-                    // get the one who created the record
-                    $client_id = $this->columnValue("user_id, created_by", $table_name[$resource]["table"], "item_id='{$params->item_id}'");
-
+                    
                     // get the count
                     $counter = $this->columnValue("comments_count", $table_name[$resource]["table"], "item_id='{$params->item_id}'");
 
@@ -413,12 +422,10 @@ class Replies extends Myschoolgh {
             $response_array["additional"]["record"] = [];
             $response_array["additional"]["data"] = $last_comment;
 
-            // additonal information 
-            if($params->resource !== "cancel_policy_comments") {
-                $response_array["additional"]["record"] = [
-                    "comments_count" => $comments_count
-                ];
-            }
+            // additonal information
+            $response_array["additional"]["record"] = [
+                "comments_count" => $comments_count
+            ];
 
             return $response_array;            
 

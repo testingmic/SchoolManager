@@ -8,17 +8,17 @@ header("Access-Control-Max-Age: 3600");
 global $myClass, $SITEURL, $defaultUser;
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed
 jump_to_main($baseUrl);
 
 // additional update
 $clientId = $session->clientId;
-$response = (object) [];
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Attendance Log";
-$response->title = "{$pageTitle} : {$appName}";
+$response->title = $pageTitle;
 
 // if the client information is not empty
 if(!empty($clientId)) {
@@ -136,8 +136,8 @@ if(!empty($clientId)) {
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fa fa-calendar-check"></i></span>
                                     </div>
-                                    <input value="'.date("Y-m-d", strtotime("first day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
-                                    <input value="'.date("Y-m-d", strtotime("last day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
+                                    <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d", strtotime("first day of this month")).'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_start_date" id="group_start_date">
+                                    <input data-item="attendance" data-maxdate="'.$myClass->data_maxdate.'" value="'.date("Y-m-d").'" type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="group_end_date" id="group_end_date">
                                     <div class="input-group-append">
                                         <button style="border-radius:0px" onclick="return filter_UserGroup_Attendance()" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
                                     </div>
@@ -185,7 +185,7 @@ if(!empty($clientId)) {
                                         <div class="input-group-prepend">
                                             <span class="input-group-text"><i class="fa fa-calendar-check"></i></span>
                                         </div>
-                                        <input type="text" class="datepicker form-control" style="border-radius:0px; height:42px;" name="class_date_select" id="class_date_select">
+                                        <input type="text" data-maxdate="'.$myClass->data_maxdate.'" class="datepicker form-control" style="border-radius:0px; height:42px;" name="class_date_select" id="class_date_select">
                                         <div class="input-group-append">
                                             <button style="border-radius:0px" onclick="return filter_Class_Attendance()" class="btn btn-outline-primary"><i class="fa fa-filter"></i></button>
                                         </div>

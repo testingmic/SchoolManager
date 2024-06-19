@@ -6,23 +6,23 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // initial variables
-$appName = config_item("site_name");
-$baseUrl = $config->base_url();
+$appName = $myClass->appName;
+$baseUrl = $myClass->baseUrl;
 
 // if no referer was parsed OR the request_method is not POST
 jump_to_main($baseUrl);
 
 // initial variables
 global $accessObject, $defaultUser, $isSupport, $defaultClientData, $clientPrefs, $SITEURL, $usersClass;
-$appName = config_item("site_name");
+$appName = $myClass->appName;
 
 // confirm that user id has been parsed
 $clientId = $session->clientId;
 $loggedUserId = $session->userId;
 
 // filters
-$response = (object) [];
-$response->title = "Register School : {$appName}";
+$response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+$response->title = "Register School ";
 
 // if not booking set
 if($isSupport) {

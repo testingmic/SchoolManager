@@ -20,11 +20,11 @@ class Departments extends Myschoolgh {
 
         $params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
 
-        $params->query .= (isset($params->q)) ? " AND a.name='{$params->q}'" : null;
-        $params->query .= (isset($params->department_head)) ? " AND a.department_head='{$params->department_head}'" : null;
-        $params->query .= (isset($params->created_by)) ? " AND a.created_by='{$params->created_by}'" : null;
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->department_id)) ? " AND a.id='{$params->department_id}'" : null;
+        $params->query .= !empty($params->q) ? " AND a.name='{$params->q}'" : null;
+        $params->query .= !empty($params->department_head) ? " AND a.department_head='{$params->department_head}'" : null;
+        $params->query .= !empty($params->created_by) ? " AND a.created_by='{$params->created_by}'" : null;
+        $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= !empty($params->department_id) ? " AND a.id='{$params->department_id}'" : null;
 
         $isMinified = (bool) isset($params->quick_analitics_load);
 
@@ -32,7 +32,15 @@ class Departments extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT COUNT(*) FROM users b WHERE b.user_status = 'Active' AND b.deleted='0' AND b.user_type='student' AND b.department = a.id AND b.client_id = a.client_id) AS students_count,
+                    (SELECT COUNT(*) FROM users b WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.user_type='student' AND b.department = a.id AND b.client_id = a.client_id
+                        AND b.user_status IN {$this->inList($this->default_allowed_status_users_array)}
+                    ) AS students_count,
+                    (SELECT COUNT(*) FROM users b WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.user_type='student' AND b.department = a.id AND b.client_id = a.client_id AND b.gender='Male'
+                        AND b.user_status IN {$this->inList($this->default_allowed_status_users_array)}
+                    ) AS students_male_count,
+                    (SELECT COUNT(*) FROM users b WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.user_type='student' AND b.department = a.id AND b.client_id = a.client_id AND b.gender='Female'
+                        AND b.user_status IN {$this->inList($this->default_allowed_status_users_array)}
+                    ) AS students_female_count,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.department_head LIMIT 1) AS department_head_info
                 FROM departments a
@@ -110,27 +118,31 @@ class Departments extends Myschoolgh {
             $fileName = basename($params->image["name"]); 
             $targetFilePath = $uploadDir . $fileName; 
             $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+            
             // Allow certain file formats 
-            $allowTypes = array('jpg', 'png', 'jpeg');            
+            $allowTypes = array('jpg', 'png', 'jpeg');
+
             // check if its a valid image
-            if(!empty($fileName) && in_array($fileType, $allowTypes)){
+            if(!empty($fileName) && validate_image($params->image["tmp_name"])){
                 // set a new filename
-                $fileName = $uploadDir . random_string('alnum', 25)."__{$fileName}";
+                $fileName = $uploadDir . random_string("alnum", RANDOM_STRING)."__{$fileName}";
                 // Upload file to the server 
                 if(move_uploaded_file($params->image["tmp_name"], $fileName)){}
+            } else {
+                $fileName = null;
             }
         }
 
         try {
 
             // generate a new string
-            $item_id = random_string("alnum", 16);
+            $item_id = random_string("alnum", RANDOM_STRING);
 
             // execute the statement
             $stmt = $this->db->prepare("
                 INSERT INTO departments SET client_id = ?, created_by = ?
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                ".(isset($fileName) ? ", image='{$fileName}'" : null)."
+                ".(!empty($fileName) ? ", image='{$fileName}'" : null)."
                 ".(!empty($item_id) ? ", item_id='{$item_id}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->department_code) ? ", department_code = '{$params->department_code}'" : null)."
@@ -184,7 +196,7 @@ class Departments extends Myschoolgh {
                 // replace any empty space with 
                 $params->department_code = str_replace("/^[\s]+$/", "", $params->department_code);
                 // confirm if the class code already exist
-                if(!empty($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$params->clientId}' AND department_code='{$params->department_code}'"))) {
+                if(!empty($this->pushQuery("id, name", "departments", "status='1' AND client_id='{$params->clientId}' AND department_code='{$params->department_code}' LIMIT 1"))) {
                     return ["code" => 203, "data" => "Sorry! There is an existing Department with the same code."];
                 }
             } elseif(empty($prevData[0]->department_code) || !isset($params->department_code)) {
@@ -204,14 +216,18 @@ class Departments extends Myschoolgh {
                 $fileName = basename($params->image["name"]); 
                 $targetFilePath = $uploadDir . $fileName; 
                 $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
+                
                 // Allow certain file formats 
-                $allowTypes = array('jpg', 'png', 'jpeg');            
+                $allowTypes = array('jpg', 'png', 'jpeg');
+
                 // check if its a valid image
-                if(!empty($fileName) && in_array($fileType, $allowTypes)){
+                if(!empty($fileName) && validate_image($params->image["tmp_name"])){
                     // set a new filename
-                    $fileName = $uploadDir . random_string('alnum', 25)."__{$fileName}";
+                    $fileName = $uploadDir . random_string("alnum", RANDOM_STRING)."__{$fileName}";
                     // Upload file to the server 
                     if(move_uploaded_file($params->image["tmp_name"], $fileName)){}
+                } else {
+                    $fileName = null;
                 }
             }
             
@@ -219,12 +235,12 @@ class Departments extends Myschoolgh {
             $stmt = $this->db->prepare("
                 UPDATE departments SET date_updated = now()
                 ".(isset($params->name) ? ", name = '{$params->name}'" : null)."
-                ".(isset($fileName) ? ", image='{$fileName}'" : null)."
+                ".(!empty($fileName) ? ", image='{$fileName}'" : null)."
                 ".(isset($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(isset($params->department_code) ? ", department_code = '{$params->department_code}'" : null)."
                 ".(isset($params->department_head) ? ", department_head = '{$params->department_head}'" : null)."
                 ".(isset($params->description) ? ", description = '{$params->description}'" : null)."
-                WHERE id = ? AND client_id = ?
+                WHERE id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([$params->department_id, $params->clientId]);
             
@@ -316,7 +332,7 @@ class Departments extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            return $e->getMessage();
+            return $this->unexpected_error;
         } 
     }
     
