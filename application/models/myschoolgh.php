@@ -45,6 +45,7 @@ class Myschoolgh extends Models {
 	public $this_term_ends;
 	public $last_term_starts;
 	public $last_term_ends;
+	public $defaultClientData;
 
 	public $thisUser;
 	public $color_set = [
@@ -202,10 +203,11 @@ class Myschoolgh extends Models {
 		}
 
 		// if the session variable is empty then set a new session
-		if(empty($this->session->defaultClientData)) {
+		if(empty($this->defaultClientData)) {
 			// load the client data
 			$client_data = $this->client_data($clientId);
-			
+			$this->defaultClientData = $client_data;
+
 			// set the session variable
 			$this->session->set("defaultClientData", ["last_timer" => time(), "data" => $client_data]);
 		} else {
@@ -220,7 +222,7 @@ class Myschoolgh extends Models {
 			if($checker > 2) {
 				// load the client data
 				$client_data = $this->client_data($clientId);
-				
+				$this->defaultClientData = $client_data;
 				// set the session variable
 				$this->session->set("defaultClientData", ["last_timer" => time(), "data" => $client_data]);
 			} else {

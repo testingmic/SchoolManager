@@ -434,7 +434,7 @@ if ( ! function_exists('jump_to_main')) {
 	function jump_to_main($baseUrl = null) {
 
 		// global variables
-		global $_SERVER, $session, $myschoolgh, $SITEURL, $defaultUser, $isSupport;
+		global $_SERVER, $session, $myschoolgh, $defaultUser, $myClass;
 
 		// set the current url in session
 		$session->user_current_url = current_url();
@@ -460,12 +460,15 @@ if ( ! function_exists('jump_to_main')) {
 			exit;
 		}
 
+		// reload the client data
+		$myClass->client_session_data($session->clientId, false);
+
 		// get the current url
 		$current_url = $session->user_current_url;
 		$current_url = str_ireplace([$baseUrl], ["{{APPURL}}"], $current_url);
 
 		// confirm if the user has been suspended
-		if(!empty($session->defaultClientData) && isset($session->defaultClientData["data"])) {
+		if(!empty($myClass->defaultClientData)) {
 			
 			// check if the user has changed the password
 			if(!$defaultUser->changed_password) {
@@ -478,7 +481,7 @@ if ( ! function_exists('jump_to_main')) {
 			}
 		
 			// set the state
-			$state = $session->defaultClientData["data"]->client_state;
+			$state = $myClass->defaultClientData->client_state;
 
 			// if the account has been suspended or expired
 			if(in_array($state, ["Suspended", "Expired"])) {

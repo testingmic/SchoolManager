@@ -1,220 +1,152 @@
 <?php
-// set the names of the directories
-$system_folder = "system";
-$application_folder = "application";
+// include the settings file
+require_once "system/config/settings.php";
 
-// display errors
-error_reporting(E_ALL);
-ini_set("display_errors", 1);
-
-// set new places for my error recordings
-ini_set("log_errors","1");
-ini_set("error_log", "errors_log");
-
-// Path to the system directory
-define('BASEPATH', $system_folder.DIRECTORY_SEPARATOR);
-define('APPPATH', $application_folder.DIRECTORY_SEPARATOR);
-define('VIEWPATH', $application_folder.DIRECTORY_SEPARATOR);
-
-function redirect_to_https() {
-	if($_SERVER["SERVER_PORT"] !==433 && (empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"]=="off")) {
-		// header("Location: https://".$_SERVER["HTTP_HOST"].''.$_SERVER["REQUEST_URI"]."");
-	}
+if(file_exists("system/core/myschoolgh.php")) {
+    require_once "system/core/myschoolgh.php";
+} else {
+    die(invalid_route("Setup Misconfiguration!", "Oopps! Server misconfiguration."));
 }
 
-redirect_to_https();
+// init variable
+$isNotRemote = false;
 
-/*
-	replace array indexes:
-	1) fix windows slashes
-	2) strip up-tree ../ as possible hack attempts
-*/
-$URL = STR_REPLACE( ARRAY( '\\', '../'), ARRAY( '/',  '' ), $_SERVER['REQUEST_URI'] );
-
-//strip all forms of get data
-IF ($offset = STRPOS($URL, '?')) { $URL = SUBSTR($URL, 0, $offset); } ELSE IF ($offset = STRPOS($URL, '//')) {
-	$URL = SUBSTR($URL, 0, $offset);
+// if there was no cookie set
+if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
+    $isNotRemote = true;
+    $session = load_class('Session', 'libraries/Session');
 }
 
-/**
- * Confirm User is Logged In
- * 
- * @return Bool
- */
-function loggedIn() {
-    global $session;
-    return ($session->userLoggedIn && $session->userId) ? true : false;
-}
-
-// call the main core function and start processing your document
-require_once "system/core/myschoolgh.php";
+global $session;
 
 // Load the models class
 load_class('models', 'models');
 
-/*
-	the path routes below aren't just handy for stripping out
-	the REQUEST_URI and looking to see if this is an attempt at
-	direct file access, they're also useful for moving uploads,
-	creating absolute URI's if needed, etc, etc
-*/
-$chop = -STRLEN(BASENAME($_SERVER['SCRIPT_NAME']));
-define('DOC_ROOT', SUBSTR($_SERVER['SCRIPT_FILENAME'], 0, $chop));
-define('URL_ROOT', SUBSTR($_SERVER['SCRIPT_NAME'], 0, $chop));
-
-// strip off the URL root from REQUEST_URI
-IF (URL_ROOT != '/') $URL = SUBSTR($URL, STRLEN(URL_ROOT));
-
-// strip off excess slashes
-$URL = TRIM($URL, '/');
-
-// 404 if trying to call a real file
-IF ( FILE_EXISTS(DOC_ROOT.'/'.$URL) && ($_SERVER['SCRIPT_FILENAME'] != DOC_ROOT.$URL) && ($URL != '') && ($URL != 'index.php') )
-	die(no_file_log());
-
-/*
-	If $url is empty of default value, set action to 'default'
-	otherwise, explode $URL into an array
-*/
-$SITEURL = (($URL == '') || ($URL == 'index.php') || ($URL == 'index.html')) ? ARRAY('index') : EXPLODE('/', html_entity_decode($URL));
-
-/*
-	I strip out non word characters from $SITEURL[0] as the include
-	which makes sure no other oddball attempts at directory
-	manipulation can be done. This means your include's basename
-	can only contain a..z, A..Z, 0..9 and underscore!
-	
-	for example, as root this would make:
-	pages/default.php
-*/
+// set the site url
+$SITEURL = run($isNotRemote, true);
 
 // call the user logged in class
+$academicSession = "Term";
 $defaultUser = (object) [];
 $defaultClientData = (object) [];
-$SITEURL = array_map("xss_clean", $SITEURL);
 $myClass = load_class('myschoolgh', 'models');
 $noticeClass = load_class('notification', 'controllers');
 $accessObject = load_class('accesslevel', 'controllers');
 
-// Check the site status
-GLOBAL $SITEURL, $session;
-
 // if the session is set
 if(!empty($session->userId)) {
 
-	// get the client data
-	$defaultClientData = $myClass->client_session_data($session->clientId, false);
-	
-	// parse the client data
-	$init_param = (object) ["client_data" => $defaultClientData];
+    // get the client data
+    $defaultClientData = $myClass->client_session_data($session->clientId, false);
+    
+    // parse the client data
+    $init_param = (object) ["client_data" => $defaultClientData];
+    
+    // the query parameter to load the user information
+    $user_params = (object) [
+        "limit" => 1, 
+        "user_id" => $session->userId, 
+        "minified" => "simplified", 
+        "append_wards" => true, 
+        "filter_preferences" => true, 
+        "userId" => $session->userId, 
+        "append_client" => true, 
+        "user_status" => $myClass->allowed_login_status
+    ];
+    $usersClass = load_class('users', 'controllers', $init_param);
+    $defaultUser = $usersClass->list($user_params)["data"];
+    $defaultAcademics = (object)[];
 
-	if(!empty($defaultClientData->client_preferences)) {
-		// set academic session
-		$academicSession = $defaultClientData->client_preferences->sessions->session ?? "Term";	
-	}
-	
-	// the query parameter to load the user information
-	$i_params = (object) [
-		"limit" => 1, 
-		"user_id" => $session->userId, 
-		"minified" => "simplified", 
-		"append_wards" => true, 
-		"filter_preferences" => true, 
-		"userId" => $session->userId, 
-		"append_client" => true, 
-		"user_status" => ["Pending", "Active"]
-	];
-	$usersClass = load_class('users', 'controllers', $init_param);
-	$defaultUser = $usersClass->list($i_params)["data"];
-	$defaultAcademics = (object)[];
+    // set the client preferences
+    $clientPrefs = $defaultClientData->client_preferences ?? [];
+    $academicSession = $clientPrefs->sessions->session ?? "Term";
 
-	// set the client preferences
-	$clientPrefs = $defaultClientData->client_preferences;
+    // call the accepted period method and set the session name to use
+    $myClass->accepted_period($academicSession);
 
-	// if the result is not empty
-	if(!empty($defaultUser)) {
-		
-		// get the current user information
-		$defaultUser = $defaultUser[0];
-		
-		// set the parameters for the access object
-		$defaultClientId = $defaultUser->client_id;
-		$accessObject->userId = $defaultUser->user_id;
-		$accessObject->clientId = $defaultUser->client_id;
-		$accessObject->userPermits = json_decode($defaultUser->user_permissions);
-		$accessObject->appPrefs = $defaultUser->client->client_preferences;
-		$defaultUser->appPrefs = $defaultUser->client->client_preferences;
-		
-		// set additional parameters
-		$isSupport = (bool) ($defaultUser->user_type == "support");
-		$isSchool = (bool) ($defaultUser->client->setup == "School");
+    // This is set when the admin sets the academic year and term to only that has already been closed.
+    $isReadOnly = $session->is_only_readable_app;
+    
+    // if the result is not empty
+    if(!empty($defaultUser)) {
+        
+        // get the current user information
+        $defaultUser = $defaultUser[0];
 
-		// set new variables
-		$isEmployee = (bool) ($defaultUser->user_type == "employee");
-		$isTutor = (bool) in_array($defaultUser->user_type, ["teacher"]);
-		$isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
-		$isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
-		$isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
-		$isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
-		$isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
-		$isAccountant = (bool) in_array($defaultUser->user_type, ["accountant"]);
-		$isAdmin = (bool) ($defaultUser->user_type == "admin");
+        // if the user id has not been set
+        if(!isset($defaultUser->user_id)) {
+            die(invalid_route("Database Misconfiguration!", "Oopps! There seems to be a misconfiguration with the system database tables."));
+        }
+                
+        // set the parameters for the access object
+        $accessObject->userId = $defaultUser->user_id;
+        $accessObject->clientId = $defaultUser->client_id;
+        $accessObject->userPermits = json_decode($defaultUser->user_permissions);
+        $accessObject->appPrefs = $clientPrefs;
+        $defaultUser->appPrefs = $clientPrefs;
+        
+        // set additional parameters
+        $isSupport = (bool) ($defaultUser->user_type == "support");
+        $isSchool = "School";
 
-		// set the features
+        // set new variables
+        $isEmployee = (bool) ($defaultUser->user_type == "employee");
+        $isTutor = (bool) in_array($defaultUser->user_type, ["teacher"]);
+        $isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
+        $isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
+        $isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
+        $isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
+        $isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
+        $isPayableStaff = (bool) in_array($defaultUser->user_type, ["accountant", "admin", "teacher", "employee"]);
+        $isAccountant = (bool) in_array($defaultUser->user_type, ["accountant"]);
+        $isAdmin = (bool) ($defaultUser->user_type == "admin");
+
+        // set the features
         $clientFeatures = !empty($clientPrefs->features_list) ? (array) $clientPrefs->features_list : [];
 
-		// if the user is not support then run this section
-		if(!$isSupport) {
+        // if the user is not support then run this section
+        if(!$isSupport) {
 
-			// set additional parameters
-			$defaultCurrency = $defaultClientData->client_preferences->labels->currency ?? null;
-			$isTeacher = $isTutor = (bool) ($defaultUser->user_type == "teacher");
-			$isParent = (bool) ($defaultUser->user_type == "parent");
-			$isStudent = (bool) ($defaultUser->user_type == "student");
+            // set additional parameters
+            $defaultCurrency = $defaultClientData->client_preferences->labels->currency ?? null;
+            $isTeacher = $isTutor = (bool) ($defaultUser->user_type == "teacher");
+            $isParent = (bool) ($defaultUser->user_type == "parent");
+            $isStudent = (bool) ($defaultUser->user_type == "student");
 
-			// set this as init
-			$defaultUser->appPrefs->termEnded = false;
-			
-			// if academics is set
-			if(isset($defaultUser->client->client_preferences->academics)) {
-				$defaultAcademics = $defaultUser->client->client_preferences->academics;
-				$defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
-			}
-		}
+            // set this as init
+            $defaultUser->appPrefs->termEnded = false;
+            
+            // if academics is set
+            if(isset($defaultClientData->client_preferences->academics)) {
+                // set the default academics information
+                $defaultAcademics = $defaultClientData->client_preferences->academics;
+                
+                // reset the academic year and term if the session variables are not empty
+                if(!empty($session->is_only_readable_app)) {
+                    $defaultAcademics->academic_year = $session->is_readonly_academic_year;
+                    $defaultAcademics->academic_term = $session->is_readonly_academic_term;
+                    $defaultAcademics->term_starts = $session->is_readonly_term_starts;
+                    $defaultAcademics->term_ends = $session->is_readonly_term_ends;
+                    $defaultAcademics->year_starts = $session->is_readonly_year_starts;
+                    $defaultAcademics->year_ends = $session->is_readonly_year_ends;
+                }
 
-	}
-	
+                // set the term ended variable
+                $defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
+            }
+        }
+
+    }
+    
 }
 
 // To be used for inserting additional scripts
 $loadedCSS = [];
 $loadedJS = [];
 
-// default file to include
-$defaultFile = config_item('default_view_path').strtolower(preg_replace('/[^\w_]-/','',$SITEURL[0])).'.php';
-$mainFile = config_item('default_view_path').'main.php';
-$errorFile = config_item('default_view_path').'404.php';
+$settings = run($isNotRemote, false, $SITEURL);
 
-// confirm if the first index has been parsed
-// however the api and auth endpoint are exempted from this file traversing loop
-if(isset($SITEURL[1]) && (!in_array($SITEURL[0], ["api", "auth", "history", "payment_checkout", "download"]))) {
-
-	// default file to include
-	$otherFile = config_item('default_view_path').strtolower(preg_replace('/[^\w_]-/','',$SITEURL[1])).'.php';
-
-	// include the file
-	if(is_file($otherFile) and file_exists($otherFile)) {
-		include($otherFile);
-	} elseif(is_file($defaultFile) and file_exists($defaultFile)) {
-		include($defaultFile);
-	} else {
-		no_file_log();
-	}
-} 
-// confirm if the first index has been parsed
-elseif(is_file($defaultFile) and file_exists($defaultFile)) {
-	include($defaultFile);
-} else {
-	no_file_log();
+if(is_array($settings)) {
+	include($settings['file']);
 }
 ?>

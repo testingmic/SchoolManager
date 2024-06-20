@@ -5,7 +5,6 @@ class Analitics extends Myschoolgh {
     /** This variable will be used for the loading of the information */
     public $stream = [];
     public $final_report = [];
-    private $iclient;
     private $iclient_id;
     public $current_title = "Today";
     public $previous_title = "Yesterday";
