@@ -130,6 +130,7 @@ if(!empty($session->userId)) {
                     $defaultAcademics->year_starts = $session->is_readonly_year_starts;
                     $defaultAcademics->year_ends = $session->is_readonly_year_ends;
                 }
+                // print_r($defaultUser->appPrefs->academics);exit;
 
                 // set the term ended variable
                 $defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));

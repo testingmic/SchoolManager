@@ -19,14 +19,14 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $filter = (object) array_map("xss_clean", $_POST);
 
 $response->title = "Staff List";
-print_r($isPayableStaff);exit;
+
 // If the user is not a teacher, employee, accountant or admin then end the request
 if(!$isPayableStaff) {
     $response->html = page_not_found("permission_denied");
     echo json_encode($response);
     exit;
 }
-print_r($appName);exit;
+
 // include the scripts to load for the page
 $response->scripts = ["assets/js/filters.js"];
 

@@ -618,7 +618,7 @@ class Crons {
                         foreach($columns as $key => $column) {
                             // exempt some data from the query
                             if(!in_array($key, [0, $last_key])) {
-                                $query_string .= ''.$column.'="'.addslashes($values[$key]).'",';
+                                $query_string .= ''.$column.'="'.(!empty($values[$key]) ? addslashes($values[$key]) : '').'",';
                             }
                         }
                         $grading_system_query_string .= trim($query_string, ",").";";
@@ -672,14 +672,15 @@ class Crons {
                         foreach($columns as $key => $column) {
                             // exempt some data from the query
                             if(!in_array($key, [0, $last_key])) {
-                                $query_string .= in_array($column, ["start_date", "end_date", "programme_id"]) ? "{$column}=NULL," : ''.$column.'="'.addslashes($values[$key]).'",';
+                                $val = in_array($column, ['weekly_meeting']) && empty($values[$key]) ? 0 : $values[$key];
+                                $query_string .= in_array($column, ["start_date", "end_date", "programme_id"]) ? "{$column}=NULL," : ''.$column.'="'.(!empty($values[$key]) ? addslashes($values[$key]) : $val).'",';
                             }
                         }
                         $courses_query_string .= trim($query_string, ",").";";
                     }
 
                     // check for empty string
-                    if(strlen($courses_query_string) > 20) {
+                    if(!empty($courses_query_string) && strlen($courses_query_string) > 20) {
                         $this->db->query($courses_query_string);
                     }
                 }
@@ -730,7 +731,7 @@ class Crons {
                     }
                     
                     // run the query for the course plan
-                    if(strlen($courses_plan_query_string) > 20) {
+                    if(!empty($courses_plan_query_string) && strlen($courses_plan_query_string) > 20) {
                         $this->db->query($courses_plan_query_string);
                     }
 
@@ -779,7 +780,7 @@ class Crons {
                     }
 
                     // run the query for the course resources
-                    if(strlen($courses_resource_query_string) > 20) {
+                    if(!empty($courses_resource_query_string) && strlen($courses_resource_query_string) > 20) {
                         $this->db->query($courses_resource_query_string);
                     }
 
@@ -878,10 +879,10 @@ class Crons {
                     }
 
                     // check for empty string
-                    if(strlen($fees_allocation_query_string) > 20) {
+                    if(!empty($fees_allocation_query_string) && strlen($fees_allocation_query_string) > 20) {
                         $this->db->query($fees_allocation_query_string);
                     }
-                    if(strlen($student_fees_allocation_query_string) > 20) {
+                    if(!empty($student_fees_allocation_query_string) && strlen($student_fees_allocation_query_string) > 20) {
                         $this->db->query($student_fees_allocation_query_string);
                     }
                     

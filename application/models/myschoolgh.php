@@ -212,23 +212,7 @@ class Myschoolgh extends Models {
 			$this->session->set("defaultClientData", ["last_timer" => time(), "data" => $client_data]);
 		} else {
 			// check timer
-			$timer = $this->session->defaultClientData["last_timer"];
-
-			// get the time difference
-			$difference = time() - $timer;
-			$checker = round(($difference / 60), 2);
-
-			// get the timer
-			if($checker > 2) {
-				// load the client data
-				$client_data = $this->client_data($clientId);
-				$this->defaultClientData = $client_data;
-				// set the session variable
-				$this->session->set("defaultClientData", ["last_timer" => time(), "data" => $client_data]);
-			} else {
-				// get the client data and push again
-				$client_data = $this->session->defaultClientData["data"];
-			}
+			$client_data = $this->defaultClientData;
 		}
 
 		return $client_data;
@@ -1238,7 +1222,7 @@ class Myschoolgh extends Models {
 	final function academic_years($clientId = null) {
 		/** Set the Parameters */
 		$previous_year = 2020;
-		$next_years = date("Y") + 2;
+		$next_years = date("Y") + 5;
 		
 		/** Loop through the list */
 		for($i = $previous_year; $i <= $next_years; $i++) {

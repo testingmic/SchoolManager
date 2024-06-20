@@ -5,7 +5,6 @@ if( !defined( 'BASEPATH' ) ) die( 'Restricted access' );
 class Users extends Myschoolgh {
 
 	public $password_ErrorMessage;
-	public $iclient = [];
 	public $fees_category_count;
 	
 	# start the construct
@@ -22,8 +21,8 @@ class Users extends Myschoolgh {
 
 		
 		$this->iclient = $data->client_data ?? [];
+		$this->defaultClientData = $this->iclient;
 		$this->fees_category_count = 20;
-		// run this query
         $this->academic_term = $data->client_data->client_preferences->academics->academic_term ?? null;
         $this->academic_year = $data->client_data->client_preferences->academics->academic_year ?? null;
 	}
@@ -320,7 +319,7 @@ class Users extends Myschoolgh {
 			$params->query .= " AND a.guardian_id LIKE '%{$params->userId}%'";
 		}
 
-		$params->query .= (isset($params->clientId) && !empty($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
+		$params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
 
 		// if a search parameter was parsed in the request
 		$order_by = "ORDER BY a.name ASC";
@@ -329,6 +328,9 @@ class Users extends Myschoolgh {
 
 		// the number of rows to limit the query
 		$params->limit = isset($params->limit) ? $params->limit : $this->global_limit;
+
+		// refresh the client data
+		// $this->client_session_data($params->clientId);
 
 		// make the request for the record from the model
 		try {
@@ -555,7 +557,7 @@ class Users extends Myschoolgh {
 
 				// append the client details in the request
 				if($appendClient) {
-					$result->client = !empty($this->iclient) ? $this->iclient : $defaultClientData;
+					$result->client = $this->defaultClientData;
 				}
 
 				// append to the results set to return
