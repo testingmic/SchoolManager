@@ -395,7 +395,7 @@ class Accounting extends Myschoolgh {
                 }
 
                 // if attachment variable was parsed
-                $result->attachment = json_decode($result->attachment);
+                $result->attachment = empty($result->attachment) ? '' : json_decode($result->attachment);
                 $result->state_label = $this->the_status_label($result->state);
 
                 // set the new name if the account type is payroll or fees

@@ -195,7 +195,7 @@ class Resources extends Myschoolgh {
 
             $total_count = count($resources_array);
 
-            $attachment_html = load_class("forms", "controllers")->list_attachments($resources_array, $params->userId, "col-lg-3 col-md-4", false, false);
+            $attachment_html = load_class("forms", "controllers")->list_attachments($resources_array, $params->userId, "col-lg-4 col-md-6", false, false);
 
             return [
                 "data" => [
@@ -362,7 +362,7 @@ class Resources extends Myschoolgh {
             $attachment_html = "<div class='text-center'>No e-learning materials have been uploaded yet. 
                 Please check back later for any.</div>";
         } else {
-            $attachment_html = load_class("forms", "controllers")->list_attachments($resources_array, $params->userId, "col-lg-3 col-md-4", false, "e-learning_view", false);
+            $attachment_html = load_class("forms", "controllers")->list_attachments($resources_array, $params->userId, "col-lg-4 col-md-6", false, "e-learning_view", false);
         }
 
         return [

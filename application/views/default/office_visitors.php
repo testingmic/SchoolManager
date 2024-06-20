@@ -41,7 +41,7 @@ if(!$accessObject->hasAccess("view", "visitor_book")) {
         "userData" => $defaultUser,
         "clientId" => $clientId,
         "section" => "visitor",
-        "request_id" => strlen($request_id) > 6 ? $request_id : null,
+        "request_id" => !empty($request_id) && strlen($request_id) > 6 ? $request_id : null,
         "user_id" => $defaultUser->user_id
     ];
 

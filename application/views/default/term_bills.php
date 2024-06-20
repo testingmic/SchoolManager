@@ -70,7 +70,7 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                 $isFound = true;
                 $class_allocation_list = '';
                 $student_allocation_list = '';
-                $pageTitle = strtoupper($academicSession)." BILL: ".strtoupper($_term)." ".strtoupper($academicSession)."- {$_year}";
+                $pageTitle = strtoupper($academicSession)." BILL: ".(empty($term) ? null : strtoupper($_term))." ".strtoupper($academicSession)."- {$_year}";
 
                 // scripts for the page
                 $response->scripts = ["assets/js/term_bills.js"];
@@ -204,7 +204,7 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
 
                     // display the record
                     $academic_calendar_years .= "
-                        <div class=\"col-12 col-sm-6 col-md-4 col-lg-3\">
+                        <div class=\"col-12 col-sm-6 col-md-6 col-lg-4\">
                             <div class=\"card\">
                                 <div class=\"card-header font-20 ".($isCurrent ? "text-primary" : null)." p-2\">
                                     {$acc_year} - YEAR

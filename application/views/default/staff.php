@@ -237,7 +237,7 @@ if(empty($user_id)) {
                         $isPermitted = $user_permission[$key][$nkey] ?? null;
                         
                         // if the user access was parsed
-                        $level_data .= "<div class='col-lg-3 col-md-4'>";
+                        $level_data .= "<div class='col-lg-4 col-md-6'>";
                         $level_data .= "<input {$isDisabled} ".($isPermitted ? "checked" : null )." type='checkbox' class='brands-checkbox' ".($updatePermission ? "id='access_level[$key][$nkey]' name='access_level[$key][$nkey][]'" : null).">";
                    
                         $level_data .= "<label class='cursor' ".($updatePermission ? "for='access_level[$key][$nkey]'" : null)."> &nbsp; ".ucwords(str_ireplace("_", " ", $nkey))."</label>";
@@ -276,7 +276,7 @@ if(empty($user_id)) {
             // if the data was is not empty
             if(!empty($prevData)) {
                 // decode the json string
-                $db_attachments = json_decode($prevData[0]->attachment);
+                $db_attachments = empty($prevData[0]->attachment) ? '' : json_decode($prevData[0]->attachment);
                 $attachment_html = $formsObj->list_attachments($db_attachments->files ?? [], $prevData[0]->created_by, "col-lg-4 col-md-6", $isAdmin, false);
             }
         }
@@ -566,7 +566,7 @@ if(empty($user_id)) {
                                     '.$level_data.'
                                     <div class="row">
                                         <input type="hidden" readonly name="user_id" id="user_id" value="'.$user_id.'">
-                                        '.($updatePermission ? 
+                                        '.($updatePermission && !$isDisabled ? 
                                         '<div class="col-lg-12 text-right">
                                             <button type="submit" '.$isDisabled.' class="btn btn-success"><i class="fa fa-save"></i> Save Permissions</button>
                                         </div>' : null).'

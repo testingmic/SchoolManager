@@ -276,7 +276,7 @@ function format_directory_item($value, $allow_click = true, $no_container = fals
     global $myClass;
 
     $item_name = $myClass->remove_quotes($value->name);
-    $html = (!$no_container ? "<div class='col-lg-3 col-md-4 col-sm-6 p-1' data-element_type='folder' data-element_id='{$value->item_id}'>" : null);
+    $html = (!$no_container ? "<div class='col-lg-4 col-md-6 col-sm-6 p-1' data-element_type='folder' data-element_id='{$value->item_id}'>" : null);
     $html .= "<div class='document-container p-2' data-parameter_type='folder' data-parameter_url='{$value->item_id}' data-parameter_name='{$item_name}' data-parameter='document'>
             <div class='d-flex justify-content-start'>
                 <div class='mr-2'>
@@ -320,7 +320,7 @@ function format_file_item($value, $no_container = false, $isTrash = false) {
 
     $isPDF = in_array($value->file_type, ["pdf"]);
     $item_name = $myClass->remove_quotes($value->name);
-    $html = (!$no_container ? "<div class='col-lg-3 col-md-4 col-sm-6 p-1' data-element_type='file' data-element_id='{$value->item_id}'>" : null);
+    $html = (!$no_container ? "<div class='col-lg-4 col-md-6 col-sm-6 p-1' data-element_type='file' data-element_id='{$value->item_id}'>" : null);
     $html .= "
         <div class='document-container file-container' data-parameter_type='file' data-parameter_url='{$value->item_id}' data-parameter_name='{$item_name}' data-parameter='file'>
             <div class='item_loader'></div>
@@ -352,7 +352,7 @@ function format_file_item($value, $no_container = false, $isTrash = false) {
  *
  * @return String
  **/
-function format_bus_item($value, $no_container = false, $no_buttons = false, $width = "col-lg-3 col-md-4 col-sm-6", $permissions = []) {
+function format_bus_item($value, $no_container = false, $no_buttons = false, $width = "col-lg-4 col-md-6 col-sm-6", $permissions = []) {
     
     global $myClass;
 
@@ -391,10 +391,10 @@ function format_bus_item($value, $no_container = false, $no_buttons = false, $wi
                 <div class='mt-3 border-top pt-2'>
                     <div class='d-flex justify-content-between'>
                         <div class='text-left'>
-                            ".(!$no_buttons && $permissions["hasModify"] ? "<button class='btn btn-sm mb-1 btn-outline-danger' title='Delete {$value->brand}' onclick='return delete_bus(\"{$value->item_id}\",\"{$item_name}\");'><i class='fa fa-trash'></i> Trash</button>" : null)."
+                            ".(!$no_buttons && !empty($permissions["hasModify"]) ? "<button class='btn btn-sm mb-1 btn-outline-danger' title='Delete {$value->brand}' onclick='return delete_bus(\"{$value->item_id}\",\"{$item_name}\");'><i class='fa fa-trash'></i> Trash</button>" : null)."
                         </div>
                         <div class='text-right'>
-                            ".($permissions["hasModify"] ? "
+                            ".(!empty($permissions["hasModify"]) ? "
                                 <button class='btn btn-sm mb-1 btn-outline-success' title='Update {$value->brand}' onclick='return update_bus(\"{$value->item_id}\");'><i class='fa fa-edit'></i> Edit</button>" : null)."
                             ".(!$no_buttons ? "<button class='btn btn-sm mb-1 btn-outline-primary' title='View Comments Log for {$value->brand}' onclick='return load(\"bus/{$value->item_id}\");'><i class='fa fa-comments'></i> Comments</button>" : null)."
                         </div>

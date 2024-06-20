@@ -635,7 +635,7 @@ var attendanceReport = (_attendance) => {
         $.each(_attendance.attendance.days_list, function(day, status) {
             comments = _attendance.attendance.days_comments[day].length ? _attendance.attendance.days_comments[day] : "<em class='font-12'>No comments</em>";
             attendance_chart_list += `
-            <div class='${single_data ? "col-lg-4 col-md-6" : "col-lg-3 col-md-4"}'>
+            <div class='${single_data ? "col-lg-4 col-md-6" : "col-lg-4 col-md-6"}'>
                 <div class='card mb-3'>
                     <div class='card-header pl-2 pr-2 pb-0'><h5 class='pb-0 mb-0'>${day}</h5></div>
                     <div class='card-body p-2'>

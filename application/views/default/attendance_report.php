@@ -72,7 +72,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="row" id="attendance_report">
-                            <div class="col-lg-3 col-md-4">
+                            <div class="col-lg-4 col-md-6">
                                 <div class="form-group">
                                     <label>Select Category</label>
                                     <select data-width="100%" class="form-control selectpicker" name="user_type" id="user_type">
@@ -95,7 +95,7 @@ $response->html = '
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-lg-3 col-md-4">
+                            <div class="col-lg-4 col-md-6">
                                 <div class="form-group">
                                     <label>Month <span class="required">*</span></label>
                                     <input type="text" class="form-control monthyear" min="2021-01" max="'.date("Y-m-d").'"  name="month_year">

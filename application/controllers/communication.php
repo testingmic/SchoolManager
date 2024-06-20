@@ -37,11 +37,12 @@ class Communication extends Myschoolgh {
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
-                    (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info
+                    (SELECT CONCAT(b.name,'|',b.phone_number,'|',b.email,'|',b.image,'|',b.user_type) 
+                    FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS createdby_info
                 FROM smsemail_send_list a
                 WHERE {$params->query} ORDER BY a.id LIMIT {$params->limit}
             ");
-            $stmt->execute([1]);
+            $stmt->execute();
 
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
@@ -69,6 +70,7 @@ class Communication extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
+            print_r($e->getMessage());
             return $this->unexpected_error;
         } 
 

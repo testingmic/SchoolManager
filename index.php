@@ -107,6 +107,11 @@ if(!empty($session->userId)) {
 	
 	// parse the client data
 	$init_param = (object) ["client_data" => $defaultClientData];
+
+	if(!empty($defaultClientData->client_preferences)) {
+		// set academic session
+		$academicSession = $defaultClientData->client_preferences->sessions->session ?? "Term";	
+	}
 	
 	// the query parameter to load the user information
 	$i_params = (object) [

@@ -79,7 +79,7 @@ if(!in_array("bus_manager", $clientFeatures)) {
             // append to the array
             $buses_array_list[$bus->item_id] = $bus;
             // format the bus
-            $buses_list .= format_bus_item($bus, false, false, "col-lg-3 col-md-4 col-sm-6", $permissions);
+            $buses_list .= format_bus_item($bus, false, false, "col-lg-4 col-md-6 col-sm-6", $permissions);
         }
     }
 

@@ -9,11 +9,11 @@ class Buses extends Myschoolgh {
 	/**
      * Get the list of all buses
      * 
-     * @param stdClass $params
+     * @param $params
      * 
-     * @return Array
+     * @return mixed
      */
-	public function list(stdClass $params) {
+	public function list($params = null) {
 
 		try {
 

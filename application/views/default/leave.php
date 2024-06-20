@@ -44,7 +44,7 @@ if($isWardParent) {
     $param = (object) [
         "userData" => $defaultUser,
         "clientId" => $clientId,
-        "application_id" => strlen($application_id) > 6 ? $application_id : null,
+        "application_id" => !empty($application_id) && strlen($application_id) > 6 ? $application_id : null,
         "user_id" => $isAdmin ? null : $defaultUser->user_id
     ];
 

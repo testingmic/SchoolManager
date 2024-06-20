@@ -51,7 +51,7 @@ if(!$accessObject->hasAccess("view", "admission_enquiry")) {
         "userData" => $defaultUser,
         "clientId" => $clientId,
         "section" => "admission_enquiry",
-        "request_id" => strlen($request_id) > 6 ? $request_id : null,
+        "request_id" => !empty($request_id) && strlen($request_id) > 6 ? $request_id : null,
         "user_id" => $defaultUser->user_id
     ];
 

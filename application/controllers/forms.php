@@ -2801,7 +2801,7 @@ class Forms extends Myschoolgh {
                         <input '.$isAdmin2.' type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-4">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="class_id">Select subject class <span class="required">*</span></label>
                         <select '.$isAdmin.' '.(!empty($itemData->name) && $isData ? "disabled" : "multiple").' data-width="100%" '.($isData ? 'name="class_id" id="class_id"' : 'name="class_id[]" id="class_id[]"').' class="form-control selectpicker">
@@ -2812,7 +2812,7 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-4">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="course_tutor">Subject Tutors</label>
                         <select data-width="100%" '.$isAdmin.' name="course_tutor[]" id="course_tutor[]" class="form-control selectpicker">
@@ -5755,9 +5755,9 @@ class Forms extends Myschoolgh {
     /**
      * Generate the Bus Form
      * 
-     * @return Array
+     * @return string
      */
-    public function bus_form($data) {
+    public function bus_form($data = null) {
 
         /** Set parameters for the data to attach */
         $file_params = (object) [

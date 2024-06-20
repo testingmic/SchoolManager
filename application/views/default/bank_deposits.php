@@ -144,7 +144,7 @@ $response->html = '
                                         <h6 class="font-14 text-uppercase font-weight-bold mb-0">
                                             TOTAL DEPOSITS
                                         </h6>
-                                        <h3 class="font-weight-bold mb-0">'.number_format($total, 2).'</h3>
+                                        <h3 class="font-weight-bold mb-0">'.(empty($average) ? 0 : number_format($total, 2)).'</h3>
                                     </div>
                                     <div class="col-auto">
                                         <div class="card-circle l-bg-green text-white">
@@ -163,7 +163,7 @@ $response->html = '
                                         <h6 class="font-14 text-uppercase font-weight-bold mb-0">
                                             AVERAGE DEPOSIT
                                         </h6>
-                                        <h3 class="font-weight-bold mb-0">'.number_format($average, 2).'</h3>
+                                        <h3 class="font-weight-bold mb-0">'.(empty($average) ? 0 : number_format($average, 2)).'</h3>
                                     </div>
                                     <div class="col-auto">
                                         <div class="card-circle l-bg-orange text-white">

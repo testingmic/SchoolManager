@@ -379,7 +379,9 @@ class Fees extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            return $this->unexpected_error;
+            return [
+                'data' => []
+            ];
         } 
 
     }

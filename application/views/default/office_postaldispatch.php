@@ -50,7 +50,7 @@ if(!$accessObject->hasAccess("view", "postal_dispatch")) {
         "userData" => $defaultUser,
         "clientId" => $clientId,
         "section" => "postal_dispatch",
-        "request_id" => strlen($request_id) > 6 ? $request_id : null,
+        "request_id" => !empty($request_id) && strlen($request_id) > 6 ? $request_id : null,
         "user_id" => $defaultUser->user_id
     ];
 

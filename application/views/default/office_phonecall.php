@@ -47,7 +47,7 @@ if(!$accessObject->hasAccess("view", "phone_call_log")) {
         "userData" => $defaultUser,
         "clientId" => $clientId,
         "section" => "phonecall",
-        "request_id" => strlen($request_id) > 6 ? $request_id : null,
+        "request_id" => !empty($request_id) && strlen($request_id) > 6 ? $request_id : null,
         "user_id" => $defaultUser->user_id
     ];
     
