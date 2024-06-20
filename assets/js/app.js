@@ -760,65 +760,78 @@ var loadPage = (loc, pushstate) => {
     })
 }
 
+var refreshChatList = (data) => {
+    $.each(data, function(i, record) {
+        if(record.user_id == current_focused_user_id) {
+            $(`div[class="chat-num-messages"]`).html(`${record.offline_ago}`);
+        }
+        $(`li[data-user_id="${record.user_id}"] div[class="status"]`).html(`
+            <i class="material-icons ${record.online ? 'online' : 'offline'}">fiber_manual_record</i>
+            ${record.online ? 'Online' : `Left ${record.offline_ago}`}
+            <span data-user_id="${record.user_id}" class="float-right">
+        `);
+    });
+}
+
 var new_message_alert = () => {
-    
-    if ($(`div[class~="chat-box___"] div[class~="chat-content"]`).length) {
-        $.ajax({
-            url: `${baseUrl}api/chats/alerts`,
-            method: "POST",
-            dataType: "json",
-            success: (response) => {
-                if (response.code === 200) {
-                    let counter = 0;
-                    $.each(response.data.result, function(i, e) {
-                        counter += e.count.chats_count
-                        if($(`span[data-user_id="${e.count.sender_id}"]`).length) {
-                            $(`span[data-user_id="${e.count.sender_id}"]`).html(`<i class="fa text-warning fa-comments"></i> ${e.count.chats_count}`);
-                        } else {
-                            let online_text = e.count.online ? "online" : "offline",
-                            online_msg = e.count.online ? "Online" : `Left ${e.offline_ago}`;
-                            $(`div[id="chat-scroll"] ul[class~="chat-list"]`).append(`
-                                <li id="default_list" style="width:100%" data-message_id="${e.count.message_unique_id}" onclick="return display_messages('${e.count.message_unique_id}','${e.count.sender_id}','${e.count.name}','${baseUrl}${e.count.image}','${e.count.offline_ago}')" class="clearfix d-flex">
-                                    <img src="${baseUrl}${e.count.image}" alt="avatar">
-                                    <div class="about" style="width:100%">
-                                        <div class="name">${e.count.name}</div>
-                                        <div class="status">
-                                            <i class="material-icons ${online_text}">fiber_manual_record</i>
-                                            ${online_msg}
-                                            <span data-user_id="${e.count.sender_id}" class="float-right"></span>
-                                        </div>
-                                    </div>
-                                </li>`);
-                            play_sound();
-                        }
-                        if(e.count.sender_id === current_focused_user_id) {
-                            $.each(e.messages_list, function(ii, chat) {
-                                $(`div[class~="chat-box"] div[class~="chat-content"]`).append(
-                                    `<div class="chat-item chat-left" style="display:block">
-                                        <img src="${baseUrl}${chat.image}">
-                                        <div class="chat-details">
-                                        <div class="chat-text">${chat.message}</div>
-                                        <div class="chat-time">${chat.sent_time}</div>
-                                        </div>
-                                    </div>`
-                                );
-                            });
-                            $(`div[class~="chat-content"]`).animate({ scrollTop: $(`div[class~="chat-content"]`).prop("scrollHeight") }, 0);
-                            $(`span[data-user_id="${e.count.sender_id}"]`).html(``);
-                            $.post(`${baseUrl}api/chats/read`, {message_id: e.message_id});
-                        }
-                    });
-                    if (counter !== 0) {
-                        $(`a[data-notification="message"]`).addClass("beep");
-                    } else {
-                        $(`a[data-notification="message"]`).removeClass("beep");
-                    }
+    let usersList = [];
+    $.each($(`ul[class~="chat-list"] li`), function(evt) {
+        usersList.push($(this).attr('data-user_id'));
+    });
+    $.post(`${baseUrl}api/chats/alerts`, { users: usersList }).then((response) => {
+        if (response.code === 200) {
+            let counter = 0;
+            $.each(response.data.result['alerts'], function(i, e) {
+                counter += e.count.chats_count
+                if($(`span[data-user_id="${e.count.sender_id}"]`).length) {
+                    $(`span[data-user_id="${e.count.sender_id}"]`).html(`<i class="fa text-warning fa-comments"></i> ${e.count.chats_count}`);
+                } else {
+                    let online_text = e.count.online ? "online" : "offline",
+                    online_msg = e.count.online ? "Online" : `Left ${e.offline_ago}`;
+                    $(`div[id="chat-scroll"] ul[class~="chat-list"]`).append(`
+                        <li id="default_list" style="width:100%" data-message_id="${e.count.message_unique_id}" onclick="return display_messages('${e.count.message_unique_id}','${e.count.sender_id}','${e.count.name}','${baseUrl}${e.count.image}','${e.count.offline_ago}')" class="clearfix d-flex">
+                            <img src="${baseUrl}${e.count.image}" alt="avatar">
+                            <div class="about" style="width:100%">
+                                <div class="name">${e.count.name}</div>
+                                <div class="status">
+                                    <i class="material-icons ${online_text}">fiber_manual_record</i>
+                                    ${online_msg}
+                                    <span data-user_id="${e.count.sender_id}" class="float-right"></span>
+                                </div>
+                            </div>
+                        </li>`);
+                    play_sound();
                 }
+                if(e.count.sender_id === current_focused_user_id) {
+                    $(`div[class="chat-num-messages"]`).html(`${e.count.offline_ago}`);
+                    $(`li[data-user_id="${current_focused_user_id}"] div[class="status"]`).html(`
+                        <i class="material-icons online">fiber_manual_record</i>Online
+                        <span data-user_id="${current_focused_user_id}" class="float-right">
+                    `);
+                    $.each(e.messages_list, function(ii, chat) {
+                        $(`div[class~="chat-box"] div[class~="chat-content"]`).append(
+                            `<div class="chat-item chat-left" style="display:block">
+                                <img src="${baseUrl}${chat.image}">
+                                <div class="chat-details">
+                                <div class="chat-text">${chat.message}</div>
+                                <div class="chat-time">${chat.sent_time}</div>
+                                </div>
+                            </div>`
+                        );
+                    });
+                    $(`div[class~="chat-content"]`).animate({ scrollTop: $(`div[class~="chat-content"]`).prop("scrollHeight") }, 0);
+                    $(`span[data-user_id="${e.count.sender_id}"]`).html(``);
+                    $.post(`${baseUrl}api/chats/read`, {message_id: e.message_id});
+                }
+            });
+            refreshChatList(response.data.result['online']);
+            if (counter !== 0) {
+                $(`a[data-notification="message"]`).addClass("beep");
+            } else {
+                $(`a[data-notification="message"]`).removeClass("beep");
             }
-        });
-        setTimeout(() => { new_message_alert() }, $.chatinterval);
-    }
-    
+        }
+    });
 }
 
 var loadFormAction = (form) => {

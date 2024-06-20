@@ -475,7 +475,7 @@
 <?php } ?>
 <?php function student_menu() { global $baseUrl, $accessObject, $clientFeatures, $academicSession, $isReadOnly; ?>
     <?php if(in_array("class_assessment", $clientFeatures)) { ?>
-        <li class="dropdown">
+        <li class="dropdown hidden">
             <a href="#" class="nav-link has-dropdown"><i class="fas fa-bookmark"></i><span>Exams Bank</span></a>
             <ul class="dropdown-menu">
                 <li><a class="nav-link" href="<?= $baseUrl ?>exams_dashboard">Summary</a></li>

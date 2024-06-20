@@ -48,7 +48,7 @@ if(!empty($recentChat["messages"])) {
                 $online_text = $message->receipient_info->online ? "online" : "offline";
                 $online_msg = $message->receipient_info->online ? "Online" : "Left {$message->receipient_info->offline_ago}";
                 $users_list .= '
-                <li id="default_list" style="width:100%" data-message_id="'.$message->message_unique_id.'" onclick="return display_messages(\''.$message->message_unique_id.'\',\''.$message->receiver_id.'\',\''.$message->receipient_info->name.'\',\''.$message->receipient_info->image.'\',\''.$message->receipient_info->offline_ago.'\')" class="clearfix d-flex '.(($key === 0) ? "actdive" : "").'">
+                <li id="default_list" style="width:100%" data-user_id="'.$message->user_id.'" data-message_id="'.$message->message_unique_id.'" onclick="return display_messages(\''.$message->message_unique_id.'\',\''.$message->receiver_id.'\',\''.$message->receipient_info->name.'\',\''.$message->receipient_info->image.'\',\''.$message->receipient_info->offline_ago.'\')" class="clearfix d-flex '.(($key === 0) ? "actdive" : "").'">
                     <img src="'.$baseUrl.''.$message->receipient_info->image.'" alt="avatar">
                     <div class="about" style="width:100%">
                         <div class="name">'.$message->receipient_info->name.'</div>
@@ -84,7 +84,7 @@ $response->html = '
                         <input type="text" id="search_user" class="form-control" placeholder="Search... (Hit enter to search)" />
                       </div>
                       <div class="m-b-20">
-                        <div id="chat-scroll">
+                        <div id="chat-scroll" class="chat-window">
                           <ul class="chat-list list-unstyled m-b-0">
                             '.$users_list.'
                           </ul>

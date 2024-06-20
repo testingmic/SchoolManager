@@ -4,7 +4,7 @@
 }
 
 .border-2px {
-    border-bottom: : solid #007bff 2px!important;
+    border-bottom: solid #007bff 2px!important;
 }
 
 .border-3px {
@@ -437,6 +437,14 @@ textarea.custom_form-control {
     font-size: 30px;
 }
 
+.chat-window {
+    height:650px !important
+}
+
+.chat-box .chat-content {
+    height: 600px !important;
+}
+
 @media only screen and (max-width: 1024px) {
     .settingSidebar {
         display: block!important;
@@ -454,6 +462,18 @@ textarea.custom_form-control {
     .settingSidebar {
         width: 285px;
         right: -289px;
+    }
+}
+
+@media only screen and (max-width: 575.98px) {
+    .chat-window {
+        max-height:200px !important;
+        overflow-y: auto!important;
+    }
+    
+    .chat-box .chat-content {
+        max-height: 300px !important;
+        overflow-y: auto!important;
     }
 }
 

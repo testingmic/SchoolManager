@@ -494,7 +494,7 @@ if ( ! function_exists('jump_to_main')) {
 			}
 
 			// save the current url and attach to the user information
-			$stmt = $myschoolgh->prepare("UPDATE users SET last_visited_page = ? WHERE item_id = ? LIMIT 1");
+			$stmt = $myschoolgh->prepare("UPDATE users SET last_visited_page = ?, last_seen = now() WHERE item_id = ? LIMIT 1");
 			return $stmt->execute([$current_url, $session->userId]);
 			
 		}

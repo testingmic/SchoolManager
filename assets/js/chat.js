@@ -156,7 +156,7 @@ $(`div[class~="chat-search"] input[id="search_user"]`).on("keyup", function(even
                         let online_text = user.online ? "online" : "offline",
                             online_msg = user.online ? "Online" : `Left ${user.offline_ago}`;
                         users_list += `
-                        <li id="search_list" style="width:100%" data-message_id="${user.message_unique_id}" onclick="return display_messages('${user.message_unique_id}','${user.user_id}','${user.name}','${user.image}','${user.offline_ago}')" class="clearfix d-flex">
+                        <li id="search_list" style="width:100%" data-user_id="${user.user_id}" data-message_id="${user.message_unique_id}" onclick="return display_messages('${user.message_unique_id}','${user.user_id}','${user.name}','${user.image}','${user.offline_ago}')" class="clearfix d-flex">
                             <img src="${baseUrl}${user.image}" alt="avatar">
                             <div class="about" style="width:100%">
                                 <div class="name">${user.name}</div>
@@ -176,4 +176,6 @@ $(`div[class~="chat-search"] input[id="search_user"]`).on("keyup", function(even
     }
 });
 
-new_message_alert();
+setInterval(function(){
+    new_message_alert();
+}, $.chatinterval);

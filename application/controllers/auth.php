@@ -823,6 +823,11 @@ class Auth extends Myschoolgh {
 
             }
 
+            // disallow users from using their current password
+            if(password_verify($params->password_1, $user->password)) {
+                return ["code" => "203", "data" => "Sorry! Your password must be different from your current password."];
+            }
+
             // change the password
             $stmt = $this->db->prepare("UPDATE users SET last_password_change = now(), password = ?, changed_password = ? WHERE item_id = ? AND client_id = ? LIMIT 3");
             $stmt->execute([password_hash($params->password_1, PASSWORD_DEFAULT), 1, $params->user_id, $params->clientId]);

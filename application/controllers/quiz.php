@@ -16,33 +16,35 @@ class Quiz extends Myschoolgh {
         if($defaultUser->user_type == 'student') {
         	$filter .= " AND users.item_id='{$defaultUser->user_id}'";
         }
+        
+        try {
+            // set the query
+            $stmt = $this->db->prepare("
+                SELECT *, 
+                    users.name, tc.category_id,
+                    (SELECT b.test_title FROM quiz_question_instructions b WHERE b.instruction_id = q.instruction_id) AS test_title,
+                    tc.name as category_name, tc.description, q.date_log AS test_date
+                FROM quiz_test_history q
+                    LEFT JOIN users ON users.item_id=q.user_id
+                    LEFT JOIN quiz_test_categories tc ON q.category_id=tc.category_id
+                WHERE {$filter} ORDER BY q.id DESC
+            ");
+            $stmt->execute();
 
-        // set the query
-        $stmt = $this->db->prepare("
-            SELECT *, 
-                users.name, tc.category_id,
-                (SELECT b.test_title FROM quiz_question_instructions b WHERE b.instruction_id = q.instruction_id) AS test_title,
-                tc.name as category_name, tc.description, q.date_log AS test_date
-            FROM quiz_test_history q
-                LEFT JOIN users ON users.item_id=q.user_id
-                LEFT JOIN quiz_test_categories tc ON q.category_id=tc.category_id
-            WHERE {$filter} ORDER BY q.id DESC
-        ");
-        $stmt->execute();
+            $data = [];
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                $data[] = $result;
+            }
 
-        $data = [];
-
-        while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-
-        	$data[] = $result;
-
+            return [
+                "code" => 200,
+                "data" => $data,
+            ];
+        } catch(\Exception $e) {
+            return [
+                'data' => []
+            ];
         }
-
-        return [
-        	"code" => 200,
-        	"data" => $data,
-        ];
-
 
 	}
 

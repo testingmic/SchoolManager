@@ -141,8 +141,12 @@ class Chats extends Myschoolgh {
                 SELECT 
                     DISTINCT a.message_unique_id, a.id AS item_id, a.message_unique_id, a.sender_id, a.receiver_id, a.message AS full_message, 
                     a.date_created, a.seen_status, a.seen_date, DATE(a.date_created) AS raw_date,
-                    (SELECT CONCAT(name,'|',COALESCE(phone_number,'NULL'),'|',COALESCE(email,'NULL'),'|',image,'|',COALESCE(last_seen,'NULL'),'|',online) FROM users WHERE users.item_id = a.receiver_id LIMIT 1) AS receipient_info,
-                    (SELECT CONCAT(name,'|',COALESCE(phone_number,'NULL'),'|',COALESCE(email,'NULL'),'|',image,'|',COALESCE(last_seen,'NULL'),'|',online) FROM users WHERE users.item_id = a.sender_id LIMIT 1) AS sender_info
+                    (SELECT CONCAT(name,'|',COALESCE(phone_number,'NULL'),'|',COALESCE(email,'NULL'),'|',
+                        image,'|',COALESCE(last_seen,'NULL'),'|',online) FROM users WHERE users.item_id = a.receiver_id LIMIT 1
+                    ) AS receipient_info,
+                    (SELECT CONCAT(name,'|',COALESCE(phone_number,'NULL'),'|',COALESCE(email,'NULL'),'|',
+                        image,'|',COALESCE(last_seen,'NULL'),'|',online) FROM users WHERE users.item_id = a.sender_id LIMIT 1
+                    ) AS sender_info
                 FROM users_chat a WHERE 
                     (a.receiver_id = '{$userId}' AND a.receiver_deleted = '0') OR
                     (a.sender_id = '{$userId}' AND a.sender_deleted = '0')
@@ -155,6 +159,7 @@ class Chats extends Myschoolgh {
             $unread_count = 0;
 
             $unread_countArray = [];
+            $userArray = [];
 
             // loop through the results list
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
@@ -176,16 +181,24 @@ class Chats extends Myschoolgh {
 
                 // convert the sender and receiver information into an object
                 if($result->sender_id === $userId) {
+                    $result->user_id = $result->receiver_id;
                     $result->receipient_info = (object) $this->stringToArray($result->receipient_info, "|", ["name", "contact", "email", "image", "last_seen", "online"]);
                     $result->receipient_info->online = $this->user_is_online($result->receipient_info->last_seen);
                     $result->receipient_info->offline_ago = time_diff($result->receipient_info->last_seen);
                 } else {
+                    $result->user_id = $result->sender_id;
                     // set the information to submit
                     $result->receiver_id = $result->sender_id;
                     $result->receipient_info = (object) $this->stringToArray($result->sender_info, "|", ["name", "contact", "email", "image", "last_seen", "online"]);
                     $result->receipient_info->online = $this->user_is_online($result->receipient_info->last_seen);
                     $result->receipient_info->offline_ago = time_diff($result->receipient_info->last_seen);
                 }
+
+                if(in_array($result->user_id, $userArray)) {
+                    continue;
+                }
+
+                $userArray[] = $result->user_id;
 
                 // convert the seen and sent dates into ago state
                 $result->clean_date = date("l, F jS", strtotime($result->date_created));
@@ -247,7 +260,13 @@ class Chats extends Myschoolgh {
         );
         $chats = [];
         foreach($list as $chat) {
+            // decode the chat message
+            $msg_id = $chat->message_unique_id;
+
+            // set the key for decryption
+            $key = "{$chat->sender_id}_{$msg_id}";
             $chat->sent_time = date("h:i A", strtotime($chat->date_created));
+            $chat->message = $this->encryptObj->decrypt($chat->message, $key);
             $chats[] = $chat;
         }
         return $chats;
@@ -285,9 +304,17 @@ class Chats extends Myschoolgh {
             }
 
 
-            return $data;
+            return [
+                'alerts' => $data,
+                'online' => $this->refresh($params)
+            ];
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return [
+                'alerts' => [],
+                'online' => []
+            ];
+        }
     }
 
     /**
@@ -302,6 +329,10 @@ class Chats extends Myschoolgh {
         $stmt = $this->db->prepare("UPDATE users_chat SET seen_status = ?, seen_date = now()
             WHERE receiver_id = ? AND message_unique_id = ? ORDER BY id DESC LIMIT 10
         ");
+
+        /** update the last seen of the user */
+        $this->db->query("UPDATE users SET last_seen = now() WHERE item_id = '{$params->userId}' LIMIT 1");
+
         return $stmt->execute([1, $params->userId, $params->message_id]);
 
     }
@@ -349,6 +380,34 @@ class Chats extends Myschoolgh {
         } catch(PDOException $e) {
             return [];
         }
+    }
+
+    /**
+     * Refresh the online status of the users
+     * 
+     * @param object     $params
+     * 
+     * @return array
+     */
+    public function refresh($params) {
+
+        try {
+
+            $users_list = implode("','", $params->users);
+
+            $list = $this->pushQuery("item_id AS user_id, last_seen", "users", "item_id IN ('{$users_list}')");
+            foreach($list as $item) {
+                $item->online = $this->user_is_online($item->last_seen);
+                $item->offline_ago = time_diff($item->last_seen);
+                $data[] = $item;
+            }
+
+            return $data ?? [];
+
+        } catch(\Exception $e) {
+
+        }
+
     }
 
     /**
@@ -455,10 +514,14 @@ class Chats extends Myschoolgh {
 	private function save_message($data) {
 
 		try {
+
 			/** Save the message log */
 			$stmt = $this->db->prepare("INSERT INTO users_chat SET client_id = ?, message_unique_id = ?, sender_id = ?, receiver_id = ?, message = ?, user_agent = ?");
 			$stmt->execute([$data->clientId, $this->message_id, $data->sender_id, $data->receiver_id, $data->message, $this->agent]);
-            
+
+            /** update the last seen of the user */
+            $this->db->query("UPDATE users SET last_seen = now() WHERE item_id = '{$data->sender_id}' LIMIT 1");
+
             return $this->db->lastInsertId();
 
 		} catch(\PDOException $e) {
