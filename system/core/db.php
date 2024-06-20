@@ -4,8 +4,8 @@
  *
  * Loads the base classes and executes the request.
  *
- * @package		InsuredMedics Plus
- * @subpackage	InsuredMedics Plus Super Class
+ * @package		Insuredmyschoolgh Plus
+ * @subpackage	Insuredmyschoolgh Plus Super Class
  * @category	Core Functions
  * @author		Analitica Innovare Dev Team
  */
@@ -13,7 +13,7 @@
 class Db {
 	
 	private $conn;
-	private $medics;
+	private $myschoolgh;
 	private $hostname;
 	private $username;
 	private $password;
@@ -26,12 +26,12 @@ class Db {
 		$this->password = DB_PASS;
 		$this->database = DB_NAME;
 		
-		if($this->medics == null) {
-			$this->medics = $this->db_connect($this->hostname, $this->username, $this->password, $this->database);
+		if($this->myschoolgh == null) {
+			$this->myschoolgh = $this->db_connect($this->hostname, $this->username, $this->password, $this->database);
 		}
 	}
 	public function get_database(){
-		return $this->medics;
+		return $this->myschoolgh;
 	}
 
 	private function db_connect($hostname, $username, $password, $database) {
@@ -39,12 +39,12 @@ class Db {
 		try {
 			$this->conn = "mysql:host=$hostname;dbname=$database;charset=utf8mb4";
 			
-			$medics = new PDO($this->conn, $username, $password);
-			$medics->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-			$medics->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_BOTH);
-			$medics->setAttribute(PDO::MYSQL_ATTR_FOUND_ROWS, TRUE);
+			$myschoolgh = new PDO($this->conn, $username, $password);
+			$myschoolgh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$myschoolgh->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_BOTH);
+			$myschoolgh->setAttribute(PDO::MYSQL_ATTR_FOUND_ROWS, TRUE);
 			
-			return $medics;
+			return $myschoolgh;
 			
 		} catch(PDOException $e) {
 			die("It seems there was an error.  Please refresh your browser and try again. ".$e->getMessage());
@@ -56,7 +56,7 @@ class Db {
 		
 		try {
 					
-			$stmt = $this->medics->prepare("$sql");
+			$stmt = $this->myschoolgh->prepare("$sql");
 			$stmt->execute();
 			$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			return $results;
@@ -67,7 +67,7 @@ class Db {
 	public function execute($sql) {
 		
 		try {
-			$stmt = $this->medics->prepare("$sql");
+			$stmt = $this->myschoolgh->prepare("$sql");
 			$stmt->execute();
 		} catch(PDOException $e) {return 0;}
 	}

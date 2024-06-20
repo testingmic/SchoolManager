@@ -8,6 +8,8 @@ class SMS_CronJOB {
 	private $mailAttachment = array();
 	private $siteName = "MySchoolGH - EmmallexTech.Com";
 	private $mnotify_key;
+	private $baseUrl;
+	private $rootUrl;
 
 	public function __construct() {
 		// INI FILE

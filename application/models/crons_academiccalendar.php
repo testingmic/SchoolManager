@@ -9,6 +9,7 @@ class Crons {
 	private $ini_data;
 	private $clientId;
 	private $limit = 5000;
+    private $baseUrl;
 	private $siteName = "MySchoolGH - EmmallexTech.Com";
 
 	public function __construct() {
@@ -126,8 +127,6 @@ class Crons {
 	 * @return Object
 	 */
 	public function client_data($clientId = null) {
-
-		$clientId = !empty($clientId) ? $clientId : (!empty($this->clientId) ? $this->clientId : $this->session->clientId);
 
 		try {
 

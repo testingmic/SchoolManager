@@ -8,6 +8,7 @@ class Crons {
 	private $rootUrl;
 	private $clientId;
 	private $ini_data;
+	private $baseUrl;
 	private $limit = 1000;
 	private $siteName = "MySchoolGH - EmmallexTech.Com";
 

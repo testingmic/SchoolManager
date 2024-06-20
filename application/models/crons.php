@@ -1,10 +1,4 @@
 <?php
-//Import PHPMailer classes into the global namespace
-//These must be at the top of your script, not inside a function
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
 class Crons {
 
 	private $mailer;
@@ -15,6 +9,7 @@ class Crons {
 	private $clientId;
 	private $ini_data;
 	private $limit = 2000;
+	private $baseUrl;
 	private $siteName = "MySchoolGH - EmmallexTech.Com";
 
 	public function __construct() {
@@ -48,7 +43,7 @@ class Crons {
 		
 		// run the database connection
 		try {
-			$conn = "mysql:host={$connectionArray['hostname']}; dbname={$connectionArray['database']}; charset=utf8";			
+			$conn = "mysql:host={$connectionArray['hostname']};dbname={$connectionArray['database']};charset=utf8mb4";			
 			$this->db = new PDO($conn, $connectionArray['username'], $connectionArray['password']);
 			$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			$this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_BOTH);
@@ -198,7 +193,6 @@ class Crons {
 		$mailer->SMTPAuth = true;
 		$mailer->Username = $config->SmtpUser;
 		$mailer->Password = $config->SmtpPass;
-		$mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
 
 		// set the port to sent the mail
 		$mailer->Port = $config->SmtpPort;
@@ -242,7 +236,7 @@ class Crons {
 		}
 
 		// this is an html message
-		$mailer->isHTML = true;
+		$mailer->isHTML(true);
 
 		// set the subject and message
 		$mailer->Subject = $subject;
@@ -558,5 +552,5 @@ class Crons {
 // create new object
 $jobs = new Crons;
 $jobs->load_emails();
-// $jobs->scheduler();
+$jobs->scheduler();
 ?>

@@ -67,24 +67,29 @@ class Backup {
     	$clients_db = [];
 
         // loop through the tables client tables
-        $clients_list = $this->db->query("SELECT * FROM clients_accounts WHERE client_state = 'Active' LIMIT 3");
+        $clients_list = $this->db->query("SELECT * FROM clients_accounts WHERE client_state = 'Active'");
 
         // loop through the clients list
-        while($client = $clients_list->fetch_array(MYSQLI_ASSOC)) {
+        try {
 
-            // loop through the tables list
-            foreach($tables_array as $table) {
-            	// select from all tables where the client_id matches the existing one
-            	$stmt = $this->db->query("SELECT * FROM {$table} WHERE client_id='{$client["client_id"]}' LIMIT 25000");
+            while($client = $clients_list->fetch_array(MYSQLI_ASSOC)) {
 
-                while($result = $stmt->fetch_array(MYSQLI_ASSOC)) {
-                    $key = isset($result["id"]) ? $result["id"] : $result["item_id"];
-                    $clients_db[$client["client_id"]][$table][$key] = $result;
+                // loop through the tables list
+                foreach($tables_array as $table) {
+                    try {
+                        // select from all tables where the client_id matches the existing one
+                        $stmt = $this->db->query("SELECT * FROM {$table} WHERE client_id='{$client["client_id"]}' LIMIT 25000");
+
+                        while($result = $stmt->fetch_array(MYSQLI_ASSOC)) {
+                            $key = isset($result["id"]) ? $result["id"] : $result["item_id"];
+                            $clients_db[$client["client_id"]][$table][$key] = $result;
+                        }
+                    } catch(\Exception $e) {}
                 }
-                
-            }
 
-        }
+            }
+            
+        } catch(\Exception $e) {}
 
         // loop through each client data
         foreach($clients_db as $client => $data) {
