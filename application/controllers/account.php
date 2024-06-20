@@ -403,7 +403,6 @@ class Account extends Myschoolgh {
 
             // Allow certain file formats 
             $allowTypes = array('jpg', 'png', 'jpeg','gif');
-
             // check if its a valid image
             if(!empty($file_name) && validate_image($params->logo["tmp_name"])){
                 // set a new file_name
@@ -452,6 +451,7 @@ class Account extends Myschoolgh {
             $this->userLogs("account", $params->clientId, $client_data, "{$params->userData->name} updated the Account Information", $params->userId);
 
             // reset the client data information
+            $this->defaultClientData = null;
             $this->client_session_data($params->clientId, true);
 
             return $return;

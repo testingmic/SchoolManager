@@ -139,7 +139,7 @@ $response->html = '
                             
                                             <div class="row">
 
-                                                <div class="col-lg-4 col-md-6">
+                                                <div class="col-lg-3 col-md-6">
                                                     <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-blue">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
@@ -157,7 +157,7 @@ $response->html = '
                                                     </div>
                                                 </div>
                                 
-                                                <div class="col-lg-4 col-md-6">
+                                                <div class="col-lg-3 col-md-6">
                                                     <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-success">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
@@ -175,7 +175,7 @@ $response->html = '
                                                     </div>
                                                 </div>
                                 
-                                                <div class="col-lg-4 col-md-6">
+                                                <div class="col-lg-3 col-md-6">
                                                     <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-danger">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">
@@ -193,7 +193,7 @@ $response->html = '
                                                     </div>
                                                 </div>
 
-                                                <div class="col-lg-4 col-md-6">
+                                                <div class="col-lg-3 col-md-6">
                                                     <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid border-warning">
                                                         <div class="card-body card-type-3">
                                                             <div class="row">

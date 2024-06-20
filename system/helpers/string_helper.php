@@ -234,12 +234,6 @@ function get_random_bytes($length)
 	}
 
 	// Unfortunately, none of the following PRNGs is guaranteed to exist ...
-	if (defined('MCRYPT_DEV_URANDOM') && ($output = mcrypt_create_iv($length, MCRYPT_DEV_URANDOM)) !== FALSE)
-	{
-		return $output;
-	}
-
-
 	if (is_readable('/dev/urandom') && ($fp = fopen('/dev/urandom', 'rb')) !== FALSE)
 	{
 		// Try not to waste entropy ...

@@ -3682,7 +3682,7 @@ class Forms extends Myschoolgh {
             '.($logoUploaded ? 
             '<div class="col-lg-2 col-md-4">
                 <div class="form-group">
-                    <img width="90px" src="'.$this->baseUrl.''.$client_data->client_logo.'">
+                    <img width="100%" src="'.$this->baseUrl.''.$client_data->client_logo.'">
                 </div>
             </div>' : '').'
             <div class="col-lg-3 col-md-6">

@@ -389,7 +389,7 @@ if(!empty($client_id)) {
                                                     Please visit <a href='{$baseUrl}promote-students?history' class='text-white font-bold'>Promotions History Page</a> to rectify this issue before proceeding to close this {$academicSession}.
                                                 </div>" : null
                                             ).'
-                                            <div class="col-12 col-md-8">
+                                            <div class="col-12 col-md-9">
                                                 <div class="card">
                                                     <div class="card-body font-14">
                                                         <div class="mb-2 row">
@@ -409,6 +409,7 @@ if(!empty($client_id)) {
                                                             <div class="col-lg-6">
                                                             <span>
                                                                 '.date("jS F Y", strtotime($defaultAcademics->term_ends)).'
+                                                                <br>
                                                                 '.($defaultUser->appPrefs->termEnded ? "<span class='badge badge-danger'>Already Ended</span>" : "<span class='badge badge-success'>Active</span>").'
                                                             </span>
                                                             </div>
@@ -440,7 +441,7 @@ if(!empty($client_id)) {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-4" id="academic_Term_Processing"></div>
+                                            <div class="col-12 col-md-9" id="academic_Term_Processing"></div>
                                         </div>
 
                                     </div>
