@@ -1,2 +1,4 @@
 application/sessions/*
 .DS_Store
+application/logs/json/*
+assets/img/accounts/*
