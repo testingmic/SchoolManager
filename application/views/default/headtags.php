@@ -79,7 +79,6 @@ load_helpers(['menu_helper']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link id="mobile" rel="manifest" href="<?= $baseUrl ?>manifest.json" />
     <title><?= $page_title ?? "Dashboard" ?> :: <?= $clientName ?></title>
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">

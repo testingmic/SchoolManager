@@ -234,7 +234,6 @@ current_column = "";
 <?php foreach($loadedJS as $eachJS) { ?>
 <script src="<?= $baseUrl; ?><?= $eachJS ?>"></script>
 <?php } ?>
-<script src="<?= $baseUrl; ?>assets/js/push.js"></script>
 <script>
 <?php if(!$isActiveAccount) { ?>
     var logout = async() => {

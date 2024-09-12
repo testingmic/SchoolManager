@@ -17,7 +17,6 @@ if(loggedIn()) {
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
   <title>Login - <?= $appName ?></title>
-  <link id="mobile" rel="manifest" href="<?= $baseUrl ?>manifest.json" />
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-social/bootstrap-social.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
@@ -104,18 +103,5 @@ if(loggedIn()) {
   <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
   <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
   <script src="<?= $baseUrl ?>assets/js/auth.js"></script>
-  <script>
-    // if ('serviceWorker' in navigator) {
-    //   window.addEventListener('load', () => {
-    //     navigator.serviceWorker.register('<?= $baseUrl ?>sw.js')
-    //       .then(registration => {
-    //         console.log(`Service Worker registered! Scope: ${registration.scope}`);
-    //       })
-    //       .catch(err => {
-    //         console.log(`Service Worker registration failed: ${err}`);
-    //       });
-    //   });
-    // }
-  </script>
 </body>
 </html>
