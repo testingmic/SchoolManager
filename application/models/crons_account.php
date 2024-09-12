@@ -19,10 +19,7 @@ class Crons {
 		// set some more variables
 		$this->baseUrl = $this->ini_data["base_url"];
 		$this->rootUrl = $this->ini_data["root_url"];
-		$this->dbConn();		
-
-		require $this->rootUrl."system/libraries/phpmailer.php";
-		require $this->rootUrl."system/libraries/smtp.php";
+		$this->dbConn();
 	}
 	
 	/**

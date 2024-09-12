@@ -1,4 +1,11 @@
 <?php
+define('ROOT_DIRECTORY', dirname(dirname(__DIR__)));
+
+require ROOT_DIRECTORY . "/vendor/autoload.php";
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+
 class Crons {
 
 	private $mailer;
@@ -16,7 +23,7 @@ class Crons {
 
 	public function __construct() {
 		// INI FILE
-		$this->ini_data = parse_ini_file(dirname(dirname(__DIR__)) . "/db.ini");
+		$this->ini_data = parse_ini_file(ROOT_DIRECTORY . "/db.ini");
 
 		// set some more variables
 		$this->baseUrl = $this->ini_data["base_url"];
@@ -24,9 +31,6 @@ class Crons {
 		$this->mnotify_key = $this->ini_data["mnotify_key"];
 
 		$this->dbConn();
-
-		require $this->rootUrl."system/libraries/phpmailer.php";
-		require $this->rootUrl."system/libraries/smtp.php";
 	}
 	
 	/**
@@ -225,15 +229,20 @@ class Crons {
 
 		print "Append the receipient to the email list\n";
 		
+		$receipient = false;
+
 		// loop through the list of recipients for this mail
         foreach($recipient_list as $emailRecipient) {
         	if(!empty($emailRecipient['email'])) {
+				$receipient = true;
 				// user fullname
 				$fullname = isset($emailRecipient['fullname']) ? $emailRecipient['fullname'] : $emailRecipient['name'];
 				// append the email address
 				$mailer->addAddress($emailRecipient['email'], $fullname);
 			}
 		}
+
+		if(empty($receipient)) return true;
 
 		print "Append any copied email address list\n";
 
@@ -597,7 +606,7 @@ class Crons {
 				} elseif($value->type === "email") {
 
 					// get the response of the request
-					$response = $this->phpmailer_send($key, $value->message, $value->recipient_list, $value->subject);
+					$response = $this->send_emails($value->recipient_list, $value->subject, $value->message);
 					
 					// save the  reponse
 					if(!empty($response)) {
@@ -650,11 +659,12 @@ class Crons {
 		    	foreach($list as $key => $value) {
 		    		$user = ["name" => $key, "email" => $value];
 		    	}
+
 		    	// send the mail
-		    	$send = $this->phpmailer_send(true, $result->bill, $user, "Student Bill");
+				$response = $this->send_emails($user, "Student Bill", $result->bill);
 
 		    	// update the status
-		    	if($send) {
+		    	if($response) {
 		    		$this->db->query("UPDATE users_bills SET sent_status='1', sent_date=now() WHERE id='{$result->id}' LIMIT 1");
 		    	}
 		    }
@@ -720,97 +730,6 @@ class Crons {
         $result = json_decode(curl_exec($ch));
         
 		return $result;
-
-	}
-
-	/**
-	 * Send the Email Message to the List of Recipients
-	 *  
-	 * @return Object
-	 */
-	public function phpmailer_send($item_id, $message, $recipient_list, $subject = null, $cc_list = null) {
-
-		//Create an instance; passing `true` enables exceptions
-		$mailer = new PHPMailer(true);
-
-		// set the message 
-		$message = htmlspecialchars_decode($message);
-
-		// configuration settings
-		$config = (Object) array(
-			'subject' => $subject,
-			'headers' => "From: {$this->siteName} - MySchoolGH.Com<{$this->ini_data["smtp_user"]}> \r\n Content-type: text/html; charset=utf-8",
-			'Smtp' => true,
-			'SmtpHost' => $this->ini_data["smtp_host"],
-			'SmtpPort' => $this->ini_data["smtp_host"],
-			'SmtpUser' => $this->ini_data["smtp_user"],
-			'SmtpPass' => $this->ini_data["smtp_password"],
-			'SmtpSecure' => 'ssl'
-		);
-
-		// additional settings
-		$mailer->SMTPDebug = SMTP::DEBUG_SERVER;
-		$mailer->isSMTP();
-		$mailer->Host = $config->SmtpHost;
-		$mailer->SMTPAuth = true;
-		$mailer->Username = $config->SmtpUser;
-		$mailer->Password = $config->SmtpPass;
-		$mailer->SMTPSecure = $config->SmtpSecure;
-		$mailer->Port = $config->SmtpPort;
-		$mailer->Subject = $subject;
-		
-		// attach documents if any was found
-		if(!empty($this->mailAttachment)) {
-			// loop through the attachments list
-			foreach($this->mailAttachment as $theAttachment) {
-				// file path
-				$filepath = $theAttachment["path"];
-				// append the attachment to the mail
-				$mailer->AddAttachment($filepath, $theAttachment["name"]);
-			}
-		}
-
-		// set the user from which the email is been sent
-		$mailer->setFrom($this->ini_data["smtp_from"], $this->siteName);
-
-		// loop through the list of recipients for this mail
-        foreach($recipient_list as $emailRecipient) {
-        	// if the email was parsed
-        	if(isset($emailRecipient['name']) && !empty($emailRecipient['email'])) {
-				// user fullname
-				$fullname = $emailRecipient['name'];
-				// append the email address
-				$mailer->addAddress($emailRecipient['email'], $fullname);
-			}
-		}
-
-		// loop through the list of cc if not empty
-		if(!empty($cc_list)) {
-			// loop through the copied list
-			foreach($cc_list as $copiedRecipient) {
-				// if the email address is not empty
-				if(!empty($copiedRecipient['email'])) {
-					// user fullname
-					$fullname = isset($copiedRecipient['name']) ? $copiedRecipient['name'] : $copiedRecipient['name'];
-					// append the email address
-					$mailer->addCC($copiedRecipient['email'], $fullname);
-				}
-			}
-		}
-
-		// this is an html message
-		$mailer->isHTML(true);
-
-		// set the subject and message
-		$mailer->Body    = $message;
-		$mailer->AltBody = strip_tags($message);
-		
-		// send the email message to the users
-		if($mailer->send()) {
-			return true;
-		} else {
- 			return false;
-		}
 
 	}
 
