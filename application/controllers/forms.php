@@ -2779,7 +2779,7 @@ class Forms extends Myschoolgh {
             <div class="row mb-4 border-bottom pb-3">
                 <div class="col-lg-4 col-md-6">
                     <div class="form-group">
-                        <label for="course_code">Subject Code <span class="required">*</span></label>
+                        <label for="course_code">Subject Code</label>
                         <input '.$isAdmin2.' type="text" maxlength="12" value="'.($itemData->course_code ?? null).'" name="course_code" id="course_code" class="form-control text-uppercase">
                     </div>
                 </div>
@@ -2801,7 +2801,7 @@ class Forms extends Myschoolgh {
                         <input '.$isAdmin2.' type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-6 col-md-6">
                     <div class="form-group">
                         <label for="class_id">Select subject class <span class="required">*</span></label>
                         <select '.$isAdmin.' '.(!empty($itemData->name) && $isData ? "disabled" : "multiple").' data-width="100%" '.($isData ? 'name="class_id" id="class_id"' : 'name="class_id[]" id="class_id[]"').' class="form-control selectpicker">

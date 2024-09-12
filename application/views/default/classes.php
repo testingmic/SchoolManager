@@ -36,6 +36,10 @@ foreach($item_list["data"] as $key => $each) {
     
     $action = "<a title='View Class record' href='#' onclick='return load(\"class/{$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
     
+    if($hasUpdate) {
+        $action .= "&nbsp;<a title='Update the class record' href='#' onclick='return load(\"class/{$each->id}/update\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-edit'></i></a>";
+    }
+
     if($viewAllocation) {
         $action .= "&nbsp;<a target='_blank' href='{$baseUrl}download/student_bill?class_id={$each->id}&isPDF=true' title='Download Class Bill' class='btn btn-sm mb-1 btn-outline-warning'><i class='fa fa-download'></i></a>";
     }

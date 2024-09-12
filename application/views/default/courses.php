@@ -45,6 +45,11 @@ $courses = "";
 foreach($item_list["data"] as $key => $each) {
     
     $action = "<a title='View the course record' href='#' onclick='return load(\"course/{$each->id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+
+    if($hasUpdate) {
+        $action .= "&nbsp;<a title='Update the course record' href='#' onclick='return load(\"course/{$each->id}/update\");' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>";
+    }
+
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Delete this Course' onclick='return delete_record(\"{$each->id}\", \"course\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
