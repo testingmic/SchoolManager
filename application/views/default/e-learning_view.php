@@ -120,10 +120,19 @@ if(empty($item_id)) {
         // video informat
         $video_mime = ["mp4", "mpeg", "movie", "webm", "mov", "mpg", "mpeg", "qt"];
         $isVideo = in_array($video->type, $video_mime);
+
+        $isPDF = in_array($video->type, ['pdf']);
+        $isImage = in_array($video->type, ['jpg', 'jpeg', 'png']);
        
         $file_content = "
             <div class=\"card-body p-0\">
-                <video data-video_unique_id='{$video->record_id}_{$video->unique_id}' data-video_item_id='{$item_id}' id='elearning_video' ".($autoplay ? "autoplay='true'" : null)." style='display: block; cursor:pointer; width:100%;' controls='true' src='{$baseUrl}{$video->path}#t={$timer}'></video>
+                ".($isVideo ? 
+                    "<video data-video_unique_id='{$video->record_id}_{$video->unique_id}' data-video_item_id='{$item_id}' id='elearning_video' ".($autoplay ? "autoplay='true'" : null)." 
+                        style='display: block; cursor:pointer; width:100%;' controls='true' src='{$baseUrl}{$video->path}#t={$timer}'></video>" :
+                    (
+                        $isPDF ? "<iframe style='border: none;' allowFullscreen='true' src='{$baseUrl}{$video->path}' height='700px' width='100%'></iframe>" : null
+                    )
+                )."
             </div>
             <div class=\"card-footer border-top p-2\">
                 <div class=\"row pr-0  border-bottom\">
@@ -195,6 +204,31 @@ if(empty($item_id)) {
             }
         }
 
+        $commentForm = '<div id="video_comments">
+                <div class="share_public_comment">
+                    <div class="mb-3"><span class="comments_counter">0</span> Comments</div>
+                    '.($elearning->allow_comments === "allow" ? 
+                        '<div class="d-flex justify-content-start" style="min-height:70px">
+                            <div class="pr-1"><img width="60px" class="rounded-circle cursor author-box-picture" src="'.$baseUrl.''.$defaultUser->image.'"></div>
+                            <div class="p-0" style="width:100%">
+                                <div id="public_comment" contenteditable="true" dir="auto" class="public_comment trix-slim-scroll" aria-label="Add a public comment..."></div>
+                                <div class="d-flex justify-content-between">
+                                    <div class="comment_response"></div>
+                                    <div class="text-right mt-2 hidden" id="public_comment_button">
+                                        <button id="cancel_button" onclick="cancel_comment()" disabled class="btn btn-sm btn-outline-danger">CANCEL</button>
+                                        <button id="share_comment" onclick="share_comment()" disabled class="btn btn-sm btn-outline-primary">COMMENT</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>' : 
+                        '<div class="alert alert-warning mb-0">Comments have been closed</div>'
+                    ).'
+                    <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-4 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
+                    <div class="text-center loader_display hidden"><i class="text-primary fa fa-spin fa-spinner fa-2x"></i></div>
+                    <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn hidden btn-sm btn-outline-secondary">Loading comments</button></div>    
+                </div>
+            </div>';
+
         $response->html = '
             <section class="section">
                 <div class="section-header">
@@ -206,44 +240,23 @@ if(empty($item_id)) {
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-12 col-md-9 col-lg-9">
+                    <div class="col-12 '.($isVideo ? 'col-md-9 col-lg-9' : 'col-md-8 col-lg-8').'">
                         <div class="card mb-0">
                             '.$file_content.'
                         </div>
                         <div class="card-body mt-0 pr-0 pl-0">
-                            <div id="video_comments">
-                                <div class="share_public_comment">
-                                    <div class="mb-3"><span class="comments_counter">0</span> Comments</div>
-                                    '.($elearning->allow_comments === "allow" ? 
-                                        '<div class="d-flex justify-content-start" style="min-height:70px">
-                                            <div class="pr-1"><img width="60px" class="rounded-circle cursor author-box-picture" src="'.$baseUrl.''.$defaultUser->image.'"></div>
-                                            <div class="p-0" style="width:100%">
-                                                <div id="public_comment" contenteditable="true" dir="auto" class="public_comment trix-slim-scroll" aria-label="Add a public comment..."></div>
-                                                <div class="d-flex justify-content-between">
-                                                    <div class="comment_response"></div>
-                                                    <div class="text-right mt-2 hidden" id="public_comment_button">
-                                                        <button id="cancel_button" onclick="cancel_comment()" disabled class="btn btn-sm btn-outline-danger">CANCEL</button>
-                                                        <button id="share_comment" onclick="share_comment()" disabled class="btn btn-sm btn-outline-primary">COMMENT</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>' : 
-                                        '<div class="alert alert-warning mb-0">Comments have been closed</div>'
-                                    ).'
-                                    <div id="comments-container" data-autoload="true" data-last-reply-id="0" data-id="'.$item_id.'" class="slim-scroll pt-3 mt-4 pr-2 pl-0" style="overflow-y:auto; max-height:850px"></div>
-                                    <div class="text-center loader_display hidden"><i class="text-primary fa fa-spin fa-spinner fa-2x"></i></div>
-                                    <div class="load-more mt-3 text-center"><button id="load-more-replies" type="button" class="btn hidden btn-sm btn-outline-secondary">Loading comments</button></div>    
-                                </div>
-                            </div>
+                            '.($isVideo ? $commentForm : null).'
                         </div>
                     </div>
-                    <div class="col-12 col-md-3 col-lg-3">
-                        <div class="card">
-                            <div class="card-body p-2">
-                                <h5 class="mb-0 border-bottom pb-2">PLAYLIST</h5>
-                                '.$related_videos.'
+                    <div class="col-12 '.($isVideo ? 'col-md-3 col-lg-3' : 'col-md-4 col-lg-4').'">
+                        '.(!$isImage && !$isPDF ? '
+                            <div class="card">
+                                <div class="card-body p-2">
+                                    <h5 class="mb-0 border-bottom pb-2">PLAYLIST</h5>
+                                    '.$related_videos.'
+                                </div>
                             </div>
-                        </div>
+                        ' : $commentForm).'
                     </div>
                 </div>
             </section>';
