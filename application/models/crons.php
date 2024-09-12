@@ -262,9 +262,12 @@ class Crons {
 		$mailer->AltBody = strip_tags($message);
 		
 		// send the email message to the users
+		print "Send the email content\n";
 		if($mailer->send()) {
+			print "Sending of email completed\n";
 			return true;
 		} else {
+			print "Sending of emails failed\n";
  			return false;
 		}
 	}
