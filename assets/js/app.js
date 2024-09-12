@@ -228,7 +228,6 @@ var linkClickStopper = (element) => {
             return;
         }
 
-    
         linkHandler(target, true)
     });
 }
@@ -251,10 +250,8 @@ var formSubmitStopper = (element) => {
 }
 
 var linkHandler = (target, pushstate) => {
-
-
     if (target.slice(0, -1) === $.baseurl || target === $.baseurl || target === $.default) {
-        target = $.most_recent_page;
+        // target = $.most_recent_page;
     }
     loadPage(target, pushstate);
 }
