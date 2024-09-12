@@ -63,8 +63,11 @@ class Crons {
 
             print "Runing Cron Activity @ ".date("Y-m-d h:i:sA")."\n";
 
+            // set the current timestamp
+            $timestamp = date("Y-m-d h:i:s");
+
 			// prepare and execute the statement
-			$stmt = $this->db->prepare("SELECT * FROM cron_scheduler WHERE status = ? AND CURRENT_TIME() > TIMESTAMP(active_date) AND cron_type = ? ORDER BY id ASC LIMIT 5");
+			$stmt = $this->db->prepare("SELECT * FROM cron_scheduler WHERE status = ? AND active_date < '{$timestamp}' AND cron_type = ? ORDER BY id ASC LIMIT 5");
 			$stmt->execute([0, "end_academic_term"]);
 
 			// loop through the result
@@ -724,7 +727,7 @@ class Crons {
                         foreach($columns as $key => $column) {
                             // exempt some data from the query
                             if(!in_array($key, [0, $last_key])) {
-                                $query_string .= in_array($column, ["start_date", "end_date", "programme_id"]) && empty($values[$key]) ? "{$column}=NULL," : ''.$column.'="'.addslashes($values[$key]).'",';
+                                $query_string .= in_array($column, ["start_date", "end_date", "programme_id"]) && empty($values[$key]) ? "{$column}=NULL," : ''.$column.'="'.(!empty($values[$key]) ? addslashes($values[$key]) : '').'",';
                             }
                         }
                         $courses_plan_query_string .= trim($query_string, ",").";";

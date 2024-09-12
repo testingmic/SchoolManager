@@ -3840,7 +3840,7 @@ class Forms extends Myschoolgh {
             <div class="col-lg-12"></div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
-                    <label for="academic_term">Academic Sessionaaaa</label>
+                    <label for="academic_term">Academic Session</label>
                     <select data-width="100%" name="general[academics][academic_term]" class="form-control selectpicker">
                         <option value="">Select Academic Session</option>';
                             foreach($this->school_academic_terms as $each) {
@@ -4006,7 +4006,7 @@ class Forms extends Myschoolgh {
                     <input type='text' min='0' max='100' name='interpretation_1' data-grading_id='1' class='form-control'>
                 </div>
                 <div class='col-lg-1'>
-                    <label>&nbsp;</label>
+                    <label>&nbsp;</label><br>
                     <button type='button' onclick='return remove_grading_mark(1)' class='btn btn-outline-danger'><i class='fa fa-trash'></i></button>
                 </div>
             </div>";
@@ -4028,7 +4028,7 @@ class Forms extends Myschoolgh {
                             <input type='text' min='0' value='".($grade->interpretation ?? "")."' max='100' name='interpretation_{$key}' data-grading_id='{$key}' class='form-control'>
                         </div>
                         <div class='col-lg-1'>
-                            <label>&nbsp;</label>
+                            <label>&nbsp;</label><br>
                             <button type='button' onclick='return remove_grading_mark({$key})' class='btn btn-outline-danger'><i class='fa fa-trash'></i></button>
                         </div>
                     </div>";

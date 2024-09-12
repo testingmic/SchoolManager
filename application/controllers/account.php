@@ -617,14 +617,12 @@ class Account extends Myschoolgh {
         $rand_limit = 10;
 
         // change the academic session names if the current doesn't match what we have in the database
-        if($academicSession !== $n_session) {
-            // get the list of all academic terms
-            $list = $this->pushQuery("id, name", "academic_terms", "client_id='{$params->clientId}' LIMIT {$rand_limit}");
-            // loop through the list
-            foreach($list as $item) {
-                // update the record
-                $this->db->query("UPDATE academic_terms SET description='{$item->name} {$n_session}' WHERE id='{$item->id}' LIMIT 1");
-            }
+        $list = $this->pushQuery("id, name", "academic_terms", "client_id='{$params->clientId}' LIMIT {$rand_limit}");
+        
+        // loop through the list
+        foreach($list as $item) {
+            // update the record
+            $this->db->query("UPDATE academic_terms SET description='{$item->name} {$n_session}' WHERE id='{$item->id}' LIMIT 1");
         }
 
         try {

@@ -485,7 +485,7 @@ class Myschoolgh extends Models {
 			return $query_style === "OBJ" ? $stmt->fetchAll(PDO::FETCH_OBJ) : $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		} catch(PDOException $e) {
-			return $e->getMessage();
+			return [];
 		}
 
 	}
@@ -505,7 +505,7 @@ class Myschoolgh extends Models {
 			return $stmt->fetch(PDO::FETCH_OBJ);
 
 		} catch(PDOException $e) {
-			return $e->getMessage();
+			return [];
 		}
 
 	}

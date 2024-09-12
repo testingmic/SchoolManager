@@ -2,14 +2,16 @@
 // start the file
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+$ini = parse_ini_file("db.ini");
+
 // set thee default date/time for the php.ini to use
-date_default_timezone_set('Africa/Accra');
+date_default_timezone_set('Europe/London');
 
 # set the constants for the database connection
-defined('DB_HOST')  OR define('DB_HOST', "127.0.0.1");
-defined('DB_USER')  OR define('DB_USER', "root");
-defined('DB_PASS')  OR define('DB_PASS', "");
-defined('DB_NAME')  OR define('DB_NAME', "myschoolgh");
+defined('DB_HOST')  OR define('DB_HOST', $ini['hostname'] ?? null);
+defined('DB_USER')  OR define('DB_USER', $ini['username'] ?? null);
+defined('DB_PASS')  OR define('DB_PASS', $ini['password'] ?? null);
+defined('DB_NAME')  OR define('DB_NAME', $ini['database'] ?? null);
 
 define('TIME_PERIOD', 60);
 define('RANDOM_STRING', 12);
