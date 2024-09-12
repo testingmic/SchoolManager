@@ -14,6 +14,7 @@ $set_current_url = !empty($set_current_url) ? $set_current_url : str_ireplace("/
 
 // get the url path
 $urlParse = parse_url($set_current_url);
+print_r($urlParse);exit;
 if(empty($urlParse['path'])) {
     $set_current_url .= "dashboard";
 }
