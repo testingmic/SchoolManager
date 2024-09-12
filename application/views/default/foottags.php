@@ -71,7 +71,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-body pt-2 trix-slim-scroll" style="max-height:470px;overflow-y:auto;">
+                    <div class="card-body pt-2 trix-slim-scroll" style="max-height:750px;overflow-y:auto;">
                         <div class="text-center hidden" id="quick_search_loader">
                             <i class="fa fa-spin fa-spinner text-primary"></i>
                         </div>
