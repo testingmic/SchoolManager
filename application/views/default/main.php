@@ -11,6 +11,12 @@ global $isActiveAccount, $clientData, $clientId, $isSchool;
 // set the current_url
 $set_current_url = $session->user_current_url;
 $set_current_url = !empty($set_current_url) ? $set_current_url : str_ireplace("/main", "/dashboard", current_url());
+
+// get the url path
+$urlParse = parse_url($set_current_url);
+if(empty($urlParse)) {
+    $set_current_url .= "/dashboard";
+}
 ?>
 <?= pageoverlay(); ?>
 <?php if(!$isActiveAccount) { ?>
