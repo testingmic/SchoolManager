@@ -646,17 +646,17 @@ var page_programming = (array_content) => {
 }
 
 var loadPage = (loc, pushstate) => {
-    console.log('loc:', loc);
+    console.log('initial loc:', loc);
     if (loc == `${$.baseurl}` || loc == `${$.baseurl}/dashboard`) {
         $(`[id="history-refresh"]`).addClass("hidden");
     } else {
         $(`[id="history-refresh"]`).removeClass("hidden");
     }
-    
+
     if((loc == $.default) || $(`div[id="load_dashboard_content"]`).length) {
         loc = $(`div[id="load_dashboard_content"]`).data('loadUrl');
     }
-    console.log('loc:', loc);
+    console.log('final loc:', loc);
 
     $.pageoverlay.show();
     $.ajax({
