@@ -54,6 +54,10 @@ foreach($api_staff_list["data"] as $each) {
     $counter++;
     $action = "<span title='View staff record' onclick='return load(\"staff/{$each->user_id}/documents\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
 
+    if($accessObject->hasAccess("update", $each->user_type)) {
+        $action .= "&nbsp;<a title='Update Staff Record' href=\"staff/{$each->user_id}/update\" class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-edit'></i></a>";
+    }
+
     if($accessObject->hasAccess("delete", $each->user_type) && ($each->user_id !== $defaultUser->user_id)) {
         $action .= "&nbsp;<span title='Delete Staff Record' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
     }

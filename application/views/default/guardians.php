@@ -36,6 +36,10 @@ foreach($guardian_list as $kkey => $each) {
 
     $action = "<a title='Click to view guardian information' href='#' onclick='return load(\"guardian/{$each->user_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
     
+    if($accessObject->hasAccess("update", "guardian")) {
+        $action .= "&nbsp;<a title='Update Staff Record' href=\"guardian/{$each->user_id}/update\" class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-edit'></i></a>";
+    }
+
     if($hasDelete) {
         $action .= "&nbsp;<a href='#' title='Click to delete guardian record' onclick='return delete_record(\"{$each->user_id}\", \"guardian\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></a>";
     }
