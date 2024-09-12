@@ -543,12 +543,12 @@ class Resources extends Myschoolgh {
      */
     public function upload_4elearning(stdClass $params) {
 
-        $class = $this->pushQuery("id, item_id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        $class = $this->pushQuery("id, item_id", "classes", "(id='{$params->class_id}' OR item_id = '{$params->class_id}') AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         if(empty($class)) {
             return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
         }
 
-        $course = $this->pushQuery("id, item_id, course_tutor", "courses", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
+        $course = $this->pushQuery("id, item_id, course_tutor", "courses", "id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         if(empty($course)) {
             return ["code" => 203, "data" => "Sorry! An invalid course id was supplied."];
         }
@@ -598,7 +598,7 @@ class Resources extends Myschoolgh {
                 "data" => "E-Learning Material was successfully uploaded.", 
                 "additional" => [
                     "clear" => true, 
-                    "href" => "{$this->baseUrl}e-learning_view?resource_id={$item_id}"
+                    "href" => "{$this->baseUrl}e-learning_view/{$item_id}?resource_id={$item_id}"
                 ]
             ];
 

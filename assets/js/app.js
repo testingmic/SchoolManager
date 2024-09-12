@@ -643,7 +643,7 @@ var page_programming = (array_content) => {
 }
 
 var loadPage = (loc, pushstate) => {
-    console.log('initial loc:', loc);
+    
     if (loc == `${$.baseurl}` || loc == `${$.baseurl}/dashboard`) {
         $(`[id="history-refresh"]`).addClass("hidden");
     } else {
@@ -656,7 +656,6 @@ var loadPage = (loc, pushstate) => {
             loc = data_url;
         }
     }
-    console.log('final loc:', loc);
 
     $.pageoverlay.show();
     $.ajax({

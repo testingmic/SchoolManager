@@ -31,7 +31,13 @@ var share_comment = (comment_id = "") => {
     let _video = document.getElementById("elearning_video");
     let comment = $(`div[id="public_comment"]`).html(),
         record_id = $(`video[id="elearning_video"]`).data("video_unique_id"),
+        t_comment_id = $(`video[id="elearning_video"]`).data("video_item_id"),
         video_time = _video.currentTime;
+
+    if(typeof t_comment_id !== 'undefined') {
+        record_id = t_comment_id;
+        console.log('record_id:', record_id);
+    }
 
     $(`div[id="public_comment_button"]`).removeClass("hidden");
     $(`div[id="public_comment_button"] button`).prop("disabled", true);

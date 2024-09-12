@@ -677,21 +677,21 @@ if ( ! function_exists('get_mimes'))
 	 * @return	array
 	 */
 	function get_mimes() {
-		// static $_mimes;
+		static $_mimes;
 
-		// if (empty($_mimes))
-		// {
-		// 	$_mimes = file_exists(APPPATH.'config/mimes.php')
-		// 	? include(APPPATH.'config/mimes.php')
-		// 	: array();
+		if (empty($_mimes))
+		{
+			$_mimes = file_exists(APPPATH.'config/mimes.php')
+			? include(APPPATH.'config/mimes.php')
+			: array();
 
-		// 	if (file_exists(APPPATH.'config/'.ENVIRONMENT.'/mimes.php'))
-		// 	{
-		// 		$_mimes = array_merge($_mimes, include(APPPATH.'config/'.ENVIRONMENT.'/mimes.php'));
-		// 	}
-		// }
+			if (file_exists(APPPATH.'config/mimes.php'))
+			{
+				$_mimes = array_merge($_mimes, include(APPPATH.'config/mimes.php'));
+			}
+		}
 
-		// return $_mimes;
+		return $_mimes;
 	}
 }
 // ------------------------------------------------------------------------

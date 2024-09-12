@@ -4833,7 +4833,7 @@ class Forms extends Myschoolgh {
 
         /** Set parameters for the data to attach */
         $form_params = (object) [
-            "accept" => ".mp4,.mpg,.mpeg,.flv",
+            "accept" => ".mp4,.mpg,.mpeg,.flv,.pdf",
             "module" => "elearning_resource",
             "userData" => $params->thisUser,
             "item_id" => $params->data->item_id ?? null
@@ -4884,7 +4884,7 @@ class Forms extends Myschoolgh {
                     "show_view" => "e-learning_view",
                     "module" => "elearning_resource",
                     "item_id" => $params->data->item_id,
-                    "accept" => implode(",", [".mp4", ".mpg", ".mpeg", ".flv"]),
+                    "accept" => implode(",", [".mp4", ".mpg", ".mpeg", ".flv", ".pdf"]),
                     "attachments_list" => $attachment
                 ];
 
@@ -4915,7 +4915,7 @@ class Forms extends Myschoolgh {
                             <select class="form-control selectpicker" data-width="100%" name="class_id">
                                 <option value="">Please Select Class</option>';
                                 foreach($classes_list as $each) {
-                                    $html_content .= "<option data-payment_module='{$each->payment_module}' ".($class === $each->item_id ? "selected" : null)." value=\"{$each->id}\">".strtoupper($each->name)."</option>";
+                                    $html_content .= "<option data-payment_module='{$each->payment_module}' ".($class === $each->item_id ? "selected" : null)." value=\"{$each->item_id}\">".strtoupper($each->name)."</option>";
                                 }
                                 $html_content .= '
                             </select>

@@ -103,18 +103,6 @@
         </li>
         <?php } ?>
     <?php } ?>
-    <?php if($isAdmin && in_array("online_applications", $clientFeatures)) { ?>
-        <li class="dropdown">
-            <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-friends"></i><span>Online Applications</span></a>
-            <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>applications">Application List</a></li>
-                <li><a class="nav-link" href="<?= $baseUrl ?>application_forms">Application Forms</a></li>
-                <?php if($isAdmin) { ?>
-                    <li><a class="nav-link" href="<?= $baseUrl ?>application_api_keys">Manage API Keys</a></li>
-                <?php } ?>
-            </ul>
-        </li>
-    <?php } ?>
     <?php if($accessObject->hasAccess("view", "class")) { ?>
     <li class="menu-header">Academics</li>
     <li class="dropdown">
@@ -306,6 +294,18 @@
     <?php if(in_array("bus_manager", $clientFeatures)) { ?>
         <li class="dropdown">
             <a href="<?= $baseUrl ?>buses" class="nav-link"><i class="fas fa-bus-alt"></i><span>Bus Management</span></a>
+        </li>
+    <?php } ?>
+    <?php if($isAdmin && in_array("online_applications", $clientFeatures)) { ?>
+        <li class="dropdown">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-friends"></i><span>Online Applications</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>applications">Application List</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>application_forms">Application Forms</a></li>
+                <?php if($isAdmin) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>application_api_keys">Manage API Keys</a></li>
+                <?php } ?>
+            </ul>
         </li>
     <?php } ?>
     <li class="menu-header">Communication</li>

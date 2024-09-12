@@ -123,7 +123,7 @@ if(empty($item_id)) {
        
         $file_content = "
             <div class=\"card-body p-0\">
-                <video data-video_unique_id='{$video->record_id}_{$video->unique_id}' id='elearning_video' ".($autoplay ? "autoplay='true'" : null)." style='display: block; cursor:pointer; width:100%;' controls='true' src='{$baseUrl}{$video->path}#t={$timer}'></video>
+                <video data-video_unique_id='{$video->record_id}_{$video->unique_id}' data-video_item_id='{$item_id}' id='elearning_video' ".($autoplay ? "autoplay='true'" : null)." style='display: block; cursor:pointer; width:100%;' controls='true' src='{$baseUrl}{$video->path}#t={$timer}'></video>
             </div>
             <div class=\"card-footer border-top p-2\">
                 <div class=\"row pr-0  border-bottom\">
@@ -169,9 +169,6 @@ if(empty($item_id)) {
                 
                 // loop through the video information
                 foreach($item as $key => $video) {
-
-                    // convert the item to an object
-                    // $video = (object) $video;
 
                     // get the video last time
                     $time = time_diff($video->datetime);
