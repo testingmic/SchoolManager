@@ -13,7 +13,7 @@ class Backup {
     public function __construct() {
 
         // INI FILE
-        $this->ini_data = parse_ini_file("db.ini");
+        $this->ini_data = parse_ini_file(dirname(dirname(__DIR__)) . "/db.ini");
 
         // set some more variables
         $this->baseUrl = $this->ini_data["base_url"];
