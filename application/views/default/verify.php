@@ -34,7 +34,7 @@ $session->refresh_page = empty($session->refresh_page) ? 1 : ($session->refresh_
 
 // end the page query if the user tries to refresh more than 10 times
 if($session->refresh_page >= 15) {
-  header("Location: {$baseUrl}main");
+  header("Location: {$myClass->dashboardPath}");
   exit;
 }
 // print an error page

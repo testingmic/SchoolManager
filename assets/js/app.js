@@ -4,7 +4,7 @@ $.current_page = "";
 $.protocol = window.location.protocol;
 $.host = window.location.host;
 $.baseurl = $.protocol + "//" + $.host;
-$.default = $.protocol + "//" + $.host + "/main";
+$.default = $.protocol + "//" + $.host + "/dashboard";
 $.pagecontent = $("#pagecontent");
 $.mainprogress = $(".main-progress-bar");
 $.pageoverlay = $(".pageoverlay");
@@ -46,7 +46,7 @@ var form_error = (message) => {
     </div>`;
 }
 $(window).on("beforeunload", (evt) => {
-    window.location.href = `${baseUrl}main`;
+    window.location.href = `${baseUrl}dashboard`;
 });
 
 var strings = {
@@ -647,15 +647,16 @@ var page_programming = (array_content) => {
 
 var loadPage = (loc, pushstate) => {
 
-
     if (loc == `${$.baseurl}` || loc == `${$.baseurl}/dashboard`) {
         $(`[id="history-refresh"]`).addClass("hidden");
     } else {
         $(`[id="history-refresh"]`).removeClass("hidden");
     }
-    if(loc == $.default) {
-        loc = `${$.baseurl}dashboard`;
+
+    if(loc == $.default || $(`div[id="load_dashboard_content"]`).length) {
+        loc = $(`div[id="load_dashboard_content"]`).data('loadUrl');
     }
+
     $.pageoverlay.show();
     $.ajax({
         url: loc,
@@ -718,6 +719,7 @@ var loadPage = (loc, pushstate) => {
                 current_url = result.current_user_url;
             }
 
+            $(`div[id="load_dashboard_content"]`).remove();
             $(`div[class~="settingSidebar"] input`).val("");
             $(`div[class~="settingSidebar"]`).removeClass("showSettingPanel");
             $(`div[id="dictionary_query_results"], div[id="system_query_results"]`).html("");

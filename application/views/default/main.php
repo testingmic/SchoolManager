@@ -93,6 +93,7 @@ global $isActiveAccount, $clientData, $clientId, $isSchool;
         </div>
     <?php } ?>
 <?php } else { ?>
+    <div id="load_dashboard_content" data-load-url="<?= $session->user_current_url; ?>"></div>
     <div id="content_menu_display"></div>
     <div class="main-content" id="pagecontent"></div>
 <?php } ?>

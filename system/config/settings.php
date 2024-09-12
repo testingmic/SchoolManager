@@ -93,8 +93,6 @@ function run($isNotRemote, $return = false, $SITEURL =  []) {
 
 	// default file to include
 	$defaultFile = config_item('default_view_path').strtolower(preg_replace('/[^\w_]-/','',$SITEURL[0])).'.php';
-	$mainFile = config_item('default_view_path').'main.php';
-	$errorFile = config_item('default_view_path').'404.php';
 
 	// get the request method that was parsed by the user
 	$method = strtoupper( $_SERVER["REQUEST_METHOD"] );

@@ -319,7 +319,7 @@ var set_default_Student = (student_id) => {
                 icon: "success",
             });
             setTimeout(() => {
-                window.location.href= `${baseUrl}main`;
+                window.location.href= `${baseUrl}dashboard`;
             }, refresh_seconds);
         }
     });

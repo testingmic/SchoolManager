@@ -7,7 +7,7 @@ $user_current_url = current_url();
 
 // if the user is not loggedin then show the login form
 if(loggedIn()) { 
-    header("location: {$baseUrl}main");
+    header("location: {$myClass->dashboardPath}");
     exit;
 }
 ?>

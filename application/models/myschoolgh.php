@@ -46,6 +46,7 @@ class Myschoolgh extends Models {
 	public $last_term_starts;
 	public $last_term_ends;
 	public $defaultClientData;
+	public $dashboardPath;
 
 	public $thisUser;
 	public $color_set = [
@@ -73,6 +74,9 @@ class Myschoolgh extends Models {
 		$this->platform = $this->user_agent->platform();
 		$this->browser = $this->user_agent->browser();
 		$this->agent = $this->user_agent->agent_string();
+
+		// set the dashboard path
+		$this->dashboardPath = $this->baseUrl . "dashboard";
 
 		$this->academic_years();
 		$this->menu_content_array();
