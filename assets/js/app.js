@@ -250,8 +250,8 @@ var formSubmitStopper = (element) => {
 }
 
 var linkHandler = (target, pushstate) => {
-    if (target.slice(0, -1) === $.baseurl || target === $.baseurl || target === $.default) {
-        // target = $.most_recent_page;
+    if (target.includes('/main')) {
+        target = target.replace('/main', '/dashboard')
     }
     loadPage(target, pushstate);
 }
