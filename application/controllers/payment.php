@@ -4,7 +4,7 @@ if( !defined( 'BASEPATH' ) ) die( 'Restricted access' );
 
 class Payment extends Myschoolgh {
 
-    private $pk_secret_key = "sk_live_6adbaeaeed4f7206d959c5e3efb480678593e8f4";
+    private $pk_secret_key = "";
     public $url;
     
     public function __construct() {

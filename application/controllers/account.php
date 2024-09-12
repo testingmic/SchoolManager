@@ -709,6 +709,19 @@ class Account extends Myschoolgh {
         global $defaultClientData;
         $client_data = $defaultClientData;
 
+        // grading_sba calculation
+        if(!empty($params->grading_sba) && is_array($params->grading_sba)) {
+            $total_grade = 0;
+            foreach($params->grading_sba as $key => $value) {
+                if(isset($value['percentage']) && preg_match("/^[0-9]+$/", $value['percentage'])) {
+                    $total_grade += $value['percentage'];
+                }
+            }
+            if($total_grade > 100 || $total_grade < 100) {
+                return ["code" => 203, "data" => "Sorry! The score must be equal to 100%. The current value is {$total_grade}%."];
+            }
+        }
+
         // check the report grading columns and ensure it does not exceed 100%
         if(isset($params->report_columns["columns"]) && !empty($params->report_columns["columns"])) {
             // assign
