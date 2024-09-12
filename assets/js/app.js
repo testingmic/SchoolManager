@@ -651,7 +651,10 @@ var loadPage = (loc, pushstate) => {
     }
 
     if((loc == $.default) || $(`div[id="load_dashboard_content"]`).length) {
-        loc = $(`div[id="load_dashboard_content"]`).data('loadUrl');
+        let data_url = $(`div[id="load_dashboard_content"]`).data('loadUrl');
+        if(typeof data_url !== 'undefined') {
+            loc = data_url;
+        }
     }
     console.log('final loc:', loc);
 
