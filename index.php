@@ -1,4 +1,18 @@
 <?php
+#display errors
+error_reporting(E_ALL);
+
+if($_SERVER['HTTP_HOST'] == "localhost") {
+	// display the errors
+	ini_set("display_errors", 1);
+}
+
+#set new places for my error recordings
+ini_set("log_errors","1");
+ini_set("error_log", "errors_log");
+
+define('ROOTPATH', __DIR__);
+
 // include the settings file
 require_once "system/config/settings.php";
 

@@ -7,6 +7,10 @@ require "headtags.php";
 
 // global variable
 global $isActiveAccount, $clientData, $clientId, $isSchool;
+
+// set the current_url
+$set_current_url = $session->user_current_url;
+$set_current_url = !empty($set_current_url) ? $set_current_url : str_ireplace("/main", "/dashboard", current_url());
 ?>
 <?= pageoverlay(); ?>
 <?php if(!$isActiveAccount) { ?>
@@ -93,7 +97,7 @@ global $isActiveAccount, $clientData, $clientId, $isSchool;
         </div>
     <?php } ?>
 <?php } else { ?>
-    <div id="load_dashboard_content" data-load-url="<?= $session->user_current_url; ?>"></div>
+    <div id="load_dashboard_content" data-load-url="<?= $set_current_url; ?>"></div>
     <div id="content_menu_display"></div>
     <div class="main-content" id="pagecontent"></div>
 <?php } ?>

@@ -939,7 +939,7 @@ class Myschoolgh extends Models {
 
         $label = $status;
         
-        if(in_array($status, ["Pending", "Due Today", "Graduated"])) {
+        if(in_array($status, ["Pending", "Due Today", "Graduated", "Activated"])) {
             $label = "<span class='badge badge-primary {$class}'>{$status}</span>";
         }
         elseif(in_array($status, ["Rejected", "Dismissed", "Reversed", "Transferred", "Cancelled", "Not Paid", "Unpaid", "Unseen", "Closed", "Overdue", "Expired", "Suspended", "Denied", "Withdrawn", "Lost"])) {
@@ -1213,7 +1213,7 @@ class Myschoolgh extends Models {
 		$clientId = !empty($clientId) ? $clientId : (!empty($this->clientId) ? $this->clientId : $this->session->clientId);
 
 		// get the schools academic years
-		$this->school_academic_terms = $this->pushQuery("id, name, description", "academic_terms","1 AND client_id = '{$clientId}' LIMIT {$this->temporal_maximum}");
+		$this->school_academic_terms = $this->pushQuery("DISTINCT name, id, description", "academic_terms","1 AND client_id = '{$clientId}' LIMIT {$this->temporal_maximum}");
 
 		return $this;
 	}

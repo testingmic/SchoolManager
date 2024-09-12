@@ -241,7 +241,7 @@ function page_not_found($request = "not_found", $string = "The resource you tryi
 
     return '
     <section class="section">
-        <div class="container">
+        <div class="container bg-white border-2px mt-3">
             <div class="page-error">
             <div class="page-inner">
                 <h1 class="text-warning">'.$title.'</h1>

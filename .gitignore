@@ -1,4 +1,5 @@
 application/sessions/*
+!application/sessions/index.html
 .DS_Store
 application/logs/json/*
 assets/img/accounts/*

@@ -261,12 +261,18 @@
             <li><a class="nav-link" href="<?= $baseUrl ?>incomes">Incomes</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>expenses">Expenses</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>transactions">All Transactions</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>bank_deposits">Bank Deposits</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>bank_withdrawals">Bank Withdrawals</a></li>
-            <?php if($accessObject->hasAccess("account_type_head", "accounting")) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>account_type">Account Type Head</a></li>
+            <?php if($accessObject->hasAccess("deposits", "accounting")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>bank_deposits">Bank Deposits</a></li>
             <?php } ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>accounting">Financial Reports</a></li>
+            <?php if($accessObject->hasAccess("bank_withdrawal", "accounting")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>bank_withdrawals">Bank Withdrawals</a></li>
+            <?php } ?>
+            <?php if($accessObject->hasAccess("account_type_head", "accounting")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>account_type">Account Type Head</a></li>
+            <?php } ?>
+            <?php if($accessObject->hasAccess("reports", "accounting")) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>accounting">Financial Reports</a></li>
+            <?php } ?>
         </ul>
     </li>
     <?php if(in_array("front_office", $clientFeatures)) { ?>

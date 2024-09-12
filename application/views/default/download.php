@@ -5,15 +5,12 @@ global $defaultUser, $isSupport, $usersClass, $defaultClientData;
 // stylesheet
 $pages_content = "<style>@page { margin: 5px; } body { margin: 5px; } .page_break { page-break-before: always; } div.page_break+div.page_break { page-break-before: always; }</style>";
 
-// set the site root
-$site_root = config_item("site_root");
-
 // set no memory limit
-error_reporting(0);
+error_reporting(1);
 ini_set("memory_limit", "-1");
 
 // require the autoload file
-require "{$site_root}system/libraries/dompdf/vendor/autoload.php";
+require ROOTPATH . "/system/libraries/dompdf/vendor/autoload.php";
 
 // reference the Dompdf namespace
 use Dompdf\Dompdf;

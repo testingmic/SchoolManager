@@ -21,7 +21,7 @@ $pageTitle = "Accounting - Bank Withdrawals";
 $response->title = $pageTitle;
 
 // permission to modify and validate
-$expensePermission = $accessObject->hasAccess("expenditure", "accounting");
+$expensePermission = $accessObject->hasAccess("bank_withdrawal", "accounting");
 
 // if the user does not have the required permissions
 if(!$expensePermission) {

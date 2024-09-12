@@ -938,9 +938,9 @@ class Auth extends Myschoolgh {
             // perform the checks
             if(!empty($a_check)) {
                 if($a_check[0]->client_status == 0) {
-                    return ["code" => 201, "data" => "Sorry! You already have an account pending verification. Please wait while we verify."];
+                    return ["code" => 201, "data" => "Sorry! You already have an account pending verification. Please wait while we complete the verification process."];
                 } elseif($a_check[0]->client_status == 1) {
-                    return ["code" => 201, "data" => "Sorry! You already have an account. Please try to login instead."];
+                    return ["code" => 201, "data" => "Sorry! You already have an account. Please try to login instead or use the reset password option if you have forgotten your password."];
                 }
             }
 
@@ -1027,9 +1027,9 @@ class Auth extends Myschoolgh {
             $sms_stmt->execute([$client_id, 10]);
 
             // insert the academic terms information for the client
-            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}',name='1st',description='1st Term'");
-            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}',name='2nd',description='2nd Term'");
-            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}',name='3rd',description='3rd Term'");
+            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}', name='1st', description='1st Term'");
+            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}', name='2nd', description='2nd Term'");
+            $this->db->query("INSERT INTO academic_terms SET client_id = '{$client_id}', name='3rd', description='3rd Term'");
             
             // insert the client details
             $client_stmt = $this->db->prepare("INSERT INTO clients_accounts SET 
@@ -1049,11 +1049,12 @@ class Auth extends Myschoolgh {
             // insert the user account details
             $ac_stmt = $this->db->prepare("INSERT INTO users SET 
                 item_id = ?, unique_id = ?, client_id = ?, access_level = ?, password = ?, user_type = ?, 
-                address = ?, username = ?, verify_token = ?, user_status = ?, email = ?, phone_number = ?, status = ?
+                address = ?, username = ?, verify_token = ?, user_status = ?, email = ?, phone_number = ?, status = ?,
+                changed_password = ?
             ");
             $ac_stmt->execute([
                 $item_id, $user_id, $client_id, $access_level, $password, "admin", 
-                $params->school_address, $username, $token, "Pending", $params->email, $contact, 1
+                $params->school_address, $username, $token, "Pending", $params->email, $contact, 1, 1
             ]);
 
             // log the user access level
@@ -1088,7 +1089,7 @@ class Auth extends Myschoolgh {
             ]);
 
             // create the client css file
-            $fd = fopen("assets/css/clients/{$client_id}.css", "w");
+            $fd = @fopen("assets/css/clients/{$client_id}.css", "w");
 
             // insert the user activity
             $this->userLogs("verify_account", $item_id, null, "{$params->school_name} created a new Account pending Verification.", $item_id, $client_id);
