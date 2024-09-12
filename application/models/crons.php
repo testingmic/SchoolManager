@@ -157,6 +157,8 @@ class Crons {
 				}
 			}
 
+			print "Sending of user emails completed successfully.\n";
+
 		} catch(PDOException $e) {
 			print "\n{$e->getMessage()}";
 		}
@@ -174,6 +176,9 @@ class Crons {
 	 */
 	private function send_emails($recipient_list, $subject, $message, $cc_list = null) {
 
+		// send the email via the library
+		print "Message submitted for sending via PHPMailer\n";
+
 		//Create an instance; passing `true` enables exceptions
 		$mailer = new PHPMailer(true);
 
@@ -189,6 +194,8 @@ class Crons {
 			'SmtpSecure' => 'ssl'
 		);
 
+		print "Setting the configuration params.\n";
+
 		// additional settings
 		$mailer->SMTPDebug = SMTP::DEBUG_SERVER;
 		$mailer->isSMTP();
@@ -203,6 +210,8 @@ class Crons {
 		// set the user from which the email is been sent
 		$mailer->setFrom($this->ini_data["smtp_from"], $this->siteName);
 
+		print "Attach all documents where applicable.\n";
+
 		// attach documents if any was found
 		if(!empty($this->mailAttachment)) {
 			// loop through the attachments list
@@ -214,6 +223,8 @@ class Crons {
 			}
 		}
 
+		print "Append the receipient to the email list\n";
+		
 		// loop through the list of recipients for this mail
         foreach($recipient_list as $emailRecipient) {
         	if(!empty($emailRecipient['email'])) {
@@ -223,6 +234,8 @@ class Crons {
 				$mailer->addAddress($emailRecipient['email'], $fullname);
 			}
 		}
+
+		print "Append any copied email address list\n";
 
 		// loop through the list of cc if not empty
 		if(!empty($cc_list)) {
@@ -240,6 +253,8 @@ class Crons {
 
 		// this is an html message
 		$mailer->isHTML(true);
+
+		print "Final setting of the email content and subject.\n";
 
 		// set the subject and message
 		$mailer->Subject = $subject;
