@@ -565,10 +565,13 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         <div class="card">
                             <div class="card-body school-details" style="min-height:235px">
                                 <div class="row">
-                                    <div align="center" class="col-sm-3">
-                                        <img width="100%" class="school-logo" src="'.$baseUrl.''.$defaultClientData->client_logo.'">
-                                    </div>
-                                    <div align="center" class="p-1 col-sm-9">
+                                    '.(
+                                        !empty($defaultClientData->client_logo) ?
+                                        '<div align="center" class="col-sm-3">
+                                            <img width="100%" class="school-logo" src="'.$baseUrl.''.$defaultClientData->client_logo.'">
+                                        </div>' : null
+                                    ).'
+                                    <div align="center" class="p-1 col-sm-'.(!empty($defaultClientData->client_logo) ? 9 : 12).'">
                                         <div style="align-items:center;">
                                             <h3 class="text-uppercase">'.$defaultClientData->client_name.'</h3>
                                             <div class="'.(!empty($defaultClientData->client_slogan) ? "mb-1" : null).' text-uppercase font-15">'.$defaultClientData->client_slogan.'</div>
