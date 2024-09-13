@@ -1434,9 +1434,11 @@ let timePlugins = () => {
 }
 
 $(window).on("load", function() {
-    setInterval(() => { 
-        $.ajax({
-            url: `${baseUrl}api/devlog/auth`, type: "POST", data: { onlineCheck: true }, timeout: 5000
-        });
-    }, 10000);
+    if($(`div[class="settingSidebar"]`).length) {
+        setInterval(() => { 
+            $.ajax({
+                url: `${baseUrl}api/devlog/auth`, type: "POST", data: { onlineCheck: true }, timeout: 5000
+            });
+        }, 10000);
+    }
 });
