@@ -54,7 +54,7 @@ if(!empty($item_id)) {
         $item_param->data = $data;
 
         // guardian information
-        $isGraded = isset($data->awarded_mark) ? true : false;
+        $isGraded = (bool)isset($data->awarded_mark);
         $isClosed = in_array($data->state, ["Closed"]);
         $isActive = in_array($data->state, ["Graded", "Pending", "Answered"]);
         $isMultipleChoice =  (bool) (($data->questions_type == "multiple_choice")); // || ($data->questions_type == "unassigned")
@@ -187,12 +187,16 @@ if(!empty($item_id)) {
                 <div class="col-lg-'.($isAuto && !$isMultipleChoice ? 9 : ($isUnassigned ? 12 : 10)).'" id="assignment-content">
                     '.( $isActive ?
                         '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
-                            <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
+                            <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Mark As Closed</button>
                             '.(!$isMultipleChoice ? '<button class="btn btn-outline-success" onclick="return save_AssignmentMarks();"><i class="fa fa-save"></i> Save</button>' : '').'
                         </div>' : (
-                            $isAdmin && $isAuto && !empty($questions_query) ? '
-                                <button class="btn mb-2 btn-outline-danger" onclick="return reopen_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Reopen</button>
-                            ' : ''
+                            $isAdmin && $isAuto ? '
+                            <div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
+                                <button class="btn mb-2 btn-outline-danger" onclick="return reopen_Assignment(\''.$data->item_id.'\');">
+                                    <i class="fa fa-times"></i> Reopen Assignment
+                                </button>
+                            </div>
+                        ' : ''
                         )
                     ).'
                     '.$myClass->quick_student_search_form.'
@@ -257,7 +261,7 @@ if(!empty($item_id)) {
                     </div>
                     '.( $isActive ?
                         '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
-                            <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Close</button>
+                            <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Mark As Closed</button>
                             '.(!$isMultipleChoice ? '<button class="btn btn-outline-success" onclick="return save_AssignmentMarks();"><i class="fa fa-save"></i> Save</button>' : '').'
                         </div>' : (
                             $isAdmin && $isAuto && !empty($questions_query) ? '
@@ -441,7 +445,7 @@ if(!empty($item_id)) {
                     <div class="card-header">
                         <h4>'.$data->assignment_type.' Details</h4>
                     </div>
-                    '.$assignmentClass->quick_data($data).'
+                    '.$assignmentClass->quick_data($data, $isActive, ($isAdmin && $isAuto)).'
                 </div>
                 <div class="card">
                     <div class="card-header"><h4>Created By Details</h4></div>

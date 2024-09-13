@@ -275,7 +275,7 @@ class Assignments extends Myschoolgh {
             // show this section if the user has the necessary permissions
             if($hasUpdate) {
                 $assignments_list .= "<td>{$each->students_assigned}</td>";
-                $assignments_list .= "<td>{$each->students_handed_in}</td>";
+                $assignments_list .= "<td>".($each->students_handed_in + $each->students_graded)."</td>";
                 $assignments_list .= "<td>{$each->students_graded}</td>";
             }
             
@@ -1310,10 +1310,13 @@ class Assignments extends Myschoolgh {
      * 
      * @return String
      */
-    public function quick_data(stdClass $data) {
+    public function quick_data(stdClass $data, bool $isActive = false, bool $canReopen = false) {
 
         // global variable
         global $isStudent, $isWardParent;
+
+        // total sum of students who have handed in
+        $handedIn = $data->students_handed_in + $data->students_graded;
 
         // set the data
         $html_content = '
@@ -1332,11 +1335,15 @@ class Assignments extends Myschoolgh {
                 </p>
                 <p class="clearfix">
                     <span class="float-left font-bold">Handed In</span>
-                    <span class="float-right text-muted">'.$data->students_handed_in . ($data->students_handed_in > 1 ? " Students" : " Student" ).'</span>
+                    <span class="float-right text-muted">'.($handedIn) . ($handedIn > 1 ? " Students" : " Student" ).'</span>
                 </p>
                 <p class="clearfix">
                     <span class="float-left font-bold">Marked</span>
-                    <span class="float-right text-muted"><span class="graded_count">'.$data->students_graded.' Students</span>
+                    <span class="float-right text-muted">
+                        <span class="graded_count">
+                        '.$data->students_graded.' '.($data->students_graded > 1 ? " Students" : " Student").'
+                        </span>
+                    </span>
                 </p>
                 <p class="clearfix">
                     <span class="float-left font-bold">Grade Scale</span>
@@ -1365,12 +1372,25 @@ class Assignments extends Myschoolgh {
                         '.($isWardParent ? $this->the_status_label($data->handed_in) : $this->the_status_label($data->state)).'
                     </span>
                 </p>
-
                 '.($data->isGraded ? 
                     '<p class="clearfix">
                         <span class="float-left font-weight-bold">Awarded Mark:</span>
                         <span class="float-right text-primary"><span style="font-size:30px">'.$data->awarded_mark.'</span>/<sub style="font-size:30px">'.$data->grading.'</sub></span>
                     </p>' : ''
+                ).'
+                '.($isActive ? '
+                    <div class="text-center">
+                        <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');">
+                            <i class="fa fa-times"></i> Mark As Closed
+                        </button>
+                    </div>' : (
+                        $canReopen ? '
+                        <div class="text-center">
+                            <button class="btn mb-2 btn-outline-danger" onclick="return reopen_Assignment(\''.$data->item_id.'\');">
+                                <i class="fa fa-times"></i> Reopen Assignment
+                            </button>
+                        </div>' : null
+                    )
                 ).'
             </div>
         </div>';
