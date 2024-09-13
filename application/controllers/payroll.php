@@ -130,15 +130,15 @@ class Payroll extends Myschoolgh {
         $t_deductions = 0;
         
         // process the employee allowances
-        if(isset($params->allowances) && !empty($params->allowances)) {
+        if(!empty($params->allowances) && is_array($params->allowances)) {
             // loop through the allowance list
             foreach($params->allowances as $key => $value) {
                 // check if the key is not null
-                if($key !== "null") {
+                if($key !== "null" && !empty($key)) {
                     // set the value
                     $allowances[] = [
                         'allowance_id' => (int) $key,
-                        'allowance_amount' => $value,
+                        'allowance_amount' => !empty($value) ? $value : 0,
                         'allowance_type' => 'Allowance'
                     ];
                     $t_allowances += !empty($value) && preg_match("/^[0-9]+$/", $value) ? $value : 0;
@@ -147,11 +147,11 @@ class Payroll extends Myschoolgh {
         }
 
         // process the employee allowances
-        if(isset($params->deductions) && !empty($params->deductions)) {
+        if(!empty($params->deductions) && is_array($params->deductions)) {
             // loop through the allowance list
             foreach($params->deductions as $key => $value) {
                 // check if the key is not null
-                if($key !== "null") {
+                if($key !== "null" && !empty($key)) {
                     // set the value
                     $allowances[] = [
                         'allowance_id' => (int) $key,
@@ -170,6 +170,11 @@ class Payroll extends Myschoolgh {
 
         /** if the gross salary is set */
         if(isset($params->basic_salary)) {
+
+            // another check
+            if(empty($the_user->basic_salary)) {
+                $employeePayslip = $this->pushQuery("*", "payslips_employees_payroll", "client_id='{$params->clientId}' AND employee_id='{$params->employee_id}' LIMIT 1");
+            }
 
             /* Delete the employee allowance records and insert a new data */
             $stmt = $this->db->prepare("DELETE FROM payslips_employees_allowances WHERE employee_id = ? AND client_id = ?");
@@ -193,7 +198,7 @@ class Payroll extends Myschoolgh {
             $net_allowance = $t_allowances - $t_deductions;
             
             /** Insert/Update the basic salary information */
-            if(empty($the_user->basic_salary)) {
+            if(empty($the_user->basic_salary) && empty($employeePayslip)) {
 
                 /** Insert a new record */
                 $stmt = $this->db->prepare("INSERT INTO payslips_employees_payroll SET 
@@ -216,17 +221,21 @@ class Payroll extends Myschoolgh {
                 $stmt->execute([$params->basic_salary, $gross_salary, $t_allowances, $t_deductions, $net_allowance, 
                     $net_salary, $params->clientId, $params->employee_id]);
 
-                /** Data to save */
-                $log = "
-                <p class='mb-0 pb-0'><strong>Basic Salary:</strong> {$the_user->basic_salary} => {$params->basic_salary}</p>
-                <p class='mb-0 pb-0'><strong>Total Allowances:</strong> {$the_user->allowances} => {$t_allowances}</p>
-                <p class='mb-0 pb-0'><strong>Gross Salary:</strong> {$the_user->gross_salary} => {$gross_salary}</p>
-                <p class='mb-0 pb-0'><strong>Total Deductions:</strong> {$the_user->deductions} => {$t_deductions}</p>
-                <p class='mb-0 pb-0'><strong>Net Allowances:</strong> {$the_user->net_allowance} => {$net_allowance}</p>
-                <p class='mb-0 pb-0'><strong>Net Salary:</strong> {$the_user->net_salary} => {$net_salary}</p>";
+                
+                if(empty($employeePayslip)) {
+                    /** Data to save */
+                    $log = "
+                    <p class='mb-0 pb-0'><strong>Basic Salary:</strong> {$the_user->basic_salary} => {$params->basic_salary}</p>
+                    <p class='mb-0 pb-0'><strong>Total Allowances:</strong> {$the_user->allowances} => {$t_allowances}</p>
+                    <p class='mb-0 pb-0'><strong>Gross Salary:</strong> {$the_user->gross_salary} => {$gross_salary}</p>
+                    <p class='mb-0 pb-0'><strong>Total Deductions:</strong> {$the_user->deductions} => {$t_deductions}</p>
+                    <p class='mb-0 pb-0'><strong>Net Allowances:</strong> {$the_user->net_allowance} => {$net_allowance}</p>
+                    <p class='mb-0 pb-0'><strong>Net Salary:</strong> {$the_user->net_salary} => {$net_salary}</p>";
+    
+                    // log the user activity
+                    $this->userLogs("salary_allowances", $params->employee_id, $log, "<strong>{$params->userData->name}</strong> updated the Salary Allowances of: <strong>{$the_user->name}</strong>", $params->userId);
+                }
 
-                // log the user activity
-                $this->userLogs("salary_allowances", $params->employee_id, $log, "<strong>{$params->userData->name}</strong> updated the Salary Allowances of: <strong>{$the_user->name}</strong>", $params->userId);
             }
             $data = "Employee Allowances was successfully updated";
         }

@@ -184,7 +184,7 @@ if(!empty($item_id)) {
                 $function = $isMultipleChoice ? "review_QuizAssignment" : "load_singleStudentData";
 
                 $grading_info .= '
-                <div class="col-lg-'.($isAuto && !$isMultipleChoice ? 9 : ($isUnassigned ? 12 : 10)).'" id="assignment-content">
+                <div class="col-lg-'.($isAuto && !$isMultipleChoice ? 11 : ($isUnassigned ? 12 : 11)).'" id="assignment-content">
                     '.( $isActive ?
                         '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
                             <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Mark As Closed</button>

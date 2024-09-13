@@ -395,15 +395,15 @@ class Users extends Myschoolgh {
 				return $params->query;
 			}
 
-			$loadWards = isset($params->append_wards) ? true : false;
-			$noKeyLoad = !isset($params->key_data_load) ? true : false;
-			$appendClient = isset($params->append_client) ? true : false;
+			$loadWards = !empty($params->append_wards) ? true : false;
+			$noKeyLoad = empty($params->key_data_load) ? true : false;
+			$appendClient = !empty($params->append_client) ? true : false;
 
 			// if the client data is parsed
-			$academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
-			$academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
+			$academic_year = !empty($params->academic_year) ? $params->academic_year : $this->academic_year;
+			$academic_term = !empty($params->academic_term) ? $params->academic_term : $this->academic_term;
 			
-			$leftJoin = isset($params->user_payroll) ? "LEFT JOIN payslips_employees_payroll up ON up.employee_id = a.item_id" : null;
+			$leftJoin = !empty($params->user_payroll) ? "LEFT JOIN payslips_employees_payroll up ON up.employee_id = a.item_id" : null;
 			$leftJoinQuery = !empty($leftJoin) ? ", 
 				up.gross_salary, up.net_allowance, up.allowances, up.deductions, up.net_salary, up.basic_salary,
 				up.account_name, up.account_number, up.bank_name, up.bank_branch, up.ssnit_number, up.tin_number" : null;
