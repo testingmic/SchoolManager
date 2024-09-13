@@ -324,7 +324,7 @@ class Terminal_reports extends Myschoolgh {
         }
 
         // set the name
-        $filename = "{$temp_dir}/".create_slug($class_name[0]->name, "_")."_".create_slug($course_item->name, "_")."_results_sheet.csv";
+        $filename = $temp_dir . create_slug($class_name[0]->name, "_")."_".create_slug($course_item->name, "_")."_results.csv";
 
         try {
 
@@ -430,7 +430,7 @@ class Terminal_reports extends Myschoolgh {
         $report_table = "<div style='max-width:1200px' class='table-responsive trix-slim-scroll'>";
         $report_table .= "<table width='100%' class='table table-bordered'>";
         $report_table .= "<thead>";
-        $report_table .= "<th>#</th>";
+        $report_table .= "<th width='5%'>#</th>";
         foreach($file_headers as $item) {
             $report_table .= "<th>{$item}</th>";
         }
@@ -461,7 +461,7 @@ class Terminal_reports extends Myschoolgh {
         $report_table .= "</table>";
         $report_table .= "</div>";
 
-        $report_table .= "<div class='text-right'>";
+        $report_table .= "<div class='text-right mt-3'>";
         $report_table .= "<button onclick='return save_terminal_report()' class='btn btn-outline-success'>Save Report</button>";
         $report_table .= "</div>";
 
@@ -990,7 +990,7 @@ class Terminal_reports extends Myschoolgh {
                 $percentage = !empty($percentage) ? array_sum($percentage) : 0;
 
                 $scores_array[$key]["raw_score"] = $raw_total;
-                $scores_array[$key]["percentage"] = $percentage;
+                $scores_array[$key]["percentage"] = round($percentage, 2);
 
                 // if the percentage exceeds 100 then log the error
                 if($percentage > 100) { $exceeds[] = $key; }
@@ -1220,9 +1220,9 @@ class Terminal_reports extends Myschoolgh {
                         $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->course_name}</td>";
                         // get the scores
                         foreach($score->scores as $s_score) {
-                            $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">{$s_score}</td>";
+                            $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">".round($s_score, 2)."</td>";
                         }
-                        $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">{$score->total_percentage}</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">".round($score->total_percentage, 2)."</td>";
                         $table .= "<td style=\"border: 1px solid #dee2e6;\">".strtoupper($score->teachers_name)."</td>";
                         $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->class_teacher_remarks}</td>";
                         $table .= "</tr>";

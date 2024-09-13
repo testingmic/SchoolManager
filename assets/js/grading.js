@@ -245,7 +245,7 @@ var download_report_csv = () => {
         if (response.code == 200) {
             $(`div[id='upload_file']`).removeClass("hidden");
             setTimeout(() => {
-                window.location.href = `${baseUrl}${response.data.result}`;
+                window.open(`${baseUrl}${response.data.result}`);
             }, 500);
         } else {
             swal({
@@ -382,7 +382,7 @@ var generate_terminal_report = () => {
         return false;
     }
 
-    window.open(`${baseUrl}download/terminal?academic_term=${academic_term}&academic_year=${academic_year}&class_id=${class_id}&student_id=${student_id}`)
+    window.open(`${baseUrl}download/terminal?academic_term=${academic_term}&academic_year=${academic_year}&class_id=${class_id}&student_id=${student_id}`);
 }
 
 $(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() {

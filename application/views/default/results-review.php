@@ -141,7 +141,7 @@ if(empty($result_id)) {
             // append to the scores
             $scores_list .= "
             <tr data-result_row_id='{$score->report_id}_{$score->student_row_id}'>
-                <td>".($key+1)."</td>
+                <td width='5%'>".($key+1)."</td>
                 <td>
                     ".strtoupper($score->student_name)." <br>
                     <strong class='text-primary'>{$score->student_unique_id}</strong>
@@ -165,7 +165,7 @@ if(empty($result_id)) {
                 // if the result has not yet been approved
                 if(!$isApproved && !$is_disabled) {
                     $scores_list .= "
-                    <td width='200px'>
+                    <td width='100px' class='text-center'>
                         ".(!$is_disabled && $hasModify ? "<span data-input_save_button='{$score->student_row_id}' onclick='return save_result(\"{$score->student_row_id}\",\"student\",\"{$score->report_id}\");' title='Save Student Marks' class='btn mb-2 hidden btn-sm btn-outline-success'><i class='fa fa-save'></i></span>" : null)."
                         ".(!$is_disabled && $hasApprove ? "<span data-input_approve_button='{$score->student_row_id}' onclick='return modify_result(\"approve\",\"{$score->report_id}_{$score->student_row_id}\");' title='Approve this Mark' class='btn btn-sm btn-outline-primary'><i class='fa fa-check-circle'></i></span>" : null)."
                     </td>";
@@ -252,7 +252,7 @@ if(empty($result_id)) {
                                 <p class="clearfix">
                                     <span class="float-left">Teachers Name</span>
                                     <span class="float-right text-muted text-uppercase">'.$data->fullname.' 
-                                        <i onclick="return load(\'staff/'.$data->created_by.'\');" class="fa btn btn-outline-success btn-sm fa-edit"></i>
+                                        <i onclick="return load(\'staff/'.$data->created_by.'/documents\');" class="fa btn btn-outline-success btn-sm fa-edit"></i>
                                     </span>
                                 </p>
                                 <p class="clearfix">
@@ -304,7 +304,7 @@ if(empty($result_id)) {
                             <div class="table-responsive trix-slim-scroll">
                                 <table width="100%" class="table table-bordered">
                                     <thead>
-                                        <th width="7%"></th>
+                                        <th width="5%"></th>
                                         <th width="20%">Student Name / ID</th>
                                         '.$scores_header.'
                                         <th>Raw Score</th>
