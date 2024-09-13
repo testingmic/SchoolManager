@@ -615,7 +615,13 @@ class Auth extends Myschoolgh {
                         $this->db->commit();
 
                         #record the password change request
-                        return ["code" => 200, "data" => "Please check your email for steps to reset password."];
+                        return [
+                            "code" => 200, 
+                            "data" => "Please check your email for steps to reset password.",
+                            "additional" => [
+                                // "resetPath" => $this->baseUrl.'verify?dw=password&token='.$request_token
+                            ]
+                        ];
 
                     }
 

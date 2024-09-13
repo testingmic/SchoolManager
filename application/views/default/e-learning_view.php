@@ -130,7 +130,9 @@ if(empty($item_id)) {
                     "<video data-video_unique_id='{$video->record_id}_{$video->unique_id}' data-video_item_id='{$item_id}' id='elearning_video' ".($autoplay ? "autoplay='true'" : null)." 
                         style='display: block; cursor:pointer; width:100%;' controls='true' src='{$baseUrl}{$video->path}#t={$timer}'></video>" :
                     (
-                        $isPDF ? "<iframe style='border: none;' allowFullscreen='true' src='{$baseUrl}{$video->path}' height='700px' width='100%'></iframe>" : null
+                        $isPDF ? "<iframe style='border: none;' allowFullscreen='true' src='{$baseUrl}{$video->path}' height='700px' width='100%'></iframe>" : (
+                            $isImage ? "<img src='{$baseUrl}{$video->path}' width='100%'>" : null
+                        )
                     )
                 )."
             </div>
