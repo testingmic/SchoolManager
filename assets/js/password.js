@@ -101,6 +101,11 @@ var search_By_Fullname_Unique_ID = () => {
                                     <td><strong>Unique ID: </strong></td>
                                     <td><strong>${data.unique_id}</strong></td>
                                 </tr>
+                                ${data.username !== null ? `
+                                <tr>
+                                    <td><strong>Username: </strong></td>
+                                    <td>${data.username}</td>
+                                </tr>` : ""}
                                 ${data.phone_number !== null ? `
                                 <tr>
                                     <td><strong>Contact Number: </strong></td>

@@ -590,7 +590,7 @@ class Assignments extends Myschoolgh {
      */
     public function load_course_students(stdClass $params) {
 
-        global $isTeacher, $defaultUser;
+        global $isTeacher, $isAdmin, $defaultUser;
 
         /** Load the Students List */
         $result["students_list"] = $this->pushQuery("
@@ -618,7 +618,9 @@ class Assignments extends Myschoolgh {
             }    
         }
 
-        $result["courses_list"] = $n_courses;
+        $result["courses_list"] = $isTeacher ? $n_courses : (
+            $isAdmin ? $result["courses_list"] : []
+        );
 
         /** Return the results */
         return [
