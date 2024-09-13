@@ -37,6 +37,17 @@ class Users extends Myschoolgh {
 	}
 
 	/**
+	 * Perform checks to handle logged in
+	 * 
+	 * @return bool
+	 */
+	public function onlineCheck() {
+		
+		return true;
+
+	}
+
+	/**
 	 * Quick List of Users
 	 * 
 	 * @return Array

@@ -89,6 +89,8 @@ if((($inner_url == "devlog") && ($outer_url == "auth")) || ($inner_url == "auth"
     } elseif(isset($params->portal_registration, $params->school_name, $params->school_address, $params->school_contact, $params->email)) {
         // request password reset
         $response->result = $logObj->create($params);
+    } elseif(!empty($params->onlineCheck)) {
+        $response->result = "You are still successfully logged in.";
     }
 
     // print the error description
