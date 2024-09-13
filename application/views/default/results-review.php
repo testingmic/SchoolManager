@@ -171,7 +171,7 @@ if(empty($result_id)) {
                     </td>";
                 } else {
                     $scores_list .= "
-                    <td>
+                    <td class='text-center'>
                         <span title='Save Student Marks' class='badge p-1 badge-success'>Approved</span>
                     </td>";
                 }

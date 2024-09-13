@@ -288,6 +288,18 @@ class Attendance extends Myschoolgh {
         // width for each column
         $width = number_format((85/count($array_list["days_range_list"])), 2);
 
+        // join the names list
+        $names_array = [];
+
+        $class_id = isset($params->class_id) && ($params->class_id !== "null") ? $params->class_id : null;
+        $user_type = $the_user_type == "staff" ? "('teacher','employee','admin','accountant')" : "('{$the_user_type}')";
+
+        $query = " AND (user_type IN {$user_type})";
+        $query .= !empty($class_id) ? " AND class_id='{$params->class_id}'" : null;
+        
+        // get the list of students
+        $names_array = $this->pushQuery("name, item_id, user_type", "users", "1 {$query} AND client_id='{$params->clientId}' AND status='1' AND user_status IN ({$this->default_allowed_status_users_list})");
+        
         // if the document is downloadable
         if($isDownloadable) {
 
@@ -304,10 +316,12 @@ class Attendance extends Myschoolgh {
 
                 // more information
                 $information = "
-                    <span><strong>User Type:</strong> {$the_user_type}</span><br>
+                    <span><strong>User Type:</strong> <span class='uppercase'>{$the_user_type}</span></span><br>
                     <span><strong>Class Name:</strong> {$class_info->name}</span><br>
                     <span><strong>Class Code:</strong> {$class_info->class_code}</span><br>
-                    <span><strong>Class Size:</strong> {$class_info->class_size}</span><br>
+                    <span><strong>Class Size:</strong> ".(
+                        !empty($class_info->class_size) ? $class_info->class_size : count($names_array)
+                    )."</span><br>
                     <span><hr></span>
                     <span><strong>Month/Year:</strong> ".date("F Y", strtotime($start_date))."</span>
                 ";
@@ -418,18 +432,6 @@ class Attendance extends Myschoolgh {
             ],
         ];
 
-        // join the names list
-        $names_array = [];
-
-        $class_id = isset($params->class_id) && ($params->class_id !== "null") ? $params->class_id : null;
-        $user_type = $the_user_type == "staff" ? "('teacher','employee','admin','accountant')" : "('{$the_user_type}')";
-
-        $query = " AND (user_type IN {$user_type})";
-        $query .= !empty($class_id) ? " AND class_id='{$params->class_id}'" : null;
-        
-        // get the list of students
-        $names_array = $this->pushQuery("name, item_id, user_type", "users", "1 {$query} AND client_id='{$params->clientId}' AND status='1' AND user_status IN ({$this->default_allowed_status_users_list})");
-        
         // set the table body
         $table_content .= "<tbody>";
 
