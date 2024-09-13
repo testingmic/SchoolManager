@@ -221,6 +221,11 @@ load_helpers(['menu_helper']);
                         </div>
                     </li>
                     <?php } ?>
+                    <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
+                        <li class="dropdown dropdown-list-toggle">
+                            <a title="Account Settings" href="<?= $baseUrl ?>settings" class="nav-link nav-link-lg"><i class="fa fa-cog"></i></a>
+                        </li>
+                    <?php } ?>
                     <?php if($accessObject->hasAccess("support", "settings")) { ?>
                     <li class="dropdown dropdown-list-toggle">
                         <a title="Support Tickets List" href="<?= $baseUrl ?>support" class="nav-link nav-link-lg"><i class="fa fa-user-cog"></i></a>
