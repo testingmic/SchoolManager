@@ -445,7 +445,7 @@ if(!empty($item_id)) {
                     <div class="card-header">
                         <h4>'.$data->assignment_type.' Details</h4>
                     </div>
-                    '.$assignmentClass->quick_data($data, $isActive, ($isAdmin && $isAuto)).'
+                    '.$assignmentClass->quick_data($data, ($isActive && $isTutorAdmin), ($isAdmin && $isAuto)).'
                 </div>
                 <div class="card">
                     <div class="card-header"><h4>Created By Details</h4></div>
@@ -476,7 +476,7 @@ if(!empty($item_id)) {
             </div>
             <div class="col-12 col-md-12 col-lg-8">
                 <div class="card">
-                <div class="padding-20">
+                <div class="padding-15">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     '.($isAuto  ?
                         ($isTutorAdmin && $isMultipleChoice ? 
@@ -487,13 +487,13 @@ if(!empty($item_id)) {
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link '.($url_link === "_grading" ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
-                                    Question Details
+                                    Instructions
                                 </a>
                             </li>
                             ' : '
                             <li class="nav-item">
                                 <a class="nav-link '.(!$updateItem ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
-                                    Question Details
+                                    Instructions
                                 </a>
                             </li>
                             '    
@@ -501,7 +501,7 @@ if(!empty($item_id)) {
                     ).'
                     <li class="nav-item">
                         <a class="nav-link '.(!$isAuto ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
-                            '.($isTutorAdmin ? "Grading" : "Handin Assignment").'
+                            '.($isTutorAdmin ? "Grading" : "Handin Answers").'
                         </a>
                     </li>';
 
