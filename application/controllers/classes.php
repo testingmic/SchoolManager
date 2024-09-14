@@ -71,8 +71,7 @@ class Classes extends Myschoolgh {
         try {
 
             $stmt = $this->db->prepare("
-                SELECT ".(isset($params->columns) ? $params->columns : " a.*,
-                    (SELECT name FROM departments WHERE departments.id = a.department_id LIMIT 1) AS department_name,
+                SELECT ".(isset($params->columns) ? $params->columns : " a.*, dp.name AS department_name,
                     (
                         SELECT COUNT(*) FROM users b 
                         WHERE b.user_status IN ({$this->default_allowed_status_users_list}) AND b.deleted='0' AND b.user_type='student' 
@@ -93,6 +92,7 @@ class Classes extends Myschoolgh {
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.user_type) FROM users b WHERE b.item_id = a.class_teacher LIMIT 1) AS class_teacher_info
                     ")."
                 FROM classes a
+                LEFT JOIN departments dp ON dp.id = a.department_id
                 WHERE {$params->query} AND a.status = ? ORDER BY a.id LIMIT {$params->limit}
             ");
             $stmt->execute([1]);

@@ -52,6 +52,7 @@ foreach($item_list["data"] as $key => $each) {
     $classes .= "<td>".($key+1)."</td>";
     $classes .= "<td><span class='bold_cursor text-uppercase underline text-info' onclick='return load(\"class/{$each->item_id}\");'>{$each->name}</span></td>";
     $classes .= "<td>{$each->class_code}</td>";
+    $classes .= "<td>{$each->department_name}</td>";
     $classes .= "<td>{$each->class_size}</td>";
     $classes .= "<td>{$each->students_count}</td>";
     $classes .= "<td><span class='user_name'>".($each->class_teacher_info->name ?? null)."</span></td>";
@@ -79,12 +80,13 @@ $response->html = '
                                     <tr>
                                         <th width="5%" class="text-center">#</th>
                                         <th>Class Name</th>
-                                        <th>Class Code</th>
+                                        <th>Code</th>
+                                        <th>Department</th>
                                         <th>Class Size</th>
                                         <th width="15%">Students Count</th>
                                         <th>Class Teacher</th>
                                         <th>Class Prefect</th>
-                                        <th align="center" width="12%"></th>
+                                        <th align="center" width="13%"></th>
                                     </tr>
                                 </thead>
                                 <tbody>'.$classes.'</tbody>

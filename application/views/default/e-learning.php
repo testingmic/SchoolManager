@@ -23,7 +23,7 @@ $response->scripts = ["assets/js/resources.js"];
 // load the classes list
 $classes_param = (object) [
     "clientId" => $clientId,
-    "columns" => "id, name",
+    "columns" => "a.id, a.name, a.item_id",
     "client_data" => $defaultUser->client
 ];
 $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
@@ -45,7 +45,7 @@ $response->html = '
                     <select class="form-control selectpicker" name="class_id">
                         <option value="">Please Select Class</option>';
                         foreach($class_list as $each) {
-                            $response->html .= "<option value=\"{$each->id}\">{$each->name}</option>";
+                            $response->html .= "<option value=\"{$each->item_id}\">{$each->name}</option>";
                         }
                         $response->html .= '
                     </select>
@@ -74,7 +74,7 @@ $response->html = '
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-12 col-lg-12">
+            <div class="col-12 col-sm-12 col-lg-12 mt-2">
                 <div class="card">
                     <div class="card-body" id="elearning">
                         <div class="form-content-loader" style="display: none; position: absolute">

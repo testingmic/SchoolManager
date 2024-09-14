@@ -62,7 +62,9 @@ class Courses extends Myschoolgh {
         }
 
         $_filters .= (!empty($params->class_id) && !is_array($params->class_id)) ? 
-            " AND a.class_id LIKE '%{$params->class_id}%'" : (!empty($params->class_id) && is_array($params->class_id) ? " AND a.class_id IN {$this->inList($params->class_id)} " : null);
+            " AND a.class_id LIKE '%{$params->class_id}%'" : (
+                !empty($params->class_id) && is_array($params->class_id) ? " AND a.class_id IN {$this->inList($params->class_id)} " : null
+        );
         $_filters .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
         $_filters .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
         $_filters .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
