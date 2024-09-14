@@ -9,9 +9,6 @@ $pages_content = "<style>@page { margin: 5px; } body { margin: 5px; } .page_brea
 error_reporting(1);
 ini_set("memory_limit", "-1");
 
-// require the autoload file
-require ROOTPATH . "/system/libraries/dompdf/vendor/autoload.php";
-
 // reference the Dompdf namespace
 use Dompdf\Dompdf;
 
