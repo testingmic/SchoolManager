@@ -10,7 +10,7 @@ attributes of individual HTML elements.
 
 *This document applies to the latest stable code which may not reflect the current 
 release. For released code please
-[navigate to the appropriate tag](https://github.com/testingmic/SchoolManager/releases/tag).*
+[navigate to the appropriate tag](https://github.com/testingmic/SchoolManager/releases).*
 
 ----
 
