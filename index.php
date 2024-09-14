@@ -2,6 +2,7 @@
 #display errors
 error_reporting(E_ALL);
 
+// display errors if the host is localhost
 if($_SERVER['HTTP_HOST'] == "localhost") {
 	// display the errors
 	ini_set("display_errors", 1);
@@ -13,8 +14,11 @@ ini_set("error_log", "errors_log");
 
 define('ROOTPATH', __DIR__);
 
+// require the autoload for composer packages
+require_once ROOTPATH . "/vendor/autoload.php";
+
 // include the settings file
-require_once "system/config/settings.php";
+require_once ROOTPATH . "/system/config/settings.php";
 
 if(file_exists("system/core/myschoolgh.php")) {
     require_once "system/core/myschoolgh.php";
