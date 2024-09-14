@@ -154,7 +154,7 @@ require "headtags.php";
                                     <div class="row">
                                         <div class="col-md-5">
                                             <div class="form-group">
-                                                <select name="resource" id="resource" class="form-control selectpicker">
+                                                <select data-width="100%" name="resource" id="resource" class="form-control selectpicker">
                                                     <option value="">Select Resource</option>
                                                     <?php foreach($resources["data"] as $key => $value) { ?>
                                                     <option <?= ($resource == $value->resource) ? "selected" : null; ?> value="<?= $value->resource ?>"><?= ucfirst($value->resource) ?></option>
@@ -164,7 +164,7 @@ require "headtags.php";
                                         </div>
                                         <div class="col-md-5">
                                             <div class="form-group">
-                                                <select name="method" id="method" class="form-control selectpicker">
+                                                <select data-width="100%" name="method" id="method" class="form-control selectpicker">
                                                     <option value="">Select Method</option>
                                                     <option <?= ($method == "get") ? "selected" : null; ?> value="get">GET</option>
                                                     <option <?= ($method == "post") ? "selected" : null; ?> value="post">POST</option>
@@ -187,7 +187,7 @@ require "headtags.php";
                                         <th width="15%">Method</th>
                                         <th width="20%"></th>
                                     </table>
-                                    <div class="slim-scroll" style="overflow-y:auto;height:430px">
+                                    <div class="slim-scroll" style="overflow-y:auto;height:650px">
                                         <table class="table pt-0 mt-0 table-hover data-table">
                                             <tbody>
                                             <?php $key = 0; foreach($list["data"] as $value) { $key++; ?>
@@ -223,7 +223,7 @@ require "headtags.php";
                     <div class="col-lg-7">
                         <div class="card">
                             <div class="card-header">
-                                <div class="card-title">
+                                <div class="card-title width-100">
                                     Endpoint Content &nbsp;
                                     <span class="float-right">
                                         <a href="<?= $baseUrl ?>endpoints" class="btn btn-sm hidden refresh-button btn-outline-success"><i class="fa fa-random"></i> Refresh</a>

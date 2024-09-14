@@ -104,7 +104,7 @@ $response->html = '
                         </div>
                         <div class="form-group">
                             <label class="font-bold">ACCESS PERMISSION</label>
-                            <textarea disabled style="height:280px" class="form-control custom_form-control" id="access_permission"></textarea>
+                            <textarea disabled style="height:350px!important" class="form-control custom_form-control" id="access_permission"></textarea>
                         </div>
                         <div class="d-flex justify-content-between">
                             <div>
