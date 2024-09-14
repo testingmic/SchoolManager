@@ -6,4 +6,3 @@ assets/img/accounts/*
 db.ini
 assets/uploads/*
 !assets/uploads/index.html
-vendor/*
