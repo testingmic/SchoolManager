@@ -23,7 +23,7 @@ Options All -Indexes
 <IfModule !mod_rewrite.c>
 	ErrorDocument 404 index.php
 </IfModule>
-<FilesMatch "\.ini$|^\.git">
+<FilesMatch "\.ini$|^\.git|^composer">
     Order allow,deny
     Deny from all
 </FilesMatch>
