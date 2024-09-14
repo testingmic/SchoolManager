@@ -148,9 +148,13 @@ var save_AssignmentQuestion = (assignment_id) => {
                         questions_list += `
                         <tr data-row_id="${e.item_id}">
                             <td>${count}</td>
-                            <td>${e.question}</td>
-                            <td data-column='mark'>${e.marks}</td>
                             <td>
+                                <div class='p-1'>
+                                    ${e.question}
+                                </div>
+                            </td>
+                            <td data-column='mark' class='text-center'>${e.marks}</td>
+                            <td class='text-center'>
                                 <button class="btn btn-outline-success btn-sm" onclick="return review_AssignmentQuestion('${assignment_id}','${e.item_id}')"><i class="fa fa-edit"></i></button>
                                 <button class="btn btn-outline-danger btn-sm" onclick="return remove_AssignmentQuestion('${assignment_id}','${e.item_id}')"><i class="fa fa-trash"></i></button>
                             </td>

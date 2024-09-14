@@ -234,7 +234,7 @@ class Assignments extends Myschoolgh {
     
             // manage questions button
             if($hasUpdate && $each->questions_type == "multiple_choice") {
-                $action .= "&nbsp;<a title='Manage questions for this Assessment' href='#' onclick='return load(\"add-assessment/add_question?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
+                $action .= "&nbsp;<a title='Manage questions for this Assessment' href='#' onclick='return load(\"add-assessment/add_question/{$each->item_id}?qid={$each->item_id}\");' class='btn btn-sm mb-1 btn-outline-warning' title='Reviews Questions'>Questions</a>";
             }
     
             // if the state is either closed or graded

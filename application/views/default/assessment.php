@@ -96,7 +96,7 @@ if(!empty($item_id)) {
                 $questions_list .= "<tr>";
                 $questions_list .= "<th width='5%'>#</th>";
                 $questions_list .= "<th width='65%'>Question Content</th>";
-                $questions_list .= "<th>Marks</th>";
+                $questions_list .= "<th class='text-center'>Marks</th>";
                 $questions_list .= "<th></th>";
                 $questions_list .= "</tr>";
                 $questions_list .= "</thead>";
@@ -121,7 +121,7 @@ if(!empty($item_id)) {
                         <tr data-row_id='{$question->item_id}'>
                             <td>{$ii}</td>
                             <td>{$question->question}</td>
-                            <td>{$question->marks}</td>
+                            <td class='text-center'>{$question->marks}</td>
                             <td align='center'>";
                                 if(!$isActive && !$isClosed) {
                                     $questions_list .= "<a href='{$baseUrl}add-assessment/add_question?qid={$item_id}&q_id={$question->item_id}' class='btn btn-sm btn-outline-success'><i class='fa fa-edit'></i></a>&nbsp;";
@@ -529,7 +529,8 @@ if(!empty($item_id)) {
                                 <div class="pt-0">
                                     '.(!$isActive && !$isClosed ? '
                                     <div class="mb-2 text-right">
-                                        '.(!empty($questions_query) ? '<a href="#" onclick="return publish_AssignmentQuestion(\''.$item_id.'\',\''.count($questions_query).'\');" class="anchor btn btn-outline-success"><i class="fa fa-send"></i> Publish Assignment</a>' : null).'
+                                        '.(!empty($questions_query) ? '<a href="#" onclick="return publish_AssignmentQuestion(\''.$item_id.'\',\''.count($questions_query).'\');" class="anchor btn btn-outline-success">
+                                            <i class="fa fa-upload"></i> Publish Assignment</a>' : null).'
                                         <a href="'.$baseUrl.'add-assessment/add_question?qid='.$item_id.'" class="btn btn-outline-primary"><i class="fa fa-plus"></i> Add Question</a>
                                     </div>' : 
                                     '<div class="mb-2 text-right">
