@@ -50,6 +50,9 @@ if(empty($user_id)) {
     if(empty($data["data"])) {
         $response->html = page_not_found();
     } else {
+
+        // set the user_id id in the console
+        $response->array_stream['user_id'] = $user_id;
         
         // load the incidents
         $incidents = load_class("incidents", "controllers")->list($staff_param);
@@ -280,11 +283,14 @@ if(empty($user_id)) {
                 $attachment_html = $formsObj->list_attachments($db_attachments->files ?? [], $prevData[0]->created_by, "col-lg-4 col-md-6", $isAdmin, false);
             }
         }
+        
+        // append to the scripts
+        $response->scripts = ["assets/js/webcam.js"];
 
         // set the other parametrs
         if($hasUpdate) {
             // append to the scripts
-            $response->scripts = ["assets/js/analitics.js", "assets/js/upload.js", "assets/js/staff.js"];
+            $response->scripts = ["assets/js/analitics.js", "assets/js/upload.js", "assets/js/staff.js", "assets/js/webcam.js"];
 
             // file upload parameter
             $file_params = (object) [

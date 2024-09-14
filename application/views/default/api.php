@@ -246,6 +246,12 @@ if(!$skipProcessing) {
         $Api->appendClient = true;
     }
 
+    // save user image
+    if($inner_url === 'save_image' && !empty($params->image) && !empty($params->user_id)) {
+        // save the user image
+        $Api->save_user_image($params);
+    }
+
     // set the full endpoint url
     $Api->endpoint_url = "{$inner_url}/{$outer_url}";
 

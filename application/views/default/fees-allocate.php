@@ -20,7 +20,7 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Allocate Student Fees";
 $response->title = $pageTitle;
 
-$response->scripts = ["assets/js/fees_allocation.js"];
+$response->scripts = ["assets/js/fees_allocation.js", "assets/js/webcam.js"];
 
 // student id
 $user_id = $SITEURL[1] ?? null;
@@ -28,6 +28,7 @@ $is_new_admission = (bool) (isset($_GET["is_new_admission"]) && ($_GET["is_new_a
 
 // if the user has the permission to allocate fees
 $canAllocate = $accessObject->hasAccess("allocation", "fees");
+$hasUpdate = $accessObject->hasAccess("update", "student");
 
 /** confirm that the user has the permission to receive payment */
 if(!$canAllocate) {
@@ -85,6 +86,9 @@ elseif(!empty($user_id)) {
 
         // set the headers
         $headers["balance"] = "BALANCE";
+
+        // set the user_id id in the console
+        $response->array_stream['user_id'] = $user_id;
 
         // list the class allocation
         if((empty($studentAllocation) && !empty($classAllocation)) || !empty($studentAllocation)) {
@@ -271,8 +275,28 @@ elseif(!empty($user_id)) {
                     <div class="col-12 col-md-5 col-lg-4">
                         <div class="card author-box pt-2">
                             <div class="card-body pl-1 pr-1">
-                                <div class="author-box-center m-0 p-0">
-                                    <img alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
+                                <div class="text-center">
+                                    <div class="author-box-center m-0 p-0">
+                                        <img id="avatar" alt="image" src="'.$baseUrl.''.$data->image.'" class="profile-picture">
+                                    </div>
+                                    '.($hasUpdate ?
+                                        '<style>
+                                            #video, canvas {
+                                                display: inline-block;
+                                                margin-bottom: 10px;
+                                            }
+                                            #video, #canvas {
+                                                display: none;
+                                            }
+                                        </style>
+                                        <video id="video" width="320" height="240" autoplay></video>
+                                        <canvas id="canvas" width="320" height="240"></canvas>
+                                        <div class="text-center mt-1">
+                                            <button class="btn btn-outline-primary" id="replaceAvatar"><i class="fa fa-camera"></i> Use Webcam</button>
+                                            <button class="btn btn-outline-success" id="capture" style="display:none;">Capture Photo</button>
+                                            <button class="btn btn-success" id="save" style="display:none;"><i class="fa fa-save"></i> Save Photo</button>
+                                        </div>' : null
+                                    ).'
                                 </div>
                                 <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
                                 <div class="text-center border-top mt-0">
@@ -331,8 +355,7 @@ elseif(!empty($user_id)) {
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                        ' : 
+                                </div>' : 
                             notification_modal("Fees Category Not Set", $myClass->error_logs["fees_category_not_set"]["msg"], $myClass->error_logs["fees_category_not_set"]["link"])
                         ).'
                         </div>

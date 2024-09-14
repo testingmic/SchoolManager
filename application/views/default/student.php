@@ -47,7 +47,7 @@ if(!empty($user_id)) {
     } else {
 
         // load the scripts
-        $response->scripts = ["assets/js/analitics.js", "assets/js/index.js", "assets/js/staff.js", "assets/js/upload.js"];
+        $response->scripts = ["assets/js/analitics.js", "assets/js/index.js", "assets/js/staff.js", "assets/js/upload.js", "assets/js/webcam.js"];
 
         // set the first key
         $data = $data["data"][0];
@@ -57,6 +57,9 @@ if(!empty($user_id)) {
 
         // load the incidents
         $incidents = load_class("incidents", "controllers")->list($student_param);
+
+        // set the user_id id in the console
+        $response->array_stream['user_id'] = $user_id;
         
         // user permissions
         $hasUpdate = $accessObject->hasAccess("update", "student");
