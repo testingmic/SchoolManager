@@ -66,7 +66,7 @@ var reviewQuizAssignment = (assignment_id) => {
     }).catch(() => {});
 }
 
-var submitQuizAssignment = (assignment_id) => {
+var submitQuizAssignment = (assignment_id, action = "") => {
     swal({
         title: "Handin Assignment",
         text: "Are you sure you want to handin your assignment? Please note, you cannot revert the action once submitted.",
@@ -89,7 +89,7 @@ var submitQuizAssignment = (assignment_id) => {
                 answers[0] = $(`input[name='answer_option'][type='number']`).val();
             }
 
-            $.post(`${baseUrl}api/assignments/handin`, { assignment_id, question_id, answers }).then((response) => {
+            $.post(`${baseUrl}api/assignments/handin`, { assignment_id, question_id, answers, action }).then((response) => {
                 if (response.code == 200) {
                     loadPage(`${baseUrl}assessment/${assignment_id}/view`);
                 }

@@ -860,7 +860,7 @@ class Forms extends Myschoolgh {
                 <div class="col-md-4">
                     <div class="form-group" style="max-width:300px">
                         <label class="custom-label"><strong>Answer Type</strong> <span class="required">*</span></label>
-                        <select '.$disabled.' class="form-control selectpicker" name="answer_type" id="answer_type">';
+                        <select '.$disabled.' data-width="100%" class="form-control selectpicker" name="answer_type" id="answer_type">';
 
                         foreach($answer_types as $key => $value) {
                             $html_content .= '<option '.(isset($data->answer_type) && ($data->answer_type == $key) ? "selected" : null).' value="'.$key.'">'.$value.'</option>';
@@ -872,7 +872,7 @@ class Forms extends Myschoolgh {
                 <div class="col-md-4">
                     <div class="form-group" style="max-width:300px">
                         <label class="custom-label"><strong>Difficulty Level</strong></label>
-                        <select '.$disabled.' class="form-control selectpicker" name="difficulty" id="difficulty">';
+                        <select '.$disabled.' data-width="100%" class="form-control selectpicker" name="difficulty" id="difficulty">';
 
                         foreach($difficulty as $key => $value) {
                             $html_content .= '<option '.(isset($data->difficulty) && ($data->difficulty == $key) ? "selected" : null).' value="'.$key.'">'.$value.'</option>';
@@ -5631,9 +5631,9 @@ class Forms extends Myschoolgh {
     /**
      * Generate the Bus Form
      * 
-     * @return Array
+     * @return object
      */
-    public function bus_form($data = []) {
+    public function bus_form($data = null) {
 
         /** Set parameters for the data to attach */
         $file_params = (object) [

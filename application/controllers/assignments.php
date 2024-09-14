@@ -274,17 +274,18 @@ class Assignments extends Myschoolgh {
     
             // show this section if the user has the necessary permissions
             if($hasUpdate) {
-                $assignments_list .= "<td>{$each->students_assigned}</td>";
-                $assignments_list .= "<td>".($each->students_handed_in + $each->students_graded)."</td>";
-                $assignments_list .= "<td>{$each->students_graded}</td>";
+                $assignments_list .= "<td class='text-center'>{$each->students_assigned}</td>";
+                $assignments_list .= "<td class='text-center'>".($each->students_handed_in + $each->students_graded)."</td>";
+                $assignments_list .= "<td class='text-center'>{$each->students_graded}</td>";
             }
             
             if(!$hasUpdate) {
-                $assignments_list .= "<td>{$each->awarded_mark}</td>";
+                $assignments_list .= "<td class='text-center'>{$each->grading}</td>";
+                $assignments_list .= "<td class='text-center'>{$each->awarded_mark}</td>";
             }
     
             $assignments_list .= "<td>{$each->date_created}</td>";
-            $assignments_list .= "<td>".($hasUpdate ? $this->the_status_label($each->state) : $each->handedin_label)."</td>";
+            $assignments_list .= "<td class='text-center'>".($hasUpdate ? $this->the_status_label($each->state) : $each->handedin_label)."</td>";
             $assignments_list .= "<td align='center'>{$action}</td>";
             $assignments_list .= "</tr>";
         }
@@ -913,8 +914,8 @@ class Assignments extends Myschoolgh {
 
                 // clean the content parsed
                 $params->content = !empty($params->content) ? custom_clean(htmlspecialchars_decode($params->content)) : null;
-                $params->content = htmlspecialchars($params->content);
-                $actionTo_Perform = $params->action ?? "Pending";
+                $params->content = !empty($params->content) ? htmlspecialchars($params->content) : null;
+                $actionTo_Perform = !empty($params->action) ? $params->action : "Pending";
                 
                 // insert a record if empty
                 if(empty($check) || (isset($check->handed_in) && ($check->handed_in === "Pending"))) {
@@ -1598,7 +1599,7 @@ class Assignments extends Myschoolgh {
                     <div align='right' class='col-md-8 mb-2'>
                         ".($session->showSubmitButton && $number == $questions_count ? "
                             <button onclick='return reviewQuizAssignment(\"{$question->assignment_id}\", \"{$session->previousQuestionId}\")' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-eye'></i> Review Answers</button>
-                            <button onclick='return submitQuizAssignment(\"{$question->assignment_id}\")' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-save'></i> Submit {$assignment_type}</button>
+                            <button onclick='return submitQuizAssignment(\"{$question->assignment_id}\", \"Submitted\")' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-save'></i> Submit {$assignment_type}</button>
                         " : "
                         ".($this->session->reviewQuestionsReached ? "<button onclick='return reviewQuizAssignment(\"{$question->assignment_id}\", \"{$session->previousQuestionId}\")' class='btn mb-1 btn-sm btn-outline-warning'><i class='fa fa-eye'></i> Review Answers</button>" : null)."
                         <button onclick='return loadQuestionInfo();' class='btn-sm mb-1 btn-outline-primary btn'>Next Question <i class='fa fa-fast-forward'></i></button>")."

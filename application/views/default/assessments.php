@@ -135,12 +135,15 @@ $response->html = '
                                         <th>Title</th>
                                         <th>Due Date</th>
                                         '.($hasUpdate ? '
-                                            <th width="10%">Assigned</th>
-                                            <th>Handed In</th>
-                                            <th>Marked</th>' : '<th>Awarded Mark</th>'
+                                            <th class="text-center" width="10%">Assigned</th>
+                                            <th class="text-center">Handed In</th>
+                                            <th class="text-center">Marked</th>' : '
+                                            <th class="text-center">Total Score</th>
+                                            <th class="text-center">Awarded Mark</th>
+                                            '
                                         ).'
                                         <th>Date Created</th>
-                                        <th>Status</th>
+                                        <th class="text-center">Status</th>
                                         <th align="center" width="12%"></th>
                                     </tr>
                                 </thead>
