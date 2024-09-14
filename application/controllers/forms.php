@@ -1370,13 +1370,13 @@ class Forms extends Myschoolgh {
                 </div>
                 <div class='col-md-6'>
                     <div class='form-group'>
-                        <label>Start Date</label>
+                        <label>Week Start Date</label>
                         <input value='".($params->data->start_date ?? null)."' type='text' name='start_date' id='start_date' data-maxdate='".date("Y-m-d", strtotime("+6 months"))."' class='form-control datepicker'>
                     </div>
                 </div>
                 <div class='col-md-6'>
                     <div class='form-group'>
-                        <label>End Date</label>
+                        <label>Week End Date</label>
                         <input value='".($params->data->end_date ?? null)."' type='text' name='end_date' id='end_date' data-maxdate='".date("Y-m-d", strtotime("+6 months"))."' class='form-control datepicker'>
                     </div>
                 </div>
@@ -2278,7 +2278,7 @@ class Forms extends Myschoolgh {
                     $response .= $guardian;
                 } else {
                     $response .= '
-                    <div class="row" data-row="1">
+                    <div class="row m-t-20" data-row="1">
                         <div class="col-lg-4 col-md-4">
                             <label for="guardian_info[guardian_fullname][1]">Fullname</label>
                             <input type="hidden" name="guardian_info[guardian_id][1]" id="guardian_info[guardian_id][1]" value="'.random_string("nozero", 8).'">
@@ -2292,7 +2292,7 @@ class Forms extends Myschoolgh {
                             <label for="guardian_info[guardian_contact_2][1]">Secondary Contact</label>
                             <input type="text" name="guardian_info[guardian_contact_2][1]" id="guardian_info[guardian_contact_2][1]" class="form-control">
                         </div>
-                        <div class="col-lg-3 col-md-3">
+                        <div class="col-lg-3 col-md-3 mt-2">
                             <label for="guardian_info[guardian_email][1]">Email Address</label>
                             <input type="text" name="guardian_info[guardian_email][1]" id="guardian_info[guardian_email][1]" class="form-control">
                         </div>
@@ -2795,13 +2795,13 @@ class Forms extends Myschoolgh {
                         <input type="number" min="1" max="30" value="'.($itemData->weekly_meeting ?? null).'" name="weekly_meeting" id="weekly_meeting" class="form-control text-uppercase">
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-6">
+                <div class="col-lg-5 col-md-5">
                     <div class="form-group">
                         <label for="name">Subject Title <span class="required">*</span></label>
                         <input '.$isAdmin2.' type="text" value="'.($itemData->name ?? null).'" name="name" id="name" class="form-control">
                     </div>
                 </div>
-                <div class="col-lg-6 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="form-group">
                         <label for="class_id">Select subject class <span class="required">*</span></label>
                         <select '.$isAdmin.' '.(!empty($itemData->name) && $isData ? "disabled" : "multiple").' data-width="100%" '.($isData ? 'name="class_id" id="class_id"' : 'name="class_id[]" id="class_id[]"').' class="form-control selectpicker">
@@ -2812,7 +2812,7 @@ class Forms extends Myschoolgh {
                         $response .= '</select>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <div class="form-group">
                         <label for="course_tutor">Subject Tutors</label>
                         <select data-width="100%" '.$isAdmin.' name="course_tutor[]" id="course_tutor[]" class="form-control selectpicker">

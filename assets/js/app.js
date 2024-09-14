@@ -1405,6 +1405,15 @@ var load_form_action = (form) => {
     });
 }
 
+var show_defaultPassword = () => {
+    let pass = $(`span[id='default_password']`).html();
+    if(pass.includes('Password')) {
+        $(`span[id='default_password']`).html('**************');
+    } else {
+        $(`span[id='default_password']`).html(defaultPassword);
+    }
+}
+
 let timePlugins = () => {
   var tp_clock = function(){
     function tp_clock_time() {

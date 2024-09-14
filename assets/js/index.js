@@ -70,7 +70,7 @@ async function append_student_guardian_row() {
                     </div>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-3">
+            <div class="col-lg-3 col-md-3 mt-2">
                 <label for="guardian_info[guardian_email][${lastRowId}]">Email Address</label>
                 <input type="text" name="guardian_info[guardian_email][${lastRowId}]" id="guardian_info[guardian_email][${lastRowId}]" class="form-control">
             </div>

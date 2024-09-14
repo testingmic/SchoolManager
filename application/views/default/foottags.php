@@ -178,8 +178,7 @@
 <script>
 var clientName = "<?= $clientName; ?>", fieldDefault = {}, refresh_seconds = 1000, thisRowId = 1, thisSelectRow = 1, userAgent = "<?= $myClass->agent."||".$myClass->platform."||".$myClass->browser."||".ip_address(); ?>",
 baseUrl = "<?= $baseUrl ?>", apiURL = "<?= config_item("api_url"); ?>", current_url="<?= $user_current_url ?>", sms_text_count = <?= $myClass->sms_text_count; ?>,
-viewedAs = "<?= (bool) isset($_GET["viewas"]) ?>", 
-this_user_unique_key = "persist:msgh-client-<?= $session->userId; ?>",
+viewedAs = "<?= (bool) isset($_GET["viewas"]) ?>", this_user_unique_key = "persist:msgh-client-<?= $session->userId; ?>", defaultPassword = "<?= DEFAULT_PASS ?>",
 form_modules = <?= json_encode($myClass->form_modules); ?>,
 swalnotice = <?= json_encode($myClass->swal_notification); ?>,
 $myPrefs = <?= json_encode($userPrefs); ?>;

@@ -55,11 +55,11 @@ $permissions = [
     ],
     "accountant" => [
         "student" => "Student",
-        "staff" => "Employees / Users",
+        "staff" => "Staff",
     ],
     "admin" => [
         "student" => "Students",
-        "staff" => "Employees / Users",
+        "staff" => "Staff",
     ]
 ];
 

@@ -456,6 +456,10 @@ class Users extends Myschoolgh {
 			// loop through the results
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
 
+				if(!empty($params->return_password)) {
+					$result->pass_word = $result->password;
+				}
+				
 				// if the preference is set
 				if(isset($result->preferences)) {
 					# return an empty result
@@ -1252,7 +1256,7 @@ class Users extends Myschoolgh {
 			// set a default password for students and parents
 			if(in_array($params->user_type, ["student", "parent", "employee", "teacher", "admin"]) || !isset($params->email)) {
 				// set this as a default password if no email was parsed or the usertype is student, parent and employee
-				$params->password = "password";
+				$params->password = DEFAULT_PASS;
 
 				// encrypt the password sent
 				$encrypt_password = password_hash($params->password, PASSWORD_DEFAULT);
@@ -1295,6 +1299,9 @@ class Users extends Myschoolgh {
 			// format the date of birth
 			$params->date_of_birth = isset($params->date_of_birth) && strtotime($params->date_of_birth) == strtotime(date("Y-m-d")) ? null : ($params->date_of_birth ?? null);
 			
+			// default password for the users
+			$defaultPass = password_hash(DEFAULT_PASS, PASSWORD_DEFAULT);
+
 			// insert the user information
 			$stmt = $this->db->prepare("
 				INSERT INTO users SET item_id = ?, user_type = ?, access_level = ?,
@@ -1320,7 +1327,7 @@ class Users extends Myschoolgh {
 				".(!empty($params->enrolment_academic_term) ? ", enrolment_academic_term='{$params->enrolment_academic_term}'" : null)."
 
 				".(isset($params->status) ? ", status='{$params->status}'" : null)."
-				".(isset($encrypt_password) ? ", password='{$encrypt_password}'" : null)."
+				".(isset($encrypt_password) ? ", password='{$encrypt_password}'" : ", password='{$defaultPass}'")."
 
 				".(!empty($course_ids) ? ", course_ids='".json_encode($course_ids)."'" : "")."
 
@@ -1881,8 +1888,6 @@ class Users extends Myschoolgh {
 
 	}
 
-
-    
     /**
      * Upload Resource
      * 

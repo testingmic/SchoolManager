@@ -94,7 +94,7 @@ $response->html = '
         </div>
     </section>
     <div data-backdrop="static" data-keyboard="false" class="modal fade" id="feesCategoryModal">
-        <form autocomplete="Off" action="'.$baseUrl.'api/fees/savecategory" class="ajax-data-form" id="ajax-data-form-content">
+        <form autocomplete="Off" action="'.$baseUrl.'api/fees/savecategory" method="POST" class="ajax-data-form" id="ajax-data-form-content">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">

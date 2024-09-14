@@ -53,7 +53,7 @@
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>staffs">Staff List</a></li>
             <?php if(($accessObject->hasAccess("add", "teacher") || $accessObject->hasAccess("add", "accountant") || $accessObject->hasAccess("add", "employee")) && !$isReadOnly) { ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>staff_add">Employ Staff</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>staff_add">Add Staff</a></li>
             <?php } ?>
         </ul>
     </li>   

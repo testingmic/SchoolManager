@@ -13,15 +13,16 @@ defined('DB_USER')  OR define('DB_USER', $ini['username'] ?? null);
 defined('DB_PASS')  OR define('DB_PASS', $ini['password'] ?? null);
 defined('DB_NAME')  OR define('DB_NAME', $ini['database'] ?? null);
 
-define('TIME_PERIOD', 60);
-define('RANDOM_STRING', 12);
-define('ATTEMPTS_NUMBER', 7);
+defined('TIME_PERIOD')      OR define('TIME_PERIOD', 60);
+defined('RANDOM_STRING')    OR define('RANDOM_STRING', 12);
+defined('ATTEMPTS_NUMBER')  OR define('ATTEMPTS_NUMBER', 7);
 
-define('ADMINISTRATOR', array(1000, 1001));
-define('DEVELOPER', array(1001));
+defined('DEFAULT_PASS')     OR define('DEFAULT_PASS', 'Password1');
+defined('ADMINISTRATOR')    OR define('ADMINISTRATOR', array(1000, 1001));
+defined('DEVELOPER')        OR define('DEVELOPER', array(1001));
 
-defined('SITE_DATE_FORMAT') 		OR define('SITE_DATE_FORMAT', 'd M Y H:iA');
-defined('SITE_URL') 				OR define('SITE_URL', config_item('base_url'));
-defined('F_SIZE') 					OR define("F_SIZE", "10Mb");
+defined('SITE_DATE_FORMAT')     OR define('SITE_DATE_FORMAT', 'd M Y H:iA');
+defined('SITE_URL')             OR define('SITE_URL', config_item('base_url'));
+defined('F_SIZE')               OR define("F_SIZE", "10Mb");
 define('ACTIVE_RANGE', "3 months");
 define('INACTIVE_RANGE', "6 months");
