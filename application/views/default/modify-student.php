@@ -54,6 +54,11 @@ if(empty($user_id) || !$accessObject->hasAccess("update", "student")) {
         $data = $data["data"][0];
         $response->scripts = ["assets/js/index.js"];
 
+        // set the default image if the user's image was not found
+        $data->image = is_file($data->image) && file_exists($data->image) ? $data->image : (
+            "assets/img/avatar.png"
+        );
+
         // guardian information
         $user_form = load_class("forms", "controllers")->student_form($clientId, $baseUrl, $data);
 

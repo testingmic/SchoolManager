@@ -354,6 +354,11 @@ if(!empty($user_id)) {
             ];
         }
 
+        // set the default image if the user's image was not found
+        $data->image = is_file($data->image) && file_exists($data->image) ? $data->image : (
+            "assets/img/avatar.png"
+        );
+
         // the default data to stream
         $data_stream = "attendance_report&label[student_id]={$user_id}";
 

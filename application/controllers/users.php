@@ -1558,23 +1558,22 @@ class Users extends Myschoolgh {
         if(isset($params->image)) {
             // set the upload directory
             $uploadDir = "assets/img/users/";
+
             // File path config 
             $fileName = basename($params->image["name"]); 
-            $targetFilePath = $uploadDir . $fileName; 
-
-            // Allow certain file formats 
-            $allowTypes = array('jpg', 'png', 'jpeg');
 
             // check if its a valid image
             if(!empty($fileName) && validate_image($params->image["tmp_name"])){
                 // set a new filename
                 $fileName = $uploadDir . random_string('alnum', 10)."__{$fileName}";
+
                 // Upload file to the server 
                 if(move_uploaded_file($params->image["tmp_name"], $fileName)){}
             } else {
             	$fileName = null;
             }
         }
+
 		// grouping guardian
 		$guardian = [];
 		if(isset($params->guardian_info) && is_array($params->guardian_info)) {

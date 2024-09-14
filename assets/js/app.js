@@ -1448,6 +1448,6 @@ $(window).on("load", function() {
             $.ajax({
                 url: `${baseUrl}api/devlog/auth`, type: "POST", data: { onlineCheck: true }, timeout: 5000
             });
-        }, 15000);
+        }, 30000);
     }
 });
