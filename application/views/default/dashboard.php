@@ -568,7 +568,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                     '.(
                                         !empty($defaultClientData->client_logo) ?
                                         '<div align="center" class="col-sm-3">
-                                            <img width="100%" class="school-logo" src="'.$baseUrl.''.$defaultClientData->client_logo.'">
+                                            <img width="100%" class="rounded-xl school-logo" src="'.$baseUrl.''.$defaultClientData->client_logo.'">
                                         </div>' : null
                                     ).'
                                     <div align="center" class="p-1 col-sm-'.(!empty($defaultClientData->client_logo) ? 9 : 12).'">
@@ -788,7 +788,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13">Students</h4>
                             </div>
-                            <div class="card-body" data-chart="male_female_comparison">
+                            <div class="card-body pb-2" data-chart="male_female_comparison">
                                 <canvas style="max-height:225px;height:225px;" id="male_female_comparison"></canvas>
                             </div>
                             <div class="card-footer">
