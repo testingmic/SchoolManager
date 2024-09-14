@@ -39,7 +39,12 @@ if(typeof canvas !== 'undefined' && canvas !== null) {
                     user_id: $.array_stream['user_id']
                 },
                 success: function(response) {
-
+                    if(response.code == 200) {
+                        swal({position: 'top', text: response.result, icon: "success"});
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    }
                 },
                 error: function(error) {}
             });

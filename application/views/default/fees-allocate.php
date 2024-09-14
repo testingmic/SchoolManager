@@ -292,7 +292,7 @@ elseif(!empty($user_id)) {
                                         <video id="video" width="320" height="240" autoplay></video>
                                         <canvas id="canvas" width="320" height="240"></canvas>
                                         <div class="text-center mt-1">
-                                            <button class="btn btn-outline-primary" id="replaceAvatar"><i class="fa fa-camera"></i> Use Webcam</button>
+                                            <button class="btn btn-outline-primary" id="replaceAvatar"><i class="fa fa-camera"></i> Change Image</button>
                                             <button class="btn btn-outline-success" id="capture" style="display:none;">Capture Photo</button>
                                             <button class="btn btn-success" id="save" style="display:none;"><i class="fa fa-save"></i> Save Photo</button>
                                         </div>' : null

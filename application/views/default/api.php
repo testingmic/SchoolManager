@@ -249,7 +249,9 @@ if(!$skipProcessing) {
     // save user image
     if($inner_url === 'save_image' && !empty($params->image) && !empty($params->user_id)) {
         // save the user image
-        $Api->save_user_image($params);
+        $upload = load_class('myschoolgh', 'models')->save_user_image($params);
+        echo json_encode($upload);
+        exit;
     }
 
     // set the full endpoint url

@@ -601,6 +601,51 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * Upload the student / user image
+	 * 
+	 * @param object $params
+	 * 
+	 * @return array
+	 */
+	public function save_user_image($params) {
+
+		$error_message = [
+			'code' => 500,
+			'result' => 'Sorry! An unexpected error occurred while attempting to upload the user image.'
+		];
+
+		try {
+			
+			$image_data = $params->image;
+
+			// Remove the "data:image/png;base64," part from the image string
+			$image_data = str_replace('data:image/png;base64,', '', $image_data);
+			$image_data = str_replace(' ', '+', $image_data);
+
+			// Specify the directory to save the image
+			$filepath = 'assets/img/users/' . 'user_' . $params->user_id . '.png';
+
+			// Save the file to the server
+			if(file_put_contents($filepath, base64_decode($image_data))) {
+
+				$stmt = $this->db->prepare("UPDATE users SET image = ? WHERE item_id = ? LIMIT 1");
+				$stmt->execute([$filepath, $params->user_id]);
+
+				return [
+					'code' => 200,
+					'result' => 'Image was successfully uploaded.'
+				];
+			}
+
+			return $error_message;
+
+		} catch(\Exception $e) {
+			$error_message['additional'] = $e->getMessage();
+			return $error_message;
+		}
+	}
+
+	/**
 	 * @method userLogs
 	 * 
 	 * @param $page 		This is the page that the user is managing
