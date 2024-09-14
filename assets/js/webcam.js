@@ -2,7 +2,7 @@ var avatar = document.getElementById('avatar');
 var video = document.getElementById('video');
 var canvas = document.getElementById('canvas');
 
-if(typeof canvas !== 'undefined') {
+if(typeof canvas !== 'undefined' && canvas !== null) {
     var replaceAvatarButton = document.getElementById('replaceAvatar');
     var captureButton = document.getElementById('capture');
     var saveButton = document.getElementById('save');
@@ -45,6 +45,6 @@ if(typeof canvas !== 'undefined') {
             });
         });
     } catch(error) {
-        
+
     }
 }
