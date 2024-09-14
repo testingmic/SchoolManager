@@ -1210,6 +1210,7 @@ class Assignments extends Myschoolgh {
                     return ["code" => 203, "data" => "Sorry! Please enter the answer for this question in the provided space."];
                 }
                 $params->answers = $params->numeric_answer;
+                $answers = $params->answers;
             }
 
             $append_msg = "";
@@ -1572,7 +1573,7 @@ class Assignments extends Myschoolgh {
                     // if the answer must be a numeric value
                     elseif($answer_type == "numeric") {
                         $question_html .= "
-                        <div class='pt-2'>
+                        <div class='pt-2 pb-3'>
                             <label>Provide Correct Answer</label>
                             <input value='{$this_answer}' name='answer_option' id='answer_option' class='form-control' type='number'>
                         </div>";
