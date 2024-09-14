@@ -1,6 +1,7 @@
 var show_eDocuments_Modal = () => {
     $(`div[id="ebook_Resource_Modal_Content"]`).modal("show");
 }
+
 var upload_Employee_Documents = (employee_id) => {
     swal({
         title: "Upload Documents",

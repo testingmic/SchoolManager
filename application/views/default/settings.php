@@ -32,7 +32,7 @@ if(!$accessObject->hasAccess("manage", "settings")) {
     $the_form = load_class("forms", "controllers")->settings_form($clientId);
 
     // load the scripts
-    $response->scripts = ["assets/js/import.js", "assets/js/grading.js"];
+    $response->scripts = ["assets/js/import.js", "assets/js/grading.js", "assets/js/upload.js"];
 
     // parse the category list in a array
     $response->array_stream["remarks_category_list"] = $the_form["_remarks"]["remarks_category_list"];

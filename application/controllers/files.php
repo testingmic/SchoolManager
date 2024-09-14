@@ -294,13 +294,19 @@ class Files extends Myschoolgh {
 
         /** Initialize for processing */
         $root_dir = "assets/uploads";
-        // return if the user is not logged in
-        if((!isset($params->userData->user_id) || !isset($params->module) || (!isset($params->label)) && !isset($params->attachments_list))) {
-            return "error";
+
+        // if the client preferences are empty
+        if(empty($params->userData->client_preferences)) {
+            // return if the user is not logged in
+            if((!isset($params->userData->user_id) || !isset($params->module) || (!isset($params->label)) && !isset($params->attachments_list))) {
+                return "error";
+            }
         }
 
         // set the current user id
-        $currentUser_Id = !empty($session->student_id) ? $session->student_id : $params->userData->user_id;
+        $currentUser_Id = !empty($session->student_id) ? $session->student_id : (
+            $params->userData->user_id ?? $params->userData->client_id
+        );
         
         // perform all this checks if the attachmments list was not parsed
         if(!isset($params->attachments_list)) {
@@ -310,7 +316,6 @@ class Files extends Myschoolgh {
 
             // assign a variable to the user information
             $module = $params->module;
-            $userData = $params->userData;
 
             // if the module is remove existing then run this query
             if($module == "remove_existing") {                
@@ -541,6 +546,7 @@ class Files extends Myschoolgh {
 
             // if the files parameter is set
             if(!empty($attachments_list->files)) {
+                
                 // loop through the list of files
                 foreach($attachments_list->files as $each_file) {
 

@@ -3675,6 +3675,42 @@ class Forms extends Myschoolgh {
         $last_date = date("Y-m-d", strtotime("+3 year"));
         $min_date = date("Y-m-d", strtotime("-10 year"));
 
+        // attachments
+        $filesObject = load_class("files", "controllers");
+
+        $docs = $filesObject->resource_attachments_list("settings_calendar", $client_data->client_id);
+        $calendar_docs = !empty($docs) ? json_encode($docs) : [];
+        $calendar_docs = !empty($calendar_docs) ? json_decode($calendar_docs) : [];
+
+        if(!empty($calendar_docs)) {
+            $calendar_docs->files = $calendar_docs->files_list;
+        }
+
+        // set a new parameter for the items
+        $files_param = (object) [
+            "userData" => $client_data,
+            "label" => "list",
+            "is_deletable" => true,
+            "module" => "settings_calendar",
+            "item_id" => $client_data->client_id,
+            "accept" => implode(",", [".pdf"]),
+            "attachments_list" => $calendar_docs
+        ];
+
+        /** Set parameters for the data to attach */
+        $form_params = (object) [
+            "accept" => ".pdf",
+            "module" => "settings_calendar",
+            "userData" => $client_data,
+            "item_id" => $client_data->client_id
+        ];
+
+        // create a new object
+        $attachments = load_class("files", "controllers")->attachments($files_param);
+
+        // get the attachments list
+        $preloaded_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
+
         // GENERAL FORM
         $general = '
         <form autocomplete="Off" class="ajax-data-form" action="'.$this->baseUrl.'api/account/update" method="POST" id="'.$form_id.'">
@@ -3862,6 +3898,13 @@ class Forms extends Myschoolgh {
                     <input type="text" value="'.($prefs->academics->term_ends ?? null).'" name="general[academics][term_ends]" id="term_ends" data-mindate="'.$min_date.'" data-maxdate="'.$last_date.'" class="form-control datepicker">
                 </div>
             </div>
+            <div class="col-lg-12">
+                <div class="form-group text-center mb-1">
+                    <div class="row">'.$this->form_attachment_placeholder($form_params).'</div>
+                </div>
+            </div>  
+            <div class="col-md-12 text-center mb-4">'.$preloaded_attachments.'</div>
+
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">NEXT ACADEMIC CALENDAR</h5></div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
@@ -4958,7 +5001,7 @@ class Forms extends Myschoolgh {
                                 <div class="row">'.$this->form_attachment_placeholder($form_params).'</div>
                             </div>
                         </div>  
-                        <div class="col-md-12 text-center mb-4">'.$preloaded_attachments.'</div>                          
+                        <div class="col-md-12 text-center mb-4">'.$preloaded_attachments.'</div>
                     </div>
                 </div>
 

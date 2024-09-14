@@ -631,6 +631,13 @@ class Account extends Myschoolgh {
             $stmt = $this->db->prepare("UPDATE clients_accounts SET client_preferences	= ? WHERE client_id = ? LIMIT 1");
             $stmt->execute([json_encode($preference), $params->clientId]);
 
+            // files object and upload the file for the academic calendar
+            $filesObj = load_class("files", "controllers");
+            $attachments = $filesObj->prep_attachments("settings_calendar", $params->userId, $params->clientId);
+            // insert the record if not already existing
+            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");
+            $files->execute(["settings_calendar", $params->clientId, json_encode($attachments), "{$params->clientId}", $params->userId, $attachments["raw_size_mb"], $params->clientId]);
+
             // log the user activity
             $this->userLogs("account", $params->clientId, $client_data, "{$params->userData->name} updated the Account Information", $params->userId);
             
