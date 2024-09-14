@@ -5,7 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $ini = parse_ini_file("db.ini");
 
 // set thee default date/time for the php.ini to use
-date_default_timezone_set('Europe/London');
+date_default_timezone_set('UTC');
 
 # set the constants for the database connection
 defined('DB_HOST')  OR define('DB_HOST', $ini['hostname'] ?? null);

@@ -11,7 +11,7 @@
  */
 
 // set the default time zone
-date_default_timezone_set('Europe/London');
+date_default_timezone_set('UTC');
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
