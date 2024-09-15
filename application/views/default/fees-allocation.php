@@ -33,7 +33,7 @@ if(!$canAllocate) {
     $response->scripts = ["assets/js/filters.js", "assets/js/payments.js"];
 
     // load the classes list
-    $classes_param = (object) ["limit" => $myClass->temporal_maximum, "clientId" => $clientId, "columns" => "id, name, payment_module"];
+    $classes_param = (object) ["limit" => $myClass->temporal_maximum, "clientId" => $clientId, "columns" => "a.id, a.name, a.payment_module"];
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
     // get the category list

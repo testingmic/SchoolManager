@@ -4238,7 +4238,7 @@ class Forms extends Myschoolgh {
         $classes_param = (object) [
             "filter" => $defaultUser->user_type,
             "userId" => $defaultUser->user_id,
-            "columns" => "id, item_id, name, payment_module",
+            "columns" => "a.id, a.item_id, a.name, a.payment_module",
             "user_type" => $defaultUser->user_type,
             "clientId" => $clientId
         ];
@@ -4337,7 +4337,7 @@ class Forms extends Myschoolgh {
         $classes_param = (object) [
             "filter" => $defaultUser->user_type,
             "userId" => $defaultUser->user_id,
-            "columns" => "id, item_id, name, payment_module",
+            "columns" => "a.id, a.item_id, a.name, a.payment_module",
             "clientId" => $clientId
         ];
         $classes_list = load_class("classes", "controllers")->list($classes_param)["data"];
@@ -4852,7 +4852,7 @@ class Forms extends Myschoolgh {
         // load the classes list
         $classes_param = (object) [
             "clientId" => $params->clientId,
-            "columns" => "id, item_id, name, payment_module"
+            "columns" => "a.id, a.item_id, a.name, a.payment_module"
         ];
         $classes_list = load_class("classes", "controllers")->list($classes_param)["data"];
 

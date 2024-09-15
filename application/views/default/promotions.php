@@ -34,7 +34,7 @@ if(!$accessObject->hasAccess("promote", "promotion")) {
         "clientId" => $clientId,
         "userId" => $defaultUser->user_id,
         "user_type" => $defaultUser->user_type,
-        "columns" => "id, name, slug, item_id"
+        "columns" => "a.id, a.name, a.slug, a.item_id"
     ];
     // if the class_id is not empty
     $classes_param->department_id = !empty($filter->department_id) ? $filter->department_id : null;

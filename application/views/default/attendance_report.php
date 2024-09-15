@@ -48,7 +48,7 @@ $permissions = [
 // default class_list
 $classes_param = (object) [
     "clientId" => $clientId,
-    "columns" => "id, name"
+    "columns" => "a.id, a.name"
 ];
 // if the class_id is not empty
 $class_list = load_class("classes", "controllers")->list($classes_param)["data"];

@@ -59,7 +59,7 @@ $courses_list = [];
 // default class_list
 $classes_param = (object) [
     "clientId" => $clientId,
-    "columns" => "id, name, item_id"
+    "columns" => "a.id, a.name, a.item_id"
 ];
 // if the class_id is not empty
 $classes_param->department_id = !empty($filter->department_id) ? $filter->department_id : null;

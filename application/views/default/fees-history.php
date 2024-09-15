@@ -27,7 +27,7 @@ $userId = $session->userId;
 // default class_list
 $classes_param = (object) [
     "clientId" => $clientId,
-    "columns" => "id, name"
+    "columns" => "a.id, a.name"
 ];
 
 // if the class_id is not empty

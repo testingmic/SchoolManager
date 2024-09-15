@@ -334,7 +334,7 @@ elseif(!empty($user_id) && ($user_id === "add")) {
     // default class_list
     $classes_param = (object) [
         "clientId" => $clientId,
-        "columns" => "id, name"
+        "columns" => "a.id, a.name"
     ];
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 

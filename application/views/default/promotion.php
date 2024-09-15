@@ -34,7 +34,7 @@ if(!$accessObject->hasAccess("promote", "promotion") || empty($promotion_log_id)
         "clientId" => $clientId,
         "userId" => $defaultUser->user_id,
         "user_type" => $defaultUser->user_type,
-        "columns" => "id, name, slug, item_id"
+        "columns" => "a.id, a.name, a.slug, a.item_id"
     ];
     // if the class_id is not empty=
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];

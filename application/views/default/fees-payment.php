@@ -145,7 +145,7 @@ if(!$receivePayment) {
         $response->scripts = ["assets/js/payments.js", "assets/js/filters.js"];
 
         // load the classes list
-        $classes_param = (object) ["clientId" => $clientId, "columns" => "id, name, payment_module"];
+        $classes_param = (object) ["clientId" => $clientId, "columns" => "a.id, a.name, a.payment_module"];
         $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
         // get the list of banks

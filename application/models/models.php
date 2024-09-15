@@ -11,7 +11,7 @@ class Models {
     public $menu_content_array = [];
     public $resource_parameters;
     public $permission_denied;
-    public $global_limit = 2500;
+    public $global_limit = 3000;
     public $formPreloader;
     public $sms_text_count = 155;
     public $underscores = "____";
@@ -19,8 +19,8 @@ class Models {
 
     // this is a simple quoted figure that certain queries are limited to
     public $temporal_maximum = 200;
-    public $maximum_class_count = 1000;
-    public $extreme_maximum = 10000;
+    public $maximum_class_count = 5000;
+    public $extreme_maximum = 15000;
     
     /** This is used for generation of user ids */
     public $ePaymentEnabled = false;

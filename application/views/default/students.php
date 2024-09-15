@@ -102,7 +102,7 @@ foreach($student_list["data"] as $key => $each) {
 // default class_list
 $classes_param = (object) [
     "clientId" => $clientId,
-    "columns" => "id, name"
+    "columns" => "a.id, a.name"
 ];
 // if the class_id is not empty
 $classes_param->department_id = !empty($filter->department_id) ? $filter->department_id : null;

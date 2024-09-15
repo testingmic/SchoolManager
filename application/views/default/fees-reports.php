@@ -42,7 +42,7 @@ $session->reportPeriod = "this_week";
 // if the class_id is not empty
 $classes_param = (object) [
     "clientId" => $clientId,
-    "columns" => "id, name",
+    "columns" => "a.id, a.name",
     "limit" => 100,
     "client_data" => $defaultUser->client
 ];

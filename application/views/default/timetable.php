@@ -40,7 +40,7 @@ if(!$accessObject->hasAccess("manage", "timetable")) {
     // set the parameter for the classes
     $classes_param = (object) [
         "clientId" => $clientId,
-        "columns" => "id, name, item_id"
+        "columns" => "a.id, a.name, a.item_id"
     ];
     $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 

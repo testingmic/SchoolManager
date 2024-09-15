@@ -76,7 +76,7 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                 $response->scripts = ["assets/js/term_bills.js"];
 
                 // load the classes list
-                $classes_param = (object) ["clientId" => $clientId, "columns" => "id, name, payment_module"];
+                $classes_param = (object) ["clientId" => $clientId, "columns" => "a.id, a.name, a.payment_module"];
                 $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
                 
                 // load fees allocation list for class

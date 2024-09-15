@@ -91,7 +91,7 @@ foreach($reports as $key => $each) {
 // if the class_id is not empty
 $classes_param = (object) [
     "clientId" => $clientId,
-    "columns" => "id, name, item_id",
+    "columns" => "a.id, a.name, a.item_id",
     "limit" => 100,
     "client_data" => $defaultUser->client
 ];
