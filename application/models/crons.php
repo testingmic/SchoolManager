@@ -772,6 +772,7 @@ class Crons {
 				if($first2 !== 'SL') continue;
 				$newChange = str_ireplace($first2, "HISS", $result->unique_id);
 				print "The new change for {$result->firstname} will be: {$newChange}\n";
+				$this->db->query("UPDATE users SET unique_id = '{$newChange}' WHERE id='{$result->id}' LIMIT 1");
 			}
 
 			return;
