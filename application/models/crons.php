@@ -757,6 +757,7 @@ class Crons {
 
 		try {
 
+			print "Execute query to update the class ids of all students\n";
 			$whereClause = !empty($client_id) ? "WHERE client_id = '{$client_id}'" : null;
 
 			$stmt = $this->db->prepare("SELECT a.id AS student_id, a.firstname, b.id AS class_id FROM users a INNER JOIN classes b ON b.class_code = a.class_id {$whereClause}");
