@@ -763,13 +763,17 @@ class Crons {
 			$stmt = $this->db->prepare("SELECT a.id AS student_id, a.firstname, b.id AS class_id FROM users a INNER JOIN classes b ON b.class_code = a.class_id {$whereClause}");
 			$stmt->execute([0]);
 
+			print "Students have successfully been loaded.\n";
+
 			// loop through the result
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 				print "Updating the record of {$result->firstname} with student id: {$result->student_id}\n";
 				$this->db->query("UPDATE users SET class_id = '{$result->class_id}' WHERE id='{$result->student_id}' LIMIT 1");
 			}
 
-		} catch(\Exception $e) {}
+		} catch(\Exception $e) {
+			print $e->getMessage() . "\n";
+		}
 
 	}
 
