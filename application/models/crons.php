@@ -763,21 +763,6 @@ class Crons {
 			$stmt = $this->db->prepare("SELECT a.id AS student_id, a.firstname, b.id AS class_id FROM users a INNER JOIN classes b ON b.class_code = a.class_id {$whereClause}");
 			$stmt->execute();
 
-			$list = $this->db->prepare("select firstname, id, unique_id from users where client_id='MSGH00001'");
-			$list->execute();
-
-			while($result = $list->fetch(PDO::FETCH_OBJ)) {
-				$first2 = substr($result->unique_id, 0, 2);
-				print "The first2 for {$result->firstname} is: {$result->unique_id}\n";
-				if($first2 !== 'SL') continue;
-				$newChange = str_ireplace($first2, "HISS", $result->unique_id);
-				print "The new change for {$result->firstname} will be: {$newChange}\n";
-				$this->db->query("UPDATE users SET unique_id = '{$newChange}' WHERE id='{$result->id}' LIMIT 1");
-			}
-
-			return;
-
-
 			print "Students have successfully been loaded.\n";
 
 			// loop through the result
@@ -792,12 +777,31 @@ class Crons {
 
 	}
 
+	/**
+	 * Temporary change to the student unique ids for specific schools
+	 * 
+	 */
+	public function temporarychange() {
+		
+		$list = $this->db->prepare("select firstname, id, unique_id from users where client_id='MSGH00001'");
+		$list->execute();
+
+		while($result = $list->fetch(PDO::FETCH_OBJ)) {
+			$first2 = substr($result->unique_id, 0, 2);
+			print "The first2 for {$result->firstname} is: {$result->unique_id}\n";
+			if($first2 !== 'SL') continue;
+			$newChange = str_ireplace($first2, "HISS", $result->unique_id);
+			print "The new change for {$result->firstname} will be: {$newChange}\n";
+			$this->db->query("UPDATE users SET unique_id = '{$newChange}' WHERE id='{$result->id}' LIMIT 1");
+		}
+
+	}
+
 }
 
 // create new object
 $jobs = new Crons;
-// $jobs->load_emails();
-// $jobs->scheduler();
-// $jobs->send_smsemail();
-$jobs->update_class_ids();
+$jobs->load_emails();
+$jobs->scheduler();
+$jobs->send_smsemail();
 ?>
