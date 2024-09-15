@@ -69,7 +69,7 @@ class Crons {
 				FROM clients_accounts a
 				WHERE a.client_status = ? AND a.client_state = ? AND a.client_id != ? LIMIT 10"
 			);
-			$stmt->execute([1, "Active", "MSGH0001"]);
+			$stmt->execute([1, "Active", "MSGH00002"]);
 			
 			// loop through the list
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {

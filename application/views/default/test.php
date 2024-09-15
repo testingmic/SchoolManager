@@ -8,7 +8,7 @@ if(!$isSupport) { invalid_route(); exit; }
 // global variables
 global $myschoolgh, $myClass;
 
-$counter = $myClass->itemsCount("users", "client_id = 'MSGH00014' AND user_type='student' LIMIT 1");
+$counter = $myClass->itemsCount("users", "client_id = 'MSGH00001' AND user_type='student' LIMIT 1");
 
 $myfile = fopen("test.txt", "r") or die("Unable to open file!");
 

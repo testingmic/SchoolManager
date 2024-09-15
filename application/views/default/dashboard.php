@@ -1083,7 +1083,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 $counter[$school->client_state] += 1;
 
                 $action = null;
-                if($school->client_id !== "MSGH0001") {
+                if($school->setup !== "Developer") {
                     $action = "<button title='Manage {$school->client_name} Account Information' onclick='return load(\"schools/{$school->client_id}\")' class='btn btn-outline-success btn-sm'><i class='fa fa-edit'></i></button>";
                     $action .= " <button title='View Update History of {$school->client_name} Account' onclick='return load(\"schools/history/{$school->client_id}\")' class='btn btn-outline-primary btn-sm'><i class='fa fa-comments'></i></button>";
                 }
