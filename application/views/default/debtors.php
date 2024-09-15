@@ -292,8 +292,10 @@ if(!$accessObject->hasAccess("view", "fees")) {
                 <div class="col-lg-4 col-md-6 col-12 form-group mb-2">
                     <label>Multiple Select Class to Filter</label>
                     <select data-width="100%" multiple class="form-control selectpicker" name="class_id">';
-                        foreach($class_list as $each) {
-                            $response->html .= "<option ".(isset($filter->class_id) && (in_array($each->id, $filter->class_id)) ? "selected" : "")." value=\"{$each->id}\">".strtoupper($each->name)."</option>";
+                        if(!empty($class_list) && is_array($class_list)) {
+                            foreach($class_list as $each) {
+                                $response->html .= "<option ".(isset($filter->class_id) && (in_array($each->id, $filter->class_id)) ? "selected" : "")." value=\"{$each->id}\">".strtoupper($each->name)."</option>";
+                            }
                         }
                         $response->html .= '
                     </select>

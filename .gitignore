@@ -4,6 +4,7 @@ application/sessions/*
 application/logs/json/*
 assets/img/accounts/*
 db.ini
+errors_log
 assets/img/users/
 assets/uploads/*
 !assets/img/users/index.html

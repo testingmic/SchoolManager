@@ -393,6 +393,8 @@ class Chats extends Myschoolgh {
 
         try {
 
+            if(empty($params->users)) return [];
+
             $users_list = implode("','", $params->users);
 
             $list = $this->pushQuery("item_id AS user_id, last_seen", "users", "item_id IN ('{$users_list}')");
