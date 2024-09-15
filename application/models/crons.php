@@ -759,11 +759,12 @@ class Crons {
 
 			$whereClause = !empty($client_id) ? "WHERE client_id = '{$client_id}'" : null;
 
-			$stmt = $this->db->prepare("SELECT a.id AS student_id, b.id AS class_id FROM users a INNER JOIN classes b ON b.class_code = a.class_id {$whereClause}");
+			$stmt = $this->db->prepare("SELECT a.id AS student_id, a.firstname, b.id AS class_id FROM users a INNER JOIN classes b ON b.class_code = a.class_id {$whereClause}");
 			$stmt->execute([0]);
 
 			// loop through the result
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+				print "Updating the record of {$result->firstname} with student id: {$result->student_id}\n";
 				$this->db->query("UPDATE users SET class_id = '{$result->class_id}' WHERE id='{$result->student_id}' LIMIT 1");
 			}
 
