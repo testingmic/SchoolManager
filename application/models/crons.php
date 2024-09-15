@@ -371,6 +371,7 @@ class Crons {
 				// if the query is to update the student parent information
 				elseif($result->cron_type == "bulk_student_update") {
 					$this->update_student_information($result->query);
+					$this->update_class_ids($result->client_id);
 					$processed = true;
 				}
 
@@ -745,6 +746,31 @@ class Crons {
 		return substr(str_shuffle(str_repeat($pool, ceil($len / strlen($pool)))), 0, $len);
 	}
 
+	/**
+	 * Update students class ids
+	 * 
+	 * @param string		$client_id
+	 * 
+	 * @return bool
+	 */
+	public function update_class_ids($client_id = null) {
+
+		try {
+
+			$whereClause = !empty($client_id) ? "WHERE client_id = '{$client_id}'" : null;
+
+			$stmt = $this->db->prepare("SELECT a.id AS student_id, b.id AS class_id FROM users a INNER JOIN classes b ON b.class_code = a.class_id {$whereClause}");
+			$stmt->execute([0]);
+
+			// loop through the result
+			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+				$this->db->query("UPDATE users SET class_id = '{$result->class_id}' WHERE id='{$result->student_id}' LIMIT 1");
+			}
+
+		} catch(\Exception $e) {}
+
+	}
+
 }
 
 // create new object
@@ -752,4 +778,5 @@ $jobs = new Crons;
 $jobs->load_emails();
 $jobs->scheduler();
 $jobs->send_smsemail();
+$jobs->update_class_ids();
 ?>
