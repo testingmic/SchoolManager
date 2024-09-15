@@ -3777,7 +3777,7 @@ class Forms extends Myschoolgh {
                 <div class="col-lg-2 col-md-3">
                     <div class="form-group">
                         <label for="'.$label["key"].'_label">'.$label["label"].' Label</label>
-                        <input type="text" value="'.($prefs->labels->{$ilabel} ?? null).'" maxlength="3" name="general[labels]['.$label["key"].'_label]" id="'.$label["key"].'_label" class="form-control text-uppercase">
+                        <input type="text" value="'.($prefs->labels->{$ilabel} ?? null).'" maxlength="4" name="general[labels]['.$label["key"].'_label]" id="'.$label["key"].'_label" class="form-control text-uppercase">
                     </div>
                 </div>';
             }
