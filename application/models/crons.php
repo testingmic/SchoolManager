@@ -784,5 +784,4 @@ $jobs = new Crons;
 $jobs->load_emails();
 $jobs->scheduler();
 $jobs->send_smsemail();
-$jobs->update_class_ids();
 ?>
