@@ -774,7 +774,6 @@ class Crons {
 			return;
 
 
-
 			print "Students have successfully been loaded.\n";
 
 			// loop through the result
@@ -793,7 +792,8 @@ class Crons {
 
 // create new object
 $jobs = new Crons;
-$jobs->load_emails();
-$jobs->scheduler();
-$jobs->send_smsemail();
+// $jobs->load_emails();
+// $jobs->scheduler();
+// $jobs->send_smsemail();
+$jobs->update_class_ids();
 ?>
