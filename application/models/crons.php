@@ -768,7 +768,10 @@ class Crons {
 
 			while($result = $list->fetch(PDO::FETCH_OBJ)) {
 				$first2 = substr($result->unique_id, 0, 2);
-				print "The first2 for {$result->firstname} is: {$first2}\n";
+				print "The first2 for {$result->firstname} is: {$result->unique_id}\n";
+				if($first2 !== 'SL') continue;
+				$newChange = str_ireplace($first2, "HISS", $result->unique_id);
+				print "The new change for {$result->firstname} will be: {$newChange}\n";
 			}
 
 			return;
