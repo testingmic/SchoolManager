@@ -1429,6 +1429,36 @@ body.dark table.dataTable img {
     padding: 10px 15px 5px 15px;
 }
 
+.height-250 {
+    min-height: 250px!important;
+    max-height: 250px!important;
+}
+
+.height-300 {
+    min-height: 300px!important;
+    max-height: 300px!important;
+}
+
+.height-400 {
+    min-height: 400px!important;
+    max-height: 400px!important;
+}
+
+.height-450 {
+    min-height: 450px!important;
+    max-height: 450px!important;
+}
+
+.height-500 {
+    min-height: 500px!important;
+    max-height: 500px!important;
+}
+
+.checkbox-box {
+    height: calc(1.0em + .50rem + 2px) !important;
+    cursor: pointer !important;
+}
+
 .modal-content {
     border-radius: 0px;
 }

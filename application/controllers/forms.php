@@ -5,6 +5,7 @@ class Forms extends Myschoolgh {
     public $thisUser;
     public $hasit;
     public $userPrefs;
+    public $default_height = 'height-250';
 
     public function __construct() {
         parent::__construct();
@@ -961,7 +962,7 @@ class Forms extends Myschoolgh {
         $data = !empty($data) ? str_ireplace("'", "", $data) : null;
         $name = empty($name) ? "faketext" : $name;
         $form_content = "<input type='hidden' hidden id='trix-editor-input' value='{$data}'>";
-        $form_content .= "<trix-editor name=\"{$name}\" data-predefined_name=\"{$predefined}\" input='trix-editor-input' class=\"trix-slim-scroll\" id=\"{$id}\"></trix-editor>";
+        $form_content .= "<trix-editor name=\"{$name}\" data-predefined_name=\"{$predefined}\" input='trix-editor-input' class=\"trix-slim-scroll {$this->default_height}\" id=\"{$id}\"></trix-editor>";
 
         // return the results
         return $form_content;
@@ -1359,6 +1360,9 @@ class Forms extends Myschoolgh {
         $item_id = isset($params->data->id) ? $params->data->id : null;
         $title = isset($params->data->name) ? $params->data->name : null;
 
+        // set the default height
+        $this->default_height = 'height-450';
+
         $html_content = "
         <form action='{$this->baseUrl}api/courses/".(!$title ? "add_unit" : "update_unit")."' autocomplete='Off' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
             <div class='row'>
@@ -1489,6 +1493,9 @@ class Forms extends Myschoolgh {
 
             }
 
+            // set the default height
+            $this->default_height = 'height-450';
+
             $html_content = "
             <form action='{$this->baseUrl}api/courses/".(!$title ? "add_lesson" : "update_lesson")."' autocomplete='Off' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
                 <div class='row'>
@@ -1602,17 +1609,17 @@ class Forms extends Myschoolgh {
                             <th>Lesson Title</th>
                         </thead>
                     </table>
-                    <div style=\"height:200px; overflow-y:auto;\" class=\"slim-scroll\">
+                    <div style=\"height:350px; overflow-y:auto;\" class=\"slim-scroll\">
                         <div class=\"form-group pt-0 mt-2\">
-                            <table class=\"table table-bordered\">
+                            <table class=\"table table-bordered table-sm\">
                                 <tbody>";
                                 foreach($lessons_list as $each) {
                                     $html_content .= "
                                         <tr class=\"pt-0 pb-0\">
-                                            <td style=\"height:40px\">
-                                                <input type=\"checkbox\" ".(in_array($each->item_id, $lesson_ids) ? "checked" : "")." class=\"form-control\" value=\"{$each->item_id}\" name=\"upload[lesson_id][]\" id=\"lesson_id[{$each->item_id}][]\">
+                                            <td style=\"height:30px\">
+                                                <input type=\"checkbox\" ".(in_array($each->item_id, $lesson_ids) ? "checked" : "")." class=\"form-control checkbox-box\" value=\"{$each->item_id}\" name=\"upload[lesson_id][]\" id=\"lesson_id[{$each->item_id}][]\">
                                             </td>
-                                            <td style=\"height:40px\">
+                                            <td style=\"height:30px\">
                                                 <label for=\"lesson_id[{$each->item_id}][]\">{$each->name}</label>
                                             </td>
                                         </tr>
@@ -3671,6 +3678,11 @@ class Forms extends Myschoolgh {
             ["key" => "receipt", "label" => "Receipts"],
         ];
 
+        $unit_labels = [
+            ["key" => "unit", "label" => "Unit"],
+            ["key" => "lesson", "label" => "Lesson"]
+        ];
+
         $logoUploaded = (bool) ($client_data && $client_data->client_logo);
         $last_date = date("Y-m-d", strtotime("+3 year"));
         $min_date = date("Y-m-d", strtotime("-10 year"));
@@ -3782,6 +3794,18 @@ class Forms extends Myschoolgh {
                 </div>';
             }
         $general .= '
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">Subject Labels</h5></div>';
+            foreach($unit_labels as $label) {
+                $ilabel = "{$label["key"]}_label";
+            $general .= '
+                <div class="col-lg-2 col-md-3">
+                    <div class="form-group">
+                        <label for="'.$label["key"].'_label">'.$label["label"].' Label</label>
+                        <input type="text" value="'.($prefs->labels->{$ilabel} ?? null).'" maxlength="10" name="general[labels]['.$label["key"].'_label]" id="'.$label["key"].'_label" class="form-control">
+                    </div>
+                </div>';
+            }
+            $general .= '
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">FINANCE</h5></div>
             <div class="col-lg-4">
                 <div class="form-group">

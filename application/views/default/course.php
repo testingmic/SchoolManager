@@ -56,6 +56,9 @@ if(!empty($item_id)) {
         $response->html = page_not_found();
     } else {
 
+        $labels = $myClass->defaultClientData->client_preferences ?? null;
+        $labels = !empty($labels) ? ($labels->labels ?? []) : null;
+
         // set the first key
         $data = $data["data"][0];
 
@@ -154,6 +157,7 @@ if(!empty($item_id)) {
 
         // if the request is to view the student information
         $updateItem = confirm_url_id(2, "update") ? true : false;
+        $lessonPlanner = confirm_url_id(2, "lesson") ? true : false;
 
         // lesson planner display
         $lessons_list = "<div class='mb-2'>&nbsp;</div>";
@@ -211,23 +215,27 @@ if(!empty($item_id)) {
                             <div><i class=\"fa fa-calendar-check\"></i> {$plan->date_created}</div>
                         </div>
                     </div>
-                    <div class=\"accordion-body ".($plan->id == $session->thisLast_UnitId ? "collapse show" : "collapse")."\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
+                    <div class=\"accordion-body ".($plan->id == $session->thisLast_UnitId ? "collapse show" : "collapse")." p-0 pt-3\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
                         <div class='d-flex justify-content-between'>
                             <div>
-                                <span class=\"mr-3\"><strong>Start Date: </strong> {$plan->start_date}</span>
-                                <span><strong>End Date: </strong> {$plan->end_date}</span>
+                                <span class=\"mr-3\"><strong>Week Start Date: </strong> {$plan->start_date}</span><br>
+                                <span><strong>Week End Date: </strong> {$plan->end_date}</span>
                             </div>
                             ".($hasPlanner ? "
-                            <div>
-                                <button onclick='return load_quick_form(\"course_unit_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-success btn-sm' type='button'><i class='fa fa-edit'></i> Edit</button>
-                                <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-primary btn-sm' type='button'><i class='fa fa-plus'></i> New Lesson</button>
-                                <a href='#' onclick='return delete_record(\"{$plan->item_id}\", \"course_unit\");' class='btn btn-sm btn-outline-danger'><i class='fa fa-trash'></i></a>
+                            <div class='text-right'>
+                                <button onclick='return load_quick_form(\"course_unit_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-success btn-sm mb-1' type='button'>
+                                    <i class='fa fa-edit'></i> Edit
+                                </button>
+                                <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-primary btn-sm mb-1' type='button'>
+                                    <i class='fa fa-plus'></i> Add ".($labels->lesson_label ?? 'Lesson')."
+                                </button>
+                                <a href='#' onclick='return delete_record(\"{$plan->item_id}\", \"course_unit\");' class='btn btn-sm btn-outline-danger mb-1'><i class='fa fa-trash'></i> Delete</a>
                             </div>
                             " : null)."
                         </div>
                         <div class='mt-2 mb-3'>{$plan->description}</div>
 
-                        <div class='border-bottom mb-3'><h6>UNIT LESSONS</h6></div>
+                        <div class='border-bottom mb-3'><h6>".strtoupper($labels->unit_label ?? 'Unit')." LESSONS</h6></div>
                         <div class='table-responsive trix-slim-scroll'>
                             <table data-order_item='asc' class='table table-bordered raw_datatable'>
                                 <thead>
@@ -235,7 +243,7 @@ if(!empty($item_id)) {
                                     <th>Lesson Title</th>
                                     <th>Start Date</th>
                                     <th>End Date</th>
-                                    <th align='center'>Action</th>
+                                    <th class='text-center'>Action</th>
                                 </thead>
                                 <tbody>{$unit_lessons}</tbody>
                             </table>
@@ -329,10 +337,10 @@ if(!empty($item_id)) {
                 <div class="padding-20">
                     <ul class="nav nav-tabs" id="myTab2" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link '.(!$updateItem ? "active" : null).'" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Classes List</a>
+                        <a class="nav-link '.(!$updateItem && !$lessonPlanner ? "active" : null).'" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Classes List</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Subject Lesson Planner</a>
+                        <a class="nav-link '.($lessonPlanner ? "active" : null).'" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Subject Lesson Planner</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" id="resources-tab2" data-toggle="tab" href="#resources" role="tab" aria-selected="true">Subject Materials</a>
@@ -350,7 +358,7 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         
-                        <div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="classes" role="tabpanel" aria-labelledby="classes-tab2">
+                        <div class="tab-pane fade '.(!$updateItem && !$lessonPlanner ? "show active" : null).'" id="classes" role="tabpanel" aria-labelledby="classes-tab2">
                             <div class="row">';
 
                             // if the class list is not empty
@@ -364,13 +372,15 @@ if(!empty($item_id)) {
                             </div>
                         </div>
 
-                        <div class="tab-pane fade" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
+                        <div class="tab-pane fade '.($lessonPlanner ? "show active" : null).'" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
                             <div class="d-flex justify-content-between">
                                 <div><h5>SUBJECT LESSONS</h5></div>
                                 <div>
-                                    '.($unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success" href="'.$baseUrl.'download/coursematerial?cs_mat='.base64_encode($data->id."_".$data->item_id."_".$data->client_id).'&dw=true"><i class="fa fa-download"></i> Download</a>' : '').'
+                                    '.($unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success mb-1" href="'.$baseUrl.'download/coursematerial?cs_mat='.base64_encode($data->id."_".$data->item_id."_".$data->client_id).'&dw=true"><i class="fa fa-download"></i> Download</a>' : '').'
                                     '.($hasPlanner ? '
-                                        <button  onclick="return load_quick_form(\'course_unit_form\',\''.$data->id.'\');" class="btn btn-sm btn-outline-primary" type="button"><i class="fa fa-plus"></i> New Unit</button>'
+                                        <button  onclick="return load_quick_form(\'course_unit_form\',\''.$data->id.'\');" class="btn mb-1 btn-sm btn-outline-primary" type="button">
+                                            <i class="fa fa-plus"></i> New '.($labels->unit_label ?? 'Unit').'
+                                        </button>'
                                     : null ).'
                                 </div>
                             </div>

@@ -219,6 +219,17 @@ class Myschoolgh extends Models {
 			$client_data = $this->defaultClientData;
 		}
 
+		if(isset($client_data?->client_preferences?->labels)) {
+			$label = $client_data?->client_preferences?->labels;
+			if(!empty($label->unit_label)) {
+				$this->form_modules['course_unit_form'] = str_ireplace("Course Unit", $label->unit_label, $this->form_modules['course_unit_form']);
+			}
+			if(!empty($label->lesson_label)) {
+				$this->form_modules['course_lesson_form'] = str_ireplace("Unit Lesson", $label->lesson_label, $this->form_modules['course_lesson_form']);
+				$this->form_modules['course_lesson_form_view'] = str_ireplace("Unit Lesson", $label->unit_label, $this->form_modules['course_unit_form']);
+			}
+		}
+
 		return $client_data;
 
 	}

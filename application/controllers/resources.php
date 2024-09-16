@@ -61,6 +61,10 @@ class Resources extends Myschoolgh {
             // if the request is to upload a link
             if(isset($upload->upload_type) && $upload->upload_type == "is_link") {
 
+                if(filter_var($upload->link_url, FILTER_VALIDATE_URL) == false) {
+                    return ["code" => 203, "data" => "Sorry! Confirm that a valid url was entered."]; 
+                }
+
                 // upload the file
                 if(isset($upload->resource_id) && !empty($upload->resource_id)) {
                     // insert the link record
