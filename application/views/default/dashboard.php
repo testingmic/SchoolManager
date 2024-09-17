@@ -477,6 +477,19 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             </div>';
     }
 
+    // set a new parameter for the items
+    $files_param = (object) [
+        "resource" => "settings_calendar",
+        "item_id" => $defaultUser->client->client_id
+    ];
+
+    // create a new object
+    $attachments = load_class("files", "controllers")->list_attachments($files_param);
+    $preloaded_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
+
+    // print_r($attachments);
+    // exit;
+
     $response->html = $myClass->async_notification().'
     <section class="section">
         <div class="default_period" data-current_period="'.$global_period.'">
@@ -899,6 +912,31 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 ).'
                 '.($isWardTutorParent || $isEmployee ?
                 '<div class="col-lg-4 col-md-12">
+                    '.($isStudent ? '
+                        <div class="card card-statistic-1 border-top-0 border-bottom-0 border-right-0 border-left-lg border-yellow border-left-solid">
+                            <div class="card-wrap">
+                                <div class="padding-20">
+                                    <div class="text-center">
+                                        <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
+                                        <h5 class="mt-2 pt-0">'.$defaultAcademics->academic_year.'</h5>
+                                        <span class="font-16 font-bold">
+                                            '.date("F d, Y", strtotime($defaultAcademics->year_starts)).' 
+                                                &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
+                                            '.date("F d, Y", strtotime($defaultAcademics->year_ends)).'
+                                        </span>
+                                        <hr>
+                                        <p class="font-16 p-0 m-0 text-primary text-uppercase">'.($academicSession ?? null).'</p>
+                                        <h5 class="mt-0 pt-0 text-uppercase">'.$defaultAcademics->academic_term.'</h5>
+                                        <span class="font-16 font-bold">
+                                            '.date("F d, Y", strtotime($defaultAcademics->term_starts)).' 
+                                                &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
+                                            '.date("F d, Y", strtotime($defaultAcademics->term_ends)).'
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>' : null
+                    ).'
                     <div class="card">
                         '.($isTutorStudent || $isEmployee ?
                             '<div class="card-header">

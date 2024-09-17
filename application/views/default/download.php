@@ -97,18 +97,23 @@ if(!$isSupport) {
 
         // confirm that the file really exists
         if(is_file($file_to_download) && file_exists($file_to_download)) {
-            // force the file download
-            header('Content-Description: File Transfer');
-            header('Content-Type: application/octet-stream');
-            header('Content-Disposition: attachment; filename="' . basename($file_to_download) . '"');
-            header('Content-Transfer-Encoding: binary');
-            header('Connection: Keep-Alive');
-            header('Expires: 0');
-            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            header('Pragma: public');
-            header('Content-Length: ' . filesize($file_to_download));
-            readfile($file_to_download);
-            exit;
+            if(!isset($_GET["preview"])) {
+                // force the file download
+                header('Content-Description: File Transfer');
+                header('Content-Type: application/octet-stream');
+                header('Content-Disposition: attachment; filename="' . basename($file_to_download) . '"');
+                header('Content-Transfer-Encoding: binary');
+                header('Connection: Keep-Alive');
+                header('Expires: 0');
+                header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+                header('Pragma: public');
+                header('Content-Length: ' . filesize($file_to_download));
+                readfile($file_to_download);
+                exit;
+            } else {
+                $file = "{$myClass->baseUrl}{$file_to_download}";
+                die("<style>html, body { margin: 0; padding: 0; height: 100%; }</style><iframe style='width: 100%; height: 100%; border: none;' src='{$file}'></iframe>");
+            }
         }
     
         

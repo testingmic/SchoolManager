@@ -543,6 +543,7 @@ class Files extends Myschoolgh {
             // html string
             $attachments = "<div class='row'>";
             $showView = (bool) isset($params->show_view);
+            $previewFile = (bool) !empty($params->preview_file);
 
             // if the files parameter is set
             if(!empty($attachments_list->files)) {
@@ -575,7 +576,7 @@ class Files extends Myschoolgh {
                             }
 
                             // get the download link
-                            $file_to_download = base64_encode($each_file->path."{$this->underscores}{$each_file->record_id}");
+                            $file_to_download = base64_encode($each_file->path."{$this->underscores}{$each_file->record_id}") . ($previewFile ? "&preview=1" : null);
 
                             // list the files
                             $attachments .= "<div data-file_container='{$each_file->record_id}_{$each_file->unique_id}' title=\"Click to view: {$fileInfo["name"]}\" class=\"col-md-12 pb-1 text-left\" data-document-link=\"{$fileInfo["server_path"]}\">";
@@ -590,11 +591,14 @@ class Files extends Myschoolgh {
 
                             // if the params has the is_deletable item set to true
                             if($params->is_deletable) {
+
+                                // set the file download url
+                                $fileUrl = "{$this->baseUrl}{$params->show_view}/{$each_file->record_id}_{$each_file->unique_id}";
                                 
                                 // display the delete button
                                 $attachments .= "
                                 <span class=\"float-right\">
-                                    ".($showView ? "<a title='Click to view material' href='{$this->baseUrl}{$params->show_view}/{$each_file->record_id}_{$each_file->unique_id}' class='btn btn-sm btn-outline-primary'><i class=\"fa fa-eye\"></i></a>" : null)."
+                                    ".($showView ? "<a title='Click to view material' href='{$fileUrl}' class='btn btn-sm btn-outline-primary'><i class=\"fa fa-eye\"></i></a>" : null)."
                                     <button type=\"button\" onclick=\"return delete_existing_file_attachment('{$each_file->record_id}_{$each_file->unique_id}');\" class=\"btn btn-outline-danger btn-sm delete-attachment-file\">
                                         <i class=\"fa fa-trash\"></i>
                                     </button>
@@ -897,11 +901,13 @@ class Files extends Myschoolgh {
 
         try {
 
+            $params->limit = empty($params->limit) ? 1 : $params->limit;
+            
             // filters to append
             $query = "1";
-            $query .= isset($params->record_id) ? " AND a.record_id = '{$params->record_id}'" : "";
-            $query .= isset($params->created_by) ? " AND a.created_by = '{$params->created_by}'" : "";
-            $query .= isset($params->resource) ? " AND a.resource = '{$params->resource}'" : "";
+            $query .= !empty($params->record_id) ? " AND a.record_id = '{$params->record_id}'" : "";
+            $query .= !empty($params->created_by) ? " AND a.created_by = '{$params->created_by}'" : "";
+            $query .= !empty($params->resource) ? " AND a.resource = '{$params->resource}'" : "";
 
             // specific file type
             $specific_type = isset($params->attachment_type) ? $this->stringToArray($params->attachment_type) : false;

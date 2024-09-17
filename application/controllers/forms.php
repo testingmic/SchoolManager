@@ -3706,7 +3706,8 @@ class Forms extends Myschoolgh {
             "module" => "settings_calendar",
             "item_id" => $client_data->client_id,
             "accept" => implode(",", [".pdf"]),
-            "attachments_list" => $calendar_docs
+            "attachments_list" => $calendar_docs,
+            "preview_file" => true
         ];
 
         /** Set parameters for the data to attach */
@@ -3714,7 +3715,8 @@ class Forms extends Myschoolgh {
             "accept" => ".pdf",
             "module" => "settings_calendar",
             "userData" => $client_data,
-            "item_id" => $client_data->client_id
+            "item_id" => $client_data->client_id,
+            "preview_file" => true
         ];
 
         // create a new object

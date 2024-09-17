@@ -631,9 +631,23 @@ class Account extends Myschoolgh {
             $stmt = $this->db->prepare("UPDATE clients_accounts SET client_preferences	= ? WHERE client_id = ? LIMIT 1");
             $stmt->execute([json_encode($preference), $params->clientId]);
 
+            // old record
+            $prevData = $this->pushQuery("a.description", "files_attachment a", "a.resource='settings_calendar' AND a.resource_id='{$params->clientId}' LIMIT 1");
+
+            /** Confirm that there is an attached document */
+            if(!empty($prevData) && isset($prevData[0]->description)) {
+                // decode the json string
+                $db_attachments = json_decode($prevData[0]->description);
+                // get the files
+                if(isset($db_attachments->files)) {
+                    $initial_attachment = $db_attachments->files;
+                }
+            }
+
             // files object and upload the file for the academic calendar
             $filesObj = load_class("files", "controllers");
-            $attachments = $filesObj->prep_attachments("settings_calendar", $params->userId, $params->clientId);
+            $attachments = $filesObj->prep_attachments("settings_calendar", $params->userId, $params->clientId, $initial_attachment ?? []);
+
             // insert the record if not already existing
             $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");
             $files->execute(["settings_calendar", $params->clientId, json_encode($attachments), "{$params->clientId}", $params->userId, $attachments["raw_size_mb"], $params->clientId]);
