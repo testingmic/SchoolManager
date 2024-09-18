@@ -902,6 +902,7 @@ class Files extends Myschoolgh {
         try {
 
             $params->limit = empty($params->limit) ? 1 : $params->limit;
+            $params->internal_limit = !empty($params->internal_limit) ? $params->internal_limit : $this->temporal_maximum;
             
             // filters to append
             $query = "1";
