@@ -916,9 +916,6 @@ class Files extends Myschoolgh {
             $stmt = $this->db->prepare("SELECT description FROM files_attachment a WHERE {$query} ORDER BY a.id DESC LIMIT {$params->limit}");
             $stmt->execute([]);
 
-            // init
-            $data = [];
-
             // append to the files list
             $count = 1;
             $files_list = [];
@@ -949,7 +946,6 @@ class Files extends Myschoolgh {
 
                     $count++;
                 }
-                $data[] = $result;
             }
 
             // return the results

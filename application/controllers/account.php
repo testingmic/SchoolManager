@@ -648,9 +648,15 @@ class Account extends Myschoolgh {
             $filesObj = load_class("files", "controllers");
             $attachments = $filesObj->prep_attachments("settings_calendar", $params->userId, $params->clientId, $initial_attachment ?? []);
 
-            // insert the record if not already existing
-            $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");
-            $files->execute(["settings_calendar", $params->clientId, json_encode($attachments), "{$params->clientId}", $params->userId, $attachments["raw_size_mb"], $params->clientId]);
+            // update attachment if already existing
+            if(isset($db_attachments)) {
+                $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? AND client_id = ? LIMIT 1");
+                $files->execute([json_encode($attachments), $attachments["raw_size_mb"], $prevData[0]->item_id, $params->clientId]);
+            } else {
+                // insert the record if not already existing
+                $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");
+                $files->execute(["settings_calendar", $params->clientId, json_encode($attachments), "{$params->clientId}", $params->userId, $attachments["raw_size_mb"], $params->clientId]);
+            }
 
             // log the user activity
             $this->userLogs("account", $params->clientId, $client_data, "{$params->userData->name} updated the Account Information", $params->userId);

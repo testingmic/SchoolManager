@@ -209,6 +209,18 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
     $data = $defaultUser;
     $admission_enquiry = null;
 
+    // set a new parameter for the items
+    $files_param = (object) [
+        "resource" => "settings_calendar",
+        "item_id" => $defaultUser->client->client_id
+    ];
+
+    // create a new object
+    $academi_calendar = load_class("files", "controllers")->list_attachments($files_param);
+
+    // set the academic calendar
+    $response->array_stream['academic_calendar'] = $academi_calendar;
+
     // if ward/parent/tutor
     if($isWardTutorParent) {
 
@@ -376,8 +388,43 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 $timetable = $timetableClass->teacher_timetable($defaultUser->user_id, $clientId, "today");
             }
 
+            // load the calendar
+            $load_calendar = '';
+            foreach($academi_calendar as $each) {
+
+                if($each->is_deleted) continue;
+                // get the download link
+                $file_to_download = base64_encode($each->path."{$myClass->underscores}{$each->record_id}") . "&preview=1";
+
+                // get the download path
+                $download_path = "{$myClass->baseUrl}download?file={$file_to_download}";
+
+                // load the calendar
+                $load_calendar .= "<div class='col-md-4 mb-4'>";
+                $load_calendar .= "<div class='border border-blue border-2px p-2 rounded'>";
+                $load_calendar .= "<div class='font-bold uppercase'>{$each->name}</div>";
+                $load_calendar .= "<div><a target='_blank' title='Click to view {$each->name}' href='{$download_path}'>View Calendar</a></div>";
+                $load_calendar .= "<div>{$each->datetime}</div>";
+                $load_calendar .= "</div>";
+                $load_calendar .= "</div>";
+            }
+
             // assign the assignments list
-            $assignment_list = '
+            $assignment_list = !empty($load_calendar) ? '
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-header text-uppercase">
+                        <h4>Academic Calendar</h4>
+                    </div>
+                    <div class="card-body pb-0 trix-slim-scroll">
+                        <div class="row">
+                            '.$load_calendar.'
+                        </div>
+                    </div>
+                </div>
+            </div>' : null;
+
+            $assignment_list .= '
             <div class="col-lg-12 col-md-12 col-12 col-sm-12">
                 <div class="card">
                     <div class="card-header text-uppercase">
@@ -477,19 +524,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
             </div>';
     }
 
-    // set a new parameter for the items
-    $files_param = (object) [
-        "resource" => "settings_calendar",
-        "item_id" => $defaultUser->client->client_id
-    ];
-
-    // create a new object
-    $attachments = load_class("files", "controllers")->list_attachments($files_param);
-    $preloaded_attachments = !empty($attachments) && isset($attachments["data"]) ? $attachments["data"]["files"] : null;
-
-    // print_r($attachments);
-    // exit;
-
+    // set the html content
     $response->html = $myClass->async_notification().'
     <section class="section">
         <div class="default_period" data-current_period="'.$global_period.'">
