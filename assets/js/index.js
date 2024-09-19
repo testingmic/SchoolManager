@@ -34,8 +34,8 @@ var full_scholarship = (student_id, status) => {
                 dataType: 'JSON',
                 success: (result) => {
                     if(result.code === 200) {
-                        notify(result.data.result);
-                        $(`#scholarship_status`).html(result.data.additional_html);
+                        notify(result.data.result, "success");
+                        $(`#scholarship_status`).html(result.data.additional);
                     } else {
                         notify(result.data.result);
                     }

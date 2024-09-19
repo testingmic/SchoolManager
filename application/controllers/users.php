@@ -913,6 +913,38 @@ class Users extends Myschoolgh {
 		return $wards_list;
 	}
 
+	/**	
+	 * Full Scholarship
+	 * 
+	 * @param String $student_id
+	 * @param String $status
+	 * 
+	 * @return Array
+	 */
+	public function full_scholarship($params) {
+
+		try {
+
+			// update the user scholarship information
+			$stmt = $this->db->prepare("UPDATE users SET scholarship_status = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
+			$stmt->execute([$params->status, $params->student_id, $params->clientId]);
+
+			// get the user scholarship status
+			$status = $params->status == 1 ? 0 : 1;
+			$color = $params->status == 1 ? "danger" : "success";
+			$title = $params->status == 1 ? "Remove Full Scholarship" : "Award Full Scholarship";
+
+			// return the success response
+			return [
+				"code" => 200,
+				"data" => "Scholarship status was successfully updated",
+				"additional" => '<span class="btn mb-1 btn-outline-'.$color.'" onclick="return full_scholarship(\''.$params->student_id.'\', '.$status.')"><i class="fa fa-ankh"></i> '.$title.'</span></span>'
+			];
+		} catch(PDOException $e) {
+			return ["code" => 201, "data" => "Sorry! There was an error while processing the request."];
+		}
+	}	
+
 	/**
 	 * Append/Remove a student to the Guardian
 	 * 
