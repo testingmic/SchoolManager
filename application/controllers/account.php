@@ -841,7 +841,8 @@ class Account extends Myschoolgh {
             $clean_set = array_slice($each, 0, $c_count-1);
             $data[] = $clean_set;
             // push the data parsed by the user to the page
-            if($i < 10)  {
+            if($i < 20)  {
+                if(empty($clean_set[1]) || empty($clean_set[2])) continue;
                 $sample_csv_data[] = $clean_set;
             }
             // increment
@@ -1265,11 +1266,11 @@ class Account extends Myschoolgh {
 
                 // set the content
                 $columns = array_values($this->accepted_column[$file]);
-                $step = count($columns)+3;
+                $step = count($columns)+2;
 
                 $table = [
-                    "department" => ["column" => "name, department_code"],
-                    "classes" => ["column" => "id, name, class_code"]
+                    "departments" => ["column" => "id, name, department_code AS code"],
+                    "classes" => ["column" => "id, name, class_code AS code"]
                 ];
 
                 // set the content of the file to download
@@ -1291,12 +1292,33 @@ class Account extends Myschoolgh {
                         $content .= str_repeat(',', $step)."\n";
                         $content .= str_repeat(',', $step)."\n";
                     }
-                    
+
+                    foreach($table as $i => $v) {
+                        try {
+                            // general queries
+                            $data_stmt = $this->db->prepare("SELECT {$v['column']} FROM {$i} WHERE client_id = '{$params->clientId}' AND status='1'");
+                            $data_stmt->execute();
+
+                            // data set
+                            $content .= str_repeat(',', $step) . "".strtoupper($i)." LIST\n";
+
+                            // if the row count is not zero
+                            if($data_stmt->rowCount()) {
+                                // append the header
+                                $content .= str_repeat(',', $step)."ID,,NAME,,CODE\n";
+                                // loop through the list of programmes
+                                while($result = $data_stmt->fetch(PDO::FETCH_OBJ)) {
+                                    // print the course information
+                                    $content .= str_repeat(',', $step)."{$result->id},,{$result->name},,{$result->code}\n";
+                                }
+                                $content .= "\n\n";
+                            }
+                        } catch(\Exception $e) {}
+                    }
                 }
 
-                // set the file name
                 $filename = "{$temp_dir}/{$file}_bulk_upload.csv";
-                
+
                 // write the content to the sample file
                 $op = fopen($filename, 'w');
                 fwrite($op, $content);

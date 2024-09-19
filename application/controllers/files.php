@@ -593,7 +593,7 @@ class Files extends Myschoolgh {
                             if($params->is_deletable) {
 
                                 // set the file download url
-                                $fileUrl = "{$this->baseUrl}{$params->show_view}/{$each_file->record_id}_{$each_file->unique_id}";
+                                $fileUrl = $this->baseUrl.($params->show_view ?? null)."/{$each_file->record_id}_{$each_file->unique_id}";
                                 
                                 // display the delete button
                                 $attachments .= "

@@ -65,7 +65,7 @@ var select_change_handler = (column) => {
     });
 }
 
-var change_select_input_field = (id, value, column) => {
+var change_select_input_field = async (id, value, column) => {
 
     if ($.inArray(value, acceptedArray[column]) !== -1) {
         $(`div[data-row="${id}"] div[class="text-center"]`)
@@ -289,7 +289,7 @@ var download_sample_csv = (column) => {
     $.get(`${baseUrl}api/account/download_temp`, { file: column }).then((response) => {
         if (response.code === 200) {
             $.each(response.data.result, function(i, e) {
-                window.location.href = `${baseUrl}${e}`;
+                window.open(`${baseUrl}${e}`, `Sample Upload Document`);
             });
         }
         $(`button[data-download_button="${column}"]`).prop("disabled", false).html(`<i class="fa fa-download"></i> Download Sample CSV File`);
