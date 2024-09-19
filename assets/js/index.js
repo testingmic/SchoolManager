@@ -25,7 +25,7 @@ var full_scholarship = (student_id, status) => {
     }).then((proceed) => {
         if(proceed) {
             $.ajax({
-                url: `${baseUrl}api/student/full_scholarship`,
+                url: `${baseUrl}api/users/full_scholarship`,
                 type: "POST",
                 data: {
                     "student_id": student_id,
