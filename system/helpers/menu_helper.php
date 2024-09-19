@@ -632,6 +632,9 @@
     </li>
     <?php } ?>
     <li class="dropdown">
+        <a href="<?= $baseUrl ?>endpoints"><i class="fas fa-code"></i><span>API Endpoints</span></a>
+    </li>
+    <li class="dropdown">
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book-reader"></i><span>Knowledgebase</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>knowledgebase">Articles List</a></li>

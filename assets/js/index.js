@@ -15,6 +15,36 @@ async function randomInt(length = 12) {
     return result;
 }
 
+var full_scholarship = (student_id, status) => {
+    swal({
+        title: "Scholarship Status",
+        text: "Are you sure you want to mark this student as a full scholarship?",
+        icon: 'warning',
+        buttons: true,
+        dangerMode: true,
+    }).then((proceed) => {
+        if(proceed) {
+            $.ajax({
+                url: `${baseUrl}api/student/full_scholarship`,
+                type: "POST",
+                data: {
+                    "student_id": student_id,
+                    "status": status
+                },
+                dataType: 'JSON',
+                success: (result) => {
+                    if(result.code === 200) {
+                        notify(result.data.result);
+                        $(`#scholarship_status`).html(result.data.additional_html);
+                    } else {
+                        notify(result.data.result);
+                    }
+                }
+            });
+        }
+    });
+}
+
 var generate_payment_report = (student_id) => {
     let category_id = $(`select[id="category_id"]`).val(),
         start_date = $(`input[name="group_start_date"]`).val(),

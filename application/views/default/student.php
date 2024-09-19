@@ -435,6 +435,9 @@ if(!empty($user_id)) {
                                 : null
                             ).'
                             '.($hasUpdate ? '<a target="_blank" title="Export Student Record" class="btn mb-1 hidden btn-outline-danger" href="'.$baseUrl.'download/export/users/'.$user_id.'"><i class="fa fa-download"></i> Export</a>' : null).'
+                            '.(
+                                $hasUpdate && $isAdminAccountant ? '<span id="scholarship_status" class="text-right"><span class="btn mb-1 btn-outline-success" onclick="return full_scholarship(\''.$user_id.'\', 1)"><i class="fa fa-ankh"></i> Full Scholarship</span></span>' : null    
+                            ).'
                         </div>
                     </div>
                 </div>
