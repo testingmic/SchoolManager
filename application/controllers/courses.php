@@ -407,7 +407,7 @@ class Courses extends Myschoolgh {
                 ".(!empty($params->department_id) ? ", department_id = '{$params->department_id}'" : null)."
                 ".(!empty($params->academic_term) ? ", academic_term = '{$params->academic_term}'" : null)."
                 ".(!empty($params->academic_year) ? ", academic_year = '{$params->academic_year}'" : null)."
-                ".(!empty($params->description) ? ", description = '{$params->description}'" : null)."
+                ".(!empty($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 WHERE id = ? AND client_id = ? LIMIT 1
             ");
             $stmt->execute([json_encode($tutor_ids), $params->course_id, $params->clientId]);

@@ -864,6 +864,20 @@ label {
     background-color: #000;
 }
 
+pre {
+    background-color: #282c34;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    white-space: pre-wrap; /* Wrap long lines */
+    word-wrap: break-word;
+}
+
+code {
+    font-family: "Courier New", Courier, monospace;
+}
+
 h4 {
     font-size: 16px;
     line-height: 28px;

@@ -29,7 +29,9 @@ var view_activity_log = (activity_id) => {
                         </div>
                     </div>
                     <div class="mt-3 border-top pt-3">
-                        ${activity.previous_record !== null ? `<h5>PREVIOUS RECORD</h5>${activity.previous_record}` : ""}
+                        ${activity.previous_record !== null ? `<h5>PREVIOUS RECORD</h5>
+                            <pre><code id="json-display">${JSON.stringify(JSON.parse(activity.previous_record), null, 2)}</code></pre>
+                        ` : ""}
                     </div>
                 </div>
             `);
@@ -75,8 +77,9 @@ var view_login_history_log = (activity_id) => {
 $(`button[id="filter_User_Activities"]`).on("click", function() {
     let start_date = $(`input[name="start_date"]`).val(),
         end_date = $(`input[name="end_date"]`).val(),
+        clientId = $(`select[name="clientId"]`).val(),
         activity_type = $(`select[name="activity_type"]`).val();
-    $.form_data = { start_date, end_date, activity_type };
+    $.form_data = { start_date, end_date, activity_type, clientId };
     loadPage(`${baseUrl}timeline`);
 });
 

@@ -20,6 +20,8 @@ $clientId = $session->clientId;
 // specify some variables
 $limit = 300;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
+
+// get the filter values
 $filter = (object) array_map("xss_clean", $_POST);
 
 $pageTitle = "User Activity Timelines";
@@ -32,18 +34,29 @@ if(!$accessObject->hasAccess("activities", "settings")) {
 } else {
 
     // set the dates
-    $start_date = $filter->start_date ?? date("Y-m-d", strtotime("yesterday"));
+    $start_date = $filter->start_date ?? date("Y-m-d", strtotime("-1 week"));
     $end_date = $filter->end_date ?? date("Y-m-d");
-    $activity_type = $filter->activity_type ?? null;
+    $activity_type = !empty($filter->activity_type) ? $filter->activity_type : null;
 
     // include the script to be executed on the page.
     $response->scripts = ["assets/js/timeline.js"];
 
+    // set the where clause to use
+    $whereClause = "";
+    $whereClause .= !empty($filter->clientId) ? "a.client_id='{$filter->clientId}' AND " : "";
+    $whereClause .= !empty($filter->user_id) ? "a.user_id='{$filter->user_id}' AND " : "";
+
+    // if the user is not a support
+    $whereClause = !$isSupport ? "(a.client_id='{$clientId}' OR a.user_id='{$userId}') AND" : $whereClause;
+
+    // get the list of schools
+    $load_schools_list = $isSupport ? $myClass->pushQuery("*", "clients_accounts") : [];
+
     // get the array list of values
     $activity_list = $myClass->pushQuery("a.*, u.name AS fullname, u.unique_id, u.email, 
         u.phone_number, u.image, u.description AS user_description", 
-        "users_activity_logs a LEFT JOIN users u ON u.item_id = a.user_id",
-        "(a.client_id='{$clientId}' OR a.user_id='{$userId}') AND a.status = '1' 
+        "users_activity_logs a INNER JOIN users u ON u.item_id = a.user_id",
+        "{$whereClause} a.status = '1' 
         AND DATE(a.date_recorded) >= '{$start_date}' AND DATE(a.date_recorded) <= '{$end_date}' 
         AND a.subject NOT IN ('endpoints') 
         ".(!empty($activity_type) ? "AND a.subject = '{$activity_type}'" : null)."
@@ -99,6 +112,8 @@ if(!$accessObject->hasAccess("activities", "settings")) {
             </div>
         </div>';
     }
+    
+    // set the array stream
     $response->array_stream["activity_list_array"] = $activity_list_array;
     $response->array_stream["activity_list_icons"] = $icons;
 
@@ -142,17 +157,28 @@ if(!$accessObject->hasAccess("activities", "settings")) {
                     <label>End Date</label>
                     <input type="text" class="form-control datepicker" value="'.$end_date.'" name="end_date">
                 </div>
+                <div class="col-lg-3 '.(!$isSupport ? 'hidden' : '').' col-md-3">
+                    <label>Academic Institution</label>
+                    <select data-width="100%" class="form-control selectpicker" name="clientId">
+                        <option value="">All Academic Institutions</option>';
+                        foreach($load_schools_list as $school) {
+                            $selected = !empty($filter->clientId) && ($school->client_id == $filter->clientId) ? 'selected' : '';
+                            $response->html .= '<option value="'.$school->client_id.'" '.$selected.'>'.$school->client_name.'</option>';
+                        }
+                    $response->html .= '
+                    </select>
+                </div>
                 <div class="col-lg-3 col-md-3">
                     <label>Section</label>
-                    <select class="form-control selectpicker" name="activity_type">
-                        <option>All Sections</option>';
+                    <select data-width="100%" class="form-control selectpicker" name="activity_type">
+                        <option value="">All Sections</option>';
                         foreach($sections as $key => $section) {
                             $response->html .= "<option ".($activity_type == $key ? "selected" : null)." value='{$key}'>{$section}</option>";
                         }
                         $response->html .= '
                     </select>
                 </div>
-                <div class="col-lg-2 col-md-3">
+                <div class="col-lg-2 col-md-2">
                     <div class="form-group">
                         <label>&nbsp;</label>
                         <button id="filter_User_Activities" class="btn btn-primary btn-block"><i class="fa fa-filter"></i> Filter</button>

@@ -25,6 +25,9 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "User Login History";
 $response->title = $pageTitle;
 
+// get the filter values
+$filter = (object) array_map("xss_clean", $_POST);
+
 // if the user has no permissions
 if(!$accessObject->hasAccess("login_history", "settings")) {
     // show the error page
@@ -38,7 +41,7 @@ if(!$accessObject->hasAccess("login_history", "settings")) {
     $load_schools_list = $isSupport ? $myClass->pushQuery("*", "clients_accounts") : [];
 
     // set the dates
-    $start_date = $filter->start_date ?? date("Y-m-d", strtotime("-1 week"));
+    $start_date = $filter->start_date ?? date("Y-m-d", strtotime("-3 days"));
     $end_date = $filter->end_date ?? date("Y-m-d");
     $activity_type = $filter->activity_type ?? null;
 
