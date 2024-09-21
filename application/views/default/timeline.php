@@ -34,7 +34,7 @@ if(!$accessObject->hasAccess("activities", "settings")) {
 } else {
 
     // set the dates
-    $start_date = $filter->start_date ?? date("Y-m-d", strtotime("-1 week"));
+    $start_date = $filter->start_date ?? date("Y-m-d", strtotime("-3 days"));
     $end_date = $filter->end_date ?? date("Y-m-d");
     $activity_type = !empty($filter->activity_type) ? $filter->activity_type : null;
 
