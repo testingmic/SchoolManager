@@ -41,41 +41,43 @@ function invalid_route($title = "Invalid Route", $content = "Sorry! You are tryi
 }
 
 // if the host is api.myschoolgh.com and the user tries to access it in the browser
-if(($_SERVER['HTTP_HOST'] === 'api.myschoolgh.com') && !isset($_SERVER['HTTP_AUTHORIZATION'])) {
-    die(invalid_route());
-} elseif(!isset($_SERVER['HTTP_AUTHORIZATION'])) {
-    function redirect_to_https() {
-        if($_SERVER["SERVER_PORT"] !==433 && (empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"]=="off")) {
-            // header("Location: http://".$_SERVER["HTTP_HOST"].''.$_SERVER["REQUEST_URI"]."");
-        }
-    }
-    redirect_to_https();
+if(isset($_SERVER['HTTP_HOST'])) {
+	if(($_SERVER['HTTP_HOST'] === 'api.myschoolgh.com') && !isset($_SERVER['HTTP_AUTHORIZATION'])) {
+		die(invalid_route());
+	} elseif(!isset($_SERVER['HTTP_AUTHORIZATION'])) {
+		function redirect_to_https() {
+			if($_SERVER["SERVER_PORT"] !==433 && (empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"]=="off")) {
+				// header("Location: http://".$_SERVER["HTTP_HOST"].''.$_SERVER["REQUEST_URI"]."");
+			}
+		}
+		redirect_to_https();
+	}
 }
 
-function run($isNotRemote, $return = false, $SITEURL =  []) {
+function run($isNotRemote, $return = false, $SITEURL =  [], $argv = []) {
 
-	if(!empty($return)) {
+	if(!empty($return) && isset($_SERVER['REQUEST_URI'])) {
 
-		$URL = STR_REPLACE( ARRAY( '\\', '../'), ARRAY( '/',  '' ), $_SERVER['REQUEST_URI'] );
+		$URL = str_replace( array( '\\', '../'), array( '/',  '' ), $_SERVER['REQUEST_URI'] );
 
 		if ($offset = strpos($URL, '?')) {
-			$URL = SUBSTR($URL, 0, $offset);
+			$URL = substr($URL, 0, $offset);
 		} else if ($offset = strpos($URL, '//')) {
-		    $URL = SUBSTR($URL, 0, $offset);
+		    $URL = substr($URL, 0, $offset);
 		}
 
-		$chop = -STRLEN(BASENAME($_SERVER['SCRIPT_NAME']));
-		define('DOC_ROOT', SUBSTR($_SERVER['SCRIPT_FILENAME'], 0, $chop));
-		define('URL_ROOT', SUBSTR($_SERVER['SCRIPT_NAME'], 0, $chop));
+		$chop = -strlen(basename($_SERVER['SCRIPT_NAME']));
+		define('DOC_ROOT', substr($_SERVER['SCRIPT_FILENAME'], 0, $chop));
+		define('URL_ROOT', substr($_SERVER['SCRIPT_NAME'], 0, $chop));
 
-		if (URL_ROOT != '/') $URL = SUBSTR($URL, STRLEN(URL_ROOT));
+		if (URL_ROOT != '/') $URL = substr($URL, strlen(URL_ROOT));
 
-		$URL = TRIM($URL, '/');
+		$URL = trim($URL, '/');
 
-		if ( FILE_EXISTS(DOC_ROOT.'/'.$URL) && ($_SERVER['SCRIPT_FILENAME'] != DOC_ROOT.$URL) && ($URL != '') && ($URL != 'index.php') )
+		if ( file_exists(DOC_ROOT.'/'.$URL) && ($_SERVER['SCRIPT_FILENAME'] != DOC_ROOT.$URL) && ($URL != '') && ($URL != 'index.php') )
 		    die(no_file_log());
 
-		$SITEURL = (($URL == '') || ($URL == 'index.php') || ($URL == 'index.html')) ? ARRAY('index') : EXPLODE('/', html_entity_decode($URL));
+		$SITEURL = (($URL == '') || ($URL == 'index.php') || ($URL == 'index.html')) ? array('index') : explode('/', html_entity_decode($URL));
 
 		// set the site url
 		$SITEURL = array_map("xss_clean", $SITEURL);
@@ -91,8 +93,13 @@ function run($isNotRemote, $return = false, $SITEURL =  []) {
 
 	}
 
+	if(!empty($argv)) {
+		unset($argv[0]);
+		return ['file' => CONTROLLERS_PATH . "/console.php", 'argv' => $argv];
+	}
+
 	// default file to include
-	$defaultFile = config_item('default_view_path').strtolower(preg_replace('/[^\w_]-/','',$SITEURL[0])).'.php';
+	$defaultFile = config_item('default_view_path').strtolower(preg_replace('/[^\w_]-/','', $SITEURL[0])).'.php';
 
 	// get the request method that was parsed by the user
 	$method = strtoupper( $_SERVER["REQUEST_METHOD"] );

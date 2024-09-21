@@ -3,7 +3,7 @@
 error_reporting(E_ALL);
 
 // display errors if the host is localhost
-if($_SERVER['HTTP_HOST'] == "localhost") {
+if(isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] == "localhost") {
 	// display the errors
 	ini_set("display_errors", 1);
 }
@@ -13,6 +13,8 @@ ini_set("log_errors","1");
 ini_set("error_log", "errors_log");
 
 define('ROOTPATH', __DIR__);
+define('MODELS_PATH', __DIR__ . "/application/models");
+define('CONTROLLERS_PATH', __DIR__ . "/application/controllers");
 
 // require the autoload for composer packages
 require_once ROOTPATH . "/vendor/autoload.php";
@@ -41,7 +43,7 @@ global $session;
 load_class('models', 'models');
 
 // set the site url
-$SITEURL = run($isNotRemote, true);
+$SITEURL = run($isNotRemote, true, [], $argv ?? []);
 
 // call the user logged in class
 $academicSession = "Term";
@@ -52,7 +54,7 @@ $noticeClass = load_class('notification', 'controllers');
 $accessObject = load_class('accesslevel', 'controllers');
 
 // if the session is set
-if(!empty($session->userId)) {
+if(!empty($session->userId) && empty($argv)) {
 
     // get the client data
     $defaultClientData = $myClass->client_session_data($session->clientId, false);
@@ -163,7 +165,7 @@ if(!empty($session->userId)) {
 $loadedCSS = [];
 $loadedJS = [];
 
-$settings = run($isNotRemote, false, $SITEURL);
+$settings = run($isNotRemote, false, $SITEURL, $argv ?? []);
 
 if(is_array($settings)) {
 	include($settings['file']);

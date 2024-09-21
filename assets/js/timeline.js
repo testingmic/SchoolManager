@@ -57,10 +57,12 @@ var view_login_history_log = (activity_id) => {
                         <div class="d-flex justify-content-start">
                             <div class="mr-3"><img width="80px" src="${baseUrl}${activity.image}" class="rounded-circle author-box-picture"></div>
                             <div>
+                                <p class="mb-0 pb-0"><i class="fa fa-home"></i> ${activity.school_name}</p>
                                 <p class="mb-0 pb-0"><i class="fa fa-user-injured"></i> ${activity.fullname}</p>
                                 <p class="mb-0 pb-0"><i class="fa fa-address-card"></i> ${activity.unique_id}</p>
                                 <p class="mb-0 pb-0"><i class="fa fa-envelope"></i> ${activity.email}</p>
                                 <p class="mb-0 pb-0"><i class="fa fa-phone"></i> ${activity.phone_number}</p>
+                                <p class="mb-0 pb-0"><i class="fa fa-tag"></i> ${activity.user_type.toUpperCase()}</p>
                             </div>
                         </div>
                     </div>
@@ -82,7 +84,8 @@ $(`button[id="filter_User_Login"]`).on("click", function() {
     let start_date = $(`input[name="start_date"]`).val(),
         end_date = $(`input[name="end_date"]`).val(),
         user_type = $(`select[name="user_type"]`).val(),
+        clientId = $(`select[name="clientId"]`).val(),
         user_id = $(`select[name="user_id"]`).val();
-    $.form_data = { start_date, end_date, user_type, user_id };
+    $.form_data = { start_date, end_date, user_type, user_id, clientId };
     loadPage(`${baseUrl}login-history`);
 });

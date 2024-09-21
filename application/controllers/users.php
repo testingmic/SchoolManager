@@ -913,7 +913,7 @@ class Users extends Myschoolgh {
 		return $wards_list;
 	}
 
-	/**	
+	/**
 	 * Full Scholarship
 	 * 
 	 * @param String $student_id

@@ -91,6 +91,8 @@ class Myschoolgh extends Models {
         
         global $SITEURL;
 
+		if(empty($SITEURL[0])) return $this;
+
         // set the default array list
         $content = [
             "students" => [
