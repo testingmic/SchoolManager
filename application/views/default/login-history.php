@@ -41,7 +41,7 @@ if(!$accessObject->hasAccess("login_history", "settings")) {
     $load_schools_list = $isSupport ? $myClass->pushQuery("*", "clients_accounts") : [];
 
     // set the dates
-    $start_date = $filter->start_date ?? date("Y-m-d", strtotime("-3 days"));
+    $start_date = $filter->start_date ?? date("Y-m-d", strtotime("-1 day"));
     $end_date = $filter->end_date ?? date("Y-m-d");
     $activity_type = $filter->activity_type ?? null;
 
