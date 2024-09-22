@@ -13,19 +13,23 @@ var add_grading_mark = () => {
         rows_count = isNaN(grades_list) ? 1 : (parseInt(grades_list) + 1);
     let grade_html = `
         <div class='row mb-2 grade_item' data-grading_id='${rows_count}'>
-            <div class='col-lg-3'>
+            <div class='col-md-2'>
+                <label>Grade</label>
+                <input type='text' maxlength='5' name='grade_${rows_count}' data-grading_id='${rows_count}' class='form-control'>
+            </div>
+            <div class='col-md-3'>
                 <label>Mark Begin(%)</label>
                 <input type='number' min='0' max='100' name='start_${rows_count}' data-grading_id='${rows_count}' class='form-control'>
             </div>
-            <div class='col-lg-3'>
+            <div class='col-md-3'>
                 <label>Marks End Point(%)</label>
                 <input type='number' min='0' max='100' name='end_${rows_count}' data-grading_id='${rows_count}' class='form-control'>
             </div>
-            <div class='col-lg-5'>
+            <div class='col-md-3'>
                 <label>Interpretation</label>
                 <input type='text' min='0' max='100' name='interpretation_${rows_count}' data-grading_id='${rows_count}' class='form-control'>
             </div>
-            <div class='col-lg-1'>
+            <div class='col-md-1'>
                 <label>&nbsp;</label><br>
                 <button type='button' onclick='return remove_grading_mark(${rows_count})' data-grading_id='${rows_count}' class='btn btn-outline-danger'><i class='fa fa-trash'></i></button>
             </div>
@@ -170,11 +174,13 @@ var save_grading_mark = () => {
             let this_id = $(this).attr("data-grading_id"),
                 start = $(`input[name="start_${this_id}"]`).val(),
                 end = $(`input[name="end_${this_id}"]`).val(),
-                interpretation = $(`input[name="interpretation_${this_id}"]`).val();
+                interpretation = $(`input[name="interpretation_${this_id}"]`).val(),
+                grade = $(`input[name="grade_${this_id}"]`).val();
             count++;
             grading_values[count] = {
                 start,
                 end,
+                grade,
                 interpretation
             }
         });

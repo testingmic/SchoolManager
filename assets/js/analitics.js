@@ -489,7 +489,7 @@ var attendanceReport = (_attendance) => {
 
             var options = {
                 chart: {
-                    height: 350,
+                    height: 420,
                     type: 'bar',
                 },
                 plotOptions: {

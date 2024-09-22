@@ -540,7 +540,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 '<div class="row">
                     <div class="col-xl-3 col-lg-6 col-md-6">
                         <div class="card">
-                            <div class="card-body bg-info text-white card-type-3">
+                            <div class="card-body bg-blue text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Students Count</h6>
@@ -557,7 +557,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
                         <div class="card">
-                            <div class="card-body bg-info text-white card-type-3">
+                            <div class="card-body bg-blue text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Teaching Stafff</h6>
@@ -574,7 +574,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
                         <div class="card">
-                            <div class="card-body bg-info text-white card-type-3">
+                            <div class="card-body bg-blue text-white card-type-3">
                                 <div class="row">
                                     <div class="col">
                                         <h6 class="font-14 text-uppercase font-bold mb-0">Employees / Users</h6>
@@ -590,7 +590,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
-                        <div class="card bg-info text-white">
+                        <div class="card bg-blue text-white">
                             <div class="card-body pb-1 pt-3">
                                 <div align="center">
                                     <h6 class="border-bottom font-13 text-uppercase font-bold p-0 pb-2 mb-2 m-0">'.date("l, F d, Y").'</h6>
@@ -793,8 +793,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 </div>
                             </div>
                             <div class="card-body pb-0">
-                                <div data-chart_container="attendance_log_chart">
-                                    <div id="attendance_log_chart" style="min-height:350px;"></div>
+                                <div data-chart_container="attendance_chart">
+                                    <div id="attendance_chart" style="min-height:420px;"></div>
                                 </div>
                             </div>
                         </div>

@@ -4062,19 +4062,23 @@ class Forms extends Myschoolgh {
         if(empty($grading_system)) {
             $grading_list = "
             <div class='row mb-2 grade_item' data-grading_id='1'>
-                <div class='col-lg-3'>
+                <div class='col-md-2'>
+                    <label>Grade</label>
+                    <input type='text' maxlength='5' name='grade_1' data-grading_id='1' class='form-control' width='100px'>
+                </div>
+                <div class='col-md-3'>
                     <label>Mark Begin(%)</label>
                     <input type='number' min='0' max='100' name='start_1' data-grading_id='1' class='form-control' width='100px'>
                 </div>
-                <div class='col-lg-3'>
+                <div class='col-md-3'>
                     <label>Marks End Point(%)</label>
                     <input type='number' min='0' max='100' name='end_1' data-grading_id='1' class='form-control' width='100px'>
                 </div>
-                <div class='col-lg-5'>
+                <div class='col-md-3'>
                     <label>Interpretation</label>
                     <input type='text' min='0' max='100' name='interpretation_1' data-grading_id='1' class='form-control'>
                 </div>
-                <div class='col-lg-1'>
+                <div class='col-md-1'>
                     <label>&nbsp;</label><br>
                     <button type='button' onclick='return remove_grading_mark(1)' class='btn btn-outline-danger'><i class='fa fa-trash'></i></button>
                 </div>
@@ -4084,19 +4088,23 @@ class Forms extends Myschoolgh {
             foreach($grading as $key => $grade) {
                 $grading_list .= "
                     <div class='row mb-2 grade_item' data-grading_id='{$key}'>
-                        <div class='col-lg-3'>
+                        <div class='col-md-2'>
+                            <label>Grade</label>
+                            <input type='text' maxlength='5' value='".($grade->grade ?? "")."' name='grade_{$key}' data-grading_id='{$key}' class='form-control' width='100px'>
+                        </div>
+                        <div class='col-md-3'>
                             <label>Mark Begin(%)</label>
                             <input type='number' min='0' value='".($grade->start ?? "")."' max='100' name='start_{$key}' data-grading_id='{$key}' class='form-control' width='100px'>
                         </div>
-                        <div class='col-lg-3'>
+                        <div class='col-md-3'>
                             <label>Marks End Point(%)</label>
                             <input type='number' min='0' value='".($grade->end ?? "")."' max='100' name='end_{$key}' data-grading_id='{$key}' class='form-control' width='100px'>
                         </div>
-                        <div class='col-lg-5'>
+                        <div class='col-md-3'>
                             <label>Interpretation</label>
                             <input type='text' min='0' value='".($grade->interpretation ?? "")."' max='100' name='interpretation_{$key}' data-grading_id='{$key}' class='form-control'>
                         </div>
-                        <div class='col-lg-1'>
+                        <div class='col-md-1'>
                             <label>&nbsp;</label><br>
                             <button type='button' onclick='return remove_grading_mark({$key})' class='btn btn-outline-danger'><i class='fa fa-trash'></i></button>
                         </div>
@@ -4137,7 +4145,7 @@ class Forms extends Myschoolgh {
         // examination forms
         $examination = '
         <div class="row">
-            <div class="col-lg-9 col-md-12 mb-3">
+            <div class="col-lg-12 col-md-12 mb-3">
                 <div class="form-group">
                     <div class="d-flex pb-3 justify-content-between">
                         <div><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GRADING SYSTEM</h5></div>
@@ -4146,8 +4154,8 @@ class Forms extends Myschoolgh {
                     <div id="grading_system_list">'.$grading_list.'</div>
                 </div>
             </div>
-            <div class="col-lg-9 mb-3 col-md-12">
-                <div class="form-group text-right">
+            <div class="col-lg-12 mb-3 col-md-12">
+                <div class="form-group text-center">
                     <button type="button" onclick="return save_grading_mark()" id="save_grading_mark" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Grades</button>
                 </div>
             </div>

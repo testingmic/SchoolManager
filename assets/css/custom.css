@@ -3,6 +3,14 @@
     margin: auto auto;
 }
 
+.navbar-bg {
+    background: #0071f3;
+}
+
+.bg-blue {
+    background: #0071f3 !important;
+}
+
 .border-2px {
     border-bottom: solid #007bff 2px!important;
 }
@@ -509,8 +517,8 @@ label {
 .card-header,
 .modal-header {
     font-weight: bold;
-    border-bottom: solid 3px #54a7f4;
-    border-bottom-color: #54a7f4;
+    border-bottom: solid 3px #0071f3;
+    /* border-bottom-color: #54a7f4; */
 }
 
 .buy_text {
