@@ -53,9 +53,12 @@ elseif(!empty($user_id)) {
     if(empty($data["data"])) {
         $response->html = page_not_found();
     } else {
-        
+
         // set the first key
         $data = $data["data"][0];
+
+        // set the scholarship status
+        $scholarship_status = $data->scholarship_status == 1 ? "<div><span class='badge p-1 badge-success'>Full Scholarship</span></div>" : null;
 
         // set the parameters
         $feesParam = (object) [
@@ -298,21 +301,24 @@ elseif(!empty($user_id)) {
                                         </div>' : null
                                     ).'
                                 </div>
-                                <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">'.$data->name.'</div>
+                                <div class="author-box-center mt-2 text-uppercase font-25 mb-0 p-0">
+                                    '.$data->name.'
+                                    '.$scholarship_status.'
+                                </div>
                                 <div class="text-center border-top mt-0">
                                     <div class="author-box-description font-22 text-success font-weight-bold">'.$data->unique_id.'</div>
                                     <div class="author-box-description font-22 text-info font-weight-bold mt-1">'.$data->class_name.'</div>
-                                        <div class="w-100 mt-2 border-top pt-3">
+                                    <div class="w-100 mt-2 border-top pt-3">
                                         <a class="btn mb-2 btn-dark" href="'.$baseUrl.'student/'.$user_id.'"><i class="fa fa-arrow-circle-left"></i> Go Back</a>
-                                            '.(!empty($allocationReviewList) ? '
-                                                '.($pay_button ? 
-                                                    '&nbsp;
-                                                    <a href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'" class="btn mb-2 btn-outline-success">
-                                                    <i class="fa fa-adjust"></i> PAY FEES
-                                                    </a>' : null
-                                                ).'' : null
-                                            ).'
-                                        </div>
+                                        '.(!empty($allocationReviewList) ? '
+                                            '.($pay_button ? 
+                                                '&nbsp;
+                                                <a href="'.$myClass->baseUrl.'fees-payment?student_id='.$user_id.'&class_id='.$data->class_id.'" class="btn mb-2 btn-outline-success">
+                                                <i class="fa fa-adjust"></i> PAY FEES
+                                                </a>' : null
+                                            ).'' : null
+                                        ).'
+                                    </div>
                                 </div>
                             </div>
                         </div>
