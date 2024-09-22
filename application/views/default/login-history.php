@@ -25,9 +25,6 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "User Login History";
 $response->title = $pageTitle;
 
-// get the filter values
-$filter = (object) array_map("xss_clean", $_POST);
-
 // if the user has no permissions
 if(!$accessObject->hasAccess("login_history", "settings")) {
     // show the error page

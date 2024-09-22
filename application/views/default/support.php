@@ -18,7 +18,7 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 
-$response->title = "Support Tickets ";
+$response->title = "Support Tickets";
 $response->scripts = ["assets/js/support.js"];
 
 $support_tickets = "";
