@@ -201,6 +201,14 @@ if(!empty($client_id)) {
             </tr>";
         }
 
+        // if the user is a support admin
+        if($isSupport) {
+            $client_packages = "";
+            // get the list of packages
+            foreach($myClass->pushQuery("*", "clients_packages", "status = 'active'") as $each) {
+                $client_packages .= "<option ".($thisClientPref->account->package == $each->package ? "selected" : null)." value=\"{$each->package}\">".ucwords($each->package)."</option>";
+            }
+        }
 
         // set the html string
         $response->html = '
@@ -324,11 +332,7 @@ if(!empty($client_id)) {
                                                             <td width="35%"><strong>PACKAGE</strong></td>
                                                             <td>
                                                                 <select '.$is_disabled.' data-width="100%" name="data[account_package]" class="form-control selectpicker">
-                                                                    <option '.($thisClientPref->account->package == "trial" ? "selected" : null).' value="basic">Trial Package</option>
-                                                                    <option '.($thisClientPref->account->package == "basic" ? "selected" : null).' value="basic">Basic Package</option>
-                                                                    <option '.($thisClientPref->account->package == "standard" ? "selected" : null).' value="standard">Standard Package</option>
-                                                                    <option '.($thisClientPref->account->package == "premium" ? "selected" : null).' value="premium">Premium Package</option>
-                                                                    <option '.($thisClientPref->account->package == "custom" ? "selected" : null).' value="premium">Custom Package</option>
+                                                                    '.$client_packages.'
                                                                 </select>
                                                             </td>
                                                         </tr>

@@ -154,7 +154,6 @@ $response->html = '
                                             <div class="form-group">
                                                 <select data-width="100%" name="resource" id="resource" class="form-control selectpicker">
                                                     <option value="">Select Resource</option>';
-
                                                     foreach($resources["data"] as $key => $value) {
                                                         $response->html .= '<option '.(($resource == $value->resource) ? "selected" : null).' value="'.$value->resource.'">'.ucfirst($value->resource).'</option>';
                                                     }

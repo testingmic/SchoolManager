@@ -45,9 +45,11 @@ if(!$package_id) {
     // loop through the list
     foreach($packagesList as $key => $package) {
 
-        $status = $package->status != 'active' ? "<span class='badge badge-danger'>{$package->status}</span>" : "<span class='badge badge-success'>Active</span>";
-        
-        $client_packages .= '<tr>
+        $isActive = ($package->status == 'active');
+        $status = !$isActive ? "<span class='badge badge-danger'>{$package->status}</span>" : "<span class='badge badge-success'>Active</span>";
+        $action = $isActive ? "&nbsp;<span title='Delete Package' onclick='delete_record(\"{$package->id}\", \"package\");' class='btn btn-sm cursor mb-1 btn-outline-danger'><i class='fa cursor fa-trash'></i></span>" : null;
+
+        $client_packages .= '<tr data-row_id="'.$package->id.'">
             <td>'.$package->id.'</td>
             <td>'.ucwords($package->package).'</td>
             <td class="text-center">'.$package->student.'</td>
@@ -58,7 +60,8 @@ if(!$package_id) {
             <td class="text-center">'.$package->pricing.'</td>
             <td class="text-center">'.$status.'</td>
             <td class="text-center">
-                <a href="'.$baseUrl.'packages/'.$package->id.'/update" class="btn btn-sm btn-outline-success"><i class="fa fa-edit"></i> Edit</a>
+                <a href="'.$baseUrl.'packages/'.$package->id.'/update" class="btn btn-sm mb-1 btn-outline-success"><i class="fa fa-edit"></i> Edit</a>
+                '.$action.'
             </td>
         </tr>';
     }
@@ -125,7 +128,7 @@ $response->html = '
                         <h4>'.($isCreate ? 'Create New Package' : 'Update Package').'</h4>
                     </div>
                     <div class="card-body">
-                        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'account/'.($isCreate ? 'create_package' : 'update_package').'" method="post">
+                        <form class="ajax-data-form" id="ajax-data-form-content" enctype="multipart/form-data" action="'.$baseUrl.'api/account/'.($isCreate ? 'create_package' : 'update_package').'" method="post">
                             <div class="row">
                                 <div class="col-sm-12 col-md-6">
                                     <div class="form-group">
@@ -147,14 +150,15 @@ $response->html = '
                                 <div class="col-sm-12 col-md-6">
                                     <div class="form-group">
                                         <label for="status">Status</label>
-                                        <select name="status" id="status" class="form-control">
-                                            <option value="active">Active</option>
-                                            <option value="inactive">Inactive</option>
+                                        <select data-width="100%" name="status" id="status" class="form-control selectpicker">
+                                            <option '.(!empty($packageData->status) && $packageData->status == "active" ? "selected" : null).' value="active">Active</option>
+                                            <option '.(!empty($packageData->status) && $packageData->status == "inactive" ? "selected" : null).' value="inactive">Inactive</option>
+                                            <option '.(!empty($packageData->status) && $packageData->status == "deleted" ? "selected" : null).' value="deleted">Deleted</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-sm-12 col-md-12 text-center">
-                                    <button type="submit" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Changes</button>
+                                    <button type="button-submit" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Changes</button>
                                 </div>
                             </div>
                         </form>

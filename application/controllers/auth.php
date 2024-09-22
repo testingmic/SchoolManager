@@ -177,7 +177,7 @@ class Auth extends Myschoolgh {
                                 $stmt->execute();
 
                                 // if the user is an admin or accountant
-                                if(in_array($results->user_type, ["admin", "accountant"])) {
+                                if(in_array($results->user_type, ["admin", "accountant", "support"])) {
                                     // run simple cron activity
                                     $this->execute_cron($results->client_id);
                                 }
@@ -252,7 +252,13 @@ class Auth extends Myschoolgh {
             // users comments is not deletable after 3 hours of posting
             $this->db->query("UPDATE users_feedback SET is_deletable='0' WHERE date_created < (NOW() + INTERVAL - 3 HOUR) AND is_deletable='1' AND client_id='{$clientId}' LIMIT 500");
             
+             // Step 2: Get the current SQL mode
+             $stmt = $this->db->query("SELECT @@SESSION.sql_mode;");
+             $new_sql_mode = trim(str_replace(',,', ',', str_replace('ONLY_FULL_GROUP_BY', '', $stmt->fetchColumn())), ',');
+             $this->db->query("SET GLOBAL sql_mode='{$new_sql_mode}';");
+
         } catch(PDOException $e) {}
+
     }
 
     /**

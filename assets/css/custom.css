@@ -24,7 +24,7 @@
 }
 
 .cursor {
-    cursor: pointer;
+    cursor: pointer !important;
 }
 
 tr.clickable-row:hover {

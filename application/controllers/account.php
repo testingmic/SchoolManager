@@ -61,6 +61,7 @@ class Account extends Myschoolgh {
         $result = [];
         
         try {
+
             $stmt = $this->db->prepare("SELECT 
                 (SELECT COUNT(DISTINCT b.item_id) FROM users b WHERE b.client_id = a.client_id AND b.user_type IN ('admin')) AS admins_count,
                 (SELECT COUNT(DISTINCT b.item_id) FROM users b WHERE b.client_id = a.client_id AND b.user_type='student') AS students_count,
@@ -119,6 +120,113 @@ class Account extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {}
+
+    }
+
+    /**
+     * Create a New Package
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function create_package(stdClass $params) {
+
+        try {
+
+            global $accessObject;
+
+            if(!$accessObject->hasAccess("schools", "settings")) {
+                return ["code" => 403, "data" => $this->permission_denied];
+            }
+            
+            $setClause = "";
+            foreach(['package', 'student', 'staff', 'admin', 'monthly_sms', 'fees', 'pricing'] as $key => $value) {
+                if(isset($params->{$value})) {
+                    $setClause .= "{$value} = '{$params->{$value}}', ";
+                }
+            }
+    
+            $setClause = !empty($setClause) ? substr($setClause, 0, -2) : null;
+
+            if(empty($setClause)) {
+                return [
+                    "code" => 203,
+                    "data" => "Sorry! No data was parsed in the request."
+                ];
+            }
+    
+            $stmt = $this->db->prepare("INSERT INTO clients_packages SET {$setClause}");
+            $stmt->execute();
+    
+            return [
+                "code" => 200,
+                "data" => "Package information was successfully created.",
+                "additional" => [
+                    "clear" => true,
+                    "href" => "{$this->baseUrl}packages"
+                ]
+            ];
+        } catch(PDOException $e) {
+            return $e->getMessage();
+        }
+
+    }
+
+    /**
+     * Update the Package Information
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function update_package(stdClass $params) {
+
+        try {
+
+            global $accessObject;
+
+            if(!$accessObject->hasAccess("schools", "settings")) {
+                return ["code" => 403, "data" => $this->permission_denied];
+            }
+
+            if(empty($params->package_id)) {
+                return [
+                    "code" => 203,
+                    "data" => "Sorry! A valid package id must be parsed in the request."
+                ];
+            }
+            
+            $setClause = "";
+            foreach(['package', 'student', 'staff', 'admin', 'monthly_sms', 'fees', 'pricing', 'status'] as $key => $value) {
+                if(isset($params->{$value})) {
+                    $setClause .= "{$value} = '{$params->{$value}}', ";
+                }
+            }
+    
+            $setClause = !empty($setClause) ? substr($setClause, 0, -2) : null;
+
+            if(empty($setClause)) {
+                return [
+                    "code" => 203,
+                    "data" => "Sorry! No data was parsed in the request."
+                ];
+            }
+
+            $stmt = $this->db->prepare("UPDATE clients_packages SET {$setClause} WHERE id = ? LIMIT 1");
+            $stmt->execute([$params->package_id]);
+    
+            return [
+                "code" => 200,
+                "data" => "Package information was successfully updated.",
+                "additional" => [
+                    "href" => "{$this->baseUrl}packages"
+                ]
+            ];
+
+        } catch(PDOException $e) {
+            return $e->getMessage();
+        }
 
     }
 

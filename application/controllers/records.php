@@ -137,6 +137,12 @@ class Records extends Myschoolgh {
                 "where" => "item_id='{$record_id}' AND status='1'",
                 "query" => "SELECT name FROM accounts_type_head WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
             ],
+            "package" => [
+                "table" => "clients_packages",
+                "update" => "status='deleted'",
+                "where" => "id='{$record_id}' AND status='active'",
+                "query" => "SELECT id FROM clients_packages WHERE id='{$record_id}' AND status ='active' LIMIT 1"
+            ],
             "daily_report" => [
                 "table" => "daily_reports",
                 "update" => "deleted='1'",
