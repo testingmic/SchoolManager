@@ -34,12 +34,12 @@ class Api_validate {
 		$authHeader = null;
 
 		// get teh redirect http authorization headers
-		if(isset($_SERVER['HTTP_AUTHORIZATION']) && $_SERVER['HTTP_AUTHORIZATION'] != "") {
+		if(isset($_SERVER['HTTP_AUTHORIZATION']) && $_SERVER['HTTP_AUTHORIZATION'] !== "") {
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
         }
-        
+
         // if the host is not from api.myschoolgh.com then end the query
-        if($headers['Host'] !== 'api.myschoolgh.com') {
+        if(!in_array($headers['Host'], ['api.myschoolgh.com', 'localhost'])) {
             return [];
         }
         
@@ -54,9 +54,6 @@ class Api_validate {
 			$authorizationToken = trim($authorizationToken);
 
 			$splitAuthInfo = explode(":", $authorizationToken);
-			$userName = xss_clean(
-				substr( $authorizationToken, 0, strpos($authorizationToken, ":") )
-			);
 
 			/** check if the authorization token was parsed **/
 			if(!isset($splitAuthInfo[1])) {
@@ -112,7 +109,7 @@ class Api_validate {
 				// verify the access token that has been parsed
 				if(password_verify($accessToken, $result->access_token)) {
 					// convert the description into an array
-					$result->permissions = json_decode($result->permissions);
+					$result->permissions = !empty($result->permissions) ? json_decode($result->permissions) : (object)[];
 					// unset the access token from the result
 					unset($result->access_token);
 					// return the result
@@ -281,12 +278,14 @@ class Api_validate {
 
 			// set the request_method
 			$request_method = !empty($_GET["request_method"]) ? "AND method='{$_GET["request_method"]}'" : null;
-			
+
 			/** The request query */
 			$stmt = $this->db->prepare("SELECT 
 					endpoint, resource, method, description, parameter AS params, description 
 				FROM users_api_endpoints 
-				WHERE 1 ".(!empty($endpoint) ? " AND method='{$method}' AND endpoint='{$endpoint}' ORDER BY endpoint LIMIT 1 " : (!empty($expl[0]) ? " AND resource='{$expl[0]}' {$request_method} ORDER BY endpoint" : "ORDER BY endpoint"))."
+				WHERE 1 ".(!empty($endpoint) ? " AND method='{$method}' AND endpoint='{$endpoint}' ORDER BY endpoint LIMIT 1 " : (
+					!empty($expl[0]) ? " AND resource='{$expl[0]}' {$request_method} ORDER BY endpoint" : "ORDER BY endpoint")
+				)."
 			");
 			$stmt->execute();
 			$data = [];
