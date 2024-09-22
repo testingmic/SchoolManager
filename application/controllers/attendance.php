@@ -1026,7 +1026,7 @@ class Attendance extends Myschoolgh {
                     "users_attendance_log", "log_date='{$day}' AND user_type IN ('{$user}') AND status='1' AND client_id='{$params->clientId}' {$query} LIMIT ".($isWardParent ? 1 : 20));
 
                 // set a new variable for the day
-                $the_day = date("Y-m-d", strtotime($day));
+                $the_day = date("jS M", strtotime($day));
 
                 // label to use
                 $the_label = ucfirst($user);

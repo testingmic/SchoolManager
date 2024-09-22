@@ -466,6 +466,11 @@ var attendanceReport = (_attendance) => {
     if (_attendance.attendance !== undefined) {
         let attendance = _attendance.attendance;
 
+        if(typeof attendance.code !== 'undefined' && attendance.code == 203) {
+            notify(attendance.data);
+            return false;
+        }
+
         $.each(attendance.summary, function(i, e) {
             $(`h3[data-attendance_count="${i}"]`).html(e);
         });
@@ -572,6 +577,8 @@ var attendanceReport = (_attendance) => {
                 document.querySelector("#attendance_log_chart"),
                 _attendance_options
             );
+
+            console.log(_attendance_options);
 
             _attendance_chart.render();
 

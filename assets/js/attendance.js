@@ -125,7 +125,7 @@ $(`select[id="attendance_category"]`).on("change", function() {
         $(`div[class~="attendance_category_list"], div[class~="refresh_attendance_list"]`).addClass("hidden");
     } else if (value == "student") {
         let category = $(`select[id="attendance_category"]`).val();
-        $.get(`${baseUrl}api/classes/list?columns=id,item_id,name,payment_module&filter=${category}&class_teacher=${$myPrefs.userId}`).then((response) => {
+        $.get(`${baseUrl}api/classes/list?columns=a.id,a.item_id,a.name,a.payment_module&filter=${category}&class_teacher=${$myPrefs.userId}`).then((response) => {
             if (response.code == 200) {
                 $(`div[class~="attendance_category_list"]`).removeClass("hidden");
                 $(`select[name="attendance_class"]`).find('option').remove().end();

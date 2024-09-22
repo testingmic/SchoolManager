@@ -159,7 +159,7 @@ if(!empty($clientId)) {
                     </div>
                 </div>
                 '.($isAdminAccountant ? '
-                    <div class="col-lg-12 col-md-12 col-12 col-sm-12">
+                    <div class="col-lg-12 col-md-12 col-12 col-sm-12 hidden">
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="text-uppercase font-20">Attendance Logs</h4>
