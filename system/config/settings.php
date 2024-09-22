@@ -84,9 +84,9 @@ function run($isNotRemote = false, $return = false, $SITEURL =  [], $argv = []) 
 
 		// redirect all requests via curl to api url
 		if(!$isNotRemote) {
-		    // $SITEURL[2] = $SITEURL[1] ?? null;
-		    // $SITEURL[1] = $SITEURL[0];
-		    // $SITEURL[0] = 'api';
+		    $SITEURL[2] = $SITEURL[1] ?? null;
+		    $SITEURL[1] = $SITEURL[0];
+		    $SITEURL[0] = 'api';
 		}
 
 		return $SITEURL;
