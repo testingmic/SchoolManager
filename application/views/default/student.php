@@ -359,6 +359,11 @@ if(!empty($user_id)) {
             "assets/img/avatar.png"
         );
 
+        // set the scholarship status
+        $scholarship_status = $data->scholarship_status == 1 ? 0 : 1;
+        $scholarship_class = $data->scholarship_status == 1 ? "btn-outline-danger" : "btn-outline-success";
+        $scholarship_title = $data->scholarship_status == 1 ? "<i class='fa fa-ankh'></i> Remove Scholarship</span>" : "<i class='fa fa-ankh'></i> Award Full Scholarship";
+
         // the default data to stream
         $data_stream = "attendance_report&label[student_id]={$user_id}";
 
@@ -436,7 +441,7 @@ if(!empty($user_id)) {
                             ).'
                             '.($hasUpdate ? '<a target="_blank" title="Export Student Record" class="btn mb-1 hidden btn-outline-danger" href="'.$baseUrl.'download/export/users/'.$user_id.'"><i class="fa fa-download"></i> Export</a>' : null).'
                             '.(
-                                $hasUpdate && $isAdminAccountant ? '<span id="scholarship_status" class="text-right"><span class="btn mb-1 btn-outline-success" onclick="return full_scholarship(\''.$user_id.'\', 1)"><i class="fa fa-ankh"></i> Full Scholarship</span></span>' : null    
+                                $hasUpdate && $isAdminAccountant ? '<span id="scholarship_status" class="text-right"><span class="btn mb-1 '.$scholarship_class.'" onclick="return full_scholarship(\''.$user_id.'\', '.$scholarship_status.')">'.$scholarship_title.'</span>' : null    
                             ).'
                         </div>
                     </div>

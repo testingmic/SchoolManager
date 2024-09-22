@@ -93,6 +93,9 @@ if(!empty($item_id)) {
             $count++;
             $action = "<button title='View Student Record' onclick='return load(\"student/{$student->user_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></button>";
 
+            // set the scholarship status
+            $scholarship_status = $student->scholarship_status == 1 ? "<div><span class='badge p-1 badge-success'>Full Scholarship</span></div>" : null;
+
             // show the payment button if the user has the permission to receive fees payment
             if($receivePayment && $student->debt > 0) {
                 $action .= "&nbsp;<button title='Pay Fees' onclick='return load(\"fees-payment?student_id={$student->user_id}&class_id={$student->class_id}\");' class='btn btn-sm btn-outline-success'>Pay</button>";
@@ -104,6 +107,7 @@ if(!empty($item_id)) {
                 <div class='d-flex justify-content-start'>
                     <div class='font-bold'>
                         <span onclick='return load(\"student/{$student->user_id}\");' class='user_name'>{$student->name}</span>
+                        {$scholarship_status}
                     </div>
                 </div>
             </td>";

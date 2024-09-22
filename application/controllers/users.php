@@ -136,7 +136,7 @@ class Users extends Myschoolgh {
 			}
 
 			// set the columns to load
-			$params->columns = "a.id, a.client_id, a.unique_id, a.item_id AS user_id, a.name, 
+			$params->columns = "a.id, a.client_id, a.unique_id, a.item_id AS user_id, a.name, a.scholarship_status,
 				a.user_type, a.phone_number, a.class_id, a.email, a.image, a.gender, a.user_status, a.can_change_status, cl.payment_module, cl.name class_name, dp.id AS department_id,
 				 dp.name AS department_name, sc.id AS section_id, sc.name AS section_name, 
 				 a.enrollment_date, a.position, a.date_of_birth";
@@ -927,12 +927,12 @@ class Users extends Myschoolgh {
 
 			// update the user scholarship information
 			$stmt = $this->db->prepare("UPDATE users SET scholarship_status = ? WHERE item_id = ? AND client_id = ? LIMIT 1");
-			$stmt->execute([$params->status, $params->student_id, $params->clientId]);
+			$stmt->execute([!empty($params->status) ? 1 : 0, $params->student_id, $params->clientId]);
 
 			// get the user scholarship status
-			$status = $params->status == 1 ? 0 : 1;
-			$color = $params->status == 1 ? "danger" : "success";
-			$title = $params->status == 1 ? "Remove Full Scholarship" : "Award Full Scholarship";
+			$status = !empty($params->status) ? 0 : 1;
+			$color = !empty($params->status) ? "danger" : "success";
+			$title = !empty($params->status) ? "Remove Scholarship" : "Award Full Scholarship";
 
 			// return the success response
 			return [

@@ -74,6 +74,7 @@ foreach($student_list["data"] as $key => $each) {
 
     // set the status
     $t_status = in_array($each->user_status, ["Active"]) ? null : "<br>{$each->the_status_label}";
+    $scholarship_status = $each->scholarship_status == 1 ? "<br><span class='badge p-1 badge-success'>Full Scholarship</span>" : null;
     
     $count++;
     $students .= "<tr data-row_id=\"{$each->user_id}\">";
@@ -82,6 +83,7 @@ foreach($student_list["data"] as $key => $each) {
     <td>
         <span title='View Details' class='user_name' onclick='load(\"student/{$each->user_id}\");'>{$each->name}</span><br>
         <strong>{$each->unique_id}</strong>{$t_status}
+        {$scholarship_status}
     </td>";
     $students .= "<td>".strtoupper($each->class_name)."</td>";
     $students .= "<td>".strtoupper($each->gender)."</td>";
