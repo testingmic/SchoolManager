@@ -302,6 +302,7 @@ if( $paramChecker['code'] !== 100) {
 
     // set the request payload parsed
     $ApiRequest["data"]["remote_request"]["payload"] = $params;
+    $ApiRequest["data"]["remote_request"]["params"] = $Api->requestParams;
 
     // set the data to return
     $data = $ApiRequest;

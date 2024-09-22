@@ -35,6 +35,7 @@ class Api {
     public $clientId;
     public $current_timestamp;
     public $accessCheck;
+    public $requestParams;
     
 
     const PERMISSION_DENIED = "Sorry! You do not have the required permissions to perform this action.";
@@ -152,6 +153,9 @@ class Api {
                 // get the keys of all the acceptable parameters
                 $endpointKeys = array_keys($accepted['params']);
                 $errorFound = false;
+
+                // set the request parameters
+                $this->requestParams = $accepted['params'];
                 
                 // confirm that the supplied parameters are within the list of expected parameters
                 foreach($params as $key => $value) {

@@ -133,117 +133,91 @@ class Api_validate {
 	 * @return Object
 	 */
 	public function paramFormat($method, $json = [], $post = [], $get = [], $files = []) {
-		// initializing
 		$params = [];
-		
-		// loop through each item and append to the params array
-		// confirm that the incoming data is not empty
-		if( !empty($json) ) {
 
-			// loop through the list if its a valid array
-			if( is_array($json) ) {
+		// Process JSON data
+		$params = array_merge($params, $this->processJsonParams($json));
 
-				// populate the user data using the request method parsed
-				// however first of all loop through the data
-				foreach( $json as $key => $value ) {
+		// Process GET parameters
+		$params = array_merge($params, $this->processGetParams($get));
 
-					// if the value is not an array in itself
-					if( !is_array($value))  {
+		// Process POST parameters and files
+		$postParams = $this->processPostParams($post, $files);
 
-						// add to list if the value is not empty
-						if(!empty($value)) {
-							$params[$key] = xss_clean($value);
-						}
-					}
-					// else if the value is an array then loop through the array
-					elseif( is_array($value) ) {
-						
-						// perform the loop
-						foreach( $value as $nkey => $nvalue ) {
-							
-							//: add the data to the array list
-							if(!is_array($nvalue)) {
-								
-								// only add to list if the value is not empty
-								if(!empty($nvalue)) {
-									$params[$key][$nkey] = xss_clean($nvalue);
-								}
-							} else {
+		// Merge the post parameters with the existing parameters
+		$params = array_merge($params, $postParams);
 
-								// loop through the array values
-								foreach($nvalue as $hhKey => $hhValue) {
-								
-									// only add to list if the value is not empty
-									if(!empty($hhValue)) {
-										$params[$key][$nkey][$hhKey] = array_map('xss_clean', $hhValue);
-									}
-								}
-							}
-							
-						}
-
-					}
-
-				}
-				
-			}
-		}
-
-		// if the request is a get method
-		else if( ($method == "GET") ) {
-			// empty the parameters list
-			$params = [];
-			// run this section if the content is not empty
-			if(!empty($get)) {
-				// loop through the url items
-				foreach($get as $key => $value) {
-					// only parse if the value is not empty
-					if( ($key !== "access_token") ) {
-						// append the parameters
-						$params[$key] = (is_array($value)) ? array_map("xss_clean", $value) : xss_clean($value);
-					}
-				}
-			}
-		}
-
-		// if the request is a post method
-		else if( ($method == "POST") ) {
-			// empty the parameters list
-			$params = [];
-			
-			// run this section if the content is not empty
-			if(!empty($post)) {
-				// loop through the url items
-				foreach($post as $key => $value) {
-					// only parse if the value is not empty
-					if( (!empty($value) && ($key != "access_token")) || ($value === 0)) {
-						// append the parameters
-						if(!is_array($value)) {
-							$params[$key] = xss_clean($value);	
-						} else {
-							foreach($value as $kkey => $kvalue) {
-								$params[$key][$kkey] = (is_array($kvalue)) ? $kvalue : xss_clean($kvalue);
-							}
-						}
-					}
-				}
-			}
-			
-			// if files were parsed
-			if(!empty($files)) {
-				// append files to the parameters
-				foreach($files as $key => $value) {
-					// only parse if the value is not empty
-					if( !empty($value) && !empty($value["tmp_name"]) ) {
-						// append the parameters
-						$params[$key] = $value;
-					}
-				}
-			}
-		}
-
-		// conver the request parameters into an object
 		return (object) $params;
+	}
+
+	/**
+	 * Process the json parameters
+	 * 
+	 * @param Mixed $json
+	 * 
+	 * @return Array
+	 */
+	private function processJsonParams($json) {
+		if (empty($json) || !is_array($json)) {
+			return [];
+		}
+
+		return $this->recursiveClean($json);
+	}
+
+	/**
+	 * Process the get parameters
+	 * 
+	 * @param Array $get
+	 * 
+	 * @return Array
+	 */
+	private function processGetParams($get) {
+		$params = [];
+		foreach ($get as $key => $value) {
+			if ($key !== "access_token") {
+				$params[$key] = is_array($value) ? array_map("xss_clean", $value) : xss_clean($value);
+			}
+		}
+		return $params;
+	}
+
+	/**
+	 * Process the post parameters
+	 * 
+	 * @param Array $post
+	 * @param Array $files
+	 * 
+	 * @return Array
+	 */	
+	private function processPostParams($post, $files) {
+		$params = [];
+		foreach ($post as $key => $value) {
+			if ((!empty($value) && $key != "access_token") || $value === 0) {
+				$params[$key] = $this->recursiveClean($value);
+			}
+		}
+
+		foreach ($files as $key => $value) {
+			if (!empty($value) && !empty($value["tmp_name"])) {
+				$params[$key] = $value;
+			}
+		}
+		return $params;
+	}
+
+	/**
+	 * Recursively clean the data
+	 * 
+	 * @param Mixed $data
+	 * 
+	 * @return Mixed
+	 */
+	private function recursiveClean($data) {
+		if (is_array($data)) {
+			return array_map([$this, 'recursiveClean'], $data);
+		}
+		return xss_clean($data);
 	}
 
 	/**

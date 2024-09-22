@@ -54,7 +54,7 @@ if(isset($_SERVER['HTTP_HOST'])) {
 	}
 }
 
-function run($isNotRemote, $return = false, $SITEURL =  [], $argv = []) {
+function run($isNotRemote = false, $return = false, $SITEURL =  [], $argv = []) {
 
 	if(!empty($return) && isset($_SERVER['REQUEST_URI'])) {
 
@@ -84,9 +84,9 @@ function run($isNotRemote, $return = false, $SITEURL =  [], $argv = []) {
 
 		// redirect all requests via curl to api url
 		if(!$isNotRemote) {
-		    $SITEURL[2] = $SITEURL[1] ?? null;
-		    $SITEURL[1] = $SITEURL[0];
-		    $SITEURL[0] = 'api';
+		    // $SITEURL[2] = $SITEURL[1] ?? null;
+		    // $SITEURL[1] = $SITEURL[0];
+		    // $SITEURL[0] = 'api';
 		}
 
 		return $SITEURL;
