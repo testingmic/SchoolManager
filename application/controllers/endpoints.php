@@ -152,7 +152,7 @@ class Endpoints extends Myschoolgh {
                 $code = 200;
                 $data = "The endpoint request was successfully executed.";
                 // log the user activity
-                $this->userLogs("endpoints", $params->endpoint_id, null, "<strong>{$params->userData->name}</strong> added a new endpoint: <strong>{$params->endpoint}</strong> to the resource: <strong>{$params->resource}</strong>.", $params->userId);
+                $this->userLogs("endpoints", $params->endpoint_id, null, "<strong>".($params->userData->name ?? "System User")."</strong> added a new endpoint: <strong>{$params->endpoint}</strong> to the resource: <strong>{$params->resource}</strong>.", $params->userId);
             } else {
                 $data = "Sorry! There was an error while processing the request.";
             }
@@ -221,7 +221,7 @@ class Endpoints extends Myschoolgh {
                 $code = 200;
                 $data = "Endpoint successfully updated.";
                 // log the user activity
-                $this->userLogs("endpoints", $params->endpoint_id, $params->prevData, "<strong>{$params->userData->name}</strong> updated the endpoint.", $params->userId);
+                $this->userLogs("endpoints", $params->endpoint_id, $params->prevData, "<strong>".($params->userData->name ?? "System User")."</strong> updated the endpoint.", $params->userId);
             }
 
             return [
