@@ -8,6 +8,7 @@ class Handler {
     private $params;
     private $session;
     private $userId;
+    private $clientId;
     private $response;
     private $db;
     
@@ -28,6 +29,7 @@ class Handler {
         $this->params = $params[3];
         $this->session = $params[4];
         $this->userId = $this->session->userId;
+        $this->clientId = $this->session->clientId;
 
         $this->db = $myschoolgh;
 
@@ -158,6 +160,149 @@ class Handler {
 
         }
 
+    }
+
+    /**
+     * Check the parameters parsed by the user
+     * 
+     * @param {object} $response
+     * @param {object} $params
+     * @param {object} $defaultuser
+     * @param {object} $apiAccessValues
+     * @param {object} $myClass
+     * @param {string} $requestUri
+     * @param {bool} $remote
+     * @param {object} $apisObject
+     * @param {string} $endpoint
+     * 
+     * @return {array}
+     */
+    public function params_checker($response, $params, $defaultUser, $apiAccessValues, $requestUri, $remote, $apisObject, $endpoint) {
+
+        global $session, $myClass;
+
+        // initialize the bugs variable
+        $bugs = false;
+
+        // confirm that the access token parameter was parsed but did not pass the test
+        // confirm if a valid api access key was parsed
+        if((!isset($apiAccessValues->user_id) && empty($session->userId)) || (isset($_GET['access_token']) && !isset($apiAccessValues->user_id))) {
+            // set the bug good
+            $bugs = true;
+            // set the description
+            $response->description = "Sorry! An invalid Access Token was supplied or the Access Token has expired.";
+            $response->data["result"] = $response->description;
+        } else {
+            
+            // if the user is making the request from an api endpoint
+            if(isset($apiAccessValues->user_id)) {
+                
+                // initiate an empty array of the parameters parsed
+                $userId = $apiAccessValues->user_id;
+                $clientId = $apiAccessValues->client_id;
+
+                // set the remote access to true
+                $remote = true;
+                $params->remote = true;
+                
+                // convert the item into an integer
+                $dailyRequestLimit = (int) $apiAccessValues->requests_limit;
+                $totalRequests = (int) $apiAccessValues->requests_count;
+
+                // if the total request is greater or equal to the request limit
+                // then return false
+                if($totalRequests >= $dailyRequestLimit) {
+                    $bugs = true;
+                    // set the too many requests header
+                    http_response_code(200);
+                    // set the information to return to the user
+                    $response->description = "Sorry! You have reached the maximum of {$dailyRequestLimit} requests that can be made daily.";
+                }
+
+                // the query parameter to load the user information
+                $i_params = (object) [
+                    "limit" => 1, 
+                    "user_id" => $userId, 
+                    "minified" => "simplified", 
+                    "append_wards" => true, 
+                    "filter_preferences" => true, 
+                    "userId" => $userId, 
+                    "append_client" => true, 
+                    "user_status" => $myClass->allowed_login_status
+                ];
+                $usersClass = load_class('users', 'controllers');
+                $defaultUser = $usersClass->list($i_params)["data"];
+
+                // get the first key
+                $defaultUser = $defaultUser[0] ?? [];
+            }
+
+            // set the userId
+            $myClass->userId = !empty($session->userId) ? $session->userId : $userId;
+            $myClass->clientId = !empty($session->clientId) ? $session->clientId : $clientId;
+
+        }
+
+        // confirm that a bug was found
+        if($bugs) {
+
+            // parse the remote request
+            !empty($params) ? $response->data["remote_request"]["payload"] = $params : null;
+
+            // print the error description
+            echo json_encode($response);
+            exit;
+        }
+
+        /* Usage of the Api Class */
+        $Api = load_class('api', 'models', 
+            ["userId" => $this->userId, "clientId" => $this->clientId, "defaultUser" => $defaultUser]
+        );
+
+        /**
+         * Test examples using the inner url of users
+         */
+        $Api->inner_url = $this->inner_url;
+        $Api->outer_url = $this->outer_url;
+        $Api->requestMethod = $this->requestMethod;
+        $Api->uri = $requestUri;
+
+        if($remote) {
+            $Api->appendClient = true;
+        }
+
+        // save user image
+        if($this->inner_url === 'save_image' && !empty($params->image) && !empty($params->user_id)) {
+            // save the user image
+            $upload = load_class('myschoolgh', 'models')->save_user_image($params);
+            echo json_encode($upload);
+            exit;
+        }
+
+        // set the full endpoint url
+        $Api->endpoint_url = "{$this->inner_url}/{$this->outer_url}";
+
+        /** Revert the params back into an array */
+        $params = (array) $params;
+
+        /** Load the parameters */
+        $Api->endpoints = $apisObject->apiEndpoint($endpoint, $this->requestMethod, $this->outer_url);
+
+        // set the default parameters
+        $Api->default_params = $params;
+
+        /* Run a check for the parameters and method parsed by the user */
+        $paramChecker = $Api->keysChecker($params);
+
+        $remote = isset($params["remote"]) ? (bool) $params["remote"] : $remote;
+
+        return [
+            'paramChecker' => $paramChecker,
+            'remote' => $remote,
+            'params' => $params,
+            'Api' => $Api
+        ];
+        
     }
 
 }

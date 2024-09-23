@@ -35,7 +35,6 @@ $outer_url = ( isset($SITEURL[2]) ) ? $SITEURL[2] : null;
 $apisObject = load_class('api_validate', 'models');
 
 // init the params variable
-$bugs = false;
 $remote = false;
 $skipProcessing = false;
 $userId = !empty($session->userId) ? $session->userId : null;
@@ -52,7 +51,7 @@ $endpoint = "{$inner_url}/{$outer_url}/";
 $endpoint = trim($endpoint, "/");
 
 // move code to an initial handler
-$handler = load_class('handler', 'models', [$outer_url, $inner_url, $requestMethod, $params, $session]);
+$handler = load_class('handler', 'models', [$outer_url, $inner_url, $requestMethod, $params, $session, $userId, $clientId]);
 $handler->process();
 
 /**
@@ -121,8 +120,15 @@ if(($inner_url == "payment") && (in_array($outer_url, ["pay", "verify", "epay_va
 /** If the value of $skipProcessing is TRUE */
 if(!$skipProcessing) {
 
-    $result = $handler->params_checker();
+    // get the params checker
+    $result = $handler->params_checker($response, $params, $defaultuser, $apiAccessValues, $requestUri, $remote, $apisObject, $endpoint);
 
+    // assign the values
+    $Api = $result['Api'];
+    $paramChecker = $result['paramChecker'];
+    $params = $result['params'];
+    $remote = $result['remote'];
+    
 }
 
 // in continuing your script then you can also do the following
