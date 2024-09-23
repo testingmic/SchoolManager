@@ -631,6 +631,17 @@ label {
     color: #fff !important;
 }
 
+.btn-outline-primary, .btn-outline-primary.disabled {
+    border-color: #0171f3;
+    color: #0171f3;
+}
+
+.btn-outline-primary:hover, .btn-outline-primary.disabled:hover {
+    border-color: #0171f3 !important;
+    color: #fff !important;
+    background-color: #0171f3 !important;
+}
+
 .buttons-html5 {
     border-color: #a9afb4!important;
 }
@@ -729,8 +740,12 @@ label {
     text-transform: uppercase;
 }
 
+.text-primary {
+    color: #0171f3 !important;
+}
+
 .user_name {
-    color: #6777ef;
+    color: #0171f3;
     font-weight: bold;
     text-transform: uppercase;
 }
