@@ -276,8 +276,11 @@ class Auth extends Myschoolgh {
             $new_sql_mode = trim(str_replace(',,', ',', str_replace('ONLY_FULL_GROUP_BY', '', $stmt->fetchColumn())), ',');
             $this->db->query("SET GLOBAL sql_mode='{$new_sql_mode}';");
 
+            // return the success message
+            return "Query handled successfully.";
+
         } catch(PDOException $e) {
-            return false;
+            return $e->getMessage();
         }
         
     }

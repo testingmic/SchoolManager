@@ -487,6 +487,8 @@ var attendanceReport = (_attendance) => {
                 chart_label.push(i);
             });
 
+            $(`div[data-chart_container="attendance_chart"]`).html(`<div id="attendance_chart" style="min-height:450px;"></div>`);
+
             var options = {
                 chart: {
                     height: 420,

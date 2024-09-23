@@ -45,7 +45,7 @@ class Api {
      * 
      * @param {array} $param   This will hold an array of the user brand and client ids
      */
-    public function __construct(array $param) {
+    public function __construct(array $param = []) {
         /**
          * global variables
          **/
@@ -66,10 +66,10 @@ class Api {
         $this->myClass = $myClass;
 
         // set the default user data
-        $this->defaultUser = $param["defaultUser"];
+        $this->defaultUser = $param["defaultUser"] ?? [];
         
         // if the users class is not empty
-        if(!empty($usersClass)) {
+        if(!empty($usersClass) && !empty($this->userId)) {
 
             // the query parameter to load the user information
             $i_params = (object) [
