@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $clientFeatures;
 
 // initial variables
 $appName = $myClass->appName;
@@ -22,6 +22,14 @@ $filter = (object) array_map("xss_clean", $_POST);
 // set the page tile
 $pageTitle = "Postal Dispatch";
 $response->title = $pageTitle;
+
+// end query if the user has no permissions
+if(!in_array("front_office", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("feature_disabled");
+    echo json_encode($response);
+    exit;
+}
 
 // set additional parameters
 $request_id = $SITEURL[1] ?? null;

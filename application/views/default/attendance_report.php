@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser;
+global $myClass, $SITEURL, $defaultUser, $clientFeatures;
 
 // initial variables
 $appName = $myClass->appName;
@@ -21,7 +21,7 @@ $pageTitle = "Attendance Report";
 $response->title = $pageTitle;
 
 // end query if the user has no permissions
-if($isWardParent) {
+if($isWardParent || !in_array("attendance", $clientFeatures)) {
     // unset the page additional information
     $response->page_programming = [];
     // permission denied information

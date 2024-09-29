@@ -21,6 +21,14 @@ $pageTitle = "Events Management";
 $response->title = $pageTitle;
 $response->timer = 0;
 
+// end query if the user has no permissions
+if(!in_array("events", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("feature_disabled");
+    echo json_encode($response);
+    exit;
+}
+
 // if the client information is not empty
 if(!empty($session->clientId)) {
 

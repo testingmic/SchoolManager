@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $clientFeatures;
 
 // initial variables
 $appName = $myClass->appName;
@@ -23,6 +23,14 @@ $params = (object) [
     "clientId" => $session->clientId,
     "client_data" => $defaultUser->client
 ];
+
+// end query if the user has no permissions
+if(!in_array("library", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("feature_disabled");
+    echo json_encode($response);
+    exit;
+}
 
 $item_list = load_class("library", "controllers", $params)->category_list($params);
 

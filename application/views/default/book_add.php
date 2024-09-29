@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass;
+global $myClass, $clientFeatures;
 
 // initial variables
 $appName = $myClass->appName;
@@ -19,6 +19,14 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Add Book";
 $response->title = $pageTitle;
 $response->scripts = [];
+
+// end query if the user has no permissions
+if(!in_array("library", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("feature_disabled");
+    echo json_encode($response);
+    exit;
+}
 
 $params = (object) [
     "clientId" => $clientId

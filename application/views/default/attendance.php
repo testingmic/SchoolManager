@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser;
+global $myClass, $SITEURL, $defaultUser, $clientFeatures;
 
 // initial variables
 $appName = $myClass->appName;
@@ -19,6 +19,14 @@ $clientId = $session->clientId;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Attendance Log";
 $response->title = $pageTitle;
+
+// end query if the user has no permissions
+if(!in_array("attendance", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("permission_denied");
+    echo json_encode($response);
+    exit;
+}
 
 // if the client information is not empty
 if(!empty($clientId)) {

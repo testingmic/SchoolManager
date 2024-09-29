@@ -320,7 +320,7 @@ if(!empty($item_id)) {
                     <li class="nav-item">
                         <a class="nav-link" id="courses-tab2" data-toggle="tab" href="#courses" role="tab" aria-selected="true">Subjects List</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item '.(!in_array("timetable", $clientFeatures) ? "hidden" : null).'">
                         <a class="nav-link" id="calendar-tab2" data-toggle="tab" href="#calendar" role="tab"
                         aria-selected="true">Timetable</a>
                     </li>';

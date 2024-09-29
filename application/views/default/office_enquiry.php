@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $clientFeatures;
 
 // initial variables
 $appName = $myClass->appName;
@@ -18,6 +18,14 @@ jump_to_main($baseUrl);
 // set some important variables
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $filter = (object) array_map("xss_clean", $_POST);
+
+// end query if the user has no permissions
+if(!in_array("front_office", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("feature_disabled");
+    echo json_encode($response);
+    exit;
+}
 
 // set the page tile
 $pageTitle = "Admission Enquiry";

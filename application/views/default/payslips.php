@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $defaultClientData, $isPayableStaff;
+global $myClass, $accessObject, $defaultUser, $defaultClientData, $isPayableStaff, $clientFeatures;
 
 // initial variables
 $appName = $myClass->appName;
@@ -20,6 +20,14 @@ $filter = (object) array_map("xss_clean", $_POST);
 
 $response->title = "Staff Payslips: {$appName}";
 $response->scripts = ["assets/js/filters.js"];
+
+// end query if the user has no permissions
+if(!in_array("payroll", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("feature_disabled");
+    echo json_encode($response);
+    exit;
+}
 
 $userId = $session->userId;
 $clientId = $session->clientId;

@@ -20,6 +20,14 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Assignment Details";
 $response->title = $pageTitle;
 
+// end query if the user has no permissions
+if(!in_array("class_assessment", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("feature_disabled");
+    echo json_encode($response);
+    exit;
+}
+
 $response->scripts = [
     "assets/js/assignments.js",
     "assets/js/comments.js",

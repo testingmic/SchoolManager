@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultUser, $isStudent, $isParent, $defaultClientData, $isWardParent, $isWardTutorParent, $isTeacher;
+global $myClass, $defaultUser, $isStudent, $isParent, $defaultClientData, $isWardParent, $isWardTutorParent, $isTeacher, $clientFeatures;
 
 // initial variables
 $appName = $myClass->appName;
@@ -18,6 +18,14 @@ $clientId = $session->clientId;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Grade Book";
 $response->title = $pageTitle;
+
+// end query if the user has no permissions
+if(!in_array("class_assessment", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("feature_disabled");
+    echo json_encode($response);
+    exit;
+}
 
 // item id
 $course = null;

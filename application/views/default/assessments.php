@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $defaultClientData;
+global $myClass, $accessObject, $defaultUser, $defaultClientData, $clientFeatures;
 
 // initial variables
 $appName = $myClass->appName;
@@ -20,6 +20,14 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $response->scripts = [];
 $filter = (object) array_map("xss_clean", $_POST);
 $response->title = "School Based Assessment List ";
+
+// end query if the user has no permissions
+if(!in_array("class_assessment", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("feature_disabled");
+    echo json_encode($response);
+    exit;
+}
 
 $response->scripts = ["assets/js/filters.js", "assets/js/lessons.js"];
 

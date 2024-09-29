@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $SITEURL, $defaultUser;
+global $myClass, $SITEURL, $defaultUser, $clientFeatures;
 
 // initial variables
 $appName = $myClass->appName;
@@ -18,6 +18,14 @@ jump_to_main($baseUrl);
 $clientId = $session->clientId;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $pageTitle = "Summary Request Information";
+
+// end query if the user has no permissions
+if(!in_array("library", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("feature_disabled");
+    echo json_encode($response);
+    exit;
+}
 
 $hasIssue = $accessObject->hasAccess("issue", "library");
 

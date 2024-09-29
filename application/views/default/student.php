@@ -56,7 +56,7 @@ if(!empty($user_id)) {
         $response->title = $data->name;
 
         // load the incidents
-        $incidents = load_class("incidents", "controllers")->list($student_param);
+        $incidents = in_array("incidents", $clientFeatures) ? load_class("incidents", "controllers")->list($student_param) : [];
 
         // set the user_id id in the console
         $response->array_stream['user_id'] = $user_id;
@@ -580,13 +580,13 @@ if(!empty($user_id)) {
                     <li class="nav-item">
                         <a class="nav-link '.($url_link === "documents" ? "active" : null).'" id="documents-tab2" data-toggle="tab" href="#documents" role="tab" aria-selected="true">Documents</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item '.(!in_array("attendance", $clientFeatures) ? "hidden" : null).'">
                         <a class="nav-link '.($url_link === "attendance" ? "active" : null).'" id="attendance-tab2" data-toggle="tab" href="#attendance" role="tab" aria-selected="true">Attendance</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item '.(!in_array("incidents", $clientFeatures) ? "hidden" : null).'">
                         <a class="nav-link '.($url_link === "incidents" ? "active" : null).'" id="incident-tab2" data-toggle="tab" href="#incident" role="tab" aria-selected="true">Incidents</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item '.(!in_array("timetable", $clientFeatures) ? "hidden" : null).'">
                         <a class="nav-link '.($url_link === "timetable" ? "active" : null).'" id="timetable-tab2" data-toggle="tab" href="#timetable" role="tab" aria-selected="true">Timetable</a>
                     </li>';
 

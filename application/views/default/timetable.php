@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass;
+global $myClass, $clientFeatures;
 
 // initial variables
 $appName = $myClass->appName;
@@ -20,7 +20,7 @@ $pageTitle = "Timetable";
 $response->title = $pageTitle;
 
 // confirm that the user has the required permissions
-if(!$accessObject->hasAccess("manage", "timetable")) {
+if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $clientFeatures)) {
     // show the error page
     $response->html = page_not_found("permission_denied");
 } else {

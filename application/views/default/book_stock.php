@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser;
+global $myClass, $accessObject, $defaultUser, $clientFeatures;
 
 // initial variables
 $appName = config_item("site_name");
@@ -18,6 +18,14 @@ jump_to_main($baseUrl);
 $response = (object) [];
 $response->title = "Update Book Stock : {$appName}";
 $hasAdd = $accessObject->hasAccess("add", "library");
+
+// end query if the user has no permissions
+if(!in_array("library", $clientFeatures)) {
+    // permission denied information
+    $response->html = page_not_found("feature_disabled");
+    echo json_encode($response);
+    exit;
+}
 
 // confirm if the user has the required permissions
 if(!$hasAdd) {
