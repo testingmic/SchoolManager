@@ -385,7 +385,8 @@ function format_bus_item($value, $no_container = false, $no_buttons = false, $wi
                 <div class='mb-2'><span class='font-bold text-primary'>Registration Number:</span><span class='float-right'>{$value->reg_number}</span></div>
                 <div class='mb-2'><span class='font-bold text-primary'>Purchase Price:</span><span class='float-right'>".(!empty($value->purchase_price) ? number_format($value->purchase_price, 2) : "-")."</span></div>
                 <div class='mb-2'><span class='font-bold text-primary'>Year of Purchase:</span><span class='float-right'>{$value->year_of_purchase}</span></div>
-                <div class='mb-2'><span class='font-bold text-primary'>Company:</span><span class='float-right'>{$value->insurance_company}</span></div>
+                <div class='mb-2'><span class='font-bold text-primary'>Insurance Company:</span><span class='float-right'>{$value->insurance_company}</span></div>
+                <div class='mb-2'><span class='font-bold text-primary'>Annual Premium:</span><span class='float-right'>".(!empty($value->annual_premium) ? number_format($value->annual_premium, 2) : "-")."</span></div>
                 <div class='mb-2'><span class='font-bold text-primary'>Insurance Date:</span><span class='float-right'>{$value->insurance_date}</span></div>
                 <div class='mb-2'><span class='font-bold text-primary'>Date of Expiry:</span><span class='float-right'>".(!empty($value->expiry_date) ? $value->expiry_date : "-")."</span></div>
                 <div class='mt-3 border-top pt-2'>

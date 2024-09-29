@@ -3685,7 +3685,7 @@ class Forms extends Myschoolgh {
 
         $logoUploaded = (bool) ($client_data && $client_data->client_logo);
         $last_date = date("Y-m-d", strtotime("+3 year"));
-        $min_date = date("Y-m-d", strtotime("-10 year"));
+        $min_date = $this->calendar_minimum_year;
 
         // attachments
         $filesObject = load_class("files", "controllers");
@@ -3865,6 +3865,7 @@ class Forms extends Myschoolgh {
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">ACADEMIC SESSIONS</h5></div>
             <div class="col-lg-3 col-md-6">
                 <div class="form-group">
+                    <label for="term_ends">Academic Session</label>
                     <select data-width="100%" name="general[sessions][session]" class="form-control selectpicker">
                         <option value="">Select Academic Session</option>';
                             foreach($this->academic_sessions as $_sess => $_session) {
@@ -3872,6 +3873,12 @@ class Forms extends Myschoolgh {
                             }
                         $calendar .= '
                     </select>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="form-group">
+                    <label for="term_ends">Session Name</label>
+                    <input type="text" value="'.($prefs->academics->current_term_name ?? 'Term').'" name="general[academics][current_term_name]" id="current_term_name" class="form-control">
                 </div>
             </div>
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">CURRENT ACADEMIC CALENDAR</h5></div>
@@ -3932,6 +3939,13 @@ class Forms extends Myschoolgh {
             <div class="col-md-12 text-center mb-4">'.$preloaded_attachments.'</div>
 
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">NEXT ACADEMIC CALENDAR</h5></div>
+            <div class="col-lg-4 col-md-6">
+                <div class="form-group">
+                    <label for="term_ends">Session Name</label>
+                    <input type="text" value="'.($prefs->academics->next_term_name ?? 'Term').'" name="general[academics][next_term_name]" id="next_term_name" class="form-control">
+                </div>
+            </div>
+            <div class="col-lg-12 border-bottom border-primary text-primary mb-2"></div>
             <div class="col-lg-4 col-md-6">
                 <div class="form-group">
                     <label for="next_academic_year">Next Academic Year</label>
@@ -5894,7 +5908,13 @@ class Forms extends Myschoolgh {
                                         <input type="text" maxlength="255" name="insurance_company" class="form-control">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="annual_premium">Annual Premium <span class="required">*</span></label>
+                                        <input type="number" name="annual_premium" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="insurance_date">Date of Insurance <span class="required">*</span></label>
                                         <input type="text" maxlength="12" name="insurance_date" class="form-control datepicker">

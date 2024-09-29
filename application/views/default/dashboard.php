@@ -46,7 +46,7 @@ $global_period = $isWardParent ? "this_term" : "this_week";
 // global params
 $global_params = (object) ["client_data" => $defaultUser->client];
 
-$academicSession = $defaultClientData->client_preferences->sessions->session ?? "Term";
+$academicSession = $defaultClientData->client_preferences->sessions->session ?? "Academic Term";
 
 // confirm if the account has been suspended or expired
 if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
@@ -442,7 +442,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="card-header text-uppercase">
                         <h4>Class Assessments</h4>
                     </div>
-                    <div class="card-body trix-slim-scroll" style="max-height:565px;height:565px;overflow-y:auto;">
+                    <div class="card-body trix-slim-scroll" style="max-height:598px;height:598px;overflow-y:auto;">
                         <div class="table-responsive">
                             <table data-empty="" class="table table-striped raw_datatable">
                                 <thead>
@@ -653,19 +653,19 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <div class="card">
                                     <div class="card-body mb-2 pl-2 pr-2 pb-2" align="center">
                                         <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
-                                        <h5 class="mt-1 pt-0">'.$defaultAcademics->academic_year.'</h5>
+                                        <h6 class="mt-1 pt-0">'.$defaultAcademics->academic_year.'</h6>
                                         <span class="font-16 font-bold">
-                                            '.date("F d, Y", strtotime($defaultAcademics->year_starts)).' 
+                                            '.date("jS M, Y", strtotime($defaultAcademics->year_starts)).' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
-                                            '.date("F d, Y", strtotime($defaultAcademics->year_ends)).'
+                                            '.date("jS M, Y", strtotime($defaultAcademics->year_ends)).'
                                         </span>
                                         <hr>
                                         <p class="font-16 p-0 m-0 text-primary text-uppercase">'.($academicSession ?? null).'</p>
-                                        <h5 class="mt-0 pt-0 text-uppercase">'.$defaultAcademics->academic_term.'</h5>
+                                        <h6 class="mt-0 pt-0 text-uppercase">'.($defaultAcademics->current_term_name ?? $defaultAcademics->academic_term).'</h6>
                                         <span class="font-16 font-bold">
-                                            '.date("F d, Y", strtotime($defaultAcademics->term_starts)).' 
+                                            '.date("jS M, Y", strtotime($defaultAcademics->term_starts)).' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
-                                            '.date("F d, Y", strtotime($defaultAcademics->term_ends)).'
+                                            '.date("jS M, Y", strtotime($defaultAcademics->term_ends)).'
                                         </span>
                                     </div>
                                 </div>
@@ -973,7 +973,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         </span>
                                         <hr>
                                         <p class="font-16 p-0 m-0 text-primary text-uppercase">'.($academicSession ?? null).'</p>
-                                        <h5 class="mt-0 pt-0 text-uppercase">'.$defaultAcademics->academic_term.'</h5>
+                                        <h5 class="mt-0 pt-0 text-uppercase">'.($defaultAcademics->current_term_name ?? $defaultAcademics->academic_term).'</h5>
                                         <span class="font-16 font-bold">
                                             '.date("F d, Y", strtotime($defaultAcademics->term_starts)).' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;

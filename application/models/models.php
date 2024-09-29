@@ -25,6 +25,9 @@ class Models {
     /** This is used for generation of user ids */
     public $ePaymentEnabled = false;
     public $append_zeros = 4;
+    public $calendar_minimum_year = 2022;
+    public $age_minimum_year;
+    public $maximum_year;
 
     /** This is the allowed number of hours which a user can delete an object */
     public $allowed_delete_range = 3;
@@ -119,6 +122,9 @@ class Models {
             "cash" => "Cash",
             "cheque" => "Cheque"
         ];
+
+        $this->age_minimum_year = date("Y-m-d", strtotime("-70 year"));
+        $this->maximum_year = date("Y-m-d", strtotime("+5 year"));
 
         // if the epayment is enabled
         if($this->ePaymentEnabled) {

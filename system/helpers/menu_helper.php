@@ -264,26 +264,30 @@
         </ul>
     </li>
     <?php if(in_array("front_office", $clientFeatures)) { ?>
-        <li class="dropdown">
-            <a href="#" class="nav-link has-dropdown"><i class="fas fa-database"></i><span>Front Office</span></a>
-            <ul class="dropdown-menu">
-                <?php if($accessObject->hasAccess("view", "admission_enquiry")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>office_enquiry">Admission Enquiry</a></li>
-                <?php } ?>
-                <?php if($accessObject->hasAccess("view", "visitor_book")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>office_visitors">Visitors Book</a></li>
-                <?php } ?>
-                <?php if($accessObject->hasAccess("view", "phone_call_log")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>office_phonecall">Phone Call Log</a></li>
-                <?php } ?>
-                <?php if($accessObject->hasAccess("view", "postal_dispatch")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>office_postaldispatch">Postal Dispatch</a></li>
-                <?php } ?>
-                <?php if($accessObject->hasAccess("view", "postal_receive")) { ?>
-                <li><a class="nav-link" href="<?= $baseUrl ?>office_postalreceive">Postal Receive</a></li>
-                <?php } ?>
-            </ul>
-        </li>
+        <?php if($accessObject->hasAccess("view", "admission_enquiry") || 
+            $accessObject->hasAccess("view", "visitor_book") || $accessObject->hasAccess("view", "phone_call_log") ||
+            $accessObject->hasAccess("view", "postal_dispatch") || $accessObject->hasAccess("view", "postal_receive")) { ?>
+            <li class="dropdown">
+                <a href="#" class="nav-link has-dropdown"><i class="fas fa-database"></i><span>Front Office</span></a>
+                <ul class="dropdown-menu">
+                    <?php if($accessObject->hasAccess("view", "admission_enquiry")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>office_enquiry">Admission Enquiry</a></li>
+                    <?php } ?>
+                    <?php if($accessObject->hasAccess("view", "visitor_book")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>office_visitors">Visitors Book</a></li>
+                    <?php } ?>
+                    <?php if($accessObject->hasAccess("view", "phone_call_log")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>office_phonecall">Phone Call Log</a></li>
+                    <?php } ?>
+                    <?php if($accessObject->hasAccess("view", "postal_dispatch")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>office_postaldispatch">Postal Dispatch</a></li>
+                    <?php } ?>
+                    <?php if($accessObject->hasAccess("view", "postal_receive")) { ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>office_postalreceive">Postal Receive</a></li>
+                    <?php } ?>
+                </ul>
+            </li>
+        <?php } ?>
     <?php } ?>
     <?php if(in_array("leave", $clientFeatures)) { ?>
         <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
