@@ -394,17 +394,29 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
                 if($each->is_deleted) continue;
                 // get the download link
-                $file_to_download = base64_encode($each->path."{$myClass->underscores}{$each->record_id}") . "&preview=1";
+                $file_to_download = base64_encode($each->path."{$myClass->underscores}{$each->record_id}");
 
                 // get the download path
-                $download_path = "{$myClass->baseUrl}download?file={$file_to_download}";
+                $download_path = "{$myClass->baseUrl}download?file={$file_to_download}&preview=1";
+                $view_path = "{$myClass->baseUrl}calendar?file={$file_to_download}";
 
                 // load the calendar
-                $load_calendar .= "<div class='col-md-4 mb-4'>";
+                $load_calendar .= "<div class='col-lg-4 col-md-6 mb-4'>";
                 $load_calendar .= "<div class='border border-blue border-2px p-2 rounded'>";
                 $load_calendar .= "<div class='font-bold uppercase'>{$each->name}</div>";
-                $load_calendar .= "<div><a target='_blank' title='Click to view {$each->name}' href='{$download_path}'>View Calendar</a></div>";
-                $load_calendar .= "<div>{$each->datetime}</div>";
+                $load_calendar .= "<div class='d-flex justify-content-between'>
+                    <div>
+                        <a class='btn btn-sm btn-outline-primary' title='Click to view {$each->name}' href='{$view_path}'>
+                            <i class='fa fa-eye'></i> View Calendar
+                        </a>
+                    </div>
+                    <div>
+                        <a class='btn btn-sm btn-outline-danger' target='_blank' title='Click to download {$each->name}' href='{$download_path}'>
+                            <i class='fa fa-download'></i> Download
+                        </a>
+                    </div>
+                </div>";
+                $load_calendar .= "<div class='relative'>".date("jS F, Y", strtotime($each->datetime))."</div>";
                 $load_calendar .= "</div>";
                 $load_calendar .= "</div>";
             }
@@ -641,7 +653,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <div class="card">
                                     <div class="card-body mb-2 pl-2 pr-2 pb-2" align="center">
                                         <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
-                                        <h5 class="mt-2 pt-0">'.$defaultAcademics->academic_year.'</h5>
+                                        <h5 class="mt-1 pt-0">'.$defaultAcademics->academic_year.'</h5>
                                         <span class="font-16 font-bold">
                                             '.date("F d, Y", strtotime($defaultAcademics->year_starts)).' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;
@@ -953,7 +965,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <div class="padding-20">
                                     <div class="text-center">
                                         <p class="font-16 p-0 m-0 text-primary text-uppercase">Academic Year</p>
-                                        <h5 class="mt-2 pt-0">'.$defaultAcademics->academic_year.'</h5>
+                                        <h5 class="mt-1 pt-0">'.$defaultAcademics->academic_year.'</h5>
                                         <span class="font-16 font-bold">
                                             '.date("F d, Y", strtotime($defaultAcademics->year_starts)).' 
                                                 &nbsp; <i class="fa fa-arrow-alt-circle-right"></i> &nbsp;

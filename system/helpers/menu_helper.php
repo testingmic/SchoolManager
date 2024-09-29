@@ -17,13 +17,15 @@
     <?php } ?>
 <?php } ?>
 <?php function incidents_menu() { global $baseUrl, $accessObject, $clientFeatures; ?>
-    <?php if($accessObject->hasAccess("view", "incident")) { ?>
-        <li class="dropdown">
-            <a href="#" class="nav-link has-dropdown"><i class="fas fa-list"></i><span>Incidents</span></a>
-            <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?= $baseUrl ?>incidents_list">List Incidents</a></li>
-            </ul>
-        </li>
+    <?php if(in_array("incidents", $clientFeatures)) { ?>
+        <?php if($accessObject->hasAccess("view", "incident")) { ?>
+            <li class="dropdown">
+                <a href="#" class="nav-link has-dropdown"><i class="fas fa-list"></i><span>Incidents</span></a>
+                <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="<?= $baseUrl ?>incidents_list">List Incidents</a></li>
+                </ul>
+            </li>
+        <?php } ?>
     <?php } ?>
 <?php } ?>
 <?php function general_menu($isAdmin = false) { global $baseUrl, $accessObject, $clientFeatures, $academicSession, $isReadOnly; ?>
@@ -283,7 +285,9 @@
             </ul>
         </li>
     <?php } ?>
-    <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
+    <?php if(in_array("leave", $clientFeatures)) { ?>
+        <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
+    <?php } ?>
     <?php if(in_array("documents_manager", $clientFeatures)) { ?>
         <?php if($accessObject->hasAccess("view", "documents") || $accessObject->hasAccess("add", "documents")) { ?>
         <li class="dropdown">
@@ -310,16 +314,18 @@
     <?php } ?>
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>notifications" class="nav-link"><i class="far fa-bell"></i><span>Notifications</span></a></li>
-    <?php if($accessObject->hasAccess("update", "events")) { ?>
-    <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-calendar-check"></i><span> Events Management</span></a>
-        <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>events">List Events</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>events_category">Events Category</a></li>
-        </ul>
-    </li>
-    <?php } else { ?>
-    <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <?php if(in_array("events", $clientFeatures)) { ?>
+        <?php if($accessObject->hasAccess("update", "events")) { ?>
+        <li class="dropdown">
+            <a href="#" class="nav-link has-dropdown"><i class="fas fa-calendar-check"></i><span> Events Management</span></a>
+            <ul class="dropdown-menu">
+                <li><a class="nav-link" href="<?= $baseUrl ?>events">List Events</a></li>
+                <li><a class="nav-link" href="<?= $baseUrl ?>events_category">Events Category</a></li>
+            </ul>
+        </li>
+        <?php } else { ?>
+        <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+        <?php } ?>
     <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
@@ -421,10 +427,14 @@
         </ul>
     </li>
     <?php } ?>
-    <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
+    <?php if(in_array("leave", $clientFeatures)) { ?>
+        <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
+    <?php } ?>
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>notifications" class="nav-link"><i class="far fa-bell"></i><span>Notifications</span></a></li>
-    <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <?php if(in_array("events", $clientFeatures)) { ?>
+        <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
 <?php function parent_menu() { global $baseUrl, $accessObject, $session, $clientFeatures, $isReadOnly; ?>
@@ -474,7 +484,9 @@
     <li><a href="<?= $baseUrl ?>fees-history" class="nav-link"><i class="fas fa-dolly-flatbed"></i><span>Fees History</span></a></li>
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>notifications" class="nav-link"><i class="far fa-bell"></i><span>Notifications</span></a></li>
-    <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <?php if(in_array("events", $clientFeatures)) { ?>
+        <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
 <?php function student_menu() { global $baseUrl, $accessObject, $clientFeatures, $academicSession, $isReadOnly; ?>
@@ -549,7 +561,9 @@
     
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>notifications" class="nav-link"><i class="far fa-bell"></i><span>Notifications</span></a></li>
-    <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <?php if(in_array("events", $clientFeatures)) { ?>
+        <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <?php } ?>
     <?= communication_menu() ?>
 <?php } ?>
 <?php function employee_menu() { global $baseUrl, $accessObject, $clientFeatures, $isReadOnly; ?>
@@ -602,7 +616,9 @@
         </ul>
     </li>
     <?php } ?>
-    <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
+    <?php if(in_array("leave", $clientFeatures)) { ?>
+        <li><a href="<?= $baseUrl ?>leave" class="nav-link"><i class="far fa-check-square"></i><span>Leave Applications</span></a></li>
+    <?php } ?>
     <?php if(in_array("documents_manager", $clientFeatures)) { ?>
         <li class="dropdown">
             <a href="<?= $baseUrl ?>documents" class="nav-link"><i class="fas fa-folder"></i><span>My Documents</span></a>
@@ -610,7 +626,9 @@
     <?php } ?>
     <li class="menu-header">Communication</li>
     <li><a href="<?= $baseUrl ?>notifications" class="nav-link"><i class="far fa-bell"></i><span>Notifications</span></a></li>
-    <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <?php if(in_array("events", $clientFeatures)) { ?>
+        <li><a href="<?= $baseUrl ?>events" class="nav-link"><i class="fas fa-calendar-check"></i><span>Events</span></a></li>
+    <?php } ?>
 <?php } ?>
 <?php function support_menu() { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
