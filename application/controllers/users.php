@@ -2110,7 +2110,7 @@ class Users extends Myschoolgh {
 
 		// return the success response
 		return [
-			"data" => "The password has been successfully updated.",
+			"data" => "{$userData->name}'s password has been successfully updated.",
 			"additional" => [
 				"clear" => true,
 				"close_modal" => "reset_password_mod"
