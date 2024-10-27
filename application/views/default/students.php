@@ -168,7 +168,7 @@ $response->html = '
             </div>
             <div class="col-xl-2 col-md-3 form-group">
                 <label class="d-sm-none d-md-block" for="">&nbsp;</label>
-                <button id="filter_Students_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+                <button id="filter_Students_List" type="submit" class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">

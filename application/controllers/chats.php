@@ -348,19 +348,27 @@ class Chats extends Myschoolgh {
 
         try {
 
+            // global variable
+            global $accessObject;
+
+            // check if the user has the permission to manage the settings
+            $isSupport = $accessObject->hasAccess("manage", "settings");
+
+            // set the client_id request
+            $clientSearch = $isSupport ? null : "a.client_id = '{$params->clientId}' AND";
+
+            // set the client_id request
             $stmt = $this->db->prepare("SELECT a.name, a.item_id AS user_id, a.unique_id, a.image, a.last_seen, 
                     (
-                        SELECT c.message_unique_id 
-                        FROM users_chat c 
+                        SELECT c.message_unique_id FROM users_chat c 
                         WHERE   (c.sender_id = '{$params->userId}' AND c.receiver_id=a.item_id) OR
                                 (c.receiver_id = '{$params->userId}' AND c.sender_id=a.item_id)
                         ORDER BY c.id DESC LIMIT 1
                     ) AS message_unique_id
                 FROM users a
-                WHERE a.client_id = ? AND a.user_status = ? AND a.item_id != ? AND
-                    (a.name LIKE '%{$params->q}%' OR a.unique_id='{$params->q}')
+                WHERE {$clientSearch} a.user_status = ? AND a.item_id != ? AND (a.name LIKE '%{$params->q}%' OR a.unique_id='{$params->q}')
             ");
-            $stmt->execute([$params->clientId, 'Active', $params->userId]);
+            $stmt->execute(['Active', $params->userId]);
 
             $data = [];
             // loop through the results list

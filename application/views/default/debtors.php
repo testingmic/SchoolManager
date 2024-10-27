@@ -320,11 +320,11 @@ if(!$accessObject->hasAccess("view", "fees")) {
                 </div>
                 <div class="col-lg-2 col-sm-6 col-md-3 col-12 form-group mb-2">
                     <label class="d-sm-none d-md-block" for="">&nbsp;</label>
-                    <button id="filter_Fees_Arrears" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+                    <button id="filter_Fees_Arrears" type="submit" class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> FILTER</button>
                 </div>
                 <div class="col-lg-2 col-sm-6 col-md-3 col-12 form-group">
                     <label class="d-sm-none d-md-block" for="">&nbsp;</label>
-                    <button onclick="return load(\'arrears/add\');" class="btn btn-outline-primary btn-block">
+                    <button onclick="return load(\'arrears/add\');" class="btn height-40 btn-outline-primary btn-block">
                         <i class="fa fa-plus"></i> MODIFY RECORD
                     </button>
                 </div>

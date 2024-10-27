@@ -132,7 +132,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                 </div>
                 <div class="col-xl-2 col-md-2 col-12 form-group">
                     <label for="">&nbsp;</label>
-                    <button id="filter_Staff_Payroll_List" type="submit" class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+                    <button id="filter_Staff_Payroll_List" type="submit" class="btn height-40 btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
                 </div>
                 <div class="col-12 col-sm-12 col-lg-12">
                     <div class="card">

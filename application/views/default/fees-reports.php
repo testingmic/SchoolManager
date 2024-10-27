@@ -132,7 +132,7 @@ $response->html = '
 
                                         <div class="col-xl-2 col-md-2 col-12 form-group">
                                             <label for="">&nbsp;</label>
-                                            <button id="filter_Fees_Report"  class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
+                                            <button id="filter_Fees_Report"  class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> FILTER</button>
                                         </div>
                             
                                         <div class="col-12 col-sm-12 col-lg-12">
@@ -400,7 +400,7 @@ $response->html = '
                                         </div>
                                         <div class="'.(!$hasFiltering ? 'hidden': '').' col-md-2 col-12 form-group">
                                             <label for="">&nbsp;</label>
-                                            <button id="generate_Fees_Report"  class="btn btn-outline-warning btn-block"><i class="fa fa-filter"></i> Generate Report</button>
+                                            <button id="generate_Fees_Report"  class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> Generate Report</button>
                                         </div>
                                         
                                     </div>

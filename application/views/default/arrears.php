@@ -213,7 +213,7 @@ if(!empty($user_id) && ($user_id !== "add")) {
                                 </select>
                             </div>
                             <div class="col-md-3 col-sm-4 mb-1">
-                                <button onclick="return load_debtor_details()" class="btn btn-block btn-outline-primary">Load</button>
+                                <button onclick="return load_debtor_details()" class="btn height-40 btn-block btn-outline-primary">Load</button>
                             </div>
                         </div>
                     </div>

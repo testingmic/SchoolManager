@@ -70,7 +70,7 @@ $response->html = '
                         <input placeholder="Search for a e-learning resource" id="search_term" name="search_term" type="text" class="form-control">
                     </div>
                     <div class="col-md-2 col-lg-2">
-                        <button onclick="return search_Resource()" class="btn-block btn btn-outline-primary">Search <i class="fa fa-search"></i></button>
+                        <button onclick="return search_Resource()" class="btn-block height-40 btn btn-outline-primary">Search <i class="fa fa-search"></i></button>
                     </div>
                 </div>
             </div>

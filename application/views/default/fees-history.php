@@ -204,13 +204,13 @@ $response->html = '
             <div class="d-flex justify-content-between">
                 <div class="col-">
                     <label class="d-sm-none d-md-block" for="">&nbsp;</label>
-                    <button id="filter_Fees_Collection" class="btn btn-outline-warning">
+                    <button id="filter_Fees_Collection" class="btn height-40 btn-outline-warning">
                         <i class="fa fa-filter"></i> FILTER
                     </button>
                 </div>
                 <div class="col-">
                     <label class="d-sm-none d-md-block" for="">&nbsp;</label>
-                    <button id="print_Fees_Collection" class="btn btn-outline-primary">
+                    <button id="print_Fees_Collection" class="btn height-40 btn-outline-primary">
                         <i class="fa fa-print"></i> PRINT
                     </button>
                 </div>
