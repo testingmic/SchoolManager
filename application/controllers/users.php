@@ -1160,7 +1160,7 @@ class Users extends Myschoolgh {
 			}
 
 			/** Generate a random password */
-			$params->password = random_string("alnum", RANDOM_STRING);
+			$params->password = $this->defaultPassword;
 
 			/** Set the changed password value */
 			$params->changed_password = 0;
