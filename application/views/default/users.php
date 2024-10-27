@@ -68,9 +68,15 @@ if(!$accessObject->hasAccess("manage", "settings")) {
         $action = "&nbsp;<button title='Reset User Password' onclick=\"return modal_popup('reset_password_mod', '{$user->unique_id}', 'Reset Password - {$user->name}', {$counter})\" 
             class=\"btn btn-sm mb-1 btn-outline-warning\"><i class=\"fa fa-lock\"></i></button>";
 
-        if(($user->item_id !== $userId) && ($user->user_status !== 'Deleted')) {
-            $action .= "&nbsp;<span title='Delete User Record' onclick='return delete_record(\"{$user->item_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
+        $action .= "<span data-action-item='{$user->item_id}'>";
+        if(($user->item_id !== $userId)) {
+            if(($user->user_status !== 'Deleted')) {
+                $action .= "&nbsp;<button title='Delete User Record' onclick='return delete_record(\"{$user->item_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></button>";
+            } else {
+                $action .= "&nbsp;<button title='Restore User Record' onclick='return delete_record(\"{$user->item_id}\", \"user\", \"restore\");' class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-undo'></i></button>";
+            }
         }
+        $action .= "</span>";
 
         $users_list .= "<tr data-row_id=\"{$user->item_id}\">";
         $users_list .= "<td>{$counter}</td>";
@@ -82,7 +88,9 @@ if(!$accessObject->hasAccess("manage", "settings")) {
         $users_list .= "<td>{$user->gender}</td>";
         $users_list .= "<td>{$user->date_of_birth}</td>";
         $users_list .= "<td>".character_limiter($user->client_name, 30)."</td>";
-        $users_list .= "<td class='text-center'>".$myClass->the_status_label($user->user_status)."</td>";
+        $users_list .= "<td class='text-center'>
+            <span data-status-item='{$user->item_id}'>".$myClass->the_status_label($user->user_status)."</span>
+        </td>";
         $users_list .= "<td align='center'>{$action}</td>";
         $users_list .= "</tr>";
 
@@ -164,7 +172,7 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                                         <th>Gender</th>
                                         <th>Date of Birth</th>
                                         <th>Academic Institution</th>
-                                        <th>Status</th>
+                                        <th class="text-center">Status</th>
                                         <th width="8%" align="center"></th>
                                     </tr>
                                 </thead>

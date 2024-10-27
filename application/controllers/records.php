@@ -13,10 +13,11 @@ class Records extends Myschoolgh {
      * @param String $resource
      * @param String $resource_id
      * @param stdClass $userData
+     * @param String $action
      * 
      * @return Array
      */
-    private function permission_control($resource, $record_id, $userData) {
+    private function permission_control($resource, $record_id, $userData, $action = "delete") {
         
         // global variable
         global $accessObject;
@@ -26,6 +27,12 @@ class Records extends Myschoolgh {
 
         // set the client_id request
         $whereClause = $isSupport ? null : "AND client_id='{$userData->client_id}'";
+
+        // set the user where clause
+        $userWhere = ($action == "restore") ? "AND user_status = 'Deleted'" : "AND user_status = 'Active'";
+
+        // set the user set where clause
+        $userSetWhere = ($action == "restore") ? "user_status = 'Active', status ='1', deleted='0'" : "user_status = 'Deleted', status ='0', deleted='1'";
                 
         // the list of composite variable to return for each resource
         $resource_list = [
@@ -121,9 +128,9 @@ class Records extends Myschoolgh {
             ],
             "user" => [
                 "table" => "users",
-                "update" => "status='0', deleted='1', user_status = 'Deleted'",
-                "where" => "item_id='{$record_id}' AND user_status='Active'",
-                "query" => "SELECT id FROM users WHERE item_id='{$record_id}' AND status ='1' {$whereClause} AND user_status='Active' LIMIT 1"
+                "update" => "{$userSetWhere}",
+                "where" => "item_id='{$record_id}' {$userWhere}",
+                "query" => "SELECT id FROM users WHERE item_id='{$record_id}' {$whereClause} {$userWhere} LIMIT 1"
             ],
             "leave" => [
                 "table" => "leave_requests",
@@ -179,12 +186,17 @@ class Records extends Myschoolgh {
      */
     public function remove(stdClass $params) {
 
+        global $accessObject;
+
         $code = 203;
         $additional = [];
         $data = "Error processing request!";
 
+        // check if the user has the permission to manage the settings
+		$isSupport = $accessObject->hasAccess("manage", "settings");
+
         // get the query to use
-        $featured = $this->permission_control($params->resource, $params->record_id, $params->userData);
+        $featured = $this->permission_control($params->resource, $params->record_id, $params->userData, $params->action);
 
         // run the query
         if(!empty($featured)) {
@@ -244,21 +256,35 @@ class Records extends Myschoolgh {
 
             // update the database record
             $this->db->query("UPDATE {$featured["table"]} SET {$featured["update"]} WHERE {$featured["where"]} LIMIT 1");
+
+            // set the action
+            $action = ($params->action == "delete" ? "deleted" : "restored");
             
-            /** Log the user activity */
-            $this->userLogs("{$params->resource}", $params->record_id, null, "<strong>{$params->userData->name}</strong> deleted this record from the system.", $params->userData->user_id);
+            if($isSupport) {
+                /** Log the user activity */
+                $this->userLogs("{$params->resource}", $params->record_id, null, "<strong>{$params->userData->name}</strong> {$action} this record from the system.", $params->userData->user_id);
+            }
 
             // return the success response
             $code = 200;
-            $data = "Record set successfully deleted";
+            $data = "Record set successfully {$action}";
+            
+            // if the action is restore
+            if($isSupport) {
+                $additional["href"] = $this->session->user_current_url;
+            } else {
+                // set the additional data
+                $additional = ["record_id" => $params->record_id, "clear" => true];
+            }
+
+            // set the is support variable
+            $additional['is_support'] = $isSupport;
 
             // if a full result was found
             return [
                 "code" => $code,
                 "data" => $data, 
-                "additional" => [
-                    "record_id" => $params->record_id
-                ]
+                "additional" => $additional
             ];
 
         } else {

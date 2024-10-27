@@ -250,23 +250,44 @@ var share_Comment = (resource, item_id) => {
     });
 }
 
-var delete_record = (record_id, resource) => {
+var delete_record = (record_id, resource, action = "delete") => {
+    let title = (action == "delete") ? "Delete Record" : "Restore Record";
     swal({
-        title: "Delete Record",
-        text: "Are you sure you want to delete this record? You cannot reverse the action once it has been confirmed.",
+        title: title,
+        text: `Are you sure you want to ${action} this record? You cannot reverse the action once it has been confirmed.`,
         icon: 'warning',
         buttons: true,
         dangerMode: true,
     }).then((proceed) => {
         if (proceed) {
-            $.post(`${baseUrl}api/records/remove`, { resource, record_id }).then((response) => {
+            
+            let active = `<span class="badge badge-success">Active</span>`,
+                deleted = `<span class="badge badge-danger">Deleted</span>`;
+
+            let restoreBtn = `&nbsp;<button title="Restore User Record" onclick="return delete_record('${record_id}', '${resource}', 'restore');" class="btn btn-sm mb-1 btn-outline-success"><i class="fa fa-undo"></i></button>`;
+            
+            let deleteBtn = `&nbsp;<button title="Delete User Record" onclick="return delete_record('${record_id}', '${resource}');" class="btn btn-sm mb-1 btn-outline-danger"><i class="fa fa-trash"></i></button>`;
+
+            $.post(`${baseUrl}api/records/remove`, { resource, record_id, action }).then((response) => {
                 let s_icon = "error";
                 if (response.code == 200) {
                    s_icon = "success";
                     if (typeof initiateCalendar === "function") {
                         initiateCalendar();
                     }
-                    $(`[data-row_id='${record_id}']`).remove();
+                    if(typeof response.data.additional !== "undefined") {
+                        if(typeof response.data.additional.is_support) {
+                            if(action === "delete") {
+                                $(`span[data-status-item="${record_id}"]`).html(deleted);
+                                $(`span[data-action-item="${record_id}"]`).html(`${restoreBtn}`);
+                            } else {
+                                $(`span[data-status-item="${record_id}"]`).html(active);
+                                $(`span[data-action-item="${record_id}"]`).html(`${deleteBtn}`);
+                            }
+                        } else {
+                            $(`[data-row_id='${record_id}']`).remove();
+                        }
+                    }
                 }
                 swal({
                     position: "top",
