@@ -1954,7 +1954,7 @@ class Users extends Myschoolgh {
 	        /** Confirm that there is an attached document */
 	        if(!empty($prevData[0]->attachment)) {
 	            // decode the json string
-	            $db_attachments = json_decode($prevData[0]->attachment);
+	            $db_attachments = !empty($prevData[0]->attachment) ? json_decode($prevData[0]->attachment) : [];
 	            // get the files
 	            if(isset($db_attachments->files)) {
 	                $initial_attachment = $db_attachments->files;
@@ -2086,12 +2086,27 @@ class Users extends Myschoolgh {
 			return ["code" => 201, "data" => $this->permission_denied];
 		}
 
+		// get the user record
+		$user = $this->list((object) ["limit" => 1, "user_id" => $params->user_id, "clientId" => $params->clientId])["data"];
+		$userData = $user[0] ?? [];
+
+		// if the user record is empty
+		if(empty($userData)) {
+			return ["code" => 201, "response" => "Sorry! An invalid user id was supplied."];
+		}
+
 		#encrypt the password
 		$password = password_hash($params->password, PASSWORD_DEFAULT);
                     
 		#deactivate all reset tokens
 		$stmt = $this->db->prepare("UPDATE users SET password = ? WHERE item_id = ? AND client_id = ? LIMIT 10");
 		$stmt->execute([$password, $params->user_id, $params->clientId]);
+
+		// admin name
+		$adminName = $params->userData->name;
+
+		#record the activity
+		$this->userLogs("change-password", $params->user_id, null, "{$adminName} successfully changed {$userData->name}'s password.", $params->userId ?? $params->user_id);
 
 		// return the success response
 		return [
@@ -2308,7 +2323,7 @@ class Users extends Myschoolgh {
 		}
 
 		// get the permissions
-		$permissions = json_decode($permissions[0]->permissions);
+		$permissions = !empty($permissions[0]->permissions) ? json_decode($permissions[0]->permissions) : [];
 
 		// return the permissions
 		return [
@@ -2467,7 +2482,7 @@ class Users extends Myschoolgh {
 			if(!empty($query)) {
 				$valid_ids[] = $course;
 				if(!empty($query[0]->course_tutor)) {
-					$result = json_decode($query[0]->course_tutor, true);
+					$result = !empty($query[0]->course_tutor) ? json_decode($query[0]->course_tutor, true) : [];
 					if(!in_array($user_id, $result)) {
 						array_push($result, $user_id);
 						$this->db->query("UPDATE courses SET course_tutor = '".json_encode($result)."' WHERE id='{$course}' LIMIT 1");
@@ -2498,7 +2513,7 @@ class Users extends Myschoolgh {
 
 		foreach($courses_ids as $course) {
 			if(!empty($course->course_tutor)) {
-				$result = json_decode($course->course_tutor, true);
+				$result = !empty($course->course_tutor) ? json_decode($course->course_tutor, true) : [];
 				if(in_array($params->user_id, $result)) {
 					$key = array_search($params->user_id, $result);
 					if($key !== FALSE) {
@@ -2525,7 +2540,7 @@ class Users extends Myschoolgh {
 			$query = $this->pushQuery("course_tutor", "courses", "id='{$course}' AND client_id='{$client_id}' LIMIT 1");
 			if(!empty($query)) {
 				if(!empty($query[0]->course_tutor)) {
-					$result = json_decode($query[0]->course_tutor, true);
+					$result = !empty($query[0]->course_tutor) ? json_decode($query[0]->course_tutor, true) : [];
 					if(in_array($user_id, $result)) {
 						$key = array_search($user_id, $result);
 						unset($result[$key]);

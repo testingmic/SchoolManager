@@ -764,10 +764,10 @@ class Auth extends Myschoolgh {
                     $reciepient = ["recipients_list" => [["fullname" => $fullname, "email" => $email, "customer_id" => $user_id]]];
 
                     // add to the email list to be sent by a cron job
-                    $stmt = $this->db->prepare("
-                        INSERT INTO users_messaging_list SET template_type = ?, item_id = ?, 
-                        users_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?
-                    ");
+                    // $stmt = $this->db->prepare("
+                    //     INSERT INTO users_messaging_list SET template_type = ?, item_id = ?, 
+                    //     users_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?
+                    // ");
                     // $stmt->execute([
                     //     'password-recovery', $user_id, $user_id, json_encode($reciepient),
                     //     $user_id, "[{$this->appName}] Change Password", $message

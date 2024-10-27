@@ -633,8 +633,8 @@ class Attendance extends Myschoolgh {
             if(!empty($check)) {
 
                 // convert into an array
-                $the_list = json_decode($check[0]->users_list, true);
-                $full_user_data = json_decode($check[0]->users_data, true);
+                $the_list = !empty($check[0]->users_list) ? json_decode($check[0]->users_list, true) : [];
+                $full_user_data = !empty($check[0]->users_data) ? json_decode($check[0]->users_data, true) : [];
 
                 // get the students present count
                 if($appendUsersList) {
@@ -959,7 +959,7 @@ class Attendance extends Myschoolgh {
                 // if the query is not empty
                 if(!empty($theQuery)) {
                     // convert the users list into an array
-                    $present = json_decode($theQuery[0]->users_list, true);
+                    $present = !empty($theQuery[0]->users_list) ? json_decode($theQuery[0]->users_list, true) : [];
                     $users_count["summary"][$user] = isset($users_count["summary"][$user]) ? ($users_count["summary"][$user] + count($present)) : count($present);
                     $users_count[$key][$user] = isset($users_count[$key][$user]) ? ($users_count[$key][$user] + count($present)) : count($present);
                 }
@@ -1041,8 +1041,8 @@ class Attendance extends Myschoolgh {
                     foreach($theQuery as $today) {
                         
                         // convert the users list into an array
-                        $present = json_decode($today->users_list, true);
-                        $_user_data = json_decode($today->users_data, true);
+                        $present = !empty($today->users_list) ? json_decode($today->users_list, true) : [];
+                        $_user_data = !empty($today->users_data) ? json_decode($today->users_data, true) : [];
 
                         // if the user is not an admin/accountant then verify if the user was present or absent
                         if($checkPresent) {
@@ -1194,8 +1194,8 @@ class Attendance extends Myschoolgh {
         /** Loop through the results list */
         foreach($classes_list as $result) {
             // convert the columns into an array
-            $users_list = json_decode($result->users_list, true);
-            $users_data = json_decode($result->users_data, true);
+            $users_list = !empty($result->users_list) ? json_decode($result->users_list, true) : [];
+            $users_data = !empty($result->users_data) ? json_decode($result->users_data, true) : [];
 
             // get the students who were present
             $result->present = !empty($users_list) ? count($users_list) : 0;

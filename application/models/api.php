@@ -331,7 +331,7 @@ class Api {
                 
                 // set the result
                 $result['result'] =  is_array($request) && isset($request["data"]) ? $request["data"] : (
-                    $request["response"] ?? $request
+                    is_array($request) ? ($request["response"] ?? $request) : $request
                 );
                 
                 // if additional parameter was parsed
