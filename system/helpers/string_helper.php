@@ -321,15 +321,52 @@ if ( ! function_exists('repeater'))
 }
 
 /**
+ * Character Limiter
+ *
+ * Limits the string based on the character count.  Preserves complete words
+ * so the character count may not be exactly as specified.
+ *
+ * @param string $endChar the end character. Usually an ellipsis
+ */
+function character_limiter($str = null, int $n = 500, string $endChar = '&#8230;'): string
+{
+	if( empty($str) ) {
+		return "";
+	}
+	if (mb_strlen($str) < $n) {
+		return $str;
+	}
+
+	// a bit complicated, but faster than preg_replace with \s+
+	$str = preg_replace('/ {2,}/', ' ', str_replace(["\r", "\n", "\t", "\x0B", "\x0C"], ' ', $str));
+
+	if (mb_strlen($str) <= $n) {
+		return $str;
+	}
+
+	$out = '';
+
+	foreach (explode(' ', trim($str)) as $val) {
+		$out .= $val . ' ';
+		if (mb_strlen($out) >= $n) {
+			$out = trim($out);
+			break;
+		}
+	}
+
+	return (mb_strlen($out) === mb_strlen($str)) ? $out : $out . $endChar;
+}
+
+/**
  * Limit words
  *
  * Splits the words and then using array_splice it reduces the number of words.
  *
  * @param	string	$str	String to check
- * @param	number	$word_limit	Number to limit the words to 
+ * @param	int	$word_limit	Number to limit the words to 
  * @return	text
  */
-function limit_words($str, $word_limit = null, $exempt = []) {
+function limit_words($str, $word_limit = 10, $exempt = []) {
 	
 	if(is_array($str)) {
 		return $str;

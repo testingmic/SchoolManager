@@ -2081,13 +2081,19 @@ class Users extends Myschoolgh {
 			return ["code" => 201, "response" => "Sorry! The password provided is not strong enough."];
 		}
 
+		// check if the user has the permission to manage the settings
+		$isSupport = $accessObject->hasAccess("manage", "settings");
+
 		/** Confirm the user permissions */
-		if(!$accessObject->hasAccess("change_password", "permissions")) {
+		if(!$isSupport && !$accessObject->hasAccess("change_password", "permissions")) {
 			return ["code" => 201, "data" => $this->permission_denied];
 		}
 
+		// set the where clause
+		$whereClause = $isSupport ? ["limit" => 1, "user_id" => $params->user_id] : ["limit" => 1, "user_id" => $params->user_id, "clientId" => $params->clientId];
+
 		// get the user record
-		$user = $this->list((object) ["limit" => 1, "user_id" => $params->user_id, "clientId" => $params->clientId])["data"];
+		$user = $this->list((object) $whereClause)["data"];
 		$userData = $user[0] ?? [];
 
 		// if the user record is empty
@@ -2099,8 +2105,8 @@ class Users extends Myschoolgh {
 		$password = password_hash($params->password, PASSWORD_DEFAULT);
                     
 		#deactivate all reset tokens
-		$stmt = $this->db->prepare("UPDATE users SET password = ? WHERE item_id = ? AND client_id = ? LIMIT 10");
-		$stmt->execute([$password, $params->user_id, $params->clientId]);
+		$stmt = $this->db->prepare("UPDATE users SET password = ? WHERE item_id = ? LIMIT 10");
+		$stmt->execute([$password, $params->user_id]);
 
 		// admin name
 		$adminName = $params->userData->name;

@@ -20,6 +20,12 @@ class Records extends Myschoolgh {
         
         // global variable
         global $accessObject;
+
+        // check if the user has the permission to manage the settings
+		$isSupport = $accessObject->hasAccess("manage", "settings");
+
+        // set the client_id request
+        $whereClause = $isSupport ? null : "AND client_id='{$userData->client_id}'";
                 
         // the list of composite variable to return for each resource
         $resource_list = [
@@ -27,115 +33,115 @@ class Records extends Myschoolgh {
                 "table" => "events_types",
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}'",
-                "query" => "SELECT id FROM events_types WHERE item_id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM events_types WHERE item_id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
             "event" => [
                 "table" => "events",
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}'",
-                "query" => "SELECT id FROM events WHERE item_id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM events WHERE item_id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
             "class" => [
                 "table" => "classes",
                 "update" => "status='0'",
                 "where" => "id='{$record_id}'",
-                "query" => "SELECT id FROM classes WHERE id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM classes WHERE id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
             "department" => [
                 "table" => "departments",
                 "update" => "status='0'",
                 "where" => "id='{$record_id}'",
-                "query" => "SELECT id FROM departments WHERE id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM departments WHERE id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
             "course" => [
                 "table" => "courses",
                 "update" => "status='0'",
                 "where" => "id='{$record_id}'",
-                "query" => "SELECT id FROM courses WHERE id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM courses WHERE id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
             "fees_category" => [
                 "table" => "fees_category",
                 "update" => "status='0'",
                 "where" => "id='{$record_id}'",
-                "query" => "SELECT id FROM fees_category WHERE id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM fees_category WHERE id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
             "book" => [
                 "table" => "books",
                 "update" => "status='0', deleted='1'",
                 "where" => "item_id='{$record_id}'",
-                "query" => "SELECT id FROM books WHERE item_id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM books WHERE item_id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
             "book_category" => [
                 "table" => "books_type",
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}'",
-                "query" => "SELECT id FROM books_type WHERE item_id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM books_type WHERE item_id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
             "course_unit" => [
                 "table" => "courses_plan",
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}'",
-                "query" => "SELECT id FROM courses_plan WHERE plan_type='unit' AND item_id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM courses_plan WHERE plan_type='unit' AND item_id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
             "course_lesson" => [
                 "table" => "courses_plan",
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}'",
-                "query" => "SELECT id FROM courses_plan WHERE plan_type='lesson' AND item_id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM courses_plan WHERE plan_type='lesson' AND item_id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
             "incident" => [
                 "table" => "incidents",
                 "update" => "deleted='0'",
                 "where" => "item_id='{$record_id}'",
-                "query" => "SELECT id FROM incidents WHERE item_id='{$record_id}' AND client_id='{$userData->client_id}' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM incidents WHERE item_id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
             ],
             "class_room" => [
                 "table" => "classes_rooms",
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}' AND status='1'",
-                "query" => "SELECT name FROM classes_rooms WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
+                "query" => "SELECT name FROM classes_rooms WHERE item_id='{$record_id}' AND status ='1' {$whereClause} LIMIT 1"
             ],
             "allowance" => [
                 "table" => "payslips_allowance_types",
                 "update" => "status='0'",
                 "where" => "id='{$record_id}' AND status='1'",
-                "query" => "SELECT name FROM payslips_allowance_types WHERE id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
+                "query" => "SELECT name FROM payslips_allowance_types WHERE id='{$record_id}' AND status ='1' {$whereClause} LIMIT 1"
             ],
             "timetable" => [
                 "table" => "timetables",
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}' AND status='1'",
-                "query" => "SELECT name FROM timetables WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
+                "query" => "SELECT name FROM timetables WHERE item_id='{$record_id}' AND status ='1' {$whereClause} LIMIT 1"
             ],
             "payslip" => [
                 "table" => "payslips",
                 "update" => "deleted='1', status='0'",
                 "where" => "item_id='{$record_id}' AND validated='0' AND deleted='0'",
-                "query" => "SELECT id FROM payslips WHERE item_id='{$record_id}' AND status ='0' AND client_id='{$userData->client_id}' LIMIT 1"
+                "query" => "SELECT id FROM payslips WHERE item_id='{$record_id}' AND status ='0' {$whereClause} LIMIT 1"
             ],
             "user" => [
                 "table" => "users",
-                "update" => "status='0', deleted='1'",
+                "update" => "status='0', deleted='1', user_status = 'Deleted'",
                 "where" => "item_id='{$record_id}' AND user_status='Active'",
-                "query" => "SELECT id FROM users WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' AND user_status='Active' LIMIT 1"
+                "query" => "SELECT id FROM users WHERE item_id='{$record_id}' AND status ='1' {$whereClause} AND user_status='Active' LIMIT 1"
             ],
             "leave" => [
                 "table" => "leave_requests",
                 "update" => "status='Cancelled'",
                 "where" => "item_id='{$record_id}' AND status='Pending'",
-                "query" => "SELECT id FROM leave_requests WHERE item_id='{$record_id}' AND status ='Pending' AND client_id='{$userData->client_id}' LIMIT 1"
+                "query" => "SELECT id FROM leave_requests WHERE item_id='{$record_id}' AND status ='Pending' {$whereClause} LIMIT 1"
             ],
             "guardian" => [
                 "table" => "users",
                 "update" => "status='0', deleted='1'",
                 "where" => "item_id='{$record_id}' AND user_type='parent'",
-                "query" => "SELECT id FROM users WHERE item_id='{$record_id}' AND client_id='{$userData->client_id}' AND user_type='parent' AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM users WHERE item_id='{$record_id}' {$whereClause} AND user_type='parent' AND status ='1' LIMIT 1"
             ],
             "accounts_type" => [
                 "table" => "accounts_type_head",
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}' AND status='1'",
-                "query" => "SELECT name FROM accounts_type_head WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
+                "query" => "SELECT name FROM accounts_type_head WHERE item_id='{$record_id}' AND status ='1' {$whereClause} LIMIT 1"
             ],
             "package" => [
                 "table" => "clients_packages",
@@ -147,13 +153,13 @@ class Records extends Myschoolgh {
                 "table" => "daily_reports",
                 "update" => "deleted='1'",
                 "where" => "item_id='{$record_id}' AND is_seen='0'",
-                "query" => "SELECT id FROM daily_reports WHERE item_id='{$record_id}' AND is_seen ='0' AND client_id='{$userData->client_id}' LIMIT 1"
+                "query" => "SELECT id FROM daily_reports WHERE item_id='{$record_id}' AND is_seen ='0' {$whereClause} LIMIT 1"
             ],
             "template" => [
                 "table" => "smsemail_templates",
                 "update" => "status='0'",
                 "where" => "item_id='{$record_id}' AND status='1'",
-                "query" => "SELECT name FROM smsemail_templates WHERE item_id='{$record_id}' AND status ='1' AND client_id='{$userData->client_id}' LIMIT 1"
+                "query" => "SELECT name FROM smsemail_templates WHERE item_id='{$record_id}' AND status ='1' {$whereClause} LIMIT 1"
             ]
         ];
 

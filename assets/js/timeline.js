@@ -74,6 +74,15 @@ var view_login_history_log = (activity_id) => {
     }
 }
 
+$(`button[id="filter_Users_List"]`).on("click", function() {
+    let status = $(`select[name="status"]`).val(),
+        user_role = $(`select[name="user_role"]`).val(),
+        gender = $(`select[name="gender"]`).val(),
+        clientId = $(`select[name="clientId"]`).val();
+    $.form_data = { status, user_role, gender, clientId };
+    loadPage(`${baseUrl}users`);
+});
+
 $(`button[id="filter_User_Activities"]`).on("click", function() {
     let start_date = $(`input[name="start_date"]`).val(),
         end_date = $(`input[name="end_date"]`).val(),

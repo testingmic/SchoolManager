@@ -499,6 +499,7 @@ class Myschoolgh extends Models {
 			return $query_style === "OBJ" ? $stmt->fetchAll(PDO::FETCH_OBJ) : $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		} catch(PDOException $e) {
+			print $e->getMessage();
 			return [];
 		}
 
@@ -1001,13 +1002,15 @@ class Myschoolgh extends Models {
         if(in_array($status, ["Pending", "Due Today", "Graduated", "Activated"])) {
             $label = "<span class='badge badge-primary {$class}'>{$status}</span>";
         }
-        elseif(in_array($status, ["Rejected", "Dismissed", "Reversed", "Transferred", "Cancelled", "Not Paid", "Unpaid", "Unseen", "Closed", "Overdue", "Expired", "Suspended", "Denied", "Withdrawn", "Lost"])) {
+        elseif(in_array($status, ["Rejected", "Dismissed", "Reversed", "Transferred", "Cancelled", "Not Paid", 
+			"Unpaid", "Unseen", "Closed", "Overdue", "Expired", "Suspended", "Denied", "Withdrawn", "Lost", "Deleted"])) {
             $label = "<span class='badge badge-danger {$class}'>{$status}</span>";
         }
         elseif(in_array($status, ["Reopen", "Waiting", "Draft", "Processing", "In Review", "Confirmed", "Graded", "Requested", "Propagation", "Passive"])) {
             $label = "<span class='badge badge-warning text-white {$class}'>{$status}</span>";
         }
-        elseif(in_array($status, ["Exported", "Complete", "Answered", "Solved", "Enrolled", "Active", "Approved", "Paid", "Running", "Seen", "Submitted", "Held", "Issued", "Returned", "Processed", "Won"])) {
+        elseif(in_array($status, ["Exported", "Complete", "Answered", "Solved", "Enrolled", "Active", "Approved", "Paid", 
+			"Running", "Seen", "Submitted", "Held", "Issued", "Returned", "Processed", "Won"])) {
             $label = "<span class='badge badge-success {$class}'>{$status}</span>";
         }
 

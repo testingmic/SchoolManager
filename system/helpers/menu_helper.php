@@ -636,9 +636,9 @@
 <?php } ?>
 <?php function support_menu() { global $baseUrl, $accessObject; ?>
     <li class="dropdown">
-        <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>Manage Users</span></a>
+        <a href="#" class="nav-link has-dropdown"><i class="fas fa-users"></i><span>List Users</span></a>
         <ul class="dropdown-menu">
-            <li><a class="nav-link" href="<?= $baseUrl ?>password_manager">Password Manager</a></li>
+            <li><a class="nav-link" href="<?= $baseUrl ?>users">Manage Users</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>support_access_manager">Access Control</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>support_security_logs">Security Logs</a></li>
         </ul>
