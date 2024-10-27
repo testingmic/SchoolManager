@@ -2058,6 +2058,52 @@ class Users extends Myschoolgh {
 	}
 
 	/**
+	 * Reset the user password
+	 * 
+	 * @param \stdClass $params
+	 * 
+	 * @return Array
+	 */
+	public function reset_password(stdClass $params) {
+		
+		/** Global variables */
+		global $accessObject;
+
+		if(empty($params->password) || empty($params->confirm_password)) {
+			return ["code" => 201, "response" => "Sorry! Please provide the password and confirm the password."];
+		}
+
+		if($params->password !== $params->confirm_password) {
+			return ["code" => 201, "response" => "Sorry! The password and confirm password does not match."];
+		}
+
+		if(!passwordTest($params->password)) {
+			return ["code" => 201, "response" => "Sorry! The password provided is not strong enough."];
+		}
+
+		/** Confirm the user permissions */
+		if(!$accessObject->hasAccess("change_password", "permissions")) {
+			return ["code" => 201, "data" => $this->permission_denied];
+		}
+
+		#encrypt the password
+		$password = password_hash($params->password, PASSWORD_DEFAULT);
+                    
+		#deactivate all reset tokens
+		$stmt = $this->db->prepare("UPDATE users SET password = ? WHERE item_id = ? AND client_id = ? LIMIT 10");
+		$stmt->execute([$password, $params->user_id, $params->clientId]);
+
+		// return the success response
+		return [
+			"data" => "The password has been successfully updated.",
+			"additional" => [
+				"clear" => true,
+				"close_modal" => "reset_password_mod"
+			]
+		];
+	}
+
+	/**
 	 * Activate the user account by seting the activation status to 1
 	 * 
 	 * @param \stdClass $params

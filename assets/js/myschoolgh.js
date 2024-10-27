@@ -620,8 +620,14 @@ var close_modal_popup = (modal_id) => {
    $(`div[id="${modal_id}"]`).modal("hide"); 
 }
 
-var modal_popup = (modal_id) => {
+var modal_popup = (modal_id, user_id = null, modal_title = null, form_id = null) => {
     $(`div[id="${modal_id}"]`).modal("show");
+    if(user_id !== null) {
+        $(`div[id="${modal_id}"] input[name="user_id"]`).val(user_id);
+    }
+    if(modal_title !== null) {
+        $(`div[id="${modal_id}"] h5[class~="modal-title"]`).html(modal_title);
+    }
 }
 
 var clear_quick_search_form = (div_id) => {

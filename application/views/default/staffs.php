@@ -49,18 +49,29 @@ $clientId = $session->clientId;
 $staff_list = "";
 $counter = 0;
 
-foreach($api_staff_list["data"] as $each) {
+// check if the user has permission to change the password
+$canChangePassword = $accessObject->hasAccess("change_password", "permissions");
+
+// loop through the staff list
+foreach($api_staff_list["data"] as $i => $each) {
     
     $counter++;
+    $userName = ucwords(strtolower($each->name));
     $action = "<span title='View staff record' onclick='return load(\"staff/{$each->user_id}/documents\");' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></span>";
 
     if($accessObject->hasAccess("update", $each->user_type)) {
         $action .= "&nbsp;<a title='Update Staff Record' href=\"staff/{$each->user_id}/update\" class='btn btn-sm mb-1 btn-outline-success'><i class='fa fa-edit'></i></a>";
     }
 
+    if($canChangePassword) {
+        $action .= "&nbsp;<button title='Reset User Password' onclick=\"return modal_popup('reset_password_mod', '{$each->user_id}', 'Reset Password - {$userName}', {$counter})\" 
+            class=\"btn btn-sm mb-1 btn-outline-warning\"><i class=\"fa fa-lock\"></i></button>";
+    }
+
     if($accessObject->hasAccess("delete", $each->user_type) && ($each->user_id !== $defaultUser->user_id)) {
         $action .= "&nbsp;<span title='Delete Staff Record' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
     }
+
 
     $staff_list .= "<tr data-row_id=\"{$each->user_id}\">";
     $staff_list .= "<td>{$counter}</td>";
@@ -70,6 +81,7 @@ foreach($api_staff_list["data"] as $each) {
             <div>
                 <span class='user_name' onclick='return load(\"staff/{$each->user_id}/documents\");'>{$each->name}</span>
                 <br><span class='badge badge-{$myClass->user_colors[$each->user_type]} p-1'>".strtoupper($each->user_type)."</span>
+                <br><span class='font-17'>".strtoupper($each->unique_id)."</span>
             </div>
         </div></td>";
     $staff_list .= "<td>{$each->position}</td>";
@@ -150,6 +162,10 @@ $response->html = '
             </div>
         </div>
     </section>';
+
+    // append the reset password modal
+    $response->html .= $canChangePassword ? reset_password_modal() : null;
+
 // print out the response
 echo json_encode($response);
 ?>

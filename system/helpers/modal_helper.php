@@ -618,9 +618,10 @@ function quick_add_student() {
 /**
  * Change Status Modal
  * 
- * @used
+ * @param string $user_id
+ * @param string $status
  * 
- * @return String
+ * @return string
  */
 function change_status_modal($user_id = null, $status = "Active") {
     
@@ -629,7 +630,7 @@ function change_status_modal($user_id = null, $status = "Active") {
 
     $html = '
     <div data-backdrop="static" data-keyboard="false" class="modal fade" id="change_user_Status">
-        <form action="'.$baseUrl.'api/users/change_status" class="ajax-data-form" id="change_status_modal">
+        <form action="'.$baseUrl.'api/users/change_status" method="POST" class="ajax-data-form" id="change_status_modal">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -662,6 +663,48 @@ function change_status_modal($user_id = null, $status = "Active") {
                             <input type="hidden" readonly name="user_id[]" value="'.$user_id.'">
                             <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
                             <button data-form_id="change_status_modal" type="button-submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>';
+
+    return $html;
+}
+
+function reset_password_modal($user_id = null) {
+    global $baseUrl;
+    $html = '
+    <div data-backdrop="static" data-keyboard="false" class="modal fade" id="reset_password_mod">
+        <form action="'.$baseUrl.'api/users/reset_password" method="POST" class="ajax-data-form" id="reset_password_modal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reset User Password</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Set Password <span class="required">*</span></label>
+                                    <input type="password" name="password" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="confirm_password">Confirm Password <span class="required">*</span></label>
+                                    <input type="password" name="confirm_password" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer p-0">
+                            <input type="hidden" readonly name="user_id" value="'.$user_id.'">
+                            <button type="reset" class="btn btn-light" data-dismiss="modal">Close</button>
+                            <button data-form_id="reset_password_modal" type="button-submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
                         </div>
                     </div>
                 </div>

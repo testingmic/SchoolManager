@@ -152,7 +152,7 @@ class Handler {
             }
             // if the user is still logged in
             elseif(!empty($this->params->onlineCheck)) {
-                $this->response->result = "You are still successfully logged in.";
+                $this->response->result = true;
             }
 
             // print the error description

@@ -330,7 +330,9 @@ class Api {
                 $code = is_array($request) && isset($request['code']) ? $request['code'] : 200;
                 
                 // set the result
-                $result['result'] =  is_array($request) && isset($request["data"]) ? $request["data"] : $request;
+                $result['result'] =  is_array($request) && isset($request["data"]) ? $request["data"] : (
+                    $request["response"] ?? $request
+                );
                 
                 // if additional parameter was parsed
                 if(is_array($request) && isset($request['additional'])) {
