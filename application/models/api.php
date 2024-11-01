@@ -115,13 +115,15 @@ class Api {
             // remove the key from the list
             unset($this->endpoints["devlog"]);
 
-            $code = empty($this->inner_url) ? 200 : 404;
+            return $this->output(100);
 
-            // log the api request
-            if(isset($params["remote"])) { $this->logRequest($this->default_params, $code); }
+            // $code = empty($this->inner_url) ? 200 : 404;
 
-            // return error if not valid
-            return $this->output($code, ['accepted' => ["endpoints" => $this->endpoints ] ]);
+            // // log the api request
+            // if(isset($params["remote"])) { $this->logRequest($this->default_params, $code); }
+
+            // // return error if not valid
+            // return $this->output($code, ['accepted' => ["endpoints" => $this->endpoints ] ]);
         }
         elseif( !isset( $this->endpoints[$this->inner_url][$this->requestMethod] ) ) {
             
