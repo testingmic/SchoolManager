@@ -262,20 +262,15 @@ class Attendance extends Myschoolgh {
         $isDownloadable = (bool) isset($params->download);
 
         // set the month and year
-        $params->month_year = !empty($params->month_year) ? $params->month_year : date("Y-m-01");
-
-        // modify the date supplied
-        $start_date = "{$params->month_year}-01";
+        $start_date = !empty($params->start_date) ? $params->start_date : date("Y-m-01");
 
         // confirm if its a valid date
         if(!$this->validDate($start_date)) {
             return ["code" => 203, "data" => "Sorry! An invalid date was supplied"];
         }
-
-        // set the end date
-        $end_date = date("Y-m-t", strtotime($start_date));
     
-        $params->date_range = "{$start_date}:{$end_date}";
+        // set the date range
+        $params->date_range = "{$start_date}:{$params->end_date}";
 
         // get the attendance array data
         $new_array_list = [];

@@ -36,7 +36,9 @@
             <?php if($accessObject->hasAccess("add", "student") && !$isReadOnly) { ?>
             <li><a class="nav-link" href="<?= $baseUrl ?>student_add">New Admission</a></li>
             <?php } ?>
-            <li><a class="nav-link" href="<?= $baseUrl ?>students_daily_reports">Daily Reports</a></li>
+            <?php if(in_array("incidents", $clientFeatures)) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>students_daily_reports">Daily Reports</a></li>
+            <?php } ?>
         </ul>
     </li>
     <?php if($accessObject->hasAccess("view", "guardian")) { ?>
@@ -344,7 +346,9 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-user-graduate"></i><span>My Students</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>students">Students List</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>students_daily_reports">Daily Reports</a></li>
+            <?php if(in_array("incidents", $clientFeatures)) { ?>
+                <li><a class="nav-link" href="<?= $baseUrl ?>students_daily_reports">Daily Reports</a></li>
+            <?php } ?>
         </ul>
     </li>
     <?php if(in_array("attendance", $clientFeatures)) { ?>
@@ -442,9 +446,11 @@
     <?= communication_menu() ?>
 <?php } ?>
 <?php function parent_menu() { global $baseUrl, $accessObject, $session, $clientFeatures, $isReadOnly; ?>
-    <li>
-        <a href="<?= $baseUrl ?>students_daily_reports" class="nav-link"><i class="fas fa-comments"></i><span>Daily Reports</span></a>
-    </li>
+    <?php if(in_array("incidents", $clientFeatures)) { ?>
+        <li>
+            <a href="<?= $baseUrl ?>students_daily_reports" class="nav-link"><i class="fas fa-comments"></i><span>Daily Reports</span></a>
+        </li>
+    <?php } ?>
     <?php if(!empty($session->student_id)) { ?>
         <?php if(in_array("attendance", $clientFeatures)) { ?>
             <li class="dropdown">

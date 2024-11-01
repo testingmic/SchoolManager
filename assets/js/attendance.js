@@ -186,7 +186,8 @@ $(`div[id="attendance_report"] select[id="user_type"]`).on("change", function() 
 
 var load_attendance_log = () => {
     let class_id = $(`select[name="class_id"]`).val(),
-        month_year = $(`input[name="month_year"]`).val(),
+        start_date = $(`input[name="start_date"]`).val(),
+        end_date = $(`input[name="end_date"]`).val(),
         user_type = $(`select[name="user_type"]`).val();
 
     if (user_type === "") {
@@ -199,19 +200,19 @@ var load_attendance_log = () => {
             text: "Sorry! Please select the class id to continue.",
             icon: "error",
         });
-    } else if (month_year === "") {
+    } else if (start_date === "") {
         swal({
-            text: "Sorry! Please select the month and year to continue.",
+            text: "Sorry! Please select the start date to continue.",
             icon: "error",
         });
     } else {
         $(`a[id="download_link"]`).addClass("hidden");
         $.pageoverlay.show();
-        $.get(`${baseUrl}api/attendance/attendance_report`, { class_id, month_year, user_type }).then((response) => {
+        $.get(`${baseUrl}api/attendance/attendance_report`, { class_id, start_date, end_date, user_type }).then((response) => {
             if (response.code == 200) {
                 let attendance_list = response.data.result;
                 $(`div[class="attendance_log_record"]`).html(attendance_list.table_content);
-                $(`a[id="download_link"]`).removeClass("hidden").attr("href", `${baseUrl}download/attendance?class_id=${class_id}&month_year=${month_year}&user_type=${user_type}&att_d=true`);
+                $(`a[id="download_link"]`).removeClass("hidden").attr("href", `${baseUrl}download/attendance?class_id=${class_id}&start_date=${start_date}&end_date=${end_date}&user_type=${user_type}&att_d=true`);
                 if ($('.datatable').length > 0) {
                     $('.datatable').dataTable({
                         search: null,

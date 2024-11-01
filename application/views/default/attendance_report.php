@@ -72,7 +72,7 @@ $response->html = '
                 <div class="card">
                     <div class="card-body">
                         <div class="row" id="attendance_report">
-                            <div class="col-lg-4 col-md-6">
+                            <div class="col-lg-2 col-md-3">
                                 <div class="form-group">
                                     <label>Select Category</label>
                                     <select data-width="100%" class="form-control selectpicker" name="user_type" id="user_type">
@@ -97,8 +97,14 @@ $response->html = '
                             </div>
                             <div class="col-lg-2 col-md-3">
                                 <div class="form-group">
-                                    <label>Month <span class="required">*</span></label>
-                                    <input type="text" class="form-control monthyear" min="2021-01" max="'.date("Y-m-d").'"  name="month_year">
+                                    <label>Start Date <span class="required">*</span></label>
+                                    <input type="date" value="'.date("Y-m-d", strtotime("-1 month")).'" class="form-control" min="2021-01" max="'.date("Y-m-d").'"  name="start_date">
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-3">
+                                <div class="form-group">
+                                    <label>End Date <span class="required">*</span></label>
+                                    <input type="date" value="'.date("Y-m-d").'" class="form-control" min="2021-01" max="'.date("Y-m-d").'"  name="end_date">
                                 </div>
                             </div>
                             <div class="col-lg-2 col-md-3">
