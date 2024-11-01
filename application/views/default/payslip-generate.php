@@ -69,7 +69,9 @@ if(!$accessObject->hasAccess("generate", "payslip")) {
                                     <select '.(!$limit ? "disabled" : 'name="employee_id"').' data-width="100%" class="form-control selectpicker">
                                         <option value="">Please Select </option>';
                                         foreach($myClass->pushQuery("name, unique_id, item_id", "users", "user_type NOT IN('parent','student') AND user_status IN ({$myClass->default_allowed_status_users_list}) AND client_id='{$clientId}' ORDER BY name LIMIT {$limit}") as $each) {
-                                            $response->html .= "<option ".(($userId == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">{$each->name}</option>";                            
+                                            $response->html .= "<option ".(($userId == $each->item_id) ? "selected" : "")." value=\"{$each->item_id}\">
+                                            ".ucwords($each->name)."
+                                            </option>";                            
                                         }
                                         $response->html .= '
                                     </select>

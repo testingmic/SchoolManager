@@ -4508,7 +4508,7 @@ class Forms extends Myschoolgh {
                             </select>
                         </div>
                         <div class="col-lg-5 mb-2 col-md-5">
-                            <input onkeyup="this.value = this.value.replace(/[^\d]+/g, \'\');" value="'.$eachAllowance->amount.'" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="allowance_amount[]" id="allowance_amount_'.$ii.'">
+                            <input value="'.$eachAllowance->amount.'" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="allowance_amount[]" id="allowance_amount_'.$ii.'">
                         </div>';
                         if($ii > 1) {
                             $allowances_list .= '
@@ -4533,7 +4533,7 @@ class Forms extends Myschoolgh {
                         </select>
                     </div>
                     <div class="col-lg-5 mb-2 col-md-5">
-                        <input placeholder="Amount" onkeyup="this.value = this.value.replace(/[^\d]+/g, \'\');" min="0" max="20000" class="form-control" type="number" name="allowance_amount_1" id="allowance_amount_1">
+                        <input placeholder="Amount" min="0" max="20000" class="form-control" type="number" name="allowance_amount_1" id="allowance_amount_1">
                     </div>
                 </div>
             </div>';
@@ -4563,7 +4563,7 @@ class Forms extends Myschoolgh {
                             </select>
                         </div>
                         <div class="col-lg-5 mb-2">
-                            <input value="'.$eachDeduction->amount.'" onkeyup="this.value = this.value.replace(/[^\d]+/g, \'\');" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="deductions_amount[]" id="deductions_amount_'.$ii.'">
+                            <input value="'.$eachDeduction->amount.'" min="0" max="20000" placeholder="Amount" class="form-control" type="number" name="deductions_amount[]" id="deductions_amount_'.$ii.'">
                         </div>';
                         if($ii > 1) {
                             $deductions_list .= '
@@ -4590,7 +4590,7 @@ class Forms extends Myschoolgh {
                         </select>
                     </div>
                     <div class="col-lg-5 mb-2 col-md-5">
-                        <input placeholder="Amount" min="0" onkeyup="this.value = this.value.replace(/[^\d]+/g, \'\');" max="20000" class="form-control" type="number" name="deductions_amount_1" id="deductions_amount_1">
+                        <input placeholder="Amount" min="0" max="20000" class="form-control" type="number" name="deductions_amount_1" id="deductions_amount_1">
                     </div>
                 </div>
             </div>';

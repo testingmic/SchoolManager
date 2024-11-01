@@ -169,7 +169,7 @@ class Payroll extends Myschoolgh {
         $params->_allowances = $allowances;
 
         /** if the gross salary is set */
-        if(isset($params->basic_salary)) {
+        if(!empty($params->basic_salary)) {
 
             // another check
             if(empty($the_user->basic_salary)) {
@@ -240,13 +240,16 @@ class Payroll extends Myschoolgh {
             $data = "Employee Allowances was successfully updated";
         }
 
-        else if(isset($params->account_name)) {
+        else if(!empty($params->account_name)) {
 
             // set the bank name
             $params->bank_name = $params->bank_name ?? null;
-            
+
+            // check if the employee payroll exists
+            $employeePayslip = $this->pushQuery("*", "payslips_employees_payroll", "client_id='{$params->clientId}' AND employee_id='{$params->employee_id}' LIMIT 1");
+
             /** Insert/Update the basic salary information */
-            if(empty($the_user->basic_salary)) {
+            if(empty($the_user->basic_salary) && empty($employeePayslip)) {
                 /** Insert a new record */
                 $stmt = $this->db->prepare("INSERT INTO payslips_employees_payroll SET 
                 client_id = ?, employee_id = ?, account_name = ?, account_number = ?,

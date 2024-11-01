@@ -356,10 +356,10 @@ var generate_list = () => {
                     </div>
                 </td>
                 <td>
-                    <input maxlength="10" onkeyup="this.value = this.value.replace(/[^\\d.]+/g, '');" type="text" class="form-control" value="${e.phone_number == null ? "" : e.phone_number}" name="ph[${e.id}]">
+                    <input maxlength="10" type="text" class="form-control" value="${e.phone_number == null ? "" : e.phone_number}" name="ph[${e.id}]">
                 </td>
                 <td>
-                    <input maxlength="10" onkeyup="this.value = this.value.replace(/[^\\d.]+/g, '');" type="text" class="form-control" value="${e.phone_number_2 == null ? "" : e.phone_number_2}" name="ph2[${e.id}]">
+                    <input maxlength="10" type="text" class="form-control" value="${e.phone_number_2 == null ? "" : e.phone_number_2}" name="ph2[${e.id}]">
                 </td>
                 <td>
                     <input type="date" class="form-control" value="${e.date_of_birth}" name="dob[${e.id}]">

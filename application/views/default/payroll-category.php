@@ -80,7 +80,7 @@ if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
                 </div>
             </div>
             <div data-backdrop="static" data-keyboard="false" class="modal fade" id="allowanceTypesModal">
-                <form action="'.$baseUrl.'api/payroll/saveallowance" class="ajax-data-form" id="ajax-data-form-content">
+                <form method="POST" action="'.$baseUrl.'api/payroll/saveallowance" class="ajax-data-form" id="ajax-data-form-content">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
