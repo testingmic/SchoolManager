@@ -13,7 +13,7 @@ if ($(`div[id="filter_Department_Class"]`).length) {
         if ((value.length && value !== "null") || $(`div[class~="byPass_Null_Value"]`).length) {
             $(`select[name='class_id'], select[name='course_id']`).find('option').remove().end();
             $(`select[name='class_id'], select[name='course_id']`).append(`<option value="">Please Select</option>`);
-            $.get(`${baseUrl}api/classes/list?columns=id,name,slug,item_id,payment_module`, { department_id: value }).then((response) => {
+            $.get(`${baseUrl}api/classes/list?columns=a.id,a.name,a.slug,a.item_id,a.payment_module`, { department_id: value }).then((response) => {
                 if (response.code == 200) {
                     $.each(response.data.result, function(i, e) {
                         let value = $(`div[id="promote_Student_Display"]`).length ? e.item_id : e.id;

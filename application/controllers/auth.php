@@ -8,8 +8,8 @@ class Auth extends Myschoolgh {
     public $success_response;
 
     // set the attempts for login and password reset
-    private $time_period = 60;
-    private $attempts_count = 7;
+    private $time_period = 10;
+    private $attempts_count = 10;
 
     private $password_ErrorMessage;
 

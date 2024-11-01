@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $defaultClientData, $clientFeatures;
+global $myClass, $accessObject, $defaultUser, $defaultClientData, $clientFeatures, $isTutorAdmin;
 
 // initial variables
 $appName = $myClass->appName;
@@ -50,7 +50,7 @@ $assessmentObj = load_class("assignments", "controllers");
 $hasDelete = $accessObject->hasAccess("delete", "assignments");
 $hasUpdate = $accessObject->hasAccess("update", "assignments");
 
-$hasFiltering = $accessObject->hasAccess("filters", "settings");
+$hasFiltering = $isTutorAdmin;
 
 $item_list = $assessmentObj->list($assignments_param);
 
