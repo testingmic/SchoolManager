@@ -365,7 +365,6 @@
         <a href="#" class="nav-link has-dropdown"><i class="fas fa-book"></i><span>Subjects Manager</span></a>
         <ul class="dropdown-menu">
             <li><a class="nav-link" href="<?= $baseUrl ?>courses">List Subjects</a></li>
-            <li><a class="nav-link" href="<?= $baseUrl ?>gradebook">Gradebook</a></li>
             <li><a class="nav-link" href="<?= $baseUrl ?>list-resources">Subject Resources</a></li>
         </ul>
     </li>
@@ -389,6 +388,7 @@
                 <li><a class="nav-link" href="<?= $baseUrl ?>add-assessment">Create Assessment</a></li>
                 <li><a class="nav-link" href="<?= $baseUrl ?>log-assessment">Log Previous Assessment</a></li>
             <?php } ?>
+            <li><a class="nav-link" href="<?= $baseUrl ?>gradebook">Gradebook</a></li>
         </ul>
     </li>
     <?php } ?>

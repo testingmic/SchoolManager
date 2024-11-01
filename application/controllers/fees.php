@@ -2525,7 +2525,7 @@ class Fees extends Myschoolgh {
             }
 
             // get the client logo content
-            if(!empty($client->client_logo)) {
+            if(!empty($client->client_logo) && file_exists($client->client_logo)) {
                 $type = pathinfo($client->client_logo, PATHINFO_EXTENSION);
                 $logo_data = file_get_contents($client->client_logo);
                 $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
@@ -2569,7 +2569,7 @@ class Fees extends Myschoolgh {
                     $outstanding = 0;
 
                     // convert the item to array
-                    $arrears_details = json_decode($arrears->arrears_details, true);
+                    $arrears_details = !empty($arrears->arrears_details) ? json_decode($arrears->arrears_details, true) : [];
 
                     foreach($arrears_details as $item => $amount) {
                         // get the academic year and term

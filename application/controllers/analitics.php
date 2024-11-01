@@ -715,6 +715,10 @@ class Analitics extends Myschoolgh {
                         $_params->end_date = ($_params->period == "this_month") ? date("Y-m-d") : $_params->end_date;
                         $_params->user_types_list = ["staff"];
                     }
+
+                    if(empty($_params->the_current_user_id)) {
+                        $_params->the_current_user_id = $_params->userId;
+                    }
                 }
                 
                 // load the attendance summary

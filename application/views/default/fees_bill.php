@@ -49,7 +49,7 @@ $response->html = '
         <div class="col-sm-12">
             <div class="card">
                 <div class="card-body">
-                    '.$pages_content["student_bill"].'
+                    '.(!empty($pages_content["student_bill"]) ? $pages_content["student_bill"] . '
                     <div class="mt-3" align="center">
                         <a title="Click to Download Bill" class="btn btn-outline-success" target="_blank" href="'.$baseUrl.'download/student_bill/'.$param->student_id.'?download=1">
                             <i class="fa fa-download"></i> DOWNLOAD BILL
@@ -57,7 +57,9 @@ $response->html = '
                         <a title="Click to Print Bill" class="btn btn-outline-primary" target="_blank" href="'.$baseUrl.'download/student_bill/'.$param->student_id.'?print=1">
                             <i class="fa fa-print"></i> PRINT BILL
                         </a>
-                    </div>
+                    </div>' : '
+                        <div class="alert alert-danger text-center mb-0">Sorry! There is no bill created for your account.</div>'
+                    ).'
                 </div>
             </div>
         </div>

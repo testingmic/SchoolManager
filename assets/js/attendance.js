@@ -65,6 +65,7 @@ var save_AttendanceLog = (date, user_type = "", class_id = "") => {
                     m_icon = "success";
                     if ($(`select[id="attendance_class"]`).length) {
                         $(`select[id="attendance_class"]`).trigger("change");
+                        // refresh_AttendanceLog();
                     }
                 }
                 swal({
@@ -125,7 +126,8 @@ $(`select[id="attendance_category"]`).on("change", function() {
         $(`div[class~="attendance_category_list"], div[class~="refresh_attendance_list"]`).addClass("hidden");
     } else if (value == "student") {
         let category = $(`select[id="attendance_category"]`).val();
-        $.get(`${baseUrl}api/classes/list?columns=a.id,a.item_id,a.name,a.payment_module&filter=${category}&class_teacher=${$myPrefs.userId}`).then((response) => {
+        let class_teacher = ''; //`&class_teacher=${$myPrefs.userId}`; To do Later
+        $.get(`${baseUrl}api/classes/list?columns=a.id,a.item_id,a.name,a.payment_module&filter=${category}${class_teacher}`).then((response) => {
             if (response.code == 200) {
                 $(`div[class~="attendance_category_list"]`).removeClass("hidden");
                 $(`select[name="attendance_class"]`).find('option').remove().end();

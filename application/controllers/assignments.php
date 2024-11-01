@@ -2148,7 +2148,7 @@ class Assignments extends Myschoolgh {
         try {
 
             /** Confirm the assignment id */
-            $data = $this->pushQuery("assignment_type, grading, assigned_to, assigned_to_list, state, date_created", 
+            $data = $this->pushQuery("assignment_type, due_date, grading, assigned_to, assigned_to_list, state, date_created, insertion_mode", 
                 "assignments", "item_id='{$params->assignment_id}' AND client_id='{$params->clientId}' 
                 AND status='1' AND course_id = '{$params->course_id}' AND class_id = '{$params->class_id}' LIMIT 1");
 
@@ -2174,7 +2174,14 @@ class Assignments extends Myschoolgh {
             // set additional parameters
             $comments = "Auto Export of {$data[0]->assignment_type} Marks to Grading Section.";
             $assessment_id = $params->assignment_id;
-            $today = date("Y-m-d", strtotime($data[0]->date_created));
+
+            // if the insertion mode is manual then use the due date if not then use the created date
+            if($data[0]->insertion_mode === 'Manual') {
+                $today = date("Y-m-d", strtotime($data[0]->due_date));
+            } else {
+                $today = date("Y-m-d", strtotime($data[0]->date_created));
+            }
+
             $grade_type = strtolower($data[0]->assignment_type);
             
             // where clause

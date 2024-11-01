@@ -301,8 +301,8 @@ class Timetable extends Myschoolgh {
                 // loop through the allocations and group them
                 foreach($allocations as $slots) {
                     // assign some variables
-                    $course_room = explode(":", $slots["value"]);
-                    $course = $course_room[0];
+                    $course_room = !empty($slots["value"]) ? explode(":", $slots["value"]) : [];
+                    $course = $course_room[0] ?? null;
                     $course_ids[$course] = isset($course_ids[$course]) ? $course_ids[$course]+1 : 1;
 
                     // confirm that a room has been assigned
@@ -354,10 +354,10 @@ class Timetable extends Myschoolgh {
                 // loop through the allocations again and group them
                 foreach($allocations as $slots) {
                     // assign some variables
-                    $slot = explode("_", $slots["slot"]);
-                    $course_room = explode(":", $slots["value"]);
-                    $course = $course_room[0];
-                    $room = $course_room[1];
+                    $slot = !empty($slots["slot"]) ? explode("_", $slots["slot"]) : [];
+                    $course_room = !empty($slots["value"]) ? explode(":", $slots["value"]) : [];
+                    $course = $course_room[0] ?? null;
+                    $room = $course_room[1] ?? null;
 
                     // insert the value into the database
                     $allot_slot->execute([$params->clientId, $item_id, $slot[0], $slot[1], $slots["slot"], $room, $class_id, $course, 1]);
@@ -380,7 +380,7 @@ class Timetable extends Myschoolgh {
                 return ["code" => 203, "data" => "Sorry! Slot parameter is required"];
             }
 
-            $slot = explode("_", $params->data["slot"]);
+            $slot = !empty($params->data["slot"]) ? explode("_", $params->data["slot"]) : [];
 
         }
 
@@ -685,7 +685,7 @@ class Timetable extends Myschoolgh {
             $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
             $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
 
-            $where_clause .= (isset($params->timetable_id) && !empty($params->timetable_id)) ? " AND a.timetable_id='{$params->timetable_id}'" : null;
+            $where_clause .= !empty($params->timetable_id) ? " AND a.timetable_id='{$params->timetable_id}'" : null;
             $where_clause .= !empty($params->course_id) ? " AND a.course_id ='{$params->course_id}'" : null;
             $where_clause .= !empty($params->class_id) ? " AND a.class_id ='{$params->class_id}'" : null;
             $where_clause .= isset($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
@@ -697,7 +697,7 @@ class Timetable extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) { 
                 foreach(["students_attendance_data", "students_grading_data"] as $item) {
-                    $result->{$item} = !empty($item) ? json_decode($result->{$item}, true) : [];
+                    $result->{$item} = !empty($item) && !empty($result->{$item}) ? json_decode($result->{$item}, true) : [];
                 }
                 $data[] = $result;
             }

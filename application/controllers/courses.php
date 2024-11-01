@@ -397,9 +397,10 @@ class Courses extends Myschoolgh {
 
             // execute the statement
             $stmt = $this->db->prepare("
-                UPDATE courses SET date_updated = '{$this->current_timestamp}', course_tutor = ?
+                UPDATE courses SET date_updated = '{$this->current_timestamp}'
                 ".(!empty($class_ids) ? ", class_id = '{$class_ids}'" : null)."
                 ".(!empty($params->name) ? ", name = '{$params->name}'" : null)."
+                ".(!empty($tutor_ids) ? ", course_tutor = '".json_encode($tutor_ids)."'" : null)."
                 ".(!empty($params->credit_hours) ? ", credit_hours = '{$params->credit_hours}'" : null)."
                 ".(!empty($params->name) ? ", slug = '".create_slug($params->name)."'" : null)."
                 ".(!empty($params->course_code) ? ", course_code = '{$params->course_code}'" : null)."
@@ -410,7 +411,7 @@ class Courses extends Myschoolgh {
                 ".(!empty($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
                 WHERE id = ? AND client_id = ? LIMIT 1
             ");
-            $stmt->execute([json_encode($tutor_ids), $params->course_id, $params->clientId]);
+            $stmt->execute([$params->course_id, $params->clientId]);
             
             // append the course tutors
             $this->append_course_tutors($tutor_ids, $params->course_id, $params->clientId);

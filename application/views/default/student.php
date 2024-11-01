@@ -731,7 +731,7 @@ if(!empty($user_id)) {
                         </div>':'').'
                         <div class="tab-pane '.($url_link === "attendance" ? "show active" : null).' fade" id="attendance" role="tabpanel" aria-labelledby="attendance-tab2">
                             <div id="single_user_data" class="row default_period" data-current_period="this_month">
-                                <div id="data-report_stream" data-report_stream="attendance_report&label[student_id]='.$user_id.'">
+                                <div id="data-report_stream" class="width-100" data-report_stream="attendance_report&label[student_id]='.$user_id.'">
                                     <div class="row p-2">
                                         <div class="col-lg-6 col-md-5">
                                             <h4 class="text-uppercase font-20">Attendance Record</h4>

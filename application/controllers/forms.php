@@ -2826,7 +2826,9 @@ class Forms extends Myschoolgh {
                         <select data-width="100%" '.$isAdmin.' name="course_tutor[]" id="course_tutor[]" class="form-control selectpicker">
                             <option value="">Select Subject Tutor</option>';
                             foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('teacher') AND user_status='Active' AND client_id='{$clientId}'") as $each) {
-                                $response .= "<option ".($isData && in_array($each->item_id, $itemData->course_tutor_ids) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
+                                $response .= "<option ".($isData && in_array($each->item_id, $itemData->course_tutor_ids) ? "selected" : null)." value=\"{$each->item_id}\">
+                                    ".ucwords($each->name)." ({$each->unique_id})
+                                </option>";                            
                             }
                         $response .= '</select>
                     </div>
