@@ -427,7 +427,7 @@ class Terminal_reports extends Myschoolgh {
         }
         
         // draw a table with the headers
-        $report_table = "<div style='max-width:1200px' class='table-responsive trix-slim-scroll'>";
+        $report_table = "<div style='max-width: 100%' class='table-responsive trix-slim-scroll'>";
         $report_table .= "<table width='100%' class='table table-bordered'>";
         $report_table .= "<thead>";
         $report_table .= "<th width='5%'>#</th>";
@@ -1138,6 +1138,8 @@ class Terminal_reports extends Myschoolgh {
                 $client_logo = 'data:image/' . $type . ';base64,' . base64_encode($logo_data);
             }
 
+            $defaultFontSize = "font-size:12px";
+
             // loop through the report set
             foreach($report_data as $key => $student) {
 
@@ -1199,16 +1201,16 @@ class Terminal_reports extends Myschoolgh {
                     </td>
                     </tr>";
                 $table .= "</table>\n";
-                $table .= "<table style=\"font-size:12px\" cellpadding=\"5\" width=\"100%\" style=\"border: 1px solid #dee2e6;\">";
+                $table .= "<table style=\"font-size:10px\" cellpadding=\"5\" width=\"100%\" style=\"border: 1px solid #dee2e6;\">";
                 $table .= "<tr style=\"font-weight:bold;font-size:15px;background-color:#050f58;color:#fff;\">";
                 $table .= "<td align=\"center\" colspan=\"".($column_count + 4)."\">END OF TERM REPORT CARD</td>";
                 $table .= "</tr>";
-                $table .= "<tr style=\"font-weight:bold\">";
-                $table .= "<td width=\"25%\">SUBJECT</td>";
+                $table .= "<tr style=\"font-weight:bold;{$defaultFontSize}\">";
+                $table .= "<td style=\"{$defaultFontSize}\" width=\"25%\">SUBJECT</td>";
                 $table .= $grading_column;
-                $table .= "<td align=\"center\" width=\"10%\">TOTAL SCORE</td>";
-                $table .= "<td width=\"15%\">TEACHER</td>";
-                $table .= "<td>TEACHER'S COMMENT</td>";
+                $table .= "<td style=\"{$defaultFontSize}\" align=\"center\" width=\"10%\">TOTAL SCORE</td>";
+                $table .= "<td style=\"{$defaultFontSize}\" width=\"15%\">TEACHER</td>";
+                $table .= "<td style=\"{$defaultFontSize}\">TEACHER'S COMMENT</td>";
                 $table .= "</tr>";
 
                 // // get the results submitted by the teachers for each subject
@@ -1222,9 +1224,9 @@ class Terminal_reports extends Myschoolgh {
                         foreach($score->scores as $s_score) {
                             $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">".round($s_score, 2)."</td>";
                         }
-                        $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">".round($score->total_percentage, 2)."</td>";
-                        $table .= "<td style=\"border: 1px solid #dee2e6;\">".strtoupper($score->teachers_name)."</td>";
-                        $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->class_teacher_remarks}</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\" align=\"center\">".round($score->total_percentage, 2)."</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\">".strtoupper($score->teachers_name)."</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\">{$score->class_teacher_remarks}</td>";
                         $table .= "</tr>";
                     }
                 }
@@ -1234,10 +1236,10 @@ class Terminal_reports extends Myschoolgh {
                 $table .= "<table cellpadding=\"5px\" border=\"0\" width=\"100%\">";
                 $table .= "<tr>";
                 $table .= "<td align=\"center\" width=\"35%\" valign=\"top\">";
-                $table .= "<table style=\"font-size:12px\" align=\"left\" cellpadding=\"5px\" border=\"0\" width=\"100%\">";
+                $table .= "<table style=\"{$defaultFontSize}\" align=\"left\" cellpadding=\"5px\" border=\"0\" width=\"100%\">";
                 $table .= "<tr style=\"font-weight:bold\">";
                 $table .= "<td colspan=\"2\" align=\"center\">";
-                $table .= "<span style=\"font-weight:bold; font-size:20px\">GRADING SYSTEM</span>";
+                $table .= "<span style=\"font-weight:bold; font-size:15px\">GRADING SYSTEM</span>";
                 $table .= "</td>";
                 $table .= "</tr>";
                 $table .= "<tr style=\"font-weight:bold\">";

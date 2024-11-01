@@ -852,7 +852,7 @@ class Account extends Myschoolgh {
                     $total_grade += $value['percentage'];
                 }
             }
-            if($total_grade > 100 || $total_grade < 100) {
+            if($total_grade > 100/* || $total_grade < 100*/) {
                 return ["code" => 203, "data" => "Sorry! The score must be equal to 100%. The current value is {$total_grade}%."];
             }
         }
@@ -869,8 +869,8 @@ class Account extends Myschoolgh {
             }
 
             // if the score is more than 100 then alert the user
-            if($score > 100 || $score < 100) {
-                return ["code" => 203, "data" => "Sorry! The score must be equal to 100%. The current value is {$score}%."];
+            if($score > 100/* || $score < 100*/) {
+                // return ["code" => 203, "data" => "Sorry! The score must be equal to 100%. The current value is {$score}%."];
             }
         }
 

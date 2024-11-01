@@ -4004,11 +4004,11 @@ class Forms extends Myschoolgh {
                         </div>
                         <div class='col-lg-2'>
                             <label>Marks Cap</label>
-                            <input type='number' min='0' value='{$column->markscap}' max='{$column->markscap}' name='column_markscap_{$count}' data-column_id='{$count}' class='form-control'>
+                            <input type='number' min='0' value='{$column->markscap}' max='{$column->markscap}' name='column_markscap_{$count}' data-column_id='{$count}' class='form-control text-center'>
                         </div>
                         <div class='col-lg-2'>
                             <label>Percentage(%)</label>
-                        <input type='number' min='0' value='{$column->percentage}' max='{$column->percentage}' name='column_percentage_{$count}' data-column_id='{$count}' class='form-control'>
+                            <input type='number' min='0' value='{$column->percentage}' max='{$column->percentage}' name='column_percentage_{$count}' data-column_id='{$count}' class='form-control text-center'>
                         </div>
                         <div class='col-lg-2'>
                             <label>&nbsp;</label>

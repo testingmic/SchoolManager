@@ -142,11 +142,11 @@ var add_report_column = () => {
             </div>
             <div class='col-lg-2'>
                 <label>Marks Cap</label>
-                <input type='number' min='0' max='100' name='column_markscap_${rows_count}' data-column_id='${rows_count}' class='form-control'>
+                <input type='number' min='0' max='100' name='column_markscap_${rows_count}' data-column_id='${rows_count}' class='form-control text-center'>
             </div>
             <div class='col-lg-2'>
                 <label>Percentage(%)</label>
-                <input type='number' min='0' max='100' name='column_percentage_${rows_count}' data-column_id='${rows_count}' class='form-control'>
+                <input type='number' min='0' max='100' name='column_percentage_${rows_count}' data-column_id='${rows_count}' class='form-control text-center'>
             </div>
             <div class='col-lg-2'>
                 <label>&nbsp;</label>
