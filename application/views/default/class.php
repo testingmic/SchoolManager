@@ -233,7 +233,9 @@ if(!empty($item_id)) {
                         '<div class="pb-0 pt-0">
                             <p class="clearfix">
                                 <span class="float-left">Fullname</span>
-                                <span class="float-right text-muted">'.($data->class_teacher_info->name ?? null).'</span>
+                                <span class="float-right text-muted">'.(
+                                    !empty($data->class_teacher_info->name) ? ucwords($data->class_teacher_info->name) : null
+                                ).'</span>
                             </p>
                             <p class="clearfix">
                                 <span class="float-left">Email</span>

@@ -190,7 +190,8 @@ var save_grading_mark = () => {
         $.each($(`div[id="term_sba_columns_list"] div[class~="sba_item"]`), function(i, e) {
             let this_id = $(this).attr("data-column_id"),
                 name = $(this).attr("data-column_name"),
-                percentage = parseInt($(`input[name="sba_percentage_${this_id}"]`).val()),
+                percent = $(`input[name="sba_percentage_${this_id}"]`).val();
+            let percentage = !isNaN(percent) ? parseInt(percent) : 0,
                 counter = parseInt($(`input[name="sba_least_${this_id}"]`).val());
             count++;
             grading_sba[name] = {percentage, counter};
@@ -198,9 +199,11 @@ var save_grading_mark = () => {
 
         $.each($(`div[id="term_report_columns_list"] div[class~="column_item"]`), function(i, e) {
             let this_id = $(this).attr("data-column_id"),
-                name = $(`input[name="column_name_${this_id}"]`).val(),
-                percentage = parseInt($(`input[name="column_percentage_${this_id}"]`).val()),
-                markscap = parseInt($(`input[name="column_markscap_${this_id}"]`).val());
+                name = $(`input[name="column_name_${this_id}"]`).val();
+            let percentage = $(`input[name="column_percentage_${this_id}"]`).val(),
+                markscap = $(`input[name="column_markscap_${this_id}"]`).val();
+            percentage = !isNaN(percentage) ? parseInt(percentage) : 0;
+            markscap = !isNaN(markscap) ? parseInt(markscap) : 0;
             count++;
             other_columns[name] = {percentage, markscap};
         });

@@ -988,9 +988,9 @@ class Attendance extends Myschoolgh {
         $days = $this->listDays($params->start_date, $params->end_date, 'Y-m-d');
         $isThisTerm = (isset($params->period) && ($params->period == "this_term")); 
 
-        // prompt error if the days is more than 31 days
-        if(count($days) > 31 && !$isThisTerm) {
-            return ["code" => 203, "data" => "Sorry! The period should not exceed 31 days"];
+        // prompt error if the days is more than 90 days
+        if(count($days) > 63 && !$isThisTerm) {
+            return ["code" => 203, "data" => "Sorry! The period should not exceed 60 days"];
         }
 
         // group the user types

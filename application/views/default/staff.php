@@ -320,24 +320,24 @@ if(empty($user_id)) {
             <div class="col-md-3">
                 <div class="card">
                     <div class="card-body text-center bg-amber">
-                        <div class="font-18 text-dark">STAFF ID</div>
-                        <div class="font-22 font-weight-bold text-uppercase text-dark">'.$data->unique_id.'</div>
+                        <div class="font-18 text-dark font-weight-bold">STAFF ID</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-white">'.$data->unique_id.'</div>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body text-center bg-info">
-                        <div class="font-18 text-dark">POSITION</div>
-                        <div class="font-22 font-weight-bold text-uppercase text-dark">'.($data->position ? $data->position : '-' ).'</div>
+                        <div class="font-18 text-dark font-weight-bold">POSITION</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-white">'.($data->position ? $data->position : '-' ).'</div>
                     </div>
                 </div>
             </div>
             <div class="col-md-5">
                 <div class="card">
                     <div class="card-body text-center bg-success">
-                        <div class="font-18 text-dark">DEPARTMENT</div>
-                        <div class="font-22 font-weight-bold text-uppercase text-dark">
+                        <div class="font-18 text-dark font-weight-bold">DEPARTMENT</div>
+                        <div class="font-22 font-weight-bold text-uppercase text-white">
                             '.($data->section_name ? $data->section_name : '-' ).'
                         </div>
                     </div>

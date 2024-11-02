@@ -4134,29 +4134,33 @@ class Forms extends Myschoolgh {
         }
 
         $columns_listing = "";
+        
         if(!empty($client_data->grading_structure)) {
+            // get the grading structure
             $columns = !is_object($client_data->grading_structure) ? json_decode($client_data->grading_structure) : $client_data->grading_structure;
+            if(!isset($columns->columns)) {
+                $columns->columns = [
+                    'School Based Assessment' => [
+                        "percentage" => 0
+                    ],
+                    'Examination' => [
+                        "percentage" => 0
+                    ]
+                ];
+            }
             if(isset($columns->columns)) {
                 $count = 0;
                 foreach($columns->columns as $key => $column) {
                     $count++;
                     $columns_listing .= "
                     <div class='row mb-2 column_item' data-column_id='{$count}'>
-                        <div class='col-lg-6'>
+                        <div class='col-lg-9 col-md-9'>
                             <label>Name</label>
                             <input type='text' maxlength='100' value='{$key}' name='column_name_{$count}' data-column_id='{$count}' class='form-control'>
                         </div>
-                        <div class='col-lg-2'>
-                            <label>Marks Cap</label>
-                            <input type='number' min='0' value='{$column->markscap}' max='{$column->markscap}' name='column_markscap_{$count}' data-column_id='{$count}' class='form-control'>
-                        </div>
-                        <div class='col-lg-2'>
+                        <div class='col-lg-3 col-md-3'>
                             <label>Percentage(%)</label>
-                        <input type='number' min='0' value='{$column->percentage}' max='{$column->percentage}' name='column_percentage_{$count}' data-column_id='{$count}' class='form-control'>
-                        </div>
-                        <div class='col-lg-2'>
-                            <label>&nbsp;</label>
-                            <button type='button' onclick='return remove_report_column({$count})' data-column_id='{$count}' class='btn btn-block btn-outline-danger'><i class='fa fa-trash'></i></button>
+                            <input type='number' min='0' value='{$column->percentage}' max='{$column->percentage}' name='column_percentage_{$count}' data-column_id='{$count}' class='text-center form-control'>
                         </div>
                     </div>";
                 }
@@ -4184,6 +4188,9 @@ class Forms extends Myschoolgh {
 
         $forms["examination"] = $examination;
 
+        
+        // set the max with
+        $max_width = "col-lg-10";
 
         // terminal reports columns list
         $default_columns_list[0] = "
@@ -4208,8 +4215,8 @@ class Forms extends Myschoolgh {
         // examination forms
         $results_structure = '
         <div class="row">
-            <div class="col-lg-9"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GRADEBOOK ASSESSMENT (SBA)</h5></div>
-            <div class="col-lg-9 mb-3 col-md-12" id="term_sba_columns_list">';
+            <div class="'.$max_width.'"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GRADEBOOK ASSESSMENT (SBA)</h5></div>
+            <div class="'.$max_width.' mb-3 col-md-12" id="term_sba_columns_list">';
             // init values
             $qu = 0;
             // loop through the assessment test group
@@ -4223,7 +4230,7 @@ class Forms extends Myschoolgh {
                 // append to the structure
                 $results_structure .= "
                     <div class='row mb-4 sba_item' data-column_id='{$qu}' data-column_name='{$sba}'>
-                        <div class='col-lg-5'>
+                        <div class='col-lg-4'>
                             <label class='text-white'>...</label>
                             <div><strong>".strtoupper($name)."</strong></div>
                         </div>
@@ -4231,9 +4238,9 @@ class Forms extends Myschoolgh {
                             <label>Least {$sba} Assigned to Students</label>
                             <input type='number' min='0' value='{$sba_mark}' name='sba_least_{$qu}' data-column_id='{$qu}' class='form-control text-center'>
                         </div>
-                        <div class='col-lg-2'>
+                        <div class='col-lg-3'>
                             <label>Percentage(%)</label>
-                        <input type='number' title='The overall percentage that it weighs' min='0' value='{$sba_percent}' name='sba_percentage_{$qu}' data-column_id='{$qu}' class='form-control text-center'>
+                            <input type='number' title='The overall percentage that it weighs' min='0' value='{$sba_percent}' name='sba_percentage_{$qu}' data-column_id='{$qu}' class='form-control text-center'>
                         </div>
                     </div>";
             }
@@ -4244,13 +4251,13 @@ class Forms extends Myschoolgh {
         // examination forms
         $results_structure .= '
         <div class="row">
-            <div class="col-lg-9">
+            <div class="'.$max_width.'">
                 <div class="d-flex pb-3 justify-content-between">
                     <div><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">TERMINAL REPORT STRUCTURE</h5></div>
-                    <div><button type="button" title="Add new Column" onclick="return add_report_column()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>
+                    <!--<div><button type="button" title="Add new Column" onclick="return add_report_column()" class="btn btn-outline-primary"><i class="fa fa-plus"></i></button></div>-->
                 </div>
             </div>
-            <div class="col-lg-9 mb-3 col-md-12">
+            <div class="'.$max_width.' mb-3 col-md-12">
                 <div class="form-group">
                     '.$default_columns_list[0].'
                     <div class="font-italic text-success">Add to list</div>
@@ -4259,7 +4266,15 @@ class Forms extends Myschoolgh {
                 </div>
 
                 <div class="row">
-                    <div class="col-lg-6 col-md-12">
+                    <div class="col-lg-4 col-md-12">
+                        <div class="form-group">
+                            <select class="form-control selectpicker" name="group_sba" data-width="100%">
+                                <option '.(isset($client_data->group_sba) && $client_data->group_sba == "true" ? "selected" : "").' value="true">Group SBA on Report Card</option>
+                                <option '.(isset($client_data->group_sba) && $client_data->group_sba == "false" ? "selected" : "").' value="false">Do not group SBA on Report</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12">
                         <div class="form-group">
                             <select class="form-control selectpicker" name="show_position" data-width="100%">
                                 <option '.(isset($client_data->show_position) && $client_data->show_position == "true" ? "selected" : "").' value="true">Show position in class</option>
@@ -4267,7 +4282,7 @@ class Forms extends Myschoolgh {
                             </select>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-md-12">
+                    <div class="col-lg-4 col-md-12">
                         <div class="form-group">
                             <select class="form-control selectpicker" name="show_teacher_name" data-width="100%">
                                 <option '.(isset($client_data->show_teacher_name) && $client_data->show_teacher_name == "true" ? "selected" : "").' value="true">Show teacher\'s name</option>
@@ -4285,7 +4300,7 @@ class Forms extends Myschoolgh {
                 </div>
 
             </div>
-            <div class="col-lg-9 mb-3 col-md-12">
+            <div class="'.$max_width.' mb-3 col-md-12">
                 <div class="form-group text-right">
                     <button type="button" onclick="return save_grading_mark()" id="save_grading_mark" class="btn btn-outline-success"><i class="fa fa-save"></i> Save Grades</button>
                 </div>

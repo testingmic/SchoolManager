@@ -131,10 +131,15 @@ $(`select[id="attendance_category"]`).on("change", function() {
             if (response.code == 200) {
                 $(`div[class~="attendance_category_list"]`).removeClass("hidden");
                 $(`select[name="attendance_class"]`).find('option').remove().end();
-                $(`select[name="attendance_class"]`).append(`<option value="null" selected="selected">Select Class</option>`);
+                if(response.data.result.length > 1) {
+                    $(`select[name="attendance_class"]`).append(`<option value="null" selected="selected">Select Class</option>`);
+                }
                 $.each(response.data.result, (_, e) => {
                     $(`select[name="attendance_class"]`).append(`<option data-payment_module="${e.payment_module}" data-item_id="${e.item_id}" value='${e.id}'>${e.name.toUpperCase()}</option>'`);
                 });
+                if(response.data.result.length == 1) {
+                    $(`select[name="attendance_class"]`).trigger("change");
+                }
             }
         });
     } else {

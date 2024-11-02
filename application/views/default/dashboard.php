@@ -734,7 +734,8 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_week" class="btn active btn-info">This Week</button>
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="last_week" class="btn sm-hide btn-info">Last Week</button>
                                         <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_month" class="btn btn-info">This Month</button>
-                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_term" class="btn btn-info">This '.$academicSession.'</button>
+                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="last_3months" class="btn btn-info">This Quarter</button>
+                                        <button type="button" data-stream="summary_report,transaction_revenue_flow" data-period="this_term" class="btn btn-info">'.$academicSession.'</button>
                                     </div>
                                 </div>
                             </div>

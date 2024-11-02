@@ -314,7 +314,7 @@ if(!empty($item_id)) {
                             <div class="pb-2 pt-3 border-bottom">
                                 <p class="clearfix mb-2">
                                     <span class="float-left">Fullname</span>
-                                    <span class="float-right text-muted"><a href="'.$baseUrl.'staff/'.$tutor->item_id.'/documents">'.$tutor->name.'</a></span>
+                                    <span class="float-right text-muted"><a href="'.$baseUrl.'staff/'.$tutor->item_id.'/documents">'.ucwords(($tutor->name)).'</a></span>
                                 </p>
                                 <p class="clearfix mb-2">
                                     <span class="float-left">Email</span>
