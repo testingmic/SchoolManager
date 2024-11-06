@@ -27,11 +27,11 @@ See https://github.com/adobe-type-tools/cmap-resources
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="google" content="notranslate">
   <title>PDF.js viewer</title>
-  <link rel="stylesheet" href="<?= $myClass->baseUrl ?>assets/vendors/pdfjs/web/viewer.css">
+  <link rel="stylesheet" href="<?= $myClass->baseUrl ?>assets/vendors/pdfjs/viewer.css">
   <!-- This snippet is used in production (included from viewer.html) -->
-  <link rel="resource" type="application/l10n" href="<?= $myClass->baseUrl ?>assets/vendors/pdfjs/web/locale/locale.properties">
-  <script src="<?= $myClass->baseUrl ?>assets/vendors/pdfjs/build/pdf.js"></script>
-  <script src="<?= $myClass->baseUrl ?>assets/vendors/pdfjs/web/viewer.js"></script>
+  <link rel="resource" type="application/l10n" href="<?= $myClass->baseUrl ?>assets/vendors/pdfjs/locale/locale.properties">
+  <script src="<?= $myClass->baseUrl ?>assets/vendors/pdfjs/pdf.mjs"></script>
+  <script src="<?= $myClass->baseUrl ?>assets/vendors/pdfjs/viewer.mjs"></script>
 </head>
 
 <body tabindex="1">
