@@ -102,6 +102,7 @@ if(!$receivePayment) {
             $disabled = (($data->paid_status == 1) || ($data->paid_status == '1')) ? "disabled='disabled'" : null;
             $search_disabled = ($data->paid_status == 1) ? null : "disabled='disabled'";
 
+            print_r($data);exit;
             // set teh student information
             $student_info = [
                 "name" => $data->student_details["student_name"],
@@ -112,6 +113,9 @@ if(!$receivePayment) {
                 "arrears" => $data->student_details["arrears"],
                 "total" => $data->student_details["debt"]
             ];
+
+            // set the student id
+            $response->array_stream["student_id"] = $student_id;
             
             // append the allocation information to the parameters before fetching the payment form
             $params->allocation_info = $data;
@@ -266,7 +270,7 @@ if(!$receivePayment) {
                                             <img onclick="return load(\'student/'.$student_info["user_id"].'\')" width="60px" class="img-shadow cursor" title="Click to view record of '.$student_info["name"].'" src="'.$baseUrl.$student_info["image"].'">
                                         </div>
                                         <div>
-                                            <div class="font-20 user_name" title="Click to view record of '.$student_info["name"].'" onclick="return load(\'student/'.$student_info["user_id"].'\')">'.$student_info["name"].'</div>
+                                            <div class="font-18 user_name" title="Click to view record of '.$student_info["name"].'" onclick="return load(\'student/'.$student_info["user_id"].'\')">'.$student_info["name"].'</div>
                                             <div><strong>STUDENT ID:</strong> '.$student_info["unique_id"].'</div>
                                             <div><strong>FEES ARREARS:</strong> <span class="fees_arrears">'.$defaultCurrency.''.number_format($student_info["debt"], 2).'</span></div>
                                             <div><strong>PREVIOUS ARREARS:</strong> '.$defaultCurrency.''.number_format($student_info["arrears"], 2).'</div>

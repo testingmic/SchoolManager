@@ -179,24 +179,25 @@ if ($(`div[id="filter_Department_Class"]`).length) {
     }
 
     $(`button[id="filter_Assignments_List"]`).on("click", function() {
-        department_id = $(`select[name="department_id"]`).val(),
+        let department_id = $(`select[name="department_id"]`).val(),
             class_id = $(`select[name="class_id"]`).val(),
-            course_id = $(`select[name="course_id"]`).val();
-        $.form_data = { department_id, class_id, course_id };
+            course_id = $(`select[name="course_id"]`).val(),
+            assessment_group = $(`select[name="assessment_group"]`).val();
+        $.form_data = { department_id, class_id, course_id, assessment_group };
         loadPage(`${baseUrl}assessments`);
     });
 
 }
 
 $(`button[id="filter_Incidents_List"]`).on("click", function() {
-    user_role = $(`select[name="user_role"]`).val(),
+    let user_role = $(`select[name="user_role"]`).val(),
         subject = $(`input[name="subject"]`).val();
     $.form_data = { user_role, subject };
     loadPage(`${baseUrl}incidents_list`);
 });
 
 $(`button[id="filter_Fees_Collection"]`).on("click", function() {
-    date_range = $(`input[name="date_range"]`).val(),
+    let date_range = $(`input[name="date_range"]`).val(),
         class_id = $(`select[name="class_id"]`).val(),
         category_id = $(`select[name="category_id"]`).val();
     $.form_data = { date_range, class_id, category_id };
@@ -249,7 +250,7 @@ $(`button[id="generate_Transaction_Report"]`).on("click", function() {
 });
 
 $(`button[id="filter_Staff_List"]`).on("click", function() {
-    department_id = $(`select[name="department_id"]`).val(),
+    let department_id = $(`select[name="department_id"]`).val(),
         user_type = $(`select[name="user_type"]`).val(),
         gender = $(`select[name="gender"]`).val();
     $.form_data = { department_id, user_type, gender };
@@ -257,7 +258,7 @@ $(`button[id="filter_Staff_List"]`).on("click", function() {
 });
 
 $(`button[id="filter_Staff_Payroll_List"]`).on("click", function() {
-    department_id = $(`select[name="department_id"]`).val(),
+    let department_id = $(`select[name="department_id"]`).val(),
         user_type = $(`select[name="user_type"]`).val(),
         gender = $(`select[name="gender"]`).val();
     $.form_data = { department_id, user_type, gender };

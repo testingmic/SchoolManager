@@ -296,7 +296,7 @@ class Models {
             "end_academic_term" => "Are you sure you want to end this academic term. You will be locked out from the system for not more than 5 minutes to allow processing? Once confirmed, you cannot reverse the action."
         ];
 
-        $this->assessment_group = ["Classwork", "Homework", "Project", "Test"];
+        $this->assessment_group = ["Classwork", "Homework", "Test", "Project", "MidTerm Exams"];
 
         $this->assessment_color_group = [
             "Classwork" => "success",
@@ -304,6 +304,7 @@ class Models {
             "GroupWork" => "secondary",
             "Quiz" => "primary",
             "MidTerm" => "dark",
+            "MidTerm Exams" => "dark",
             "Project" => "secondary",
             "Test" => "primary"
         ];

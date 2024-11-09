@@ -39,7 +39,8 @@ $assignments_param = (object) [
     "client_data" => $defaultClientData,
     "department_id" => $filter->department_id ?? null,
     "class_id" => $filter->class_id ?? null,
-    "course_id" => $filter->course_id ?? null
+    "course_id" => $filter->course_id ?? null,
+    "assessment_group" => $filter->assessment_group ?? null
 ];
 
 // unset the session
@@ -98,7 +99,7 @@ $response->html = '
             </div>
         </div>
         <div class="row" id="filter_Department_Class">
-            <div class="col-xl-4 '.(!$hasFiltering ? 'hidden': '').' col-md-4 col-12 form-group">
+            <div class="col-xl-3 '.(!$hasFiltering ? 'hidden': '').' col-md-3 col-12 form-group">
                 <label>Select Department</label>
                 <select class="form-control selectpicker" data-width="100%" id="department_id" name="department_id">
                     <option value="">Please Select Department</option>';
@@ -108,7 +109,7 @@ $response->html = '
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-xl-3 '.(!$hasFiltering ? 'hidden': '').' col-md-3 col-12 form-group">
+            <div class="col-xl-2 col-md-2 col-12 form-group">
                 <label>Select Class</label>
                 <select class="form-control selectpicker" data-width="100%" name="class_id">
                     <option value="">Please Select Class</option>';
@@ -118,7 +119,7 @@ $response->html = '
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-xl-3 '.(!$hasFiltering ? 'hidden': '').' col-md-3 col-12 form-group">
+            <div class="col-xl-3 col-md-3 col-12 form-group">
                 <label>Select Subject</label>
                 <select class="form-control selectpicker" data-width="100%" name="course_id">
                     <option value="">Please Select Subject</option>';
@@ -128,7 +129,17 @@ $response->html = '
                     $response->html .= '
                 </select>
             </div>
-            <div class="col-xl-2 '.(!$hasFiltering ? 'hidden': '').' col-md-2 col-12 form-group">
+            <div class="col-lg-2 col-md-2 col-12 form-group">
+                <label>Select SBA Type</label>
+                <select class="form-control selectpicker" data-width="100%" name="assessment_group">
+                    <option value="">Please Select SBA Type</option>';
+                    foreach($assessmentObj->assessment_group as $each) {
+                        $response->html .= "<option ".(isset($filter->assessment_group) && ($filter->assessment_group == $each) ? "selected" : "")." value=\"{$each}\">{$each}</option>";
+                    }
+                    $response->html .= '
+                </select>
+            </div>
+            <div class="col-xl-2 col-md-2 col-12 form-group">
                 <label for="">&nbsp;</label>
                 <button id="filter_Assignments_List" type="submit" class="btn height-40 btn-outline-warning btn-block"><i class="fa fa-filter"></i> FILTER</button>
             </div>

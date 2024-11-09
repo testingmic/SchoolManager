@@ -3816,7 +3816,7 @@ class Forms extends Myschoolgh {
             }
             $general .= '
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">FINANCE</h5></div>
-            <div class="col-lg-4">
+            <div class="col-lg-4 settings-form">
                 <div class="form-group">
                     <label for="opening_days">School Opening Days</label>';
                     // loop through the count 7
@@ -4216,7 +4216,10 @@ class Forms extends Myschoolgh {
         $results_structure = '
         <div class="row">
             <div class="'.$max_width.'"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GRADEBOOK ASSESSMENT (SBA)</h5></div>
-            <div class="'.$max_width.' mb-3 col-md-12" id="term_sba_columns_list">';
+            <div class="'.$max_width.' mb-3 col-md-12" id="term_sba_columns_list">
+                <div class="font-16 alert alert-warning text-center">
+                    Check which SBA to automatically populate and include in the report card
+                </div>';
             // init values
             $qu = 0;
             // loop through the assessment test group
@@ -4225,6 +4228,7 @@ class Forms extends Myschoolgh {
                 $qu++;
                 $sba_mark = $client_data->grading_sba[$sba]["counter"] ?? 0;
                 $sba_percent = $client_data->grading_sba[$sba]["percentage"] ?? 0;
+                $sba_checkbox = $client_data->grading_sba[$sba]["sba_checkbox"] ?? [];
                 $name = $sba == "Test" ? "Test or Quiz" : $sba;
 
                 // append to the structure
@@ -4234,13 +4238,17 @@ class Forms extends Myschoolgh {
                             <label class='text-white'>...</label>
                             <div><strong>".strtoupper($name)."</strong></div>
                         </div>
-                        <div class='col-lg-5'>
+                        <div class='col-lg-4'>
                             <label>Least {$sba} Assigned to Students</label>
                             <input type='number' min='0' value='{$sba_mark}' name='sba_least_{$qu}' data-column_id='{$qu}' class='form-control text-center'>
                         </div>
-                        <div class='col-lg-3'>
+                        <div class='col-lg-2'>
                             <label>Percentage(%)</label>
                             <input type='number' title='The overall percentage that it weighs' min='0' value='{$sba_percent}' name='sba_percentage_{$qu}' data-column_id='{$qu}' class='form-control text-center'>
+                        </div>
+                        <div class='col-lg-2'>
+                            <label>&nbsp;</label><br>
+                             <input type=\"checkbox\" ".($sba_checkbox ? "checked" : "")." class=\"form-control checkbox-box\" value=\"{$sba_checkbox}\" name=\"sba_checkbox_{$qu}\" id=\"sba_checkbox_{$qu}\">
                         </div>
                     </div>";
             }
@@ -4292,11 +4300,15 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
                 '.$default_columns_list[2].'
-                <div class="form-group mt-3">
-                    <select class="form-control selectpicker" name="allow_submission" data-width="100%">
-                        <option '.(isset($client_data->allow_submission) && $client_data->allow_submission == "true" ? "selected" : "").' value="true">Allow teachers to submit report</option>
-                        <option '.(isset($client_data->allow_submission) && $client_data->allow_submission == "false" ? "selected" : "").' value="false">Disallow the submission of reports</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group mt-3">
+                            <select class="form-control selectpicker" name="allow_submission" data-width="100%">
+                                <option '.(isset($client_data->allow_submission) && $client_data->allow_submission == "true" ? "selected" : "").' value="true">Allow teachers to submit report</option>
+                                <option '.(isset($client_data->allow_submission) && $client_data->allow_submission == "false" ? "selected" : "").' value="false">Disallow the submission of reports</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
             </div>

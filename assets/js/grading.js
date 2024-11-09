@@ -190,11 +190,12 @@ var save_grading_mark = () => {
         $.each($(`div[id="term_sba_columns_list"] div[class~="sba_item"]`), function(i, e) {
             let this_id = $(this).attr("data-column_id"),
                 name = $(this).attr("data-column_name"),
-                percent = $(`input[name="sba_percentage_${this_id}"]`).val();
+                percent = $(`input[name="sba_percentage_${this_id}"]`).val(),
+                sba_checkbox = $(`input[name="sba_checkbox_${this_id}"]`).is(":checked");
             let percentage = !isNaN(percent) ? parseInt(percent) : 0,
                 counter = parseInt($(`input[name="sba_least_${this_id}"]`).val());
             count++;
-            grading_sba[name] = {percentage, counter};
+            grading_sba[name] = {percentage, counter, sba_checkbox};
         });
 
         $.each($(`div[id="term_report_columns_list"] div[class~="column_item"]`), function(i, e) {

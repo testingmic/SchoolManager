@@ -82,8 +82,7 @@ foreach($student_list["data"] as $key => $each) {
     $students .= "
     <td>
         <span title='View Details' class='user_name' onclick='load(\"student/{$each->user_id}\");'>{$each->name}</span><br>
-        <strong>{$each->unique_id}</strong>{$t_status}
-        {$scholarship_status}
+        {$each->unique_id}{$t_status}{$scholarship_status}
     </td>";
     $students .= "<td>".strtoupper($each->class_name)."</td>";
     $students .= "<td>".strtoupper($each->gender)."</td>";
@@ -91,9 +90,9 @@ foreach($student_list["data"] as $key => $each) {
 
     // if the user has permission to view the student fees allocation
     if($viewAllocation) {
-        $students .= "<td>{$defaultCurrency}{$each->debt_formated}</td>";
-        $students .= "<td>{$defaultCurrency}{$each->arrears_formated}</td>";
-        $students .= "<td>{$defaultCurrency}{$each->total_debt_formated}</td>";
+        $students .= "<td class='text-center'>{$defaultCurrency}{$each->debt_formated}</td>";
+        $students .= "<td class='text-center'>{$defaultCurrency}{$each->arrears_formated}</td>";
+        $students .= "<td class='text-center'>{$defaultCurrency}{$each->total_debt_formated}</td>";
     } else {
         $students .= "<td>{$each->email}</td>";
     }
@@ -183,9 +182,9 @@ $response->html = '
                                         <th>Gender</th>
                                         <th>Department</th>
                                         '.($viewAllocation ? 
-                                        '<th>Term Bill</th>
-                                        <th>Arrears</th>
-                                        <th>Total</th>' : '<th>Email</th>').'
+                                        '<th class="text-center">Term Bill</th>
+                                        <th class="text-center">Arrears</th>
+                                        <th class="text-center">Total</th>' : '<th>Email</th>').'
                                         <th width="14%"></th>
                                     </tr>
                                 </thead>

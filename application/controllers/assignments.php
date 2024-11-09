@@ -78,6 +78,7 @@ class Assignments extends Myschoolgh {
         $filtering .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
         $filtering .= !empty($params->course_id) ? " AND a.course_id='{$params->course_id}'" : null;
         $filtering .= !empty($params->assignment_id) ? " AND a.item_id='{$params->assignment_id}'" : null;
+        $filtering .= !empty($params->assessment_group) ? " AND a.assignment_type='{$params->assessment_group}'" : null;
 
         $filtering .= !empty($params->course_tutor) ? " AND ((a.course_tutor LIKE '%{$params->course_tutor}%') OR (a.created_by LIKE '{$params->course_tutor}'))" : null;
         

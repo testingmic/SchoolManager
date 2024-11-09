@@ -1,3 +1,11 @@
+body {
+    font-family: "Source Sans 3", sans-serif !important;
+}
+
+body .btn {
+    font-weight: normal;
+}
+
 .endpoint-container {
     width: 90%;
     margin: auto auto;
@@ -513,6 +521,10 @@ label {
     font-weight: bold;
 }
 
+.settings-form label {
+    font-weight: normal;
+}
+
 .custom-600px {
     max-height: 600px;
     overflow-y: auto;
@@ -972,6 +984,10 @@ h4 {
 
 .dark {
     background-color: #1e1f1f;
+}
+
+.main-sidebar .sidebar-menu li a {
+    font-weight: normal;
 }
 
 body.dark .card {
