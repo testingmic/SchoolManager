@@ -78,7 +78,6 @@ class Events extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            print $e->getMessage();
             return $this->unexpected_error;
         } 
 

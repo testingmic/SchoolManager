@@ -70,7 +70,6 @@ class Communication extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
-            print_r($e->getMessage());
             return $this->unexpected_error;
         } 
 

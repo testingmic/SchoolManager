@@ -535,7 +535,7 @@ class Chats extends Myschoolgh {
             return $this->db->lastInsertId();
 
 		} catch(\PDOException $e) {
-            print $e->getMessage();
+            return $e->getMessage();
         }
 	}
 

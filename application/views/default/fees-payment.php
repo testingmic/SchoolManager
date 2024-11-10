@@ -102,7 +102,6 @@ if(!$receivePayment) {
             $disabled = (($data->paid_status == 1) || ($data->paid_status == '1')) ? "disabled='disabled'" : null;
             $search_disabled = ($data->paid_status == 1) ? null : "disabled='disabled'";
 
-            print_r($data);exit;
             // set teh student information
             $student_info = [
                 "name" => $data->student_details["student_name"],

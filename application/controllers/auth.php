@@ -666,8 +666,11 @@ class Auth extends Myschoolgh {
         } catch(PDOException $e) {
             // rollback all transactions if at least one fails
             $this->db->rollBack();
-            print $e->getMessage();
-            return ["code" => 201, "data" => "Sorry! An error was encountered while processing the request."];
+            return [
+                "code" => 201, 
+                "data" => "Sorry! An error was encountered while processing the request.",
+                "error" => $e->getMessage()
+            ];
         }
     }
 
