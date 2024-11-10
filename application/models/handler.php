@@ -129,8 +129,8 @@ class Handler {
                 $parameters = (object)[
                     "username" => $this->params->username,
                     "password" => $this->params->password,
-                    "remote" => $remote_login,
-                    "rememberme" => $this->params->rememberme ?? null
+                    "remote" => $this->params->remote ?? $remote_login,
+                    "rememberme" => $this->params->rememberme ?? false
                 ];
                 // Auth the user credentials
                 $this->response->result = $logObj->login($parameters);
