@@ -880,6 +880,7 @@ class Account extends Myschoolgh {
             // prepare and execute the statement.
             $stmt = $this->db->prepare("INSERT INTO grading_system SET client_id = ?, grading = ?, structure = ?, academic_year = ?, academic_term = ?
                 ".(isset($params->report_columns["show_position"]) ? ",show_position='{$params->report_columns["show_position"]}'" : "")."
+                ".(isset($params->report_columns["group_sba"]) ? ",group_sba='{$params->report_columns["group_sba"]}'" : "")."
                 ".(isset($params->report_columns["show_teacher_name"]) ? ",show_teacher_name='{$params->report_columns["show_teacher_name"]}'" : "")."
                 ".(isset($params->report_columns["allow_submission"]) ? ",allow_submission='{$params->report_columns["allow_submission"]}'" : "")."
                 ".(isset($params->grading_sba) ? ",sba='".json_encode($params->grading_sba)."'" : "")."
@@ -893,6 +894,7 @@ class Account extends Myschoolgh {
             // update the values if not already set
             $stmt = $this->db->prepare("UPDATE grading_system SET grading = ?, structure = ?
                 ".(isset($params->report_columns["show_position"]) ? ",show_position='{$params->report_columns["show_position"]}'" : "")."
+                ".(isset($params->report_columns["group_sba"]) ? ",group_sba='{$params->report_columns["group_sba"]}'" : "")."
                 ".(isset($params->report_columns["show_teacher_name"]) ? ",show_teacher_name='{$params->report_columns["show_teacher_name"]}'" : "")."
                 ".(isset($params->report_columns["allow_submission"]) ? ",allow_submission='{$params->report_columns["allow_submission"]}'" : "")."
                 ".(isset($params->grading_sba) ? ",sba='".json_encode($params->grading_sba)."'" : "")."

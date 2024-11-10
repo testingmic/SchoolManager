@@ -211,6 +211,7 @@ var save_grading_mark = () => {
 
         report_columns["columns"] = other_columns;
         report_columns["average_score"] = true;
+        report_columns["group_sba"] = $(`select[name="group_sba"]`).val();
         report_columns["show_position"] = $(`select[name="show_position"]`).val();
         report_columns["show_teacher_name"] = $(`select[name="show_teacher_name"]`).val();
         report_columns["allow_submission"] = $(`select[name="allow_submission"]`).val();

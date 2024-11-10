@@ -4218,7 +4218,7 @@ class Forms extends Myschoolgh {
             <div class="'.$max_width.'"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">GRADEBOOK ASSESSMENT (SBA)</h5></div>
             <div class="'.$max_width.' mb-3 col-md-12" id="term_sba_columns_list">
                 <div class="font-16 alert alert-warning text-center">
-                    Check which SBA to automatically populate and include in the report card
+                    Select the checkbox of the SBA to automatically populate and include in the final report card.
                 </div>';
             // init values
             $qu = 0;
@@ -4277,8 +4277,8 @@ class Forms extends Myschoolgh {
                     <div class="col-lg-4 col-md-12">
                         <div class="form-group">
                             <select class="form-control selectpicker" name="group_sba" data-width="100%">
-                                <option '.(isset($client_data->group_sba) && $client_data->group_sba == "true" ? "selected" : "").' value="true">Group SBA on Report Card</option>
-                                <option '.(isset($client_data->group_sba) && $client_data->group_sba == "false" ? "selected" : "").' value="false">Do not group SBA on Report</option>
+                                <option '.(!empty($client_data->grading_structure) && $client_data->grading_structure->group_sba == "true" ? "selected" : "").' value="true">Group SBA on Report Card</option>
+                                <option '.(!empty($client_data->grading_structure) && $client_data->grading_structure->group_sba == "false" ? "selected" : "").' value="false">Do not group SBA on Report</option>
                             </select>
                         </div>
                     </div>
