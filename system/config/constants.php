@@ -12,6 +12,7 @@ defined('DB_HOST')  OR define('DB_HOST', $ini['hostname'] ?? null);
 defined('DB_USER')  OR define('DB_USER', $ini['username'] ?? null);
 defined('DB_PASS')  OR define('DB_PASS', $ini['password'] ?? null);
 defined('DB_NAME')  OR define('DB_NAME', $ini['database'] ?? null);
+defined('DB_TYPE')  OR define('DB_TYPE', $ini['db_type'] ?? 'mysql');
 
 defined('TIME_PERIOD')      OR define('TIME_PERIOD', 60);
 defined('RANDOM_STRING')    OR define('RANDOM_STRING', 12);

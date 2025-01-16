@@ -13,6 +13,7 @@
 class Db {
 	
 	private $conn;
+	private $dbType;
 	private $myschoolgh;
 	private $hostname;
 	private $username;
@@ -25,6 +26,7 @@ class Db {
 		$this->username = DB_USER;
 		$this->password = DB_PASS;
 		$this->database = DB_NAME;
+		$this->dbType = DB_TYPE;
 		
 		if($this->myschoolgh == null) {
 			$this->myschoolgh = $this->db_connect($this->hostname, $this->username, $this->password, $this->database);
@@ -34,11 +36,53 @@ class Db {
 		return $this->myschoolgh;
 	}
 
+	/**
+	 * SQLite Connection
+	 * 
+	 * Connect to the SQLite database
+	 * 
+	 * @param string $hostname
+	 * @param string $username
+	 * @param string $password
+	 * @param string $database
+	 * @return object
+	 */
+	private function sqlite_connect($database) {
+
+		// Connect to the SQLite database
+		$myschoolgh = new PDO("sqlite:{$database}.db");
+		$myschoolgh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+		$myschoolgh->query("PRAGMA journal_mode = WAL");
+		$myschoolgh->query("PRAGMA synchronous = NORMAL");
+		$myschoolgh->query("PRAGMA locking_mode = NORMAL");
+		$myschoolgh->query("PRAGMA busy_timeout = 5000");
+		$myschoolgh->query("PRAGMA cache_size = -16000");
+
+		return $myschoolgh;
+
+	}
+
+	/**
+	 * Database Connection
+	 * 
+	 * Connect to the database
+	 * 
+	 * @param string $hostname
+	 * @param string $username
+	 * @param string $password
+	 * @param string $database
+	 * @return object
+	 */
 	private function db_connect($hostname, $username, $password, $database) {
 		
 		try {
-			$this->conn = "mysql:host=$hostname;dbname=$database;charset=utf8mb4";
-			
+
+			// check the database type
+			if($this->dbType == "sqlite") {
+				return $this->sqlite_connect($database);
+			}
+
 			$myschoolgh = new PDO($this->conn, $username, $password);
 			$myschoolgh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			$myschoolgh->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_BOTH);
@@ -52,6 +96,14 @@ class Db {
 		
 	}
 
+	/**
+	 * Database Query
+	 * 
+	 * Execute a query
+	 * 
+	 * @param string $sql
+	 * @return array
+	 */
 	public function query($sql) {
 		
 		try {
@@ -64,6 +116,12 @@ class Db {
 		} catch(PDOException $e) {return 0;}
 	}
 
+	/**
+	 * Execute a query
+	 * 
+	 * @param string $sql
+	 * @return array
+	 */
 	public function execute($sql) {
 		
 		try {
