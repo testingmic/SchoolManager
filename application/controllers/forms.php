@@ -4139,14 +4139,14 @@ class Forms extends Myschoolgh {
             // get the grading structure
             $columns = !is_object($client_data->grading_structure) ? json_decode($client_data->grading_structure) : $client_data->grading_structure;
             if(!isset($columns->columns)) {
-                $columns->columns = [
+                $columns->columns = json_decode(json_encode([
                     'School Based Assessment' => [
                         "percentage" => 0
                     ],
                     'Examination' => [
                         "percentage" => 0
                     ]
-                ];
+                ]));
             }
             if(isset($columns->columns)) {
                 $count = 0;
@@ -4228,7 +4228,7 @@ class Forms extends Myschoolgh {
                 $qu++;
                 $sba_mark = $client_data->grading_sba[$sba]["counter"] ?? 0;
                 $sba_percent = $client_data->grading_sba[$sba]["percentage"] ?? 0;
-                $sba_checkbox = $client_data->grading_sba[$sba]["sba_checkbox"] ?? [];
+                $sba_checkbox = $client_data->grading_sba[$sba]["sba_checkbox"] ?? false;
                 $name = $sba == "Test" ? "Test or Quiz" : $sba;
 
                 // append to the structure
