@@ -758,8 +758,8 @@ class Account extends Myschoolgh {
 
             // update attachment if already existing
             if(isset($db_attachments)) {
-                $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE record_id = ? AND client_id = ? LIMIT 1");
-                $files->execute([json_encode($attachments), $attachments["raw_size_mb"], $prevData[0]->item_id, $params->clientId]);
+                $files = $this->db->prepare("UPDATE files_attachment SET description = ?, attachment_size = ? WHERE resource = ? AND client_id = ? LIMIT 1");
+                $files->execute([json_encode($attachments), $attachments["raw_size_mb"], 'settings_calendar', $params->clientId]);
             } else {
                 // insert the record if not already existing
                 $files = $this->db->prepare("INSERT INTO files_attachment SET resource= ?, resource_id = ?, description = ?, record_id = ?, created_by = ?, attachment_size = ?, client_id = ?");

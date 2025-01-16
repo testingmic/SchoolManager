@@ -76,7 +76,7 @@ class Attendance extends Myschoolgh {
             foreach($params->attendance as $key => $eachInfo) {
 
                 // set the value
-                $value = $eachInfo["status"];
+                $value = $eachInfo["status"] ?? '';
 
                 // append to the list of present users array
                 if($value == "present") {
