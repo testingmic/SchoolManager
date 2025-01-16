@@ -83,6 +83,8 @@ class Db {
 				return $this->sqlite_connect($database);
 			}
 
+			$this->conn = "mysql:host=$hostname;dbname=$database;charset=utf8mb4";
+			
 			$myschoolgh = new PDO($this->conn, $username, $password);
 			$myschoolgh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			$myschoolgh->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_BOTH);

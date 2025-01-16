@@ -5,6 +5,7 @@ application/logs/json/*
 assets/img/accounts/*
 db.ini
 errors_log
+myschoolgh.db
 assets/img/users/
 assets/uploads/*
 !assets/img/users/index.html
