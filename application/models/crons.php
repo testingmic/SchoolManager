@@ -55,7 +55,7 @@ class Crons {
 			$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 			$this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_BOTH);
 		} catch(PDOException $e) {
-			die("Database Connection Error: ".$e->getMessage());
+			die("Database Connection Error: ".$e->getMessage() . "\n");
 		}
 
 		return $this->db;

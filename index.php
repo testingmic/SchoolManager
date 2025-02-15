@@ -3,21 +3,19 @@
 error_reporting(E_ALL);
 
 // display errors if the host is localhost
-if(isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] == "localhost") {
-	// display the errors
-	ini_set("display_errors", 1);
-}
+ini_set("display_errors", 1);
 
 #set new places for my error recordings
 ini_set("log_errors","1");
 ini_set("error_log", "errors_log");
 
 define('ROOTPATH', __DIR__);
-define('MODELS_PATH', __DIR__ . "/application/models");
-define('CONTROLLERS_PATH', __DIR__ . "/application/controllers");
 
 // require the autoload for composer packages
 require_once ROOTPATH . "/vendor/autoload.php";
+
+define('MODELS_PATH', __DIR__ . "/application/models");
+define('CONTROLLERS_PATH', __DIR__ . "/application/controllers");
 
 // include the settings file
 require_once ROOTPATH . "/system/config/settings.php";

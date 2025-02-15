@@ -3,6 +3,7 @@
 class Alter {
 
 	private $db;
+	private $baseUrl;
 	private $rootUrl;
 	private $clientId;
 

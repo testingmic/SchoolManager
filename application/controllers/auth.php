@@ -611,18 +611,9 @@ class Auth extends Myschoolgh {
                         $message .= '<br><br>If it does not work please copy this link and place it in your browser url.<br><br>';
                         $message .= $this->baseUrl.'verify?dw=password&token='.$request_token;
 
-                        // recipient list
-                        $reciepient = ["recipients_list" => [["fullname" => $fullname,"email" => $params->email,"customer_id" => $user_id]]];
-                        
-                        // insert the email content to be processed by the cron job
-                        $stmt = $this->db->prepare("
-                            INSERT INTO users_messaging_list 
-                            SET  template_type = ?, client_id = ?, item_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?, users_id = ?
-                        ");
-                        $stmt->execute([
-                            'password-recovery', $results->client_id, $random_string, json_encode($reciepient),
-                            $user_id, "[".$this->appName."] Change Password", $message, $user_id
-                        ]);
+                        // send the email
+                        $emailObject = load_class("emailing", "controllers");
+                        $emailObject->send_email("Password Reset Request", $message, $params->email, $fullname);
 
                         // send a notification to the user
                         $params = (object) [
@@ -766,16 +757,6 @@ class Auth extends Myschoolgh {
                     #send email to the user
                     $reciepient = ["recipients_list" => [["fullname" => $fullname, "email" => $email, "customer_id" => $user_id]]];
 
-                    // add to the email list to be sent by a cron job
-                    // $stmt = $this->db->prepare("
-                    //     INSERT INTO users_messaging_list SET template_type = ?, item_id = ?, 
-                    //     users_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?
-                    // ");
-                    // $stmt->execute([
-                    //     'password-recovery', $user_id, $user_id, json_encode($reciepient),
-                    //     $user_id, "[{$this->appName}] Change Password", $message
-                    // ]);
-
                     // commit all transactions
                     $this->db->commit();
                     $this->session->redirect = "{$this->baseUrl}";
@@ -879,17 +860,6 @@ class Auth extends Myschoolgh {
             $message .= '<br><br>Ignore this message if your rightfully effected this change.<br>';
             $message .= '<br>If not, ';
             $message .= '<a class="alert alert-success" href="'.$this->baseUrl.'forgot-password">Click Here</a> if you did not perform this act.';
-
-            #send email to the user
-            $reciepient = ["recipients_list" => [["fullname" => $user->name, "email" => $user->email, "customer_id" => $params->user_id]]];
-
-            // add to the email list to be sent by a cron job
-            $stmt = $this->db->prepare("INSERT INTO users_messaging_list SET template_type = ?, item_id = ?, 
-                users_id = ?, recipients_list = ?, created_by = ?, subject = ?, message = ?
-            ");
-            // $stmt->execute(['password_reset', $params->user_id, $params->user_id, json_encode($reciepient),
-            //     $params->user_id, "[{$this->appName}] Password Reset", $message
-            // ]);
 
             // reset the counter
             $this->session->reset_count = 0;

@@ -14,6 +14,12 @@ defined('DB_PASS')  OR define('DB_PASS', $ini['password'] ?? null);
 defined('DB_NAME')  OR define('DB_NAME', $ini['database'] ?? null);
 defined('DB_TYPE')  OR define('DB_TYPE', $ini['db_type'] ?? 'mysql');
 
+defined('SMTP_HOST')  OR define('SMTP_HOST', $ini['smtp_host'] ?? null);
+defined('SMTP_USER')  OR define('SMTP_USER', $ini['smtp_user'] ?? null);
+defined('SMTP_PASSWORD')  OR define('SMTP_PASSWORD', $ini['smtp_password'] ?? null);
+defined('SMTP_PORT')  OR define('SMTP_PORT', $ini['smtp_port'] ?? null);
+defined('SMTP_FROM')  OR define('SMTP_FROM', $ini['smtp_from'] ?? null);
+
 defined('TIME_PERIOD')      OR define('TIME_PERIOD', 60);
 defined('RANDOM_STRING')    OR define('RANDOM_STRING', 12);
 defined('ATTEMPTS_NUMBER')  OR define('ATTEMPTS_NUMBER', 7);
