@@ -135,7 +135,7 @@ if($defaultUser->appPrefs->termEnded) {
                                 <div class="col-md-3">
                                     <div class="form-group refresh_attendance_list hidden">
                                         <label class="text-white">Select Class</label>
-                                        <button onclick="return refresh_AttendanceLog()" class="btn btn-block refresh btn-primary"><i class="fa fa-circle-notch"></i> Refresh</button>
+                                        <button onclick="return refresh_AttendanceLog()" class="btn btn-block refresh btn-primary"><i class="fa fa-circle-notch"></i> Load Attendance</button>
                                     </div>
                                 </div>
                             </div>

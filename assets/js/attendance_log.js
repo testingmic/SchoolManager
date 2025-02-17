@@ -19,7 +19,7 @@ var list_userAttendance = (query = "") => {
             checkAllState();
         }
         $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "none" });
-        $(`button[class~="refresh"]`).html(`<i class='fa fa-notch'></i> Refresh`).prop("disabled", false);
+        $(`button[class~="refresh"]`).html(`<i class='fa fa-notch'></i> Load Attendace`).prop("disabled", false);
     }).catch(() => {
         $(`div[id="attendance"] div[class="form-content-loader"]`).css({ "display": "none" });
     });
