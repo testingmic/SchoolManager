@@ -5025,6 +5025,7 @@ class Forms extends Myschoolgh {
         // load the classes list
         $classes_param = (object) [
             "limit" => 100,
+            "forceYear" => true,
             "clientId" => $params->clientId,
             "columns" => "a.id, a.item_id, a.name, a.payment_module"
         ];

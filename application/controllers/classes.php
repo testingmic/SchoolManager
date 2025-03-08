@@ -2,9 +2,15 @@
 
 class Classes extends Myschoolgh {
     
-    
 
-    public function __construct(stdClass $data = null) {
+    /**
+     * Constructor
+     * 
+     * @param stdClass $data
+     * 
+     * @return void
+     */
+    public function __construct($data = null) {
     
         parent::__construct();
 
@@ -46,8 +52,14 @@ class Classes extends Myschoolgh {
             }
         }
 
-        $params->academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
-        $params->academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
+        $params->academic_term = !empty($params->academic_term) ? $params->academic_term : $this->academic_term;
+        $params->academic_year = !empty($params->academic_year) ? $params->academic_year : $this->academic_year;
+        
+        if(!empty($params->forceYear) && !empty($params->userData)) {
+            $academics = $params->userData->client->client_preferences->academics;
+            $params->academic_year = empty($params->academic_year) ? $academics->academic_year : $params->academic_year;
+            $params->academic_term = empty($params->academic_term) ? $academics->academic_term : $params->academic_term;
+        }
 
         $params->query .= !empty($params->q) ? " AND a.name='{$params->q}'" : null;
         $params->query .= !$isAdmin && !empty($params->class_teacher) ? " AND a.class_teacher LIKE '%{$params->class_teacher}%'" : null;
