@@ -180,7 +180,11 @@ if(empty($item_id)) {
                 
                 // loop through the video information
                 foreach($item as $key => $video) {
-
+                    
+                    if(empty($video)) continue;
+                    
+                    $video = is_array($video) ? json_decode(json_encode($video)) : $video;
+                    
                     // get the video last time
                     $time = time_diff($video->datetime);
 
@@ -190,16 +194,18 @@ if(empty($item_id)) {
                     // get the video timer
                     $timer = $resourceObj->video_time($video_param);
 
-                    $related_videos .= "
-                    <div class='mb-4 p-0' style='border-radius:0px 0px 10px 10px'>
-                        <div class='card-body p-0 m-0' id='related_video'>
-                            <video width='100%' data-href='{$baseUrl}e-learning_view/{$video->record_id}_{$video->unique_id}?autoplay=true' data-src='{$baseUrl}{$video->path}#t={$timer}' title='Click to watch the video: {$video->name}' height='100%' class='cursor' src='{$baseUrl}{$video->path}#t={$timer}'></video>
-                        </div>
-                        <div class='card-footer pl-2 pr-2 pt-0 pb-0 m-0'>
-                            <h6 class='p-0 m-0'>{$video->name}</h6>
-                            <p style='line-height:13px' class='font-italic'>{$time}</p>
-                        </div>
-                    </div>";
+                    if(!empty($video->path)) {
+                        $related_videos .= "
+                        <div class='mb-4 p-0' style='border-radius:0px 0px 10px 10px'>
+                            <div class='card-body p-0 m-0' id='related_video'>
+                                <video width='100%' data-href='{$baseUrl}e-learning_view/{$video->record_id}_{$video->unique_id}?autoplay=true' data-src='{$baseUrl}{$video->path}#t={$timer}' title='Click to watch the video: {$video->name}' height='100%' class='cursor' src='{$baseUrl}{$video->path}#t={$timer}'></video>
+                            </div>
+                            <div class='card-footer pl-2 pr-2 pt-0 pb-0 m-0'>
+                                <h6 class='p-0 m-0'>{$video->name}</h6>
+                                <p style='line-height:13px' class='font-italic'>{$time}</p>
+                            </div>
+                        </div>";
+                    }
                     
                 }
 
