@@ -259,7 +259,7 @@ class Users extends Myschoolgh {
 	 * 
 	 * @return Object
 	 */
-	public function list(stdClass $params = null) {
+	public function list($params = []) {
 
 		$params->query = " 1 ";
 		

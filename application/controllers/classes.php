@@ -298,6 +298,11 @@ class Classes extends Myschoolgh {
 			} else {
 				$this->remove_all_class_rooms($params, $prevData[0]->item_id);
 			}
+            
+            // convert the class teacher to a string
+            if(!empty($params->class_teacher) && is_array($params->class_teacher)) {
+                $params->class_teacher = implode(",", $params->class_teacher);
+            }
 
             // execute the statement
             $stmt = $this->db->prepare("
