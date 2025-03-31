@@ -8,5 +8,6 @@ errors_log
 myschoolgh.db
 assets/img/users/*
 assets/uploads/*
+assets/img/accounts/*
 !assets/img/users/index.html
 !assets/uploads/index.html
