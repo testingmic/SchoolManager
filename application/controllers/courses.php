@@ -475,6 +475,16 @@ class Courses extends Myschoolgh {
             $params->academic_term = isset($params->academic_term) ? $params->academic_term : $defaultClientData->client_preferences->academics->academic_term;
             $params->academic_year = isset($params->academic_year) ? $params->academic_year : $defaultClientData->client_preferences->academics->academic_year;
 
+            // validate the date
+            if(!empty($params->start_date) && !isvalid_date($params->start_date)) {
+                return ["code" => 203, "data" => "Sorry! The start date is invalid."];
+            }
+
+            // validate the end date
+            if(!empty($params->end_date) && !isvalid_date($params->end_date)) {
+                return ["code" => 203, "data" => "Sorry! The end date is invalid."];
+            }
+
             // execute the statement
             $stmt = $this->db->prepare("
                 INSERT INTO courses_plan SET client_id = ?, created_by = ?, item_id = '{$item_id}'

@@ -247,9 +247,9 @@ if(!$isSupport) {
                 $orientation = "portrait";
                 $course_info = $course_info["data"][0];
                 $pages_content .= $courseObj->draw($course_info);
-                
+
                 // file name
-                $file_name = "Course_Material.pdf";
+                $file_name = "Course_Material.".strtoupper($course_info->name).".pdf";
 
                 if(!isset($_GET["dw"])) {
                     print $content;

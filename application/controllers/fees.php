@@ -410,7 +410,7 @@ class Fees extends Myschoolgh {
                 $class_allocation_list .= "<td width='7%'>".($key+1)."</td>";
                 $class_allocation_list .= "<td>".strtoupper($each->class_name)."</td>";
                 $class_allocation_list .= "<td>".($each->category_name ?? $each->category_list)."</td>";
-                $class_allocation_list .= "<td>{$each->currency} {$each->amount}</td>";
+                $class_allocation_list .= "<td>{$each->currency} ".number_format($each->amount, 2)."</td>";
                 $class_allocation_list .= "<td align='center'><a class='btn btn-sm btn-primary' target='_blank' href='{$this->baseUrl}download/student_bill?class_id={$each->class_id}&academic_year={$params->academic_year}&academic_term={$params->academic_term}'><i class='fa fa-print'></i> Print Bill</a></td>";
                 $class_allocation_list .= "</tr>";
             }
@@ -505,9 +505,9 @@ class Fees extends Myschoolgh {
                             <div class='text-uppercase bold'>
                                 <span onclick='return load(\"student/{$student->student_info->user_id}\");' class='user_name'>{$student->student_info->name}</span><br>
                                 <span>{$student->class_name}</span><br>
-                                <span onclick='return load(\"student/{$student->student_info->user_id}\");'>
+                                <!--<span onclick='return load(\"student/{$student->student_info->user_id}\");'>
                                     {$student->student_info->unique_id}
-                                </span>
+                                </span>-->
                             </div>
                         </div>
                     </td>";
@@ -516,9 +516,9 @@ class Fees extends Myschoolgh {
                 $student_allocation_list .= $groupBy ? null : "<td>
                     {$student->category_name} {$payment_module} ".(!$showStudentData ? $label : null)."
                 </td>";
-                $student_allocation_list .= "<td width='17%'>{$student->currency} ".($groupBy ? $student->total_amount_due : $student->amount_due)."</td>";
-                $student_allocation_list .= "<td>{$student->currency} ".($groupBy ? $student->total_amount_paid : $student->amount_paid)."</td>";
-                $student_allocation_list .= "<td>{$student->currency} ".($groupBy ? $student->total_balance : $student->balance)."</td>";
+                $student_allocation_list .= "<td width='17%'>{$student->currency} ".($groupBy ? number_format($student->total_amount_due, 2) : number_format($student->amount_due, 2))."</td>";
+                $student_allocation_list .= "<td>{$student->currency} ".($groupBy ? number_format($student->total_amount_paid, 2) : number_format($student->amount_paid, 2))."</td>";
+                $student_allocation_list .= "<td>{$student->currency} ".($groupBy ? number_format($student->total_balance, 2) : number_format($student->balance, 2))."</td>";
 
                 // if the student is style owing fees
                 if(!$student->exempted && !$isPaid) {
@@ -2623,13 +2623,13 @@ class Fees extends Myschoolgh {
                             <div style="background-color: #ccc !important;margin-top:1px;border-bottom: 1px solid #ccc !important;height:0.5px;margin-bottom:5px;"></div>
                             <table border="0" class="table table-md" width="100%">
                                 <tr>
-                                    <td style="font-weight:bold;">#</td>
-                                    <td style="font-weight:bold;">Description</td>
-                                    <td style="font-weight:bold;">Status</td>
-                                    <td style="font-weight:bold;">Amount</td>
-                                    <td style="font-weight:bold;">Discount</td>
-                                    <td style="font-weight:bold;">Paid</td>
-                                    <td style="font-weight:bold;" align="right">Balance</td>
+                                    <td style="font-weight:bold;font-size:13px">#</td>
+                                    <td style="font-weight:bold;font-size:13px">Description</td>
+                                    <td style="font-weight:bold;font-size:13px">Status</td>
+                                    <td style="font-weight:bold;font-size:13px">Amount ('.$defaultCurrency.')</td>
+                                    <td style="font-weight:bold;font-size:13px">Discount ('.$defaultCurrency.')</td>
+                                    <td style="font-weight:bold;font-size:13px">Paid ('.$defaultCurrency.')</td>
+                                    <td style="font-weight:bold;font-size:13px" align="right">Balance ('.$defaultCurrency.')</td>
                                 </tr>';
                                 if(empty($allocation_list)) {
                                     $student_bill .= "
@@ -2679,14 +2679,14 @@ class Fees extends Myschoolgh {
                                         // if the student fees has not been exempted
                                         if(!$fees->exempted) {
 
-                                            $student_bill .= "<tr style='font-size:15px'>";
+                                            $student_bill .= "<tr style='font-size:14px'>";
                                             $student_bill .= "<td width='8%'>".($counter)."</td>";
                                             $student_bill .= "<td>{$fees->category_name} {$payment_module}</td>";
                                             $student_bill .= "<td>{$status}</td>";
-                                            $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_due, 2)."</td>";
-                                            $student_bill .= "<td>{$defaultCurrency} ".number_format($discount, 2)."</td>";
-                                            $student_bill .= "<td>{$defaultCurrency} ".number_format($fees->amount_paid, 2)."</td>";
-                                            $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($balance, 2)."</td>";
+                                            $student_bill .= "<td>".number_format($fees->amount_due, 2)."</td>";
+                                            $student_bill .= "<td>".number_format($discount, 2)."</td>";
+                                            $student_bill .= "<td>".number_format($fees->amount_paid, 2)."</td>";
+                                            $student_bill .= "<td align='right'>".number_format($balance, 2)."</td>";
                                             $student_bill .= "</tr>";
 
                                             // append to the bills informaton
@@ -2772,19 +2772,19 @@ class Fees extends Myschoolgh {
                                     $student_bill .= "
                                     <tr>
                                         <td colspan='6' align='right'><strong>Grand Total:</strong></td>
-                                        <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_due + $arrears_total), 2)."</td>
+                                        <td colspan='1' align='right'>{$defaultCurrency} ".number_format(($total_due + $arrears_total), 2)."</td>
                                     </tr>
                                     <tr>
                                         <td colspan='6' align='right'><strong>Paid:</strong></td>
-                                        <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_paid, 2)."</td>
+                                        <td colspan='1' align='right'>{$defaultCurrency} ".number_format($total_paid, 2)."</td>
                                     </tr>
                                     <tr>
                                         <td colspan='6' align='right'><strong>Discount:</strong></td>
-                                        <td colspan='1' align='right'>{$defaultCurrency}".number_format($total_discount, 2)."</td>
+                                        <td colspan='1' align='right'>{$defaultCurrency} ".number_format($total_discount, 2)."</td>
                                     </tr>
                                     <tr>
                                         <td colspan='6' align='right'><strong>Balance:</strong></td>
-                                        <td colspan='1' align='right'>{$defaultCurrency}".number_format(($total_balance + $arrears_total), 2)."</td>
+                                        <td colspan='1' align='right'>{$defaultCurrency} ".number_format(($total_balance + $arrears_total), 2)."</td>
                                     </tr>
                                     <tr>
                                         <td colspan='7' align='center'>
