@@ -2740,16 +2740,18 @@ class Fees extends Myschoolgh {
                                         // append the bill description
                                         $_bill_description = "Arrears for {$defaultAcademics->academic_term} {$academicSession} of {$defaultAcademics->academic_year} Academic Year";
 
-                                        // loop through the current term bill
-                                        $student_bill .= "<tr style='font-size:15px'>";
-                                        $student_bill .= "<td width='8%'>".($counter)."</td>";
-                                        $student_bill .= "<td>{$_bill_description}</td>";
-                                        $student_bill .= "<td>{$_state}</td>";
-                                        $student_bill .= "<td>{$defaultCurrency} ".number_format($current_term_bill->term_bill, 2)."</td>";
-                                        $student_bill .= "<td>{$defaultCurrency} ".number_format(0, 2)."</td>";
-                                        $student_bill .= "<td>{$defaultCurrency} ".number_format($current_term_bill->amount_paid, 2)."</td>";
-                                        $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($current_term_bill->debt, 2)."</td>";
-                                        $student_bill .= "</tr>";
+                                        if($current_term_bill->debt > 1) {
+                                            // loop through the current term bill
+                                            $student_bill .= "<tr style='font-size:15px'>";
+                                            $student_bill .= "<td width='8%'>".($counter)."</td>";
+                                            $student_bill .= "<td>{$_bill_description}</td>";
+                                            $student_bill .= "<td>{$_state}</td>";
+                                            $student_bill .= "<td>{$defaultCurrency} ".number_format($current_term_bill->term_bill, 2)."</td>";
+                                            $student_bill .= "<td>{$defaultCurrency} ".number_format(0, 2)."</td>";
+                                            $student_bill .= "<td>{$defaultCurrency} ".number_format($current_term_bill->amount_paid, 2)."</td>";
+                                            $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($current_term_bill->debt, 2)."</td>";
+                                            $student_bill .= "</tr>";
+                                        }
 
                                         // append to the bills informaton
                                         $student_bills_record_list[$studentId]["bill"][$_bill_description] = [
