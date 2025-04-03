@@ -1207,6 +1207,7 @@ class Terminal_reports extends Myschoolgh {
             }
 
             $defaultFontSize = "font-size:12px";
+            $increaseFontSize = "font-size:18px";
 
             // loop through the report set
             foreach($report_data as $key => $student) {
@@ -1290,9 +1291,9 @@ class Terminal_reports extends Myschoolgh {
                         $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->course_name}</td>";
                         // get the scores
                         foreach($score->scores as $s_score) {
-                            $table .= "<td style=\"border: 1px solid #dee2e6;\" align=\"center\">".round($s_score, 2)."</td>";
+                            $table .= "<td style=\"border: 1px solid #dee2e6;{$increaseFontSize}\" align=\"center\">".round($s_score, 2)."</td>";
                         }
-                        $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\" align=\"center\">".round($score->total_percentage, 2)."</td>";
+                        $table .= "<td style=\"border: 1px solid #dee2e6;{$increaseFontSize}\" align=\"center\">".round($score->total_percentage, 2)."</td>";
                         $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\">".strtoupper($score->teachers_name)."</td>";
                         $table .= "<td style=\"border: 1px solid #dee2e6;{$defaultFontSize}\">{$score->class_teacher_remarks}</td>";
                         $table .= "</tr>";
