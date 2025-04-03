@@ -20,6 +20,12 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Manage {$academicSession} Bills";
 $response->title = $pageTitle;
 
+// if the filter is set
+$filter = (object) array_map("xss_clean", $_POST);
+
+// if the filter is set
+$allocationTab = (bool) (!empty($filter->filter) && $filter->filter == "student");
+
 // list the academic years
 $academic_calendar_years = null;
 
@@ -32,7 +38,7 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
     // current url
     $isFound = false;
     $currentUrl = $SITEURL[1] ?? null;
-    $currentAccYearTerm = $SITEURL[2] ?? null;
+    $currentAccYearTerm = $SITEURL[2] ?? ($_GET['period'] ?? false);
     $termIsSet = (bool) (!empty($currentUrl) && in_array($currentUrl, ["set", "review"]));
     $isReview =(bool) (!empty($currentUrl) && $currentUrl !== "review");
 
@@ -51,12 +57,12 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
     // if the admin has selected to manage an academic year 
     if($termIsSet) {
         // if the academic year and term is not set
-        if(!confirm_url_id(2)) {
+        if(!$currentAccYearTerm) {
             // error found page
             $academic_calendar_years = "<div class='col-lg-12'>".page_not_found()."</div>";
         } else {
             // split the item
-            $split = explode("_", $SITEURL[2]);
+            $split = explode("_", $currentAccYearTerm);
             $_term = $split[1] ?? null;
             $_year = str_ireplace(".", "/", $split[0]);
             $setNewBill = (bool) ($SITEURL[1] == "set");
@@ -70,10 +76,10 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                 $isFound = true;
                 $class_allocation_list = '';
                 $student_allocation_list = '';
-                $pageTitle = strtoupper($academicSession)." BILL: ".(empty($term) ? null : strtoupper($_term))." ".strtoupper($academicSession)."- {$_year}";
+                $pageTitle = strtoupper($academicSession)." BILL: ".(empty($_term) ? null : strtoupper($_term))." ".strtoupper($academicSession)." - {$_year}";
 
                 // scripts for the page
-                $response->scripts = ["assets/js/term_bills.js"];
+                $response->scripts = ["assets/js/term_bills.js", "assets/js/filters.js"];
 
                 // load the classes list
                 $classes_param = (object) ["clientId" => $clientId, "columns" => "a.id, a.name, a.payment_module"];
@@ -95,6 +101,7 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                 $class_allocation_list = $feesObject->class_allocation_array($allocation_param);
 
                 // load fees allocation list for the students
+                $allocation_param->class_id = $filter->class_id ?? 0;
                 $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
 
                 // get the category list
@@ -116,18 +123,18 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                         <div class="card-body">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="allocation_form-tab2" data-toggle="tab" href="#allocation_form" role="tab" aria-selected="true">Bulk Fees Allocation</a>
+                                    <a class="nav-link '.(!$allocationTab ? "active" : null).'" id="allocation_form-tab2" data-toggle="tab" href="#allocation_form" role="tab" aria-selected="true">Bulk Fees Allocation</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Class Fees Allocation</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="false">Student Fees Allocation</a>
+                                    <a class="nav-link '.($allocationTab ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="'.($allocationTab ? "true" : null).'">Student Fees Allocation</a>
                                 </li>
                             </ul>
 
                             <div class="tab-content tab-bordered" id="myTab3Content">
-                                <div class="tab-pane fade show active" id="allocation_form" role="tabpanel" aria-labelledby="allocation_form-tab2">
+                                <div class="tab-pane fade '.(!$allocationTab ? "show active" : null).'" id="allocation_form" role="tabpanel" aria-labelledby="allocation_form-tab2">
                                     '.$class_fees_allocation_form.'
                                 </div>
                                 <div class="tab-pane fade" id="classes" role="tabpanel" aria-labelledby="classes-tab2">
@@ -146,7 +153,23 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                                         </table>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
+                                <div class="tab-pane fade '.($allocationTab ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
+                                    <div class="row border-bottom mb-2" id="filter_Department_Class">
+                                        <div class="col-xl-4 col-md-4 mb-2 form-group">
+                                            <label>Select Class</label>
+                                            <select data-width="100%" class="form-control selectpicker" name="list_class_id">
+                                                <option value="">Please Select Class</option>';
+                                                foreach($class_list as $each) {
+                                                    $academic_calendar_years .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">".strtoupper($each->name)."</option>";
+                                                }
+                                                $academic_calendar_years .= '
+                                            </select>
+                                        </div>
+                                        <div class="col-xl-2 col-md-3 form-group">
+                                            <label class="d-sm-none d-md-block" for="">&nbsp;</label>
+                                            <button id="filter_Fees_Allocation_List" data-location="/set?period='.$currentAccYearTerm.'" type="submit" class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> FILTER</button>
+                                        </div>
+                                    </div>
                                     <div class="table-responsive">
                                         <table data-empty="" class="table table-bordered table-sm table-striped datatable">
                                             <thead>
@@ -197,9 +220,9 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                     
                     // set the caption
                     $caption = in_array($term_year, $_previous_academic_years) ? 
-                        "<a class='btn btn-warning btn-sm' href='{$baseUrl}term_bills/review/{$term_year}'>Review</a>" : 
+                        "<a class='btn btn-warning btn-sm' href='{$baseUrl}term_bills/review?period={$term_year}'>Review</a>" : 
                         ($isCurrent ? "<a class='btn btn-success btn-sm' href='{$baseUrl}fees-allocation'><i class='fa fa-edit'></i> Manage</a>" :
-                            "<a class='btn btn-primary btn-sm' href='{$baseUrl}term_bills/set/{$term_year}'><i class='fa fa-ankh'></i> Allocate</a>"
+                            "<a class='btn btn-primary btn-sm' href='{$baseUrl}term_bills/set?period={$term_year}'><i class='fa fa-ankh'></i> Allocate</a>"
                         );
 
                     // display the record

@@ -24,6 +24,14 @@ if ($(`div[id="filter_Department_Class"]`).length) {
         }
     });
 
+    $(`button[id="filter_Fees_Allocation_List"]`).on("click", function() {
+        let location = $(this).data("location");
+        department_id = $(`select[name="department_id"]`).val(),
+        class_id = $(`select[name="list_class_id"]`).val();
+        $.form_data = { department_id, class_id, filter: 'student' };
+        loadPage(`${baseUrl}term_bills${location}`);
+    });
+
     $(`button[id="filter_Students_List"]`).on("click", function() {
         department_id = $(`select[name="department_id"]`).val(),
             class_id = $(`select[name="class_id"]`).val(),

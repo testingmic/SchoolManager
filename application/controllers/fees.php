@@ -328,10 +328,10 @@ class Fees extends Myschoolgh {
 
         $params->query .= (isset($params->q)) ? " AND a.name LIKE '%{$params->q}%'" : null;
         $params->query .= !empty($student_id) ? " AND a.student_id='{$student_id}'" : null;
-        $params->query .= (isset($params->record_id)) ? " AND a.id='{$params->record_id}'" : null;
-        $params->query .= (isset($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
-        $params->query .= (isset($params->clientId)) ? " AND a.client_id='{$params->clientId}'" : null;
-        $params->query .= (isset($params->category_id)) ? " AND a.category_id='{$params->category_id}'" : null;
+        $params->query .= !empty($params->record_id) ? " AND a.id='{$params->record_id}'" : null;
+        $params->query .= !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : null;
+        $params->query .= !empty($params->clientId) ? " AND a.client_id='{$params->clientId}'" : null;
+        $params->query .= !empty($params->category_id) ? " AND a.category_id='{$params->category_id}'" : null;
         $params->query .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : "";
         $params->query .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : "";
 
