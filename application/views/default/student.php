@@ -538,7 +538,7 @@ if(!empty($user_id)) {
                                     <span class="float-right text-muted">'.$data->username.'</span>
                                 </p>
                                 '.(
-                                    password_verify(DEFAULT_PASS, $data->pass_word) ? 
+                                    !empty($data->pass_word) && password_verify(DEFAULT_PASS, $data->pass_word) ? 
                                     "<p class='clearfix'>
                                         <span class='float-left'>Default Password</span>
                                         <span class='float-right text-muted cursor' id='default_password' title='Click to toggle password' onclick='return show_defaultPassword()'>

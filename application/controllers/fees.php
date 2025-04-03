@@ -539,9 +539,9 @@ class Fees extends Myschoolgh {
                 }
 
                 // set the allocation summary
-                $this->allocationSummary['totalDue'] += $student->total_amount_due;
-                $this->allocationSummary['totalPaid'] += $student->total_amount_paid;
-                $this->allocationSummary['totalBalance'] += $student->total_balance;
+                $this->allocationSummary['totalDue'] += $student->total_amount_due ?? 0;
+                $this->allocationSummary['totalPaid'] += $student->total_amount_paid ?? 0;
+                $this->allocationSummary['totalBalance'] += $student->total_balance ?? 0;
                 
                 $student_allocation_list .= "<td align='center' class='pl-2'>";
                 // confirm if the user has the permission to make payment
