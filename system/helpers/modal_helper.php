@@ -544,6 +544,11 @@ function leave_comments_builder($resource, $recordId, $upload = true, $comment =
     return $html;
 }
 
+/**
+ * Quick Add Student Modal
+ * 
+ * @return string
+ */
 function quick_add_student() {
     global $myClass, $defaultClientId;
 
@@ -673,6 +678,13 @@ function change_status_modal($user_id = null, $status = "Active") {
     return $html;
 }
 
+/**
+ * Reset Password Modal
+ * 
+ * @param string $user_id
+ * 
+ * @return string
+ */
 function reset_password_modal($user_id = null) {
     global $baseUrl;
     $html = '
@@ -771,4 +783,99 @@ function select_field_modal() {
         </div>
     </div>";
     return $html;
+}
+
+/**
+ * Display the class filter
+ * 
+ * @param bool $isReview
+ * @param array $class_list
+ * @param string $currentAccYearTerm
+ * @param int $selectedClassId
+ * 
+ * @return string
+ */
+function display_class_filter($isReview, $class_list, $currentAccYearTerm, $selectedClassId) {
+    $display = '';
+    $urlPath = $isReview ? "data-location='term_bills/set?period={$currentAccYearTerm}'" : "data-location='fees-allocation'";
+    $display .= '<div class="row border-bottom mb-2" id="filter_Department_Class">
+            <div class="col-xl-4 col-md-4 mb-2 form-group">
+                <label>Select Class</label>
+                <select data-width="100%" class="form-control selectpicker" name="list_class_id">
+                    <option value="">Please Select Class</option>';
+                    foreach($class_list as $each) {
+                        $display .= "<option ".(isset($selectedClassId) && ($selectedClassId == $each->id) ? "selected" : "")." value=\"{$each->id}\">".strtoupper($each->name)."</option>";
+                    }
+                    $display .= '
+                </select>
+            </div>
+            <div class="col-xl-2 col-md-3 form-group">
+                <label class="d-sm-none d-md-block" for="">&nbsp;</label>
+                <button id="filter_Fees_Allocation_List" '.$urlPath.' type="submit" class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> FILTER</button>
+            </div>
+        </div>';
+
+    return $display;
+}
+
+/**
+ * Fees Allocation Summary
+ * 
+ * @param float $totalDue
+ * @param float $totalPaid
+ * @param float $totalBalance
+ * @param string $defaultCurrency
+ * 
+ * @return string
+ */
+function fees_allocation_summary($totalDue, $totalPaid, $totalBalance, $defaultCurrency) {
+
+    $summaryDetails = [
+        'Total Fees Due' => [
+            'amount' => $totalDue,
+            'color' => 'bg-info',
+            'border-color' => 'border-info',
+            'text-color' => 'text-info',
+            'currency' => $defaultCurrency
+        ],
+        'Total Fees Paid' => [
+            'amount' => $totalPaid,
+            'color' => 'bg-success',
+            'border-color' => 'border-success',
+            'text-color' => 'text-success',
+            'currency' => $defaultCurrency
+        ],
+        'Total Fees Balance' => [
+            'amount' => $totalBalance,
+            'color' => 'bg-danger',
+            'border-color' => 'border-danger',
+            'text-color' => 'text-danger',
+            'currency' => $defaultCurrency
+        ]
+    ];
+
+    $html = '<div class="row">';
+    foreach($summaryDetails as $label => $each) {
+        $html .= '
+        <div class="col-md-4">
+            <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-left-solid '.$each['border-color'].'">
+                <div class="card-body card-type-3">
+                    <div class="row">
+                        <div class="col pr-0">
+                            <h6 class="font-14 text-uppercase font-bold mb-0">'.$label.'</h6>
+                            <span data-summary="amount_due" class="font-bold '.$each['text-color'].' font-23 mb-0">'.$each['currency'].' '.number_format($each['amount'], 2).'</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="'.$each['color'].' text-white card-circle">
+                                <i class="fas fa-money-bill-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>';    
+    }
+    $html .= '</div>';
+    return $html;
+
 }

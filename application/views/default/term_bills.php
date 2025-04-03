@@ -104,6 +104,11 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                 $allocation_param->class_id = $filter->class_id ?? 0;
                 $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
 
+                // set the total due, paid and balance
+                $totalDue = $feesObject->allocationSummary['totalDue'];
+                $totalPaid = $feesObject->allocationSummary['totalPaid'];
+                $totalBalance = $feesObject->allocationSummary['totalBalance'];
+
                 // get the category list
                 $category_list = $myClass->pushQuery("id, name", "fees_category", "status='1' AND client_id='{$clientId}'");
 
@@ -123,7 +128,7 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                         <div class="card-body">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link '.(!$allocationTab ? "active" : null).'" id="allocation_form-tab2" data-toggle="tab" href="#allocation_form" role="tab" aria-selected="true">Bulk Fees Allocation</a>
+                                    <a class="nav-link '.(!$allocationTab ? "active" : null).'" id="allocation_form-tab2" data-toggle="tab" href="#allocation_form" role="tab" aria-selected="'.(!$allocationTab ? "true" : null).'">Bulk Fees Allocation</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Class Fees Allocation</a>
@@ -154,22 +159,7 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                                     </div>
                                 </div>
                                 <div class="tab-pane fade '.($allocationTab ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
-                                    <div class="row border-bottom mb-2" id="filter_Department_Class">
-                                        <div class="col-xl-4 col-md-4 mb-2 form-group">
-                                            <label>Select Class</label>
-                                            <select data-width="100%" class="form-control selectpicker" name="list_class_id">
-                                                <option value="">Please Select Class</option>';
-                                                foreach($class_list as $each) {
-                                                    $academic_calendar_years .= "<option ".(isset($filter->class_id) && ($filter->class_id == $each->id) ? "selected" : "")." value=\"{$each->id}\">".strtoupper($each->name)."</option>";
-                                                }
-                                                $academic_calendar_years .= '
-                                            </select>
-                                        </div>
-                                        <div class="col-xl-2 col-md-3 form-group">
-                                            <label class="d-sm-none d-md-block" for="">&nbsp;</label>
-                                            <button id="filter_Fees_Allocation_List" data-location="/set?period='.$currentAccYearTerm.'" type="submit" class="btn btn-outline-warning height-40 btn-block"><i class="fa fa-filter"></i> FILTER</button>
-                                        </div>
-                                    </div>
+                                    '.display_class_filter(true, $class_list, $currentAccYearTerm, $filter->class_id ?? 0).'
                                     <div class="table-responsive">
                                         <table data-empty="" class="table table-bordered table-sm table-striped datatable">
                                             <thead>

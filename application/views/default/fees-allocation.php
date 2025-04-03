@@ -20,9 +20,15 @@ $response = (object) ["current_user_url" => $session->user_current_url, "page_pr
 $pageTitle = "Fees Allocation";
 $response->title = $pageTitle;
 
+// if the filter is set
+$filter = (object) array_map("xss_clean", $_POST);
+
 // fees allocation mandate
 $canAllocate = $accessObject->hasAccess("allocation", "fees");
 $receivePayment = $accessObject->hasAccess("receive", "fees");
+
+// if the filter is set
+$allocationTab = (bool) (!empty($filter->filter) && $filter->filter == "student");
 
 /** confirm that the user has the permission to receive payment */
 if(!$canAllocate) {
@@ -53,11 +59,17 @@ if(!$canAllocate) {
     // create a new object
     $feesObject = load_class("fees", "controllers", $allocation_param);
 
-    // load fees allocation list for the students
-    $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
-    
-    // load the class allocation list
+    // load the class allocation list    
     $class_allocation_list = $feesObject->class_allocation_array($allocation_param);
+
+    // load fees allocation list for the students
+    $allocation_param->class_id = $filter->class_id ?? 0;
+    $student_allocation_list = $feesObject->student_allocation_array($allocation_param);
+
+    // set the total due, paid and balance
+    $totalDue = $feesObject->allocationSummary['totalDue'];
+    $totalPaid = $feesObject->allocationSummary['totalPaid'];
+    $totalBalance = $feesObject->allocationSummary['totalBalance'];
 
     // info
     $info = "Use this form to assign fees to a class or to a particular student. Leave the student id field blank if you want to set for the entire class.";
@@ -72,7 +84,7 @@ if(!$canAllocate) {
     $response->html = '
     <section class="section">
         <div class="section-header">
-            <h1>'.$pageTitle.'</h1>
+            <h1>'.$pageTitle.'  - '.$allocation_param->academic_year.': '.$allocation_param->academic_term.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'fees-history">Fees Payment List</a></div>
@@ -86,18 +98,18 @@ if(!$canAllocate) {
                         <div class="card-body">
                             <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" id="allocation_form-tab2" data-toggle="tab" href="#allocation_form" role="tab" aria-selected="true">Bulk Fees Allocation</a>
+                                    <a class="nav-link '.(!$allocationTab ? "active" : null).'" id="allocation_form-tab2" data-toggle="tab" href="#allocation_form" role="tab" aria-selected="'.(!$allocationTab ? "true" : null).'">Bulk Fees Allocation</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Class Fees Allocation</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="false">Student Fees Allocation</a>
+                                    <a class="nav-link '.($allocationTab ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="'.($allocationTab ? "true" : null).'">Student Fees Allocation</a>
                                 </li>
                             </ul>
 
                             <div class="tab-content tab-bordered" id="myTab3Content">
-                                <div class="tab-pane fade show active" id="allocation_form" role="tabpanel" aria-labelledby="allocation_form-tab2">';
+                                <div class="tab-pane fade '.(!$allocationTab ? "show active" : null).'" id="allocation_form" role="tabpanel" aria-labelledby="allocation_form-tab2">';
                                 
                                 // display class not set error
                                 if(empty($class_list)) {
@@ -130,7 +142,9 @@ if(!$canAllocate) {
                                     </div>
                                 </div>
 
-                                <div class="tab-pane fade" id="students" role="tabpanel" aria-labelledby="students-tab2">
+                                <div class="tab-pane fade '.($allocationTab ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
+                                    '.display_class_filter(false, $class_list, $defaultAcademics->academic_year ?? null, $filter->class_id ?? 0).'
+                                    '.fees_allocation_summary($totalDue, $totalPaid, $totalBalance, $defaultCurrency).'
                                     <div class="table-responsive">
                                         <table data-empty="" class="table table-bordered table-sm table-striped datatable">
                                             <thead>

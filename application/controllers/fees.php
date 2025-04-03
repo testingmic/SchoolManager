@@ -2,7 +2,14 @@
 
 class Fees extends Myschoolgh {
 
-	public function __construct(stdClass $params = null) {
+    // allocation summary
+    public $allocationSummary = [
+        'totalDue' => 0,
+        'totalPaid' => 0,
+        'totalBalance' => 0
+    ];
+
+	public function __construct($params = null) {
 		parent::__construct();
 
         // get the client data
@@ -524,7 +531,11 @@ class Fees extends Myschoolgh {
                 if(!$student->exempted && !$isPaid) {
                     $owning = true;
                 }
-                
+
+                // set the allocation summary
+                $this->allocationSummary['totalDue'] += $student->total_amount_due;
+                $this->allocationSummary['totalPaid'] += $student->total_amount_paid;
+                $this->allocationSummary['totalBalance'] += $student->total_balance;
                 
                 $student_allocation_list .= "<td align='center' class='pl-2'>";
                 // confirm if the user has the permission to make payment
