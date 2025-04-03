@@ -162,3 +162,23 @@ var save_result = (record_id, record_type, additional_id = "") => {
         }
     });
 }
+
+var save_sba_score_cap = (result_id) => {
+    let sba_score_cap = $(`input[name="sba_score_cap"][data-result_id="${result_id}"]`).val();
+    let label = {
+        sba_score_cap,
+        result_id
+    };
+    $.post(`${baseUrl}api/terminal_reports/save_sba_score_cap`, label).then((response) => {
+        if(response.code == 200) {
+            setTimeout(() => {
+                $(`span[data-input_save_button="${result_id}"]`).trigger("click");
+            }, refresh_seconds);
+        } else {
+            swal({
+                text: response.data.result || response.description,
+                icon: responseCode(response.code),
+            });
+        }
+    });
+}

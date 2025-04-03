@@ -5,7 +5,7 @@ class Terminal_reports extends Myschoolgh {
     public $update_stmt;
     public $insert_stmt;
 
-    public function __construct(stdClass $params = null) {
+    public function __construct($params = null) {
         
         // call the parent function
 		parent::__construct();
@@ -302,7 +302,7 @@ class Terminal_reports extends Myschoolgh {
                 $count = 0;
                 foreach($columns->columns as $key => $column) {
                     $count++;
-                    $csv_file .= strtoupper("{$key} - {$column->markscap} Marks,");
+                    $csv_file .= strtoupper("{$key} - {$column->percentage} Percent,");
                 }
             }
         }
@@ -913,9 +913,16 @@ class Terminal_reports extends Myschoolgh {
             // if the type is results
             if(in_array($record_type, ["results", "approve_results"])) {
                 // get the details of the terminal report
-                $check = $this->pushQuery("a.status, a.course_name, a.class_name, a.course_code, a.course_id, a.report_id,
+                $check = $this->pushQuery("a.status, a.course_name, a.class_name, a.course_code, a.course_id, a.report_id, a.sba_score_cap,
                     (SELECT COUNT(*) FROM grading_terminal_scores b WHERE b.report_id = a.report_id AND a.status='Submitted') AS students_count", 
                     "grading_terminal_logs a", "a.report_id='{$record_id}' LIMIT 1");
+
+                // check if the sba score cap is set
+                if(!empty($check)) {
+                    if(empty($check[0]->sba_score_cap)) {
+                        return ["code" => 203, "data" => "Sorry! The SBA Score Cap has not been set for this result."];
+                    }
+                }
             }
             // if the student is empty
             elseif($record_type === "student") {
@@ -926,7 +933,7 @@ class Terminal_reports extends Myschoolgh {
 
                 // get the details of the terminal report
                 $check = $this->pushQuery("
-                    a.status, a.student_name, a.report_id, a.course_name, a.class_name, a.course_code, a.course_id", 
+                    a.status, a.student_name, a.report_id, a.course_name, a.class_name, a.course_code, a.course_id, a.sba_score_cap", 
                     "grading_terminal_scores a", "a.student_row_id='{$student_id}' AND a.report_id='{$report_id}' LIMIT 1");
             }
 
@@ -938,6 +945,7 @@ class Terminal_reports extends Myschoolgh {
             // set the report
             $report = $check[0];
             $report_id = $report->report_id;
+            $sba_score_cap = $report->sba_score_cap ?? 0;
             $students_count = $report->students_count ?? 1;
             $student_name = $report->student_name ?? ("{$report->course_name} {$report->class_name}");
 
@@ -960,14 +968,18 @@ class Terminal_reports extends Myschoolgh {
                         // clean the item key
                         $key = ucwords(str_ireplace("_", " ", $item));
                         $percent_cap = $grading_column[$key]->percentage;
-                        $raw_score_cap = $grading_column[$key]->markscap;
+                        $raw_score_cap = $grading_column[$key]->markscap ?? 0;
+                        $raw_score_cap = $raw_score_cap > 0 ? $raw_score_cap : (
+                            strtolower($item) == 'examination' ? 100 : $sba_score_cap
+                        );
 
-                        $percent_value = (($mark * $percent_cap) / $raw_score_cap);
+                        // calculate the percentage value
+                        $percent_value = $raw_score_cap > 0 ? (($mark * $percent_cap) / $raw_score_cap) : 0;
 
                         // append to the array list
                         $scores_array[$stu_id]["marks"][$count]["item"] = $item;
                         $scores_array[$stu_id]["marks"][$count]["score"] = $mark;
-                        $scores_array[$stu_id]["marks"][$count]["percent_value"] = $percent_value;
+                        $scores_array[$stu_id]["marks"][$count]["percent_value"] = number_format($percent_value);
                         $scores_array[$stu_id]["marks"][$count]["percent_rawscore_cap"] = $raw_score_cap;
                         $scores_array[$stu_id]["marks"][$count]["percentage_ratio"] = $percent_cap;
                         $overall_score += $percent_value;
@@ -1015,11 +1027,11 @@ class Terminal_reports extends Myschoolgh {
                 
                 // execute the statement
                 $update_stmt->execute([
-                    json_encode($student["marks"]), $student["raw_score"], $student["percentage"], $average_score, $student["remarks"],
+                    json_encode($student["marks"]), $student["raw_score"], $student["percentage"], number_format($average_score, 2), $student["remarks"],
                     $params->academic_year, $params->academic_term, $key, $report_id, $params->clientId
                 ]);
                 // log the user activity
-                $this->userLogs("terminal_report", $key, null, "{$params->userData->name} updated the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of <strong>{$student_name}</strong> With ID: {$key}", $params->userId);
+                // $this->userLogs("terminal_report", $key, null, "{$params->userData->name} updated the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of <strong>{$student_name}</strong> With ID: {$key}", $params->userId);
                 
             }
 
@@ -1051,6 +1063,62 @@ class Terminal_reports extends Myschoolgh {
             return $e->getMessage();
         }
 
+    }
+
+    /**
+     * Save the SBA Score Cap
+     * 
+     * @param       $params->label["sba_score_cap"]
+     * @param       $params->label["result_id"]
+     * 
+     * @return Array
+     */
+    public function save_sba_score_cap(stdClass $params) {
+        try {
+
+            // confirm that the score cap and result id is parsed
+            if(empty($params->sba_score_cap) || empty($params->result_id)) {
+                return ["code" => 203, "data" => "Sorry! No SBA Score Cap or Result ID was parsed."];
+            }
+
+            // confirm that the score cap is a number
+            if(!preg_match("/^[0-9]+$/", $params->sba_score_cap)) {
+                return ["code" => 203, "data" => "Sorry! The SBA Score Cap must be a valid number."];
+            }
+
+            // confirm that the score cap is between 1 and 200
+            if($params->sba_score_cap < 1 || $params->sba_score_cap > 200) {
+                return ["code" => 203, "data" => "Sorry! The SBA Score Cap must be between 1 and 200."];
+            }
+
+            // get the list of records inserted already in the grading_terminal_scores table
+            $existingRecords = $this->pushQuery("scores", "grading_terminal_scores", "report_id = '{$params->result_id}'");
+
+            if(!empty($existingRecords)) {
+                $highest = 0;
+                foreach($existingRecords as $record) {
+                    $scores = json_decode($record->scores, true);
+                    $iscore = $scores[0]['score'];
+                    if($iscore > $highest) {
+                        $highest = $iscore;
+                    }
+                }
+                if($params->sba_score_cap < $highest) {
+                    return ["code" => 203, "data" => "Sorry! The SBA Score Cap must be greater than the highest score '{$highest}' in the result."];
+                }
+            }
+
+            // update the sba score cap
+            $stmt = $this->db->prepare("UPDATE grading_terminal_logs SET sba_score_cap = ? WHERE report_id = ? LIMIT 1");
+            $stmt->execute([$params->sba_score_cap, $params->result_id]);
+
+            return [
+                "code" => 200,
+                "data" => "The SBA Score Cap was successfully updated."
+            ];
+        } catch(PDOException $e) {
+            return $e->getMessage();
+        }
     }
 
     /**

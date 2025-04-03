@@ -36,7 +36,7 @@ $results_list = load_class("terminal_reports", "controllers", $report_param)->re
 $terminal_reports_list = "";
 foreach($results_list as $key => $report) {
 
-    $action = "<a href='{$baseUrl}results-review/{$report->report_id}' title='Click to view the details of this report' class='btn mb-1 btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
+    $action = "<a href='{$baseUrl}results-review/{$report->report_id}' title='Click to view the details of this report' class='btn mb-1 btn-sm btn-outline-primary'>Review <i class='fa fa-eye'></i></a>";
     if((($report->created_by == $defaultUser->user_id) || ($report->teacher_ids == $defaultUser->unique_id)) && ($report->status == "Pending")) {
         $action .= " <a onclick='return modify_report_result(\"Submit\",\"{$report->report_id}\")' href='#' title='Submit this terminal report to Admin for Review and Approval' class='btn btn-sm mb-1 btn-outline-success'>
             <i class='fa fa-check'></i> Submit</a>";

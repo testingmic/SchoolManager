@@ -256,6 +256,7 @@ var download_report_csv = () => {
         if (response.code == 200) {
             $(`div[id='upload_file']`).removeClass("hidden");
             setTimeout(() => {
+                console.log(`${baseUrl}${response.data.result}`);
                 window.open(`${baseUrl}${response.data.result}`);
             }, 500);
         } else {

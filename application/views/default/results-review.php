@@ -154,7 +154,7 @@ if(empty($result_id)) {
                     )."
                 </td>
                 <td align='center'>
-                    <span class='font-20' data-student_percentage='{$score->student_row_id}'>{$total_percentage_score}%</span>
+                    <span class='font-20' data-student_percentage='{$score->student_row_id}'>{$score->total_percentage}%</span>
                 </td>
                 <td>
                 ".(!$is_disabled ? 
@@ -230,6 +230,35 @@ if(empty($result_id)) {
                                     <span class="float-left">Status</span>
                                     <span class="float-right text-muted">'.$myClass->the_status_label($data->status).'</span>
                                 </p>
+                                <div class="width-100">
+                                    <table width="100%" class="table table-bordered">
+                                        <tr>
+                                            <td width="50%">
+                                                <label>Examination Score Cap</label>
+                                            </td>
+                                            <td class="text-right p-r-10">
+                                                <span class="font-weight-bold font-20">'.($data->exam_score_cap ?? 100).'%</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="50%">
+                                                <label>Score Cap for SBA</label>
+                                            </td>
+                                            <td class="text-right">
+                                                <div class="d-flex justify-content-end width-100">
+                                                    <div class="form-group  mb-0 mr-2">
+                                                        <input '.($isApproved ? 'disabled' : '').' type="number" data-result_id="'.$data->report_id.'" style="width: 100%;" value="'.$data->sba_score_cap.'" placeholder="Score Cap for SBA" name="sba_score_cap" id="sba_score_cap" class="form-control text-center">
+                                                    </div>
+                                                    <div '.($isApproved ? 'hidden' : '').' class="form-group mb-0">
+                                                        <button style="height:42px;width: 42px;" class="btn btn-outline-success btn-sm" onclick="return save_sba_score_cap(\''.$report_param->result_id.'\');">
+                                                            <i class="fa fa-save"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -252,7 +281,7 @@ if(empty($result_id)) {
                                 <p class="clearfix">
                                     <span class="float-left">Teachers Name</span>
                                     <span class="float-right text-muted text-uppercase">'.$data->fullname.' 
-                                        <i onclick="return load(\'staff/'.$data->created_by.'/documents\');" class="fa btn btn-outline-success btn-sm fa-edit"></i>
+                                        <i onclick="return load(\'staff/'.$data->created_by.'/documents\');" class="fa btn btn-outline-success btn-sm fa-eye"></i>
                                     </span>
                                 </p>
                                 <p class="clearfix">

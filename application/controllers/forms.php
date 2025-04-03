@@ -4152,10 +4152,10 @@ class Forms extends Myschoolgh {
                 foreach($columns->columns as $key => $column) {
                     $count++;
                     $columns_listing .= "
-                    <div class='row mb-2 column_item' data-column_id='{$count}'>
+                    <div class='row mb-4 column_item' data-column_id='{$count}'>
                         <div class='col-lg-9 col-md-9'>
                             <label>Name</label>
-                            <input type='text' maxlength='100' value='{$key}' name='column_name_{$count}' data-column_id='{$count}' class='form-control'>
+                            <input type='text' maxlength='100' ".($key == 'Examination' ? "readonly title='This label is automatically generated and not editable.'" : null)." value='{$key}' name='column_name_{$count}' data-column_id='{$count}' class='form-control'>
                         </div>
                         <div class='col-lg-3 col-md-3'>
                             <label>Percentage(%)</label>
@@ -4450,20 +4450,20 @@ class Forms extends Myschoolgh {
                         </select>
                     </div>
                     <div class='col-lg-2' id='download_button'>
-                        <button onclick='return download_report_csv()' disabled type='download_csv' class='btn btn-block btn-outline-primary'>Download Template</button>
+                        <button onclick='return download_report_csv()' disabled type='download_csv' class='btn btn-block btn-outline-primary'>Download Sample</button>
                     </div>
                     <div class='col-lg-2 hidden' id='upload_button'>
                         <button onclick='return download_student_list()' disabled type='upload_button' class='btn btn-block btn-outline-primary'>Load Students</button>
                     </div>
                     <div class='col-lg-12 mt-4'></div>
                     <div class='col-lg-12 mt-1 text-center' id='notification'></div>
-                    <div class='col-md-3 mt-3 hidden' id='upload_file'>
+                    <div class='col-md-4 hidden' id='upload_file'>
                         <div class='form-group'>
                             <label>Select file to upload</label>
                             <input type='file' name='upload_report_file' accept='.csv' class='form-control'>
                         </div>
                     </div>
-                    <div class='col-md-2 mt-3 hidden' id='upload_file'>
+                    <div class='col-md-3 hidden' id='upload_file'>
                         <div class='form-group'>
                             <label>&nbsp;</label>
                             <button onclick='return upload_csv_file();' class='btn btn-block btn-primary'><i class='fa fa-upload'></i> Click to Upload</button>
