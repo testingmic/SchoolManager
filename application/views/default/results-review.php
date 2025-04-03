@@ -298,7 +298,7 @@ if(empty($result_id)) {
                             <h4>SUMMARY DATA</h4>
                         </div>
                         <div class="card-body pt-0 pb-0 pr-2 pl-2">
-                            <div class="py-3">
+                            <div class="pt-3">
                                 <p class="clearfix">
                                     <span class="float-left">Students Count</span>
                                     <span class="float-right text-muted">'.$data->students_count.'</span>
@@ -311,6 +311,11 @@ if(empty($result_id)) {
                                 <p class="clearfix text-center mt-3 border-top pt-3">
                                     <span onclick="return modify_report_result(\'Submit\',\''.$data->report_id.'\')" class="btn btn-outline-success">SUBMIT RESULT</span>
                                 </p>': '').'
+                            </div>
+                            <div class="mb-3 border-top pt-3 text-center">
+                                <a href="'.$baseUrl.'results-upload/list?show_results=true" class="btn btn-outline-primary">
+                                    <i class="fa fa-arrow-left"></i> Back to Results List
+                                </a>
                             </div>
                         </div>
                     </div>
