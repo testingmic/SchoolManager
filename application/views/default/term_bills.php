@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
 // global 
-global $myClass, $accessObject, $defaultUser, $session, $defaultAcademics, $academicSession;
+global $myClass, $accessObject, $defaultUser, $session, $defaultAcademics, $academicSession, $defaultCurrency;
 
 // initial variables
 $appName = $myClass->appName;
@@ -87,10 +87,16 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                 
                 // load fees allocation list for class
                 $allocation_param = (object) [
-                    "group_by_student" => "group_by", "clientId" => $clientId, 
-                    "userData" => $defaultUser, "receivePayment" => false, 
-                    "canAllocate" => true, "showPrintButton" => true, "currentTerm" => true,
-                    "academic_year" => $_year, "academic_term" => $_term
+                    "group_by_student" => "group_by", 
+                    "clientId" => $clientId, 
+                    "userData" => $defaultUser, 
+                    "receivePayment" => false, 
+                    "canAllocate" => true, 
+                    "showPrintButton" => true, 
+                    "currentTerm" => true,
+                    "showOutstanding" => true,
+                    "academic_year" => $_year, 
+                    "academic_term" => $_term
                 ];
                 $allocation_param->client_data = $defaultUser->client;
                 
@@ -160,6 +166,7 @@ if(!$accessObject->hasAccess("allocation", "fees")) {
                                 </div>
                                 <div class="tab-pane fade '.($allocationTab ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
                                     '.display_class_filter(true, $class_list, $currentAccYearTerm, $filter->class_id ?? 0).'
+                                    '.fees_allocation_summary($totalDue, $totalPaid, $totalBalance, $defaultCurrency).'
                                     <div class="table-responsive">
                                         <table data-empty="" class="table table-bordered table-sm table-striped datatable">
                                             <thead>

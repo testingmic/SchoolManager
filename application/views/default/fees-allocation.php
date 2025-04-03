@@ -5,7 +5,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 
-global $myClass, $defaultUser, $SITEURL, $defaultAcademics;
+global $myClass, $defaultUser, $SITEURL, $defaultAcademics, $defaultCurrency;
 
 // initial variables
 $appName = $myClass->appName;
@@ -48,11 +48,15 @@ if(!$canAllocate) {
     // load fees allocation list for class
     $allocation_param = (object) [
         "limit" => $myClass->maximum_class_count,
-        "group_by_student" => "group_by", "clientId" => $clientId, 
-        "userData" => $defaultUser, "receivePayment" => $receivePayment, 
-        "canAllocate" => $canAllocate, "showPrintButton" => true,
+        "group_by_student" => "group_by",
+        "clientId" => $clientId, 
+        "userData" => $defaultUser, 
+        "receivePayment" => $receivePayment, 
+        "canAllocate" => $canAllocate, 
+        "showPrintButton" => true,
         "academic_year" => $defaultAcademics->academic_year ?? null, 
-        "academic_term" => $defaultAcademics->academic_term ?? null
+        "academic_term" => $defaultAcademics->academic_term ?? null,
+        "showOutstanding" => false,
     ];
     $allocation_param->client_data = $defaultUser->client;
     

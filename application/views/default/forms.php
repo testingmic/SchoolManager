@@ -2,8 +2,6 @@
 
 class Forms extends Myschoolgh {
 
-    private $thisUser;
-
     public function __construct() {
         parent::__construct();
 
@@ -1118,7 +1116,7 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function form_attachment_placeholder(stdClass $params = null, $width = "col-lg-12") {
+    public function form_attachment_placeholder($params = null, $width = "col-lg-12") {
         
         // initialize
         $preloaded_attachments = "";
@@ -1199,7 +1197,7 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function comments_form_attachment_placeholder(stdClass $params = null) {
+    public function comments_form_attachment_placeholder($params = null) {
         
         // existing
         $preloaded_attachments = "";
@@ -4312,7 +4310,7 @@ class Forms extends Myschoolgh {
      * 
      * @return Array
      */
-    public function generate_terminal_reports($clientId, stdClass $additional = null) {
+    public function generate_terminal_reports($clientId, $additional = null) {
         $the_form = [];
 
         // get the client data

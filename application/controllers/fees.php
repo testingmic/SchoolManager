@@ -409,6 +409,9 @@ class Fees extends Myschoolgh {
         $class_allocation_list = "";
         $class_allocation_array = $this->class_fees_allocation($params)["data"];
 
+        // if the show outstanding was parsed
+        $showOutstanding = (bool) !empty($params->showOutstanding);
+
         // if the result is not empty
         if(!empty($class_allocation_array) && is_array($class_allocation_array)) {
             // loop through the results list
@@ -418,7 +421,9 @@ class Fees extends Myschoolgh {
                 $class_allocation_list .= "<td>".strtoupper($each->class_name)."</td>";
                 $class_allocation_list .= "<td>".($each->category_name ?? $each->category_list)."</td>";
                 $class_allocation_list .= "<td>{$each->currency} ".number_format($each->amount, 2)."</td>";
-                $class_allocation_list .= "<td align='center'><a class='btn btn-sm btn-primary' target='_blank' href='{$this->baseUrl}download/student_bill?class_id={$each->class_id}&academic_year={$params->academic_year}&academic_term={$params->academic_term}'><i class='fa fa-print'></i> Print Bill</a></td>";
+                $class_allocation_list .= "<td align='center'><a class='btn btn-sm btn-primary' target='_blank' 
+                    href='{$this->baseUrl}download/student_bill?class_id={$each->class_id}&academic_year={$params->academic_year}&academic_term={$params->academic_term}".($showOutstanding ? "&current_bal=true" : null)."'>
+                        <i class='fa fa-print'></i> Print Bill</a></td>";
                 $class_allocation_list .= "</tr>";
             }
         }
@@ -451,6 +456,7 @@ class Fees extends Myschoolgh {
             $showStudentData = (bool) !isset($params->show_student);
             $showPrintButton = (bool) isset($params->showPrintButton);
             $add_current_term = (bool) isset($params->currentTerm);
+            $showOutstanding = (bool) !empty($params->showOutstanding);
             $groupBy = (bool) isset($params->group_by_student) && ($params->group_by_student == "group_by");
 
             // init values
