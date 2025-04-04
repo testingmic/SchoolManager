@@ -2806,12 +2806,7 @@ class Fees extends Myschoolgh {
                                     <tr>
                                         <td colspan='6' align='right'><strong>Balance:</strong></td>
                                         <td colspan='1' align='right'>{$defaultCurrency} ".number_format(($total_balance + $arrears_total), 2)."</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan='7' align='center'>
-                                            <div style='padding:0px;'><em>{$client->client_slogan}</em></div>
-                                        </td>
-                                    </tr>                           
+                                    </tr>                         
                                     ";
                                 }
                 $student_bill .= '
@@ -2824,6 +2819,9 @@ class Fees extends Myschoolgh {
                                 '.(!empty($billingPref->account_info) ? "<div>{$billingPref->account_info}</div>" : "").'
                                 '.(!empty($billingPref->mobile_money) ? "<div style='border-top:solid 1px #ccc;padding-top:10px;margin-top:10px;'><strong>Mobile Money:</strong> {$billingPref->mobile_money}</div>" : "").'
                             </div>
+                        </div>
+                        <div style="padding:0px;margin-top:10px; text-align:center; padding-bottom:10px;color:#6777ef;">
+                            <em>'.$client->client_slogan.'</em>
                         </div>
                     </div>
                 </div>';

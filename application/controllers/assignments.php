@@ -260,7 +260,7 @@ class Assignments extends Myschoolgh {
             }
 
             $assignments_list .= "<tr data-row_id=\"{$each->id}\">";
-            $assignments_list .= "<td>".($key+1)."</td>";
+            $assignments_list .= "<td class='text-center'>".($key+1)."</td>";
             $assignments_list .= "<td>
                 <a href='#' onclick='return load(\"assessment/{$each->item_id}\");'>
                     {$each->assignment_title}
