@@ -3817,8 +3817,8 @@ class Forms extends Myschoolgh {
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">FEES & BILLING NOTES</h5></div>
             <div class="col-lg-4 col-md-4">
                 <div class="form-group">
-                    <label for="name">Fees Account Information</label>
-                    <textarea placeholder="Enter the fees account information" name="general[billing][account_info]" class="form-control">'.(!empty($prefs?->billing?->account_info) ? strip_tags($prefs?->billing?->account_info) : null).'</textarea>
+                    <label for="name">Bank Account Information</label>
+                    <textarea placeholder="Enter the bank account information" name="general[billing][account_info]" class="form-control">'.(!empty($prefs?->billing?->account_info) ? strip_tags($prefs?->billing?->account_info) : null).'</textarea>
                 </div>
             </div>
             <div class="col-lg-4 col-md-4">
