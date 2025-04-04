@@ -1432,7 +1432,7 @@ let timePlugins = () => {
       tp_clock_time();
       window.setInterval(function(){
         tp_clock_time();
-      }, 10000);
+      }, 5000);
     }
   } 
   return {
