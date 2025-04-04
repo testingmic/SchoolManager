@@ -233,16 +233,18 @@ $response->html = '
                                                     <div class="card">
                                                         <div class="card-header pr-0">
                                                             <div class="row width-100">
-                                                                <div class="col-md-3">
+                                                                <div class="col-md-2">
                                                                     <h4>Revenue</h4>
                                                                 </div>
-                                                                <div align="right" class="col-md-9">
+                                                                <div align="right" class="col-md-10">
                                                                     <div class="btn-group" data-filter="quick_summary_filter" role="group" aria-label="Filter Attendance">
                                                                         <button type="button" data-stream="summary_report" data-period="today" class="btn '.($session->reportPeriod == "today" ? "active" : null).' btn-info">Today</button>
-                                                                        <button type="button" data-stream="summary_report" data-period="last_week" class="btn '.($session->reportPeriod == "last_week" ? "active" : null).' btn-info">Last Week</button>
                                                                         <button type="button" data-stream="summary_report" data-period="this_week" class="btn '.($session->reportPeriod == "this_week" ? "active" : null).' btn-info">This Week</button>
+                                                                        <button type="button" data-stream="summary_report" data-period="last_week" class="btn '.($session->reportPeriod == "last_week" ? "active" : null).' btn-info">Last Week</button>
                                                                         <button type="button" data-stream="summary_report" data-period="this_month" class="btn '.($session->reportPeriod == "this_month" ? "active" : null).' btn-info">This Month</button>
                                                                         <button type="button" data-stream="summary_report" data-period="last_month" class="btn '.($session->reportPeriod == "last_month" ? "active" : null).' btn-info">Last Month</button>
+                                                                        <button type="button" data-stream="summary_report" data-period="last_3months" class="btn '.($session->reportPeriod == "last_3months" ? "active" : null).' btn-info">Quarter</button>
+                                                                        <button type="button" data-stream="summary_report" data-period="this_year" class="btn '.($session->reportPeriod == "this_year" ? "active" : null).' btn-info">This Year</button>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -300,16 +302,17 @@ $response->html = '
                                                     <div class="card">
                                                         <div class="card-header pr-0">
                                                             <div class="row width-100">
-                                                                <div class="col-md-5">
-                                                                    <h4>Current Fees + Arrears Payments Flow Chart</h4>
+                                                                <div class="col-md-4">
+                                                                    <h4>Current Fees + Arrears Payments</h4>
                                                                 </div>
-                                                                <div align="right" class="col-md-7">
+                                                                <div align="right" class="col-md-8">
                                                                     <div class="btn-group" data-filter="quick_revenue_filter" role="group" aria-label="Filter Attendance">
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="today" class="btn '.($session->reportPeriod == "today" ? "active" : null).' btn-info">Today</button>
-                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="last_week" class="btn '.($session->reportPeriod == "last_week" ? "active" : null).' btn-info">Last Week</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="this_week" class="btn '.($session->reportPeriod == "this_week" ? "active" : null).'  btn-info">This Week</button>
+                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="last_week" class="btn '.($session->reportPeriod == "last_week" ? "active" : null).' btn-info">Last Week</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="this_month" class="btn '.($session->reportPeriod == "this_month" ? "active" : null).' btn-info">This Month</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="last_month" class="btn '.($session->reportPeriod == "last_month" ? "active" : null).' btn-info">Last Month</button>
+                                                                        <button type="button" data-stream="fees_revenue_flow" data-period="last_3months" class="btn '.($session->reportPeriod == "last_3months" ? "active" : null).' btn-info">Quarter</button>
                                                                         <button type="button" data-stream="fees_revenue_flow" data-period="this_year" class="btn '.($session->reportPeriod == "this_year" ? "active" : null).' btn-info">This Year</button>
                                                                     </div>
                                                                 </div>

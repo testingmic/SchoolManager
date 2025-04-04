@@ -2738,18 +2738,18 @@ class Fees extends Myschoolgh {
                                         $total_paid += $current_term_bill->amount_paid;
 
                                         // append the bill description
-                                        $_bill_description = "Arrears for {$defaultAcademics->academic_term} {$academicSession} of {$defaultAcademics->academic_year} Academic Year";
+                                        $_bill_description = "Arrears for {$defaultAcademics->academic_term} {$academicSession} of {$defaultAcademics->academic_year}";
 
                                         if($current_term_bill->debt > 1) {
                                             // loop through the current term bill
                                             $student_bill .= "<tr style='font-size:15px'>";
                                             $student_bill .= "<td width='8%'>".($counter)."</td>";
-                                            $student_bill .= "<td>{$_bill_description}</td>";
-                                            $student_bill .= "<td>{$_state}</td>";
-                                            $student_bill .= "<td>{$defaultCurrency} ".number_format($current_term_bill->term_bill, 2)."</td>";
-                                            $student_bill .= "<td>{$defaultCurrency} ".number_format(0, 2)."</td>";
-                                            $student_bill .= "<td>{$defaultCurrency} ".number_format($current_term_bill->amount_paid, 2)."</td>";
-                                            $student_bill .= "<td align='right'>{$defaultCurrency} ".number_format($current_term_bill->debt, 2)."</td>";
+                                            $student_bill .= "<td colspan='3'>{$_bill_description}</td>";
+                                            // $student_bill .= "<td><!--{$_state}--></td>";
+                                            // $student_bill .= "<td><!--".number_format($current_term_bill->term_bill, 2)."--></td>";
+                                            $student_bill .= "<td><!--".number_format(0, 2)."--></td>";
+                                            $student_bill .= "<td><!--".number_format($current_term_bill->amount_paid, 2)."--></td>";
+                                            $student_bill .= "<td align='right'>".number_format($current_term_bill->debt, 2)."</td>";
                                             $student_bill .= "</tr>";
                                         }
 
@@ -2789,14 +2789,14 @@ class Fees extends Myschoolgh {
                                         ];
                                     }
                                     $student_bill .= "
-                                    <tr>
+                                    <!--<tr>
                                         <td colspan='6' align='right'><strong>Grand Total:</strong></td>
                                         <td colspan='1' align='right'>{$defaultCurrency} ".number_format(($total_due + $arrears_total), 2)."</td>
                                     </tr>
                                     <tr>
                                         <td colspan='6' align='right'><strong>Paid:</strong></td>
                                         <td colspan='1' align='right'>{$defaultCurrency} ".number_format($total_paid, 2)."</td>
-                                    </tr>
+                                    </tr>-->
                                     <tr>
                                         <td colspan='6' align='right'><strong>Discount:</strong></td>
                                         <td colspan='1' align='right'>{$defaultCurrency} ".number_format($total_discount, 2)."</td>
