@@ -3814,7 +3814,7 @@ class Forms extends Myschoolgh {
                 </div>';
             }
             $general .= '
-            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">FEES & BILLING</h5></div>
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">FEES & BILLING NOTES</h5></div>
             <div class="col-lg-4 col-md-4">
                 <div class="form-group">
                     <label for="name">Fees Account Information</label>
