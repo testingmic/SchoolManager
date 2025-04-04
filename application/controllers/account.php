@@ -531,11 +531,19 @@ class Account extends Myschoolgh {
         $preference["features_list"] = $client_data->client_preferences->features_list ?? [];
         $preference["account"] = $client_data->client_preferences->account;
         $preference["academics"] = $client_data->client_preferences->academics;
+        $preference["billing"] = $params->general["billing"] ?? [];
+
+        foreach(["account_info", "additional_info"] as $key) {
+            if(!empty($preference["billing"][$key])) {
+                $preference["billing"][$key] = nl2br($preference["billing"][$key]);
+            }
+        }
 
         // unset the values
         unset($params->general["opening_days"]);
         unset($params->general["academics"]);
         unset($params->general["labels"]);
+        unset($params->general["billing"]);
 
         // format
         $query = "";

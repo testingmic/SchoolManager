@@ -1137,7 +1137,7 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function form_attachment_placeholder(stdClass $params = null, $width = "col-lg-12") {
+    public function form_attachment_placeholder($params = null, $width = "col-lg-12") {
         
         // initialize
         $preloaded_attachments = "";
@@ -1218,7 +1218,7 @@ class Forms extends Myschoolgh {
      * 
      * @return String
      */
-    public function comments_form_attachment_placeholder(stdClass $params = null) {
+    public function comments_form_attachment_placeholder($params = null) {
         
         // existing
         $preloaded_attachments = "";
@@ -3802,7 +3802,7 @@ class Forms extends Myschoolgh {
                 </div>';
             }
         $general .= '
-            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">Subject Labels</h5></div>';
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">SUBJECT LABELS</h5></div>';
             foreach($unit_labels as $label) {
                 $ilabel = "{$label["key"]}_label";
             $general .= '
@@ -3814,6 +3814,25 @@ class Forms extends Myschoolgh {
                 </div>';
             }
             $general .= '
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">FEES & BILLING</h5></div>
+            <div class="col-lg-4 col-md-4">
+                <div class="form-group">
+                    <label for="name">Fees Account Information</label>
+                    <textarea placeholder="Enter the fees account information" name="general[billing][account_info]" class="form-control">'.(!empty($prefs?->billing?->account_info) ? strip_tags($prefs?->billing?->account_info) : null).'</textarea>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <div class="form-group">
+                    <label for="name">Fees Mobile Money Numbers</label>
+                    <input type="text" placeholder="Enter the mobile money numbers separated by commas" value="'.($prefs?->billing?->mobile_money ?? null).'" name="general[billing][mobile_money]" class="form-control">
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4">
+                <div class="form-group">
+                    <label for="name">Billing Additional Information</label>
+                    <textarea placeholder="Enter the billing additional information" name="general[billing][additional_info]" class="form-control">'.(!empty($prefs?->billing?->additional_info) ? strip_tags($prefs?->billing?->additional_info) : null).'</textarea>
+                </div>
+            </div>
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">FINANCE</h5></div>
             <div class="col-lg-4 settings-form">
                 <div class="form-group">
@@ -4483,7 +4502,7 @@ class Forms extends Myschoolgh {
      * 
      * @return Array
      */
-    public function generate_terminal_reports($clientId, stdClass $additional = null) {
+    public function generate_terminal_reports($clientId, $additional = null) {
         $the_form = [];
 
         // get the client data

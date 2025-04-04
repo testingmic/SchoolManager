@@ -1486,9 +1486,9 @@ class Fees extends Myschoolgh {
                 $result->debt = $payments[1];
                 $result->amount_paid = $payments[0];
                 $result->term_bill = $payments[0] + $payments[1];
-                $result->debt_formated = number_format($result->debt, 2);
-                $result->arrears_formated = number_format($result->arrears, 2);
-                $result->total_debt_formated = number_format(($result->debt + $result->arrears), 2);
+                $result->debt_formated = !empty($result->debt) ? number_format($result->debt, 2) : "0.00";
+                $result->arrears_formated = !empty($result->arrears) ? number_format($result->arrears, 2) : "0.00";
+                $result->total_debt_formated = !empty($result->debt) ? number_format(($result->debt + $result->arrears), 2) : "0.00";
 
                 unset($result->payments_data);
                 
@@ -2561,6 +2561,8 @@ class Fees extends Myschoolgh {
             // set the button class
             $button_class = "font-weight:bold;border-radius:4px;padding:3px;border:solid 1px";
 
+            $billingPref = $clientPrefs->billing ?? [];
+
             // loop through the students list
             foreach($students_list as $studentRecord) {
 
@@ -2814,6 +2816,13 @@ class Fees extends Myschoolgh {
                                 }
                 $student_bill .= '
                                 </table>
+                            </div>
+                        </div>
+                        <div align="center" style="margin:40px; font-size:14px;">
+                            <div style="border:solid 1px #ccc;padding:10px;border-radius:5px;">
+                                '.(!empty($billingPref->additional_info) ? "<div style='border-bottom:solid 1px #ccc;padding-bottom:10px;margin-bottom:10px;'>{$billingPref->additional_info}</div>" : "").'
+                                '.(!empty($billingPref->account_info) ? "<div>{$billingPref->account_info}</div>" : "").'
+                                '.(!empty($billingPref->mobile_money) ? "<div style='border-top:solid 1px #ccc;padding-top:10px;margin-top:10px;'><strong>Mobile Money:</strong> {$billingPref->mobile_money}</div>" : "").'
                             </div>
                         </div>
                     </div>

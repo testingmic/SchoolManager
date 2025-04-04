@@ -405,7 +405,7 @@ function check_invalid_utf8( $string, $strip = false ) {
 	return '';
 }
 
-function xss_clean( $str, $keep_newlines = false ) {
+function xss_clean( $str, $keep_newlines = true ) {
 	if ( is_object( $str ) || is_array( $str ) ) {
 		return $str;
 	}
