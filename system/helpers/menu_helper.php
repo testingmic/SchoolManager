@@ -171,6 +171,7 @@
                         <li><a class="nav-link" href="<?= $baseUrl ?>add-assessment">Create Assessment</a></li>
                         <li><a class="nav-link" href="<?= $baseUrl ?>log-assessment">Log Previous Assessment</a></li>
                     <?php } ?>
+                    <li><a class="nav-link" href="<?= $baseUrl ?>gradebook">Gradebook</a></li>
                 </ul>
             </li>
         <?php } ?>
