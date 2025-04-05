@@ -2,8 +2,6 @@
 class Terminal_reports extends Myschoolgh {
 
     public $iclient;
-    public $update_stmt;
-    public $insert_stmt;
 
     public function __construct($params = null) {
         
@@ -30,22 +28,6 @@ class Terminal_reports extends Myschoolgh {
 
         $this->last_term_starts = $academics->last_term_starts ?? $academics->term_starts;
         $this->last_term_ends = $academics->last_term_ends ?? $academics->term_ends;
-        
-        // prepare the statement
-        $this->insert_stmt = $this->db->prepare("INSERT INTO grading_terminal_scores SET 
-            class_id = ?, class_name = ?, date_modified = now(),
-            course_id = ?, course_name = ?, course_code = ?, scores = ?, total_score = ?, 
-            average_score = ?, teacher_ids = ?, class_teacher_remarks = ?, created_by = ?,
-            academic_year = ?, academic_term = ?, student_unique_id = ?, client_id = ?, report_id = ?
-        ");
-
-        // prepare the statement
-        $this->update_stmt = $this->db->prepare("UPDATE grading_terminal_scores SET 
-                class_id = ?, class_name = ?, report_id = ?, course_name = ?, 
-                course_code = ?, scores = ?, total_score = ?, date_modified = now(),
-                average_score = ?, teacher_ids = ?, class_teacher_remarks = ?
-            WHERE academic_year = ? AND academic_term = ? AND student_unique_id = ? AND course_id = ? AND client_id = ?
-        ");
 
     }
 
@@ -278,7 +260,7 @@ class Terminal_reports extends Myschoolgh {
         }
 
         // get the students for the classes
-        $students_list = $this->pushQuery("name, unique_id", "users", 
+        $students_list = $this->pushQuery("name, unique_id, item_id", "users", 
             "class_id='{$class_name[0]->id}' AND client_id='{$params->clientId}' 
             AND user_status='Active' AND user_type='student' LIMIT {$this->global_limit}"
         );
@@ -292,8 +274,19 @@ class Terminal_reports extends Myschoolgh {
         $course_name = ucwords($course_item->name);
         $course_code = strtoupper($course_item->course_code);
 
-        $csv_file = "STUDENT NAME,STUDENT ID,";
-        $csv_file .= "SUBJECT NAME,SUBJECT CODE,";
+        $csv_file = "STUDENT,STUDENT ID,";
+        $csv_file .= "SUBJECT,";
+
+        $grading_sba = $client_data->grading_sba ?? [];
+
+        // get the grading structure
+        if(!empty($grading_sba)) {
+            foreach($grading_sba as $keyName => $item) {
+                if($item['sba_checkbox'] == 'true') {
+                    $csv_file .= strtoupper("{$keyName},");
+                }
+            }
+        }
 
         // get the grading structure
         if(!empty($client_data->grading_structure)) {
@@ -302,17 +295,78 @@ class Terminal_reports extends Myschoolgh {
                 $count = 0;
                 foreach($columns->columns as $key => $column) {
                     $count++;
-                    $csv_file .= strtoupper("{$key} - {$column->percentage} Percent,");
+                    $csv_file .= strtoupper("{$key} - {$column->percentage}%,");
                 }
             }
         }
 
-        $csv_file .= "TEACHER ID,";
+        // $csv_file .= "TEACHER ID,";
         $csv_file .= "TEACHER REMARKS\n";
         $course_name = str_ireplace(", ", "", $course_name);
 
+        // get the sba results only if the grading structure is not empty
+        if(!empty($grading_sba)) {
+            $sba_results = $this->perform_raw_query("SELECT a.student_id, b.assignment_type, b.course_id, SUM(b.grading) AS total_score, 
+                    SUM(a.score) AS student_score
+                FROM `assignments_submitted` a
+                INNER JOIN assignments b ON b.item_id = a.assignment_id
+                WHERE a.handed_in = 'Graded' AND b.academic_year = '{$params->academic_year}' AND b.academic_term = '{$params->academic_term}' AND b.course_id = '{$params->course_id}'
+                GROUP BY a.student_id, b.assignment_type, b.course_id
+                ORDER BY a.student_id;'");
+
+            // regroup the results list by student id
+            $sba_results_list = [];
+
+            // loop through the sba results
+            foreach($sba_results as $result) {
+
+                // if the total percentage is not set then set it to 0
+                if(!isset($sba_results_list[$result->student_id]['total_percentage'])) {
+                    $sba_results_list[$result->student_id]['total_percentage'] = 0;
+                }
+
+                // raw score
+                $sba_results_list[$result->student_id]['raw'][$result->assignment_type] = $result->student_score;
+
+                // set the total score
+                $sba_results_list[$result->student_id]['total'][$result->assignment_type] = $result->total_score;
+
+                // grading value
+                $grading_value = $grading_sba[$result->assignment_type] ?? [];
+                $grading_value = $grading_value['percentage'] ?? 0;
+
+                // calculate the percentage
+                $percentage = $grading_value !== 0 ? ($result->student_score / $result->total_score) * $grading_value : 0;
+                $sba_results_list[$result->student_id]['percentage'][$result->assignment_type] = round($percentage);
+
+                // set the total percentage
+                $sba_results_list[$result->student_id]['total_percentage'] += round($percentage);
+                $sba_results_list[$result->student_id]['grading_value'][$result->assignment_type] = round($grading_value);
+
+            }
+        }
+
+        // get the sba percentage
+        $sbaPercentage = $client_data->grading_structure->columns->{"School Based Assessment"}->percentage ?? 0;
+
+        // loop through the students
         foreach($students_list as $student) {
-            $csv_file .= strtoupper($student->name).",{$student->unique_id},{$course_name},{$course_code}\n";
+            $csv_file .= strtoupper($student->name).",{$student->unique_id},{$course_name},";
+            $totalSba = 0;
+            foreach($grading_sba as $keyName => $item) {
+                if($item['sba_checkbox'] == 'true') {
+                    if (isset($sba_results_list[$student->item_id])) {
+                        $getRecord = $sba_results_list[$student->item_id];
+                        $score = $getRecord['percentage'][$keyName] ?? ($item['percentage'] ?? 0);
+                        $csv_file .= trim($score).",";
+                        $totalSba += $score;
+                    } else {
+                        $csv_file .= "0,0,";
+                    }
+                }
+            }
+            $csv_file .= round(($totalSba / 100) * $sbaPercentage) . ",";
+            $csv_file .= "\n";
         }
 
         // upload file
@@ -370,7 +424,7 @@ class Terminal_reports extends Myschoolgh {
         }
 
         // check the file that have been uploaded
-        $headers = ["STUDENT NAME","STUDENT ID","SUBJECT NAME","SUBJECT CODE"];
+        $headers = ["STUDENT","STUDENT ID","SUBJECT"];
 
         // get the client data
         $client_data = $defaultClientData;
@@ -396,7 +450,18 @@ class Terminal_reports extends Myschoolgh {
 
             }
         }
-        $headers[] = "TEACHER ID";
+        $grading_sba = $client_data->grading_sba ?? [];
+
+        // get the grading structure
+        if(!empty($grading_sba)) {
+            foreach($grading_sba as $keyName => $item) {
+                if($item['sba_checkbox'] == 'true') {
+                    $headers[] = strtoupper($keyName);
+                }
+            }
+        }
+
+        // $headers[] = "TEACHER ID";
         $headers[] = "TEACHER REMARKS";
 
         // set a new header
@@ -428,21 +493,23 @@ class Terminal_reports extends Myschoolgh {
         
         // draw a table with the headers
         $report_table = "<div style='max-width: 100%' class='table-responsive trix-slim-scroll'>";
-        $report_table .= "<table width='100%' class='table table-bordered'>";
+        $report_table .= "<table width='100%' class='table table-bordered font-13'>";
         $report_table .= "<thead>";
-        $report_table .= "<th width='5%'>#</th>";
+        // $report_table .= "<th width='5%' class='text-center'>#</th>";
         foreach($file_headers as $item) {
-            $report_table .= "<th>{$item}</th>";
+            $item = $item == 'SCHOOL BASED ASSESSMENT' ? 'SBA' : $item;
+            if(in_array($item, ['SUBJECT'])) continue;
+            $report_table .= "<th class='text-center'>{$item}</th>";
         }
         $report_table .= "</thead>";
         $report_table .= "<tbody>";
 
-
         // set the files
         foreach($complete_csv_data as $key => $result) {
             $report_table .= "<tr>";
-            $report_table .= "<td width='200px'>".($key+1)."</td>";
+            // $report_table .= "<td width='200px' class='text-center'>".($key+1)."</td>";
             foreach($result as $kkey => $kvalue) {
+                if(in_array($kkey, [2])) continue;
                 // if the key is in the array list
                 if(in_array($file_headers[$kkey], array_keys($columns["columns"]))) {
                     $column = create_slug($file_headers[$kkey], "_");
@@ -452,7 +519,8 @@ class Terminal_reports extends Myschoolgh {
                 } elseif($file_headers[$kkey] == "TEACHER ID") {
                     $report_table .= "<td><span style='font-weight-bold font-17'>".(empty($kvalue) ? $params->userData->unique_id : $kvalue)."</span></td>";                    
                 } else {
-                    $report_table .= "<td><span ".($file_headers[$kkey] == "STUDENT ID" ? "data-student_row_id='{$key}' data-student_id='{$kvalue}'" : "").">{$kvalue}</span></td>";
+                    $data_key = "data-".strtolower(str_ireplace(" ", "_", $file_headers[$kkey]))."='{$kvalue}'";
+                    $report_table .= "<td class='text-center'><span data-student_row_id='{$key}' {$data_key}>{$kvalue}</span></td>";
                 }
             }
             $report_table .= "</tr>";
@@ -544,23 +612,29 @@ class Terminal_reports extends Myschoolgh {
                 // explode the record
                 $split = explode("|", $score);
 
-                // append to the array if its a numeric figure
-                if(isset($split[1]) && preg_match("/^[0-9.]+$/", $split[1])) {
-                    $scores_array[$split[2]]["marks"][] = [
-                        "item" => $split[0],
-                        "score" => $split[1]
-                    ];
-                    $overall_score += $split[1];
+                foreach($split as $item) {
+                    $spl = explode("=", $item);
+                    if($spl[0] == "id") {
+                        $student_id = $spl[1];
+                    }
+                    if($spl[0] == "remarks") {
+                        $scores_array[$student_id]["remarks"] = $spl[1];
+                    }
+                    if(!in_array($spl[0], ['name', 'id', 'remarks'])) {
+                        $scores_array[$student_id]["marks"][] = [
+                            "item" => $spl[0],
+                            "score" => $spl[1]
+                        ];
+                        if(!isset($scores_array[$student_id]["total_score"])) {
+                            $scores_array[$student_id]["total_score"] = 0;
+                            $scores_array[$student_id]["total_percentage"] = 0;
+                        }
+                        if(in_array($spl[0], ['sba', 'marks'])) {
+                            $scores_array[$student_id]["total_percentage"] += $spl[1];
+                        }
+                        $scores_array[$student_id]["total_score"] += $spl[1];
+                    }
                 }
-                // append the teachers remarks to the array
-                $scores_array[$split[2]]["remarks"] = $split[3] ?? null;
-            }
-
-            // get the sum for all scores
-            foreach($scores_array as $key => $score) {
-                $total = array_column($score["marks"], "score");
-                $total = !empty($total) ? array_sum($total) : 0;
-                $scores_array[$key]["total_score"] = $total;
             }
 
             $course_item = $course_item[0];
@@ -576,83 +650,24 @@ class Terminal_reports extends Myschoolgh {
 
             // get the class teacher id
             $teacher_key = array_search("TEACHER ID", $session_array["headers"]);
-            $teacher_ids = $session_array["students"][0][$teacher_key];
+            // $teacher_ids = $session_array["students"][0][$teacher_key];
 
             // set the current user id if the teacher id was not parsed.
-            $teacher_ids = empty($teacher_ids) ? $params->userData->unique_id : $teacher_ids;
+            // $teacher_ids = empty($teacher_ids) ? $params->userData->unique_id : $teacher_ids;
+              
+            // temporary use this as the teacher id
+            $teacher_ids = $params->userId;
 
             // set a new log id
             $report_id = random_string("alnum", RANDOM_STRING);
-            $isFound = false;
 
-            // loop through the list and insert the record
-            foreach($scores_array as $key => $student) {
-                
-                // confirm if there is an existing record that has already been approved
-                $check = $this->pushQuery("a.scores, a.total_score, a.average_score, 
-                    a.report_id, a.class_position, u.name AS student_name, a.status", 
-                    "grading_terminal_scores a LEFT JOIN users u ON u.unique_id = a.student_unique_id", 
-                    "a.student_unique_id='{$key}' AND a.course_id='{$report->course_id}'
-                    AND a.academic_year = '{$params->academic_year}' AND a.academic_term='{$params->academic_term}' AND a.client_id = '{$params->clientId}'");
-            
-                // if there is no existing record
-                if(empty($check)) {
-                    // execute the statement
-                    $this->insert_stmt->execute([
-                        $report->class_id, $class_item->name,
-                        $report->course_id, $course_name, $course_code, json_encode($student["marks"]),
-                        $student["total_score"], $average_score, $teacher_ids, $student["remarks"], $params->userId,
-                        $params->academic_year, $params->academic_term, $key, $params->clientId, $report_id
-                    ]);
-                    $data = "The Exam Results Marks was successfully inserted.";
-                    // log the user activity
-                    $this->userLogs("terminal_report", $key, json_encode($student), "{$params->userData->name} uploaded the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of Student With ID: {$key}", $params->userId);
-                } else {
-                    // is found 
-                    $isFound = true;
-
-                    // get the upload id
-                    $report_id = $check[0]->report_id;
-
-                    // ensure it hasnt been approved
-                    if($check[0]->status === "Saved") {
-                        // execute the statement
-                        $this->update_stmt->execute([
-                            $report->class_id, $class_item->name, $report_id, $course_name, 
-                            $course_code, json_encode($student["marks"]),
-                            $student["total_score"], $average_score, $teacher_ids, $student["remarks"],
-                            $params->academic_year, $params->academic_term, $key, $report->course_id, $params->clientId
-                        ]);
-                        // log the user activity
-                        $this->userLogs("terminal_report", $key, $check[0], "{$params->userData->name} updated the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of <strong>{$check[0]->student_name}</strong> With ID: {$key}", $params->userId);
-                    }
-                    $data = "The Exam Results Marks was successfully updated.";
-                }
-            }
+            // old record
+            $isFound = $this->pushQuery("id, report_id", 
+                "grading_terminal_logs", 
+                "academic_year='{$report->academic_year}' AND academic_term='{$report->academic_term}' AND course_id='{$report->course_id}' AND client_id='{$params->clientId}' LIMIT 1");
 
             // if there is an existing record
-            if($isFound) {
-
-                // insert the activity into the cron_scheduler
-                $query = $this->db->prepare("UPDATE cron_scheduler SET client_id = '{$params->clientId}', status = ?, active_date = now() WHERE item_id = ? AND cron_type = ? LIMIT 1");
-                $query->execute([1, $report_id, "terminal_report"]);
-
-                // log the information
-                $log_stmt = $this->db->prepare("UPDATE grading_terminal_logs 
-                        SET class_name = ?, course_name = ?, date_modified = now(), course_code = ?
-                    WHERE report_id = ? AND client_id = ? AND course_id = ? AND class_id = ? AND 
-                        academic_year = ? AND academic_term = ?
-                ");
-                $log_stmt->execute([
-                    $class_item->name, $course_name, strtoupper($course_item->course_code), $report_id, 
-                    $params->clientId, $report->course_id, 
-                    $report->class_id, $params->academic_year, $params->academic_term
-                ]);
-                // insert the activity into the cron_scheduler
-                $query = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = '{$params->clientId}', item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
-                $query->execute([$report_id, $params->userId, "terminal_report"]);
-            } else {
-
+            if(empty($isFound)) {
                 // log the information
                 $log_stmt = $this->db->prepare("INSERT INTO grading_terminal_logs SET report_id = ?, client_id = ?, 
                     class_id = ?, class_name = ?, course_id = ?, course_name = ?, academic_year = ?, academic_term = ?,
@@ -663,24 +678,56 @@ class Terminal_reports extends Myschoolgh {
                     $params->academic_term, $params->userId, strtoupper($course_item->course_code),
                     json_encode($defaultClientData->grading_structure->columns)
                 ]);
-
-                // insert the activity into the cron_scheduler
-                $query = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = '{$params->clientId}', item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
-                $query->execute([$report_id, $params->userId, "terminal_report"]);
+            } else {
+                $report_id = $isFound[0]->report_id;
             }
+
+            // loop through the list and insert the record
+            foreach($scores_array as $key => $student) {
+                
+                // generate a unique record
+                $distinct_record = md5($params->academic_year.$params->academic_term.$key.$report->course_id);
+                
+                // prepare the statement
+                $stmt = $this->db->prepare("INSERT IGNORE INTO grading_terminal_scores SET 
+                    distinct_record = ?,class_id = ?, class_name = ?, date_modified = now(),
+                    course_id = ?, course_name = ?, course_code = ?, scores = ?, total_score = ?, 
+                    average_score = ?, teacher_ids = ?, class_teacher_remarks = ?, created_by = ?,
+                    academic_year = ?, academic_term = ?, student_unique_id = ?, client_id = ?, report_id = ?
+                    ON DUPLICATE KEY UPDATE scores = ?, total_score = ?, average_score = ?, class_teacher_remarks = ?
+                ");
+                // execute the statement
+                $stmt->execute([
+                    $distinct_record, $report->class_id, $class_item->name,
+                    $report->course_id, $course_name, $course_code, json_encode($student["marks"]),
+                    $student["total_score"], $average_score, $teacher_ids, $student["remarks"], $params->userId,
+                    $params->academic_year, $params->academic_term, $key, $params->clientId, $report_id,
+                    json_encode($student["marks"]), $student["total_score"], $average_score, $student["remarks"]
+                ]);
+                // log the user activity
+                $this->userLogs("terminal_report", $key, json_encode($student), 
+                    "{$params->userData->name} uploaded the terminal report for {$params->academic_term} {$params->academic_year} 
+                    Academic Year of Student With ID: {$key}", $params->userId
+                );
+
+            }
+
+            // insert the activity into the cron_scheduler
+            // $query = $this->db->prepare("INSERT INTO cron_scheduler SET client_id = '{$params->clientId}', item_id = ?, user_id = ?, cron_type = ?, active_date = now()");
+            // $query->execute([$report_id, $params->userId, "terminal_report"]);
 
             // delete the session
             $this->session->remove("terminal_report_{$report->class_id}_{$report->course_id}");
 
             return [
-                "data" => $data,
+                "data" => "The report information was successfully saved.",
                 "additional" => [
                     "reportId" => $report_id
                 ]
             ];
 
         } catch(PDOException $e) {
-            return $this->unexpected_error;
+            return $e->getMessage();
         }
     }
 
@@ -920,7 +967,7 @@ class Terminal_reports extends Myschoolgh {
                 // check if the sba score cap is set
                 if(!empty($check)) {
                     if(empty($check[0]->sba_score_cap)) {
-                        return ["code" => 203, "data" => "Sorry! The SBA Score Cap has not been set for this result."];
+                        // return ["code" => 203, "data" => "Sorry! The SBA Score Cap has not been set for this result."];
                     }
                 }
             }

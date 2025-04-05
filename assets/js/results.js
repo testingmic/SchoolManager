@@ -1,26 +1,18 @@
-var recalculate_score = (student_id, total) => {
-    let score = 0,
-        total_percentage = 0;
+var recalculate_score = (student_id, sba_percentage, examination) => {
+    let score = 0;
     $.each($(`input[data-input_type_q="marks"][data-input_row_id="${student_id}"]`), function() {
         let input = $(this);
         if(input.val().length && !isNaN(input.val())) {
-            let mark = parseInt(input.val()),
-                raw = parseInt(input.attr("data-max_value")),
-                percentage = parseInt(input.attr("data-raw_percentage"));
-            score += mark;
-
-            let percent = ((mark * percentage) / raw);
-            total_percentage += percent;
+            score += parseInt(input.val());
         }
     });
-    if (score > total) {
-        $(`input[data-input_type_q="marks"][data-input_row_id="${student_id}"]`).addClass("border-red");
-    } else {
-        $(`input[data-input_type_q="marks"][data-input_row_id="${student_id}"]`).removeClass("border-red");
-    }
-    $(`input[data-input_total_id="${student_id}"]`).val(score);
-    $(`span[data-input_save_button="${student_id}"]`).removeClass("hidden");
-    $(`span[data-student_percentage="${student_id}"]`).html(`${total_percentage}%`);
+    let sba_score = (score * sba_percentage) / 100;
+    let examination_score = examination;
+    let total_score = sba_score + examination_score;
+    
+    $(`span[data-input_row_id="${student_id}"][data-examination]`).text(Math.round(examination_score));
+    $(`span[data-input_row_id="${student_id}"][data-school_based_assessment]`).text(Math.round(sba_score));
+    $(`span[data-input_row_id="${student_id}"][data-student_percentage]`).text(`${Math.round(total_score)}%`);
 }
 
 $(`input[data-input_method="remarks"]`).on("input", function() {
@@ -32,21 +24,18 @@ $(`input[data-input_method="remarks"]`).on("input", function() {
 
 $(`input[data-input_type_q="marks"]`).on("input", function() {
     let input = $(this);
-    let student_id = input.attr("data-input_row_id"),
-        total = parseInt(input.attr("data-overall_total")),
-        max = parseInt(input.attr("data-max_value"));
+    let row_id = parseInt(input.attr("data-input_row_id")),
+        max_value = parseInt(input.attr("data-max_value")),
+        input_value = parseInt(input.val());
 
-    if(input.val() > max) {
-        input.val(max);
-        recalculate_score(student_id, total);
-        return false;
-    }
-    else if(input.val() < 0) {
+    if(input_value > max_value) {
+        input.val(max_value);
+    } else if(input_value < 0) {
         input.val(0);
-        recalculate_score(student_id, total);
-        return false;
     }
-    recalculate_score(student_id, total);
+    let sba_percentage = parseInt($(`span[data-grade_name="sba"]`).attr("data-grade_percentage")),
+        examination = parseInt($(`span[data-input_row_id="${row_id}"][data-examination]`).attr("data-examination"));
+    recalculate_score(row_id, sba_percentage, examination);
 });
 
 var modify_result = (action, report_id) => {

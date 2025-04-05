@@ -281,14 +281,22 @@ var save_terminal_report = () => {
             let ss = {},
                 class_id = $(`div[id="terminal_reports"] select[name="class_id"]`).val(),
                 course_id = $(`div[id="terminal_reports"] select[name="course_id"]`).val();
-            $.each($(`div[id="summary_report_sheet_content"] input[data-input_type="score"]`), function(i, e) {
+            $.each($(`div[id="summary_report_sheet_content"] input[data-input_type="score"][name="examination"]`), function(i, e) {
                 let item = $(this),
                     row_id = item.attr("data-input_row_id"),
-                    student_id = $(`span[data-student_row_id="${row_id}"]`).attr("data-student_id"),
-                    remarks = $(`input[data-input_row_id="${row_id}"][data-input_method='remarks']`).val();
+                    sba = $(`input[data-input_row_id="${row_id}"][name='school_based_assessment']`).val(),
+                    marks = $(`input[data-input_row_id="${row_id}"][name='examination']`).val(),
+                    name = $(`span[data-student_row_id="${row_id}"][data-student]`).attr("data-student"),
+                    student_id = $(`span[data-student_row_id="${row_id}"][data-student_id]`).attr("data-student_id"),
+                    remarks = $(`input[data-input_row_id="${row_id}"][data-input_method='remarks']`).val(),
+                    classwork = $(`span[data-student_row_id="${row_id}"][data-classwork]`).attr("data-classwork"),
+                    homework = $(`span[data-student_row_id="${row_id}"][data-homework]`).attr("data-homework"),
+                    test = $(`span[data-student_row_id="${row_id}"][data-test]`).attr("data-test"),
+                    project = $(`span[data-student_row_id="${row_id}"][data-project]`).attr("data-project"),
+                    midterm_exams = $(`span[data-student_row_id="${row_id}"][data-midterm_exams]`).attr("data-midterm_exams");
                     
-                if(item.attr("name") !== undefined) {
-                    ss[i] = `${item.attr("name")}|${item.val()}|${student_id}|${remarks}`;
+                if(typeof name !== 'undefined') {
+                    ss[i] = `name=${name}|id=${student_id}|remarks=${remarks}|sba=${sba}|marks=${marks}|classwork=${classwork}|homework=${homework}|test=${test}|project=${project}|midterm_exams=${midterm_exams}`;
                 }
             });
             let rs = {
@@ -413,7 +421,7 @@ $(`div[id="terminal_reports"] select[name="class_id"]`).on("change", function() 
             $.get(`${baseUrl}api/${link}/${endpoint}?class_id=${class_id}&minified=true`).then((response) => {
                 if (response.code == 200) {
                     $.each(response.data.result, function(i, e) {
-                        $(`select[name='${option_link}']`).append(`<option value='${e.item_id !== undefined ? e.item_id : e.user_id}'>${e.name.toUpperCase()}</option>'`);
+                        $(`select[name='${option_link}']`).append(`<option value='${typeof e.item_id !== 'undefined' ? e.item_id : e.user_id}'>${e.name.toUpperCase()}</option>'`);
                     });
                 }
             });

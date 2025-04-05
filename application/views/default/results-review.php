@@ -88,19 +88,39 @@ if(empty($result_id)) {
         
         // set some new variables
         $headers["total_raw_score"] = 0;
+        $structured_list = "";
 
         // grading_structure
         if(!empty($defaultClientData->grading_structure)) {
             // if the columns are not empty
             if(isset($defaultClientData->grading_structure->columns)) {
+                // loop through the columns
                 foreach($defaultClientData->grading_structure->columns as $key => $column) {
                     $headers["total_raw_score"] += $column->markscap;
                     $headers["column"][$key] = [
                         "raw_score" => $column->markscap,
                         "percentage" => $column->percentage,
                     ];
+                    $ikey = strtolower($key == 'School Based Assessment' ? 'sba' : $key);
+                    $structured_list .= "
+                    <tr>
+                        <td width='50%'><label>{$key}</label></td>
+                        <td class='text-right p-r-10'>
+                            <span class='font-weight-bold font-20' data-grade_name='{$ikey}' data-grade_percentage='{$column->percentage}'>
+                                {$column->percentage}%
+                            </span>
+                        </td>
+                    </tr>";
                 }
             }
+        }
+
+        // get the grading_sba
+        $grading_sba = $defaultClientData->grading_sba ?? [];
+    
+        // restructure the grading
+        foreach($grading_sba as $key => $column) {
+            $simplified_sba[str_ireplace(" ", "_", strtolower($key))] = $column['percentage'];
         }
 
         // loop through the scores list
@@ -120,14 +140,24 @@ if(empty($result_id)) {
 
             // loop through the scores list
             foreach($score->scores as $s_key => $marks) {
+
+                if(in_array($s_key, ["sba", "marks"])) continue;
+
                 // append the key to it
                 $scores_array[] = $s_key;
                 $clean_key = ucwords(str_ireplace("_", " ", $s_key));
+
+                // set the values
+                $percent = $headers["column"]["{$clean_key}"]["percentage"] ?? 0;
+                $rawscore = $headers["column"]["{$clean_key}"]["raw_score"] ?? 0;
+
+                $simp_value = $simplified_sba[$s_key] ?? 0;
+
                 // append to the item
                 $marks_list .= "
                 <td align='center'>
                     ".(!$is_disabled ?
-                        "<input min='0' ".(!$is_disabled ? "data-input_type_q='marks' data-raw_percentage='{$headers["column"]["{$clean_key}"]["percentage"]}' data-max_value='{$headers["column"]["{$clean_key}"]["raw_score"]}' data-overall_total='{$headers["total_raw_score"]}' data-input_row_id='{$score->student_row_id}'" : "disabled='disabled'")." type='number' data-input_name='{$s_key}' data-input_type='score' style='width:7rem' value='{$marks}' class='form-control text-center'>"
+                        "<input min='0' ".(!$is_disabled ? "data-input_type_q='marks' data-max_value='{$simp_value}' data-input_row_id='{$score->student_row_id}'" : "disabled='disabled'")." type='number' data-input_name='{$s_key}' data-input_type='score' style='width:7rem' value='{$marks}' class='form-control text-center'>"
                         : "<span>{$marks}</span>"
                     )."
                 </td>";
@@ -138,6 +168,7 @@ if(empty($result_id)) {
                 $percent = $raw ? round((($marks * $cap) / $raw), 2) : 0;
                 $total_percentage_score += $percent;
             }
+            $totalPercentage = ($score->scores["sba"] ?? 0) + ($score->scores["marks"] ?? 0);
             // append to the scores
             $scores_list .= "
             <tr data-result_row_id='{$score->report_id}_{$score->student_row_id}'>
@@ -148,13 +179,13 @@ if(empty($result_id)) {
                 </td>
                 ".$marks_list."
                 <td align='center'>
-                    ".(!$is_disabled ?
-                        "<input type='number' min='0' max='{$headers["total_raw_score"]}' style='width:7rem' value='{$score->total_score}' disabled='disabled' data-input_total_id='{$score->student_row_id}' class='form-control text-center'>"
-                        : $score->total_score
-                    )."
+                    <span class='font-20' data-input_row_id='{$score->student_row_id}' data-school_based_assessment='{$score->scores["sba"]}'>{$score->scores["sba"]}</span>
                 </td>
                 <td align='center'>
-                    <span class='font-20' data-student_percentage='{$score->student_row_id}'>{$score->total_percentage}%</span>
+                    <span class='font-20' data-input_row_id='{$score->student_row_id}' data-examination='{$score->scores["marks"]}'>{$score->scores["marks"]}</span>
+                </td>
+                <td align='center'>
+                    <span class='font-20' data-input_row_id='{$score->student_row_id}' data-student_percentage='{$totalPercentage}'>{$totalPercentage}%</span>
                 </td>
                 <td>
                 ".(!$is_disabled ? 
@@ -232,31 +263,7 @@ if(empty($result_id)) {
                                 </p>
                                 <div class="width-100">
                                     <table width="100%" class="table table-bordered">
-                                        <tr>
-                                            <td width="50%">
-                                                <label>Examination Score Cap</label>
-                                            </td>
-                                            <td class="text-right p-r-10">
-                                                <span class="font-weight-bold font-20">'.($data->exam_score_cap ?? 100).'%</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td width="50%">
-                                                <label>Score Cap for SBA</label>
-                                            </td>
-                                            <td class="text-right">
-                                                <div class="d-flex justify-content-end width-100">
-                                                    <div class="form-group  mb-0 mr-2">
-                                                        <input '.($isApproved ? 'disabled' : '').' type="number" data-result_id="'.$data->report_id.'" style="width: 100%;" value="'.$data->sba_score_cap.'" placeholder="Score Cap for SBA" name="sba_score_cap" id="sba_score_cap" class="form-control text-center">
-                                                    </div>
-                                                    <div '.($isApproved ? 'hidden' : '').' class="form-group mb-0">
-                                                        <button style="height:42px;width: 42px;" class="btn btn-outline-success btn-sm" onclick="return save_sba_score_cap(\''.$report_param->result_id.'\');">
-                                                            <i class="fa fa-save"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        '.$structured_list.'
                                     </table>
                                 </div>
                             </div>
@@ -341,9 +348,10 @@ if(empty($result_id)) {
                                         <th width="5%"></th>
                                         <th width="20%">Student Name / ID</th>
                                         '.$scores_header.'
-                                        <th>Raw Score</th>
-                                        <th>Percentage</th>
-                                        <th>Remarks</th>
+                                        <th class="text-center">SBA</th>
+                                        <th class="text-center">Examination</th>
+                                        <th class="text-center">Total</th>
+                                        <th class="text-center">Remarks</th>
                                         <th></th>
                                     </thead>
                                     <tbody>'.$scores_list.'</tbody>

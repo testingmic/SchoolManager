@@ -1,2 +1,1 @@
-ALTER TABLE `grading_terminal_logs` ADD `sba_score_cap` INT NOT NULL DEFAULT '0' AFTER `grading`;
-ALTER TABLE `classes` CHANGE `class_teacher` `class_teacher` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL;
+ALTER TABLE `grading_terminal_scores` ADD `distinct_record` VARCHAR(32) NULL DEFAULT NULL AFTER `report_id`, ADD UNIQUE (`distinct_record`);
