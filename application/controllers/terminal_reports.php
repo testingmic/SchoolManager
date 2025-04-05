@@ -77,7 +77,7 @@ class Terminal_reports extends Myschoolgh {
 
         try {
 
-            $stmt = $this->db->prepare("SELECT a.*, u.name AS fullname, u.unique_id AS user_unique_id,
+            $stmt = $this->db->prepare("SELECT a.*, u.name AS fullname, u.unique_id AS user_unique_id, u.item_id AS student_item_id,
                     (SELECT COUNT(*) FROM grading_terminal_scores b WHERE b.report_id = a.report_id) AS students_count,
                     (SELECT b.average_score FROM grading_terminal_scores b WHERE b.report_id = a.report_id LIMIT 1) AS overall_score
                 FROM grading_terminal_logs a
@@ -150,12 +150,15 @@ class Terminal_reports extends Myschoolgh {
             $data = [];
 
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+
                 $scores = json_decode($result->scores, true);
                 $scores_array = [];
 
                 // loop through the user scores
-                foreach($scores as $key => $score) {
-                    $scores_array[$scores[$key]["item"]] = $scores[$key][$getItem];
+                if(!empty($scores) && is_array($scores)) {
+                    foreach($scores as $key => $score) {
+                        $scores_array[$scores[$key]["item"]] = $scores[$key][$getItem] ?? 0;
+                    }
                 }
                 
                 // set the scores as an array
@@ -926,6 +929,41 @@ class Terminal_reports extends Myschoolgh {
     }
 
     /**
+     * Sort by percentage with position
+     * 
+     * @param       $array
+     * 
+     * @return Array
+     */
+    public function sortByPercentageWithPosition($array) {
+        // Sort by percentage in descending order
+        uasort($array, function ($a, $b) {
+            return $b['percentage'] <=> $a['percentage'];
+        });
+
+        // Assign positions with tie handling
+        $position = 1;
+        $prevPercentage = null;
+        $sameRankCount = 0;
+
+        foreach ($array as &$item) {
+            if ($item['percentage'] === $prevPercentage) {
+                // Tie: assign the same position as previous
+                $item['position'] = $position;
+                $sameRankCount++;
+            } else {
+                // New rank: increment position by the number of tied entries
+                $position += $sameRankCount;
+                $item['position'] = $position;
+                $sameRankCount = 1;
+                $prevPercentage = $item['percentage'];
+            }
+        }
+
+        return $array;
+    }
+
+    /**
      * Save the Class Results Set
      * 
      * Populate the Data and Save the new Data
@@ -950,39 +988,14 @@ class Terminal_reports extends Myschoolgh {
 
         try {
 
-            // global variable
-            global $defaultClientData;
-
             // report id
             $record_id = $params->label["record_id"];
             $record_type = $params->label["record_type"];
 
-            // if the type is results
-            if(in_array($record_type, ["results", "approve_results"])) {
-                // get the details of the terminal report
-                $check = $this->pushQuery("a.status, a.course_name, a.class_name, a.course_code, a.course_id, a.report_id, a.sba_score_cap,
-                    (SELECT COUNT(*) FROM grading_terminal_scores b WHERE b.report_id = a.report_id AND a.status='Submitted') AS students_count", 
-                    "grading_terminal_logs a", "a.report_id='{$record_id}' LIMIT 1");
-
-                // check if the sba score cap is set
-                if(!empty($check)) {
-                    if(empty($check[0]->sba_score_cap)) {
-                        // return ["code" => 203, "data" => "Sorry! The SBA Score Cap has not been set for this result."];
-                    }
-                }
-            }
-            // if the student is empty
-            elseif($record_type === "student") {
-                // split the record_id
-                $split = explode("_", $record_id);
-                $student_id = $split[1];
-                $report_id = $split[0];
-
-                // get the details of the terminal report
-                $check = $this->pushQuery("
-                    a.status, a.student_name, a.report_id, a.course_name, a.class_name, a.course_code, a.course_id, a.sba_score_cap", 
-                    "grading_terminal_scores a", "a.student_row_id='{$student_id}' AND a.report_id='{$report_id}' LIMIT 1");
-            }
+            // get the details of the terminal report
+            $check = $this->pushQuery("a.status, a.course_name, a.class_name, a.course_code, a.course_id, a.report_id,
+            (SELECT COUNT(*) FROM grading_terminal_scores b WHERE b.report_id = a.report_id AND a.status='Submitted') AS students_count", 
+            "grading_terminal_logs a", "a.report_id='{$record_id}' LIMIT 1");
 
             // confirm if the result is not empty
             if(empty($check)) {
@@ -992,94 +1005,68 @@ class Terminal_reports extends Myschoolgh {
             // set the report
             $report = $check[0];
             $report_id = $report->report_id;
-            $sba_score_cap = $report->sba_score_cap ?? 0;
             $students_count = $report->students_count ?? 1;
-            $student_name = $report->student_name ?? ("{$report->course_name} {$report->class_name}");
 
             // initial values
             $additional = [];
-            $overall_score = 0;
             $scores_array = [];
             $students_list = $params->label["results"];
 
-            // grading structure
-            $grading_column = (array) $defaultClientData->grading_structure->columns;
+            // init the scores
+            $sba_score = 0;
+            $exams_score = 0;
 
             // group the information in an array
             foreach($students_list as $stu_id => $score) {
                 // if the marks is set and an array
                 if(isset($score["marks"]) && is_array($score["marks"])) {
-                    $count = 0;
-                    // loop through the marks list
-                    foreach($score["marks"] as $item => $mark) {
-                        // clean the item key
-                        $key = ucwords(str_ireplace("_", " ", $item));
-                        $percent_cap = $grading_column[$key]->percentage;
-                        $raw_score_cap = $grading_column[$key]->markscap ?? 0;
-                        $raw_score_cap = $raw_score_cap > 0 ? $raw_score_cap : (
-                            strtolower($item) == 'examination' ? 100 : $sba_score_cap
-                        );
-
-                        // calculate the percentage value
-                        $percent_value = $raw_score_cap > 0 ? (($mark * $percent_cap) / $raw_score_cap) : 0;
-
-                        // append to the array list
-                        $scores_array[$stu_id]["marks"][$count]["item"] = $item;
-                        $scores_array[$stu_id]["marks"][$count]["score"] = $mark;
-                        $scores_array[$stu_id]["marks"][$count]["percent_value"] = number_format($percent_value);
-                        $scores_array[$stu_id]["marks"][$count]["percent_rawscore_cap"] = $raw_score_cap;
-                        $scores_array[$stu_id]["marks"][$count]["percentage_ratio"] = $percent_cap;
-                        $overall_score += $percent_value;
-                        $count++;
-                    }
+                    $sba_score += $score["marks"]["sba"] ?? 0;
+                    $exams_score += $score["marks"]["marks"] ?? 0;
                 }
-                // // append the teachers remarks to the array
+                // append the teachers remarks to the array
+                $scores_array[$stu_id]["percentage"] = ($score["marks"]["sba"] ?? 0) + ($score["marks"]["marks"] ?? 0);
                 $scores_array[$stu_id]["remarks"] = $score["remarks"];
+
+                // raw scores
+                $raw_score = 0;
+                foreach($score["marks"] as $key => $value) {
+                    if(!in_array($key, ["sba", "marks"])) {
+                        $raw_score += $value;
+                    }
+                    $scores_array[$stu_id]['marks'][] = [
+                        'item' => $key,
+                        'score' => $value
+                    ];
+                }
+                $scores_array[$stu_id]["raw_score"] = $raw_score;
             }
+
+            $scores_array = $this->sortByPercentageWithPosition($scores_array);
+
+            // calculate the average score
+            $average_score = ($sba_score + $exams_score) / count($students_list);
 
             // exceeds the total 100% score
             $exceeds = [];
-
-            // get the sum for all scores
-            foreach($scores_array as $key => $score) {
-                $raw_total = array_column($score["marks"], "score");
-                $raw_total = !empty($raw_total) ? array_sum($raw_total) : 0;
-
-                $percentage = array_column($score["marks"], "percent_value");
-                $percentage = !empty($percentage) ? array_sum($percentage) : 0;
-
-                $scores_array[$key]["raw_score"] = $raw_total;
-                $scores_array[$key]["percentage"] = round($percentage, 2);
-
-                // if the percentage exceeds 100 then log the error
-                if($percentage > 100) { $exceeds[] = $key; }
-            }
 
             // if an error was found
             if(!empty($exceeds)) {
                 return ["code" => 203, "data" => "Sorry! Please ensure the total score of any student does not exceed 100%."];
             }
 
-            //set more values
-            $average_score = $overall_score / count($scores_array);
-
             // update query
-            $update_stmt = $this->db->prepare("UPDATE grading_terminal_scores SET 
+            $update_stmt = $this->db->prepare("UPDATE grading_terminal_scores SET class_position = ?,
                 scores = ?, total_score = ?, total_percentage = ?, date_modified = now(), average_score = ?, class_teacher_remarks = ?
-                WHERE academic_year = ? AND academic_term = ? AND student_row_id = ? AND report_id = ? AND client_id = ? LIMIT 1
+                WHERE academic_year = ? AND academic_term = ? AND student_item_id = ? AND report_id = ? AND client_id = ? LIMIT 1
             ");
             
             // loop through the list and insert the record
             foreach($scores_array as $key => $student) {
-                
                 // execute the statement
                 $update_stmt->execute([
-                    json_encode($student["marks"]), $student["raw_score"], $student["percentage"], number_format($average_score, 2), $student["remarks"],
+                    $student["position"], json_encode($student["marks"]), $student["raw_score"], $student["percentage"], number_format($average_score, 2), $student["remarks"],
                     $params->academic_year, $params->academic_term, $key, $report_id, $params->clientId
                 ]);
-                // log the user activity
-                // $this->userLogs("terminal_report", $key, null, "{$params->userData->name} updated the terminal report for {$params->academic_term} {$params->academic_year} Academic Year of <strong>{$student_name}</strong> With ID: {$key}", $params->userId);
-                
             }
 
             // approve the results

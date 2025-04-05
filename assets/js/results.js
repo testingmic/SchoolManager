@@ -90,34 +90,49 @@ var save_result = (record_id, record_type, additional_id = "") => {
     }).then((proceed) => {
         if (proceed) {
             $.pageoverlay.show();
-            let results = {},
-                student_ids = new Array();
+            let results = {};
+            let raw_record_id = record_id;
+            let refresh = true;
             if (record_type === "student") {
                 $.each($(`input[data-input_type_q="marks"][data-input_row_id="${record_id}"]`), function(i, e) {
-                    let item = $(this).attr("data-input_name"),
+                    let item_id = $(this).attr(`data-input_row_id`),
+                        item = $(this).attr("data-input_name"),
+                        student_id = $(this).attr(`data-result_student_id`),
                         score = parseInt($(this).val()),
-                        remarks = $(`input[data-input_method="remarks"][data-input_row_id="${record_id}"]`).val();
-                    if (results[record_id] === undefined) {
-                        results[record_id] = {
+                        sba = $(`span[data-result_student_id="${student_id}"][data-school_based_assessment]`).text(),
+                        examination = $(`span[data-result_student_id="${student_id}"][data-examination]`).text(),
+                        remarks = $(`input[data-input_method="remarks"][data-input_row_id="${item_id}"]`).val();
+                    if (typeof results[student_id] === 'undefined') {
+                        results[student_id] = {
                             ["remarks"]: remarks,
                             ["marks"]: {}
                         };
                     }
-                    results[record_id]["marks"][item] = score;
+                    results[student_id]["marks"][item] = score;
+                    results[student_id]["marks"]["sba"] = sba;
+                    results[student_id]["marks"]["marks"] = examination;
                 });
+                record_id = additional_id;
+                record_type = "results";
+                refresh = false;
             } else if (record_type === "results" || record_type === "approve_results") {
                 $.each($(`input[data-input_type_q="marks"]`), function(i, e) {
                     let item_id = $(this).attr(`data-input_row_id`),
                         item = $(this).attr("data-input_name"),
+                        student_id = $(this).attr(`data-result_student_id`),
                         score = parseInt($(this).val()),
+                        sba = $(`span[data-result_student_id="${student_id}"][data-school_based_assessment]`).text(),
+                        examination = $(`span[data-result_student_id="${student_id}"][data-examination]`).text(),
                         remarks = $(`input[data-input_method="remarks"][data-input_row_id="${item_id}"]`).val();
-                    if (results[item_id] === undefined) {
-                        results[item_id] = {
+                    if (typeof results[student_id] === 'undefined') {
+                        results[student_id] = {
                             ["remarks"]: remarks,
                             ["marks"]: {}
                         };
                     }
-                    results[item_id]["marks"][item] = score;
+                    results[student_id]["marks"][item] = score;
+                    results[student_id]["marks"]["sba"] = sba;
+                    results[student_id]["marks"]["marks"] = examination;
                 });
             }
             let label = {
@@ -125,19 +140,16 @@ var save_result = (record_id, record_type, additional_id = "") => {
                 record_type,
                 record_id
             };
-            if(record_type === "student") {
-                label["record_id"] = `${additional_id}_${record_id}`;
-            }
             $.post(`${baseUrl}api/terminal_reports/update_report`, { label }).then((response) => {
                 swal({
                     text: response.data.result,
                     icon: responseCode(response.code),
                 });
                 if (response.code == 200) {
-                    if (record_type === "student") {
-                        $(`span[data-input_save_button="${record_id}"]`).addClass("hidden");
-                    } else {
-                        if (response.data.additional.href !== undefined) {
+                    $(`span[data-input_save_button="${record_id}"]`).addClass("hidden");
+                    $(`span[data-input_save_button="${raw_record_id}"]`).addClass("hidden");
+                    if(refresh) {
+                        if (typeof response.data.additional.href !== 'undefined') {
                             setTimeout(() => {
                                 loadPage(response.data.additional.href);
                             }, refresh_seconds);
