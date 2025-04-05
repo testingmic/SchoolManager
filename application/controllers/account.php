@@ -856,12 +856,12 @@ class Account extends Myschoolgh {
         if(!empty($params->grading_sba) && is_array($params->grading_sba)) {
             $total_grade = 0;
             foreach($params->grading_sba as $key => $value) {
-                if(isset($value['percentage']) && preg_match("/^[0-9]+$/", $value['percentage'])) {
+                if(isset($value['percentage']) && preg_match("/^[0-9]+$/", $value['percentage']) && $value['sba_checkbox'] == 'true') {
                     $total_grade += $value['percentage'];
                 }
             }
-            if($total_grade > 100) {
-                return ["code" => 203, "data" => "Sorry! The score must be equal to 100%. The current value is {$total_grade}%."];
+            if($total_grade !== 100) {
+                return ["code" => 203, "data" => "Sorry! The selected SBA Summation must be equal to 100%. The current value is {$total_grade}%."];
             }
         }
 

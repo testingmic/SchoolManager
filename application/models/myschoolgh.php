@@ -396,6 +396,23 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * Perform a raw query
+	 * 
+	 * @param String $query
+	 * 
+	 * @return Array
+	 */
+	final function perform_raw_query($query) {
+		try {
+			$stmt = $this->db->prepare($query);
+			$stmt->execute();
+			return $stmt->fetchAll(PDO::FETCH_OBJ);
+		} catch(PDOException $e) {
+			return [];
+		}
+	}
+
+	/**
 	 * @method itemById
 	 * @param string $table
 	 * @param string $field
@@ -424,12 +441,16 @@ class Myschoolgh extends Models {
 	 **/
 	final function itemByIdNoStatus($table, $column, $value, $column_to_return) {
 		
-		$stmt = $this->db->query("SELECT * FROM $table WHERE $column='$value' LIMIT 1");
+		try {
+			$stmt = $this->db->query("SELECT * FROM $table WHERE $column='$value' LIMIT 1");
 
-		if($stmt->rowCount() > 0) {
-			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
-				return $result->$column_to_return ?? null;
+			if($stmt->rowCount() > 0) {
+				while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+					return $result->$column_to_return ?? null;
+				}
 			}
+		} catch(PDOException $e) {
+			return null;
 		}
 
 	}
@@ -443,10 +464,14 @@ class Myschoolgh extends Models {
 	 **/
 	final function lastRowId($tableName) {
 
-		$stmt = $this->db->prepare("SELECT id AS rowId FROM {$tableName} ORDER BY id DESC LIMIT 1");
-		$stmt->execute();
+		try {
+			$stmt = $this->db->prepare("SELECT id AS rowId FROM {$tableName} ORDER BY id DESC LIMIT 1");
+			$stmt->execute();
 
-		return $stmt->rowCount() > 0 ? $stmt->fetch(PDO::FETCH_OBJ)->rowId : 0;
+			return $stmt->rowCount() > 0 ? $stmt->fetch(PDO::FETCH_OBJ)->rowId : 0;
+		} catch(PDOException $e) {
+			return 0;
+		}
 	}
 
 	/**

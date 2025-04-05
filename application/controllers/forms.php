@@ -4246,7 +4246,10 @@ class Forms extends Myschoolgh {
                 $qu++;
                 $sba_mark = $client_data->grading_sba[$sba]["counter"] ?? 0;
                 $sba_percent = $client_data->grading_sba[$sba]["percentage"] ?? 0;
-                $sba_checkbox = $client_data->grading_sba[$sba]["sba_checkbox"] ?? false;
+                $sba_checkbox = !empty($client_data->grading_sba[$sba]["sba_checkbox"]);
+                if(isset($client_data->grading_sba[$sba]["sba_checkbox"])) {
+                    $sba_checkbox = $client_data->grading_sba[$sba]["sba_checkbox"] == 'true' ? true : false;
+                }
                 $name = $sba == "Test" ? "Test or Quiz" : $sba;
 
                 // append to the structure
@@ -4271,6 +4274,7 @@ class Forms extends Myschoolgh {
                     </div>";
             }
         $results_structure .= "
+                <div class='text-center text-danger'>The selected options should sum up to 100%.</div>
             </div>
         </div>";
 
