@@ -360,15 +360,17 @@ class Terminal_reports extends Myschoolgh {
                 if($item['sba_checkbox'] == 'true') {
                     if (isset($sba_results_list[$student->item_id])) {
                         $getRecord = $sba_results_list[$student->item_id];
-                        $score = $getRecord['percentage'][$keyName] ?? ($item['percentage'] ?? 0);
+                        $score = $getRecord['percentage'][$keyName] ?? 0;
                         $csv_file .= trim($score).",";
                         $totalSba += $score;
                     } else {
-                        $csv_file .= "0,0,";
+                        $csv_file .= "0,";
                     }
                 }
             }
-            $csv_file .= round(($totalSba / 100) * $sbaPercentage) . ",";
+            if($totalSba > 0) {
+                $csv_file .= round(($totalSba / 100) * $sbaPercentage) . ",";
+            }
             $csv_file .= "\n";
         }
 
