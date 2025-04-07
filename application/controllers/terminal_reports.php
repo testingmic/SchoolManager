@@ -157,7 +157,7 @@ class Terminal_reports extends Myschoolgh {
                 // loop through the user scores
                 if(!empty($scores) && is_array($scores)) {
                     foreach($scores as $key => $score) {
-                        $scores_array[$scores[$key]["item"]] = $scores[$key][$getItem] ?? 0;
+                        $scores_array[$scores[$key]["item"]] = $score;
                     }
                 }
                 
@@ -281,15 +281,18 @@ class Terminal_reports extends Myschoolgh {
         $csv_file .= "SUBJECT,";
 
         $grading_sba = $client_data->grading_sba ?? [];
+        $sba_list = "";
 
         // get the grading structure
         if(!empty($grading_sba)) {
             foreach($grading_sba as $keyName => $item) {
                 if($item['sba_checkbox'] == 'true') {
-                    $csv_file .= strtoupper("{$keyName},");
+                    $csv_file .= strtoupper("{$keyName} - {$item['percentage']}%,");
                 }
             }
         }
+
+        $csv_notes = "";
 
         // get the grading structure
         if(!empty($client_data->grading_structure)) {
@@ -298,6 +301,12 @@ class Terminal_reports extends Myschoolgh {
                 $count = 0;
                 foreach($columns->columns as $key => $column) {
                     $count++;
+                    if($key == 'School Based Assessment') {
+                        $csv_notes = "{$key} is {$column->percentage}% of the total scores";
+                    }
+                    if($key == 'Examination') {
+                        $csv_notes = "{$key} is {$column->percentage}% of the total examination scores.";
+                    }
                     $csv_file .= strtoupper("{$key} - {$column->percentage}%,");
                 }
             }
@@ -373,6 +382,8 @@ class Terminal_reports extends Myschoolgh {
             }
             $csv_file .= "\n";
         }
+
+        $csv_file .= "\n{$csv_notes}\n";
 
         // upload file
         $temp_dir = "assets/uploads/results/{$params->clientId}/tmp/";
@@ -456,12 +467,14 @@ class Terminal_reports extends Myschoolgh {
             }
         }
         $grading_sba = $client_data->grading_sba ?? [];
+        $sba_percentage = [];
 
         // get the grading structure
         if(!empty($grading_sba)) {
             foreach($grading_sba as $keyName => $item) {
                 if($item['sba_checkbox'] == 'true') {
                     $headers[] = strtoupper($keyName);
+                    $sba_percentage[$keyName] = $item['percentage'];
                 }
             }
         }
@@ -500,7 +513,7 @@ class Terminal_reports extends Myschoolgh {
         $report_table = "<div style='max-width: 100%' class='table-responsive trix-slim-scroll'>";
         $report_table .= "<table width='100%' class='table table-bordered font-13'>";
         $report_table .= "<thead>";
-        // $report_table .= "<th width='5%' class='text-center'>#</th>";
+        
         foreach($file_headers as $item) {
             $item = $item == 'SCHOOL BASED ASSESSMENT' ? 'SBA' : $item;
             if(in_array($item, ['SUBJECT'])) continue;
@@ -511,14 +524,15 @@ class Terminal_reports extends Myschoolgh {
 
         // set the files
         foreach($complete_csv_data as $key => $result) {
+            if(empty($result[2]) && empty($result[3])) continue;
             $report_table .= "<tr>";
-            // $report_table .= "<td width='200px' class='text-center'>".($key+1)."</td>";
             foreach($result as $kkey => $kvalue) {
                 if(in_array($kkey, [2])) continue;
                 // if the key is in the array list
                 if(in_array($file_headers[$kkey], array_keys($columns["columns"]))) {
                     $column = create_slug($file_headers[$kkey], "_");
-                    $report_table .= "<td><input style='min-width:100px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? "disabled='disabled' data-input_total_id='{$key}'" : "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." class='form-control pl-0 pr-0 font-18 text-center' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}'></td>";
+                    $readOnly = in_array($column, ['school_based_assessment']) ? "readonly='readonly'" : "";
+                    $report_table .= "<td><input style='min-width:100px;' ".($columns["columns"][$file_headers[$kkey]] == "100" ? "disabled='disabled' data-input_total_id='{$key}'" : "data-input_type_q='marks' data-input_type='score' data-input_row_id='{$key}'" )." class='form-control pl-0 pr-0 font-18 text-center' name='{$column}' min='0' max='1000' type='number' value='{$kvalue}' {$readOnly}></td>";
                 } elseif($file_headers[$kkey] == "TEACHER REMARKS") {
                     $report_table .= "<td><input style='min-width:300px' type='text' data-input_method='remarks' data-input_type='score' data-input_row_id='{$key}' class='form-control' value='{$kvalue}'></td>";
                 } elseif($file_headers[$kkey] == "TEACHER ID") {
@@ -1245,6 +1259,10 @@ class Terminal_reports extends Myschoolgh {
             $defaultFontSize = "font-size:12px";
             $increaseFontSize = "font-size:18px";
 
+            // header("Content-Type: application/json");
+            // echo json_encode($report_data);
+            // exit;
+
             // loop through the report set
             foreach($report_data as $key => $student) {
 
@@ -1327,6 +1345,8 @@ class Terminal_reports extends Myschoolgh {
                         $table .= "<td style=\"border: 1px solid #dee2e6;\">{$score->course_name}</td>";
                         // get the scores
                         foreach($score->scores as $s_score) {
+                            if(!in_array($s_score['item'], ["sba", "marks"])) continue;
+                            $s_score = $s_score['score'] ?? 0;
                             $table .= "<td style=\"border: 1px solid #dee2e6;{$increaseFontSize}\" align=\"center\">".round($s_score, 2)."</td>";
                         }
                         $table .= "<td style=\"border: 1px solid #dee2e6;{$increaseFontSize}\" align=\"center\">".round($score->total_percentage, 2)."</td>";

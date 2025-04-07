@@ -102,6 +102,7 @@ if(empty($result_id)) {
                         "percentage" => $column->percentage,
                     ];
                     $ikey = strtolower($key == 'School Based Assessment' ? 'sba' : $key);
+                    $simplified_sba[$ikey] = $column->percentage;
                     $structured_list .= "
                     <tr>
                         <td width='50%'><label>{$key}</label></td>
@@ -152,6 +153,7 @@ if(empty($result_id)) {
                 $rawscore = $headers["column"]["{$clean_key}"]["raw_score"] ?? 0;
 
                 $simp_value = $simplified_sba[$s_key] ?? 0;
+                $marks = $marks > $simp_value ? $simp_value : $marks;
 
                 // append to the item
                 $marks_list .= "
@@ -168,7 +170,17 @@ if(empty($result_id)) {
                 $percent = $raw ? round((($marks * $cap) / $raw), 2) : 0;
                 $total_percentage_score += $percent;
             }
-            $totalPercentage = ($score->scores["sba"] ?? 0) + ($score->scores["marks"] ?? 0);
+
+            $sbaScore = $score->scores["sba"] ?? 0;
+            $sbaPercentage = $sbaScore > $simplified_sba["sba"] ? $simplified_sba["sba"] : $sbaScore;
+
+            $examsScore = $score->scores["marks"] ?? 0;
+            $examsPercentage = $examsScore > $simplified_sba["examination"] ? $simplified_sba["examination"] : $examsScore;
+
+            // calculate the total percentage
+            $totalPercentage = ($sbaPercentage ?? 0) + ($examsPercentage ?? 0);
+            $totalPercentage = $totalPercentage > 100 ? 100 : $totalPercentage;
+
             // append to the scores
             $scores_list .= "
             <tr data-result_row_id='{$score->report_id}_{$score->student_row_id}' data-result_student_id='{$score->student_item_id}'>
@@ -179,10 +191,10 @@ if(empty($result_id)) {
                 </td>
                 ".$marks_list."
                 <td align='center'>
-                    <span class='font-20' data-result_student_id='{$score->student_item_id}' data-input_row_id='{$score->student_row_id}' data-school_based_assessment='{$score->scores["sba"]}'>{$score->scores["sba"]}</span>
+                    <span class='font-20' data-result_student_id='{$score->student_item_id}' data-input_row_id='{$score->student_row_id}' data-school_based_assessment='{$sbaPercentage}'>{$sbaPercentage}</span>
                 </td>
                 <td align='center'>
-                    <span class='font-20' data-result_student_id='{$score->student_item_id}' data-input_row_id='{$score->student_row_id}' data-examination='{$score->scores["marks"]}'>{$score->scores["marks"]}</span>
+                    <span class='font-20' data-result_student_id='{$score->student_item_id}' data-input_row_id='{$score->student_row_id}' data-examination='{$examsPercentage}'>{$examsPercentage}</span>
                 </td>
                 <td align='center'>
                     <span class='font-20' data-result_student_id='{$score->student_item_id}' data-input_row_id='{$score->student_row_id}' data-student_percentage='{$totalPercentage}'>{$totalPercentage}%</span>
