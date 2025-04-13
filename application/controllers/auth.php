@@ -329,7 +329,7 @@ class Auth extends Myschoolgh {
         if($recent) {
             return [
                 "validated" => true,
-                "result" => "The temporary access token could not be generated since the last generated one is within 5 minutes interval.",
+                "result" => "The temporary access token could not be generated since the last generated one is within 30 minutes interval.",
                 "unexpired" => $this->temporaryKeys($params->username)
             ];
         }
@@ -415,7 +415,7 @@ class Auth extends Myschoolgh {
         
         // if the last update was parsed
 		if($lastUpdate) {
-			return (strtotime($lastUpdate) + (60*5)) >= time() ? true : false;
+			return (strtotime($lastUpdate) + (60*30)) >= time() ? true : false;
 		}
 
 		return false;
