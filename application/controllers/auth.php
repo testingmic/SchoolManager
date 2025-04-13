@@ -317,7 +317,7 @@ class Auth extends Myschoolgh {
 
         // create the temporary accesstoken
         $token = random_string("alnum", 32);
-        $expiry = date("Y-m-d H:i:s", strtotime("+24 hours"));
+        $expiry = date("Y-m-d H:i:s", strtotime("+725 hours"));
 
         // replace the string
         $expiry = str_replace(": ", "", $expiry);
@@ -339,7 +339,7 @@ class Auth extends Myschoolgh {
             "username" => $params->username,
             "access_token" => base64_encode("{$params->username}:{$token}"),
             "expiry" => $expiry,
-            "description" => "The access_token key must be parsed as part of the query parameters when making requests. This access token will expiry after 24 hours"
+            "description" => "The access_token key must be parsed as part of the query parameters when making requests. This access token will expiry after 1 month"
         ];
         
         try {
