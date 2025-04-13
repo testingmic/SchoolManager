@@ -20,7 +20,7 @@ class Endpoints extends Myschoolgh {
      * 
      * @return Object
      */
-    public function list(stdClass $params = null) {
+    public function list($params = null) {
 
         // filters
         $params->query = "1";
@@ -177,7 +177,7 @@ class Endpoints extends Myschoolgh {
      * 
      * @return Object
      */
-    public function update(stdClass $params = null) {
+    public function update($params = null) {
         
         try {
 
@@ -316,8 +316,8 @@ class Endpoints extends Myschoolgh {
                 $this->db->query("INSERT INTO users_api_keys 
                     SET user_id = '{$params->userId}', username = '{$defaultUser->username}', 
                     access_token = '".password_hash($token, PASSWORD_DEFAULT)."', access_type = 'permanent', 
-                    expiry_date = '".date("Y-m-d", strtotime("+6 month"))."', 
-                    expiry_timestamp = '".date("Y-m-d H:i:s", strtotime("+6 month"))."', 
+                    expiry_date = '".date("Y-m-d", strtotime("+24 month"))."', 
+                    expiry_timestamp = '".date("Y-m-d H:i:s", strtotime("+24 month"))."', 
                     requests_limit = '5000', access_key = '{$token}', client_id = '{$params->clientId}'
                 ");
 

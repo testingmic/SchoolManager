@@ -16,7 +16,7 @@ var extend_api_expiry = (api_id) => {
 var create_api_key = () => {
 	swal({
 		title: "Generate API Keys",
-		text: "Are you sure you want to create a new API Keys with a duration of 6 months?",
+		text: "Are you sure you want to create a new API Keys with a duration of 24 months?",
 		icon: 'warning',
 		buttons: true,
 		dangerMode: true,
