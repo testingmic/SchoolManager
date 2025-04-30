@@ -229,7 +229,12 @@ if(!$createAssessmentTest) {
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'assessments">Assessments List</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
-            </div>
+            </div>';
+            // if the term has ended
+            if($defaultUser->appPrefs->termEnded && ($isAdminAccountant || $isTutorAdmin)) {
+                $response->html .= academic_term_ended_dashboard_modal($defaultAcademics, $baseUrl);
+            }
+            $response->html .= '
             <div class="row">
                 <div class="col-12 col-sm-12 col-lg-12">
                     <div class="card">

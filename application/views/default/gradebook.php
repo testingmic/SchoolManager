@@ -519,7 +519,12 @@ $response->html = '
             <div class="breadcrumb-item active"><a href="'.$baseUrl.'courses">Subjects List</a></div>
             <div class="breadcrumb-item">'.$pageTitle.'</div>
         </div>
-    </div>
+    </div>';
+    // if the term has ended
+    if($defaultUser->appPrefs->termEnded && ($isAdminAccountant || $isTutorAdmin)) {
+        $response->html .= academic_term_ended_dashboard_modal($defaultAcademics, $baseUrl);
+    }
+    $response->html .= '
     <div class="row" id="course_lesson">
         '.(!empty($course) ?
             '<div class="col-md-8 mb-3 table-responsive width-100-per">

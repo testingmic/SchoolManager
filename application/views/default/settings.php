@@ -48,8 +48,14 @@ if(!$accessObject->hasAccess("manage", "settings")) {
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
-            </div>
-            <div class="row">
+            </div>';
+
+        // if the term has ended
+        if($defaultUser->appPrefs->termEnded && $isAdminAccountant) {
+            $response->html .= academic_term_ended_notification($defaultAcademics, $baseUrl);
+        }
+        
+        $response->html .= '<div class="row">
                 <div class="col-12 col-sm-12 col-lg-12">
                     <div class="card">
                         <div class="card-body">

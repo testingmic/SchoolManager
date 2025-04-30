@@ -393,7 +393,7 @@ if(!empty($client_id)) {
                                                     Please visit <a href='{$baseUrl}promote-students?history' class='text-white font-bold'>Promotions History Page</a> to rectify this issue before proceeding to close this {$academicSession}.
                                                 </div>" : null
                                             ).'
-                                            <div class="col-12 col-md-9">
+                                            <div class="col-12 col-md-12">
                                                 <div class="card">
                                                     <div class="card-body font-14">
                                                         <div class="mb-2 row">

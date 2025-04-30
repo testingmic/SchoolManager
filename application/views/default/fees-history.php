@@ -34,7 +34,7 @@ $classes_param = (object) [
 $classes_param->department_id = !empty($filter->department_id) ? $filter->department_id : null;
 $class_list = load_class("classes", "controllers")->list($classes_param)["data"];
 
-$date_range = $filter->date_range ?? date("Y-m-d", strtotime("monday this week")).":".date("Y-m-d", strtotime("sunday this week"));
+$date_range = $filter->date_range ?? date("Y-m-d", strtotime("-1 month")).":".date("Y-m-d");
 
 // begin the request parameter
 $param = (object) [
@@ -174,8 +174,14 @@ $response->html = '
             <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
             <div class="breadcrumb-item">Fees Payment History</div>
         </div>
-    </div>
-    <div class="row print_Fees_Collection" id="filter_Department_Class">
+    </div>';
+
+    // if the term has ended
+    if($defaultUser->appPrefs->termEnded && $isAdminAccountant) {
+        $response->html .= academic_term_ended_dashboard_modal($defaultAcademics, $baseUrl);
+    }
+
+    $response->html .= '<div class="row print_Fees_Collection" id="filter_Department_Class">
         <div class="col-xl-3 col-md-3 form-group">
             <label>Select Class</label>
             <select data-width="100%" class="form-control selectpicker" name="class_id">

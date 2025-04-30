@@ -377,7 +377,13 @@ if(!empty($user_id)) {
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'students">Students</a></div>
                     <div class="breadcrumb-item">'.strtoupper($data->name).'</div>
                 </div>
-            </div>
+            </div>';
+            // if the term has ended
+            if($defaultUser->appPrefs->termEnded && $isAdminAccountant) {
+                $response->html .= academic_term_ended_dashboard_modal($defaultAcademics, $baseUrl);
+            }
+
+            $response->html .= '
             <div class="section-body">
             <div class="row">
             <div class="col-md-3">

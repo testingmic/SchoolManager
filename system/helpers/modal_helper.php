@@ -382,6 +382,41 @@ function changed_password($title = null, $timer = null) {
 }
 
 /**
+ * Academic Term Ended Notification
+ * 
+ * @param StdClass $defaultAcademics
+ * @param String $baseUrl
+ * 
+ * @return String
+ */
+function academic_term_ended_notification($defaultAcademics, $baseUrl) {
+    return '
+    <div class="alert alert-danger text-center font-19">
+        The current Academic Term ended on <strong>'.date("jS F, Y", strtotime($defaultAcademics->term_ends)).'</strong>.
+        Click Here to <a href="'.$baseUrl.'schools/close_term"><strong>End the Academic Term</strong></a>. 
+        <br><strong>DO NOT</strong> change the <strong>Academic Year</strong> or <strong>Term</strong>
+        to reflect what you want. Only do so if the date was inserted incorrectly.
+    </div>';
+}
+
+/**
+ * Academic Term Ended Notification Modal
+ * 
+ * @param StdClass $defaultAcademics
+ * @param String $baseUrl
+ * 
+ * @return String
+ */
+function academic_term_ended_dashboard_modal($defaultAcademics, $baseUrl) {
+    return '
+    <div class="alert alert-danger text-center font-19">
+        The current Academic Term ended on <strong>'.date("jS F, Y", strtotime($defaultAcademics->term_ends)).'</strong>.
+        Go to settings to review the academic calendar or 
+        <a href="'.$baseUrl.'schools/close_term"><strong>End the Academic Term Now</strong></a>
+    </div>';
+}
+
+/**
  * Account Expired or Suspended
  * 
  * @return String

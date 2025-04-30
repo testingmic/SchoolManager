@@ -6,12 +6,12 @@ var end_Academic_Term = (action = "begin") => {
             <div class="card-body font-16">
                 <div class="text-center">
                     You have opted to end this <strong>Academic ${academicSession}</strong>.
-                    Once confirmed, you will be unable to use the system for not more than <strong>10 minutes</strong>.
+                    Once confirmed, you will be unable to use the system for not less than <strong>15 minutes</strong>.
                 </div>
                 <div class="mt-2 text-center">
                     This process is termed as <strong>propagation</strong> as the current term will be closed;
                     the fees owned by students will be taken into consideration and all outstanding
-                    assessments will be closed.
+                    assessments will be closed and forwarded to the next academic year and term.
                 </div>
                 <div class="mt-2 text-center pt-2 border-top">
                     <button id="proceed_term_closure" onclick="return end_Academic_Term('proceed')" class="btn btn-outline-success">PROCEED TO END ${academicSession.toUpperCase()}</button>

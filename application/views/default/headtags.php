@@ -168,7 +168,9 @@ load_helpers(['menu_helper']);
                                 <span><?= $clientPrefs->academics->academic_year ?></span> 
                                 <span>|</span>
                                 <span class="text-uppercase"><?= $clientPrefs->academics->academic_term ?> <?= $academicSession; ?></span>
-                                <?= ($endPermission && $defaultUser->appPrefs->termEnded ? "<span class='badge badge-danger notification'>Already Ended</span>" : ($endPermission ? "<span class='badge badge-success'>Active</span>" : null)); ?>
+                                <?= ($endPermission && $defaultUser->appPrefs->termEnded ? 
+                                    "<span class='badge badge-danger notification cursor' title='This academic year and term has been closed and forwarded to the next academic year and term.'>Term Ended</span>" : 
+                                    ($endPermission ? "<span class='badge badge-success'>Active</span>" : null)); ?>
                                 <br><span class="font-weight-light font-17 text-uppercase"><?= $defaultUser->name; ?> / <?= ucwords($defaultUser->user_type); ?></span>
                             </strong>
                         </a>

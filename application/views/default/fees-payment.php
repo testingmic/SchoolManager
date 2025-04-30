@@ -172,7 +172,14 @@ if(!$receivePayment) {
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'fees-history">Fees Payment List</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
-            </div>
+            </div>';
+            
+            // if the term has ended
+            if($defaultUser->appPrefs->termEnded && $isAdminAccountant) {
+                $response->html .= academic_term_ended_dashboard_modal($defaultAcademics, $baseUrl);
+            }
+
+            $response->html .= '
             <div class="section-body">
                 '.(!empty($student_id) && !empty($class_id) ? "<input id='auto_load_form' hidden type='hidden'>" : null).'
                 <div class="row mt-sm-4" id="filter_Department_Class">

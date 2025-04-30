@@ -548,6 +548,12 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
 
             // if an admin is logged in
             if($isAdmin) {
+
+                // if the term has ended
+                if($defaultUser->appPrefs->termEnded) {
+                    $response->html .= academic_term_ended_dashboard_modal($defaultAcademics, $baseUrl);
+                }
+
                 $response->html .=
                 '<div class="row">
                     <div class="col-xl-3 col-lg-6 col-md-6">

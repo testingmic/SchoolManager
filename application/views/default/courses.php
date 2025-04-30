@@ -98,7 +98,13 @@ $response->html = '
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">Subjects List</div>
             </div>
-        </div>
+        </div>';
+        // if the term has ended
+        if($defaultUser->appPrefs->termEnded && $isAdminAccountant) {
+            $response->html .= academic_term_ended_dashboard_modal($defaultAcademics, $baseUrl);
+        }
+
+        $response->html .= '
         <div class="row" id="filter_Department_Class">
             <div class="col-xl-4 '.(!$hasFiltering ? 'hidden': '').' col-md-4 col-12 form-group">
                 <label>Select Department</label>
