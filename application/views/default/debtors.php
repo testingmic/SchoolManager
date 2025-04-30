@@ -81,8 +81,8 @@ if(!$accessObject->hasAccess("view", "fees")) {
         $param = (object) [
             "academics" => $defaultAcademics,
             "clientId" => $clientId, 
-            "academic_year" => $defaultAcademics->academic_year ?? null,
-            "academic_term" => $defaultAcademics->academic_term ?? null,
+            "academic_year" => $filter->academic_year ?? null,
+            "academic_term" => $filter->academic_term ?? null,
             "limit" => $myClass->global_limit,
             // "client_data" => $defaultClientData, 
             "class_id" => $filter->class_id ?? null,
