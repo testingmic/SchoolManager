@@ -62,7 +62,7 @@ class Crons {
 
             date_default_timezone_set('UTC');
 
-            print "Runing Cron Activity @ ".date("Y-m-d h:i:sA")."\n";
+            print "Runing Cron Activity @ ".date("Y-m-d H:i:s")."\n";
 
             // set the current timestamp
             $timestamp = date("Y-m-d H:i:s");
