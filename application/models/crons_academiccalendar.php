@@ -20,6 +20,8 @@ class Crons {
 		$this->baseUrl = $this->ini_data["base_url"];
 		$this->rootUrl = $this->ini_data["root_url"];
 		$this->dbConn();
+
+        date_default_timezone_set('UTC');
 	}
 	
 	/**
@@ -63,11 +65,11 @@ class Crons {
             // set the current timestamp
             $timestamp = date("Y-m-d h:i:s");
 
-            print "SELECT * FROM cron_scheduler WHERE status = ? AND active_date < '{$timestamp}' AND cron_type = ? ORDER BY id ASC LIMIT 5\n\n";
+            print "SELECT * FROM cron_scheduler WHERE status = '0' AND active_date < '{$timestamp}' AND cron_type = 'end_academic_term' ORDER BY id ASC LIMIT 5\n\n";
 
 			// prepare and execute the statement
-			$stmt = $this->db->prepare("SELECT * FROM cron_scheduler WHERE status = ? AND active_date < '{$timestamp}' AND cron_type = ? ORDER BY id ASC LIMIT 5");
-			$stmt->execute([0, "end_academic_term"]);
+			$stmt = $this->db->prepare("SELECT * FROM cron_scheduler WHERE status = '0' AND active_date < '{$timestamp}' AND cron_type = ? ORDER BY id ASC LIMIT 5");
+			$stmt->execute(["end_academic_term"]);
 
 			// loop through the result
 			while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
