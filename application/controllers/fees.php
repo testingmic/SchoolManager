@@ -834,7 +834,6 @@ class Fees extends Myschoolgh {
 
             /**  */
             $balance = $balance;
-            $discount = number_format($discount, 2);
             $amount_due = number_format($amount_due, 2);
             $amount_paid = number_format($amount_paid, 2);
             
@@ -846,6 +845,7 @@ class Fees extends Myschoolgh {
             $html_form .= "<td><span class='font-17'>{$currency} {$amount_due}</span></td>";
             $html_form .= "</tr>";
 
+            // if the arrears is greater than 0
             if(!empty($studentInfo) && !empty($studentInfo['arrears'])) {
                 $html_form .= "<tr>";
                 $html_form .= "<td class='font-weight-bold' width='35%'>Previous Arrears:</td>";
@@ -855,10 +855,13 @@ class Fees extends Myschoolgh {
                 $balance += $studentInfo['arrears'];
             }
 
-            $html_form .= "<tr>";
-            $html_form .= "<td class='font-weight-bold' width='35%'>Discount Amount:</td>";
-            $html_form .= "<td>{$currency} {$discount}</td>";
-            $html_form .= "</tr>";
+            // if the discount is greater than 0
+            if($discount > 0) {
+                $html_form .= "<tr>";
+                $html_form .= "<td class='font-weight-bold' width='35%'>Discount Amount:</td>";
+                $html_form .= "<td>{$currency} ".number_format($discount, 2)."</td>";
+                $html_form .= "</tr>";
+            }
             
             $html_form .= "<tr>";
             $html_form .= "<td class='font-weight-bold'>Amount Paid:</td>";
@@ -1546,9 +1549,6 @@ class Fees extends Myschoolgh {
             
             // get the preference of the client
             $preference = $this->iclient->client_preferences->labels;
-            
-            // begin transaction
-            $this->db->beginTransaction();
 
             /** Validate the amount */
             if(!$params->amount) {
@@ -1567,15 +1567,47 @@ class Fees extends Myschoolgh {
 
             /** If no allocation record was found */
             if(empty($paymentRecord)) {
-
                 return ["code" => 203, "data" => "Sorry! No fees allocation for this selected category found."];
-
             }
 
             /** Validate email address */
             if(!empty($params->email_address) && !filter_var($params->email_address, FILTER_VALIDATE_EMAIL)) {
                 return ["code" => 203, "data" => "Sorry! A valid email address is required."];
             }
+
+            if(!empty($paymentRecord) && is_array($paymentRecord)) {
+
+                if(!empty($paymentRecord[0]->arrears)) {
+
+                    $arrears = $paymentRecord[0]->arrears;
+
+                    $amountPayable = $params->amount;
+                    if($params->amount > $arrears) {
+                        $amountPayable = $arrears;
+                        $params->amount = $params->amount - $arrears;
+                    } else {
+                        $params->amount = 0;
+                    }
+
+                    $newpayload = (object) [
+                        'amount' => $amountPayable,
+                        'student_id' => $params->student_id,
+                        'payment_method' => $params->payment_method,
+                        'contact_number' => $params->contact_number,
+                        'clientId' => $params->clientId,
+                        'academic_term' => $params->academic_term,
+                        'academic_year' => $params->academic_year,
+                        'userId' => $params->userId,
+                        'requestMethod' => $params->requestMethod,
+                        'userData' => $params->userData,
+                        'doNotRemoveReceipt' => true
+                    ];
+                    $payArrears = load_class("arrears", "controllers", $newpayload)->make_payment($newpayload);
+                }
+            }
+
+            // begin transaction
+            $this->db->beginTransaction();
 
             // confirm if the data parsed is an array
             if(is_array($paymentRecord)) {

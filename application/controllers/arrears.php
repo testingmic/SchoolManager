@@ -503,7 +503,9 @@ class Arrears extends Myschoolgh {
             $this->db->commit();
 
             // unset the sessions
-            $this->session->remove(["e_payment_transaction_id"]);
+            if(empty($params->doNotRemoveReceipt)) {
+                $this->session->remove(["e_payment_transaction_id"]);
+            }
 
             // return the success message
             return [
