@@ -122,7 +122,7 @@ if(!$receivePayment) {
             $params->category_id = $data->category_id;
 
             // load the last payment information
-            $payment_form = $feesClass->payment_form($params)["data"];
+            $payment_form = $feesClass->payment_form($params, $student_info)["data"];
             $payment_form = $payment_form["form"];
 
             // append to the params

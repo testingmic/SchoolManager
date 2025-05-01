@@ -617,13 +617,20 @@ class Fees extends Myschoolgh {
      * 
      * @return Array
      */
-    public function payment_form(stdClass $params) {
+    public function payment_form(stdClass $params, $studentInfo = []) {
 
         global $defaultCurrency;
 
         /** Load the payment information that has been allocated to the student */
         $allocation = isset($params->allocation_info) ? $params->allocation_info : $this->confirm_student_payment_record($params);
         
+        // check for the arrears of the student
+        if(empty($studentInfo) && !empty($allocation)) {
+            $studentInfo = [
+                'arrears' => $allocation[0]->arrears
+            ];
+        }
+
         /** If no allocation record was found */
         if(!empty($params->category_id) && empty($allocation)) {
             
@@ -801,6 +808,13 @@ class Fees extends Myschoolgh {
                 $owings_list .= "</tr>";
             }
 
+            if(!empty($studentInfo) && !empty($studentInfo['arrears'])) {
+                $owings_list .= "<tr>";
+                $owings_list .= "<td colspan='3' class='font-weight-bold'>Arrears</td>";
+                $owings_list .= "<td class='font-weight-bold'>".number_format($studentInfo['arrears'], 2)."</td>";
+                $owings_list .= "</tr>";
+            }
+
             $owings_list .= "</table>";
 
             /** Set the label for the amount */
@@ -831,6 +845,15 @@ class Fees extends Myschoolgh {
             $html_form .= "<td class='font-weight-bold' width='35%'>Amount Due:</td>";
             $html_form .= "<td><span class='font-17'>{$currency} {$amount_due}</span></td>";
             $html_form .= "</tr>";
+
+            if(!empty($studentInfo) && !empty($studentInfo['arrears'])) {
+                $html_form .= "<tr>";
+                $html_form .= "<td class='font-weight-bold' width='35%'>Previous Arrears:</td>";
+                $html_form .= "<td><span class='font-17'>{$currency} ".number_format($studentInfo['arrears'], 2)."</span></td>";
+                $html_form .= "</tr>";
+
+                $balance += $studentInfo['arrears'];
+            }
 
             $html_form .= "<tr>";
             $html_form .= "<td class='font-weight-bold' width='35%'>Discount Amount:</td>";
