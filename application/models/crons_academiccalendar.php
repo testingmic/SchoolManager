@@ -60,10 +60,12 @@ class Crons {
 
 		try {
 
+            date_default_timezone_set('UTC');
+
             print "Runing Cron Activity @ ".date("Y-m-d h:i:sA")."\n";
 
             // set the current timestamp
-            $timestamp = date("Y-m-d h:i:s");
+            $timestamp = date("Y-m-d H:i:s");
 
             print "SELECT * FROM cron_scheduler WHERE status = '0' AND active_date < '{$timestamp}' AND cron_type = 'end_academic_term' ORDER BY id ASC LIMIT 5\n\n";
 
