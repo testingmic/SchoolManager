@@ -165,6 +165,10 @@ if(!empty($client_id)) {
             $promotion_log = $myClass->pushQuery("count(*) AS list_count", "promotions_history", "client_id='{$clientId}' AND status='Pending' LIMIT {$myClass->temporal_maximum}");
         }
 
+        // set the url
+        $url_link = $SITEURL[1] ?? null;
+        $closeTerm = (bool) ($url_link ==  "close_term");
+
         // init
         $limits_analysis = "";
 
@@ -270,7 +274,7 @@ if(!empty($client_id)) {
                             <div class="padding-20">
                                 <ul class="nav nav-tabs" id="myTab2" role="tablist">
                                     <li class="nav-item">
-                                        <a class="nav-link active" id="account-tab2" data-toggle="tab" href="#account" role="tab" aria-selected="true">ACCOUNT</a>
+                                        <a class="nav-link '.(!$closeTerm ? 'active' : null).'" id="account-tab2" data-toggle="tab" href="#account" role="tab" aria-selected="true">ACCOUNT</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="account_analysis-tab2" data-toggle="tab" href="#account_analysis" role="tab" aria-selected="true">ANALYSIS</a>
@@ -291,11 +295,11 @@ if(!empty($client_id)) {
                                     </li>' : null).'
                                     '.($accessObject->hasAccess("close", "settings") && !$isSupport  ? 
                                     '<li class="nav-item">
-                                        <a class="nav-link" id="close_session-tab2" data-toggle="tab" href="#close_session" role="tab" aria-selected="true">CLOSE '.$academicSession.'</a>
+                                        <a class="nav-link '.($closeTerm ? 'active' : null).'" id="close_session-tab2" data-toggle="tab" href="#close_session" role="tab" aria-selected="true">CLOSE '.$academicSession.'</a>
                                     </li>' : null).'
                                 </ul>
                                 <div class="tab-content tab-bordered" id="myTab3Content">
-                                    <div class="tab-pane fade show active" id="account" role="tabpanel" aria-labelledby="account-tab2">
+                                    <div class="tab-pane fade '.(!$closeTerm ? 'show active' : null).'" id="account" role="tabpanel" aria-labelledby="account-tab2">
                                         <div class="row">
                                             <div class="col-lg-12 table-responsive">
                                                 <table class="table table-striped table-bordered table-md">
@@ -383,7 +387,7 @@ if(!empty($client_id)) {
                                         </div>
                                     </div>
                                     ' : '
-                                    <div class="tab-pane fade" id="close_session" role="tabpanel" aria-labelledby="close_session-tab2">
+                                    <div class="tab-pane fade '.($closeTerm ? 'show active' : null).'" id="close_session" role="tabpanel" aria-labelledby="close_session-tab2">
 
 
                                         <div class="row">
@@ -445,7 +449,7 @@ if(!empty($client_id)) {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-9" id="academic_Term_Processing"></div>
+                                            <div class="col-12 col-md-12 text-20" id="academic_Term_Processing"></div>
                                         </div>
 
                                     </div>

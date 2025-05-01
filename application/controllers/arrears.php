@@ -177,6 +177,7 @@ class Arrears extends Myschoolgh {
             ];
 
         } catch(PDOException $e) {
+            print $e->getMessage();exit;
             // return an unexpected error notice
             return $this->unexpected_error;
         }

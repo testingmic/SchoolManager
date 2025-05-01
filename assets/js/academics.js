@@ -3,7 +3,7 @@ var end_Academic_Term = (action = "begin") => {
     if (action === "begin") {
         $display_div.html(`
         <div class="card">
-            <div class="card-body font-16">
+            <div class="card-body font-20">
                 <div class="text-center">
                     You have opted to end this <strong>Academic ${academicSession}</strong>.
                     Once confirmed, you will be unable to use the system for not less than <strong>15 minutes</strong>.

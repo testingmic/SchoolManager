@@ -290,10 +290,13 @@ function propagating_data($clientData) {
             <div class="mt-3 text-center font-18">
                 <div class="page-inner">
                     <div class="page-description">
-                        <h3>Propagating Data</h3>
+                        <h3>ARCHIVAL & SETUP</h3>
                     </div>
                     <div class="text-danger">
-                        Please wait while the process completes <i class="fa fa-spin fa-spinner"></i>
+                        The previous academic term has been closed. 
+                        Please wait while the system processes the data and forwards it to the next academic year and term.
+                        This <strong>Transitioning process</strong> may take at most <strong>15 minutes</strong> to complete.
+                        <i class="fa fa-spin fa-spinner"></i>
                     </div>
                 </div>
             </div>

@@ -71,137 +71,47 @@ if(!$accessObject->hasAccess("view", "fees")) {
     $total_term_bill_arrears = 0;
     $total_term_bill_total = 0;
 
-    // load the class debtors list
-    if(!empty($filter->class_id)) {
 
-        // set the user status
-        $user_status = $filter->user_status ?? "Active";
+    // set the user status
+    $user_status = $filter->user_status ?? "Active";
 
-        // set the parameters
-        $param = (object) [
-            "academics" => $defaultAcademics,
-            "clientId" => $clientId, 
-            "academic_year" => $filter->academic_year ?? null,
-            "academic_term" => $filter->academic_term ?? null,
-            "limit" => $myClass->global_limit,
-            // "client_data" => $defaultClientData, 
-            "class_id" => $filter->class_id ?? null,
-            "user_status" => $user_status
-        ];
-        // create a new arrears object
-        $arrearsObj = load_class("arrears", "controllers", $param);
+    // set the parameters
+    $param = (object) [
+        "academics" => $defaultAcademics,
+        "clientId" => $clientId, 
+        "academic_year" => $defaultAcademics->academic_year ?? null,
+        "academic_term" => $defaultAcademics->academic_term ?? null,
+        "limit" => $myClass->global_limit,
+        // "client_data" => $defaultClientData, 
+        "class_id" => $filter->class_id ?? null,
+        "user_status" => $user_status
+    ];
+    // create a new arrears object
+    $arrearsObj = load_class("arrears", "controllers", $param);
 
-        // get the list of all debtors
-        $arrears_array = $arrearsObj->list($param);
-        $students_ids = [];
+    // get the list of all debtors
+    $arrears_array = $arrearsObj->list($param);
+    $students_ids = [];
 
-        // initial value
-        $count = 0;
+    // initial value
+    $count = 0;
 
-        // if the fees arrears not empty
-        if(!empty($arrears_array["data"])) {
+    // if the fees arrears not empty
+    if(!empty($arrears_array["data"])) {
 
-            // loop through the arrears details
-            foreach($arrears_array["data"] as $key => $student) {
+        // loop through the arrears details
+        foreach($arrears_array["data"] as $key => $student) {
 
-                // append to the array list
-                $students_ids[] = $student->_student_id;
+            // append to the array list
+            $students_ids[] = $student->_student_id;
 
-                // if the total is more than 1
-                if(($student->arrears_total > 0) || ($student->debt > 0)) {
+            // if the total is more than 1
+            if(($student->arrears_total > 0) || ($student->debt > 0)) {
 
-                    // append to the class summary information
-                    $total = $student->debt + $student->arrears_total;
-
-                    // calculate the percentage
-                    $percentage = $student->amount_paid > 0 ? round((100 - ($student->amount_paid / $student->term_bill) * 100), 2) : 100;
-
-                    // percentage range
-                    if(($percentage >= $from) && ($percentage <= $to)) {
-
-                        // increment the total breakdown
-                        $total_term_bill += $student->term_bill;
-                        $total_term_bill_paid += $student->amount_paid;
-                        $total_term_bill_balance += $student->debt;
-                        $total_term_bill_arrears += $student->arrears_total;
-                        $total_term_bill_total += $total; 
-
-                        // set the button
-                        $action = "";
-                        if($receivePayment) {
-                            $action = "<td align='center'>";
-                            $action .= "<span title='Click to pay current fees balance' onclick='load(\"fees-payment?student_id={$student->student_id}&class_id={$student->class_id}\");' class='btn mb-1 btn-sm btn-outline-success'>Pay Fees</span>";
-
-                            if($student->arrears_total > 0) {
-                                $action .= "&nbsp;<span title='Click to pay previous fees arrears' onclick='load(\"arrears/{$student->student_id}\");' class='btn mb-1 btn-sm btn-outline-primary'>Pay Arrears</span>";
-                            }
-                            
-                            $action .= "</td>";
-                        }
-                        $count++;
-
-                        // append to the list
-                        $class_debtors_list .= "
-                        <tr>
-                            <td>{$count}</td>
-                            <td>
-                                <div class='d-flex text-uppercase justify-content-start'>
-                                    <div>
-                                        <span class='user_name' onclick='load(\"student/{$student->student_id}\");'>".strtoupper($student->student_info->name)."</span> <br>
-                                        <strong>{$student->class_name}</strong><br>
-                                        REG. ID: <strong>{$student->student_info->unique_id}</strong><br>
-                                        ".$myClass->the_status_label($student->user_status)."
-                                    </div>
-                                </div>
-                            </td>
-                            <td>{$defaultCurrency} {$student->term_bill}</td>
-                            <td>{$defaultCurrency} {$student->amount_paid}</td>
-                            <td>{$defaultCurrency} {$student->debt}</td>
-                            <td>{$defaultCurrency} {$student->arrears_total}</td>
-                            <td>{$defaultCurrency} {$total}</td>
-                            <td align='center'>{$percentage}%</td>
-                            {$action}
-                        </tr>";
-
-                    }
-
-                }
-
-            }
-
-        }
-
-        // get the list of students who do not appear in the list
-        $other_students = $myClass->pushQuery(
-            "a.name, c.id AS class_id, c.name AS class_name, a.unique_id, a.image, a.item_id, a.user_status,
-                (
-                    SELECT sum(b.amount_due) FROM fees_payments b 
-                    WHERE b.student_id = a.item_id AND b.academic_term = '{$defaultAcademics->academic_term}'
-                        AND b.academic_year = '{$defaultAcademics->academic_year}' AND b.exempted='0'
-                ) AS term_bill,
-                (
-                    SELECT sum(b.amount_paid) FROM fees_payments b 
-                    WHERE b.student_id = a.item_id AND b.academic_term = '{$defaultAcademics->academic_term}'
-                        AND b.academic_year = '{$defaultAcademics->academic_year}' AND b.exempted='0'
-                ) AS amount_paid,
-                (
-                    SELECT sum(b.balance) FROM fees_payments b 
-                    WHERE b.student_id = a.item_id AND b.academic_term = '{$defaultAcademics->academic_term}'
-                        AND b.academic_year = '{$defaultAcademics->academic_year}' AND b.exempted='0'
-                ) AS debt
-            ", 
-            "users a LEFT JOIN classes c ON c.id = a.class_id", 
-            "a.client_id='{$clientId}' ".(!empty($students_ids) ? "AND a.id NOT IN {$myClass->inList($students_ids)}" : null)."
-                ".(!empty($filter->class_id) ? " AND c.id IN {$myClass->inList($filter->class_id)}" : "")."
-                AND a.user_type='student' AND a.status='1' AND a.user_status IN {$myClass->inList($user_status)}");
-
-        // loop through the students list
-        foreach($other_students as $student) {
-
-            if($student->debt > 0) {
                 // append to the class summary information
-                $total = $student->debt;
+                $total = $student->debt + $student->arrears_total;
 
+                // calculate the percentage
                 $percentage = $student->amount_paid > 0 ? round((100 - ($student->amount_paid / $student->term_bill) * 100), 2) : 100;
 
                 // percentage range
@@ -211,18 +121,23 @@ if(!$accessObject->hasAccess("view", "fees")) {
                     $total_term_bill += $student->term_bill;
                     $total_term_bill_paid += $student->amount_paid;
                     $total_term_bill_balance += $student->debt;
-                    $total_term_bill_total += $total;
-                    
+                    $total_term_bill_arrears += $student->arrears_total;
+                    $total_term_bill_total += $total; 
+
                     // set the button
                     $action = "";
                     if($receivePayment) {
                         $action = "<td align='center'>";
-                        $action .= "&nbsp;<button title='Click to pay current fees balance' onclick='load(\"fees-payment?student_id={$student->item_id}&class_id={$student->class_id}\");' class='btn btn-sm btn-outline-primary'>Pay Fees</button>";
+                        $action .= "<span title='Click to pay current fees balance' onclick='load(\"fees-payment?student_id={$student->student_id}&class_id={$student->class_id}\");' class='btn mb-1 btn-sm btn-outline-success'>Pay Fees</span>";
+
+                        if($student->arrears_total > 0) {
+                            $action .= "&nbsp;<span title='Click to pay previous fees arrears' onclick='load(\"arrears/{$student->student_id}\");' class='btn mb-1 btn-sm btn-outline-primary'>Pay Arrears</span>";
+                        }
+                        
                         $action .= "</td>";
                     }
-                    
                     $count++;
-                
+
                     // append to the list
                     $class_debtors_list .= "
                     <tr>
@@ -230,9 +145,9 @@ if(!$accessObject->hasAccess("view", "fees")) {
                         <td>
                             <div class='d-flex text-uppercase justify-content-start'>
                                 <div>
-                                    <span class='user_name' onclick='load(\"student/{$student->item_id}\");'>".strtoupper($student->name)."</span> <br>
+                                    <span class='user_name' onclick='load(\"student/{$student->student_id}\");'>".strtoupper($student->student_info->name)."</span> <br>
                                     <strong>{$student->class_name}</strong><br>
-                                    <strong>{$student->unique_id}</strong><br>
+                                    REG. ID: <strong>{$student->student_info->unique_id}</strong><br>
                                     ".$myClass->the_status_label($student->user_status)."
                                 </div>
                             </div>
@@ -240,37 +155,118 @@ if(!$accessObject->hasAccess("view", "fees")) {
                         <td>{$defaultCurrency} {$student->term_bill}</td>
                         <td>{$defaultCurrency} {$student->amount_paid}</td>
                         <td>{$defaultCurrency} {$student->debt}</td>
-                        <td>{$defaultCurrency} 0</td>
+                        <td>{$defaultCurrency} {$student->arrears_total}</td>
                         <td>{$defaultCurrency} {$total}</td>
                         <td align='center'>{$percentage}%</td>
                         {$action}
                     </tr>";
+
                 }
 
             }
+
         }
 
-        // if the class debtors list is not empty
-        if(!empty($class_debtors_list)) {
+    }
 
-            // calculate the percentage
-            $percentage = $total_term_bill_paid > 0 ? round((100 - ($total_term_bill_paid / $total_term_bill) * 100), 2) : 100;
+    // get the list of students who do not appear in the list
+    $other_students = $myClass->pushQuery(
+        "a.name, c.id AS class_id, c.name AS class_name, a.unique_id, a.image, a.item_id, a.user_status,
+            (
+                SELECT sum(b.amount_due) FROM fees_payments b 
+                WHERE b.student_id = a.item_id AND b.academic_term = '{$defaultAcademics->academic_term}'
+                    AND b.academic_year = '{$defaultAcademics->academic_year}' AND b.exempted='0'
+            ) AS term_bill,
+            (
+                SELECT sum(b.amount_paid) FROM fees_payments b 
+                WHERE b.student_id = a.item_id AND b.academic_term = '{$defaultAcademics->academic_term}'
+                    AND b.academic_year = '{$defaultAcademics->academic_year}' AND b.exempted='0'
+            ) AS amount_paid,
+            (
+                SELECT sum(b.balance) FROM fees_payments b 
+                WHERE b.student_id = a.item_id AND b.academic_term = '{$defaultAcademics->academic_term}'
+                    AND b.academic_year = '{$defaultAcademics->academic_year}' AND b.exempted='0'
+            ) AS debt
+        ", 
+        "users a LEFT JOIN classes c ON c.id = a.class_id", 
+        "a.client_id='{$clientId}' ".(!empty($students_ids) ? "AND a.id NOT IN {$myClass->inList($students_ids)}" : null)."
+            ".(!empty($filter->class_id) ? " AND c.id IN {$myClass->inList($filter->class_id)}" : "")."
+            AND a.user_type='student' AND a.status='1' AND a.user_status IN {$myClass->inList($user_status)}");
+
+    // loop through the students list
+    foreach($other_students as $student) {
+
+        if($student->debt > 0) {
+            // append to the class summary information
+            $total = $student->debt;
+
+            $percentage = $student->amount_paid > 0 ? round((100 - ($student->amount_paid / $student->term_bill) * 100), 2) : 100;
+
+            // percentage range
+            if(($percentage >= $from) && ($percentage <= $to)) {
+
+                // increment the total breakdown
+                $total_term_bill += $student->term_bill;
+                $total_term_bill_paid += $student->amount_paid;
+                $total_term_bill_balance += $student->debt;
+                $total_term_bill_total += $total;
+                
+                // set the button
+                $action = "";
+                if($receivePayment) {
+                    $action = "<td align='center'>";
+                    $action .= "&nbsp;<button title='Click to pay current fees balance' onclick='load(\"fees-payment?student_id={$student->item_id}&class_id={$student->class_id}\");' class='btn btn-sm btn-outline-primary'>Pay Fees</button>";
+                    $action .= "</td>";
+                }
+                
+                $count++;
             
-            // perpare the final row for summation
-            $class_debtors_list .= "
-                <tr class='font-bold font-14'>
-                    <td class='text-white'>".($count+1)."</td>
-                    <td>SUMMARY TOTAL</td>
-                    <td>{$defaultCurrency} ".number_format($total_term_bill, 2)."</td>
-                    <td>{$defaultCurrency} ".number_format($total_term_bill_paid, 2)."</td>
-                    <td>{$defaultCurrency} ".number_format($total_term_bill_balance, 2)."</td>
-                    <td>{$defaultCurrency} ".number_format($total_term_bill_arrears, 2)."</td>
-                    <td>{$defaultCurrency} ".number_format($total_term_bill_total, 2)."</td>
+                // append to the list
+                $class_debtors_list .= "
+                <tr>
+                    <td>{$count}</td>
+                    <td>
+                        <div class='d-flex text-uppercase justify-content-start'>
+                            <div>
+                                <span class='user_name' onclick='load(\"student/{$student->item_id}\");'>".strtoupper($student->name)."</span> <br>
+                                <strong>{$student->class_name}</strong><br>
+                                <strong>{$student->unique_id}</strong><br>
+                                ".$myClass->the_status_label($student->user_status)."
+                            </div>
+                        </div>
+                    </td>
+                    <td>{$defaultCurrency} {$student->term_bill}</td>
+                    <td>{$defaultCurrency} {$student->amount_paid}</td>
+                    <td>{$defaultCurrency} {$student->debt}</td>
+                    <td>{$defaultCurrency} 0</td>
+                    <td>{$defaultCurrency} {$total}</td>
                     <td align='center'>{$percentage}%</td>
-                    <td align='center'></td>
+                    {$action}
                 </tr>";
-        }
+            }
 
+        }
+    }
+
+    // if the class debtors list is not empty
+    if(!empty($class_debtors_list)) {
+
+        // calculate the percentage
+        $percentage = $total_term_bill_paid > 0 ? round((100 - ($total_term_bill_paid / $total_term_bill) * 100), 2) : 100;
+        
+        // perpare the final row for summation
+        $class_debtors_list .= "
+            <tr class='font-bold font-14'>
+                <td class='text-white'>".($count+1)."</td>
+                <td>SUMMARY TOTAL</td>
+                <td>{$defaultCurrency} ".number_format($total_term_bill, 2)."</td>
+                <td>{$defaultCurrency} ".number_format($total_term_bill_paid, 2)."</td>
+                <td>{$defaultCurrency} ".number_format($total_term_bill_balance, 2)."</td>
+                <td>{$defaultCurrency} ".number_format($total_term_bill_arrears, 2)."</td>
+                <td>{$defaultCurrency} ".number_format($total_term_bill_total, 2)."</td>
+                <td align='center'>{$percentage}%</td>
+                <td align='center'></td>
+            </tr>";
     }
 
     $response->scripts = ["assets/js/debtors.js"];
