@@ -70,7 +70,7 @@ class Crons {
             print "SELECT * FROM cron_scheduler WHERE status = '0' AND active_date < '{$timestamp}' AND cron_type = 'end_academic_term' ORDER BY id ASC LIMIT 5\n\n";
 
 			// prepare and execute the statement
-			$stmt = $this->db->prepare("SELECT * FROM cron_scheduler WHERE status = '0' AND active_date < '{$timestamp}' AND cron_type = ? ORDER BY id ASC LIMIT 5");
+			$stmt = $this->db->prepare("SELECT * FROM cron_scheduler WHERE status = '0' AND active_date < '{$timestamp}' AND cron_type = ? ORDER BY id ASC LIMIT 20");
 			$stmt->execute(["end_academic_term"]);
 
 			// loop through the result
@@ -84,6 +84,8 @@ class Crons {
 
 				// update the cron status
 				$this->db->query("UPDATE cron_scheduler SET date_processed=now(), status='1' WHERE id='{$result->id}' LIMIT 1");
+
+                sleep(1);
 			}
             
             print "Runing Cron Activity Ended @ ".date("Y-m-d h:i:sA")."\n";
@@ -343,8 +345,6 @@ class Crons {
 
             // begin transaction
             $this->db->beginTransaction();
-
-            print_r($client_data);exit;
 
             // confirm that the status is propagation of record
             if($client_data->client_state === "Propagation") {
