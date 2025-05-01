@@ -338,6 +338,8 @@ class Crons {
             // begin transaction
             $this->db->beginTransaction();
 
+            print_r($client_data);exit;
+
             // confirm that the status is propagation of record
             if($client_data->client_state === "Propagation") {
 
