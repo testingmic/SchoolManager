@@ -8,7 +8,7 @@ class Users extends Myschoolgh {
 	public $fees_category_count;
 	
 	# start the construct
-	public function __construct(stdClass $data = null) {
+	public function __construct($data = null) {
 		parent::__construct();
 
 		$this->permission_denied = "Sorry! You do not have the required permission to perform this action.";

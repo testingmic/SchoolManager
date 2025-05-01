@@ -288,7 +288,7 @@ function propagating_data($clientData) {
     <section class="section">
         <div class="container">
             <div class="mt-3 text-center font-18">
-                <div class="page-inner">
+                <div class="page-inner" id="transitioning_data">
                     <div class="page-description">
                         <h3>ARCHIVAL & SETUP</h3>
                     </div>

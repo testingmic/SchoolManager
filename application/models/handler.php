@@ -160,6 +160,34 @@ class Handler {
 
         }
 
+        if(($this->inner_url == "devlog") && ($this->outer_url == "transitioning")) {
+
+            // set the default result
+            $this->response->result = "Propagation";
+
+            // // loop through the list
+            if(!empty($this->session->clientId)) {
+
+                // prepare and execute the statement
+                $stmt = $this->db->prepare("
+                    SELECT a.*, b.item_id AS default_account_id, b.balance AS default_account_balance
+                    FROM clients_accounts a
+                    LEFT JOIN accounts b ON b.client_id = a.client_id AND b.default_account = '1' AND b.status = '1'
+                    WHERE a.client_id = ? AND a.client_status = ? LIMIT 1
+                ");
+                $stmt->execute([$this->session->clientId, 1]);
+                $result = $stmt->fetch(PDO::FETCH_OBJ);
+
+                if(!empty($result)) {
+                    if($result->client_state == "Active") {
+                        $this->response->result = "Active";
+                    }
+                }
+            }
+
+            die(json_encode($this->response));
+        }
+        
     }
 
     /**

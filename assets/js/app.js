@@ -1450,4 +1450,15 @@ $(window).on("load", function() {
             });
         }, 30000);
     }
+    if($(`div[id="transitioning_data"]`).length) {
+        setInterval(() => {
+            $.post(`${baseUrl}api/devlog/transitioning`, { activeCheck: true }, (response) => {
+                if(typeof response.result !== "undefined") {
+                    if(response.result == "Active") {
+                        window.location.reload();
+                    }
+                }
+            });
+        }, 30000);
+    }
 });
