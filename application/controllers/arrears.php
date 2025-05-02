@@ -509,6 +509,7 @@ class Arrears extends Myschoolgh {
 
             // return the success message
             return [
+                "code" => 200,
                 "data" => "Fees Arrears Payment was successfully recorded.",
                 "additional" => [ "payment_id" => $payment_id ]
             ];

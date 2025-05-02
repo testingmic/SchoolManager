@@ -741,6 +741,17 @@ class Fees extends Myschoolgh {
                 </tr>";
             $data_content = null;
 
+            if(!empty($allocation)) {
+                foreach($allocation as $fees) {
+                    if(!empty($fees->last_payment_id)) {
+                        $last_payment_id[] = $fees->last_payment_id;
+                    }
+                }
+                // $last_payment_id = array_unique($last_payment_id);
+                // print_r($last_payment_id);
+                // exit;
+            }
+
             // loop through the allocations list
             foreach($allocation as $fees) {
 
@@ -1575,6 +1586,9 @@ class Fees extends Myschoolgh {
                 return ["code" => 203, "data" => "Sorry! A valid email address is required."];
             }
 
+            /** Re use payment id */
+            $reUsePaymentId = false;
+
             if(!empty($paymentRecord) && is_array($paymentRecord)) {
 
                 if(!empty($paymentRecord[0]->arrears)) {
@@ -1603,6 +1617,9 @@ class Fees extends Myschoolgh {
                         'doNotRemoveReceipt' => true
                     ];
                     $payArrears = load_class("arrears", "controllers", $newpayload)->make_payment($newpayload);
+                    if(isset($payArrears["code"]) && $payArrears["code"] == 200 && isset($payArrears["additional"]["payment_id"])) {
+                        $reUsePaymentId = $payArrears["additional"]["payment_id"];
+                    }
                 }
             }
 
@@ -1743,7 +1760,7 @@ class Fees extends Myschoolgh {
                 $receiptId = strtoupper($receiptId);
 
                 // generate a new payment_id
-                $payment_id = $receiptId;
+                $payment_id = !empty($reUsePaymentId) ? $reUsePaymentId : $receiptId;
 
                 // log the payment record
                 $stmt = $this->db->prepare("INSERT INTO fees_collection
@@ -1779,7 +1796,7 @@ class Fees extends Myschoolgh {
             } else {
 
                 // generate a new payment_id
-                $payment_id = random_string("alnum", RANDOM_STRING);
+                $payment_id = !empty($reUsePaymentId) ? $reUsePaymentId : random_string("alnum", RANDOM_STRING);
 
                 // get the student name
                 $student = $this->pushQuery("name AS student_name, phone_number, phone_number_2", "users", "item_id = '{$params->student_id}' AND user_type='student' AND client_id = '{$params->clientId}' LIMIT 1");
