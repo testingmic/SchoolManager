@@ -1766,7 +1766,7 @@ class Fees extends Myschoolgh {
                 $receiptId = strtoupper($receiptId);
 
                 // generate a new payment_id
-                $payment_id = !empty($reUsePaymentId) ? $reUsePaymentId : $receiptId;
+                $payment_id = !empty($reUsePaymentId) ? $reUsePaymentId : $uniqueId;
 
                 // log the payment record
                 $stmt = $this->db->prepare("INSERT INTO fees_collection
