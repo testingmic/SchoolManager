@@ -119,7 +119,7 @@ class Models {
 
         // check if the base url is set
         if(isset($_SERVER['HTTP_X_FORWARDED_SERVER']) && isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-            $this->baseUrl = $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_X_FORWARDED_SERVER'];
+            $this->baseUrl = $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_X_FORWARDED_SERVER'] . "/";
         }
 
         // set the accepted payment methods

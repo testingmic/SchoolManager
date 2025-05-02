@@ -2,7 +2,7 @@
 // set some global variables
 global $myClass;
 $appName = $myClass->appName;
-$baseUrl = config_item("base_url");
+$baseUrl = $myClass->baseUrl;
 $user_current_url = current_url();
 
 // if the user is not loggedin then show the login form
