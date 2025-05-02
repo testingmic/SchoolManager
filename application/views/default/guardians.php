@@ -103,8 +103,8 @@ $response->html = '
             </div>
         </div>';
         // if the term has ended
-        if($defaultUser->appPrefs->termEnded && $isAdminAccountant) {
-            $response->html .= academic_term_ended_dashboard_modal($defaultAcademics, $baseUrl);
+        if($isAdminAccountant) {
+            $response->html .= top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl);
         }
         $response->html .= '
         <div class="row">

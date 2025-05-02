@@ -1,6 +1,6 @@
 <?php
 // global variables
-global $usersClass, $accessObject, $myClass, $isSupport, $defaultClientData, 
+global $usersClass, $accessObject, $myClass, $isSupport, $defaultClientData, $isSupportPreviewMode,
     $clientPrefs, $isParent, $defaultUser, $clientFeatures, $isReadOnly, $academicSession;
 
 // base url
@@ -304,7 +304,10 @@ load_helpers(['menu_helper']);
                         <?php 
                         // set the menu function 
                         $menu_function = $isSupport ? "support_menu" : ($isSuspendedAccount ? "help_menu" : $userData->user_type."_menu");
-                        
+                        if(!$isSuspendedAccount) {
+                            $menu_function = $isSupportPreviewMode ? "admin_menu" : $menu_function;
+                        }
+
                         // confirm that the function exists
                         if(function_exists($menu_function)) {
                             // load the function

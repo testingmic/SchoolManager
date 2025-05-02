@@ -29,7 +29,7 @@ if(empty($urlParse['path']) || !empty($urlParse['path']) && strlen($urlParse['pa
         <div class="card">
             <div class="card-body">
                 <h1 class="text-center text-info text-uppercase"><?= $clientData->client_name ?></h1>
-                <?= propagating_data($clientData); ?>
+                <?= propagating_data($clientData, $session); ?>
             </div>
         </div>
     </div>

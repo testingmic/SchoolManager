@@ -51,8 +51,15 @@ $myClass = load_class('myschoolgh', 'models');
 $noticeClass = load_class('notification', 'controllers');
 $accessObject = load_class('accesslevel', 'controllers');
 
+global $isSupportPreviewMode, $isSupport;
+
 // if the session is set
 if(!empty($session->userId) && empty($argv)) {
+
+    // use a new client id 
+    if($session->previewMode && $session->previewClientId) {
+        $session->clientId = $session->previewClientId;
+    }
 
     // get the client data
     $defaultClientData = $myClass->client_session_data($session->clientId, false);
@@ -102,6 +109,8 @@ if(!empty($session->userId) && empty($argv)) {
         $accessObject->userPermits = json_decode($defaultUser->user_permissions);
         $accessObject->appPrefs = $clientPrefs;
         $defaultUser->appPrefs = $clientPrefs;
+        $defaultUser->isPreviewMode = false;
+        $defaultUser->appPrefs->isPreviewMode = false;
         
         // set additional parameters
         $isSupport = (bool) ($defaultUser->user_type == "support");
@@ -155,6 +164,19 @@ if(!empty($session->userId) && empty($argv)) {
             }
         }
 
+    }
+
+    if($session->previewMode) {
+        $isSupport = false;
+        $isAdmin = true;
+        $isTutorAdmin = true;
+        $isPayableStaff = true;
+        $isAdminAccountant = true;
+        $isSupportPreviewMode = true;
+
+        // set the preview mode
+        $defaultUser->isPreviewMode = true;
+        $defaultUser->appPrefs->isPreviewMode = true;
     }
     
 }

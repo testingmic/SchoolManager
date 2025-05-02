@@ -69,7 +69,10 @@ $response->html = '
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">Classes</div>
             </div>
-        </div>
+        </div>';
+        // if the term has ended
+        $response->html .= top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
+        $response->html .= '
         <div class="row">
             <div class="col-12 col-sm-12 col-lg-12">
                 <div class="card">

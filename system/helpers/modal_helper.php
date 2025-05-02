@@ -283,7 +283,7 @@ function page_not_found($request = "not_found", $string = "The resource you tryi
  * 
  * @return String
  */
-function propagating_data($clientData) {
+function propagating_data($clientData, $session = null) {
     return '
     <section class="section">
         <div class="container">
@@ -410,13 +410,34 @@ function academic_term_ended_notification($defaultAcademics, $baseUrl) {
  * 
  * @return String
  */
-function academic_term_ended_dashboard_modal($defaultAcademics, $baseUrl) {
-    return '
-    <div class="alert alert-danger text-center font-19">
-        The current Academic Term ended on <strong>'.date("jS F, Y", strtotime($defaultAcademics->term_ends)).'</strong>.
-        Go to settings to review the academic calendar or 
-        <a href="'.$baseUrl.'schools/close_term"><strong>End the Academic Term Now</strong></a>
-    </div>';
+function top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, $previewOnly = false) {
+    $html = '';
+    
+    // notification engine is not required
+    if(empty($defaultUser) && !isset($defaultUser->appPrefs)) return $html;
+
+    // check if the term has ended
+    if($defaultUser->appPrefs->termEnded && !$previewOnly) {
+        $html .= '
+        <div class="alert alert-danger text-center font-19">
+            The current Academic Term ended on <strong>'.date("jS F, Y", strtotime($defaultAcademics->term_ends)).'</strong>.
+            Go to settings to review the academic calendar or 
+            <a href="'.$baseUrl.'schools/close_term"><strong>End the Academic Term Now</strong></a>
+        </div>';
+    }
+    
+    // check if the user is in preview mode
+    if($defaultUser->isPreviewMode) {
+        $html .= '
+        <div class="notification-engine">
+            <div class="alert alert-warning text-center font-19">
+                Hello '.$defaultUser->name.' you are currently in preview mode. Changes made will not be saved - 
+                <button class="btn btn-outline-danger" onclick="return loadPage(\''.$baseUrl.'dashboard?preview_exit=true\');">Exit Preview Mode</button>
+            </div>
+        </div>';
+    }
+
+    return $html;
 }
 
 /**

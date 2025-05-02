@@ -262,6 +262,7 @@ if(!empty($client_id)) {
                             </div>
                             <div class="w-100 mt-2 border-top text-center pt-3">
                                 <a class="btn btn-dark" href="'.$baseUrl.'dashboard"><i class="fa fa-arrow-circle-left"></i> Go Back</a>
+                                '.($isSupport ? "<a class='btn btn-outline-success' href='{$baseUrl}dashboard/?preview_mode=true&client_id={$data->client_id}'><i class='fa fa-eye'></i> Enter Preview Mode</a>" : null).'
                             </div>
 
                         </div>

@@ -671,7 +671,7 @@ var loadPage = (loc, pushstate) => {
             $(`div[id="viewOnlyModal"] div[class="modal-body"]`).html("");
             $(`div[class~="toggle-calculator"]`).addClass("hidden");
             $(`div[class~="calculator"] div[class~="display"], div[class~="calculator"] div[class~="all-buttons"]`).addClass("hidden");
-            if (result.redirect !== undefined) {
+            if (typeof result.redirect !== "undefined") {
                 let redirectUrl = $.baseurl + "/" + result.redirect;
                 window.location = redirectUrl
                 return false;
@@ -717,6 +717,10 @@ var loadPage = (loc, pushstate) => {
 
             if(result.current_user_url !== undefined) {
                 current_url = result.current_user_url;
+            }
+
+            if(typeof result.notification_engine !== "undefined") {
+                $(`div[class="section-header"]`).append($.parseHTML(result.notification_engine));
             }
 
             $(`div[id="load_dashboard_content"]`).remove();
@@ -1442,13 +1446,27 @@ let timePlugins = () => {
   }
 }
 
+var online_check = () => {
+    $.post(`${baseUrl}api/devlog/auth`, { onlineCheck: true }, (response) => {
+        if(typeof response.result !== "undefined") {
+            if($(`div[class="section-header"]`).length) {
+                if(typeof response.notification_engine !== "undefined") {
+                    if(response.notification_engine.length) {
+                        $(`div[class="notification-engine"]`).remove();
+                    }
+                    $(`div[class="section-header"]`).after($.parseHTML(response.notification_engine));
+                }
+            }
+        }
+    });
+}
+
 $(window).on("load", function() {
     if($(`div[class="settingSidebar"]`).length) {
+        online_check();
         setInterval(() => { 
-            $.ajax({
-                url: `${baseUrl}api/devlog/auth`, type: "POST", data: { onlineCheck: true }, timeout: 5000
-            });
-        }, 30000);
+            online_check();
+        }, 10000);
     }
     if($(`div[id="transitioning_data"]`).length) {
         setInterval(() => {

@@ -112,8 +112,16 @@ class Accesslevel {
      */
     public function hasAccess($role, $currentPage = null) {
         
+        // set the isSupportPreviewMode
+        global $isSupportPreviewMode;
+
         // Check User Roles Table
         $permits = !empty($this->userPermits) ? $this->userPermits : [];
+
+        // check if the session is in preview mode
+        if($this->session->previewMode && $isSupportPreviewMode) {
+            return true;
+        }
         
         // user permissions
         if ($permits != false) {

@@ -65,6 +65,8 @@ class Handler {
      */
     public function finalize($Api, $params, $remote) {
         
+        global $defaultUser, $defaultAcademics, $baseUrl;
+
         // set the default parameters
         $Api->default_params = $params;
 
@@ -90,6 +92,9 @@ class Handler {
         if(isset($params->raw_loading)) {
             $data = $ApiRequest["data"]["result"];
         }
+
+        // set the notification engine
+        $data['notification_engine'] = top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
         
         // print out the response
         echo json_encode($data);
@@ -102,6 +107,8 @@ class Handler {
      */
     public function process() {
 
+        global $defaultUser, $defaultAcademics, $baseUrl;
+        
         // control
         if((($this->inner_url == "devlog") && ($this->outer_url == "auth")) || ($this->inner_url == "auth" && !$this->outer_url) || ($this->inner_url == "auth" && $this->outer_url == "logout")) {
 
@@ -154,6 +161,9 @@ class Handler {
             elseif(!empty($this->params->onlineCheck)) {
                 $this->response->result = true;
             }
+
+            // set the notification engine
+            $this->response->notification_engine = top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
 
             // print the error description
             die(json_encode($this->response));
