@@ -4,13 +4,8 @@ global $usersClass, $accessObject, $myClass, $isSupport, $defaultClientData,
     $clientPrefs, $isParent, $defaultUser, $clientFeatures, $isReadOnly, $academicSession;
 
 // base url
-$baseUrl = config_item("base_url");
+$baseUrl = $myClass->baseUrl;
 $appName = $myClass->appName;
-
-// check if the base url is set
-if(isset($_SERVER['HTTP_X_FORWARDED_SERVER']) && isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-    $baseUrl = $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_X_FORWARDED_SERVER'];
-}
 
 // confirm that user id has been parsed
 $clientId = $session->clientId;
