@@ -117,6 +117,11 @@ class Models {
         $this->appName = config_item('site_name');
         $this->data_maxdate = date("Y-m-d", strtotime("+1 year"));
 
+        // check if the base url is set
+        if(isset($_SERVER['HTTP_X_FORWARDED_SERVER']) && isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+            $this->baseUrl = $_SERVER['HTTP_X_FORWARDED_PROTO'] . "://" . $_SERVER['HTTP_X_FORWARDED_SERVER'];
+        }
+
         // set the accepted payment methods
         $this->payment_methods = [
             "cash" => "Cash",
