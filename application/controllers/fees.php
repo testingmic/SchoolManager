@@ -626,9 +626,15 @@ class Fees extends Myschoolgh {
         
         // check for the arrears of the student
         if(empty($studentInfo) && !empty($allocation)) {
-            $studentInfo = [
-                'arrears' => $allocation[0]->arrears
-            ];
+            if(is_array($allocation)) {
+                $studentInfo = [
+                    'arrears' => $allocation[0]->arrears
+                ];
+            } else {
+                $studentInfo = [
+                    'arrears' => $allocation->arrears
+                ];
+            }
         }
 
         /** If no allocation record was found */
