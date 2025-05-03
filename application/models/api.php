@@ -324,6 +324,15 @@ class Api {
 
                 // set the method to load
                 $method = $this->outer_url;
+
+                // if in preview mode but the user is not a super admin user
+                if($this->session->previewMode && empty($this->session->superAdminUser)) {
+                    if(in_array($method, ['update'])) {
+                        return $this->output(203, [
+                            "result" => "Sorry! You will not be able to perform the delete action since you are in preview mode."
+                        ]);
+                    }
+                }
                 
                 // convert the response into an arry if not already in there
                 $request = $classObject->$method($params);

@@ -68,7 +68,7 @@ foreach($student_list["data"] as $key => $each) {
         }
         // if the user has permission to delete student information
         if($hasDelete) {
-            $action .= "&nbsp;<span title='Delete Student' onclick='delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
+            $action .= "&nbsp;<span title='Delete Student' onclick='return delete_record(\"{$each->user_id}\", \"user\");' class='btn btn-sm mb-1 btn-outline-danger'><i class='fa fa-trash'></i></span>";
         }
     }
 

@@ -198,6 +198,17 @@ class Records extends Myschoolgh {
         // get the query to use
         $featured = $this->permission_control($params->resource, $params->record_id, $params->userData, $params->action);
 
+        // if in preview mode but the user is not a super admin user
+        if($this->session->previewMode && empty($this->session->superAdminUser)) {
+            return [
+                "code" => 203, 
+                "data" => "Sorry! You will not be able to perform the delete action since you are in preview mode.",
+                "additional" => [
+                    "record_id" => $params->record_id, "clear" => true
+                ]
+            ];
+        }
+
         // run the query
         if(!empty($featured)) {
 

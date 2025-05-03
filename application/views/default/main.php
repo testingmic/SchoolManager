@@ -63,7 +63,7 @@ if(empty($urlParse['path']) || !empty($urlParse['path']) && strlen($urlParse['pa
             "user_type" => $defaultUser->user_type
         ];
         $data = load_class("users", "controllers")->list($staff_param)["data"];
-        $userData = $data[0];
+        $userData = $data[0] ?? (object)[];
         $userData->disabled = true;
 
         // not ready variable

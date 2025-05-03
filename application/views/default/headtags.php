@@ -168,7 +168,7 @@ load_helpers(['menu_helper']);
                                 <span><?= $clientPrefs->academics->academic_year ?></span> 
                                 <span>|</span>
                                 <span class="text-uppercase"><?= $clientPrefs->academics->academic_term ?> <?= $academicSession; ?></span>
-                                <?= ($endPermission && $defaultUser->appPrefs->termEnded ? 
+                                <?= ($endPermission && isset($defaultUser->appPrefs) && !empty($defaultUser->appPrefs->termEnded) ? 
                                     "<span class='badge badge-danger notification cursor' title='This academic year and term has been closed and forwarded to the next academic year and term.'>Term Ended</span>" : 
                                     ($endPermission ? "<span class='badge badge-success'>Active</span>" : null)); ?>
                                 <br><span class="font-weight-light font-17 text-uppercase"><?= $defaultUser->name; ?> / <?= ucwords($defaultUser->user_type); ?></span>
@@ -272,7 +272,8 @@ load_helpers(['menu_helper']);
                     </a>
                     <?php if($accessObject->hasAccess("manage", "settings") && !$isSupport) { ?>
                         <a href="<?= $baseUrl ?>schools" class="dropdown-item has-icon">
-                            <i class="fas fa-wrench"></i> <span class="mr-3">Account Setup</span> <?= $endPermission && $defaultUser->appPrefs->termEnded ? '<span class="notification beep"></span>' : null ?>
+                            <i class="fas fa-wrench"></i> <span class="mr-3">Account Setup</span> 
+                            <?= $endPermission && isset($defaultUser->appPrefs) && !empty($defaultUser->appPrefs->termEnded) ? '<span class="notification beep"></span>' : null ?>
                         </a>
                     <?php } ?>
                     <div class="dropdown-divider"></div>
