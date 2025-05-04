@@ -683,39 +683,8 @@ class Payment extends Myschoolgh {
                     // return error if the balance is less than the message to send
                     if($balance > $message_count) {
 
-                        //open connection
-                        $ch = curl_init();
-
-                        // set the field parameters
-                        $fields_string = [
-                            "key" => $this->mnotify_key,
-                            "recipient" => [$session->user_contact],
-                            "sender" => !empty($params->client_data->sms_sender) ? $params->client_data->sms_sender : $this->sms_sender,
-                            "message" => $message
-                        ];
-
-                        // send the message
-                        curl_setopt_array($ch, 
-                            array(
-                                CURLOPT_URL => "https://api.mnotify.com/api/sms/quick",
-                                CURLOPT_RETURNTRANSFER => true,
-                                CURLOPT_ENCODING => "",
-                                CURLOPT_MAXREDIRS => 10,
-                                CURLOPT_TIMEOUT => 30,
-                                CURLOPT_POST => true,
-                                CURLOPT_SSL_VERIFYPEER => false,
-                                CURLOPT_CAINFO => dirname(__FILE__)."\cacert.pem",
-                                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                                CURLOPT_CUSTOMREQUEST => "POST",
-                                CURLOPT_POSTFIELDS => json_encode($fields_string),
-                                CURLOPT_HTTPHEADER => [
-                                    "Content-Type: application/json",
-                                ]
-                            )
-                        );
-
                         //execute post
-                        $result = json_decode(curl_exec($ch));
+                        $result = $this->send_mnotify_sms([$session->user_contact], $message);
                         
                         // if the sms was successful
                         if(!empty($result)) {

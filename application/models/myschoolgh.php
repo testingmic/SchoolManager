@@ -27,7 +27,7 @@ class Myschoolgh extends Models {
 	public $school_academic_terms = [];
 	public $academic_calendar_years = [];
 	public $pk_public_key = "pk_live_1eca68da1afea8bb9d567a05fe05db1b4297a8c6";
-	public $mnotify_key = "3LhA1Cedn4f2qzkTPO3cIkRz8pv0inBl9TWavaoTeEVFe";
+	public $mnotify_key = "Id2itReHkQ1C0bMfjSjj7VeU3";
 	public $default_pay_email = "payments@myschoolgh.com";
 
 	public $db;
@@ -155,6 +155,65 @@ class Myschoolgh extends Models {
 
         return $this;
     }
+
+	/**
+	 * Build the Mnotify Query
+	 * 
+	 * @param String $number
+	 * @param String $message
+	 * 
+	 * @return Array
+	 */
+	public function build_mnotify_query($number, $message) {
+		return [
+			"key" => $this->mnotify_key,
+			"to" => $number,
+			"msg" => $message,
+			"sender_id" => !empty($this->iclient->sms_sender) ? $this->iclient->sms_sender : $this->sms_sender
+		];
+	}
+
+	/**
+	 * Send the Mnotify SMS
+	 * 
+	 * @param String $number
+	 * @param String $message
+	 * 
+	 * @return Array
+	 */
+	public function send_mnotify_sms($number, $message) {
+		
+		$fields_string = $this->build_mnotify_query($message, $number);
+
+		//open connection
+		$ch = curl_init();
+
+		// send the message
+		curl_setopt_array($ch, 
+			array(
+				CURLOPT_URL => "https://apps.mnotify.net/smsapi",
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 30,
+				CURLOPT_POST => true,
+				CURLOPT_SSL_VERIFYPEER => false,
+				CURLOPT_CAINFO => dirname(__FILE__)."\cacert.pem",
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => json_encode($fields_string),
+				CURLOPT_HTTPHEADER => [
+					"Content-Type: application/json",
+				]
+			)
+		);
+
+		//execute post
+		$result = json_decode(curl_exec($ch));
+
+		return $result;
+		
+	}
 
 	/**
 	 * Check if the user account is activated

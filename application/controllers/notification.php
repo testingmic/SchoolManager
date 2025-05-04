@@ -19,7 +19,7 @@ class Notification extends Myschoolgh {
 	 * 
 	 * @return Object
 	 */
-	public function list(stdClass $params = null) {
+	public function list($params = null) {
 
 		$params->query = "1";
 
