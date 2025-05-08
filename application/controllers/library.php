@@ -522,9 +522,7 @@ class Library extends Myschoolgh {
 			$params->label["data"]["userId"] = $params->userId;
 			$params->label["data"]["clientId"] = $params->clientId;
 			$params->label["data"]["request"] = $todo;
-			$params->label["data"]["fullname"] = $params->userData->name;
-			
-			// issue book from session
+			$params->label["data"]["fullname"] = $params->userData->name;			// issue book from session
 			$request = $this->issue_book_to_user($params->label["data"], $the_session, $params->userId);
 
 			// return the session list as the response
