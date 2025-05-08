@@ -673,7 +673,7 @@ var loadPage = (loc, pushstate) => {
             $(`div[class~="calculator"] div[class~="display"], div[class~="calculator"] div[class~="all-buttons"]`).addClass("hidden");
             if (typeof result.redirect !== "undefined") {
                 let redirectUrl = $.baseurl + "/" + result.redirect;
-                window.location = redirectUrl
+                window.location.href = redirectUrl
                 return false;
             }
 

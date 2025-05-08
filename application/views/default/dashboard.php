@@ -1203,7 +1203,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                 if($school->setup !== "Developer") {
                     $action = "<button title='Manage {$school->client_name} Account Information' onclick='return load(\"schools/{$school->client_id}\")' class='btn btn-outline-success btn-sm'><i class='fa fa-edit'></i></button>";
                     $action .= " <button title='View Update History of {$school->client_name} Account' onclick='return load(\"schools/history/{$school->client_id}\")' class='btn btn-outline-primary btn-sm'><i class='fa fa-comments'></i></button>";
-                    $action .= " <a title='Enter Preview Mode for {$school->client_name} Account' href='{$myClass->baseUrl}dashboard/?preview_mode=true&client_id={$school->client_id}' class='btn btn-outline-warning btn-sm'><i class='fa fa-eye'></i></a>";
+                    $action .= " <a title='Enter Preview Mode for {$school->client_name} Account' href='{$myClass->baseUrl}dashboard?preview_mode=true&client_id={$school->client_id}' class='btn btn-outline-warning btn-sm'><i class='fa fa-eye'></i></a>";
                 }
 
                 $schools_list .= "
