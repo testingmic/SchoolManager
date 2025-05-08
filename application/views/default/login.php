@@ -54,7 +54,7 @@ if(loggedIn()) {
               </div>
               <div class="card-body">
                   <?= form_loader(); ?>
-                <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth" id="auth-form" class="needs-validation" novalidate="">
+                <form method="POST" autocomplete="Off" action="<?= $baseUrl ?>api/auth/login" id="auth-form" class="needs-validation" novalidate="">
                   <div class="form-group">
                     <label for="username">Username</label>
                     <input id="username" type="text" autocomplete="Off" class="form-control" name="username" tabindex="1" required autofocus>

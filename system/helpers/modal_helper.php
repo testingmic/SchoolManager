@@ -417,7 +417,7 @@ function top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl
     if(empty($defaultUser) && !isset($defaultUser->appPrefs)) return $html;
 
     // check if the term has ended
-    if($defaultUser->appPrefs->termEnded && !$previewOnly) {
+    if(!empty($defaultUser->appPrefs->termEnded) && !$previewOnly) {
         $html .= '
         <div class="alert alert-danger text-center font-19">
             The current Academic Term ended on <strong>'.date("jS F, Y", strtotime($defaultAcademics->term_ends)).'</strong>.
@@ -427,7 +427,7 @@ function top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl
     }
     
     // check if the user is in preview mode
-    if($defaultUser->isPreviewMode) {
+    if(!empty($defaultUser->isPreviewMode)) {
         $html .= '
         <div class="notification-engine">
             <div class="alert alert-warning text-center font-19">

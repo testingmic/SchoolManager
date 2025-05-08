@@ -207,26 +207,26 @@ class Auth extends Myschoolgh {
                             $this->addAttempt($params->username, "login", 1);
                             $this->db->commit();
                             //return the error message
-                            return ["code" => 201, "data" => "Sorry! Invalid Username/Password."];
+                            return ["code" => 400, "data" => "Sorry! Invalid Username/Password."];
                         }
                     }
                     
                 } else {
                     // return the error message
-                    return ["code" => 201, "data" => "Access denied due to multiple trial. Try again in an Hour's time."];
+                    return ["code" => 429, "data" => "Access denied due to multiple trial. Try again in an Hour's time."];
                 }
             } else {
                 // add user attempt
                 //$this->addAttempt($params->username);
                 $this->db->commit();
-                return ["code" => 201, "data" => "Sorry! Invalid Username/Password."];
+                return ["code" => 400, "data" => "Sorry! Invalid Username/Password."];
             }
 
             // return the success response
             if($params->remote && !$this->status) {
                 return [
                     "error" => [
-                        "code" => 201,
+                        "code" => 400,
                         "data" => "Sorry! The Username/Password could not be validated" 
                     ]
                 ];
@@ -328,6 +328,7 @@ class Auth extends Myschoolgh {
         // if within the last 10 minutes
         if($recent) {
             return [
+                "status" => 200,
                 "validated" => true,
                 "result" => "The temporary access token could not be generated since the last generated one is within 30 minutes interval.",
                 "unexpired" => $this->temporaryKeys($params->username)
@@ -336,10 +337,11 @@ class Auth extends Myschoolgh {
 
         // access
         $access = [
+            "status" => 200,
             "username" => $params->username,
             "access_token" => base64_encode("{$params->username}:{$token}"),
             "expiry" => $expiry,
-            "description" => "The access_token key must be parsed as part of the query parameters when making requests. This access token will expiry after 1 month"
+            "description" => "This access token will expiry after 1 month."
         ];
         
         try {
@@ -351,9 +353,9 @@ class Auth extends Myschoolgh {
             $this->db->query("INSERT INTO users_api_keys 
                 SET user_id = '{$params->user_id}', username = '{$params->username}', 
                 access_token = '".password_hash($token, PASSWORD_DEFAULT)."', access_type = 'temp', 
-                expiry_date = '".date("Y-m-d", strtotime("+2 hours"))."', 
-                expiry_timestamp = '".date("Y-m-d H:i:s", strtotime("+2 hours"))."', 
-                requests_limit = '5000', access_key = '{$token}', client_id = '{$params->client_id}'
+                expiry_date = '".date("Y-m-d", strtotime("+725 hours"))."', 
+                expiry_timestamp = '".date("Y-m-d H:i:s", strtotime("+725 hours"))."', 
+                requests_limit = '50000', access_key = '{$token}', client_id = '{$params->client_id}'
             ");
 
         } catch(PDOException $e) {} 
@@ -854,6 +856,9 @@ class Auth extends Myschoolgh {
 
             // log the user activity
             $this->userLogs("password_reset", $params->user_id, null, "Password was successfully changed.", $params->userId);
+
+            // delete all the api keys for the user
+            $this->db->query("delete from users_api_keys where username = '{$user->username}'");
                    
             //FORM THE MESSAGE TO BE SENT TO THE USER
             $message = 'Hi '.$user->name.'<br>Your password was successfully changed.';
@@ -886,7 +891,7 @@ class Auth extends Myschoolgh {
      * 
      * @return Array
      */
-    public function logout(stdClass $params = null) {
+    public function logout($params = null) {
         // unset the sessions
         $this->session->remove([
             "userLoggedIn", "userName", "current_url", "clientId", 

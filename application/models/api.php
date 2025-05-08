@@ -23,10 +23,10 @@ class Api {
 
     /* the endpoint variable is only accessible in the class */
     public $endpoints = [];
-    private $userData;
-    private $requestPayload;
+    public $userData;
+    public $requestPayload;
 
-    private $defaultUser;
+    public $defaultUser;
     public $session;
     public $config;
     public $usersClass;
@@ -67,6 +67,22 @@ class Api {
 
         // set the default user data
         $this->defaultUser = $param["defaultUser"] ?? [];
+
+        // if the users class is empty
+        if(empty($usersClass)) {
+            // the query parameter to load the user information
+            $user_params = (object) [
+                "limit" => 1, 
+                "user_id" => $this->userId, 
+                "minified" => "simplified", 
+                "append_wards" => true, 
+                "filter_preferences" => true, 
+                "userId" => $this->clientId, 
+                "append_client" => true, 
+                "user_status" => $myClass->allowed_login_status
+            ];
+            $usersClass = load_class('users', 'controllers', $user_params);
+        }
         
         // if the users class is not empty
         if(!empty($usersClass) && !empty($this->userId)) {
@@ -255,7 +271,7 @@ class Api {
 
         // preset the response
         $result = [];
-        $code = 203;
+        $code = 400;
 
         $this->requestPayload = $params;
         
@@ -295,9 +311,10 @@ class Api {
         // end the query here if nothing was found
         if(isset($this->accessCheck)) {
 
+            
             // set the default limit to 1000
             $params->limit = isset($params->limit) ? (int) $params->limit : $this->myClass->global_limit;
-
+            
             // developer access permission check
             $params->devAccess = $isSupport ? true : false;
             
@@ -328,7 +345,7 @@ class Api {
                 // if in preview mode but the user is not a super admin user
                 if($this->session->previewMode && empty($this->session->superAdminUser)) {
                     if(in_array($method, ['update'])) {
-                        return $this->output(203, [
+                        return $this->output(400, [
                             "result" => "Sorry! You will not be able to perform the delete action since you are in preview mode."
                         ]);
                     }
@@ -455,8 +472,7 @@ class Api {
             201 => 'The request was successful however, no results was found.',
             205 => 'The record was successfully updated.',
             202 => 'The data was successfully inserted into the database.',
-            203 => 'Sorry! An error was encountered while processing the request.',
-            400 => 'Invalid request method parsed.',
+            400 => 'Sorry! An error was encountered while processing the request.',
             401 => 'Sorry! Please ensure all required fields are not empty.',
             404 => 'Invalid request node parsed.',
             405 => 'Invalid parameters was parsed to the endpoint.',

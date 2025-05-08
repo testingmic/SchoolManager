@@ -27,28 +27,27 @@ class Api_validate {
 	 *  
 	 * @return Array
 	 */
-	public function validateApiKey() {
+	public function validateApiKey($payload = []) {
 
 		/** get the user full request headers **/
 		$headers = apache_request_headers();
 		$authHeader = null;
+
+		// set the proceed to verify
+		$proceedToVerify = false;
 
 		// get teh redirect http authorization headers
 		if(isset($_SERVER['HTTP_AUTHORIZATION']) && $_SERVER['HTTP_AUTHORIZATION'] !== "") {
             $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
         }
 
-        // if the host is not from api.myschoolgh.com then end the query
-        if(!in_array($headers['Host'], ['api.myschoolgh.com', 'localhost'])) {
-            return [];
-        }
-        
 		/** authenticate the headers that have been parsed **/
-		if((isset($headers["Authorization"]) && ($headers["Authorization"] == $authHeader)) || isset($_GET['access_token'])) {
+		if((isset($headers["Authorization"]) && ($headers["Authorization"] == $authHeader)) || isset($payload['access_token'])) {
 			
 			/** Set the Authorization Code **/
-			$accessToken = isset($headers['Authorization']) ? xss_clean($headers['Authorization']) : xss_clean($_GET['access_token']);
-			
+			$accessToken = $payload['access_token'] ?? ($payload['token'] ?? ($headers['Authorization'] ?? null));
+			$accessToken = xss_clean($accessToken);
+
 			/** Split the Authorization Code **/
 			$authorizationToken = base64_decode(str_ireplace("Bearer", "", $accessToken));
 			$authorizationToken = trim($authorizationToken);
@@ -60,22 +59,23 @@ class Api_validate {
 			 	/** Inform the user that a wrong request was parsed **/
 			 	return false;
 			}
+			
+			/** Proceed to verify the token **/
+			$proceedToVerify = true;
+	
+		}
 
+		// if the proceed to verify is true
+		if($proceedToVerify) {
 			// verify credentials 
 			$result = $this->verifyToken($splitAuthInfo[0], $splitAuthInfo[1]);
-
 			/** Verify the Authorization Token **/
 			if(!$result) {
 				/** Inform the user that a wrong request was parsed **/
 				return false;
 			}
-
 			/** Continue with the processing after verification **/
-			return $result;			
-			
-		} else {
-			/** Return error message **/
-			return false;
+			return $result;		
 		}
 	}
 
@@ -99,7 +99,7 @@ class Api_validate {
 					(
 						SELECT c.requests_count 
 						FROM users_api_queries c
-						WHERE DATE(request_date) = CURDATE()
+						WHERE DATE(request_date) = CURDATE() LIMIT 1
 					) AS requests_count
 				FROM users_api_keys a WHERE a.username = '{$username}' AND a.status = ? AND (TIMESTAMP(a.expiry_timestamp) >= CURRENT_TIMESTAMP()) LIMIT {$this->maximum}
 			");

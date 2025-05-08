@@ -28,9 +28,10 @@ if(file_exists("system/core/myschoolgh.php")) {
 
 // init variable
 $isNotRemote = false;
+$dataParam = $_GET + $_POST;
 
 // if there was no cookie set
-if (!isset($_SERVER['HTTP_AUTHORIZATION'])) {
+if (!isset($_SERVER['HTTP_AUTHORIZATION']) || !isset($dataParam['access_token']) || !isset($dataParam['remote'])) {
     $isNotRemote = true;
     $session = load_class('Session', 'libraries/Session');
 }
@@ -157,7 +158,6 @@ if(!empty($session->userId) && empty($argv)) {
                     $defaultAcademics->year_starts = $session->is_readonly_year_starts;
                     $defaultAcademics->year_ends = $session->is_readonly_year_ends;
                 }
-                // print_r($defaultUser->appPrefs->academics);exit;
 
                 // set the term ended variable
                 $defaultUser->appPrefs->termEnded = (bool) (strtotime($defaultUser->appPrefs->academics->term_ends) < strtotime(date("Y-m-d")));
@@ -165,6 +165,9 @@ if(!empty($session->userId) && empty($argv)) {
         }
 
     }
+
+    // set the isNotRemote variable
+    $isNotRemote = false;
 
     if($session->previewMode) {
         $isSupport = false;

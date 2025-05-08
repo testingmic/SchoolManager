@@ -11,6 +11,23 @@ class Handler {
     private $clientId;
     private $response;
     private $db;
+
+    public $messages = array(
+        200 => 'Ok',
+        201 => 'Created',
+        204 => 'No Response',
+        301 => 'Moved Permanently',
+        302 => 'Found',
+        304 => 'Not Modified',
+        400 => 'Bad Request',
+        401 => 'Unauthorized',
+        403 => 'Forbidden',
+        404 => 'Not Found',
+        419 => 'Page Expired',
+        429 => 'Too Many Requests',
+        500 => 'Internal Server Error',
+        503 => 'Service Unavailable',
+    );
     
     /**
      * Initialize the request
@@ -35,6 +52,14 @@ class Handler {
 
         // get the list access token
         $this->response = (object) ["result" => "Sorry! Please ensure that all the required variables are not empty."];
+
+        if(!empty($params[5])) {
+            $this->userId = $params[5];
+        }
+
+        if(!empty($params[6])) {
+            $this->clientId = $params[6];
+        }
     }
 
     /**
@@ -65,7 +90,7 @@ class Handler {
      */
     public function finalize($Api, $params, $remote) {
         
-        global $defaultUser, $defaultAcademics, $baseUrl;
+        global $defaultUser, $defaultAcademics, $baseUrl, $session;
 
         // set the default parameters
         $Api->default_params = $params;
@@ -74,16 +99,22 @@ class Handler {
         $param = (object) $params;
         $param->remote = $remote;
 
+        if(!empty($session->userdata)) {
+            $Api->userId = !empty($Api->userId) ? $Api->userId : ($session->userdata['userId'] ?? $this->userId);
+            $Api->clientId = !empty($Api->clientId) ? $Api->clientId : ($session->userdata['clientId'] ?? $this->clientId);
+            $Api->defaultUser = !empty($Api->defaultUser) ? $Api->defaultUser : $session->userdata;
+            $Api->appendClient = $session->userdata['defaultClientData'] ?? false;
+        }
+
         // run the request
         $ApiRequest = $Api->requestHandler($param, $this->requestMethod);
-
+        
         // remove access token if in
         if(isset($params->access_token)) {
             unset($params->access_token);
         }
 
         // set the request payload parsed
-        $ApiRequest["data"]["remote_request"]["payload"] = $params;
         $ApiRequest["data"]["remote_request"]["params"] = $Api->requestParams;
 
         // set the data to return
@@ -95,6 +126,21 @@ class Handler {
 
         // set the notification engine
         $data['notification_engine'] = top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
+
+        // set the response code
+        if(isset($data['code'])) {
+            header("HTTP/1.1 {$data['code']} {$this->messages[$data['code']]}");
+        }
+
+        // remove the method and endpoint
+        if(isset($data['method'])) {
+            unset($data['method']);
+        }
+
+        // remove the endpoint
+        if(isset($data['endpoint'])) {
+            unset($data['endpoint']);
+        }
         
         // print out the response
         echo json_encode($data);
@@ -109,12 +155,23 @@ class Handler {
 
         global $defaultUser, $defaultAcademics, $baseUrl;
         
+        $endpoint = "{$this->inner_url}/{$this->outer_url}";
+
+        // create a sample path
+        foreach(['auth', 'auth/logout', 'auth/login', 'devlog/transitioning', 'devlog/auth'] as $paths) {
+            $samplePath[] = "api/{$paths}";
+            $samplePath[] = "{$paths}";
+        }
+
         // control
-        if((($this->inner_url == "devlog") && ($this->outer_url == "auth")) || ($this->inner_url == "auth" && !$this->outer_url) || ($this->inner_url == "auth" && $this->outer_url == "logout")) {
+        if(in_array($endpoint, $samplePath)) {
+
+            // load the session class
+            $session = load_class('Session', 'libraries/Session');
 
             // Auth object
             $logObj = load_class("auth", "controllers");
-            
+
             // if the parameters were parsed
             if($this->requestMethod !== "POST") {
                 $this->response->result = "Sorry! The method must be POST.";
@@ -164,6 +221,10 @@ class Handler {
 
             // set the notification engine
             $this->response->notification_engine = top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
+
+            if(isset($this->response->result) && isset($this->response->result['code'])) {
+                header("HTTP/1.1 {$this->response->result['code']} {$this->messages[$this->response->result['code']]}");
+            }
 
             // print the error description
             die(json_encode($this->response));
@@ -222,63 +283,67 @@ class Handler {
         // initialize the bugs variable
         $bugs = false;
 
-        // confirm that the access token parameter was parsed but did not pass the test
-        // confirm if a valid api access key was parsed
-        if((!isset($apiAccessValues->user_id) && empty($session->userId)) || (isset($_GET['access_token']) && !isset($apiAccessValues->user_id))) {
-            // set the bug good
-            $bugs = true;
-            // set the description
-            $response->description = "Sorry! An invalid Access Token was supplied or the Access Token has expired.";
-            $response->data["result"] = $response->description;
-        } else {
-            
-            // if the user is making the request from an api endpoint
-            if(isset($apiAccessValues->user_id)) {
-                
-                // initiate an empty array of the parameters parsed
-                $userId = $apiAccessValues->user_id;
-                $clientId = $apiAccessValues->client_id;
+        // check if the endpoint is not the auth endpoint
+        if(!in_array($endpoint, ["api/auth"])) {
 
-                // set the remote access to true
-                $remote = true;
-                $params->remote = true;
+            // confirm that the access token parameter was parsed but did not pass the test
+            // confirm if a valid api access key was parsed
+            if((!isset($apiAccessValues->user_id) && empty($session->userId)) || (isset($_GET['access_token']) && !isset($apiAccessValues->user_id))) {
+                // set the bug good
+                $bugs = true;
+                // set the description
+                $response->description = "Sorry! An invalid Access Token was supplied or the Access Token has expired.";
+                $response->data["result"] = $response->description;
+            } else {
                 
-                // convert the item into an integer
-                $dailyRequestLimit = (int) $apiAccessValues->requests_limit;
-                $totalRequests = (int) $apiAccessValues->requests_count;
+                // if the user is making the request from an api endpoint
+                if(isset($apiAccessValues->user_id)) {
+                    
+                    // initiate an empty array of the parameters parsed
+                    $userId = $apiAccessValues->user_id;
+                    $clientId = $apiAccessValues->client_id;
 
-                // if the total request is greater or equal to the request limit
-                // then return false
-                if($totalRequests >= $dailyRequestLimit) {
-                    $bugs = true;
-                    // set the too many requests header
-                    http_response_code(200);
-                    // set the information to return to the user
-                    $response->description = "Sorry! You have reached the maximum of {$dailyRequestLimit} requests that can be made daily.";
+                    // set the remote access to true
+                    $remote = true;
+                    $params->remote = true;
+                    
+                    // convert the item into an integer
+                    $dailyRequestLimit = (int) $apiAccessValues->requests_limit;
+                    $totalRequests = (int) $apiAccessValues->requests_count;
+
+                    // if the total request is greater or equal to the request limit
+                    // then return false
+                    if($totalRequests >= $dailyRequestLimit) {
+                        $bugs = true;
+                        // set the too many requests header
+                        http_response_code(200);
+                        // set the information to return to the user
+                        $response->description = "Sorry! You have reached the maximum of {$dailyRequestLimit} requests that can be made daily.";
+                    }
+
+                    // the query parameter to load the user information
+                    $i_params = (object) [
+                        "limit" => 1, 
+                        "user_id" => $userId, 
+                        "minified" => "simplified", 
+                        "append_wards" => true, 
+                        "filter_preferences" => true, 
+                        "userId" => $userId, 
+                        "append_client" => true, 
+                        "user_status" => $myClass->allowed_login_status
+                    ];
+                    $usersClass = load_class('users', 'controllers');
+                    $defaultUser = $usersClass->list($i_params)["data"];
+
+                    // get the first key
+                    $defaultUser = $defaultUser[0] ?? [];
                 }
 
-                // the query parameter to load the user information
-                $i_params = (object) [
-                    "limit" => 1, 
-                    "user_id" => $userId, 
-                    "minified" => "simplified", 
-                    "append_wards" => true, 
-                    "filter_preferences" => true, 
-                    "userId" => $userId, 
-                    "append_client" => true, 
-                    "user_status" => $myClass->allowed_login_status
-                ];
-                $usersClass = load_class('users', 'controllers');
-                $defaultUser = $usersClass->list($i_params)["data"];
+                // set the userId
+                $myClass->userId = !empty($session->userId) ? $session->userId : $userId;
+                $myClass->clientId = !empty($session->clientId) ? $session->clientId : $clientId;
 
-                // get the first key
-                $defaultUser = $defaultUser[0] ?? [];
             }
-
-            // set the userId
-            $myClass->userId = !empty($session->userId) ? $session->userId : $userId;
-            $myClass->clientId = !empty($session->clientId) ? $session->clientId : $clientId;
-
         }
 
         // confirm that a bug was found
@@ -292,9 +357,13 @@ class Handler {
             exit;
         }
 
+        // set the user id and client id
+        $this->userId = $defaultUser->user_id ?? ($defaultUser->userId ?? $session->userdata['userId']);
+        $this->clientId = $defaultUser->client_id ?? ($defaultUser->clientId ?? $session->userdata['clientId']);
+
         /* Usage of the Api Class */
         $Api = load_class('api', 'models', 
-            ["userId" => $this->userId, "clientId" => $this->clientId, "defaultUser" => $defaultUser]
+            ["userId" => $this->userId, "clientId" => $this->clientId, "defaultUser" => $defaultUser, "apiAccessValues" => $apiAccessValues]
         );
 
         /**
@@ -340,7 +409,6 @@ class Handler {
             'params' => $params,
             'Api' => $Api
         ];
-        
     }
 
 }

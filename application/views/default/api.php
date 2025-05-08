@@ -41,7 +41,15 @@ $userId = !empty($session->userId) ? $session->userId : null;
 $clientId = !empty($session->clientId) ? $session->clientId : null;
 
 // validate the user api keys parsed
-$apiAccessValues = $apisObject->validateApiKey();
+$apiAccessValues = $apisObject->validateApiKey($_GET + $_POST);
+
+// if the api access values are not empty
+if(!empty($apiAccessValues)) {
+    // set the user id
+    $userId = empty($userId) ? $apiAccessValues->user_id : $userId;
+    // set the client id
+    $clientId = empty($clientId) ? $apiAccessValues->client_id : $clientId;
+}
 
 // get the parameters
 $params = $apisObject->paramFormat($requestMethod, $incomingData, $_POST, $_GET, $_FILES);
