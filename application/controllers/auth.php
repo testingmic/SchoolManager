@@ -194,12 +194,12 @@ class Auth extends Myschoolgh {
                                 // response to return
                                 return [
                                     "code" => 200,
-                                    "data" => "Login successful. Redirecting", 
+                                    "result" => "Login successful. Redirecting", 
                                     "refresh" => 1000
                                 ];
                             } else {
                                 //return the error message
-                                return ["code" => 201, "data" => "Sorry! You have been denied access to the system."];
+                                return ["code" => 201, "result" => "Sorry! You have been denied access to the system."];
                             }
 
                         } else {
@@ -207,34 +207,32 @@ class Auth extends Myschoolgh {
                             $this->addAttempt($params->username, "login", 1);
                             $this->db->commit();
                             //return the error message
-                            return ["code" => 400, "data" => "Sorry! Invalid Username/Password."];
+                            return ["code" => 400, "result" => "Sorry! Invalid Username/Password."];
                         }
                     }
                     
                 } else {
                     // return the error message
-                    return ["code" => 429, "data" => "Access denied due to multiple trial. Try again in an Hour's time."];
+                    return ["code" => 429, "result" => "Access denied due to multiple trial. Try again in an Hour's time."];
                 }
             } else {
                 // add user attempt
                 //$this->addAttempt($params->username);
                 $this->db->commit();
-                return ["code" => 400, "data" => "Sorry! Invalid Username/Password."];
+                return ["code" => 400, "result" => "Sorry! Invalid Username/Password."];
             }
 
             // return the success response
             if($params->remote && !$this->status) {
                 return [
-                    "error" => [
-                        "code" => 400,
-                        "data" => "Sorry! The Username/Password could not be validated" 
-                    ]
+                    "code" => 400,
+                    "result" => "Sorry! The Username/Password could not be validated" 
                 ];
             }
 
         } catch(PDOException $e) {
             $this->db->rollBack();
-            return "Sorry! The Username/Password could not be validated";
+            return ["code" => 400, "result" => "Sorry! The Username/Password could not be validated"];
         }
     }
 
@@ -329,7 +327,6 @@ class Auth extends Myschoolgh {
         if($recent) {
             return [
                 "status" => 200,
-                "validated" => true,
                 "result" => "The temporary access token could not be generated since the last generated one is within 30 minutes interval.",
                 "unexpired" => $this->temporaryKeys($params->username)
             ];
@@ -533,12 +530,12 @@ class Auth extends Myschoolgh {
         // if the email parameter was not parsed
         if(!isset($params->email)) {
             // print the error message
-            return ["code" => 201, "data" => "Sorry! Please enter a valid email address."];
+            return ["code" => 201, "result" => "Sorry! Please enter a valid email address."];
         }
 
         // if the email address could not be validated
         if(!filter_var($params->email, FILTER_VALIDATE_EMAIL)) {
-            return ["code" => 201, "data" => "Sorry! Please enter a valid email address."];
+            return ["code" => 201, "result" => "Sorry! Please enter a valid email address."];
         }
 
         // create the user agent
@@ -640,20 +637,17 @@ class Auth extends Myschoolgh {
                         #record the password change request
                         return [
                             "code" => 200, 
-                            "data" => "Please check your email for steps to reset password.",
-                            "additional" => [
-                                // "resetPath" => $this->baseUrl.'verify?dw=password&token='.$request_token
-                            ]
+                            "data" => "Please check your email for steps to reset password."
                         ];
 
                     }
 
                 } else {
                     $this->addAttempt($params->email, "reset");
-                    return ["code" => 201, "data" => "Sorry! The email address could not be validated."];
+                    return ["code" => 201, "result" => "Sorry! The email address could not be validated."];
                 }
             } else {
-                return ["code" => 201, "data" => "Access denied due to multiple trial. Try again in an Hour's time."];
+                return ["code" => 201, "result" => "Access denied due to multiple trial. Try again in an Hour's time."];
             }
 
         } catch(PDOException $e) {
@@ -661,7 +655,7 @@ class Auth extends Myschoolgh {
             $this->db->rollBack();
             return [
                 "code" => 201, 
-                "data" => "Sorry! An error was encountered while processing the request.",
+                "result" => "Sorry! An error was encountered while processing the request.",
                 "error" => $e->getMessage()
             ];
         }
@@ -906,7 +900,7 @@ class Auth extends Myschoolgh {
         $this->session->destroy();
 
         // return success
-        return ["code" => 200, "data" => "You have successfully been logged out."];
+        return ["code" => 200, "result" => "You have successfully been logged out."];
     }
 
     /**

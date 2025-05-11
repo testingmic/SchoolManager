@@ -158,10 +158,12 @@ class Handler {
         $endpoint = "{$this->inner_url}/{$this->outer_url}";
 
         // create a sample path
-        foreach(['auth', 'auth/logout', 'auth/login', 'devlog/transitioning', 'devlog/auth'] as $paths) {
+        foreach(['auth', 'auth/logout', 'auth/login', 'devlog/transitioning', 'devlog/auth', 'auth/forgotten'] as $paths) {
             $samplePath[] = "api/{$paths}";
             $samplePath[] = "{$paths}";
         }
+
+        $response = [];
 
         // control
         if(in_array($endpoint, $samplePath)) {
@@ -174,14 +176,14 @@ class Handler {
 
             // if the parameters were parsed
             if($this->requestMethod !== "POST") {
-                $this->response->result = "Sorry! The method must be POST.";
+                $response["data"] = "Sorry! The method must be POST.";
             }
             // if the user is logging out
             elseif($this->outer_url == "logout") { 
                 // append the user id and 
                 $this->params->userId = $this->userId;
                 // logout the user
-                $this->response->result = $logObj->logout($this->params);
+                $response["data"] = $logObj->logout($this->params);
             }
 
             // if the user is logging in
@@ -197,37 +199,42 @@ class Handler {
                     "rememberme" => $this->params->rememberme ?? false
                 ];
                 // Auth the user credentials
-                $this->response->result = $logObj->login($parameters);
+                $response["data"] = $logObj->login($parameters);
             }
             // if the user is requesting a password reset
             elseif(isset($this->params->recover, $this->params->email)) {
                 // request password reset
-                $this->response->result = $logObj->send_password_reset_token($this->params);
+                $response["data"] = $logObj->send_password_reset_token($this->params);
             }
             // if the user is resetting their password
             elseif(isset($this->params->reset_token, $this->params->password, $this->params->password_2)) {
                 // request password reset
-                $this->response->result = $logObj->reset_user_password($this->params);
+                $response["data"] = $logObj->reset_user_password($this->params);
             }
             // if the user is creating a new portal account
             elseif(isset($this->params->portal_registration, $this->params->school_name, $this->params->school_address, $this->params->school_contact, $this->params->email)) {
                 // request password reset
-                $this->response->result = $logObj->create($this->params);
+                $response["data"] = $logObj->create($this->params);
             }
             // if the user is still logged in
             elseif(!empty($this->params->onlineCheck)) {
-                $this->response->result = true;
+                $response["data"] = true;
+            }
+
+            if(isset($response["data"]["code"])) {
+                $response["code"] = $response["data"]["code"];
+                unset($response["data"]["code"]);
             }
 
             // set the notification engine
-            $this->response->notification_engine = top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
+            $response["notification_engine"] = top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
 
-            if(isset($this->response->result) && isset($this->response->result['code'])) {
-                header("HTTP/1.1 {$this->response->result['code']} {$this->messages[$this->response->result['code']]}");
+            if(isset($response["data"]) && isset($response["code"])) {
+                header("HTTP/1.1 {$response["code"]} {$this->messages[$response["code"]]}");
             }
 
             // print the error description
-            die(json_encode($this->response));
+            die(json_encode($response));
 
         }
 

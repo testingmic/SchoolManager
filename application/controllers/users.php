@@ -521,6 +521,9 @@ class Users extends Myschoolgh {
 				// unset the permissions
 				if(isset($params->no_permissions)) {
 					unset($result->user_permissions);
+				} else {
+					$result->user_permissions = !empty($result->user_permissions) ? 
+						(!is_array($result->user_permissions) ? json_decode($result->user_permissions, true) : $result->user_permissions) : [];
 				}
 
 				// run this section if the user is a student

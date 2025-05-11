@@ -6,9 +6,9 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
     $(`form[id="auth-form"] *`).prop("disabled", true);
 
     $(`div[class="form-content-loader"]`).css("display", "flex");
-    $.post(`${form_action}`, form_data, function(data) {
-        if (data.result.code == 200) {
-            $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-success">${data.result.data}</div>`);
+    $.post(`${form_action}`, form_data, function(response) {
+        if (response.code == 200) {
+            $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-success">${response.data.result}</div>`);
             if ($(`input[name="recover"]`).length) {
                 $(`input[name="email"]`).val("");
                 $(`form[id="auth-form"] *`).prop("disabled", false);
@@ -16,9 +16,9 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
                 if ($(`link[name="current_url"]`).length) {
                     setTimeout(() => {
                         window.location.href = $(`link[name="current_url"]`).attr("value");
-                    }, data.result.refresh);
+                    }, response.data.refresh);
                 }
-                if (data.result.clear !== undefined) {
+                if (response.data.clear !== undefined) {
                     $(`form[id="auth-form"] *`).val("");
                     $(`form[id="auth-form"] *`).prop("disabled", false);
                     $(`form[id="auth-form"] input[name="plan"]`).val("basic");
@@ -27,10 +27,10 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
             }
         } else {
             $(`form[id="auth-form"] *`).prop("disabled", false);
-            if (data.result.data !== undefined) {
-                $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-danger">${data.result.data}</div>`);
+            if (response.data.result !== undefined) {
+                $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-danger">${response.data.result}</div>`);
             } else {
-                $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-danger">${data.result}</div>`);
+                $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-danger">${response.result}</div>`);
             }
         }
         $(`div[class="form-content-loader"]`).css("display", "none");

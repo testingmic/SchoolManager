@@ -55,7 +55,7 @@ if(loggedIn()) {
               </div>
               <div class="card-body">
                 <?= form_loader(); ?>
-                <form method="POST" action="<?= $baseUrl ?>api/auth" id="auth-form" class="needs-validation" novalidate="">
+                <form method="POST" action="<?= $baseUrl ?>api/auth/forgotten" id="auth-form" class="needs-validation" novalidate="">
                   <div class="form-group">
                     <label for="email">Email Address</label>
                     <input id="email" type="email" class="form-control" name="email" tabindex="1" required>

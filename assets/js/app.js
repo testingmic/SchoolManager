@@ -149,7 +149,7 @@ var play_sound = () => {
 
 var logout = async() => {
     await $.post(`${baseUrl}api/auth/logout`).then((resp) => {
-        if (resp.result.code == 200) {
+        if (resp.code == 200) {
             swal({
                 text: "You have successfully been logged out.",
                 icon: "success",

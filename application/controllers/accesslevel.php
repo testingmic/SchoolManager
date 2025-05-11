@@ -127,11 +127,13 @@ class Accesslevel {
         if ($permits != false) {
 
             // code the user permissions section
-            $permit = empty($this->userPermits) ? json_decode($permits[0]->permissions) : (!is_object($this->userPermits) ? json_decode($this->userPermits) : $this->userPermits);
-            $permissions = $permit->permissions;
+            $permit = empty($this->userPermits) ? $this->userPermits : (
+                !is_array($this->userPermits) ? json_decode($this->userPermits, true) : $this->userPermits
+            );
+            $permissions = $permit['permissions'];
             
             // confirm that the requested page exists
-            if(!isset($permissions->$currentPage)) {
+            if(!isset($permissions[$currentPage])) {
                 return false;
             }
 
@@ -144,8 +146,8 @@ class Accesslevel {
             }
 
             // confirm that the role exists
-            if(isset($permissions->$currentPage->$role)) {
-                return (bool) ($permissions->$currentPage->$role == 1) ? true : false;
+            if(isset($permissions[$currentPage][$role])) {
+                return (bool) ($permissions[$currentPage][$role] == 1) ? true : false;
             } else {
                 return false;
             }

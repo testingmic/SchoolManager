@@ -167,11 +167,11 @@ class Assignments extends Myschoolgh {
                         if($isAttachment) {
                             // if the assignment is an attachment type
                             $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
-                            $result->attached_attachment_html = isset($result->attached_document->files) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-4 col-md-6", false, false) : null;
+                            $result->attached_attachment_html = isset($result->attached_document->files) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-6 col-md-6", false, false) : null;
 
                             // decode the attachments as well
                             $result->attachment = json_decode($result->attachment);
-                            $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-4 col-md-6", false, false) : "";
+                            $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false) : "";
                         }
 
                         // loop through the information
@@ -620,9 +620,9 @@ class Assignments extends Myschoolgh {
             }    
         }
 
-        $result["courses_list"] = $isTeacher ? $n_courses : (
-            $isAdmin ? $result["courses_list"] : []
-        );
+        // $result["courses_list"] = $isTeacher ? $n_courses : (
+        //     $isAdmin ? $result["courses_list"] : []
+        // );
 
         /** Return the results */
         return [

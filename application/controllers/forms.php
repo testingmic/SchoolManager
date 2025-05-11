@@ -1036,7 +1036,7 @@ class Forms extends Myschoolgh {
                         // set init
                         $thumbnail = "
                         <div style=\"height:150px\" title=\"Click to preview: {$eachFile->name}\" data-toggle=\"tooltip\">
-                            <div><span class=\"text text-{$eachFile->color}\"><i class=\"{$eachFile->favicon} fa-6x\"></i></span></div>
+                            <div><span class=\"text text-{$eachFile->color}\"><i class=\"{$eachFile->favicon} fa-10x\"></i></span></div>
                         </div>";
                         
                         $caption = "

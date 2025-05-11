@@ -107,7 +107,7 @@ if(!empty($session->userId) && empty($argv)) {
         // set the parameters for the access object
         $accessObject->userId = $defaultUser->user_id;
         $accessObject->clientId = $defaultUser->client_id;
-        $accessObject->userPermits = json_decode($defaultUser->user_permissions);
+        $accessObject->userPermits = !is_array($defaultUser->user_permissions) ? json_decode($defaultUser->user_permissions, true) : $defaultUser->user_permissions;
         $accessObject->appPrefs = $clientPrefs;
         $defaultUser->appPrefs = $clientPrefs;
         $defaultUser->isPreviewMode = false;
