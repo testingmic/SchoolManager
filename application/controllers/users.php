@@ -289,9 +289,10 @@ class Users extends Myschoolgh {
 		}
 
 		// set more parameters
-		$params->query .= (isset($params->user_id) && !empty($params->user_id)) ? " AND a.item_id IN {$this->inList($params->user_id)}" : "";
-		$params->query .= (isset($params->class_id) && !empty($params->class_id)) ? " AND a.class_id='{$params->class_id}'" : null;
-		$params->query .= (isset($params->user_type) && !empty($params->user_type)) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
+		$params->query .= !empty($params->user_id) ? " AND a.item_id IN {$this->inList($params->user_id)}" : "";
+		$params->query .= !empty($params->unique_id)? " AND a.unique_id IN {$this->inList($params->unique_id)}" : "";
+		$params->query .= !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : null;
+		$params->query .= !empty($params->user_type) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 
 		// if the activated parameter was not and not equal to pending then append this section
 		if((isset($this->session->activated) && ($this->session->activated !== "Pending")) || (!isset($this->session->activated))) {
@@ -347,7 +348,7 @@ class Users extends Myschoolgh {
 		try {
 
 			// if minified list was requested
-			if(isset($params->minified)) {
+			if(!empty($params->minified)) {
 
 				// set the columns to load
 				$params->columns = "
@@ -2093,7 +2094,11 @@ class Users extends Myschoolgh {
 		}
 
 		// set the where clause
-		$whereClause = $isSupport ? ["limit" => 1, "user_id" => $params->user_id] : ["limit" => 1, "user_id" => $params->user_id, "clientId" => $params->clientId];
+		$whereClause = $isSupport ? [
+			"limit" => 1, "unique_id" => $params->user_id, "minified" => false
+		] : [
+			"limit" => 1, "unique_id" => $params->user_id, "clientId" => $params->clientId, "minified" => false
+		];
 
 		// get the user record
 		$user = $this->list((object) $whereClause)["data"];
@@ -2101,15 +2106,15 @@ class Users extends Myschoolgh {
 
 		// if the user record is empty
 		if(empty($userData)) {
-			return ["code" => 201, "response" => "Sorry! An invalid user id was supplied."];
+			return ["code" => 201, "response" => "Sorry! An invalid user id was supplied"];
 		}
 
 		#encrypt the password
 		$password = password_hash($params->password, PASSWORD_DEFAULT);
                     
 		#deactivate all reset tokens
-		$stmt = $this->db->prepare("UPDATE users SET password = ? WHERE item_id = ? LIMIT 10");
-		$stmt->execute([$password, $params->user_id]);
+		$stmt = $this->db->prepare("UPDATE users SET password = ?, changed_password = ? WHERE (item_id = ? OR unique_id = ?) LIMIT 10");
+		$stmt->execute([$password, 1, $params->user_id, $params->user_id]);
 
 		// admin name
 		$adminName = $params->userData->name;

@@ -103,6 +103,10 @@ if(!empty($user_id)) {
                     <div class="card-body pt-0 pb-0">
                         <div class="py-4">
                             <p class="clearfix">
+                                <span class="float-left">Unique ID</span>
+                                <span class="float-right text-muted">'.$data->unique_id.'</span>
+                            </p>
+                            <p class="clearfix">
                                 <span class="float-left">Gender</span>
                                 <span class="float-right text-muted">'.$data->gender.'</span>
                             </p>

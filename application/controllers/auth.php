@@ -1261,8 +1261,8 @@ class Auth extends Myschoolgh {
                 }
 
                 // change the password
-                $stmt = $this->db->prepare("UPDATE users SET password = ?, last_password_change='{$this->current_timestamp}' WHERE item_id = ? AND client_id = ? LIMIT 10");
-                $stmt->execute([password_hash($params->data["password"], PASSWORD_DEFAULT), $check[0]->user_id, $params->clientId]);
+                $stmt = $this->db->prepare("UPDATE users SET password = ?, last_password_change='{$this->current_timestamp}', password_changed = ? WHERE item_id = ? AND client_id = ? LIMIT 10");
+                $stmt->execute([password_hash($params->data["password"], PASSWORD_DEFAULT), 1, $check[0]->user_id, $params->clientId]);
 
                 // process the form
                 $stmt = $this->db->query("UPDATE users_reset_request SET request_token=NULL, reset_date='{$this->current_timestamp}', reset_agent='{$br}|{$ip}', token_status='USED', expiry_time='".time()."', changed_by = '{$params->userId}' WHERE item_id='{$request_id}' LIMIT 1");
@@ -1342,7 +1342,7 @@ class Auth extends Myschoolgh {
                     $stmt = $this->db->prepare("UPDATE users SET 
                         ".(!empty($username) ? "username = '{$username}', " : null)."
                         password = ?, last_password_change='{$this->current_timestamp}', 
-                        changed_password='0' WHERE item_id = ? AND client_id = ? LIMIT 1"
+                        changed_password='1' WHERE item_id = ? AND client_id = ? LIMIT 1"
                     );
                     $stmt->execute([password_hash($params->data["password"], PASSWORD_DEFAULT), $request_id, $params->clientId]);
 
