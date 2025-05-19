@@ -48,7 +48,7 @@ class Auth extends Myschoolgh {
                     u.access_level, u.username, u.client_id, 
                     u.status AS activated, u.email, u.user_type,
                     u.last_timetable_id, c.client_state, u.user_status,
-                    cl.item_id AS class_guid
+                    cl.item_id AS class_guid, u.firstname, u.lastname
                 FROM users u
                 LEFT JOIN classes cl ON cl.id = u.class_id
                 LEFT JOIN clients_accounts c ON c.client_id = u.client_id
@@ -323,12 +323,28 @@ class Auth extends Myschoolgh {
         // most recent query
         $recent = $this->lastAccessKey($params->username);
 
+        $userInfo = [
+            'client_id' => $params->client_id,
+            'user_id' => $params->user_id,
+            'username' => $params->username,
+            'firstname' => $params->firstname,
+            'lastname' => $params->lastname,
+            'user_type' => $params->user_type,
+            'access_level' => $params->access_level,
+            'user_status' => $params->user_status,
+            
+        ];
+
         // if within the last 10 minutes
         if($recent) {
+            $getList = $this->temporaryKeys($params->username);
             return [
                 "status" => 200,
                 "result" => "The temporary access token could not be generated since the last generated one is within 30 minutes interval.",
-                "unexpired" => $this->temporaryKeys($params->username)
+                "access_token" => $getList[0]["access_token"],
+                "expiry" => $getList[0]["expiry"],
+                "username" => $getList[0]["username"],
+                "user" => $userInfo
             ];
         }
 
@@ -338,6 +354,7 @@ class Auth extends Myschoolgh {
             "username" => $params->username,
             "access_token" => base64_encode("{$params->username}:{$token}"),
             "expiry" => $expiry,
+            "user" => $userInfo,
             "description" => "This access token will expiry after 1 month."
         ];
         
@@ -414,7 +431,7 @@ class Auth extends Myschoolgh {
         
         // if the last update was parsed
 		if($lastUpdate) {
-			return (strtotime($lastUpdate) + (60*30)) >= time() ? true : false;
+			return (strtotime($lastUpdate) + (60 * 60 * 2)) >= time() ? true : false;
 		}
 
 		return false;

@@ -27,15 +27,17 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
             }
         } else {
             $(`form[id="auth-form"] *`).prop("disabled", false);
-            if (response.data.result !== undefined) {
+            if (typeof response.data.result !== undefined) {
                 $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-danger">${response.data.result}</div>`);
             } else {
                 $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-danger">${response.result}</div>`);
             }
         }
         $(`div[class="form-content-loader"]`).css("display", "none");
-    }, "json").catch(() => {
+    }, "json").catch((error) => {
+        let parsed_error = JSON.parse(error.responseText);
         $(`form[id="auth-form"] *`).prop("disabled", false);
+        $(`div[class~="form-results"]`).html(`<div class="alert mb-0 alert-danger">${parsed_error.data.result}</div>`);
         $(`div[class="form-content-loader"]`).css("display", "none");
     });
 });
