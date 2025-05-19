@@ -109,7 +109,6 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                             <div class="row">
                                 <div class="col-lg-12 text-center">
                                     <div class="form-group">
-                                        <label>Timetable</label>
                                         <select style="max-width:400px" class="form-control selectpicker" data-url="timetable-allocate" id="current_TimetableId" name="current_TimetableId">';
                                         if(empty($timetable_id)) {
                                             $response->html .= "<option value='auto_select'>Select Timetable</option>";
