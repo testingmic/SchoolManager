@@ -863,7 +863,7 @@ class Auth extends Myschoolgh {
 
             // change the password
             $stmt = $this->db->prepare("UPDATE users SET last_password_change = now(), password = ?, changed_password = ? WHERE item_id = ? AND client_id = ? LIMIT 3");
-            $stmt->execute([password_hash($params->password_1, PASSWORD_DEFAULT), 1, $params->user_id, $params->clientId]);
+            $stmt->execute([password_hash($params->password_1, PASSWORD_DEFAULT), 0, $params->user_id, $params->clientId]);
 
             // log the user activity
             $this->userLogs("password_reset", $params->user_id, null, "Password was successfully changed.", $params->userId);
