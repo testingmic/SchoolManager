@@ -109,7 +109,9 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                 if(!$timetable_found) {
                                     $response->html .= '
                                     <div class="col-lg-3 p-0">
-                                        <h5>CREATED TIMETABLES LIST</h5>
+                                        <div class="form-group p-2 mb-0">
+                                            <h5 class="badge-success p-2">CREATED TIMETABLES LIST</h5>
+                                        </div>
                                         <div class="trix-slim-scroll p-2" style="max-height:500px; overflow-y:auto;">';
 
                                     if(empty($timetable_list)) {
