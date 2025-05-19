@@ -100,8 +100,8 @@ if(loggedIn()) {
         <div>By: <strong><?= config_item("developer") ?></strong></div>
     </div>
   </div>
-  <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
-  <script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
-  <script src="<?= $baseUrl ?>assets/js/auth.js"></script>
+  <script src="<?= $baseUrl; ?>assets/js/app.min.js?v=<?= version() ?>"></script>
+  <script src="<?= $baseUrl; ?>assets/js/scripts.js?v=<?= version() ?>"></script>
+  <script src="<?= $baseUrl ?>assets/js/auth.js?v=<?= version() ?>"></script>
 </body>
 </html>
