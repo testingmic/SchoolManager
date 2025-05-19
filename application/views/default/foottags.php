@@ -197,13 +197,13 @@ current_column = "";
 <script src="<?= $baseUrl; ?>assets/bundles/datatables/DataTables-1.10.16/js/dataTables.bootstrap4.min.js"></script>
 <script src="<?= $baseUrl; ?>assets/bundles/datatables/export-tables/dataTables.buttons.min.js"></script>
 <script src="<?= $baseUrl; ?>assets/bundles/datatables/export-tables/buttons.print.min.js"></script>
-<script src="<?= $baseUrl; ?>assets/js/magnify.js"></script>
-<script src="<?= $baseUrl; ?>assets/js/notify.js"></script>
-<script src="<?= $baseUrl; ?>assets/vendors/trix/trix.js"></script>
-<script src="<?= $baseUrl; ?>assets/bundles/bootstrap-daterangepicker/daterangepicker.js"></script>
-<script src="<?= $baseUrl; ?>assets/bundles/bootstrap-datepicker/datepicker.min.js"></script>
-<script src="<?= $baseUrl; ?>assets/bundles/fullcalendar/fullcalendar.min.js"></script>
-<script src="<?= $baseUrl; ?>assets/js/scripts.js"></script>
+<script src="<?= $baseUrl; ?>assets/js/magnify.js?v=<?= version() ?>"></script>
+<script src="<?= $baseUrl; ?>assets/js/notify.js?v=<?= version() ?>"></script>
+<script src="<?= $baseUrl; ?>assets/vendors/trix/trix.js?v=<?= version() ?>"></script>
+<script src="<?= $baseUrl; ?>assets/bundles/bootstrap-daterangepicker/daterangepicker.js?v=<?= version() ?>"></script>
+<script src="<?= $baseUrl; ?>assets/bundles/bootstrap-datepicker/datepicker.min.js?v=<?= version() ?>"></script>
+<script src="<?= $baseUrl; ?>assets/bundles/fullcalendar/fullcalendar.min.js?v=<?= version() ?>"></script>
+<script src="<?= $baseUrl; ?>assets/js/scripts.js?v=<?= version() ?>"></script>
 <?php if($isActiveAccount) { ?>
 <script src="https://js.paystack.co/v2/inline.js"></script>
 <script src="<?= $baseUrl; ?>assets/vendors/timetable/ui.min.js"></script>
@@ -211,27 +211,27 @@ current_column = "";
 <script src="<?= $baseUrl; ?>assets/vendors/timetable/chosen.js"></script>
 <script src="<?= $baseUrl; ?>assets/vendors/timetable/form.js"></script>
 <script src="<?= $baseUrl; ?>assets/vendors/timetable/grid.js"></script>
-<script src="<?= $baseUrl; ?>assets/js/myschoolgh.js"></script>
-<script src="<?= $baseUrl; ?>assets/js/filemanager.js"></script>
-<script src="<?= $baseUrl; ?>assets/js/app.js"></script>
+<script src="<?= $baseUrl; ?>assets/js/myschoolgh.js?v=<?= version() ?>"></script>
+<script src="<?= $baseUrl; ?>assets/js/filemanager.js?v=<?= version() ?>"></script>
+<script src="<?= $baseUrl; ?>assets/js/app.js?v=<?= version() ?>"></script>
 <?php } else { ?>
-<script src="<?= $baseUrl; ?>assets/js/app.js"></script>
+<script src="<?= $baseUrl; ?>assets/js/app.js?v=<?= version() ?>"></script>
 <?php if(!in_array($defaultClientData->client_state, ["Expired", "Suspended"])) { ?>
-    <script src="<?= $baseUrl; ?>assets/js/setup.js"></script>
+    <script src="<?= $baseUrl; ?>assets/js/setup.js?v=<?= version() ?>"></script>
 <?php } ?>
-<script src="<?= $baseUrl; ?>assets/js/grading.js"></script>
-<script src="<?= $baseUrl; ?>assets/js/import.js"></script>
+<script src="<?= $baseUrl; ?>assets/js/grading.js?v=<?= version() ?>"></script>
+<script src="<?= $baseUrl; ?>assets/js/import.js?v=<?= version() ?>"></script>
 <?php } ?>
 <?php if($isSupport) { ?>
-<script src="<?= $baseUrl; ?>assets/js/schools.js"></script>
+<script src="<?= $baseUrl; ?>assets/js/schools.js?v=<?= version() ?>"></script>
 <?php } ?>
-<script src="<?= $baseUrl; ?>assets/js/notification.js"></script>
-<script src="<?= $baseUrl; ?>assets/js/media-uploader.js"></script>
+<script src="<?= $baseUrl; ?>assets/js/notification.js?v=<?= version() ?>"></script>
+<script src="<?= $baseUrl; ?>assets/js/media-uploader.js?v=<?= version() ?>"></script>
 <?php if(isset($formToShow)) { ?>
 <script>fieldDefault = <?= json_encode($formToShow) ?>, thisSelectRow = <?= $formData["thisSelectRow"] ?>, thisRowId = <?= $formData["thisRowId"] ?>;</script>
 <?php } ?>
 <?php foreach($loadedJS as $eachJS) { ?>
-<script src="<?= $baseUrl; ?><?= $eachJS ?>"></script>
+<script src="<?= $baseUrl; ?><?= $eachJS ?>?v=<?= version() ?>"></script>
 <?php } ?>
 <script>
 <?php if(!$isActiveAccount) { ?>

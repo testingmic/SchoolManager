@@ -80,8 +80,8 @@ load_helpers(['menu_helper']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title><?= $page_title ?? "Dashboard" ?> :: <?= $clientName ?></title>
-    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css">
-    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/app.min.css?v=<?= version() ?>">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/style.css?v=<?= version() ?>">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/components.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/gallery.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/datatables/datatables.min.css">
@@ -90,11 +90,11 @@ load_helpers(['menu_helper']);
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/bootstrap-datepicker/datepicker.min.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/vendors/trix/trix.css">
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/select2/select2.css">
-    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
-    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/calendar.css">
-    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/table.css">
-    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/chosen.css">
-    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/calculator.css">    
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css?v=<?= version() ?>">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/calendar.css?v=<?= version() ?>">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/table.css?v=<?= version() ?>">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/chosen.css?v=<?= version() ?>">
+    <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/calculator.css?v=<?= version() ?>">    
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/fullcalendar/fullcalendar.min.css">
     <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
     <?php foreach($loadedCSS as $eachCSS) { ?>

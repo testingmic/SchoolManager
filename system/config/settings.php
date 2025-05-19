@@ -15,6 +15,10 @@ define('BASEPATH', $system_folder.DIRECTORY_SEPARATOR);
 define('APPPATH', $application_folder.DIRECTORY_SEPARATOR);
 define('VIEWPATH', $application_folder.DIRECTORY_SEPARATOR);
 
+function version() {
+    return "1.0.1";
+}
+
 function loggedIn() {
     global $session;
     return ($session->userLoggedIn && $session->userId) ? true : false;
