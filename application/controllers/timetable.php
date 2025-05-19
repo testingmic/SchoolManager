@@ -335,7 +335,8 @@ class Timetable extends Myschoolgh {
 
                 // if the bug is not empty then return
                 if(!empty($bugs_list)) {
-                    return ["code" => 203, "data" => $bugs_list];
+                    // allow subjects to be allocated even if the weekly meeting is less than the allocated days
+                    // return ["code" => 203, "data" => $bugs_list];
                 }
 
                 // delete any slots inserted into the database for this class record

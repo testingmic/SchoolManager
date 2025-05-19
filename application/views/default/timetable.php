@@ -121,7 +121,7 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                     } else {
                                         foreach($timetable_list as $key => $value) {
                                             $response->html .= "
-                                                <div data-row_id=\"{$value->item_id}\" class='form-group mb-3 border-bottom'>
+                                                <div data-row_id=\"{$value->item_id}\" class='form-group mb-3 border-bottom timetable-item'>
                                                     <p class='clearfix pb-0 mb-0'>
                                                         <span class='float-left font-weight-bolder'>Name</span>
                                                         <span class='float-right'>{$value->name}</span>
@@ -250,8 +250,8 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                             </div>
                                             <div class="text-center col-lg-8 mt-3">
                                                 <div class="d-flex justify-content-around">
-                                                    '.($isPermitted ? '<div><a href="'.$baseUrl.'timetable-allocate/'.$timetable_id.'" class="btn btn-outline-warning"><i class="fa fa-copy"></i> Allocate Timetable</a></div>' : null).'
-                                                    <div><button onclick="return save_Timetable_Record()" class="btn btn-outline-success"><i class="fa fa-save"></i> Update Timetable</button></div>
+                                                    '.($isPermitted ? '<div><a href="'.$baseUrl.'timetable-allocate/'.$timetable_id.'" class="btn btn-outline-warning pt-3 pb-3"><i class="fa fa-copy"></i> Allocate Timetable</a></div>' : null).'
+                                                    <div><button onclick="return save_Timetable_Record()" class="btn btn-outline-success pt-3 pb-3"><i class="fa fa-save"></i> Update Timetable</button></div>
                                                 </div>
                                             </div>
                                         </div>
