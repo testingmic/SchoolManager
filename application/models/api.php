@@ -190,10 +190,10 @@ class Api {
                 if($errorFound) {
 
                     // log the api request
-                    if(isset($params["remote"])) { $this->logRequest($this->default_params, 405); }
+                    if(isset($params["remote"])) { $this->logRequest($this->default_params, 400); }
 
                     // return invalid parameters parsed to the endpoint
-                    return $this->output(405, ['accepted' => ["parameters" => $accepted['params'] ]]);
+                    return $this->output(400, ["accepted_params" => $accepted['params']]);
                 } else {
 
                     /**
@@ -213,13 +213,14 @@ class Api {
                     /* Set the required into an empty array list */
                     $required = [];
                     $required_text = [];
+                    $request_payload = array_keys($params);
 
                     // loop through the accepted parameters and check which one has the description 
                     // required and append to the list
                     foreach($accepted['params'] as $key => $value) {
                         
                         // evaluates to true
-                        if( strpos($value, "required") !== false) {
+                        if( strpos($value, "required") !== false && !in_array($key, $request_payload)) {
                             $required[] = $key;
                             $required_text[] = $key . ": " . str_replace(["required", "-"], "", $value);
                         }
@@ -241,10 +242,10 @@ class Api {
                     if(!$confirm) {
 
                         // log the api request
-                        if(isset($params["remote"])) { $this->logRequest($this->default_params, 401); }
+                        if(isset($params["remote"])) { $this->logRequest($this->default_params, 400); }
 
                         // return the response of required parameters
-                        return $this->output(401, ['required' => $required_text]);
+                        return $this->output(400, ['required' => $required_text, "accepted_params" => $accepted['params']]);
                     } else {
                         // return all tests parsed
                         return $this->output(100);
@@ -396,9 +397,13 @@ class Api {
                 );
                 
                 // if additional parameter was parsed
-                if(is_array($request) && isset($request['additional'])) {
+                if(is_array($request) && isset($request['additional']) && !$params->remote) {
                     // set the additional parameter
                     $result['additional'] = $request["additional"];
+                }
+
+                if($params->remote && is_array($request) && isset($request["record"])) {
+                    $result["record"] = $request["record"];
                 }
                 
             }
@@ -482,6 +487,9 @@ class Api {
             'method' => $this->requestMethod,
             'endpoint' => $_SERVER["REQUEST_URI"]
         ];
+
+        header("HTTP/1.1 {$data['code']}");
+
         // remove the description endpoint if the response is 200
         if($code == 200) {
             unset($data['description']);

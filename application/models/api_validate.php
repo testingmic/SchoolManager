@@ -253,11 +253,14 @@ class Api_validate {
 			// set the request_method
 			$request_method = !empty($_GET["request_method"]) ? "AND method='{$_GET["request_method"]}'" : null;
 
+			$method = $method == 'POST' ? ["POST", "PUT"] : $method;
+			$method = stringToArray($method);
+
 			/** The request query */
 			$stmt = $this->db->prepare("SELECT 
 					endpoint, resource, method, description, parameter AS params, description 
 				FROM users_api_endpoints 
-				WHERE 1 ".(!empty($endpoint) ? " AND method='{$method}' AND endpoint='{$endpoint}' ORDER BY endpoint LIMIT 1 " : (
+				WHERE 1 ".(!empty($endpoint) ? " AND method IN ('".implode("', '", $method)."') AND endpoint='{$endpoint}' ORDER BY endpoint LIMIT 1 " : (
 					!empty($expl[0]) ? " AND resource='{$expl[0]}' {$request_method} ORDER BY endpoint" : "ORDER BY endpoint")
 				)."
 			");

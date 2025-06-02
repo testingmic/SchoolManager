@@ -502,8 +502,13 @@ class Assignments extends Myschoolgh {
             if(!$is_attached) {
                 $return["data"] = "Assignment successfully created. Proceeding to add the questions";
                 $return["additional"]["href"] = "{$this->baseUrl}add-assessment/add_question?qid={$item_id}";
-            } else {
+            }
 
+            if($params->remote) {
+                $return["data"] = "Assignment successfully created. Proceeding to add the questions";
+
+                $params->assignment_id = $item_id;
+                $return["record"] = $this->view($params);
             }
 
 			// return the output
@@ -643,6 +648,11 @@ class Assignments extends Myschoolgh {
 
             # set the output to return when successful
             $return = ["code" => 200, "data" => "Assignment successfully updated.", "refresh" => 2000, "additional" => $additional];
+
+            if($params->remote) {
+                $params->assignment_id = $params->assignment_id;
+                $return["record"] = $this->view($params);
+            }
 			
 			// return the output
             return $return;
@@ -901,7 +911,8 @@ class Assignments extends Myschoolgh {
             $this->userLogs("assignment", "{$params->assignment_id}", null, "{$params->userData->name} published the assignment.", $params->userId);
 
             return [
-                "data" => "Assignment was successfully published."
+                "data" => "Assignment was successfully published.",
+                "record" => $params->remote ? $this->view($params) : []
             ];
         
         } catch(PDOException $e) {}
