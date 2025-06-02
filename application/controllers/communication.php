@@ -193,7 +193,7 @@ class Communication extends Myschoolgh {
             $prevData = $this->pushQuery("*", "smsemail_templates", "item_id='{$params->template_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
             
             // if empty then return
-            if(empty($prevData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+            if(empty($prevData)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
 
             // clean the template
             $params->message = custom_clean(htmlspecialchars_decode($params->message));
@@ -247,7 +247,7 @@ class Communication extends Myschoolgh {
 
             // validate the recipient type
             if(!isset($params->send_mode)) {
-                return ["code" => 203, "data" => "Sorry! An invalid sending mode."];
+                return ["code" => 400, "data" => "Sorry! An invalid sending mode."];
             }
 
             // get the message to be sent type
@@ -256,12 +256,12 @@ class Communication extends Myschoolgh {
 
             // if the recipient array is empty then return error
             if(empty($params->recipients)) {
-                return ["code" => 203, "data" => $this->is_required("Reminder Recipient")];
+                return ["code" => 400, "data" => $this->is_required("Reminder Recipient")];
             }
 
             // recipient list must be a valid array
             if(!is_array($params->recipients)) {
-                return ["code" => 203, "data" => "Sorry! The recipient list must be a valid array."];
+                return ["code" => 400, "data" => "Sorry! The recipient list must be a valid array."];
             }
 
             // set the init variables
@@ -269,13 +269,13 @@ class Communication extends Myschoolgh {
             $actual_recipients_array = [];
 
             // if no class id was selected
-            if(empty($params->class_id)) { return ["code" => 203, "data" => $this->is_required("Class ID")]; }
+            if(empty($params->class_id)) { return ["code" => 400, "data" => $this->is_required("Class ID")]; }
 
             // old record
             $class_check = $this->pushQuery("id, name", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
             // return error message
-            if(empty($class_check)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+            if(empty($class_check)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
 
             // get the recipients array list
             $actual_recipients_array = $this->pushQuery(
@@ -287,7 +287,7 @@ class Communication extends Myschoolgh {
 
             // return false if the recipients list is empty
             if(empty($actual_recipients_array)) {
-                return ["code" => 203, "data" => "Sorry! No recipient found."];
+                return ["code" => 400, "data" => "Sorry! No recipient found."];
             }
 
             // perform this action if the message type is sms
@@ -306,7 +306,7 @@ class Communication extends Myschoolgh {
 
                 // return error if the balance is less than the message to send
                 if($units > $balance) {
-                    if(empty($class_check)) { return ["code" => 203, 
+                    if(empty($class_check)) { return ["code" => 400, 
                         "data" => "Sorry! Your SMS Balance is insufficient to send this message.\n
                             You have {$balance} units left. However, you would required {$units} units to send the message.
                         "]; 
@@ -331,7 +331,7 @@ class Communication extends Myschoolgh {
             
             // check the time to ensure its not less than current time
             if(strtotime($time_to_send) < time()) {
-                return ["code" => 203, "data" => "Sorry! The scheduled time and date must be above current time."];
+                return ["code" => 400, "data" => "Sorry! The scheduled time and date must be above current time."];
             }
 
             // generate the message unique id
@@ -432,22 +432,22 @@ class Communication extends Myschoolgh {
 
             // validate the message type (email or sms)
             if(!in_array($params->type, ["email", "sms"])) {
-                return ["code" => 203, "data" => "Sorry! An invalid request type was parsed. Must either be 'email' or 'sms'."];
+                return ["code" => 400, "data" => "Sorry! An invalid request type was parsed. Must either be 'email' or 'sms'."];
             }
 
             // validate the recipient type
             if(!in_array($params->recipient_type, ["group", "individual", "class"])) {
-                return ["code" => 203, "data" => "Sorry! An invalid recipient group type was parsed. Must either be 'group', 'individual' or 'class'."];
+                return ["code" => 400, "data" => "Sorry! An invalid recipient group type was parsed. Must either be 'group', 'individual' or 'class'."];
             }
 
             // if the recipient array is empty then return error
             if(empty($params->recipients)) {
-                return ["code" => 203, "data" => $this->is_required("Message Recipient")];
+                return ["code" => 400, "data" => $this->is_required("Message Recipient")];
             }
 
             // recipient list must be a valid array
             if(!is_array($params->recipients)) {
-                return ["code" => 203, "data" => "Sorry! The recipient list must be a valid array."];
+                return ["code" => 400, "data" => "Sorry! The recipient list must be a valid array."];
             }
 
             // set the init variables
@@ -460,13 +460,13 @@ class Communication extends Myschoolgh {
             if($params->recipient_type == "class") {
 
                 // if no class id was selected
-                if(empty($params->class_id)) { return ["code" => 203, "data" => $this->is_required("Class ID")]; }
+                if(empty($params->class_id)) { return ["code" => 400, "data" => $this->is_required("Class ID")]; }
 
                 // old record
                 $class_check = $this->pushQuery("id, name", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
 
                 // return error message
-                if(empty($class_check)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+                if(empty($class_check)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
 
                 // get the recipients array list
                 $recipients_array = $this->pushQuery(
@@ -482,7 +482,7 @@ class Communication extends Myschoolgh {
 
                 // if the recipients list was not parsed
                 if(!isset($params->recipients) || empty($params->recipients)) { 
-                    return ["code" => 203, "data" => $this->is_required("Message Recipient")];
+                    return ["code" => 400, "data" => $this->is_required("Message Recipient")];
                 }
 
                 // if the $params->recipients is an array list
@@ -508,7 +508,7 @@ class Communication extends Myschoolgh {
 
                 // if the role_group was not parsed
                 if(!isset($params->role_group) || empty($params->role_group)) { 
-                    return ["code" => 203, "data" => $this->is_required("Role Group")];
+                    return ["code" => 400, "data" => $this->is_required("Role Group")];
                 }
 
                 // get the recipients array list
@@ -523,7 +523,7 @@ class Communication extends Myschoolgh {
 
             // return false if the recipients list is empty
             if(empty($recipients_array)) {
-                return ["code" => 203, "data" => "Sorry! No recipient found ."];
+                return ["code" => 400, "data" => "Sorry! No recipient found ."];
             }
 
             // loop through the recipients array
@@ -535,7 +535,7 @@ class Communication extends Myschoolgh {
 
             // return false if the recipients list is empty
             if(empty($actual_recipients_array)) {
-                return ["code" => 203, "data" => "Sorry! No recipient found ."];
+                return ["code" => 400, "data" => "Sorry! No recipient found ."];
             }
 
             // perform this action if the message type is sms
@@ -554,7 +554,7 @@ class Communication extends Myschoolgh {
 
                 // return error if the balance is less than the message to send
                 if($units > $balance) {
-                    if(empty($class_check)) { return ["code" => 203, 
+                    if(empty($class_check)) { return ["code" => 400, 
                         "data" => "Sorry! Your SMS Balance is insufficient to send this message. 
                             You have {$balance} units left. However, you would required {$units} units to send the message.
                         "]; 
@@ -579,7 +579,7 @@ class Communication extends Myschoolgh {
 
             // check the time to ensure its not less than current time
             if(strtotime($time_to_send) < time()) {
-                return ["code" => 203, "data" => "Sorry! The scheduled time and date must be above current time."];
+                return ["code" => 400, "data" => "Sorry! The scheduled time and date must be above current time."];
             }
 
             // generate the message unique id
@@ -632,19 +632,19 @@ class Communication extends Myschoolgh {
         try {
             // check if any item is empty
             if(empty($params->package_id) || empty($params->reference_id) || empty($params->transaction_id)) {
-                return ["code" => 203, "data" => "Sorry! Ensure all required parameters have been parsed."];
+                return ["code" => 400, "data" => "Sorry! Ensure all required parameters have been parsed."];
             }
 
             // check if the transaction id already exits
             $transaction = $this->pushQuery("id", "transaction_logs", "transaction_id='{$params->transaction_id}' AND state='Processed' LIMIT 1");
             if(!empty($transaction)) {
-                return ["code" => 203, "data" => "Sorry! This transaction has already been processed."];
+                return ["code" => 400, "data" => "Sorry! This transaction has already been processed."];
             }
 
             // validate the package
             $sms_package = $this->pushQuery("*", "sms_packages", "item_id='{$params->package_id}' LIMIT 1");
             if(empty($sms_package)) {
-                return ["code" => 203, "data" => "Sorry! An invalid package id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid package id was parsed."];
             }
 
             // create a new payment object
@@ -675,7 +675,7 @@ class Communication extends Myschoolgh {
                         with an amount of <strong>{$amount}</strong> which actually costs {$sms_package[0]->amount}'
                     ");
                     // return a warning to the user.
-                    return ["code" => 203, "data" => "Sorry! You attempted to purchase a different SMS Package with an amount that is lower/higher than required. Your Account may be terminated should you try this again in future."];
+                    return ["code" => 400, "data" => "Sorry! You attempted to purchase a different SMS Package with an amount that is lower/higher than required. Your Account may be terminated should you try this again in future."];
                 }
                 
                 // update the user sms balance
@@ -696,7 +696,7 @@ class Communication extends Myschoolgh {
                 $this->userLogs("sms_topup", $params->package_id, null,  "{$params->userData->name} purchased {$sms_package[0]->units} sms units at the rate of {$payment_check["data"]->data->currency}{$amount}.", $params->userId);
 
             } else {
-                return ["code" => 203, "data" => "Sorry! An error was encountered while processing the request."];
+                return ["code" => 400, "data" => "Sorry! An error was encountered while processing the request."];
             }
             
             // validate the package
@@ -724,7 +724,7 @@ class Communication extends Myschoolgh {
 
             // get the data parsed
             if(!is_array($params->data)) {
-                return ["code" => 203, "data" => "Sorry! An array data is required."];
+                return ["code" => 400, "data" => "Sorry! An array data is required."];
             }
 
             // get the email address parsed
@@ -734,7 +734,7 @@ class Communication extends Myschoolgh {
             if(!empty($email)) {
                 // validate the email address
                 if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    return ["code" => 203, "data" => "Sorry! A valid email address is required."];
+                    return ["code" => 400, "data" => "Sorry! A valid email address is required."];
                 }
             }
 
@@ -743,13 +743,13 @@ class Communication extends Myschoolgh {
 
             // check and confirm the package id
             if(!isset($params->data["package_id"])) {
-                return ["code" => 203, "data" => "Sorry! The package_id is required."];
+                return ["code" => 400, "data" => "Sorry! The package_id is required."];
             }
 
             // validate the package
             $sms_package = $this->pushQuery("*", "sms_packages", "item_id='{$params->data["package_id"]}' LIMIT 1");
             if(empty($sms_package)) {
-                return ["code" => 203, "data" => "Sorry! An invalid package id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid package id was parsed."];
             }
 
             // return the data 

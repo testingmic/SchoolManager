@@ -841,9 +841,13 @@ class Myschoolgh extends Models {
 		foreach($expl as $key => $each) {
 			if(!empty($each) || $allowEmpty) {
 				if(!empty($key_name)) {
-					$array[$key_name[$key]] = trim($each) == "NULL" ? null : $func(trim($each));
+					$theValue = trim($each) == "NULL" ? null : $func(trim($each));
+					if(empty($theValue) && !$allowEmpty) continue;
+					$array[$key_name[$key]] = $theValue;
 				} else{
-					$array[] = trim($each) == "NULL" ? null : trim($func($each), "\"");
+					$theValue = trim($each) == "NULL" ? null : trim($func($each), "\"");
+					if(empty($theValue) && !$allowEmpty) continue;
+					$array[] = $theValue;
 				}
 			}
 		}

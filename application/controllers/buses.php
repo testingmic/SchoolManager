@@ -82,7 +82,7 @@ class Buses extends Myschoolgh {
 
 			// confirm that the bus id is valid
 			if(!empty($this->pushQuery("id", "buses", "reg_number='{$reg_number}' AND client_id='{$params->clientId}' LIMIT 1"))) {
-				return ["code" => 203, "data" => "Sorry! This bus record already exists in the database."];
+				return ["code" => 400, "data" => "Sorry! This bus record already exists in the database."];
 			}
 
 			// generate a new string
@@ -133,7 +133,7 @@ class Buses extends Myschoolgh {
 
 			// insert the record
 			if(!$this->_save("buses", $data)) {
-				return ["code" => 203, "data" => "Sorry! There was an error while processing the request."];
+				return ["code" => 400, "data" => "Sorry! There was an error while processing the request."];
 			}
 
             // log the user activity
@@ -175,7 +175,7 @@ class Buses extends Myschoolgh {
 
 			// confirm that the bus id is valid
 			if(empty($prevData)) {
-				return ["code" => 203, "data" => "Sorry! An invalid bus id was parsed."];
+				return ["code" => 400, "data" => "Sorry! An invalid bus id was parsed."];
 			}
 
 			// set the data to update
@@ -212,7 +212,7 @@ class Buses extends Myschoolgh {
 
 			// update the record
 			if(!$this->_save("buses", $data, ["item_id" => $params->bus_id, "client_id" => $params->clientId])) {
-				return ["code" => 203, "data" => "Sorry! There was an error while processing the request."];
+				return ["code" => 400, "data" => "Sorry! There was an error while processing the request."];
 			}
 
 			// attachments
@@ -294,7 +294,7 @@ class Buses extends Myschoolgh {
 
 			// confirm that the bus id is valid
 			if(empty($check)) {
-				return ["code" => 203, "data" => "Sorry! An invalid bus id was parsed."];
+				return ["code" => 400, "data" => "Sorry! An invalid bus id was parsed."];
 			}
 
 			// update the status of the bus

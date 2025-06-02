@@ -18,17 +18,17 @@ class Attendance extends Myschoolgh {
 
         // confirm a valid list of array for the attendance parameter
         if(!isset($params->finalize) && !is_array($params->attendance)) {
-            return ["code" => 203, "data" => "Sorry! The attendance parameter must be an array with the user id as the key."];
+            return ["code" => 400, "data" => "Sorry! The attendance parameter must be an array with the user id as the key."];
         }
 
         // confirm valid date
         if(!$this->validDate($params->date)) {
-            return ["code" => 203, "data" => "Sorry! A valid date is required."];
+            return ["code" => 400, "data" => "Sorry! A valid date is required."];
         }
 
         // confirm if the user_type was parsed if the finalize parameter was not set
         if(!isset($params->finalize) && !isset($params->user_type)) {
-            return ["code" => 203, "data" => "Sorry! Please the user_type is required."];
+            return ["code" => 400, "data" => "Sorry! Please the user_type is required."];
         }
 
         // unset the user id if the user type is not teacher
@@ -45,7 +45,7 @@ class Attendance extends Myschoolgh {
 
             // if empty then return
             if(empty($classData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid class id was supplied."];
             }
         }
 
@@ -88,7 +88,7 @@ class Attendance extends Myschoolgh {
                 
                 // end the query if the result is empty
                 if(empty($data)) {
-                    return ["code" => 203, "data" => "Sorry! The user with GUID {$key} does not fall within the specified user_type."];
+                    return ["code" => 400, "data" => "Sorry! The user with GUID {$key} does not fall within the specified user_type."];
                 }
 
                 // append the attendance status to the query
@@ -109,7 +109,7 @@ class Attendance extends Myschoolgh {
 
         // Return error message if finalize was parsed and yet no results was found
         if(isset($params->finalize) && empty($check)) {
-            return ["code" => 203, "data" => "Sorry! An invalid record id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid record id was supplied."];
         }
 
         // insert the record into the database
@@ -141,7 +141,7 @@ class Attendance extends Myschoolgh {
 
             // confirm that the user has not finalize the attendance log
             if($check[0]->finalize === 1) {
-                return ["code" => 203, "data" => "Sorry! The attendance log for the specified date has already been finalized and cannot be updated."];
+                return ["code" => 400, "data" => "Sorry! The attendance log for the specified date has already been finalized and cannot be updated."];
             }
 
             // prepare and execute the statement
@@ -206,7 +206,7 @@ class Attendance extends Myschoolgh {
             $html .= "
             <span class='mr-2'>
                 <input {$disabled} type='radio' ".($user_state == $the_key ? "checked" : "")." class='cursor' value='{$the_key}' id='{$userId}_{$the_key}'>
-                <label class='cursor' title='Click to Select {$label}' for='{$userId}_{$the_key}'>".($user_state == $the_key ? "<strong class='text-{$color}'>{$label}</strong>" : "{$label}")."</label>
+                <label style='display: table-cell;' class='cursor' title='Click to Select {$label}' for='{$userId}_{$the_key}'>".($user_state == $the_key ? "<strong class='text-{$color}'>{$label}</strong>" : "{$label}")."</label>
             </span>
             ";
         }
@@ -266,7 +266,7 @@ class Attendance extends Myschoolgh {
 
         // confirm if its a valid date
         if(!$this->validDate($start_date)) {
-            return ["code" => 203, "data" => "Sorry! An invalid date was supplied"];
+            return ["code" => 400, "data" => "Sorry! An invalid date was supplied"];
         }
     
         // set the date range
@@ -990,7 +990,7 @@ class Attendance extends Myschoolgh {
 
         // prompt error if the days is more than 90 days
         if(count($days) > 63 && !$isThisTerm) {
-            return ["code" => 203, "data" => "Sorry! The period should not exceed 60 days"];
+            return ["code" => 400, "data" => "Sorry! The period should not exceed 60 days"];
         }
 
         // group the user types

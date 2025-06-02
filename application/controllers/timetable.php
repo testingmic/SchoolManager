@@ -143,7 +143,7 @@ class Timetable extends Myschoolgh {
                 $item_id = $params->timetable_id;
                 // check if a record exist
                 if(empty($this->pushQuery("item_id", "timetables", "item_id = '{$item_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
-                    return ["code" => 203, "data" => "Sorry! An invalid timetable id was parsed"];
+                    return ["code" => 400, "data" => "Sorry! An invalid timetable id was parsed"];
                 }
                 $isFound = true;
             } else {
@@ -155,7 +155,7 @@ class Timetable extends Myschoolgh {
                 if(isset($params->class_id)) {
                     // confirm if a class already exist with the same id
                     if(!empty($this->pushQuery("item_id", "timetables", "class_id='{$params->class_id}' AND client_id = '{$params->clientId}' AND status='1' AND academic_term='{$params->academic_term}' AND academic_year='{$params->academic_year}'"))) {
-                        return ["code" => 203, "data" => "Sorry! There is an existing record in the database for the specified Class ID."];
+                        return ["code" => 400, "data" => "Sorry! There is an existing record in the database for the specified Class ID."];
                     }
                 }
             }
@@ -165,7 +165,7 @@ class Timetable extends Myschoolgh {
 
             // clean input
             if( !is_numeric($params->days) || !is_numeric($params->slots) || !is_numeric($params->duration)) {
-                return ["code" => 203, "data" => "Sorry! The days, slots and duration must be a valid numeric integers."];
+                return ["code" => 400, "data" => "Sorry! The days, slots and duration must be a valid numeric integers."];
             }
 
             // schedules
@@ -173,7 +173,7 @@ class Timetable extends Myschoolgh {
             
             // set a boundary
             if($schedules > 180) {
-                return ["code" => 203, "data" => "Sorry! The maximum number of Allocations must be 180  ie 9 rows & 20 columns."];
+                return ["code" => 400, "data" => "Sorry! The maximum number of Allocations must be 180  ie 9 rows & 20 columns."];
             }
 
             // update the record if found
@@ -238,7 +238,7 @@ class Timetable extends Myschoolgh {
         
         // check if a record exist
         if(empty($this->pushQuery("item_id", "timetables", "item_id = '{$item_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
-            return ["code" => 203, "data" => "Sorry! An invalid timetable id was parsed"];
+            return ["code" => 400, "data" => "Sorry! An invalid timetable id was parsed"];
         }
 
         // set in session
@@ -268,7 +268,7 @@ class Timetable extends Myschoolgh {
         
         /** End Query if there was no allocation */
         if(!isset($params->data["query"])) {
-            return ["code" => 203, "data" => "Sorry! Query parameter is required"];
+            return ["code" => 400, "data" => "Sorry! Query parameter is required"];
         }
 
         // if the user wants to save changes
@@ -276,12 +276,12 @@ class Timetable extends Myschoolgh {
             
             // end query if the allocations array is not parsed
             if(!isset($params->data["allocations"]) || !isset($params->data["timetable_id"])) {
-                return ["code" => 203, "data" => "Sorry! Allocation / Timetable ID parameters are required"];
+                return ["code" => 400, "data" => "Sorry! Allocation / Timetable ID parameters are required"];
             }
 
             // confirm that allocations is an array
             if(!is_array($params->data["allocations"])) {
-                return ["code" => 203, "data" => "Sorry! Allocations must be an array"];
+                return ["code" => 400, "data" => "Sorry! Allocations must be an array"];
             }
 
             // validate the id
@@ -292,7 +292,7 @@ class Timetable extends Myschoolgh {
             
                 // check if a record exist
                 if(empty($this->pushQuery("item_id", "timetables", "item_id = '{$item_id}' AND client_id='{$params->clientId}' LIMIT 1"))) {
-                    return ["code" => 203, "data" => "Sorry! An invalid timetable id was parsed"];
+                    return ["code" => 400, "data" => "Sorry! An invalid timetable id was parsed"];
                 }
 
                 // init values
@@ -307,7 +307,7 @@ class Timetable extends Myschoolgh {
 
                     // confirm that a room has been assigned
                     if(!isset($course_room[1])) {
-                        return ["code" => 203, "data" => "Sorry! There was no room assigned to the course."];
+                        return ["code" => 400, "data" => "Sorry! There was no room assigned to the course."];
                     }
                 }
                 
@@ -329,14 +329,14 @@ class Timetable extends Myschoolgh {
                             $bugs_list .= "<div>".($key+1).". {$single->name} has only <strong>{$single->weekly_meeting} meetings</strong> per week.</div>";
                         }
                     } else {
-                        return ["code" => 203, "data" => "Sorry! An invalid Course ID was parsed."];
+                        return ["code" => 400, "data" => "Sorry! An invalid Course ID was parsed."];
                     }
                 }
 
                 // if the bug is not empty then return
                 if(!empty($bugs_list)) {
                     // allow subjects to be allocated even if the weekly meeting is less than the allocated days
-                    // return ["code" => 203, "data" => $bugs_list];
+                    // return ["code" => 400, "data" => $bugs_list];
                 }
 
                 // delete any slots inserted into the database for this class record
@@ -378,7 +378,7 @@ class Timetable extends Myschoolgh {
 
             // if slot is not parsed
             if(!isset($params->data["slot"])) {
-                return ["code" => 203, "data" => "Sorry! Slot parameter is required"];
+                return ["code" => 400, "data" => "Sorry! Slot parameter is required"];
             }
 
             $slot = !empty($params->data["slot"]) ? explode("_", $params->data["slot"]) : [];
@@ -754,7 +754,7 @@ class Timetable extends Myschoolgh {
             
             // confirm if the data set is not empty
             if(empty($timetable_data)) {
-                return ["code" => 203, "data" => "Sorry! An invalid record data was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid record data was parsed."];
             }
 
             // convert the attendance record to json
@@ -918,7 +918,7 @@ class Timetable extends Myschoolgh {
             
             // confirm if the data set is not empty
             if(empty($timetable_data)) {
-                return ["code" => 203, "data" => "Sorry! An invalid record data was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid record data was parsed."];
             }
 
             // convert the attendance record to json
@@ -1082,7 +1082,7 @@ class Timetable extends Myschoolgh {
 
             // ensure the date does not exceed current date
             if(strtotime($today) > strtotime(date("Y-m-d"))) {
-                return ["code" => 203, "data" => "Sorry! The date must not exceed the current date."];
+                return ["code" => 400, "data" => "Sorry! The date must not exceed the current date."];
             }
 
             // convert the grade to an int
@@ -1106,7 +1106,7 @@ class Timetable extends Myschoolgh {
             
             // confirm if the data set is not empty
             if(empty($timetable_data)) {
-                return ["code" => 203, "data" => "Sorry! An invalid record data was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid record data was parsed."];
             }
 
             // convert the attendance record to json

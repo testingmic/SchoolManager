@@ -141,7 +141,7 @@ class Support extends Myschoolgh {
 
             // confirm if the ticket exists
             if(empty($query)) {
-                return ["code" => 203, "data" => "Sorry! An invalid {$table} was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid {$table} was parsed."];
             }
 
             // set the client id
@@ -149,7 +149,7 @@ class Support extends Myschoolgh {
 
             // if the ticket is closed
             if($query[0]->status == "Closed"){
-                return ["code" => 203, "data" => "Sorry! The ticket has been closed, hence cannot send any message."];
+                return ["code" => 400, "data" => "Sorry! The ticket has been closed, hence cannot send any message."];
             }
 
             // modify the content variable
@@ -220,7 +220,7 @@ class Support extends Myschoolgh {
 
             // confirm if the ticket exists
             if(empty($this->pushQuery("id", $table, "id='{$params->ticket_id}' {$append} LIMIT 1"))) {
-                return ["code" => 203, "data" => "Sorry! An invalid ticket id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid ticket id was parsed."];
             }
 
             // close the ticket
@@ -255,7 +255,7 @@ class Support extends Myschoolgh {
 
             // confirm if the ticket exists
             if(empty($this->pushQuery("id", "support_tickets", "id='{$params->ticket_id}' {$append} LIMIT 1"))) {
-                return ["code" => 203, "data" => "Sorry! An invalid ticket id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid ticket id was parsed."];
             }
 
             // close the ticket
@@ -370,7 +370,7 @@ class Support extends Myschoolgh {
 
             // only support personnel are allowed to add
             if(!$isSupport) {
-                return ["code" => 203, "data" => $this->permission_denied];
+                return ["code" => 400, "data" => $this->permission_denied];
             }
 
             // modify the content variable
@@ -433,7 +433,7 @@ class Support extends Myschoolgh {
         
         // end query is the session access_denied_log is not empty
         if(!empty($this->session->access_denied_log)) {
-            return ["code" => 203, "data" => $this->permission_denied];
+            return ["code" => 400, "data" => $this->permission_denied];
         }
 
         // only support personnel are allowed to add
@@ -449,7 +449,7 @@ class Support extends Myschoolgh {
             $this->session->access_denied_log = true;
 
             // return an error
-            return ["code" => 203, "data" => $this->permission_denied];
+            return ["code" => 400, "data" => $this->permission_denied];
         }
 
         // unset the sessions
@@ -457,12 +457,12 @@ class Support extends Myschoolgh {
 
         // array data check
         if(!is_array($params->data)) {
-            return ["code" => 203, "data" => "Sorry! An invalid dataset was parsed."];
+            return ["code" => 400, "data" => "Sorry! An invalid dataset was parsed."];
         }
 
         // access permission check
         if(!isset($params->data["access_id"]) || !isset($params->data["permission"])) {
-            return ["code" => 203, "data" => "Sorry! An invalid dataset was parsed."];
+            return ["code" => 400, "data" => "Sorry! An invalid dataset was parsed."];
         }
 
         // set the access id
@@ -474,12 +474,12 @@ class Support extends Myschoolgh {
 
         // if the param is empty
         if(empty($param)) {
-           return ["code" => 203, "data" => "Please ensure a valid json data was parsed as permissions."];
+           return ["code" => 400, "data" => "Please ensure a valid json data was parsed as permissions."];
         }
 
         // confirm that the permissions key was also parsed
         if(!isset($param->permissions)) {
-            return ["code" => 203, "data" => "Please ensure a valid json data was parsed as permissions."];
+            return ["code" => 400, "data" => "Please ensure a valid json data was parsed as permissions."];
         }
 
         try {
@@ -490,7 +490,7 @@ class Support extends Myschoolgh {
 
             // confirm the access permission id
             if(empty($record)) {
-                return ["code" => 203, "data" => "Sorry! An invalid access level id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid access level id was parsed."];
             }
 
             // update the user permissions

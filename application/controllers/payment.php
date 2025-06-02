@@ -176,7 +176,7 @@ class Payment extends Myschoolgh {
 
             // if the client subaccount is empty then end the query
             if(empty($client->client_account)) {
-                return ["code" => 203, "data" => "Sorry! {$client->client_name} have not yet subscribed to use the e-Payment Module."];
+                return ["code" => 400, "data" => "Sorry! {$client->client_name} have not yet subscribed to use the e-Payment Module."];
             }
 
             // trim all the variables parsed
@@ -186,22 +186,22 @@ class Payment extends Myschoolgh {
 
             // validate the param variable
             if(!isset($params->param) || (isset($params->param) && !is_array($params->param))) {
-                return ["code" => 203, "result" => "Sorry! Param variable is required and must be an array."];
+                return ["code" => 400, "result" => "Sorry! Param variable is required and must be an array."];
             }
 
             // validate the amount
             if(!preg_match("/^[0-9.]+$/", $params->amount)) {
-                return ["code" => 203, "result" => "Sorry! Please enter a valid amount."];
+                return ["code" => 400, "result" => "Sorry! Please enter a valid amount."];
             }
 
             // validate the contact number
             if(isset($params->contact) && !preg_match("/^[0-9+]+$/", $params->contact)) {
-                return ["code" => 203, "result" => "Sorry! Please enter a valid contact number."];
+                return ["code" => 400, "result" => "Sorry! Please enter a valid contact number."];
             }
 
             // validate the email address
             if(!filter_var($params->email, FILTER_VALIDATE_EMAIL)) {
-                return ["code" => 203, "result" => "Sorry! Please enter a valid email address."];
+                return ["code" => 400, "result" => "Sorry! Please enter a valid email address."];
             }
 
             // param information
@@ -213,7 +213,7 @@ class Payment extends Myschoolgh {
 
             // if both items were not parsed
             if(!isset($param["student_id"]) && !isset($param["checkout_url"])) {
-                return ["code" => 203, "result" => "Missing Parameter! student_id and/or checkout_url is required."];
+                return ["code" => 400, "result" => "Missing Parameter! student_id and/or checkout_url is required."];
             }
             
             // append the student id
@@ -238,7 +238,7 @@ class Payment extends Myschoolgh {
 
             // payment information
             if(empty($pay_info)) {
-                return ["code" => 203, "data" => "Sorry! The checkout url parsed is either incorrect or has expired."];
+                return ["code" => 400, "data" => "Sorry! The checkout url parsed is either incorrect or has expired."];
             }
 
             // get the payment information
@@ -257,7 +257,7 @@ class Payment extends Myschoolgh {
 
             // ensure the amount to be paid is not more than the balance
             if($params->amount > $balance) {
-                return ["code" => 203, "data" => "Sorry! The amount to be paid must not exceed the oustanding balance."];
+                return ["code" => 400, "data" => "Sorry! The amount to be paid must not exceed the oustanding balance."];
             }
 
             // set the data
@@ -342,7 +342,7 @@ class Payment extends Myschoolgh {
             
             // validate the param variable
             if(!isset($params->param) || (isset($params->param) && !is_array($params->param))) {
-                return ["code" => 203, "result" => "Missing Parameter! Param variable is required and must be an array."];
+                return ["code" => 400, "result" => "Missing Parameter! Param variable is required and must be an array."];
             }
 
             // params
@@ -350,12 +350,12 @@ class Payment extends Myschoolgh {
 
             // if both items were not parsed
             if(!isset($param["student_id"]) && !isset($param["checkout_url"])) {
-                return ["code" => 203, "result" => "Missing Parameter! student_id and/or checkout_url is required."];
+                return ["code" => 400, "result" => "Missing Parameter! student_id and/or checkout_url is required."];
             }
 
             // confirm the reference_id exists
             if(empty($session->self_pay_reference_id)) {
-                return ["code" => 203, "result" => "Sorry! Payment validation unsuccessful."];
+                return ["code" => 400, "result" => "Sorry! Payment validation unsuccessful."];
             }
 
             // academic year
@@ -371,7 +371,7 @@ class Payment extends Myschoolgh {
 
             // check
             if(empty($payment_check["data"])) {
-                return ["code" => 203, "data" => "Sorry! We could not validate the transaction."];
+                return ["code" => 400, "data" => "Sorry! We could not validate the transaction."];
             }
 
             // if payment status is true
@@ -379,19 +379,19 @@ class Payment extends Myschoolgh {
 
                 // confirm the reference_id
                 if($session->self_pay_reference_id !== $payment_check["data"]->data->reference) {
-                    return ["code" => 203, "result" => "Sorry! Payment validation unsuccessful."];
+                    return ["code" => 400, "result" => "Sorry! Payment validation unsuccessful."];
                 }
 
                 // end query if the $params->subaccount was not parsed for verification
                 if(empty($params->subaccount)) {
-                    return ["code" => 203, "data" => "Sorry! We could not validate this transaction."];
+                    return ["code" => 400, "data" => "Sorry! We could not validate this transaction."];
                 }
 
                 // if the subaccount was parsed
                 if(isset($payment_check["data"]->data->subaccount)) {
                     // if the client subaccount is empty then end the query
                     if($payment_check["data"]->data->subaccount->subaccount_code !== $params->subaccount) {
-                        return ["code" => 203, "data" => "Sorry! We could not validate this transaction."];
+                        return ["code" => 400, "data" => "Sorry! We could not validate this transaction."];
                     }
                 }
 
@@ -442,7 +442,7 @@ class Payment extends Myschoolgh {
 
                 /** If no allocation record was found */
                 if(empty($paymentRecord)) {
-                    return ["code" => 203, "data" => "Sorry! An invalid checkout url was parsed for processing."];
+                    return ["code" => 400, "data" => "Sorry! An invalid checkout url was parsed for processing."];
                 }
 
                 // confirm if the data parsed is an array
@@ -714,12 +714,12 @@ class Payment extends Myschoolgh {
                 ];
 
             } else {
-                return ["code" => 203, "data" => "Sorry! We could not validate the transaction."];
+                return ["code" => 400, "data" => "Sorry! We could not validate the transaction."];
             }
 
         } catch(PDOException $e) {
             $this->db->rollBack();
-            return ["code" => 203, "data" => "Sorry! An unexpected error occurred while processing the request."];
+            return ["code" => 400, "data" => "Sorry! An unexpected error occurred while processing the request."];
         }
 
     }
@@ -736,7 +736,7 @@ class Payment extends Myschoolgh {
         // end query is the session access_denied_log is not empty
         if(empty($this->session->self_pay_reference_id)) {
             // return permission denied
-            return ["code" => 203, "data" => "Payment request cancelled."];
+            return ["code" => 400, "data" => "Payment request cancelled."];
         }
 
         // set the transaction id
@@ -747,12 +747,12 @@ class Payment extends Myschoolgh {
 
         // confirm if a record already exists
         if(empty($log)) {
-            return ["code" => 203, "data" => "Payment request cancelled."];
+            return ["code" => 400, "data" => "Payment request cancelled."];
         }
 
         // get the status
         if($log[0]->state == "Processed") {
-            return ["code" => 203, "data" => "Payment request already processed."];   
+            return ["code" => 400, "data" => "Payment request already processed."];   
         }
 
         // set the parameters
@@ -779,7 +779,7 @@ class Payment extends Myschoolgh {
             // process the payment
             return $this->verify($_param);
         } else {
-            return ["code" => 203, "data" => "Payment request cancelled."];
+            return ["code" => 400, "data" => "Payment request cancelled."];
         }
 
     }

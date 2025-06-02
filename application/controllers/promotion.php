@@ -230,7 +230,7 @@ class Promotion extends Myschoolgh {
 
             // if the class id is empty
             if(empty($params->promote_from) || empty($params->promote_to)) {
-                return ["code" => 203, "data" => $this->is_required("Class to Promote From and To")];
+                return ["code" => 400, "data" => $this->is_required("Class to Promote From and To")];
             }
             // convert the students list into an array list
             $students_list = $this->stringToArray($params->students_list);
@@ -241,7 +241,7 @@ class Promotion extends Myschoolgh {
 
             // if the class id is invalid
             if(empty($from_class) || empty($to_class)) {
-                return ["code" => 203,"data" => "Please ensure a valid class id was supplied"];
+                return ["code" => 400,"data" => "Please ensure a valid class id was supplied"];
             }
 
             // check if there is an existing record already
@@ -260,7 +260,7 @@ class Promotion extends Myschoolgh {
 
             // if the class has already been promoted
             if(!empty($existing_record) && ($existing_record[0]->status === "Processed")) {
-                return ["code" => 203,"data" => "Sorry! This class has already been promoted. Hence cannot repeat the action."];
+                return ["code" => 400,"data" => "Sorry! This class has already been promoted. Hence cannot repeat the action."];
             }
 
             // get the existing promotion_log_id
@@ -302,7 +302,7 @@ class Promotion extends Myschoolgh {
             
             // return false if an invalid student id was parsed
             if($not_found) {
-                return ["code" => 203, "data" => "Sorry! Ensure all students id parsed is valid."];
+                return ["code" => 400, "data" => "Sorry! Ensure all students id parsed is valid."];
             }
 
             // trim the end
@@ -339,7 +339,7 @@ class Promotion extends Myschoolgh {
                     ]
                 ];
             } else {
-                return ["code" => 203, "data" => "Sorry! There was an error while processing the request."];
+                return ["code" => 400, "data" => "Sorry! There was an error while processing the request."];
             }
             
         } catch(PDOException $e) {
@@ -363,12 +363,12 @@ class Promotion extends Myschoolgh {
             $student_array = $this->stringToArray($params->students_list);
 
             if(empty($student_array)) {
-                return ["code" => 203,"data" => "Sorry! Please select at least one student to proceed."];
+                return ["code" => 400,"data" => "Sorry! Please select at least one student to proceed."];
             }
 
             // check the option parsed
             if(!in_array($params->option, ["repeat", "promote"])) {
-                return ["code" => 203,"data" => "Sorry! An invalid option was parsed."];
+                return ["code" => 400,"data" => "Sorry! An invalid option was parsed."];
             }
 
             // confirm that the record actually exists
@@ -377,12 +377,12 @@ class Promotion extends Myschoolgh {
 
             // if the class id is invalid
             if(empty($history_log)) {
-                return ["code" => 203,"data" => "Sorry! An invalid promotion history log id was supplied"];
+                return ["code" => 400,"data" => "Sorry! An invalid promotion history log id was supplied"];
             }
 
             // check the status
             if($history_log[0]->status !== "Pending") {
-                return ["code" => 203,"data" => "Sorry! This log has already been {$history_log[0]->status}"];
+                return ["code" => 400,"data" => "Sorry! This log has already been {$history_log[0]->status}"];
             }
 
             // set the is_promoted
@@ -423,12 +423,12 @@ class Promotion extends Myschoolgh {
 
             // if the class id is invalid
             if(empty($history_log)) {
-                return ["code" => 203,"data" => "Sorry! An invalid promotion history log id was supplied"];
+                return ["code" => 400,"data" => "Sorry! An invalid promotion history log id was supplied"];
             }
 
             // check the status
             if($history_log[0]->status !== "Pending") {
-                return ["code" => 203,"data" => "Sorry! This log has already been {$history_log[0]->status}"];
+                return ["code" => 400,"data" => "Sorry! This log has already been {$history_log[0]->status}"];
             }
 
             // update the log history record
@@ -463,12 +463,12 @@ class Promotion extends Myschoolgh {
 
             // if the class id is invalid
             if(empty($history_log)) {
-                return ["code" => 203,"data" => "Sorry! An invalid promotion history log id was supplied"];
+                return ["code" => 400,"data" => "Sorry! An invalid promotion history log id was supplied"];
             }
 
             // check the status
             if($history_log[0]->status !== "Pending") {
-                return ["code" => 203,"data" => "Sorry! This log has already been {$history_log[0]->status}"];
+                return ["code" => 400,"data" => "Sorry! This log has already been {$history_log[0]->status}"];
             }
             
             // update the students promotion list record

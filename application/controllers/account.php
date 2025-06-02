@@ -96,7 +96,7 @@ class Account extends Myschoolgh {
 
             // if the remarks_list is empty or not an array
             if(empty($params->remarks_list) || !is_array($params->remarks_list)) {
-                return ["code" => 203, "data" => "Sorry! An array data is expected in the request"];
+                return ["code" => 400, "data" => "Sorry! An array data is expected in the request"];
             }
 
             // set the remarks
@@ -151,7 +151,7 @@ class Account extends Myschoolgh {
 
             if(empty($setClause)) {
                 return [
-                    "code" => 203,
+                    "code" => 400,
                     "data" => "Sorry! No data was parsed in the request."
                 ];
             }
@@ -192,7 +192,7 @@ class Account extends Myschoolgh {
 
             if(empty($params->package_id)) {
                 return [
-                    "code" => 203,
+                    "code" => 400,
                     "data" => "Sorry! A valid package id must be parsed in the request."
                 ];
             }
@@ -208,7 +208,7 @@ class Account extends Myschoolgh {
 
             if(empty($setClause)) {
                 return [
-                    "code" => 203,
+                    "code" => 400,
                     "data" => "Sorry! No data was parsed in the request."
                 ];
             }
@@ -252,12 +252,12 @@ class Account extends Myschoolgh {
 
             // if not an array data is parsed
             if(!is_array($params->data)) {
-                return ["code" => 203, "data" => "Sorry! An array data is expected"];
+                return ["code" => 400, "data" => "Sorry! An array data is expected"];
             }
 
             // confirm the client id
             if(!isset($data["client_id"])) {
-                return ["code" => 203, "data" => "Sorry! A valid client_id must be parsed in the request."];
+                return ["code" => 400, "data" => "Sorry! A valid client_id must be parsed in the request."];
             }
 
             // check the client id if existing
@@ -267,7 +267,7 @@ class Account extends Myschoolgh {
                 "clients_accounts a", "a.client_id='{$data["client_id"]}' LIMIT 1");
             
             // if no record was found
-            if(empty($check)) { return ["code" => 203, "data" => "Sorry! A valid client_id must be parsed in the request."]; }
+            if(empty($check)) { return ["code" => 400, "data" => "Sorry! A valid client_id must be parsed in the request."]; }
 
             // set the redirection link
             $additional["href"] = "{$this->baseUrl}schools/{$data["client_id"]}";
@@ -277,7 +277,7 @@ class Account extends Myschoolgh {
                 
                 // update only if the account has not been suspended or expired
                 if(in_array($check[0]->client_state, ["Expired", "Suspended"])) {
-                    return ["code" => 203, "data" => "Sorry! You cannot modify a {$check[0]->client_state} account. First change the status to continue."];
+                    return ["code" => 400, "data" => "Sorry! You cannot modify a {$check[0]->client_state} account. First change the status to continue."];
                 }
 
                 // update the user sms balance
@@ -302,7 +302,7 @@ class Account extends Myschoolgh {
 
             foreach($data as $key => $value) {
                 if(!in_array($key, $required)) {
-                    return ["code" => 203, "data" => "Sorry! An unexpected parameter was parsed."];
+                    return ["code" => 400, "data" => "Sorry! An unexpected parameter was parsed."];
                 }
             }
 
@@ -324,7 +324,7 @@ class Account extends Myschoolgh {
                         description='The user attempted to assign a non existent package to {$check[0]->client_name}'
                     ");
                     // return a warning to the user.
-                    return ["code" => 203, "data" => "Sorry! You attempted to assign a non existent package to the user."];
+                    return ["code" => 400, "data" => "Sorry! You attempted to assign a non existent package to the user."];
                 }
 
                 // continue with the processing
@@ -393,7 +393,7 @@ class Account extends Myschoolgh {
         // confirm that the academic term and year are not empty
         if(empty($next_academic_year) || empty($next_academic_term)) {
             return [
-                "code" => 203,
+                "code" => 400,
                 "data" => "Sorry! The next academic year and term cannot be empty. Ensure it has been correctly set before proceeding"
             ];
         }
@@ -402,7 +402,7 @@ class Account extends Myschoolgh {
         if("{$academic_year}_{$academic_term}" == "{$next_academic_year}_{$next_academic_term}") {
             // return an error message
             return [
-                "code" => 203,
+                "code" => 400,
                 "data" => "Fatal Error! Please ensure that the current academic year and term is not the same as the next academic year and term.
                     This can be corrected under the SETTINGS panel.",
             ];
@@ -481,12 +481,12 @@ class Account extends Myschoolgh {
 
         // return error
         if(!isset($params->general["labels"])) {
-            return ["code" => 203, "data" => "Sorry! Ensure labels have been parsed."];
+            return ["code" => 400, "data" => "Sorry! Ensure labels have been parsed."];
         }
 
         // academics and labels must be an array
         if(!is_array($params->general["labels"])) {
-            return ["code" => 203, "data" => "Sorry! Labels must be an array."];
+            return ["code" => 400, "data" => "Sorry! Labels must be an array."];
         }
 
         // get the client data
@@ -521,7 +521,7 @@ class Account extends Myschoolgh {
                     $return["additional"] = ["href" => "{$this->baseUrl}settings/_general"];
                 }
             } else {
-                return ["code" => 203, "data" => "Sorry! The logo must be a valid image."];
+                return ["code" => 400, "data" => "Sorry! The logo must be a valid image."];
             }
         }
 
@@ -553,7 +553,7 @@ class Account extends Myschoolgh {
         }
 
         if(empty($query)) {
-            return ["code" => 203, "data" => "Sorry! Academics and Labels must be an array."];
+            return ["code" => 400, "data" => "Sorry! Academics and Labels must be an array."];
         }
 
         try {
@@ -590,12 +590,12 @@ class Account extends Myschoolgh {
         
         // ensure an array was parsed
         if(!empty($params->features) && !is_array($params->features)) {
-            return ["code" => 203, "data" => "Sorry! Features must be an array."];
+            return ["code" => 400, "data" => "Sorry! Features must be an array."];
         }
 
         // if the user is an admin
         if(!$isSupport && ($params->client_id !== $params->clientId)) {
-            return ["code" => 203, "data" => "Sorry! You attempted to update an account that is not yours."];
+            return ["code" => 400, "data" => "Sorry! You attempted to update an account that is not yours."];
         }
 
         // if a user is a support
@@ -621,7 +621,7 @@ class Account extends Myschoolgh {
         // loop through the list to ensure a valid item was parsed
         foreach($features_list as $item) {
             if(!in_array($item, $accepted_features)) {
-                return ["code" => 203, "data" => "Sorry! An invalid feature was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid feature was parsed."];
             }
         }
 
@@ -664,12 +664,12 @@ class Account extends Myschoolgh {
 
         // return error
         if(!isset($params->general["academics"])) {
-            return ["code" => 203, "data" => "Sorry! Ensure academics have been parsed."];
+            return ["code" => 400, "data" => "Sorry! Ensure academics have been parsed."];
         }
 
         // academics and labels must be an array
         if(!is_array($params->general["academics"])) {
-            return ["code" => 203, "data" => "Sorry! Academics must be an array."];
+            return ["code" => 400, "data" => "Sorry! Academics must be an array."];
         }
 
         // get the client data
@@ -698,7 +698,7 @@ class Account extends Myschoolgh {
 
         // confirm if the next academic year and term is equal to the current academic year and term
         if("{$_next_academic_year}_{$_next_academic_term}" == "{$_academic_year}_{$_academic_term}") {
-            return ["code" => 203, "data" => "Sorry! The next Academic Year and term cannot be the same as the current details."];
+            return ["code" => 400, "data" => "Sorry! The next Academic Year and term cannot be the same as the current details."];
         }
 
         // check if the next academic year and term is already logged as completed
@@ -709,7 +709,7 @@ class Account extends Myschoolgh {
 
         // confirm that the academic year and term is not empty
         if(!empty($_check)) {
-            return ["code" => 203, "data" => "Sorry! The selected Next Academic Year & Term began on
+            return ["code" => 400, "data" => "Sorry! The selected Next Academic Year & Term began on
                 ".date("jS F Y", strtotime($_check[0]->term_starts))." to 
                 ".date("jS F Y", strtotime($_check[0]->term_ends))." hence cannot be repeated."];
         }
@@ -723,7 +723,7 @@ class Account extends Myschoolgh {
         // set the session is_only_readable_app if not empty
         if(!empty($_check)) {
             // set it as readonly
-            return ["code" => 203, "data" => "Sorry! The selected Academic Year & Term began on
+            return ["code" => 400, "data" => "Sorry! The selected Academic Year & Term began on
                 ".date("jS F Y", strtotime($_check[0]->term_starts))." to 
                 ".date("jS F Y", strtotime($_check[0]->term_ends))." hence cannot be repeated."];
         }
@@ -845,7 +845,7 @@ class Account extends Myschoolgh {
 
         // confirm its an array
         if(!is_array($params->grading_values) || !is_array($params->report_columns)) {
-            return ["code" => 203, "data" => "Sorry! An array data is expected"];
+            return ["code" => 400, "data" => "Sorry! An array data is expected"];
         }
 
         // get the client data
@@ -861,7 +861,7 @@ class Account extends Myschoolgh {
                 }
             }
             if($total_grade !== 100) {
-                return ["code" => 203, "data" => "Sorry! The selected SBA Summation must be equal to 100%. The current value is {$total_grade}%."];
+                return ["code" => 400, "data" => "Sorry! The selected SBA Summation must be equal to 100%. The current value is {$total_grade}%."];
             }
         }
 
@@ -878,7 +878,7 @@ class Account extends Myschoolgh {
 
             // if the score is more than 100 then alert the user
             if($score > 100) {
-                return ["code" => 203, "data" => "Sorry! The score must be equal to 100%. The current value is {$score}%."];
+                return ["code" => 400, "data" => "Sorry! The score must be equal to 100%. The current value is {$score}%."];
             }
         }
 
@@ -932,7 +932,7 @@ class Account extends Myschoolgh {
     public function upload_csv(stdClass $params) {
 
         if(!isset($this->accepted_column[$params->column])) {
-            return ["code" => 203, "data" => "Sorry! An invalid column value was parsed"];
+            return ["code" => 400, "data" => "Sorry! An invalid column value was parsed"];
         }
 
         // reading tmp_file name
@@ -1018,10 +1018,10 @@ class Account extends Myschoolgh {
 
         if($keys_count > count(array_keys($accepted_column))) {
             // break the code if an error was found
-            return ["code" => 203, "data" => 'Required columns exceeded. Please confirm and try.'];
+            return ["code" => 400, "data" => 'Required columns exceeded. Please confirm and try.'];
         } elseif($notFound) {
             // break the code if an error was found
-            return ["code" => 203, "data" => 'Invalid column parsed. Please confirm all columns match.'];
+            return ["code" => 400, "data" => 'Invalid column parsed. Please confirm all columns match.'];
         }
 
         // start at zero
@@ -1039,7 +1039,7 @@ class Account extends Myschoolgh {
 
         // confirm that the column table exists
         if(!isset($table[$params->column])) {
-            return ["code" => 203, "data" => 'Invalid request parsed.'];
+            return ["code" => 400, "data" => 'Invalid request parsed.'];
         }
 
         // begin the processing of the array data
@@ -1243,7 +1243,7 @@ class Account extends Myschoolgh {
                     $count++;
                     $bugs_list .= "{$count}. {$bug}\n";
                 }
-                return ["code" => 203, "data" => $bugs_list];
+                return ["code" => 400, "data" => $bugs_list];
             }
             
             try {
@@ -1287,13 +1287,13 @@ class Account extends Myschoolgh {
                 return ["data" => "{$import}s data was successfully imported."];
 
             } catch(PDOException $e) {
-                return ["code" => 203, "data" => $e->getMessage()];
+                return ["code" => 400, "data" => $e->getMessage()];
             }
 
         }
 
         // return error
-        return ["code" => 203, "data" => "Sorry! No data was submitted to be processed."];
+        return ["code" => 400, "data" => "Sorry! No data was submitted to be processed."];
 
     }
 

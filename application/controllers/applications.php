@@ -27,7 +27,7 @@ class Applications extends Myschoolgh {
 
         // return error if no data was found
         if(empty($form["data"])) {
-            return ["code" => 203, "data" => "Sorry! An invalid form id was parsed."];
+            return ["code" => 400, "data" => "Sorry! An invalid form id was parsed."];
         }
 
         // get the first key of the result returned
@@ -57,7 +57,7 @@ class Applications extends Myschoolgh {
 
             // check the last time for applying
             if(!$this->check_time("users_applications")) {
-                return ["code" => 203, "data" => "Sorry! You cannot submit another application within 2 minutes."];
+                return ["code" => 400, "data" => "Sorry! You cannot submit another application within 2 minutes."];
             }
 
             // load the application form
@@ -111,7 +111,7 @@ class Applications extends Myschoolgh {
                 }
 
                 // return the error list
-                return ["code" => 203, "data" => $bugs_list];
+                return ["code" => 400, "data" => $bugs_list];
             }
 
             // generate a new application id
@@ -252,14 +252,14 @@ class Applications extends Myschoolgh {
 
         /** confirm that the form is not empty  */
         if(!isset($params->form)) {
-            return ["data" => "Sorry! The application form cannot be empty", "code" => 203];
+            return ["data" => "Sorry! The application form cannot be empty", "code" => 400];
         }
 
         /** Convert the form data into an array json */
         $params->form = json_decode($params->form, true);
         
         if(!is_array($params->form)) {
-            return ["data" => "Sorry! The application form must be an array", "code" => 203];
+            return ["data" => "Sorry! The application form must be an array", "code" => 400];
         }
 
         /** Loop through the form and rearrange the data */
@@ -350,19 +350,19 @@ class Applications extends Myschoolgh {
             "users_application_forms a", "a.item_id='{$params->application_id}' AND a.client_id='{$params->clientId}' LIMIT 1");
 
         if(empty($prevData)) {
-            return ["code" => 203, "data" => "Sorry! An invalid assignment id was submitted"];
+            return ["code" => 400, "data" => "Sorry! An invalid assignment id was submitted"];
         }
 
         /** confirm that the form is not empty  */
         if(!isset($params->form)) {
-            return ["data" => "Sorry! The application form cannot be empty", "code" => 203];
+            return ["data" => "Sorry! The application form cannot be empty", "code" => 400];
         }
 
         /** Convert the form data into an array json */
         $params->form = json_decode($params->form, true);
         
         if(!is_array($params->form)) {
-            return ["data" => "Sorry! The application form must be an array", "code" => 203];
+            return ["data" => "Sorry! The application form must be an array", "code" => 400];
         }
 
         /** Loop through the form and rearrange the data */

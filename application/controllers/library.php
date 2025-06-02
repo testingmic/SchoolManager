@@ -362,7 +362,7 @@ class Library extends Myschoolgh {
 
             # if empty then return
             if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
             # execute the statement
@@ -425,7 +425,7 @@ class Library extends Myschoolgh {
 		
 		/** Return false if an array was not parsed */
 		if(!is_array($params->label) || !isset($params->label["todo"]) || !isset($params->label["mode"])) {
-			return ["code" => 203, "data" => "Sorry! The label parameter must be an array. Also ensure 'todo' and 'mode' was parsed"];
+			return ["code" => 400, "data" => "Sorry! The label parameter must be an array. Also ensure 'todo' and 'mode' was parsed"];
 		}
 
 		/** Assign variables */
@@ -451,7 +451,7 @@ class Library extends Myschoolgh {
 
 			// confirm that the book exists
 			if(empty($book_info)) {
-				return ["code" => 203, "data" => "Sorry! Invalid book id was supplied"];
+				return ["code" => 400, "data" => "Sorry! Invalid book id was supplied"];
 			}
 
 			// add to session
@@ -510,12 +510,12 @@ class Library extends Myschoolgh {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
-				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+				return ["code" => 400, "data" => "Sorry! The data to be processed"];
 			}
 
 			// the books list
 			if(!isset($params->label["data"]["books_list"])) {
-				return ["code" => 203, "data" => "Sorry! You have not selected any books yet"];
+				return ["code" => 400, "data" => "Sorry! You have not selected any books yet"];
 			}
 
 			// append more values
@@ -541,7 +541,7 @@ class Library extends Myschoolgh {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
-				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+				return ["code" => 400, "data" => "Sorry! The data to be processed"];
 			}
 
 			// set additional parameters to the data parameter
@@ -562,7 +562,7 @@ class Library extends Myschoolgh {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
-				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+				return ["code" => 400, "data" => "Sorry! The data to be processed"];
 			}
 
 			// set additional parameters to the data parameter
@@ -583,7 +583,7 @@ class Library extends Myschoolgh {
 
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
-				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+				return ["code" => 400, "data" => "Sorry! The data to be processed"];
 			}
 
 			// set additional parameters to the data parameter
@@ -602,7 +602,7 @@ class Library extends Myschoolgh {
 		elseif(in_array($todo, ["approve_request", "cancel_request"])) {
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
-				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+				return ["code" => 400, "data" => "Sorry! The data to be processed"];
 			}
 
 			// set additional parameters to the data parameter
@@ -621,7 +621,7 @@ class Library extends Myschoolgh {
 		elseif($todo === "return_books") {
 			// if the data is not parsed
 			if(!isset($params->label["data"])) {
-				return ["code" => 203, "data" => "Sorry! The data to be processed"];
+				return ["code" => 400, "data" => "Sorry! The data to be processed"];
 			}
 
 			// set additional parameters to the data parameter
@@ -638,7 +638,7 @@ class Library extends Myschoolgh {
 			return $request;
 		}
 
-		return ["code" => 203, "data" => "Sorry! Unknown request was parsed."];
+		return ["code" => 400, "data" => "Sorry! Unknown request was parsed."];
 
 	}
 
@@ -754,20 +754,20 @@ class Library extends Myschoolgh {
 
 		// confirm that the return date is not empty
 		if(!isset($data->return_date)) {
-			return ["code" => 203, "data" => "Sorry! The return date for this request must be set."];
+			return ["code" => 400, "data" => "Sorry! The return date for this request must be set."];
 		}
 
 		// confirm that the user id was selected
 		if(($status == "Issued") && empty($data->user_id)) {
-			return ["code" => 203, "data" => "Sorry! Please select the user to issue to this to."];
+			return ["code" => 400, "data" => "Sorry! Please select the user to issue to this to."];
 		}
 		if(($status == "Issued") && empty($data->user_role)) {
-			return ["code" => 203, "data" => "Sorry! Please select the user to issue to this to."];
+			return ["code" => 400, "data" => "Sorry! Please select the user to issue to this to."];
 		}
 
 		// confirm the user id parsed
 		if(empty($this->pushQuery("id", "users", "item_id='{$data->user_id}' AND client_id='{$data->clientId}' LIMIT 1"))) {
-			return ["code" => 203, "data" => "Sorry! An invalid user had been selected."];
+			return ["code" => 400, "data" => "Sorry! An invalid user had been selected."];
 		}
 
 		// rate for overdue
@@ -850,7 +850,7 @@ class Library extends Myschoolgh {
 			$data = $this->pushQuery("id, quantity", "books_borrowed_details", "borrowed_id='{$params->borrowed_id}' AND book_id='{$params->book_id}' AND deleted='0'");
 
 			if(empty($data)) {
-				return ["code" => 203, "data" => "Sorry! An invalid ids were submitted."];
+				return ["code" => 400, "data" => "Sorry! An invalid ids were submitted."];
 			}
 
 			/** Remove the file from the list */
@@ -885,7 +885,7 @@ class Library extends Myschoolgh {
 		$data = $this->pushQuery("quantity", "books_borrowed_details", "borrowed_id='{$params->borrowed_id}' AND book_id='{$params->book_id}' AND deleted='0'");
 
 		if(empty($data)) {
-			return ["code" => 203, "data" => "Sorry! An invalid ids were submitted."];
+			return ["code" => 400, "data" => "Sorry! An invalid ids were submitted."];
 		}
 
 		/** Remove the file from the list */
@@ -929,7 +929,7 @@ class Library extends Myschoolgh {
 		$data = $this->pushQuery("fine", "books_borrowed", "client_id='{$params->clientId}' AND item_id='{$params->borrowed_id}' AND deleted='0'");
 
 		if(empty($data)) {
-			return ["code" => 203, "data" => "Sorry! An invalid id were submitted."];
+			return ["code" => 400, "data" => "Sorry! An invalid id were submitted."];
 		}
 
 		/** update the fine for the request */
@@ -958,12 +958,12 @@ class Library extends Myschoolgh {
 		$data = $this->pushQuery("status", "books_borrowed", "client_id='{$params->clientId}' AND item_id='{$params->borrowed_id}' AND deleted='0'");
 
 		if(empty($data)) {
-			return ["code" => 203, "data" => "Sorry! An invalid id were submitted."];
+			return ["code" => 400, "data" => "Sorry! An invalid id were submitted."];
 		}
 
 		// confirm that it has not already been cancelled
 		if($data[0]->status === "Cancelled") {
-			return ["code" => 203, "data" => "Sorry! The request has already been Cancelled."];
+			return ["code" => 400, "data" => "Sorry! The request has already been Cancelled."];
 		}
 
 		/** Remove the file from the list */
@@ -989,12 +989,12 @@ class Library extends Myschoolgh {
 		$data = $this->pushQuery("status", "books_borrowed", "client_id='{$params->clientId}' AND item_id='{$params->borrowed_id}' AND deleted='0'");
 
 		if(empty($data)) {
-			return ["code" => 203, "data" => "Sorry! An invalid id were submitted."];
+			return ["code" => 400, "data" => "Sorry! An invalid id were submitted."];
 		}
 
 		// confirm that it has not already been approved
 		if($data[0]->status === "Approved") {
-			return ["code" => 203, "data" => "Sorry! The request has already been Approved."];
+			return ["code" => 400, "data" => "Sorry! The request has already been Approved."];
 		}
 
 		/** Remove the file from the list */
@@ -1047,7 +1047,7 @@ class Library extends Myschoolgh {
 			
 			/** If the book id was not parsed */
 			if(!isset($expl[1])) {
-				return ["code" => 203, "data" => "Sorry! An invalid book id was submitted."];
+				return ["code" => 400, "data" => "Sorry! An invalid book id was submitted."];
 			}
 
 			/** Set the borrowed id */
@@ -1059,12 +1059,12 @@ class Library extends Myschoolgh {
 
 		/** If no record was found */
 		if(empty($data)) {
-			return ["code" => 203, "data" => "Sorry! An invalid record_id was submitted."];
+			return ["code" => 400, "data" => "Sorry! An invalid record_id was submitted."];
 		}
 
 		// confirm that it has not already been approved
 		if($data[0]->status === "Returned") {
-			return ["code" => 203, "data" => "Sorry! The book(s) has already been Returned."];
+			return ["code" => 400, "data" => "Sorry! The book(s) has already been Returned."];
 		}
 
 		/** Update the returned information */
@@ -1121,7 +1121,7 @@ class Library extends Myschoolgh {
 
         // if empty then return
         if(empty($prevData)) {
-            return ["code" => 203, "data" => "Sorry! An invalid book id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid book id was supplied."];
         }
 
 		// confirm that a logo was parsed
@@ -1269,12 +1269,12 @@ class Library extends Myschoolgh {
 
         // if empty then return
         if(empty($prevData)) {
-            return ["code" => 203, "data" => "Sorry! An invalid book id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid book id was supplied."];
         }
 
         // return error message if no attachments has been uploaded
         if(empty($this->session->{$module})) {
-            return ["code" => 203, "data" => "Sorry! Please upload files to be uploaded."];
+            return ["code" => 400, "data" => "Sorry! Please upload files to be uploaded."];
         }
 
         // initialize
@@ -1342,7 +1342,7 @@ class Library extends Myschoolgh {
 
 			// confirm that the stock quantity parsed is a valid array list
 			if(!is_array($params->stock_quantity)) {
-				return ["code" => 203, "data" => "Sorry! The Stock Quantities must be an array."];
+				return ["code" => 400, "data" => "Sorry! The Stock Quantities must be an array."];
 			}
 
 			// return the quantities
@@ -1352,17 +1352,17 @@ class Library extends Myschoolgh {
 			foreach($params->stock_quantity as $stock) {
 				if(isset($stock["book_id"], $stock["quantity"])) {
 					if(isset($quantities[$stock["book_id"]])) {
-						return ["code" => 203, "data" => "Sorry! Please ensure you have not repeated the book to update stock."];
+						return ["code" => 400, "data" => "Sorry! Please ensure you have not repeated the book to update stock."];
 					}
 					$quantities[$stock["book_id"]] = $stock;
 				} else {
-					return ["code" => 203, "data" => "Sorry! Ensure all required parameters were parsed"];
+					return ["code" => 400, "data" => "Sorry! Ensure all required parameters were parsed"];
 				}
 			}
 
 			// compare the current query to the previous
 			if(json_encode($quantities) === $this->session->recentSQLQuery) {
-				return ["code" => 203, "data" => "Sorry! You are parsing the same query already processed."];
+				return ["code" => 400, "data" => "Sorry! You are parsing the same query already processed."];
 			}
 
 			// loop through the products list

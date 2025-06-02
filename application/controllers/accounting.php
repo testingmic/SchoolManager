@@ -82,12 +82,12 @@ class Accounting extends Myschoolgh {
 
             // ensure the correct account type is parsed
             if(!in_array(strtolower($params->account_type), ["income", "expense"])) {
-                return ["code" => 203, "data" => $this->is_required("Account Type")];
+                return ["code" => 400, "data" => $this->is_required("Account Type")];
             }
 
             // check if the name matches any of these values
             if(in_array(strtolower($params->name), ["payroll", "payslip", "school fees", "fees", "fee"])) {
-                return ["code" => 203, "data" => "Sorry! You cannot add any account type head with the names [payroll, payslip, fee or fees]."];
+                return ["code" => 400, "data" => "Sorry! You cannot add any account type head with the names [payroll, payslip, fee or fees]."];
             }
 
             // create an item_id
@@ -133,18 +133,18 @@ class Accounting extends Myschoolgh {
 
             // check if the name matches any of these values
             if(in_array(strtolower($params->name), ["payroll", "payslip", "school fees", "fees", "fee"])) {
-                return ["code" => 203, "data" => "Sorry! You cannot change any account type head to the names [payroll, payslip, fee or fees]."];
+                return ["code" => 400, "data" => "Sorry! You cannot change any account type head to the names [payroll, payslip, fee or fees]."];
             }
 
             // old record
             $prevData = $this->pushQuery("*", "accounts_type_head", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
             
             // if empty then return
-            if(empty($prevData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+            if(empty($prevData)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
 
             // ensure the correct account type is parsed
             if(!in_array(strtolower($params->account_type), ["income", "expense"])) {
-                return ["code" => 203, "data" => $this->is_required("Account Type")];
+                return ["code" => 400, "data" => $this->is_required("Account Type")];
             }
 
             // insert the record
@@ -248,7 +248,7 @@ class Accounting extends Myschoolgh {
             $accounts_count = count($check);
 
             // if empty, end the query
-            if($accounts_count > 4) { return ["code" => 203, "data" => "Maximum Accounts Reached! You cannot have create more than 5 active accounts at a time."]; }
+            if($accounts_count > 4) { return ["code" => 400, "data" => "Maximum Accounts Reached! You cannot have create more than 5 active accounts at a time."]; }
 
             // insert the new account details
             // if there isn't any existing account then, auto set the current account as the default account
@@ -299,7 +299,7 @@ class Accounting extends Myschoolgh {
             $prevData = $this->pushQuery("*", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
             
             // if empty then return
-            if(empty($prevData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+            if(empty($prevData)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
 
             // insert the record
             $stmt = $this->db->prepare("UPDATE accounts SET account_name = ?, account_number = ? 
@@ -619,7 +619,7 @@ class Accounting extends Myschoolgh {
 
             // validate the account id
             $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");
-            if(empty($accountData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+            if(empty($accountData)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
 
             // set the payment medium if not set
             $params->payment_medium = isset($params->payment_medium) ? $params->payment_medium : "cash";
@@ -687,11 +687,11 @@ class Accounting extends Myschoolgh {
 
             // old record
             $prevData = $this->pushQuery("*", "accounts_transaction", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND item_type='Deposit' AND status='1' LIMIT 1");
-            if(empty($prevData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+            if(empty($prevData)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
 
             // validate the account id
             $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");
-            if(empty($accountData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+            if(empty($accountData)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
 
             // set the payment medium if not set
             $params->payment_medium = isset($params->payment_medium) ? $params->payment_medium : "cash";
@@ -747,7 +747,7 @@ class Accounting extends Myschoolgh {
 
             // validate the account id
             $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");
-            if(empty($accountData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+            if(empty($accountData)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
 
             // set the payment medium if not set
             $params->payment_medium = isset($params->payment_medium) ? $params->payment_medium : "cash";
@@ -815,11 +815,11 @@ class Accounting extends Myschoolgh {
 
             // old record
             $prevData = $this->pushQuery("*", "accounts_transaction", "item_id='{$params->type_id}' AND client_id='{$params->clientId}' AND item_type='Expense' AND status='1' LIMIT 1");
-            if(empty($prevData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+            if(empty($prevData)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
 
             // validate the account id
             $accountData = $this->pushQuery("balance", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' LIMIT 1");
-            if(empty($accountData)) { return ["code" => 203, "data" => "Sorry! An invalid id was supplied."]; }
+            if(empty($accountData)) { return ["code" => 400, "data" => "Sorry! An invalid id was supplied."]; }
 
             // set the payment medium if not set
             $params->payment_medium = isset($params->payment_medium) ? $params->payment_medium : "cash";
@@ -1605,7 +1605,7 @@ class Accounting extends Myschoolgh {
             $check = $this->pushQuery("id", "accounts", "item_id='{$params->account_id}' AND client_id='{$params->clientId}' AND status='1'");
 
             // if empty, end the query
-            if(empty($check)) { return ["code" => 203, "data" => "Sorry! An invalid account id was parsed."]; }
+            if(empty($check)) { return ["code" => 400, "data" => "Sorry! An invalid account id was parsed."]; }
 
             // set all accounts default_account column to 0
             $this->db->query("UPDATE accounts SET default_account='0' WHERE client_id='{$params->clientId}' AND status='1' LIMIT 10");
@@ -1639,12 +1639,12 @@ class Accounting extends Myschoolgh {
 
             // end query if empty
             if(empty($payment_check)) {
-                return ["code" => 203, "data" => "Sorry! An invalid Transaction ID was parsed for processing"];
+                return ["code" => 400, "data" => "Sorry! An invalid Transaction ID was parsed for processing"];
             }
 
             // confirm if already reversed
             if($payment_check[0]->state == "Reserved") {
-                return ["code" => 203, "data" => "Sorry! This transaction has already been reversed"];
+                return ["code" => 400, "data" => "Sorry! This transaction has already been reversed"];
             }
 
             // set the amount

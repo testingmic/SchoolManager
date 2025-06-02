@@ -121,7 +121,7 @@ class Incidents extends Myschoolgh {
             if(isset($params->user_id)) {
                 $user = $this->pushQuery("user_type", "users", "item_id='{$params->user_id}' AND client_id='{$params->clientId}' LIMIT 1");
                 if(empty($user)) {
-                    return ["code" => 203, "data" => "Sorry! An invalid user id was supplied"];
+                    return ["code" => 400, "data" => "Sorry! An invalid user id was supplied"];
                 }
                 $user_role = $user[0]->user_type;
             }
@@ -195,7 +195,7 @@ class Incidents extends Myschoolgh {
 
             // if empty then return
             if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
             // initialize
@@ -290,7 +290,7 @@ class Incidents extends Myschoolgh {
 
         // if empty then return
         if(empty($prevData)) {
-            return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
         }
 
         try {
@@ -443,7 +443,7 @@ class Incidents extends Myschoolgh {
 
         // confirm the user type
         if(!in_array($params->userData->user_type, ["parent", "admin"])) {
-            return ["code" => 203, "data" => $this->permission_denied];
+            return ["code" => 400, "data" => $this->permission_denied];
         }
 
         try {
@@ -453,12 +453,12 @@ class Incidents extends Myschoolgh {
 
             // end query if no record was found
             if(empty($record)) {
-                return ["code" => 203, "data" => "Sorry! An invalid report id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid report id was parsed."];
             }
 
             // confirm the seen status
             if($record[0]->is_seen) {
-               return ["code" => 203, "data" => "Sorry! This record has already been marked as seen."];
+               return ["code" => 400, "data" => "Sorry! This record has already been marked as seen."];
             }
 
             // update the record
@@ -495,7 +495,7 @@ class Incidents extends Myschoolgh {
 
         // confirm the user type
         if(!in_array($params->userData->user_type, ["teacher", "admin"])) {
-            return ["code" => 203, "data" => $this->permission_denied];
+            return ["code" => 400, "data" => $this->permission_denied];
         }
 
         try {
@@ -507,7 +507,7 @@ class Incidents extends Myschoolgh {
 
             // confirm the class id
             if(empty($class)) {
-                return ["code" => 203, "data" => "Sorry! An invalid class id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid class id was parsed."];
             }
 
             // confirm the student id
@@ -517,7 +517,7 @@ class Incidents extends Myschoolgh {
 
                 // if the student record is empty
                 if(empty($student)) {
-                    return ["code" => 203, "data" => "Sorry! An invalid student id was parsed."];
+                    return ["code" => 400, "data" => "Sorry! An invalid student id was parsed."];
                 }
             }
 
@@ -532,12 +532,12 @@ class Incidents extends Myschoolgh {
 
                 // end query if no record was found
                 if(empty($record)) {
-                    return ["code" => 203, "data" => "Sorry! An invalid report id was parsed."];
+                    return ["code" => 400, "data" => "Sorry! An invalid report id was parsed."];
                 }
                 
                 // confirm the seen status
                 if($record[0]->is_seen) {
-                   return ["code" => 203, "data" => "Sorry! This record has already been seen by a parent and cannot be changed."];
+                   return ["code" => 400, "data" => "Sorry! This record has already been seen by a parent and cannot be changed."];
                 }
 
                 // update the record

@@ -302,12 +302,12 @@ class Courses extends Myschoolgh {
 
         // check permission
         if(!$accessObject->hasAccess("add", "course")) {
-            return ["code" => 203, "data" => $this->permission_denied];
+            return ["code" => 400, "data" => $this->permission_denied];
         }
 
         // ensure at least one class has been selected
         if(empty($params->class_id)) {
-            return ["code" => 203, "data" => "Sorry! Select at least one class to continue."];   
+            return ["code" => 400, "data" => "Sorry! Select at least one class to continue."];   
         }
 
         // create a new Course code
@@ -385,7 +385,7 @@ class Courses extends Myschoolgh {
 
         // check permission
         if(!$accessObject->hasAccess("update", "course")) {
-            return ["code" => 203, "data" => $this->permission_denied];
+            return ["code" => 400, "data" => $this->permission_denied];
         }
 
         try {
@@ -395,7 +395,7 @@ class Courses extends Myschoolgh {
             
             // if empty then return
             if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
             // init
@@ -477,12 +477,12 @@ class Courses extends Myschoolgh {
 
             // validate the date
             if(!empty($params->start_date) && !isvalid_date($params->start_date)) {
-                return ["code" => 203, "data" => "Sorry! The start date is invalid."];
+                return ["code" => 400, "data" => "Sorry! The start date is invalid."];
             }
 
             // validate the end date
             if(!empty($params->end_date) && !isvalid_date($params->end_date)) {
-                return ["code" => 203, "data" => "Sorry! The end date is invalid."];
+                return ["code" => 400, "data" => "Sorry! The end date is invalid."];
             }
 
             // execute the statement
@@ -540,7 +540,7 @@ class Courses extends Myschoolgh {
 
             // if empty then return
             if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
             // execute the statement
@@ -687,7 +687,7 @@ class Courses extends Myschoolgh {
 
             // if empty then return
             if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
             // initialize

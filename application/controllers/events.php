@@ -107,7 +107,7 @@ class Events extends Myschoolgh {
 
         /** Audience check */
         if(!in_array($params->audience, array_keys($this->event_audience))) {
-            return ["code" => 203, "data" => "Sorry! Invalid audience was parsed."];
+            return ["code" => 400, "data" => "Sorry! Invalid audience was parsed."];
         }
         
         // confirm that a logo was parsed
@@ -134,7 +134,7 @@ class Events extends Myschoolgh {
                 // Upload file to the server 
                 if(move_uploaded_file($params->event_image["tmp_name"], $image)){}
             } else {
-                return ["code" => 203, "data" => "Sorry! The event file must be a valid image."];
+                return ["code" => 400, "data" => "Sorry! The event file must be a valid image."];
             }
         }
 
@@ -195,12 +195,12 @@ class Events extends Myschoolgh {
 
         // validate the record
         if(empty($prev)) {
-            return ["code" => 203, "data" => "Sorry! An invalid event id was parsed."];
+            return ["code" => 400, "data" => "Sorry! An invalid event id was parsed."];
         }
 
         /** Audience check */
         if(!in_array($params->audience, array_keys($this->event_audience))) {
-            return ["code" => 203, "data" => "Sorry! Invalid audience was parsed."];
+            return ["code" => 400, "data" => "Sorry! Invalid audience was parsed."];
         }
         
         // confirm that a logo was parsed
@@ -227,7 +227,7 @@ class Events extends Myschoolgh {
                 // Upload file to the server 
                 if(move_uploaded_file($params->event_image["tmp_name"], $image)){}
             } else {
-                return ["code" => 203, "data" => "Sorry! The event file must be a valid image."];
+                return ["code" => 400, "data" => "Sorry! The event file must be a valid image."];
             }
         }
 
@@ -349,7 +349,7 @@ class Events extends Myschoolgh {
 
         // if empty then return
         if(empty($prevData)) {
-            return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
         }
         
         /** Push the record into the database */

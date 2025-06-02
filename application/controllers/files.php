@@ -103,12 +103,12 @@ class Files extends Myschoolgh {
 
         // if the attachment file upload is not parsed
         if(!isset($params->files_list)) {
-            return ["code" => 203, "data" => "No file attached."];
+            return ["code" => 400, "data" => "No file attached."];
         }
 
         // verify if the files_list parameter is an array
         if(!is_array($params->files_list)) {
-            return ["code" => 203, "data" => "No file attached."];
+            return ["code" => 400, "data" => "No file attached."];
         }
 
         // attachment list
@@ -126,13 +126,13 @@ class Files extends Myschoolgh {
 
         // confirm the keys parsed
         if(count($parsed_keys) !== count($files_array_keys)) {
-            return ["code" => 203, "data" => "Please ensure only valid files were attached."];
+            return ["code" => 400, "data" => "Please ensure only valid files were attached."];
         }
 
         // loop through the keys parsed to ensure all are existent in the main
         foreach($parsed_keys as $key) {
             if(!in_array($key, $files_array_keys)) {
-                return ["code" => 203, "data" => "Please ensure only valid files were attached."];
+                return ["code" => 400, "data" => "Please ensure only valid files were attached."];
             }
         }
 
@@ -179,19 +179,19 @@ class Files extends Myschoolgh {
 
                     // if the file type is not accepted at all on this server.
                     if(!in_array($check, $this->accepted_attachment_file_types)) {
-                        return ["code" => 203, "data" => "Uploaded file type not accepted."];
+                        return ["code" => 400, "data" => "Uploaded file type not accepted."];
                     }
                 }
             }
 
             // if the file type is in the list of accepted types
             if(!in_array($obj_key, $accepted_files)){
-                return ["code" => 203, "data" => "Uploaded file type not accepted."];
+                return ["code" => 400, "data" => "Uploaded file type not accepted."];
             }
 
             // validate the file uploaded
             if(!validate_document($fileName, $file_to_upload["tmp_name"])) {
-                return ["code" => 203, "data" => "Sorry! The uploaded file type not accepted."];   
+                return ["code" => 400, "data" => "Sorry! The uploaded file type not accepted."];   
             }
 
             // file size
@@ -212,7 +212,7 @@ class Files extends Myschoolgh {
 
             // maximum files fize check
             if($n_FileSize > $this->max_attachment_size) {
-                return ["code" => 203, "data" => "Maximum attachment size is {$this->max_attachment_size}MB"];
+                return ["code" => 400, "data" => "Maximum attachment size is {$this->max_attachment_size}MB"];
             }
 
             // set a new filename
@@ -237,7 +237,7 @@ class Files extends Myschoolgh {
 
             // if the $attachments_list is empty
             if(empty($attachments_list)) {
-                return ["code" => 203, "data" => "Please attach a file(s) to proceed."];
+                return ["code" => 400, "data" => "Please attach a file(s) to proceed."];
             }
 
             // create a new unique_id
@@ -350,7 +350,7 @@ class Files extends Myschoolgh {
 
                 // if the attachment file upload is not parsed
                 if((!isset($params->attachment_file_upload) || (isset($params->attachment_file_upload) && !isset($params->attachment_file_upload["name"]))) && !isset($params->comment_attachment_file_upload) && !isset($params->_attachment_file_upload)) {
-                    return ["code" => 203, "data" => "No file attached."];
+                    return ["code" => 400, "data" => "No file attached."];
                 }
 
                 // attachment list
@@ -364,7 +364,7 @@ class Files extends Myschoolgh {
 
                 // if the file attachment is empty
                 if(empty($file_to_upload)) {
-                    return ["code" => 203, "data" => "No file attached."];
+                    return ["code" => 400, "data" => "No file attached."];
                 }
                 
                 // set the file details to upload
@@ -393,19 +393,19 @@ class Files extends Myschoolgh {
 
                         // if the file type is not accepted at all on this server.
                         if(!in_array($check, $this->accepted_attachment_file_types)) {
-                            return ["code" => 203, "data" => "Uploaded file type not accepted."];
+                            return ["code" => 400, "data" => "Uploaded file type not accepted."];
                         }
                     }
                 }
 
                 // if the file type is in the list of accepted types
                 if(!in_array($obj_key, $accepted_files)){
-                    return ["code" => 203, "data" => "Uploaded file type not accepted."];
+                    return ["code" => 400, "data" => "Uploaded file type not accepted."];
                 }
 
                 // validate the file uploaded
                 if(!validate_document($fileName, $file_to_upload["tmp_name"])) {
-                    return ["code" => 203, "data" => "Sorry! The uploaded file type not accepted."];   
+                    return ["code" => 400, "data" => "Sorry! The uploaded file type not accepted."];   
                 }
 
                 // file size
@@ -428,7 +428,7 @@ class Files extends Myschoolgh {
 
                 // maximum files fize check
                 if($n_FileSize > $this->max_attachment_size) {
-                    return ["code" => 203, "data" => "Maximum attachment size is {$this->max_attachment_size}MB"];
+                    return ["code" => 400, "data" => "Maximum attachment size is {$this->max_attachment_size}MB"];
                 }
 
                 // set a new filename

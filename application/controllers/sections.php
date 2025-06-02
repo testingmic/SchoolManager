@@ -86,7 +86,7 @@ class Sections extends Myschoolgh {
             $params->section_code = str_replace("/^[\s]+$/", "", $params->section_code);
             // confirm if the department code already exist
             if(!empty($this->pushQuery("id, name", "sections", "status='1' AND client_id='{$params->clientId}' AND section_code='{$params->section_code}'"))) {
-                return ["code" => 203, "data" => "Sorry! There is an existing Section with the same code."];
+                return ["code" => 400, "data" => "Sorry! There is an existing Section with the same code."];
             }
         } else {
             // generate a new department code
@@ -169,7 +169,7 @@ class Sections extends Myschoolgh {
 
             // if empty then return
             if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
             // create a new class code
@@ -178,7 +178,7 @@ class Sections extends Myschoolgh {
                 $params->section_code = str_replace("/^[\s]+$/", "", $params->section_code);
                 // confirm if the class code already exist
                 if(!empty($this->pushQuery("id, name", "sections", "status='1' AND client_id='{$params->clientId}' AND section_code='{$params->section_code}' LIMIT 1"))) {
-                    return ["code" => 203, "data" => "Sorry! There is an existing Section with the same code."];
+                    return ["code" => 400, "data" => "Sorry! There is an existing Section with the same code."];
                 }
             } elseif(empty($prevData[0]->section_code) || !isset($params->section_code)) {
                 // generate a new class code
@@ -259,29 +259,29 @@ class Sections extends Myschoolgh {
 
             // confirm that the variable is an array
             if(empty($params->data) && !is_array($params->data)) {
-                return ["code" => 203, "data" => "Sorry! The data array must be a valid array."];
+                return ["code" => 400, "data" => "Sorry! The data array must be a valid array."];
             }
 
             // confirm that the section id was parsed
             if(!isset($params->data["section_id"])) {
-                return ["code" => 203, "data" => "Sorry! Ensure that the section id was parsed."];
+                return ["code" => 400, "data" => "Sorry! Ensure that the section id was parsed."];
             }
 
             // confirm that the class id was parsed
             if(!isset($params->data["class_id"])) {
-                return ["code" => 203, "data" => "Sorry! Ensure that the class id was parsed."];
+                return ["code" => 400, "data" => "Sorry! Ensure that the class id was parsed."];
             }
 
             // confirm that the class is parsed
             $check = $this->pushQuery("id, name", "classes", "id='{$params->data["class_id"]}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
             if(empty($check)) {
-                return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid class id was supplied."];
             }
 
             // confirm that the class is parsed
             $dcheck = $this->pushQuery("id, name", "sections", "id='{$params->data["section_id"]}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
             if(empty($dcheck)) {
-                return ["code" => 203, "data" => "Sorry! An invalid section_id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid section_id was supplied."];
             }
 
             // update class department
@@ -293,7 +293,7 @@ class Sections extends Myschoolgh {
 
                 // confirm that the student id is an array
                 if(!is_array($params->data["student_id"])) {
-                    return ["code" => 203, "data" => "Sorry! Ensure that the student id parsed is a valid array."];
+                    return ["code" => 400, "data" => "Sorry! Ensure that the student id parsed is a valid array."];
                 }
 
                 // update query

@@ -100,23 +100,23 @@ class Leave extends Myschoolgh {
 
         // return error if the leave days is more than 35 days
         if(count($days_count) > 35) {
-            return ["code" => 203, "data" => "Sorry! The leave days must not exceed 35 days."];
+            return ["code" => 400, "data" => "Sorry! The leave days must not exceed 35 days."];
         }
 
         // error message
         if(!$isAdmin && $defaultUser->user_id !== $params->user_id) {
-            return ["code" => 203, "data" => "Sorry! An invalid user id was parsed"];
+            return ["code" => 400, "data" => "Sorry! An invalid user id was parsed"];
         }
 
         // confirm that a valid leave type was parsed
         if(empty($this->pushQuery("*", "leave_types", "status='1' AND id='{$params->type_id}' LIMIT 20"))) {
-            return ["code" => 203, "data" => "Sorry! An invalid leave type was parsed."];   
+            return ["code" => 400, "data" => "Sorry! An invalid leave type was parsed."];   
         }
 
         // check if the user has a pending leave application
         if(!empty($this->pushQuery("id", "leave_requests", 
             "client_id = '{$params->clientId}' AND status='Pending' AND user_id='{$params->user_id}' AND DATE(leave_from) BETWEEN '{$leave_from}' AND '{$leave_to}' LIMIT 1"))) {
-            return ["code" => 203, "data" => "Sorry! There is a pending leave application from this staff."];   
+            return ["code" => 400, "data" => "Sorry! There is a pending leave application from this staff."];   
         }
 
         // proceed
@@ -165,7 +165,7 @@ class Leave extends Myschoolgh {
             // check if the user has a pending leave application
             if(empty($this->pushQuery("id", "leave_requests", 
                 "client_id = '{$params->clientId}' AND item_id='{$params->leave_id}' LIMIT 1"))) {
-                return ["code" => 203, "data" => "Sorry! An invalid leave id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid leave id was parsed."];
             }
 
             // update the status

@@ -181,7 +181,7 @@ class Classes extends Myschoolgh {
                 $params->class_code = str_replace("/^[\s]+$/", "", $params->class_code);
                 // confirm if the class code already exist
                 if(!empty($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$params->clientId}' AND class_code='{$params->class_code}'"))) {
-                    return ["code" => 203, "data" => "Sorry! There is an existing Class with the same code."];
+                    return ["code" => 400, "data" => "Sorry! There is an existing Class with the same code."];
                 }
             } else {
                 // generate a new class code
@@ -255,7 +255,7 @@ class Classes extends Myschoolgh {
 
             // if empty then return
             if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
             // create a new class code
@@ -264,7 +264,7 @@ class Classes extends Myschoolgh {
                 $params->class_code = str_replace("/^[\s]+$/", "", $params->class_code);
                 // confirm if the class code already exist
                 if(!empty($this->pushQuery("id, name", "classes", "status='1' AND client_id='{$params->clientId}' AND class_code='{$params->class_code}' LIMIT 1"))) {
-                    return ["code" => 203, "data" => "Sorry! There is an existing Class with the same code."];
+                    return ["code" => 400, "data" => "Sorry! There is an existing Class with the same code."];
                 }
             } elseif(empty($prevData[0]->class_code) || !isset($params->class_code)) {
                 // generate a new class code
@@ -356,28 +356,28 @@ class Classes extends Myschoolgh {
 
             // confirm that the variable is an array
             if(empty($params->data) && !is_array($params->data)) {
-                return ["code" => 203, "data" => "Sorry! The data array must be a valid array."];
+                return ["code" => 400, "data" => "Sorry! The data array must be a valid array."];
             }
 
             // confirm that the class id was parsed
             if(!isset($params->data["class_id"])) {
-                return ["code" => 203, "data" => "Sorry! Ensure that the class id was parsed."];
+                return ["code" => 400, "data" => "Sorry! Ensure that the class id was parsed."];
             }
 
             // confirm that the class id was parsed
             if(!isset($params->data["student_id"])) {
-                return ["code" => 203, "data" => "Sorry! Ensure that the student id was parsed."];
+                return ["code" => 400, "data" => "Sorry! Ensure that the student id was parsed."];
             }
 
             // confirm that the student id is an array
             if(!is_array($params->data["student_id"])) {
-                return ["code" => 203, "data" => "Sorry! Ensure that the student id parsed is a valid array."];
+                return ["code" => 400, "data" => "Sorry! Ensure that the student id parsed is a valid array."];
             }
 
             // confirm that the class is parsed
             $check = $this->pushQuery("id, name", "classes", "id='{$params->data["class_id"]}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
             if(empty($check)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
             // confirm if the current class fees must be assign to the students

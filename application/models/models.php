@@ -290,7 +290,7 @@ class Models {
         ];
 
         // unexpected error messages
-        $this->unexpected_error = ["code" => 203, "data" => "Sorry! An unexpected error occured.\nPlease contact the admin if problem persists"];
+        $this->unexpected_error = ["code" => 400, "data" => "Sorry! An unexpected error occured.\nPlease contact the admin if problem persists"];
 
         $this->permission_denied = "Sorry! You do not have the required permission to perform this action.";
 
@@ -373,7 +373,7 @@ class Models {
             <input type="hidden" value="true" name="auto_search">
         </div>';
 
-        $this->readonly_mode = ["code" => 203, "data" => "Sorry! You are currently in a readonly mode hence cannot perform the request.\nLeave current mode to continue."];
+        $this->readonly_mode = ["code" => 400, "data" => "Sorry! You are currently in a readonly mode hence cannot perform the request.\nLeave current mode to continue."];
 
         // these are the global error logs to be displayed on the pages
         $this->error_logs = [

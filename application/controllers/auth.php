@@ -1165,16 +1165,16 @@ class Auth extends Myschoolgh {
 
             // confirm if the user has the required permission
             if(!$accessObject->hasAccess("change_password", "permissions")) {
-                return ["code" => 203, "data" => $this->permission_denied];
+                return ["code" => 400, "data" => $this->permission_denied];
             }
 
             if(!is_array($params->data)) {
-                return ["code" => 203, "data" => "Sorry! Invalid data parsed."];
+                return ["code" => 400, "data" => "Sorry! Invalid data parsed."];
             }
 
             // confirm that the request and request id were parsed
             if(!isset($params->data["request"])) {
-                return ["code" => 203, "data" => "Sorry! Invalid data parsed."];
+                return ["code" => 400, "data" => "Sorry! Invalid data parsed."];
             }
 
             // set parameters
@@ -1184,7 +1184,7 @@ class Auth extends Myschoolgh {
 
             // check the request parsed
             if(!in_array($request, ["change", "cancel", "resend", "modify"])) {
-                return ["code" => 203, "data" => "Sorry! Invalid data parsed."];
+                return ["code" => 400, "data" => "Sorry! Invalid data parsed."];
             }
 
             // run this section if the request is either to change, cancel or resend token
@@ -1194,7 +1194,7 @@ class Auth extends Myschoolgh {
 
                 // confirm that the request and request id were parsed
                 if(empty($request_id)) {
-                    return ["code" => 203, "data" => "Sorry! Invalid data parsed."];
+                    return ["code" => 400, "data" => "Sorry! Invalid data parsed."];
                 }
                 
                 // run the check
@@ -1202,7 +1202,7 @@ class Auth extends Myschoolgh {
 
                 // confirm that the request exists
                 if(empty($check)) {
-                    return ["code" => 203, "data" => "Sorry! Invalid request id was parsed for processing."];
+                    return ["code" => 400, "data" => "Sorry! Invalid request id was parsed for processing."];
                 }
 
                 // send a notification to the user
@@ -1242,22 +1242,22 @@ class Auth extends Myschoolgh {
 
                 // if the password parameter was not parsed
                 if(!isset($params->data["password"]) || !isset($params->data["password_2"])) {
-                    return ["code" => 203, "data" => "Sorry! The password parameter is request."];
+                    return ["code" => 400, "data" => "Sorry! The password parameter is request."];
                 }
 
                 // if the password is empty
                 if(empty($params->data["password"]) || empty($params->data["password_2"])) {
-                    return ["code" => 203, "data" => "Sorry! The password parameter cannot be empty."];
+                    return ["code" => 400, "data" => "Sorry! The password parameter cannot be empty."];
                 }
 
                 // password test
                 if(!passwordTest($params->data["password"])) {
-                    return ["code" => 203, "data" => $this->password_ErrorMessage_2 ];
+                    return ["code" => 400, "data" => $this->password_ErrorMessage_2 ];
                 }
 
                 // confirm if the passwords match
                 if($params->data["password"] !== $params->data["password_2"]) {
-                    return ["code" => 203, "data" => "Sorry! The passwords supplied does not match."];
+                    return ["code" => 400, "data" => "Sorry! The passwords supplied does not match."];
                 }
 
                 // change the password
@@ -1284,22 +1284,22 @@ class Auth extends Myschoolgh {
 
                 // confirm that the user_id, password and password_2 variables were all parsed
                 if(!isset($params->data["user_id"]) || !isset($params->data["password"]) || !isset($params->data["password_2"])) {
-                    return ["code" => 203, "data" => "Sorry! The user_id, password and password_2 variables are all required."];
+                    return ["code" => 400, "data" => "Sorry! The user_id, password and password_2 variables are all required."];
                 }
 
                 // if the password is empty
                 if(empty($params->data["password"]) || empty($params->data["password_2"])) {
-                    return ["code" => 203, "data" => "Sorry! The password parameter cannot be empty."];
+                    return ["code" => 400, "data" => "Sorry! The password parameter cannot be empty."];
                 }
 
                 // password test
                 if(!passwordTest($params->data["password"])) {
-                    return ["code" => 203, "data" => $this->password_ErrorMessage_2 ];
+                    return ["code" => 400, "data" => $this->password_ErrorMessage_2 ];
                 }
 
                 // confirm if the passwords match
                 if($params->data["password"] !== $params->data["password_2"]) {
-                    return ["code" => 203, "data" => "Sorry! The passwords supplied does not match."];
+                    return ["code" => 400, "data" => "Sorry! The passwords supplied does not match."];
                 }
 
                 // get the user details using the username
@@ -1307,7 +1307,7 @@ class Auth extends Myschoolgh {
                 
                 // confirm that the request and request id were parsed
                 if(empty($check)) {
-                    return ["code" => 203, "data" => "Sorry! An invalid user id was parsed."];
+                    return ["code" => 400, "data" => "Sorry! An invalid user id was parsed."];
                 }
 
                 // send a notification to the user
@@ -1334,7 +1334,7 @@ class Auth extends Myschoolgh {
                         
                         // return error message
                         if(!empty($check_2)) {
-                            return ["code" => 203, "data" => "Sorry! The username parsed is not available for use."];
+                            return ["code" => 400, "data" => "Sorry! The username parsed is not available for use."];
                         }
                     }
 

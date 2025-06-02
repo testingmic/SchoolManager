@@ -201,7 +201,7 @@ class Records extends Myschoolgh {
         // if in preview mode but the user is not a super admin user
         if($this->session->previewMode && empty($this->session->superAdminUser)) {
             return [
-                "code" => 203, 
+                "code" => 400, 
                 "data" => "Sorry! You will not be able to perform the delete action since you are in preview mode.",
                 "additional" => [
                     "record_id" => $params->record_id, "clear" => true
@@ -220,12 +220,12 @@ class Records extends Myschoolgh {
                 $result = $stmt->fetch(PDO::FETCH_OBJ);
             } catch(PDOException $e) {
                 // quit the execution of the file
-                return ["code" => 203, "data" => $e->getMessage() ." Sorry! There was an error while processing the request."];
+                return ["code" => 400, "data" => $e->getMessage() ." Sorry! There was an error while processing the request."];
             }
 
             // return if no result was found
             if(empty($result)) {
-                return ["code" => 203, "data" => "Sorry! There was no record found for the specified id."];
+                return ["code" => 400, "data" => "Sorry! There was no record found for the specified id."];
             }
 
             // payslip modification
@@ -299,7 +299,7 @@ class Records extends Myschoolgh {
             ];
 
         } else {
-            return ["code" => 203, "data" => "Sorry! There was no record found for the specified id."];
+            return ["code" => 400, "data" => "Sorry! There was no record found for the specified id."];
         }
 
     }
@@ -313,7 +313,7 @@ class Records extends Myschoolgh {
         
         // confirm that all required parameters has been parsed
         if(!isset($params->label["record_id"]) || !isset($params->label["record"])) {
-            return ["code" => 203, "data" => "Sorry! Please ensure all required parameters has been parsed."];
+            return ["code" => 400, "data" => "Sorry! Please ensure all required parameters has been parsed."];
         }
 
         // set the record
@@ -328,7 +328,7 @@ class Records extends Myschoolgh {
                 $payslip = $this->pushQuery("a.payslip_month, a.id, a.payslip_year, (SELECT b.name FROM users b WHERE b.item_id = a.employee_id ORDER BY b.id DESC LIMIT 1) AS employee_name", 
                 "payslips a", "a.client_id='{$params->clientId}' AND a.deleted='0' AND a.item_id='{$record_id}' AND a.validated='0' LIMIT 1");
                 if(empty($payslip)) {
-                    return ["code" => 203, "data" => "Sorry! An invalid id was supplied or the payslip has already been validated."];
+                    return ["code" => 400, "data" => "Sorry! An invalid id was supplied or the payslip has already been validated."];
                 }
                 $this->db->query("UPDATE payslips SET validated='1', validated_date = now(), status='1' WHERE item_id='{$record_id}' LIMIT 1");
 
@@ -353,7 +353,7 @@ class Records extends Myschoolgh {
                 // validate the transaction record
                 $transaction = $this->pushQuery("item_id", "accounts_transaction", "client_id='{$params->clientId}' AND state='Pending' AND item_id='{$record_id}' LIMIT 1");
                 if(empty($transaction)) {
-                    return ["code" => 203, "data" => "Sorry! An invalid id was supplied or the transaction has already been validated."];
+                    return ["code" => 400, "data" => "Sorry! An invalid id was supplied or the transaction has already been validated."];
                 }
                 $this->db->query("UPDATE accounts_transaction SET state='Approved', validated_date = now(), validated_by = '{$params->userId}' WHERE item_id='{$record_id}' AND state != 'Approved' LIMIT 5");
 

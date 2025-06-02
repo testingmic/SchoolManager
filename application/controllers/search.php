@@ -76,7 +76,7 @@ class Search extends Myschoolgh {
 
 			// return empty if the term to search is empty
 			if(empty($params->term)) {
-				return ["code" => 203, "data" => "Sorry! The search term is required."];
+				return ["code" => 400, "data" => "Sorry! The search term is required."];
 			}
 
 			// convert the params into an array string

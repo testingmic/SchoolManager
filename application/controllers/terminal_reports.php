@@ -226,9 +226,9 @@ class Terminal_reports extends Myschoolgh {
             if($check[0]->status === "Pending") {
                 return ["code" => 200, "data" => "There is an existing record, trying to upload a new set of data will replace the existing one."];
             } elseif($check[0]->status === "Approved") {
-                return ["code" => 203, "data" => "Sorry! This result has already been approved hence cannot be updated."];
+                return ["code" => 400, "data" => "Sorry! This result has already been approved hence cannot be updated."];
             } elseif($check[0]->status === "Submitted") {
-                return ["code" => 203, "data" => "Sorry! This result has been submitted pending approval hence cannot be updated."];
+                return ["code" => 400, "data" => "Sorry! This result has been submitted pending approval hence cannot be updated."];
             }
         } else {
             return ["code" => 200, "data" => "You can proceed to upload the results of the class."];
@@ -252,14 +252,14 @@ class Terminal_reports extends Myschoolgh {
         $class_name = $this->pushQuery("id, item_id, name", "classes", "item_id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         // if empty then return
         if(empty($class_name)) {
-            return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid class id was supplied."];
         }
 
         // old record
         $course_item = $this->pushQuery("id, item_id, name, course_code", "courses", "item_id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         // if empty then return
         if(empty($course_item)) {
-            return ["code" => 203, "data" => "Sorry! An invalid course id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid course id was supplied."];
         }
 
         // get the students for the classes
@@ -270,7 +270,7 @@ class Terminal_reports extends Myschoolgh {
 
         // if empty then return
         if(empty($students_list)) {
-            return ["code" => 203, "data" => "Sorry! No student was found under the specified Class."];
+            return ["code" => 400, "data" => "Sorry! No student was found under the specified Class."];
         }
 
         $course_item = $course_item[0];
@@ -423,7 +423,7 @@ class Terminal_reports extends Myschoolgh {
         global $defaultClientData;
 
         if(!isset($params->report_file['tmp_name'])) {
-            return ["code" => 203, "data" => "Sorry! Please select a file to upload."];
+            return ["code" => 400, "data" => "Sorry! Please select a file to upload."];
         }
     
         // reading tmp_file name
@@ -505,7 +505,7 @@ class Terminal_reports extends Myschoolgh {
 
             // if not in array
             if(!in_array($h_item, $headers)) {
-                return ["code" => 203, "data" => "Ensure you have uploaded the sample CSV File with the predefined headers."];
+                return ["code" => 400, "data" => "Ensure you have uploaded the sample CSV File with the predefined headers."];
             }
         }
         
@@ -570,7 +570,7 @@ class Terminal_reports extends Myschoolgh {
 
         // confirm that the record set is an array
         if(!is_array($params->rs)) {
-            return ["code" => 203, "data" => "Sorry! The rs parameter must be an array."];
+            return ["code" => 400, "data" => "Sorry! The rs parameter must be an array."];
         }
 
         global $defaultClientData;
@@ -585,7 +585,7 @@ class Terminal_reports extends Myschoolgh {
 
         // check if a file has been uploaded
         if(empty($this->session->get("terminal_report_{$report->class_id}_{$report->course_id}"))) {
-            return ["code" => 203, "data" => "Sorry! Upload a valid CSV file to proceed."];
+            return ["code" => 400, "data" => "Sorry! Upload a valid CSV file to proceed."];
         }
 
         // confirm that the valid information was parsed
@@ -600,7 +600,7 @@ class Terminal_reports extends Myschoolgh {
 
             // ensure that all the required parameters have been parsed
             if(!isset($report->class_id) || !isset($report->course_id)) {
-                return ["code" => 203, "data" => "Sorry! The course_id and class_id are required."];
+                return ["code" => 400, "data" => "Sorry! The course_id and class_id are required."];
             }
 
             // old record
@@ -608,7 +608,7 @@ class Terminal_reports extends Myschoolgh {
             
             // if empty then return
             if(empty($class_item)) {
-                return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid class id was supplied."];
             }
 
             // old record
@@ -616,12 +616,12 @@ class Terminal_reports extends Myschoolgh {
             
             // if empty then return
             if(empty($course_item)) {
-                return ["code" => 203, "data" => "Sorry! An invalid course id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid course id was supplied."];
             }
 
             // student scores checkeer
             if(!isset($report->ss)) {
-                return ["code" => 203, "data" => "Sorry! The students scores is required and must be submitted."];
+                return ["code" => 400, "data" => "Sorry! The students scores is required and must be submitted."];
             }
 
             $overall_score = 0;
@@ -792,12 +792,12 @@ class Terminal_reports extends Myschoolgh {
             
             // confirm that the label is an array variable
             if(!is_array($params->label)) {
-                return ["code" => 203, "data" => "Sorry! The label variable must be a valid array."];
+                return ["code" => 400, "data" => "Sorry! The label variable must be a valid array."];
             }
 
             // ensure that the action and report_id were parsed
             if(!isset($params->label["action"]) || !isset($params->label["report_id"])) {
-                return ["code" => 203, "data" => "Sorry! Action and Report ID are required."];
+                return ["code" => 400, "data" => "Sorry! Action and Report ID are required."];
             }
 
             // set the action to capitalize
@@ -806,7 +806,7 @@ class Terminal_reports extends Myschoolgh {
 
             // check the action to perform
             if(!in_array($action, ["Submit", "Cancel", "Approve"])) {
-                return ["code" => 203, "data" => "Sorry! An invalid action was requested."];
+                return ["code" => 400, "data" => "Sorry! An invalid action was requested."];
             }
 
             // confirm if the report contains the user id as well
@@ -823,7 +823,7 @@ class Terminal_reports extends Myschoolgh {
                 "grading_terminal_logs a", "a.report_id='{$report_id}' LIMIT 1");
 
             if(empty($check)) {
-                return ["code" => 203, "data" => "Sorry! An invalid report id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid report id was parsed."];
             }
 
             // set the report
@@ -840,7 +840,7 @@ class Terminal_reports extends Myschoolgh {
                 
                 // if empty then return false
                 if(empty($student_check)) {
-                    return ["code" => 203, "data" => "Sorry! An invalid result id was parsed."];
+                    return ["code" => 400, "data" => "Sorry! An invalid result id was parsed."];
                 }
                 $student_info = $student_check[0];
                 $status = $student_info->status;
@@ -850,7 +850,7 @@ class Terminal_reports extends Myschoolgh {
 
             // continue to process the user request
             if(in_array($status, ["Approved", "Cancelled"])) {
-                return ["code" => 203, "data" => "Sorry! The result has been {$status} and cannot be modified."];
+                return ["code" => 400, "data" => "Sorry! The result has been {$status} and cannot be modified."];
             }
 
             // run more checks
@@ -858,7 +858,7 @@ class Terminal_reports extends Myschoolgh {
 
                 // confirm that the report has already been submitted
                 if(($status !== "Submitted")) {
-                    return ["code" => 203, "data" => "Sorry! The result has not yet been submitted by the Teacher hence cannot be approved."];
+                    return ["code" => 400, "data" => "Sorry! The result has not yet been submitted by the Teacher hence cannot be approved."];
                 }
 
                 // run this section if the student id was not parsed
@@ -881,7 +881,7 @@ class Terminal_reports extends Myschoolgh {
 
                 // confirm that the report has already been submitted
                 if(($status === "Submitted")) {
-                    return ["code" => 203, "data" => "Sorry! The result has already been submitted by the Teacher hence cannot repeat same action."];
+                    return ["code" => 400, "data" => "Sorry! The result has already been submitted by the Teacher hence cannot repeat same action."];
                 }
                 
                 // run this section if the student id was not parsed
@@ -910,7 +910,7 @@ class Terminal_reports extends Myschoolgh {
                 
                 // confirm that the report has already been submitted
                 if(($status !== "Approved")) {
-                    return ["code" => 203, "data" => "Sorry! The result has not yet been Approved hence action cannot be reversed."];
+                    return ["code" => 400, "data" => "Sorry! The result has not yet been Approved hence action cannot be reversed."];
                 }
 
                 // run this section if the student id was not parsed
@@ -994,12 +994,12 @@ class Terminal_reports extends Myschoolgh {
 
         // confirm that the label is an array variable
         if(!is_array($params->label)) {
-            return ["code" => 203, "data" => "Sorry! The label variable must be a valid array."];
+            return ["code" => 400, "data" => "Sorry! The label variable must be a valid array."];
         }
 
         // confirm that the results and record_id has been parsed
         if(!isset($params->label["results"], $params->label["record_id"])) {
-            return ["code" => 203, "data" => "Sorry! No result set has been parsed."];
+            return ["code" => 400, "data" => "Sorry! No result set has been parsed."];
         }
 
         try {
@@ -1015,7 +1015,7 @@ class Terminal_reports extends Myschoolgh {
 
             // confirm if the result is not empty
             if(empty($check)) {
-                return ["code" => 203, "data" => "Sorry! An invalid report/student id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid report/student id was parsed."];
             }
 
             // set the report
@@ -1067,7 +1067,7 @@ class Terminal_reports extends Myschoolgh {
 
             // if an error was found
             if(!empty($exceeds)) {
-                return ["code" => 203, "data" => "Sorry! Please ensure the total score of any student does not exceed 100%."];
+                return ["code" => 400, "data" => "Sorry! Please ensure the total score of any student does not exceed 100%."];
             }
 
             // update query
@@ -1128,17 +1128,17 @@ class Terminal_reports extends Myschoolgh {
 
             // confirm that the score cap and result id is parsed
             if(empty($params->sba_score_cap) || empty($params->result_id)) {
-                return ["code" => 203, "data" => "Sorry! No SBA Score Cap or Result ID was parsed."];
+                return ["code" => 400, "data" => "Sorry! No SBA Score Cap or Result ID was parsed."];
             }
 
             // confirm that the score cap is a number
             if(!preg_match("/^[0-9]+$/", $params->sba_score_cap)) {
-                return ["code" => 203, "data" => "Sorry! The SBA Score Cap must be a valid number."];
+                return ["code" => 400, "data" => "Sorry! The SBA Score Cap must be a valid number."];
             }
 
             // confirm that the score cap is between 1 and 200
             if($params->sba_score_cap < 1 || $params->sba_score_cap > 200) {
-                return ["code" => 203, "data" => "Sorry! The SBA Score Cap must be between 1 and 200."];
+                return ["code" => 400, "data" => "Sorry! The SBA Score Cap must be between 1 and 200."];
             }
 
             // get the list of records inserted already in the grading_terminal_scores table
@@ -1154,7 +1154,7 @@ class Terminal_reports extends Myschoolgh {
                     }
                 }
                 if($params->sba_score_cap < $highest) {
-                    return ["code" => 203, "data" => "Sorry! The SBA Score Cap must be greater than the highest score '{$highest}' in the result."];
+                    return ["code" => 400, "data" => "Sorry! The SBA Score Cap must be greater than the highest score '{$highest}' in the result."];
                 }
             }
 

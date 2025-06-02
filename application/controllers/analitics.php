@@ -96,7 +96,7 @@ class Analitics extends Myschoolgh {
 
         /** If invalid date then end the query */
         if(in_array($the_date, array_keys($this->error_codes))) {
-            return ["code" => 203, "data" => $this->error_codes[$the_date]];
+            return ["code" => 400, "data" => $this->error_codes[$the_date]];
         }
 
         // set the period in session

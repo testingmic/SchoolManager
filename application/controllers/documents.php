@@ -464,7 +464,7 @@ class Documents extends Myschoolgh {
 
 			// ensure that the description is not empty
 			if(empty($params->description)) {
-				return ["code" => 203, "data" => "Sorry! The document content is required."];
+				return ["code" => 400, "data" => "Sorry! The document content is required."];
 			}
 
 			// create a new unique id for this file
@@ -527,14 +527,14 @@ class Documents extends Myschoolgh {
 			$record = $this->pushQuery("mode", "documents", "item_id='{$params->unique_id}' AND client_id='{$params->clientId}' LIMIT 1");
 
 			if(empty($record)) {
-				return ["code" => 203, "data" => "Sorry! An invalid document id was submitted for processing"];
+				return ["code" => 400, "data" => "Sorry! An invalid document id was submitted for processing"];
 			}
 
 			// if the document was created manually
 			if($record[0]->mode === "manual") {
 				// ensure that the description is not empty
 				if(empty($params->description)) {
-					return ["code" => 203, "data" => "Sorry! The document content is required."];
+					return ["code" => 400, "data" => "Sorry! The document content is required."];
 				}
 				
 				// save the document into the database
@@ -601,7 +601,7 @@ class Documents extends Myschoolgh {
 
 		// confirm that the session is not empty
 		if(empty($attachments_list)) {
-			return ["data" => "Sorry! Please upload at least one file to proceed.", "code" => 203];
+			return ["data" => "Sorry! Please upload at least one file to proceed.", "code" => 400];
 		}
 
 		// create an object of the files class
@@ -709,12 +709,12 @@ class Documents extends Myschoolgh {
 
 		// if the record set is empty
 		if(empty($documents)) {
-			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 203];
+			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 400];
 		}
 
 		// if both the directory_list and file_list are empty
 		if(!isset($documents["directory_list"]) && !isset($documents["file_list"])) {
-			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 203];
+			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 400];
 		}
 
 		// if the item is a file
@@ -776,12 +776,12 @@ class Documents extends Myschoolgh {
 
 		// if the record set is empty
 		if(empty($documents)) {
-			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 203];
+			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 400];
 		}
 
 		// if both the directory_list and file_list are empty
 		if(!isset($documents["directory_list"]) && !isset($documents["file_list"])) {
-			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 203];
+			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 400];
 		}
 
 		// if the item is a file
@@ -844,12 +844,12 @@ class Documents extends Myschoolgh {
 
 		// if the record set is empty
 		if(empty($documents)) {
-			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 203];
+			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 400];
 		}
 
 		// if both the directory_list and file_list are empty
 		if(!isset($documents["directory_list"]) && !isset($documents["file_list"])) {
-			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 203];
+			return ["data" => "Sorry! An invalid document id was submitted.", "code" => 400];
 		}
 
 		// if the item is a file
@@ -922,7 +922,7 @@ class Documents extends Myschoolgh {
 
 			// if the file was not found
 			if(!isset($file[1])) {
-				return ["code" => 203, "data" => "File was not found"];
+				return ["code" => 400, "data" => "File was not found"];
 			}
 
 	       	// get the record id
@@ -933,7 +933,7 @@ class Documents extends Myschoolgh {
 	        
 	        // if no record found
 	        if(empty($attachment_record)) {
-	            return ["code" => 203, "data" => "File was not found"];
+	            return ["code" => 400, "data" => "File was not found"];
 	        }
 
 	        // set the file to download

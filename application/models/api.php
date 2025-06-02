@@ -267,7 +267,7 @@ class Api {
     final function requestHandler(stdClass $params) {
         
         // global variable
-        global $defaultClientData, $isSupport, $defaultAcademics;
+        global $defaultClientData, $isSupport, $defaultAcademics, $defaultUser;
 
         // preset the response
         $result = [];
@@ -278,8 +278,41 @@ class Api {
         // get the client data
         $client_data = empty($defaultClientData->client_name) ? $this->myClass->client_data($this->clientId) : $defaultClientData;
         
+        // set the default academics
+        $defaultAcademics = !empty($defaultAcademics) ? $defaultAcademics : $client_data->client_preferences->academics;
+
+        // get the client data
+        $defaultClientData = !empty($defaultClientData->client_name) ? $defaultClientData : $client_data;
+
+        // get the default user
+        $defaultUser = !empty($defaultUser->unique_id) ? $defaultUser : $this->userData;
+
         // reassign the variable data
         $academics = $defaultAcademics ?? null;
+
+        if($params->remote) {
+
+            $globalProps = [
+                'isTutor', 'isTutorAdmin', 'isTutorStudent', 'isWardParent', 'isWardTutorParent', 
+                'isEmployee', 'isAdminAccountant', 'isAdmin', 'isAccountant'
+            ];
+            
+            foreach($globalProps as $key) {
+                global $$key;
+            }
+
+            // set new variables
+            $isTutor = (bool) in_array($defaultUser->user_type, ["teacher"]);
+            $isTutorAdmin = (bool) in_array($defaultUser->user_type, ["teacher", "admin"]);
+            $isTutorStudent = (bool) in_array($defaultUser->user_type, ["teacher", "student"]);
+            $isWardParent = (bool) in_array($defaultUser->user_type, ["parent", "student"]);
+            $isWardTutorParent = (bool) in_array($defaultUser->user_type, ["teacher", "parent", "student"]);
+            $isEmployee = (bool) ($defaultUser->user_type == "employee");
+            $isAdminAccountant = (bool) in_array($defaultUser->user_type, ["accountant", "admin"]);
+            $isPayableStaff = (bool) in_array($defaultUser->user_type, ["accountant", "admin", "teacher", "employee"]);
+            $isAccountant = (bool) in_array($defaultUser->user_type, ["accountant"]);
+            $isAdmin = (bool) ($defaultUser->user_type == "admin");
+        }
         
         // set the academic year and term
         $params->academic_term = isset($params->academic_term) ? $params->academic_term : ($academics->academic_term ?? null);

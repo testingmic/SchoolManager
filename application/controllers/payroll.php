@@ -111,7 +111,7 @@ class Payroll extends Myschoolgh {
         global $usersClass, $accessObject;
 
         if(!$accessObject->hasAccess("modify_payroll", "payslip")) {
-            return ["code" => 203, "data" => "Sorry! You do not have the permissions to modify the details of this employee's salary information."];
+            return ["code" => 400, "data" => "Sorry! You do not have the permissions to modify the details of this employee's salary information."];
         }
 
         // confirm that the user_id does not already exist
@@ -305,16 +305,16 @@ class Payroll extends Myschoolgh {
         global $usersClass, $accessObject;
 
         if(!$accessObject->hasAccess("view", "payslip")) {
-            return ["code" => 203, "data" => "Sorry! You do not have the permissions to view the details of this payslip."];
+            return ["code" => 400, "data" => "Sorry! You do not have the permissions to view the details of this payslip."];
         }
 
         if((strlen($params->year_id) !== 4)  || ($params->year_id === "null")) {
-            return ["code" => 203, "data" => "Please select a valid year to load record."];
+            return ["code" => 400, "data" => "Please select a valid year to load record."];
         }
 
         // return error
         if(strlen($params->month_id) < 3 || ($params->month_id === "null")) {
-            return ["code" => 203, "data" => "Please select a valid month to load record."];
+            return ["code" => 400, "data" => "Please select a valid month to load record."];
         }
 
         // set the employee_id
@@ -543,16 +543,16 @@ class Payroll extends Myschoolgh {
         global $usersClass, $accessObject, $noticeClass;
 
         if(!$accessObject->hasAccess("generate", "payslip")) {
-            return ["code" => 203, "data" => "Sorry! You do not have the permissions to generate a payslip."];
+            return ["code" => 400, "data" => "Sorry! You do not have the permissions to generate a payslip."];
         }
 
         if((strlen($params->year_id) !== 4)  || ($params->year_id === "null")) {
-            return ["code" => 203, "data" => "Please select a valid year to load record."];
+            return ["code" => 400, "data" => "Please select a valid year to load record."];
         }
 
         // return error
         if(strlen($params->month_id) < 3 || ($params->month_id === "null")) {
-            return ["code" => 203, "data" => "Please select a valid month to load record."];
+            return ["code" => 400, "data" => "Please select a valid month to load record."];
         }
 
         // confirm that the user_id does not already exist
@@ -811,7 +811,7 @@ class Payroll extends Myschoolgh {
 
         } catch(PDOException $e) {
             $this->db->rollBack();
-            return ["code" => 203, "data" => $e->getMessage()];
+            return ["code" => 400, "data" => $e->getMessage()];
         }
 
     }
@@ -829,14 +829,14 @@ class Payroll extends Myschoolgh {
     public function saveallowance(stdClass $params) {
         
         if(!in_array($params->type, ["Allowance", "Deduction"])) {
-            return ["code" => 203, "data" => "Sorry! The type must either be Allowance or Deduction."];
+            return ["code" => 400, "data" => "Sorry! The type must either be Allowance or Deduction."];
         }
         
         $found = false;
         if(isset($params->allowance_id) && !empty($params->allowance_id)) {
             $allowance = $this->pushQuery("*", "payslips_allowance_types", "id='{$params->allowance_id}' AND client_id='{$params->clientId}'");
             if(empty($allowance)) {
-                return ["code" => 203, "data" => "Sorry! An invalid allowance id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid allowance id was parsed."];
             }
             $found = true;
         }
@@ -879,7 +879,7 @@ class Payroll extends Myschoolgh {
         $payroll = $this->paysliplist($params)["data"];
 
         if(empty($payroll)) {
-            return ["code" => 203, "data" => "Sorry! An invalid Payslip ID was parsed"];
+            return ["code" => 400, "data" => "Sorry! An invalid Payslip ID was parsed"];
         }
         $data = $payroll[0];
 

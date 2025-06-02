@@ -971,13 +971,13 @@ class Users extends Myschoolgh {
 		// confirm that a valid parent id was parsed
 		$p_data = $this->pushQuery("a.id, a.name", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND (a.item_id = '{$expl[0]}' OR a.unique_id = '{$expl[0]}') LIMIT 1");
 		if(empty($p_data)) {
-			return ["code" => 203, "data" => "Sorry! An invalid guardian id was parsed"];
+			return ["code" => 400, "data" => "Sorry! An invalid guardian id was parsed"];
 		}
 
 		// confirm that a valid student id was parsed
 		$u_data = $this->pushQuery("a.guardian_id, a.name", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[1]}' AND user_type='student' LIMIT 1");
 		if(empty($u_data)) {
-			return ["code" => 203, "data" => "Sorry! An invalid student id was parsed"];
+			return ["code" => 400, "data" => "Sorry! An invalid student id was parsed"];
 		}
 
 		// convert the guardian id into an array
@@ -1064,13 +1064,13 @@ class Users extends Myschoolgh {
 		// confirm that a valid parent id was parsed
 		$p_data = $this->pushQuery("a.id, a.name", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[0]}' LIMIT 1");
 		if(empty($p_data)) {
-			return ["code" => 203, "data" => "Sorry! An invalid guardian id was parsed"];
+			return ["code" => 400, "data" => "Sorry! An invalid guardian id was parsed"];
 		}
 
 		// confirm that a valid student id was parsed
 		$u_data = $this->pushQuery("a.guardian_id, a.name", "users a", "a.status='1' AND a.client_id='{$params->clientId}' AND a.item_id = '{$expl[1]}' LIMIT 1");
 		if(empty($u_data)) {
-			return ["code" => 203, "data" => "Sorry! An invalid student id was parsed"];
+			return ["code" => 400, "data" => "Sorry! An invalid student id was parsed"];
 		}
 
 		// convert the guardian id into an array
@@ -1144,7 +1144,7 @@ class Users extends Myschoolgh {
 
 		/** Check the email address if not empty */
 		if(!empty($params->email) && !filter_var($params->email, FILTER_VALIDATE_EMAIL)) {
-			return ["code" => 203, "data" => "Sorry! Provide a valid email address."];
+			return ["code" => 400, "data" => "Sorry! Provide a valid email address."];
 		}
 
 		/** If the user is logged in */
@@ -1174,7 +1174,7 @@ class Users extends Myschoolgh {
 
 			/** Check the username if not empty */
 			if(!isset($params->lastname)) {
-				return ["code" => 203, "data" => "Sorry! The lastname cannot be empty"];
+				return ["code" => 400, "data" => "Sorry! The lastname cannot be empty"];
 			}
 			
 		}
@@ -1219,12 +1219,12 @@ class Users extends Myschoolgh {
 
 		/** Check the contact number if not empty */
 		if((isset($params->phone) && !empty($params->phone) && !preg_match("/^[0-9+]+$/", $params->phone))) {
-			return ["code" => 203, "data" => "Sorry! Provide a valid contact number."];
+			return ["code" => 400, "data" => "Sorry! Provide a valid contact number."];
 		}
 
 		/** Check the contact number if not empty */
 		if(isset($params->portal_registration) && !passwordTest($params->password)) {
-			return ["code" => 203, "data" => $this->password_ErrorMessage];
+			return ["code" => 400, "data" => $this->password_ErrorMessage];
 		}
 
 		// set the user type
@@ -1238,7 +1238,7 @@ class Users extends Myschoolgh {
 
 		// if the permission is empty
 		if(empty($accessPermissions)) {
-			return ["code" => 203, "data" => "Sorry! An invalid user_type was provided for processing."];
+			return ["code" => 400, "data" => "Sorry! An invalid user_type was provided for processing."];
 		}
 
 		// if the email address is not empty
@@ -1249,7 +1249,7 @@ class Users extends Myschoolgh {
 			
 			// get the user data
 			if(!empty($this->quick_list($i_params)["data"])) {
-				return ["code" => 203, "data" => "Sorry! The email is already in use."];
+				return ["code" => 400, "data" => "Sorry! The email is already in use."];
 			}
 		}
 
@@ -1667,7 +1667,7 @@ class Users extends Myschoolgh {
 
 				// if the permission is empty
 				if(empty($accessPermissions)) {
-					return ["code" => 203, "data" => "Sorry! An invalid user_type was provided for processing."];
+					return ["code" => 400, "data" => "Sorry! An invalid user_type was provided for processing."];
 				}
 
 				// load the access level permissions
@@ -1940,7 +1940,7 @@ class Users extends Myschoolgh {
 
 	        // return error message if no attachments has been uploaded
 		    if(empty($this->session->{$module})) {
-		        return ["code" => 203, "data" => "Sorry! Please upload files to be uploaded."];
+		        return ["code" => 400, "data" => "Sorry! Please upload files to be uploaded."];
 		    }
 
         	// get the previous data
@@ -1949,7 +1949,7 @@ class Users extends Myschoolgh {
 
 	        // if empty then return
 	        if(empty($prevData)) {
-	            return ["code" => 203, "data" => "Sorry! An invalid staff id was supplied."];
+	            return ["code" => 400, "data" => "Sorry! An invalid staff id was supplied."];
 	        }
 
 	        // initialize
@@ -2644,7 +2644,7 @@ class Users extends Myschoolgh {
 
 		// return error if no student record was parsed
 		if(empty($students_array_list)) {
-			return ["code" => 203, "data" => "Sorry! No student record was parsed for processing."];
+			return ["code" => 400, "data" => "Sorry! No student record was parsed for processing."];
 		}
 
 		// create a new $scheduler_id
@@ -2698,7 +2698,7 @@ class Users extends Myschoolgh {
 
 			// confirm that the student id variable is an array
 			if(!is_array($params->user_id)) {
-				return ["code" => 203, "data" => "Sorry! The user_id variable must be an array."];
+				return ["code" => 400, "data" => "Sorry! The user_id variable must be an array."];
 			}
 
 			// prepare the statement

@@ -198,7 +198,7 @@ class Frontoffice extends Myschoolgh {
             // check if the user has a pending leave application
             if(empty($this->pushQuery("id", "frontoffice", 
                 "client_id = '{$params->clientId}' AND item_id='{$params->request_id}' LIMIT 1"))) {
-                return ["code" => 203, "data" => "Sorry! An invalid leave id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid leave id was parsed."];
             }
 
             // update the status

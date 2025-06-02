@@ -252,12 +252,12 @@ class Endpoints extends Myschoolgh {
 
             // if the user is neither an admin or support personnel
             if(!$isAdmin && !$isSupport) {
-                return ["code" => 203, "data" => $this->permission_denied];
+                return ["code" => 400, "data" => $this->permission_denied];
             }
 
             // if the action was submitted
             if(!isset($params->data["action"])) {
-                return ["code" => 203, "data" => "Ensure all required parameters were parsed."];
+                return ["code" => 400, "data" => "Ensure all required parameters were parsed."];
             }
 
             // set the date
@@ -268,7 +268,7 @@ class Endpoints extends Myschoolgh {
 
                     // if the expiry date or the api id was not parsed
                     if(!isset($params->data["expiry_date"]) || !isset($params->data["api_id"])) {
-                        return ["code" => 203, "data" => "Ensure all required parameters were parsed."];                
+                        return ["code" => 400, "data" => "Ensure all required parameters were parsed."];                
                     }
 
                     // set the date
@@ -284,14 +284,14 @@ class Endpoints extends Myschoolgh {
                     $this->db->query("INSERT INTO security_logs SET client_id='{$params->clientId}', created_by='{$params->userId}', section='Update API Key', description='The user attempted to update an <strong>API Key Expiry Date</strong> which does not belong to the user.'
                     ");
                     // return a warning to the user.
-                    return ["code" => 203, "data" => "Sorry! You attempted to update a non existent api key."];
+                    return ["code" => 400, "data" => "Sorry! You attempted to update a non existent api key."];
                 }
                 
                 // if the request is to update the date
                 if(in_array($params->data["action"], ["extend_date"])) {
                     // confirm the validity of the date
                     if(!$this->validDate($params->data["expiry_date"])) {
-                        return ["code" => 203, "data" => "Sorry! An invalid date was submitted."];   
+                        return ["code" => 400, "data" => "Sorry! An invalid date was submitted."];   
                     }
 
                     // update the information
@@ -324,7 +324,7 @@ class Endpoints extends Myschoolgh {
                 return ["code" => 200, "data" => "Api Key successfully created."];
 
             } else {
-                return ["code" => 203, "data" => "Sorry! An unknown request was parsed."];
+                return ["code" => 400, "data" => "Sorry! An unknown request was parsed."];
             }
 
 

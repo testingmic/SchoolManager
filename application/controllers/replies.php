@@ -192,7 +192,7 @@ class Replies extends Myschoolgh {
 
         /** Validate the request */
         if(!in_array($params->resource, ['assignments', 'document', 'daily_report', 'leave'])) {
-            return ["code" => 203, "data" => "Invalid request parsed"];
+            return ["code" => 400, "data" => "Invalid request parsed"];
         }
 
         // clean the description 
@@ -316,7 +316,7 @@ class Replies extends Myschoolgh {
 
         /** If the resource is not in the array */
         if(!in_array($resource, ["assignments", "events", "ebook", "books_request", "document", "bus", "application", "daily_report", "leave", "frontoffice"])) {
-            return ["code" => 203, "data" => "Invalid request parsed"];
+            return ["code" => 400, "data" => "Invalid request parsed"];
         }
 
         // append the attachments
@@ -451,12 +451,12 @@ class Replies extends Myschoolgh {
 
         /** Return if no data was found */
         if(empty($replyInfo)) {
-            return ["code" => 203, "data" => "Sorry! An invalid reply id was parsed"];
+            return ["code" => 400, "data" => "Sorry! An invalid reply id was parsed"];
         }
 
         /** Check the user id to the person trying to delete the object */
         if($replyInfo[0]->user_id !== $params->userId) {
-            return ["code" => 203, "data" => "Sorry! You are not permitted to delete this reply object"];
+            return ["code" => 400, "data" => "Sorry! You are not permitted to delete this reply object"];
         }
 
         try {

@@ -37,7 +37,7 @@ class Resources extends Myschoolgh {
 
         // end query if no course_id was parsed
         if(!isset($upload->course_id)) {
-            return ["code" => 203, "data" => "Sorry! Course ID is required."];
+            return ["code" => 400, "data" => "Sorry! Course ID is required."];
         }
 
         // confirm if a valid course id was submitted
@@ -45,7 +45,7 @@ class Resources extends Myschoolgh {
 
         // if empty then return
         if(empty($prevData)) {
-            return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
         }
 
         // create an item id
@@ -62,7 +62,7 @@ class Resources extends Myschoolgh {
             if(isset($upload->upload_type) && $upload->upload_type == "is_link") {
 
                 if(filter_var($upload->link_url, FILTER_VALIDATE_URL) == false) {
-                    return ["code" => 203, "data" => "Sorry! Confirm that a valid url was entered."]; 
+                    return ["code" => 400, "data" => "Sorry! Confirm that a valid url was entered."]; 
                 }
 
                 // upload the file
@@ -127,10 +127,10 @@ class Resources extends Myschoolgh {
                         // Upload file to the server 
                         if(move_uploaded_file($params->the_file["tmp_name"], $fileName)){}
                     } else {
-                        return ["code" => 203, "data" => "Sorry! An invalid file type was uploaded"];      
+                        return ["code" => 400, "data" => "Sorry! An invalid file type was uploaded"];      
                     }
                 } else {
-                   return ["code" => 203, "data" => "Sorry! The file cannot be empty"]; 
+                   return ["code" => 400, "data" => "Sorry! The file cannot be empty"]; 
                 }
 
                 // upload the file
@@ -549,12 +549,12 @@ class Resources extends Myschoolgh {
 
         $class = $this->pushQuery("id, item_id", "classes", "(id='{$params->class_id}' OR item_id = '{$params->class_id}') AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         if(empty($class)) {
-            return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid class id was supplied."];
         }
 
         $course = $this->pushQuery("id, item_id, course_tutor", "courses", "id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         if(empty($course)) {
-            return ["code" => 203, "data" => "Sorry! An invalid course id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid course id was supplied."];
         }
 
         $item_id = random_string("alnum", RANDOM_STRING);
@@ -566,7 +566,7 @@ class Resources extends Myschoolgh {
 
             // confirm that a file has been upload
             if(empty($this->session->elearning_resource)) {
-                return ["code" => 203, "data" => "Sorry! You must upload a file."];
+                return ["code" => 400, "data" => "Sorry! You must upload a file."];
             }
             
             // attachments
@@ -621,12 +621,12 @@ class Resources extends Myschoolgh {
 
         $class = $this->pushQuery("id, item_id", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         if(empty($class)) {
-            return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid class id was supplied."];
         }
 
         $course = $this->pushQuery("id, item_id, course_tutor", "courses", "id='{$params->course_id}' AND client_id='{$params->clientId}' AND academic_year='{$params->academic_year}' AND academic_term='{$params->academic_term}' AND status='1' LIMIT 1");
         if(empty($course)) {
-            return ["code" => 203, "data" => "Sorry! An invalid course id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid course id was supplied."];
         }
 
         $return = [];
@@ -643,7 +643,7 @@ class Resources extends Myschoolgh {
 
             // if empty then return
             if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
             // initialize
@@ -669,7 +669,7 @@ class Resources extends Myschoolgh {
             
             // confirm that a file has been upload
             if(empty($this->session->elearning_resource) && empty($initial_attachment)) {
-                return ["code" => 203, "data" => "Sorry! You must upload a file."];
+                return ["code" => 400, "data" => "Sorry! You must upload a file."];
             }
 
             // prepare and upload the file

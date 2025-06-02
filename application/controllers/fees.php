@@ -641,7 +641,7 @@ class Fees extends Myschoolgh {
         if(!empty($params->category_id) && empty($allocation)) {
             
             // only receive payment that has been allocated to the student
-            return ["code" => 203, "data" => "Sorry! The selected fee item has not yet been allocated to this Student."];
+            return ["code" => 400, "data" => "Sorry! The selected fee item has not yet been allocated to this Student."];
 
             // get the category item name
             $category_item = $this->pushQuery("amount, name", "fees_category", "id='{$params->category_id}' AND client_id='{$params->clientId}' LIMIT 1");
@@ -1094,7 +1094,7 @@ class Fees extends Myschoolgh {
                 "a.id='{$params->class_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1");
 
             if(empty($class_check)) {
-                return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid class id was supplied."];
             }
 
             /** Start a transaction */
@@ -1208,7 +1208,7 @@ class Fees extends Myschoolgh {
         /** Check if the student id is valid */
         $class_check = $this->pushQuery("id, payment_module", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         if(empty($class_check)) {
-            return ["code" => 203, "data" => "Sorry! An invalid class id was supplied."];
+            return ["code" => 400, "data" => "Sorry! An invalid class id was supplied."];
         }
 
         // set the additional query if the academic year and term were parsed
@@ -1243,7 +1243,7 @@ class Fees extends Myschoolgh {
 
             /** Return false if the student id was not parsed */
             if(empty($params->student_id)) {
-                return ["code" => 203, "data" => "Sorry! The student id cannot be left empty"];
+                return ["code" => 400, "data" => "Sorry! The student id cannot be left empty"];
             }
 
             /** Confirm if a record already exist */
@@ -1569,12 +1569,12 @@ class Fees extends Myschoolgh {
 
             /** Validate the amount */
             if(!$params->amount) {
-                return ["code" => 203, "data" => "Sorry! The amount cannot be empty."];
+                return ["code" => 400, "data" => "Sorry! The amount cannot be empty."];
             }
             
             // ensure the amount is a valid integer
             if(!preg_match("/^[0-9.]+$/", $params->amount)) {
-                return ["code" => 203, "data" => "Sorry! The amount must be a valid numeric integer."];
+                return ["code" => 400, "data" => "Sorry! The amount must be a valid numeric integer."];
             }
 
             /** Get the checkout details */
@@ -1584,12 +1584,12 @@ class Fees extends Myschoolgh {
 
             /** If no allocation record was found */
             if(empty($paymentRecord)) {
-                return ["code" => 203, "data" => "Sorry! No fees allocation for this selected category found."];
+                return ["code" => 400, "data" => "Sorry! No fees allocation for this selected category found."];
             }
 
             /** Validate email address */
             if(!empty($params->email_address) && !filter_var($params->email_address, FILTER_VALIDATE_EMAIL)) {
-                return ["code" => 203, "data" => "Sorry! A valid email address is required."];
+                return ["code" => 400, "data" => "Sorry! A valid email address is required."];
             }
 
             /** Re use payment id */
@@ -1729,7 +1729,7 @@ class Fees extends Myschoolgh {
             }
 
             if(round($params->amount) > round($amount_due)) {
-                return ["code" => 203, "data" => "Sorry! The amount to be paid cannot be more than the outstanding balance."];
+                return ["code" => 400, "data" => "Sorry! The amount to be paid cannot be more than the outstanding balance."];
             }
 
             // get the currency
@@ -1741,7 +1741,7 @@ class Fees extends Myschoolgh {
 
             // ensure that the bank_id and the cheque number are not empty
             if(!empty($append_sql) && (empty($params->bank_id) || empty($params->cheque_number))) {
-                return ["code" => 203, "data" => "Sorry! The bank name and cheque number cannot be empty."];
+                return ["code" => 400, "data" => "Sorry! The bank name and cheque number cannot be empty."];
             }
 
             // append additional sql
@@ -2036,7 +2036,7 @@ class Fees extends Myschoolgh {
                 "transaction_id='{$params->transaction_id}' AND state='Processed' LIMIT 1"
             );
             if(!empty($transaction)) {
-                return ["code" => 203, "data" => "Sorry! This transaction has already been processed."];
+                return ["code" => 400, "data" => "Sorry! This transaction has already been processed."];
             }
 
             // create a new payment object
@@ -2044,7 +2044,7 @@ class Fees extends Myschoolgh {
 
             /** Validate the amount */
             if(!$params->amount) {
-                return ["code" => 203, "data" => "Sorry! The amount cannot be empty."];
+                return ["code" => 400, "data" => "Sorry! The amount cannot be empty."];
             }
 
             // set the parameters
@@ -2066,7 +2066,7 @@ class Fees extends Myschoolgh {
                 return $this->make_payment($params);
 
             } else {
-                return ["code" => 203, "data" => "Sorry! An error was encountered while processing the request."];
+                return ["code" => 400, "data" => "Sorry! An error was encountered while processing the request."];
             }
 
         } catch(PDOException $e) {
@@ -2092,7 +2092,7 @@ class Fees extends Myschoolgh {
         if(isset($params->category_id) && !empty($params->category_id)) {
             $category = $this->pushQuery("*", "fees_category", "id='{$params->category_id}' AND client_id='{$params->clientId}'");
             if(empty($category)) {
-                return ["code" => 203, "data" => "Sorry! An invalid category id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid category id was parsed."];
             }
             $found = true;
         }
@@ -2961,7 +2961,7 @@ class Fees extends Myschoolgh {
 
             // parse the category id
             if(isset($params->category_id) && !is_array($params->category_id)) {
-                return ["code" => 203, "data" => "Please the category_id variable must be an array."];
+                return ["code" => 400, "data" => "Please the category_id variable must be an array."];
             }
 
             // student record
@@ -2969,7 +2969,7 @@ class Fees extends Myschoolgh {
 
             // confirm that student id is valid
             if(empty($studentRecord)) {
-                return ["code" => 203, "data" => "An invalid student id was submitted for processing."];
+                return ["code" => 400, "data" => "An invalid student id was submitted for processing."];
             }
 
             // error bugs
@@ -3040,7 +3040,7 @@ class Fees extends Myschoolgh {
                     foreach($error_bugs as $key => $bug) {
                         $data .= ($key + 1).". The {$bug["category"]} balance should be equal to OR less than {$bug["amount_due"]}.\n";
                     }
-                    return ["code" => 203, "data" => $data];
+                    return ["code" => 400, "data" => $data];
                 }
 
                 // execute the statement
@@ -3107,7 +3107,7 @@ class Fees extends Myschoolgh {
 
             // end query if empty
             if(empty($payment_check)) {
-                return ["code" => 203, "data" => "Sorry! An invalid Payment ID was parsed for processing"];
+                return ["code" => 400, "data" => "Sorry! An invalid Payment ID was parsed for processing"];
             }
 
             // init value
@@ -3276,7 +3276,7 @@ class Fees extends Myschoolgh {
 
             // return error if the student id is not an array
             if(!is_array($params->student_id)) {
-                return ["code" => 203, "data" => "Sorry! The student_id variable must be a valid array."];
+                return ["code" => 400, "data" => "Sorry! The student_id variable must be a valid array."];
             }
 
             // loop through the students 
@@ -3286,7 +3286,7 @@ class Fees extends Myschoolgh {
                 $student = $this->pushQuery("item_id, phone_number, guardian_id, name, email", "users", "client_id='{$params->clientId}' AND user_type='student' AND item_id='{$student_id}' LIMIT 1");
 
                 if(empty($student)) {
-                    return ["code" => 203, "data" => "Sorry! An invalid student id was parsed"];
+                    return ["code" => 400, "data" => "Sorry! An invalid student id was parsed"];
                 }
                 // get the guardian information
                 $guardian = $student[0]->guardian_id;
@@ -3360,7 +3360,7 @@ class Fees extends Myschoolgh {
 
             // if the contact list is empty
             if(empty($contacts_list)) {
-                return ["code" => 203, "data" => "Sorry! The contact list is empty."];
+                return ["code" => 400, "data" => "Sorry! The contact list is empty."];
             }
   
             // append the message
@@ -3488,7 +3488,7 @@ class Fees extends Myschoolgh {
             $this->session->destroy();
 
             // return permission denied
-            return ["code" => 203, "data" => $this->permission_denied];
+            return ["code" => 400, "data" => $this->permission_denied];
         }
 
         try {
@@ -3517,7 +3517,7 @@ class Fees extends Myschoolgh {
                     
                     // return an error
                     return [
-                        "code" => 203,
+                        "code" => 400,
                         "data" => "Attempt to forge subaccount has been detected and logged. You are warned to desist from such action!!! The next attempt will result in your account been deactivated."
                     ];
                 }
@@ -3528,7 +3528,7 @@ class Fees extends Myschoolgh {
 
             // confirm that the student id was parsed
             if(!isset($data["student_id"], $data["amount"])) {
-                return ["code" => 203, "data" => "Sorry! Ensure all required parameters were parsed."];
+                return ["code" => 400, "data" => "Sorry! Ensure all required parameters were parsed."];
             }
 
             // append query
@@ -3553,12 +3553,12 @@ class Fees extends Myschoolgh {
 
             // confirm that the student id was parsed
             if(empty($student_info)) {
-                return ["code" => 203, "data" => "Sorry! The student id is required."];
+                return ["code" => 400, "data" => "Sorry! The student id is required."];
             }
 
             // confirm the amount to be paid
             if(round($data["amount"]) > round($student_info[0]->arrears)){
-                return ["code" => 203, "data" => "Sorry! You cannot pay more than the outstanding balance of {$student_info[0]->arrears}."];
+                return ["code" => 400, "data" => "Sorry! You cannot pay more than the outstanding balance of {$student_info[0]->arrears}."];
             }
 
             // create a new transaction id
@@ -3607,7 +3607,7 @@ class Fees extends Myschoolgh {
         // end query is the session access_denied_log is not empty
         if(empty($this->session->e_payment_transaction_id)) {
             // return permission denied
-            return ["code" => 203, "data" => "Payment request cancelled."];
+            return ["code" => 400, "data" => "Payment request cancelled."];
         }
 
         // set the transaction id
@@ -3618,12 +3618,12 @@ class Fees extends Myschoolgh {
 
         // confirm if a record already exists
         if(empty($log)) {
-            return ["code" => 203, "data" => "Payment request cancelled."];
+            return ["code" => 400, "data" => "Payment request cancelled."];
         }
 
         // get the status
         if($log[0]->state == "Processed") {
-            return ["code" => 203, "data" => "Payment request already processed."];   
+            return ["code" => 400, "data" => "Payment request already processed."];   
         }
 
         // create a new payment object
@@ -3648,7 +3648,7 @@ class Fees extends Myschoolgh {
             // process the payment
             return $this->make_payment($param);
         } else {
-            return ["code" => 203, "data" => "Payment request cancelled."];
+            return ["code" => 400, "data" => "Payment request cancelled."];
         }
 
     }

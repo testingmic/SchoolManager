@@ -102,10 +102,9 @@ class Assignments extends Myschoolgh {
                 ) AS created_by_info {$query}
                 FROM assignments a
                 LEFT JOIN classes cl ON cl.item_id = a.class_id
-                WHERE {$filtering} AND a.status = ? ORDER BY a.id DESC LIMIT {$params->limit}
+                WHERE {$filtering} AND a.status = '1' ORDER BY a.id DESC LIMIT {$params->limit}
             ");
-            //exit;
-            $stmt->execute([1]);
+            $stmt->execute();
 
             $isMinified = isset($params->minified) ? true : false;
             $showMarks = isset($params->show_marks) ? true : false;
@@ -122,8 +121,8 @@ class Assignments extends Myschoolgh {
                 $course_tutor = json_decode($result->course_tutor, true);
 
                 // set the course tutor
-                if(empty($course_tutor)) {
-                    $course_tutor = $this->stringToArray($result->course_tutor);
+                if(!empty($course_tutor)) {
+                    $course_tutor = array_filter($course_tutor);
                 }
 
                 // set new variable
@@ -165,13 +164,24 @@ class Assignments extends Myschoolgh {
 
                         // if attachment variable was parsed
                         if($isAttachment) {
-                            // if the assignment is an attachment type
-                            $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
-                            $result->attached_attachment_html = isset($result->attached_document->files) ? $filesObject->list_attachments($result->attached_document->files, $result->created_by, "col-lg-6 col-md-6", false, false) : null;
+                            if($params->remote) {
+                                $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
+                                $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : [];
+                            } else {
+                                // if the assignment is an attachment type
+                                $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
+                                $result->attached_attachment_html = isset($result->attached_document->files) ? (
+                                    $params->remote ? $result->attached_document->files : $filesObject->list_attachments(
+                                        $result->attached_document->files, $result->created_by, "col-lg-6 col-md-6", false, false
+                                    )
+                                ) : null;
 
-                            // decode the attachments as well
-                            $result->attachment = json_decode($result->attachment);
-                            $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments($result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false) : "";
+                                // decode the attachments as well
+                                $result->attachment = json_decode($result->attachment);
+                                $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments(
+                                    $result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false
+                                ) : "";
+                            }
                         }
 
                         // loop through the information
@@ -185,12 +195,14 @@ class Assignments extends Myschoolgh {
                         $result->marks_list = $this->marks_list($result->item_id);
                     }
 
-                    // labels
-                    $result->handedin_label = $result->state !== "Closed" ? $this->the_status_label("Pending") : $this->the_status_label($result->state);
+                    if(!$params->remote) {
+                        // labels
+                        $result->handedin_label = $result->state !== "Closed" ? $this->the_status_label("Pending") : $this->the_status_label($result->state);
 
-                    // handedin label
-                    if(isset($result->handed_in)) {
-                        $result->handedin_label = $this->the_status_label($result->handed_in);
+                        // handedin label
+                        if(isset($result->handed_in)) {
+                            $result->handedin_label = $this->the_status_label($result->handed_in);
+                        }
                     }
                 }
                 
@@ -205,6 +217,65 @@ class Assignments extends Myschoolgh {
 
         } catch(PDOException $e) {} 
 
+    }
+
+    /**
+     * View the assignment
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function view($params = null) {
+
+        if(empty($params->assignment_id)) {
+            return ["code" => 400, "data" => "Sorry! An assignment id is required"];
+        }
+
+        $resultSet = $this->list($params);
+
+        if(!empty($resultSet["data"])) {
+
+            $result = $resultSet["data"][0];
+
+            $params = (object) [
+                "clientId" => $params->clientId,
+                "columns" => "a.*",
+                "assignment_id" => $params->assignment_id
+            ];
+            $resultSet["data"][0]->questions = $this->questions_list($params);
+
+            /** Get the students list */
+            $students_list = ($result->assigned_to == "selected_students") ? $this->stringToArray($result->assigned_to_list) 
+                : array_column(
+                    $this->pushQuery(
+                        "a.item_id, a.unique_id, a.name, a.email, a.phone_number, a.gender", 
+                        "users a LEFT JOIN classes c ON c.id = a.class_id", 
+                        "a.client_id='{$params->clientId}' AND c.item_id='{$result->class_id}' AND a.user_type='student' AND a.user_status IN ({$this->default_allowed_status_users_list}) AND a.status='1'"
+                ), "item_id");
+
+            /**
+             * List the students to whom the assignment has been assigned to
+             * 
+             * @param 
+             * 
+             * @return Array
+             */
+            $the_students_list = $this->db->prepare("
+				SELECT id, item_id, unique_id, name, email, phone_number, gender, image,
+                (SELECT score FROM assignments_submitted WHERE assignment_id = '{$result->item_id}' AND student_id = users.item_id LIMIT 1) AS score,
+                (SELECT CONCAT(b.handed_in,'|',b.is_submitted) FROM assignments_submitted b WHERE b.assignment_id = '{$result->item_id}' AND b.student_id = users.item_id LIMIT 1) AS handed_in_submitted
+                FROM users 
+                WHERE user_type='student' 
+                AND user_status IN ({$this->default_allowed_status_users_list}) AND status='1' AND item_id IN ('".implode("', '", $students_list)."') ORDER BY name ASC
+			");
+			$the_students_list->execute();
+            $resultSet["data"][0]->students_list = $the_students_list->fetchAll(PDO::FETCH_OBJ);
+
+        }
+
+        return $resultSet["data"][0] ?? [];
+        
     }
 
     /**
@@ -330,7 +401,7 @@ class Assignments extends Myschoolgh {
 
         /** Confirm that the questions_type is valid */
         if(!in_array($params->questions_type, ["file_attachment", "multiple_choice"])) {
-            return ["code" => 203, "data" => "Sorry! An invalid assignment type was parsed."];
+            return ["code" => 400, "data" => "Sorry! An invalid assignment type was parsed."];
         }
 
         /** Run a class check */
@@ -338,28 +409,28 @@ class Assignments extends Myschoolgh {
 
         /** Confirm the class id */
         if(empty($classCheck)) {
-            return ["code" => 203, "data" => "Sorry! An invalid class id was submitted"];
+            return ["code" => 400, "data" => "Sorry! An invalid class id was submitted"];
         }
 
         /** Confirm the selected course */
         $course_data = $this->pushQuery("id, course_tutor", "courses", "item_id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         if(empty($course_data)) {
-            return ["code" => 203, "data" => "Sorry! An invalid course id was submitted"];
+            return ["code" => 400, "data" => "Sorry! An invalid course id was submitted"];
         }
 
         /** Confirm if the submission date is valid */
         if(!$this->validDate($params->date_due)) {
-            return ["code" => 203, "data" => "Sorry! A valid submission date is required"];
+            return ["code" => 400, "data" => "Sorry! A valid submission date is required"];
         }
 
         /** The due date must not be lesser than today */
         if(strtotime($params->date_due) < strtotime(date("Y-m-d"))) {
-            return ["code" => 203, "data" => "Sorry! The submission date must not be less than current date"];
+            return ["code" => 400, "data" => "Sorry! The submission date must not be less than current date"];
         }
 
         /** Confirm the grade */
         if($params->grade < 1) {
-            return ["code" => 203, "data" => "Sorry! The grade's value must be at least '1'"];
+            return ["code" => 400, "data" => "Sorry! The grade's value must be at least '1'"];
         }
 
         /** Confirm that the user is using the file attachment module */
@@ -458,28 +529,28 @@ class Assignments extends Myschoolgh {
             "assignments a", "a.item_id='{$params->assignment_id}' AND a.client_id='{$params->clientId}' AND a.status='1' LIMIT 1");
 
         if(empty($prevData)) {
-            return ["code" => 203, "data" => "Sorry! An invalid assignment id was submitted"];
+            return ["code" => 400, "data" => "Sorry! An invalid assignment id was submitted"];
         }
 
         /** Confirm the class id */
         if(empty($this->pushQuery("id", "classes", "item_id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1"))) {
-            return ["code" => 203, "data" => "Sorry! An invalid class id was submitted"];
+            return ["code" => 400, "data" => "Sorry! An invalid class id was submitted"];
         }
 
         /** Confirm the selected course */
         $course_data = $this->pushQuery("id, course_tutor", "courses", "item_id='{$params->course_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
         if(empty($course_data)) {
-            return ["code" => 203, "data" => "Sorry! An invalid course id was submitted"];
+            return ["code" => 400, "data" => "Sorry! An invalid course id was submitted"];
         }
 
         /** Confirm if the submission date is valid */
         if(!$this->validDate($params->date_due)) {
-            return ["code" => 203, "data" => "Sorry! A valid submission date is required"];
+            return ["code" => 400, "data" => "Sorry! A valid submission date is required"];
         }
 
         /** Confirm the grade */
         if($params->grade < 1) {
-            return ["code" => 203, "data" => "Sorry! The grade's value must be at least '1'"];
+            return ["code" => 400, "data" => "Sorry! The grade's value must be at least '1'"];
         }
 
         /** Append to the previous assignment documents */
@@ -650,14 +721,14 @@ class Assignments extends Myschoolgh {
 
         // validate the record
         if(empty($the_data)) {
-            return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+            return ["code" => 400, "data" => "Sorry! An invalid assignment id was parsed."];
         }
         $bug = false;
         $data = $the_data[0];
 
         // validate the record parsed
         if(!is_array($params->student_list)) {
-            return ["code" => 203, "data" => "Sorry! The student_list variable accepts an array value."];
+            return ["code" => 400, "data" => "Sorry! The student_list variable accepts an array value."];
         }
 
         // loop through the list
@@ -675,7 +746,7 @@ class Assignments extends Myschoolgh {
 
         // return error if a bug was found
         if($bug) {
-            return ["code" => 203, "data" => "Sorry! Please ensure that the marks assigned student does not exceed the grading value of: {$data->grading}."];
+            return ["code" => 400, "data" => "Sorry! Please ensure that the marks assigned student does not exceed the grading value of: {$data->grading}."];
         }
 
         $graded_count = 0;
@@ -755,7 +826,7 @@ class Assignments extends Myschoolgh {
 
             // validate the record
             if(empty($the_data)) {
-                return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid assignment id was parsed."];
             }
 
             // update the status of the assignment
@@ -788,7 +859,7 @@ class Assignments extends Myschoolgh {
 
             // validate the record
             if(empty($the_data)) {
-                return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid assignment id was parsed."];
             }
 
             // update the status of the assignment
@@ -820,7 +891,7 @@ class Assignments extends Myschoolgh {
 
             // validate the record
             if(empty($the_data)) {
-                return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid assignment id was parsed."];
             }
 
             // update the status of the assignment
@@ -856,7 +927,7 @@ class Assignments extends Myschoolgh {
 
         // validate the record
         if(empty($the_data)) {
-            return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+            return ["code" => 400, "data" => "Sorry! An invalid assignment id was parsed."];
         }
 
         // initial values
@@ -1179,14 +1250,14 @@ class Assignments extends Myschoolgh {
         
         // confirm if the answer_type is in the array
         if(!in_array($params->answer_type, ["option", "multiple", "numeric", "input"])) {
-            return ["code" => 203, "data" => "Sorry! An invalid answer type was parsed. Accepted values are: option, multiple, numeric, input"];
+            return ["code" => 400, "data" => "Sorry! An invalid answer type was parsed. Accepted values are: option, multiple, numeric, input"];
         }
 
         try {
 
             // check the marks for a valid numeric integer
             if(!preg_match("/^[0-9]+$/", $params->marks)) {
-                return ["code" => 203, "data" => "Sorry! Ensure a valid numeric integer was parsed for the marks field."];
+                return ["code" => 400, "data" => "Sorry! Ensure a valid numeric integer was parsed for the marks field."];
             }
 
             // get the assignment information
@@ -1194,7 +1265,7 @@ class Assignments extends Myschoolgh {
 
             // validate the record
             if(empty($the_data)) {
-                return ["code" => 203, "data" => "Sorry! An invalid assignment id was parsed."];
+                return ["code" => 400, "data" => "Sorry! An invalid assignment id was parsed."];
             }
 
             $found = false;
@@ -1203,13 +1274,13 @@ class Assignments extends Myschoolgh {
 
             // ensure that the answers parameter is not empty
             if(empty($answers) && in_array($params->answer_type, ["option", "multiple"])) {
-                return ["code" => 203, "data" => "Sorry! Please select at least one option as the answer."];
+                return ["code" => 400, "data" => "Sorry! Please select at least one option as the answer."];
             }
 
             // if the answer type is a numeric variable
             if(in_array($params->answer_type, ["numeric"])) {
                 if(!isset($params->numeric_answer)) {
-                    return ["code" => 203, "data" => "Sorry! Please enter the answer for this question in the provided space."];
+                    return ["code" => 400, "data" => "Sorry! Please enter the answer for this question in the provided space."];
                 }
                 $params->answers = $params->numeric_answer;
                 $answers = $params->answers;
@@ -1229,7 +1300,7 @@ class Assignments extends Myschoolgh {
                 $total_mark = isset($params->marks) ? ($params->marks + $the_marks) : $the_marks;
 
                 if($total_mark > $grading) {
-                    return ["code" => 203, "data" => "Sorry! Adding this question with the assigned mark would result in a grade of: {$total_mark} which is more than the alloted one of: {$grading}."];
+                    return ["code" => 400, "data" => "Sorry! Adding this question with the assigned mark would result in a grade of: {$total_mark} which is more than the alloted one of: {$grading}."];
                 } elseif($total_mark == $grading) {
                     $append_msg = "This should be your last question. Since the marking scheme matches the grade set.";
                 }
@@ -1241,7 +1312,7 @@ class Assignments extends Myschoolgh {
                 $the_data = $this->pushQuery("id", "assignments_questions", "assignment_id='{$params->assignment_id}' AND item_id='{$params->question_id}' LIMIT 1");
                 // validate the record
                 if(empty($the_data)) {
-                    return ["code" => 203, "data" => "Sorry! An invalid question id was parsed."];
+                    return ["code" => 400, "data" => "Sorry! An invalid question id was parsed."];
                 }
                 $found = true;
             }
@@ -1421,7 +1492,7 @@ class Assignments extends Myschoolgh {
 
         // if the question information is not empty
         if(empty($question_info)) {
-           return ["code" => 203, "data" => "Sorry! An invalid question/assignment id was parsed."]; 
+           return ["code" => 400, "data" => "Sorry! An invalid question/assignment id was parsed."]; 
         }
         $data = $question_info[0];
         $isActive = (bool) ($data->theState == "Draft");
@@ -1821,7 +1892,7 @@ class Assignments extends Myschoolgh {
 
         // if the question information is not empty
         if(empty($question_info)) {
-           return ["code" => 203, "data" => "Sorry! An invalid question id was parsed."];
+           return ["code" => 400, "data" => "Sorry! An invalid question id was parsed."];
         }
         $data = $question_info[0];
 
@@ -1833,7 +1904,7 @@ class Assignments extends Myschoolgh {
 
             // get the answer type
             if($data->answer_type == "option" && count($answers) > 1) {
-                return ["code" => 203, "data" => "Sorry! This question requires a single answer. Multiple answers were given"];
+                return ["code" => 400, "data" => "Sorry! This question requires a single answer. Multiple answers were given"];
             }
 
             // append to the correct answer if the answer_type is multiple
@@ -1959,7 +2030,7 @@ class Assignments extends Myschoolgh {
 
             // check the overall_score
             if(isset($params->overall_score) && !preg_match("/^[0-9]+$/", $params->overall_score)) {
-                return ["code" => 203, "data" => "Sorry! The overall score must be a numeric integer."];
+                return ["code" => 400, "data" => "Sorry! The overall score must be a numeric integer."];
             }
 
             // get the id equivalent of the class id
@@ -1972,7 +2043,7 @@ class Assignments extends Myschoolgh {
 
             // if the course id is empty
             if(empty($course_id)) {
-                return ["code" => 203, "data" => "Sorry! An invalid course id was submitted."];
+                return ["code" => 400, "data" => "Sorry! An invalid course id was submitted."];
             }
 
             // load the students list based on the class id parsed
@@ -2009,12 +2080,12 @@ class Assignments extends Myschoolgh {
 
         // confirm that the data is an array
         if(!is_array($params->data)) {
-            return ["code" => 203, "data" => "Sorry! The data parameter must be an array."];
+            return ["code" => 400, "data" => "Sorry! The data parameter must be an array."];
         }
 
         // confirm that the students_list is an array
         if(!is_array($params->students_list)) {
-            return ["code" => 203, "data" => "Sorry! The students_list parameter must be an array."];
+            return ["code" => 400, "data" => "Sorry! The students_list parameter must be an array."];
         }
 
         // confirm that all the parameters are extent
@@ -2040,7 +2111,7 @@ class Assignments extends Myschoolgh {
 
         // return error
         if(!empty($not_found)) {
-            return ["code" => 203, "data" => "Sorry! The variables ".implode(" | ", $not_found)." was not parsed."];
+            return ["code" => 400, "data" => "Sorry! The variables ".implode(" | ", $not_found)." was not parsed."];
         }
 
         try {
@@ -2155,12 +2226,12 @@ class Assignments extends Myschoolgh {
 
             /** if the record was not found*/
             if(empty($data)) {
-                return ["code" => 203, "data" => "Sorry! An invalid {$data[0]->assignment_type} id was submitted."];
+                return ["code" => 400, "data" => "Sorry! An invalid {$data[0]->assignment_type} id was submitted."];
             }
 
             /** Confirm if the state is closed */
             if($data[0]->state !== "Closed") {
-                return ["code" => 203, "data" => "Sorry! The {$data[0]->assignment_type} must first be closed in order to proceed."];
+                return ["code" => 400, "data" => "Sorry! The {$data[0]->assignment_type} must first be closed in order to proceed."];
             }
 
             /** Get the marks of students */

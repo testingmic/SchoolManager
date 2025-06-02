@@ -86,7 +86,7 @@ class Rooms extends Myschoolgh {
                 $params->code = str_replace("/^[\s]+$/", "", $params->code);
                 // confirm if the room code already exist
                 if(!empty($this->pushQuery("item_id, name", "classes_rooms", "status='1' AND client_id='{$params->clientId}' AND code='{$params->code}'"))) {
-                    return ["code" => 203, "data" => "Sorry! There is an existing Room with the same code."];
+                    return ["code" => 400, "data" => "Sorry! There is an existing Room with the same code."];
                 }
             } else {
                 // generate a new room code
@@ -147,7 +147,7 @@ class Rooms extends Myschoolgh {
 
             // if empty then return
             if(empty($prevData)) {
-                return ["code" => 203, "data" => "Sorry! An invalid id was supplied."];
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
             }
 
             // create a new class code
@@ -156,7 +156,7 @@ class Rooms extends Myschoolgh {
                 $params->code = str_replace("/^[\s]+$/", "", $params->code);
                 // confirm if the class code already exist
                 if(!empty($this->pushQuery("item_id, name", "classes_rooms", "status='1' AND client_id='{$params->clientId}' AND code='{$params->code}' LIMIT 1"))) {
-                    return ["code" => 203, "data" => "Sorry! There is an existing Classroom with the same code."];
+                    return ["code" => 400, "data" => "Sorry! There is an existing Classroom with the same code."];
                 }
             } elseif(empty($prevData[0]->code) || !isset($params->code)) {
                 // set the key
