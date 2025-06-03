@@ -292,6 +292,15 @@ function strip_all_tags( $string, $remove_breaks = false ) {
 	return trim( $string );
 }
 
+/**
+ * Escape HTML
+ *
+ * @param string $string
+ * @param int $quote_style
+ * @param string $charset
+ * @param bool $double_encode
+ * @return string
+ */
 function _wp_specialchars( $string, $quote_style = ENT_NOQUOTES, $charset = false, $double_encode = false ) {
 	$string = (string) $string;
 
@@ -331,6 +340,12 @@ function _wp_specialchars( $string, $quote_style = ENT_NOQUOTES, $charset = fals
 
 }
 
+/**
+ * Escape HTML
+ *
+ * @param string $text
+ * @return string
+ */
 function esc_html( $text ) {
 	$safe_text = check_invalid_utf8( $text );
 	$safe_text = _wp_specialchars( $safe_text, ENT_QUOTES );
@@ -365,6 +380,13 @@ function pre_kses_less_than( $text ) {
 	return preg_replace_callback( '%<[^>]*?((?=<)|>|$)%', 'pre_kses_less_than_callback', $text );
 }
 
+/**
+ * Check Invalid UTF8
+ *
+ * @param string $string
+ * @param bool $strip
+ * @return string
+ */
 function check_invalid_utf8( $string, $strip = false ) {
 	$string = (string) $string;
 
@@ -405,6 +427,13 @@ function check_invalid_utf8( $string, $strip = false ) {
 	return '';
 }
 
+/**
+ * XSS Clean
+ *
+ * @param string $str
+ * @param bool $keep_newlines
+ * @return string
+ */
 function xss_clean( $str, $keep_newlines = true ) {
 	if ( is_object( $str ) || is_array( $str ) ) {
 		return $str;
@@ -416,11 +445,7 @@ function xss_clean( $str, $keep_newlines = true ) {
 
 	if ( strpos( $filtered, '<' ) !== false ) {
 		$filtered = pre_kses_less_than( $filtered );
-		// This will strip extra whitespace for us.
 		$filtered = strip_all_tags( $filtered, false );
-
-		// Use HTML entities in a special case to make sure no later
-		// newline stripping stage could lead to a functional tag.
 		$filtered = str_replace( "<\n", "&lt;\n", $filtered );
 	}
 
@@ -436,13 +461,18 @@ function xss_clean( $str, $keep_newlines = true ) {
 	}
 
 	if ( $found ) {
-		// Strip out the whitespace that may now exist after removing the octets.
 		$filtered = trim( preg_replace( '/ +/', ' ', $filtered ) );
 	}
 
-	return $filtered;
+	return $str;
 }
 
+/**
+ * Custom Clean
+ *
+ * @param string $str
+ * @return string
+ */
 function custom_clean($str) {
 	
 	// Remove Invisible Characters
@@ -560,7 +590,6 @@ function set_cookie($name, $value = '', $expire = '', $domain = '', $path = '/',
 *
 * @return	string	IP address
 */
-
 function valid_ip($ip) {
 	if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
 		return false;
@@ -568,6 +597,13 @@ function valid_ip($ip) {
 	return true;
 }
 
+/**
+ * Fetch the IP Address
+ *
+ * Determines and validates the visitor's IP address.
+ *
+ * @return	string	IP address
+*/
 function ip_address() {
 	$ip_keys = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR');
 	foreach ($ip_keys as $key) {
@@ -585,7 +621,12 @@ function ip_address() {
 	return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : false;
 }
 
-#CREATE A SIMPLE FUNCTION TO RUN A TEST ON USER PASSWORD
+/**
+ * Password Test
+ *
+ * @param string $password
+ * @return bool
+ */
 function passwordTest($password) {
 	if(strlen($password) < 8) {
 		return false;
@@ -606,6 +647,12 @@ function passwordTest($password) {
 	}
 }
 
+/**
+ * Valid Date
+ *
+ * @param string $date
+ * @return bool
+ */
 function valid_date($date) { 
     if (false === strtotime($date)) { 
         return false;

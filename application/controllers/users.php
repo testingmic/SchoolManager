@@ -497,7 +497,7 @@ class Users extends Myschoolgh {
 						$result->the_status_label = $this->the_status_label($result->user_status);
 
 						// action buttons
-						$result->action .= " &nbsp; <a class='btn p-1 btn-outline-success m-0 btn-sm' title='Click to view details of this policy' href='{$this->baseUrl}profile/{$result->user_id}'><i class='fa fa-eye'></i></a>";
+						$result->action .= " &nbsp; <a class='btn p-1 btn-outline-success m-0 btn-sm' title='Click to view details of this profile' href='{$this->baseUrl}profile/{$result->user_id}'><i class='fa fa-eye'></i></a>";
 					}
 					
 					// append to the list and return

@@ -2,7 +2,12 @@
 
 class Timetable extends Myschoolgh {
 
-    public function __construct(stdClass $params = null) {
+    /**
+     * Constructor
+     * 
+     * @param stdClass $params
+     */
+    public function __construct($params = null) {
 		parent::__construct();
 
         // get the client data
@@ -530,138 +535,195 @@ class Timetable extends Myschoolgh {
         $filters = [
             "yesterday" => "AND ts.day = '".date("w", strtotime("-1 day"))."'",
             "today" => "AND ts.day = '".date("w")."'",
-            "tomorrow" => "AND ts.day = '".date("w", strtotime("+1 day"))."'"
+            "tomorrow" => "AND ts.day = '".date("w", strtotime("+1 day"))."'",
+            "week" => "AND ts.day BETWEEN '".date("w", strtotime("monday this week"))."' AND '".date("w", strtotime("friday this week"))."'"
         ];
         $query = $filter ? ($filters[$filter] ?? null) : null;
-
-        // if the class id parameter was also parsed
-        $_class_id = !empty($classId) ? $classId : null;
 
         // init
         $data = [];
 
-        // run a query for the teacher courses taught
-        $stmt = $this->db->prepare("SELECT ts.*, c.name AS course_name, r.name AS room_name,
-                cl.name AS class_name, t.disabled_inputs, t.name AS timetable_name, ts.course_id,
-                t.slots, t.days, t.duration, t.start_time, t.allow_conflicts, c.course_code
-            FROM timetables_slots_allocation ts 
-                LEFT JOIN courses c ON c.item_id = ts.course_id
-                    AND c.academic_year ='{$defaultAcademics->academic_year}'
-                    AND c.academic_term ='{$defaultAcademics->academic_term}'
-                LEFT JOIN classes cl ON cl.item_id = ts.class_id
-                LEFT JOIN timetables t ON t.item_id = ts.timetable_id
-                LEFT JOIN classes_rooms r ON r.item_id = ts.room_id
-            WHERE ".(!empty($course_ids) ? "(c.course_tutor LIKE '%{$course_ids}%') AND" : null)."
-                ".(!empty($classId) ? "ts.class_id = '{$classId}' AND " : null)."
-                ts.status = ? AND ts.client_id = ? {$query} AND t.published = ? AND t.status = ?
-            AND t.academic_year = ? AND t.academic_term = ? ORDER BY ts.day DESC LIMIT 200 
-        ");
-        $stmt->execute([1, $clientId, 1, 1, $defaultAcademics->academic_year, $defaultAcademics->academic_term]);
+        try {
 
-        // loop through the result set
-        while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+            // run a query for the teacher courses taught
+            $stmt = $this->db->prepare("SELECT ts.*, c.name AS course_name, r.name AS room_name,
+                    cl.name AS class_name, t.disabled_inputs, t.name AS timetable_name, ts.course_id,
+                    t.slots, t.days, t.duration, t.start_time, t.allow_conflicts, c.course_code
+                FROM timetables_slots_allocation ts 
+                    LEFT JOIN courses c ON c.item_id = ts.course_id
+                        AND c.academic_year ='{$defaultAcademics->academic_year}'
+                        AND c.academic_term ='{$defaultAcademics->academic_term}'
+                    LEFT JOIN classes cl ON cl.item_id = ts.class_id
+                    LEFT JOIN timetables t ON t.item_id = ts.timetable_id
+                    LEFT JOIN classes_rooms r ON r.item_id = ts.room_id
+                WHERE ".(!empty($course_ids) ? "(c.course_tutor LIKE '%{$course_ids}%') AND" : null)."
+                    ".(!empty($classId) ? "ts.class_id = '{$classId}' AND " : null)."
+                    ts.status = '1' AND ts.client_id = '{$clientId}' AND t.published = '1' AND t.status = '1' {$query}
+                AND t.academic_year = ? AND t.academic_term = ? ORDER BY ts.day DESC LIMIT 200 
+            ");
+            $stmt->execute([$defaultAcademics->academic_year, $defaultAcademics->academic_term]);
+
+            // loop through the result set
+            while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
+                
+                // convert the disabled inputs into an array
+                $result->disabled_inputs = !empty($result->disabled_inputs) ? json_decode($result->disabled_inputs, true) : [];
+                
+                // main timetable information
+                $timetable = (object) [
+                    "days" => $result->days,
+                    "name" => $result->timetable_name,
+                    "slots" => $result->slots,
+                    "duration" => $result->duration,
+                    "disabled_inputs" => $result->disabled_inputs,
+                    "start_time" => $result->start_time,
+                    "allow_conflicts" => $result->allow_conflicts,
+                ];
+
+                // set the last timetable id to a variable
+                $data[$result->day_slot][] = $result;
+            }
+            // Subjects List
+            $courses_list = [];
+            $t_course_ids = [];
+
+            // if the record is not empty
+            if(!empty($data)) {
             
-            // convert the disabled inputs into an array
-            $result->disabled_inputs = !empty($result->disabled_inputs) ? json_decode($result->disabled_inputs, true) : [];
-            
-            // main timetable information
-            $timetable = (object) [
-                "days" => $result->days,
-                "name" => $result->timetable_name,
-                "slots" => $result->slots,
-                "duration" => $result->duration,
-                "disabled_inputs" => $result->disabled_inputs,
-                "start_time" => $result->start_time,
-                "allow_conflicts" => $result->allow_conflicts,
-            ];
+                // group all the items
+                foreach($data as $each) {
 
-            // set the last timetable id to a variable
-            $data[$result->day_slot][] = $result;
-        }
-        // Subjects List
-        $courses_list = [];
-        $t_course_ids = [];
+                    // loop through the array
+                    foreach($each as $key => $value) {
+                        // convert to array
+                        $value = (array) $value;
+                        $t_course_ids[] = $value["course_id"]; 
 
-        // if the record is not empty
-        if(!empty($data)) {
-        
-            // group all the items
-            foreach($data as $each) {
+                        // get the lesson time
+                        $start = $value["duration"] * $value["slot"];
+                        $end = ($value["duration"] * $value["slot"]) + $value["duration"];
+                        // configure the lesson start and end time
+                        $value["lesson_start_time"] = date("h:i A", strtotime("{$value["start_time"]} +{$start} minutes"));
+                        $value["lesson_end_time"] = date("h:i A", strtotime("{$value["start_time"]} +{$end} minutes"));
+                        // append to the list
+                        $courses_list[] = $value;
+                    }
+                }
 
-                // loop through the array
-                foreach($each as $key => $value) {
-                    // convert to array
-                    $value = (array) $value;
-                    $t_course_ids[] = $value["course_id"]; 
+            }
 
-                    // get the lesson time
-                    $start = $value["duration"] * $value["slot"];
-                    $end = ($value["duration"] * $value["slot"]) + $value["duration"];
-                    // configure the lesson start and end time
-                    $value["lesson_start_time"] = date("h:i A", strtotime("{$value["start_time"]} +{$start} minutes"));
-                    $value["lesson_end_time"] = date("h:i A", strtotime("{$value["start_time"]} +{$end} minutes"));
-                    // append to the list
-                    $courses_list[] = $value;
+            // init
+            $lessons_list = "<div class='row'>";
+
+            // end the query if no course was found
+            if(empty($courses_list) && $format) {
+                // return error message
+                $lessons_list .= "<div class='col-lg-12 text-center'>You do not have any lessons to teach today.</div>";
+            } else {
+                // get only the unique course ids
+                $course_ids = array_unique($t_course_ids);
+
+                // set
+                $color_set = [];
+
+                // color coding
+                foreach($course_ids as $key => $each) {
+                    $color_set[$each] = $this->color_set[$key] ?? null;
+                }
+                
+                // order the array set using the date of the event
+                usort($courses_list, "sort_lesson_start_time");
+
+                // return the array list
+                if(!$format) {
+                    return $courses_list;
+                }
+
+                // confirm if term has ended
+                $termEnded = (bool) $defaultUser->appPrefs->termEnded;
+
+                // loop through the lessons and generate a clean sheet for the teacher
+                foreach($courses_list as $course) {
+                    $lessons_list .= "
+                    <div class='col-lg-3 col-md-6'>
+                        <div class='card' style='border-top: solid 4px {$color_set[$course["course_id"]]}'>
+                            <div class='card-header pt-1 pb-1'>
+                                <strong>{$course["class_name"]}</strong>
+                            </div>
+                            <div style='min-height:140px' class='card-body pb-0 pt-2 mb-0'>
+                                <p>{$course["course_name"]} ({$course["course_code"]})</p>
+                                <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course["lesson_start_time"]}</p>
+                                <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course["lesson_end_time"]}</p>
+                            </div>
+                            <div class='card-footer p-2 border-top mt-0 text-right'>
+                                <a href='{$this->baseUrl}gradebook/{$course["course_id"]}?class_id={$course["class_id"]}&timetable_id={$course["timetable_id"]}' class='btn btn-outline-success btn-sm'><i class='fa fa-book-open'></i> Lesson</a>
+                                <a href='{$this->baseUrl}course/{$course["course_id"]}' class='btn btn-outline-primary btn-sm'><i class='fa fa-eye'></i> View Course</a>
+                            </div>
+                        </div>
+                    </div>";
                 }
             }
 
+            $lessons_list .= "</div>";
+
+            return $lessons_list;
+        
+        } catch(PDOException $e) {
+            return false;
         }
 
-        // init
-        $lessons_list = "<div class='row'>";
+    }
 
-        // end the query if no course was found
-        if(empty($courses_list) && $format) {
-            // return error message
-            $lessons_list .= "<div class='col-lg-12 text-center'>You do not have any lessons to teach today.</div>";
-        } else {
-            // get only the unique course ids
-            $course_ids = array_unique($t_course_ids);
+    /**
+     * Get The List Of Timetables
+     * 
+     * @param String    $params->clientId
+     * @param String    $params->academic_year
+     * @param String    $params->academic_term
+     * 
+     * @return Array
+     */
+    public function getlist($params = null) {
 
-            // set
-            $color_set = [];
+        global $isAdminAccountant, $isTutor,  $defaultUser;
 
-            // color coding
-            foreach($course_ids as $key => $each) {
-                $color_set[$each] = $this->color_set[$key] ?? null;
-            }
-            
-            // order the array set using the date of the event
-            usort($courses_list, "sort_lesson_start_time");
+        $classId = $isTutor || $isAdminAccountant ? null : $defaultUser->class_guid;
 
-            // return the array list
-            if(!$format) {
-                return $courses_list;
-            }
+        // loop through the days for yesterday, today and tomorrow
+        foreach(['yesterday', 'today', 'tomorrow', 'week'] as $day) {
 
-            // confirm if term has ended
-            $termEnded = (bool) $defaultUser->appPrefs->termEnded;
+            if(!empty($params->period) && !in_array($day, stringToArray($params->period))) continue;
 
-            // loop through the lessons and generate a clean sheet for the teacher
-            foreach($courses_list as $course) {
-                $lessons_list .= "
-                <div class='col-lg-3 col-md-6'>
-                    <div class='card' style='border-top: solid 4px {$color_set[$course["course_id"]]}'>
-                        <div class='card-header pt-1 pb-1'>
-                            <strong>{$course["class_name"]}</strong>
-                        </div>
-                        <div style='min-height:140px' class='card-body pb-0 pt-2 mb-0'>
-                            <p>{$course["course_name"]} ({$course["course_code"]})</p>
-                            <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course["lesson_start_time"]}</p>
-                            <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course["lesson_end_time"]}</p>
-                        </div>
-                        <div class='card-footer p-2 border-top mt-0 text-right'>
-                            <a href='{$this->baseUrl}gradebook/{$course["course_id"]}?class_id={$course["class_id"]}&timetable_id={$course["timetable_id"]}' class='btn btn-outline-success btn-sm'><i class='fa fa-book-open'></i> Lesson</a>
-                            <a href='{$this->baseUrl}course/{$course["course_id"]}' class='btn btn-outline-primary btn-sm'><i class='fa fa-eye'></i> View Course</a>
-                        </div>
-                    </div>
-                </div>";
+            if($day == "week" && empty($params->period)) continue;
+
+            // get the timetable list
+            $timetableList = $this->teacher_timetable($isTutor ? $defaultUser->user_id : null, $defaultUser->clientId, $day, false, $classId);
+
+            // loop through the timetable list
+            foreach($timetableList as $i => $value) {
+
+                $data = [
+                    "id" => $value["id"],
+                    "day" => dayToWord($value["day"]),
+                    "course_id" => $value["course_id"],
+                    "class_id" => $value["class_id"],
+                    "timetable_id" => $value["timetable_id"],
+                    "lesson_start_time" => $value["lesson_start_time"],
+                    "lesson_end_time" => $value["lesson_end_time"],
+                    "course_name" => $value["course_name"],
+                    "course_code" => $value["course_code"],
+                    "class_name" => $value["class_name"],
+                    "room_name" => $value["room_name"],
+                    "timetable_name" => $value["timetable_name"],
+                    "duration" => $value["duration"],
+                    
+                ];
+
+                $todayLessons[$data['day']][] = $data;
             }
         }
 
-        $lessons_list .= "</div>";
-
-        return $lessons_list;
+        return $todayLessons ?? [];
         
     }
 

@@ -115,7 +115,7 @@ class Assignments extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
                 // clean the assignment description
-                $result->assignment_description = custom_clean(htmlspecialchars_decode($result->assignment_description));
+                $result->assignment_description = !empty($result->assignment_description) ? custom_clean(htmlspecialchars_decode($result->assignment_description)) : null;
 
                 // convert to array
                 $course_tutor = json_decode($result->course_tutor, true);
@@ -164,7 +164,7 @@ class Assignments extends Myschoolgh {
 
                         // if attachment variable was parsed
                         if($isAttachment) {
-                            if($params->remote) {
+                            if(!empty($params->remote)) {
                                 $result->attached_document = isset($result->attached_document) ? json_decode($result->attached_document) : [];
                                 $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : [];
                             } else {
@@ -195,7 +195,7 @@ class Assignments extends Myschoolgh {
                         $result->marks_list = $this->marks_list($result->item_id);
                     }
 
-                    if(!$params->remote) {
+                    if(empty($params->remote)) {
                         // labels
                         $result->handedin_label = $result->state !== "Closed" ? $this->the_status_label("Pending") : $this->the_status_label($result->state);
 
@@ -270,7 +270,18 @@ class Assignments extends Myschoolgh {
                 AND user_status IN ({$this->default_allowed_status_users_list}) AND status='1' AND item_id IN ('".implode("', '", $students_list)."') ORDER BY name ASC
 			");
 			$the_students_list->execute();
-            $resultSet["data"][0]->students_list = $the_students_list->fetchAll(PDO::FETCH_OBJ);
+            $students = $the_students_list->fetchAll(PDO::FETCH_OBJ);
+
+            foreach($students as $student) {
+                $student->phone_number = !empty($student->phone_number) ? $student->phone_number : "N/A";
+                $assign = explode("|", $student->handed_in_submitted);
+                $student->status = !empty($assign[0]) ? $assign[0] : 'Pending';
+                $student->submitted = !empty($assign[1]) ? 'Yes' : 'No';
+                unset($student->handed_in_submitted);
+                $student->score = (int)$student->score;
+            }
+
+            $resultSet["data"][0]->students_list = $students;
 
         }
 
@@ -741,6 +752,8 @@ class Assignments extends Myschoolgh {
             return ["code" => 400, "data" => "Sorry! The student_list variable accepts an array value."];
         }
 
+        $exceed = false;
+
         // loop through the list
         foreach($params->student_list as $student) {
             // explode each student record
@@ -750,13 +763,17 @@ class Assignments extends Myschoolgh {
             if(!isset($exp[2])) { $bug = true; break; }
             
             // check the grading marks
-            if(($exp[2] > $data->grading) || ($exp[2] < 0)) { $bug = true; break; }
+            if(($exp[2] > $data->grading) || ($exp[2] < 0)) { 
+                $bug = true; 
+                $exceed = $exp[0];
+                break; 
+            }
 
         }
 
         // return error if a bug was found
         if($bug) {
-            return ["code" => 400, "data" => "Sorry! Please ensure that the marks assigned student does not exceed the grading value of: {$data->grading}."];
+            return ["code" => 400, "data" => "Please ensure that the marks assigned to '{$exceed}' does not exceed the grading value of: {$data->grading}."];
         }
 
         $graded_count = 0;
@@ -809,10 +826,13 @@ class Assignments extends Myschoolgh {
         // update the assignment state
         $this->db->query("UPDATE assignments SET state='Graded', class_average = '{$class_average}' WHERE item_id='{$params->assignment_id}' AND client_id='{$params->clientId}' LIMIT 1");
 
+        // set the key to use
+        $keyToUse = $params->remote ? "record" : "additional";
+        
         // return the success response
         return [
             "data" => "Marks were successfully awarded to the list of students specified.",
-            "additional" => [
+            $keyToUse => [
                 "marks" => $student_marks,
                 "class_average" => $class_average,
                 "graded_count" => $graded_count
@@ -1441,11 +1461,11 @@ class Assignments extends Myschoolgh {
                 ' : null).'
                 <p class="clearfix">
                     <span class="float-left font-bold">Submission Date</span>
-                    <span class="float-right text-muted">'.date("jS F Y", strtotime($data->due_date)).'</span>
+                    <span class="float-right text-muted">'.(!empty($data->due_date) ? date("jS F Y", strtotime($data->due_date)) : "N/A").'</span>
                 </p>
                 <p class="clearfix">
                     <span class="float-left font-bold">Submission Time</span>
-                    <span class="float-right text-muted">'.date("h:iA", strtotime($data->due_time)).'</span>
+                    <span class="float-right text-muted">'.(!empty($data->due_time) ? date("h:iA", strtotime($data->due_time)) : "N/A").'</span>
                 </p>
                 <p class="clearfix">
                     <span class="float-left font-bold">Date Created</span>

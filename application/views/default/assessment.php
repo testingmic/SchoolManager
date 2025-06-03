@@ -224,7 +224,7 @@ if(!empty($item_id)) {
                             
                             $counter++;
                             // split the varible
-                            $split = explode("|", $student->handed_in_submitted);
+                            $split = !empty($student->handed_in_submitted) ? explode("|", $student->handed_in_submitted) : [];
 
                             // set a new variable for the handed in
                             $student->handed_in = $split[0];

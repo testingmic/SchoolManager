@@ -133,13 +133,6 @@ class Api {
 
             return $this->output(100);
 
-            // $code = empty($this->inner_url) ? 200 : 404;
-
-            // // log the api request
-            // if(isset($params["remote"])) { $this->logRequest($this->default_params, $code); }
-
-            // // return error if not valid
-            // return $this->output($code, ['accepted' => ["endpoints" => $this->endpoints ] ]);
         }
         elseif( !isset( $this->endpoints[$this->inner_url][$this->requestMethod] ) ) {
             
@@ -272,7 +265,7 @@ class Api {
 
         // preset the response
         $result = [];
-        $code = 400;
+        $code = 404;
 
         $this->requestPayload = $params;
         
@@ -292,6 +285,8 @@ class Api {
         $academics = $defaultAcademics ?? null;
 
         if($params->remote) {
+
+            $defaultUser->clientId = $defaultUser->client_id;
 
             $globalProps = [
                 'isTutor', 'isTutorAdmin', 'isTutorStudent', 'isWardParent', 'isWardTutorParent', 
@@ -488,7 +483,8 @@ class Api {
             'endpoint' => $_SERVER["REQUEST_URI"]
         ];
 
-        header("HTTP/1.1 {$data['code']}");
+        $code = $data['code'] == 100 ? 201 : $data['code'];
+        header("HTTP/1.1 {$code}");
 
         // remove the description endpoint if the response is 200
         if($code == 200) {
@@ -513,7 +509,7 @@ class Api {
             201 => 'The request was successful however, no results was found.',
             205 => 'The record was successfully updated.',
             202 => 'The data was successfully inserted into the database.',
-            400 => 'Sorry! An error was encountered while processing the request.',
+            400 => 'An invalid parameter was parsed to the endpoint.',
             401 => 'Sorry! Please ensure all required fields are not empty.',
             404 => 'Invalid request node parsed.',
             405 => 'Invalid parameters was parsed to the endpoint.',

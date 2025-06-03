@@ -2,7 +2,7 @@
 
 class Courses extends Myschoolgh {
 
-    public function __construct(stdClass $params = null)
+    public function __construct($params = null)
     {
         parent::__construct();
 
@@ -194,6 +194,12 @@ class Courses extends Myschoolgh {
                     }
                 }
 
+                if(!empty($params->remote)) {
+                    unset($result->course_tutor_ids);
+                    unset($result->course_tutor);
+                    unset($result->class_ids);
+                }
+
                 // if the files is set
                 if(isset($params->attachments_only)) {
                     $data[] = $filesObject->resource_attachments_list("courses_plan", $result->id, $params->rq ?? null);
@@ -211,6 +217,25 @@ class Courses extends Myschoolgh {
             return $this->unexpected_error;
         } 
 
+    }
+
+    /**
+     * View a course
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function view($params) {
+
+        if(empty($params->course_id)) {
+            return ["code" => 400, "data" => "Sorry! An invalid course id was supplied."];
+        }
+        
+        $params->full_details = true;
+        $params->full_attachments = true;
+
+        return $this->list($params)["data"][0] ?? [];
     }
 
     /**

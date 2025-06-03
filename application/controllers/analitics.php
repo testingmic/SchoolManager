@@ -45,7 +45,7 @@ class Analitics extends Myschoolgh {
     public function generate(stdClass $params) {
 
         // initiate the global variable
-        global $academicSession;
+        global $academicSession, $isAdminAccountant, $isTutorStudent, $isPayableStaff;
         
         // call the accepted period method and set the session name to use
         $this->accepted_period($academicSession);
@@ -63,7 +63,13 @@ class Analitics extends Myschoolgh {
         $params->period = empty($params->period) ? "academic_term" : $params->period;
         
         /** Convert the stream into an array list */
-        $params->stream = isset($params->label["stream"]) && !empty($params->label["stream"]) ? $this->stringToArray($params->label["stream"]) : $this->default_stream;
+        $stream = isset($params->label["stream"]) && !empty($params->label["stream"]) ? $this->stringToArray($params->label["stream"]) : $this->default_stream;
+        
+        $params->stream = [];
+        foreach($stream as $value) {
+            $params->stream[] = trim($value);
+        }
+
         $this->info_to_stream = $params->stream;
 
         /** Preformat date */
@@ -138,7 +144,7 @@ class Analitics extends Myschoolgh {
         }
 
         // get the revenue information if not parsed in the stream
-        if(in_array("fees_revenue_flow", $params->stream)) {
+        if(in_array("fees_revenue_flow", $params->stream) && $isAdminAccountant) {
             // query the revenue data
             $this->final_report["fees_revenue_flow"] = $this->fees_revenue_flow($params);
         }
@@ -174,7 +180,7 @@ class Analitics extends Myschoolgh {
         }   
 
         // get the transactions information if not parsed in the stream
-        if(in_array("transaction_revenue_flow", $params->stream)) {
+        if(in_array("transaction_revenue_flow", $params->stream) && $isAdminAccountant) {
             // query the department data
             $this->final_report["transaction_revenue_flow"] = $this->transaction_revenue_flow($params);
         }
