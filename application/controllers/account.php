@@ -151,7 +151,6 @@ class Account extends Myschoolgh {
                     $totalCount['success'][$user->user_type]++;
                 } catch(PDOException $e) {
                     $totalCount['failed']['total']++;
-                    print $e->getMessage() . "<br>";
                 }
             }
 
