@@ -135,6 +135,7 @@ class Account extends Myschoolgh {
                 $user->class_id = null;
                 $user->item_id = random_string("alnum", RANDOM_STRING);
                 $user->unique_id = str_ireplace("HISS", "JOE", $user->unique_id);
+                $user->unique_id = str_ireplace("STL", "TEACH", $user->unique_id);
                 $user->client_id = $transfer_to;
                 $user->date_created = date("Y-m-d H:i:s");
                 $user->last_updated = date("Y-m-d H:i:s");
