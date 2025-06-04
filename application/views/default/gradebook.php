@@ -572,7 +572,7 @@ $response->html = '
         </div>
         '.($isAttendance && $showLogAttendance_Button && $course_id ? 
             "<div class='col-md-2'>
-                <label class='text-white'>Mark Register</label>
+                <label class='text-dark'>Mark Register</label>
                 <button onclick='return show_Bulk_Attendance()' class='btn-block btn btn-outline-primary'><i class='fa fa-check-circle'></i> Bulk Attendance</button>
             </div>"
             : null

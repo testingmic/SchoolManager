@@ -128,7 +128,7 @@ class Handler {
         $data['notification_engine'] = top_level_notification_engine($defaultUser, $defaultAcademics, $baseUrl, true);
 
         // set the response code
-        if(isset($data['code'])) {
+        if(isset($data['code']) && $param->remote) {
             header("HTTP/1.1 {$data['code']} {$this->messages[$data['code']]}");
         }
 

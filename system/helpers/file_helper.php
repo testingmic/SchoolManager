@@ -453,7 +453,7 @@ function validate_document($filename, $tmp_file = null) {
 	$mime_type = @mime_content_type($tmp_file);
 	
 	// if is an image file
-	if(!in_array($mime_type, $accepted_mimes)) {
+	if(is_array($accepted_mimes) && !in_array($mime_type, $accepted_mimes)) {
 		return false;
 	}
 

@@ -135,7 +135,7 @@ return array(
 	'cer'   =>	array('application/pkix-cert', 'application/x-x509-ca-cert'),
 	'3g2'   =>	'video/3gpp2',
 	'3gp'   =>	array('video/3gp', 'video/3gpp'),
-	'mp4'   =>	'video/mp4',
+	'mp4'   =>	array('video/mp4', 'video/x-mp4'),
 	'm4a'   =>	'audio/x-m4a',
 	'f4v'   =>	array('video/mp4', 'video/x-f4v'),
 	'flv'	=>	'video/x-flv',

@@ -365,42 +365,42 @@ var trigger_form_submit = () => {
                                     $(".modal").modal("hide");
                                     $(`form[class="ajax-data-form"]${appendForm_Id} input, form[class="ajax-data-form"]${appendForm_Id} textarea`).val("");
                                 }
-                                if (response.data.additional.append !== undefined) {
+                                if (typeof response.data.additional.append !== 'undefined') {
                                     $(`div[id="${response.data.additional.append.div_id}"]`).html(response.data.additional.append.data);
                                 }
-                                if (response.data.additional.append_data !== undefined) {
+                                if (typeof response.data.additional.append_data !== 'undefined') {
                                     $(`${response.data.additional.append_data.container}`).after(response.data.additional.append_data.data);
                                     try {
                                         document_handler();
                                         documents_summary();
                                     } catch(err) {}
                                 }
-                                if (response.data.additional.replace_data !== undefined) {
+                                if (typeof response.data.additional.replace_data !== 'undefined') {
                                     $(`${response.data.additional.replace_data.container}`).html(response.data.additional.replace_data.data);
                                     try {
                                         document_handler();
                                         documents_summary();
                                     } catch(err) {}
                                 }
-                                if (response.data.additional.delete_divs !== undefined) {
+                                if (typeof response.data.additional.delete_divs !== 'undefined') {
                                     $.each(response.data.additional.delete_divs, function(ie, iv) {
                                         $(`${iv}`).remove();
                                     });
                                 }
-                                if(response.data.additional.array_stream !== undefined) {
+                                if(typeof response.data.additional.array_stream !== 'undefined') {
                                     $.each(response.data.additional.array_stream, function(ie, iv) {
                                         $.each(iv, function(iname, vvalue) {
                                             $.array_stream[ie][iname] = vvalue;
                                         });
                                     }); 
                                 }
-                                if (response.data.additional.record !== undefined) {
+                                if (typeof response.data.additional.record !== 'undefined') {
                                     $.each(response.data.additional.record, function(ie, iv) {
                                         $(`form[class="ajax-data-form"]${appendForm_Id} input[name="${ie}"]`).val(iv);
                                         $(`[data-record="${ie}"]`).html(iv);
                                     });
                                 }
-                                if (response.data.additional.href !== undefined) {
+                                if (typeof response.data.additional.href !== 'undefined') {
                                     if (theButton.attr("href") !== undefined) {
                                         setTimeout(() => {
                                             loadPage(theButton.attr("href"));
@@ -411,7 +411,7 @@ var trigger_form_submit = () => {
                                         }, refresh_seconds);
                                     }
                                 }
-                                if (response.data.additional.data !== undefined) {
+                                if (typeof response.data.additional.data !== 'undefined') {
                                     preload_AjaxData(response.data.additional.data);
                                 }
                             }
@@ -423,7 +423,7 @@ var trigger_form_submit = () => {
                             $form_modal.modal("hide");
                             $(`form[class="ajax-data-form"]${appendForm_Id} div[class~="file-preview"]`).html("");
                         } else {
-                            if (response.data.result !== undefined) {
+                            if (typeof response.data.result !== 'undefined') {
                                 swal({
                                     position: 'top',
                                     text: response.data.result,

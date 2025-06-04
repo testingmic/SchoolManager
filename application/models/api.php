@@ -37,6 +37,7 @@ class Api {
     public $accessCheck;
     public $requestParams;
     
+    private $isRemote = false;
 
     const PERMISSION_DENIED = "Sorry! You do not have the required permissions to perform this action.";
 
@@ -267,6 +268,7 @@ class Api {
         $result = [];
         $code = 404;
 
+        $this->isRemote = $params->remote;
         $this->requestPayload = $params;
         
         // get the client data
@@ -491,7 +493,10 @@ class Api {
         ];
 
         $code = $data['code'] == 100 ? 201 : $data['code'];
-        header("HTTP/1.1 {$code}");
+
+        if($this->isRemote) {
+            header("HTTP/1.1 {$code}");
+        }
 
         // remove the description endpoint if the response is 200
         if($code == 200) {

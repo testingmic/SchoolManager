@@ -32,7 +32,7 @@ var share_comment = (comment_id = "") => {
     let comment = $(`div[id="public_comment"]`).html(),
         record_id = $(`video[id="elearning_video"]`).data("video_unique_id"),
         t_comment_id = $(`video[id="elearning_video"]`).data("video_item_id"),
-        video_time = _video.currentTime;
+        video_time = typeof _video !== 'undefined' ? _video?.currentTime : 0;
 
     if(typeof t_comment_id !== 'undefined') {
         record_id = t_comment_id;

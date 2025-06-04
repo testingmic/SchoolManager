@@ -284,7 +284,7 @@ class Resources extends Myschoolgh {
                 $key++;
                 $result->row_id = $key;
 
-                $result->comment = htmlspecialchars_decode($result->comment);
+                $result->comment = !empty($result->comment) ? htmlspecialchars_decode($result->comment) : null;
                
                 $last_comment_id = $result->id;
 
@@ -450,7 +450,7 @@ class Resources extends Myschoolgh {
             $data = [];
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
                 // clean the description data
-                $result->description = custom_clean(htmlspecialchars_decode($result->description));
+                $result->description = !empty($result->description) ? custom_clean(htmlspecialchars_decode($result->description)) : null;
 
                 // if attachment variable was parsed
                 if($attachmentsOnly) {
@@ -524,7 +524,7 @@ class Resources extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
                 // clean the description data
-                $result->description = custom_clean(htmlspecialchars_decode($result->description));
+                $result->description = !empty($result->description) ? custom_clean(htmlspecialchars_decode($result->description)) : null;
                 $files_only = json_decode($result->attachment, true)["files"];
                 $data["files"][] = $files_only;
                 $data["data"][] = $result;

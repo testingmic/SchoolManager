@@ -741,7 +741,7 @@ class Attendance extends Myschoolgh {
         $attendance["days_range_list"] = $list_days;
         
         // can finalize the attendance log
-        $canFinalize = $accessObject->hasAccess("finalize","attendance");
+        $canFinalize = $accessObject->hasAccess("finalize", "attendance");
 
         // if attendance was parsed and an array
         if(isset($attendance["attendance"]) && is_array($attendance["attendance"])) {

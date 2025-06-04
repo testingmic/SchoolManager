@@ -223,12 +223,23 @@ function format_payment_data($payment_data) {
  */
 function format_daily_attendance($logs, $student_id, $student_name = null) {
     $mylist = null;
+    $colors = [
+        "late" => "bg-warning",
+        "present" => "bg-success",
+        "absent" => "bg-danger",
+        "holiday" => "bg-info",
+        "leave" => "bg-secondary",
+        "late_with_permission" => "bg-warning",
+        "late_without_permission" => "bg-warning",
+    ];
     // if the item is an array and also not empty
     if(is_array($logs) && !empty($logs)) {
         // loop through the logs list
         foreach($logs as $date => $log) {
             $state = str_ireplace("_", " ", $log["status"]);
-            $mylist .= "<span onclick='return show_Attendance_Log(\"{$student_id}\",\"{$date}\",\"{$student_name}\");' class='attendance_log'>{$date}<br><strong>{$state}</strong></span>";
+            $state_color = $colors[$log["status"]] ?? "bg-success";
+
+            $mylist .= "<span onclick='return show_Attendance_Log(\"{$student_id}\",\"{$date}\",\"{$student_name}\");' class='attendance_log {$state_color}'>{$date}<br><strong>{$state}</strong></span>";
         }
     }
 
