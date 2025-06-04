@@ -455,6 +455,12 @@ textarea.custom_form-control {
     border-radius: 5px;
 }
 
+.stick_to_top {
+    position: sticky;
+    top: 10px;
+    z-index: 9999;
+}
+
 .settingSidebar {
     width: 400px;
     right: -400px;
