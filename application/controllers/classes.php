@@ -412,7 +412,7 @@ class Classes extends Myschoolgh {
                 "data" => count($params->data["student_id"]) ." Students were successfully assigned to {$check[0]->name}.", 
                 "additional" => [
                     "students_list" => $params->data["student_id"],
-                    "href" => "{$this->baseUrl}assign_class"
+                    "href" => "assign_class"
                 ]
             ];
 
