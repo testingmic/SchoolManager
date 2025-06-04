@@ -321,7 +321,11 @@ class Api {
         $params->userData = !empty($this->userData) ? (object) $this->userData : $this->defaultUser;
 
         // if the user type is empty
-        $params->userData->user_type = $defaultUser->user_type;
+        if(is_array($params->userData)) {
+            $params->userData['user_type'] = $defaultUser->user_type;
+        } else {
+            $params->userData->user_type = $defaultUser->user_type;
+        }
         
         // parse the code to return
         $code = !empty($code) ? $code : 201;
