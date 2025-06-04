@@ -680,7 +680,7 @@ if(in_array($url, ["attendance", "grading"])) {
         // show form
         $response->html .= '
         <div data-backdrop="static" data-keyboard="false" class="modal fade" id="bulk_Attendance_Log">
-            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-dialog modal-xl" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title"><span data="title">Bulk Lesson Attendance Log - '.date("l, jS F, Y").'</span></h5>

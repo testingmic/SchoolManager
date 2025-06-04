@@ -307,7 +307,7 @@ var show_Bulk_Attendance = () => {
             student_name = student_name.substring(0, 25);
 
             data += `
-            <div id="student" class="col-lg-4 col-md-4" data-student_row_id="${i}">
+            <div id="student" class="col-lg-4 col-md-4 mb-2" data-student_row_id="${i}">
                 <div class="card mb-2 pb-0">
                     <div class="card-header p-0 pl-1" style="display:block">
                         <strong>${student_name}</strong> <span class="selected"></span>
