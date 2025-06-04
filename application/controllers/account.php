@@ -115,8 +115,14 @@ class Account extends Myschoolgh {
             $users = $this->pushQuery("*", "users", "client_id='{$transfer_from}' AND user_type IN ('teacher', 'student')");
 
             $totalCount = [
-                'student' => 0,
-                'teacher' => 0
+                'success' => [
+                    'student' => 0,
+                    'teacher' => 0
+                ],
+                'failed' => [
+                    'student' => 0,
+                    'teacher' => 0
+                ]
             ];
 
             $password = password_hash('Pa$$word!', PASSWORD_DEFAULT);
@@ -142,8 +148,9 @@ class Account extends Myschoolgh {
 
                 try {
                     $this->db->query("INSERT INTO users ({$columns}) VALUES ('{$values}')");
-                    $totalCount[$user->user_type]++;
+                    $totalCount['success'][$user->user_type]++;
                 } catch(PDOException $e) {
+                    $totalCount['failed'][$user->user_type]++;
                 }
             }
 
