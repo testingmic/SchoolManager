@@ -246,7 +246,7 @@ var save_Class_Allocation = () => {
                                 div[id="bulk_assign_class"] button[type="submit"]`).prop({"checked": false});
                         });
                     }
-                    load($.current_page);
+                    loadPage($.current_page);
                 } else {
 
                 }
