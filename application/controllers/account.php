@@ -5,7 +5,7 @@ class Account extends Myschoolgh {
     public $accepted_column;
     public $readonly_mode;
 
-	public function __construct(stdClass $params = null) {
+	public function __construct($params = null) {
 		parent::__construct();
 
         // get the client data
@@ -56,7 +56,7 @@ class Account extends Myschoolgh {
      * 
      * @return Array
      */
-    public function client(stdClass $params) {
+    public function client($params = null) {
 
         $result = [];
         
@@ -80,6 +80,69 @@ class Account extends Myschoolgh {
         } catch(PDOException $e) {
             return [];
         }
+
+    }
+
+    /**
+     * Transfer a Client Account
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function transfer($params = null) {
+
+        try {
+
+            if(empty($params->transfer_from) || empty($params->transfer_to)) {
+                return [
+                    "code" => 400,
+                    "data" => "Sorry! The transfer_from and transfer_to parameters are required."
+                ];
+            }
+
+            if($params->transfer_from == $params->transfer_to) {
+                return [
+                    "code" => 400,
+                    "data" => "Sorry! The transfer_from and transfer_to parameters cannot be the same."
+                ];
+            }
+
+            $transfer_from = $params->transfer_from;
+            $transfer_to = $params->transfer_to;
+
+            // get all users from the transfer_from client
+            $users = $this->pushQuery("*", "users", "client_id='{$transfer_to}' AND user_type = 'student'");
+
+            $password = password_hash('Pa$$word!', PASSWORD_DEFAULT);
+            foreach($users as $user) {
+                // insert the user into the transfer_to client dynamically
+                unset($user->id);
+                unset($user->date_of_birth);
+                $user->email = "";
+                $user->username = random_string("alnum", RANDOM_STRING);
+                $user->password = $password;
+                $user->item_id = random_string("alnum", RANDOM_STRING);
+                $user->unique_id = str_ireplace("HISS", "JOE", $user->unique_id);
+                $user->client_id = $transfer_to;
+                $user->date_created = date("Y-m-d H:i:s");
+                $user->last_updated = date("Y-m-d H:i:s");
+                $user->last_login = date("Y-m-d H:i:s");
+                $user->last_password_change = date("Y-m-d H:i:s");
+
+                $user = json_decode(json_encode($user), true);
+                $columns = implode(", ", array_keys($user));
+                $values = implode("', '", array_values($user));
+
+                try {
+                    $this->db->query("INSERT INTO users ({$columns}) VALUES ('{$values}')");
+                } catch(PDOException $e) {
+                }
+            }
+
+            return $users;
+
+        } catch(PDOException $e) {}
 
     }
 
