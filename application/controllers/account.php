@@ -112,7 +112,7 @@ class Account extends Myschoolgh {
             $transfer_to = $params->transfer_to;
 
             // get all users from the transfer_from client
-            $users = $this->pushQuery("*", "users", "client_id='{$transfer_to}' AND user_type = 'student'");
+            $users = $this->pushQuery("*", "users", "client_id='{$transfer_from}' AND user_type = 'student'");
 
             $password = password_hash('Pa$$word!', PASSWORD_DEFAULT);
             foreach($users as $user) {
@@ -140,7 +140,10 @@ class Account extends Myschoolgh {
                 }
             }
 
-            return $users;
+            return [
+                "code" => 200,
+                "data" => "All students have been successfully transferred to the new client."
+            ];
 
         } catch(PDOException $e) {}
 
