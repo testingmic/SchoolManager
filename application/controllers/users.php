@@ -294,6 +294,11 @@ class Users extends Myschoolgh {
 		$params->query .= !empty($params->class_id) ? " AND a.class_id='{$params->class_id}'" : null;
 		$params->query .= !empty($params->user_type) ? " AND a.user_type IN {$this->inList($params->user_type)}" : null;
 
+		// if the unique or item id was parsed
+		if(!empty($params->unique_or_item_id)) {
+			$params->query .= " AND (a.unique_id='{$params->unique_or_item_id}' OR a.item_id='{$params->unique_or_item_id}')";
+		}
+
 		// if the activated parameter was not and not equal to pending then append this section
 		if((isset($this->session->activated) && ($this->session->activated !== "Pending")) || (!isset($this->session->activated))) {
 			$params->query .= (isset($params->user_status) && !empty($params->user_status)) ? " AND a.user_status IN {$this->inList($params->user_status)}" : " AND a.user_status NOT IN ({$this->default_not_allowed_status_users_list})";
@@ -2095,9 +2100,9 @@ class Users extends Myschoolgh {
 
 		// set the where clause
 		$whereClause = $isSupport ? [
-			"limit" => 1, "unique_id" => $params->user_id, "minified" => false
+			"limit" => 1, "unique_or_item_id" => $params->user_id, "minified" => false
 		] : [
-			"limit" => 1, "unique_id" => $params->user_id, "clientId" => $params->clientId, "minified" => false
+			"limit" => 1, "unique_or_item_id" => $params->user_id, "clientId" => $params->clientId, "minified" => false
 		];
 
 		// get the user record
