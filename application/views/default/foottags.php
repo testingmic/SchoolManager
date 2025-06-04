@@ -187,6 +187,7 @@ var acceptedArray = new Array();
 acceptedArray["<?= $key ?>"] = <?php $values = array_values($accountObj->accepted_column[$key]); print "[\"". implode("\",\"", $values) ."\"]"; ?>, 
 <?php } ?>
 current_column = "";
+var appVersion = "<?= version() ?>";
 </script>
 <script src="<?= $baseUrl; ?>assets/js/app.min.js"></script>
 <script src="<?= $baseUrl; ?>assets/bundles/chartjs/chart.min.js"></script>

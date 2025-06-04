@@ -685,7 +685,7 @@ var loadPage = (loc, pushstate) => {
                 $.each(result.scripts, function(ii, ie) {
                     try {
                         setTimeout(() => {
-                            $.cachedScript(`${baseUrl}${ie}`);
+                            $.cachedScript(`${baseUrl}${ie}?v=${appVersion}`);
                         }, timer);
                         timer += increment;
                     } catch (err) {}
