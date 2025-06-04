@@ -114,6 +114,11 @@ class Account extends Myschoolgh {
             // get all users from the transfer_from client
             $users = $this->pushQuery("*", "users", "client_id='{$transfer_from}' AND user_type IN ('teacher', 'student')");
 
+            $totalCount = [
+                'student' => 0,
+                'teacher' => 0
+            ];
+
             $password = password_hash('Pa$$word!', PASSWORD_DEFAULT);
             foreach($users as $user) {
                 // insert the user into the transfer_to client dynamically
@@ -131,6 +136,8 @@ class Account extends Myschoolgh {
                 $user->last_login = date("Y-m-d H:i:s");
                 $user->last_password_change = date("Y-m-d H:i:s");
 
+                $totalCount[$user->user_type]++;
+
                 $user = json_decode(json_encode($user), true);
                 $columns = implode(", ", array_keys($user));
                 $values = implode("', '", array_values($user));
@@ -143,7 +150,10 @@ class Account extends Myschoolgh {
 
             return [
                 "code" => 200,
-                "data" => "All students have been successfully transferred to the new client."
+                "data" => [
+                    "message" => "All students have been successfully transferred to the new client.",
+                    "totalCount" => $totalCount
+                ]
             ];
 
         } catch(PDOException $e) {}
