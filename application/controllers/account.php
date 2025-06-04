@@ -120,8 +120,7 @@ class Account extends Myschoolgh {
                     'teacher' => 0
                 ],
                 'failed' => [
-                    'student' => 0,
-                    'teacher' => 0
+                    'total' => 0
                 ]
             ];
 
@@ -150,7 +149,8 @@ class Account extends Myschoolgh {
                     $this->db->query("INSERT INTO users ({$columns}) VALUES ('{$values}')");
                     $totalCount['success'][$user->user_type]++;
                 } catch(PDOException $e) {
-                    $totalCount['failed'][$user->user_type]++;
+                    $totalCount['failed']['total']++;
+                    print $e->getMessage() . "<br>";
                 }
             }
 
