@@ -136,14 +136,13 @@ class Account extends Myschoolgh {
                 $user->last_login = date("Y-m-d H:i:s");
                 $user->last_password_change = date("Y-m-d H:i:s");
 
-                $totalCount[$user->user_type]++;
-
                 $user = json_decode(json_encode($user), true);
                 $columns = implode(", ", array_keys($user));
                 $values = implode("', '", array_values($user));
 
                 try {
                     $this->db->query("INSERT INTO users ({$columns}) VALUES ('{$values}')");
+                    $totalCount[$user->user_type]++;
                 } catch(PDOException $e) {
                 }
             }
