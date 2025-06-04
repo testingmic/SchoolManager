@@ -132,7 +132,7 @@ class Account extends Myschoolgh {
                 $user->email = "";
                 $user->username = random_string("alnum", RANDOM_STRING);
                 $user->password = $password;
-                $user->class_guid = null;
+                $user->class_id = null;
                 $user->item_id = random_string("alnum", RANDOM_STRING);
                 $user->unique_id = str_ireplace("HISS", "JOE", $user->unique_id);
                 $user->client_id = $transfer_to;
