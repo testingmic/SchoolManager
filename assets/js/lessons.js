@@ -300,11 +300,17 @@ var show_Bulk_Attendance = () => {
             style = 'style="border:solid 1px #fff"';
         $.each($.array_stream["students_array_list"], function(i, e) {
             row++;
+            // set the student name
+            let student_name = e.name.toUpperCase();
+
+            // get the first 20 characters of the student name
+            student_name = student_name.substring(0, 25);
+
             data += `
             <div id="student" class="col-lg-4 col-md-4" data-student_row_id="${i}">
                 <div class="card mb-2 pb-0">
                     <div class="card-header p-0 pl-1" style="display:block">
-                        <strong>${e.name.toUpperCase()}</strong> <span class="selected"></span>
+                        <strong>${student_name}</strong> <span class="selected"></span>
                     </div>
                     <div class="card-body p-1">
                         <div class="attedance_selector" data-allow_selection="1" data-student_row_id="${i}" align="center">
