@@ -320,6 +320,11 @@ class Api {
         $params->requestMethod = $this->requestMethod;
         $params->userData = !empty($this->userData) ? (object) $this->userData : $this->defaultUser;
 
+        // if the user type is empty
+        if(!empty($params->userData['user_type'])) {
+            $params->userData['user_type'] = $defaultUser->user_type;
+        }
+        
         // parse the code to return
         $code = !empty($code) ? $code : 201;
 
@@ -381,7 +386,7 @@ class Api {
                 }
                 
                 // convert the response into an arry if not already in there
-                $request = $classObject->$method($params);
+                $request = $classObject->{$method}($params);
                 
                 // set the response code to return
                 $code = is_array($request) && isset($request['code']) ? $request['code'] : 200;

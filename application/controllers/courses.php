@@ -53,10 +53,11 @@ class Courses extends Myschoolgh {
 
         // run this portion if the userData is parsed
         if(isset($params->userData)) {
+            $userType = $params->userData->user_type ?? $params->userData['user_type'];
             // append the class_id if the user type is student
-            if(($params->userData->user_type === "student") && !isset($params->bypass)) {
+            if(($userType === "student") && !isset($params->bypass)) {
                 $params->class_id = $params->userData->class_guid;
-            } elseif(($params->userData->user_type === "teacher")) {
+            } elseif(($userType === "teacher")) {
                 $params->course_tutor = $params->userData->user_id;
             }
         }

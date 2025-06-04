@@ -788,6 +788,10 @@ class Myschoolgh extends Models {
 	 **/
 	final function listDays($startDate, $endDate, $format='Y-m-d', $weekends = false) {
 
+		if(empty($startDate) || empty($endDate)) {
+			return [];
+		}
+
 		$period = new DatePeriod(
 		  new DateTime($startDate),
 		  new DateInterval('P1D'),
@@ -799,12 +803,8 @@ class Myschoolgh extends Models {
 
 		// check the date parsed
 		if(date("Y-m-d", strtotime($sCheck['date'])) == "1970-01-01") {
-			
 			// set a new start date and call the function again
 			return $this->listDays(date("Y-m-d", strtotime("first day of this week")), date("Y-m-d", strtotime("today")));
-
-			// exit the query
-			exit;
 		}
 		
 		// fetch the days to display

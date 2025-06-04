@@ -3062,11 +3062,11 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-6 '.($userData->username ? 'hidden' : '').' text-left">
+                <div class="col-lg-6 '.(!empty($userData->username) ? 'hidden' : '').' text-left">
                     NB: <span class="text-danger">Default password for this account is:
                         <strong class="font-18">'.$this->defaultPassword.'</strong></span>
                 </div>
-                <div class="col-lg-'.($userData->username ? 12 : 6).' text-right">
+                <div class="col-lg-'.(!empty($userData->username) ? 12 : 6).' text-right">
                     <button type="button-submit" class="btn btn-success"><i class="fa fa-save"></i> Save Record</button>
                 </div>
             </div>

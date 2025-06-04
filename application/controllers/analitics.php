@@ -691,7 +691,7 @@ class Analitics extends Myschoolgh {
                 $_params->end_date = isset($_params->label["end_date"]) ? $_params->label["end_date"] : $this->end_date;
 
                 // set the quick information
-                $user_type = $_params->userData->user_type;
+                $user_type = $_params->userData->user_type ?? $_params->userData['user_type'];
                 $_params->the_user_type = $user_type;
                 
                 // set the user types that each person can view

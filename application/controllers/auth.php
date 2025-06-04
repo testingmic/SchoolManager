@@ -127,6 +127,7 @@ class Auth extends Myschoolgh {
                                     $session->set("clientId", $results->client_id);
                                     $session->set("activated", $results->user_status);
                                     $session->set("userRole", $results->access_level);
+                                    $session->set("user_type", $results->user_type);
 
                                     // check the client state
                                     if($results->client_state === "Pending") {

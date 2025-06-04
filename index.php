@@ -117,6 +117,11 @@ if(!empty($session->userId) && empty($argv)) {
         $isSupport = (bool) ($defaultUser->user_type == "support");
         $isSchool = "School";
 
+        // set the user type
+        if(empty($session->user_type)) {
+            $session->set("user_type", $defaultUser->user_type);
+        }
+
         // set new variables
         $isEmployee = (bool) ($defaultUser->user_type == "employee");
         $isTutor = (bool) in_array($defaultUser->user_type, ["teacher"]);
@@ -133,7 +138,7 @@ if(!empty($session->userId) && empty($argv)) {
         $clientFeatures = !empty($clientPrefs->features_list) ? (array) $clientPrefs->features_list : [];
 
         // if the user is not support then run this section
-        if(!$isSupport) {
+        if(!$isSupport || !empty($session->previewClientId)) {
 
             // set additional parameters
             $defaultCurrency = $defaultClientData->client_preferences->labels->currency ?? null;

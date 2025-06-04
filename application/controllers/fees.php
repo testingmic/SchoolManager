@@ -40,7 +40,7 @@ class Fees extends Myschoolgh {
         $group_by = $params->group_by ?? null;
         
         // run this section if the user is not a support staff
-        if(!$isSupport) {
+        if(!$isSupport && !empty($params->userData->user_type)) {
             // set the student id
             $student_id = $params->student_id ?? $params->userData->user_id;
 
