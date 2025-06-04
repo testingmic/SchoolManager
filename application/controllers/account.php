@@ -148,7 +148,9 @@ class Account extends Myschoolgh {
 
                 try {
                     $this->db->query("INSERT INTO users ({$columns}) VALUES ('{$values}')");
-                    $totalCount['success'][$user->user_type]++;
+                    if(!empty($user->user_type)) {
+                        $totalCount['success'][$user->user_type]++;
+                    }
                 } catch(PDOException $e) {
                     $totalCount['failed']['total']++;
                 }
