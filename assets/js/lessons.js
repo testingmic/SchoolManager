@@ -310,7 +310,7 @@ var show_Bulk_Attendance = () => {
             <div id="student" class="col-lg-4 col-md-6 mb-2" data-student_row_id="${i}">
                 <div class="card mb-2 pb-0" style="box-shadow: 0px 1px 7px 1px #131212;">
                     <div class="card-header p-0 pl-1" style="display:block">
-                        <strong>${student_name}</strong> <span class="selected"></span>
+                        <strong class="text-dark">${student_name}</strong> <span class="selected"></span>
                     </div>
                     <div class="card-body p-1">
                         <div class="attedance_selector" data-allow_selection="1" data-student_row_id="${i}" align="center">
@@ -319,7 +319,7 @@ var show_Bulk_Attendance = () => {
                             <span data-student_row_id="${i}" ${style} data-option="absent" class="badge cursor mb-1 hover-border badge-danger">Absent</span>
                         </div>
                         <div class="p-2">
-                            <input type="text" name="comments" placeholder="Add comments" class="form-control font-12 font-italic" style="height:30px">
+                            <input type="text" name="comments" placeholder="Add comments" class="form-control font-12 text-dark font-italic" style="height:30px">
                         </div>
                     </div>
                 </div>

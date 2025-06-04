@@ -951,7 +951,7 @@ h4 {
 
 .bg-selected {
     font-weight: bold;
-    background-color: #323333 !important;
+    background-color: #000000 !important;
 }
 
 .hover-border:hover {
