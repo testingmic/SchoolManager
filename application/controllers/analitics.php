@@ -133,6 +133,7 @@ class Analitics extends Myschoolgh {
         $this->query_date_range = isset($params->label["stream_period"]) ? $this->stringToArray($params->label["stream_period"]) : ["current", "previous"];
 
         // append the arange information
+        $this->final_report["userData"] = $params->userData;
         $this->final_report["date_range"] = $this->date_range;
 
         // get the clients information if not parsed in the stream
