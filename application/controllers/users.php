@@ -1526,6 +1526,72 @@ class Users extends Myschoolgh {
 	}
 
 	/**
+	 * View a users record
+	 * 
+	 * @param \stdClass $params
+	 * 
+	 * @return Array
+	 */
+	public function view(stdClass $params) {
+		// global variable
+		global $accessObject;
+		
+		$payload = (object) [
+			"clientId" => $params->clientId,
+			"unique_or_item_id" => !empty($params->user_id) ? $params->user_id : $params->userData->user_id,
+			"limit" => 1,
+			"full_details" => true,
+			"no_limit" => 1,
+		];
+
+		$record = $this->list($payload);
+		
+		if(empty($record["data"])) {
+			return ["code" => 404, "data" => "Sorry! No record was found."];
+		}
+
+		$record = $record["data"][0];
+		unset($record->action);
+		unset($record->contact_details);
+		unset($record->the_status_label);
+
+		return $record;
+	}
+
+	/**
+	 * View a users record
+	 * 
+	 * @param \stdClass $params
+	 * 
+	 * @return Array
+	 */
+	public function profile(stdClass $params) {
+		// global variable
+		global $accessObject;
+		
+		$payload = (object) [
+			"clientId" => $params->clientId,
+			"user_id" => $params->userId,
+			"limit" => 1,
+			"full_details" => true,
+			"no_limit" => 1,
+		];
+
+		$record = $this->list($payload);
+		
+		if(empty($record["data"])) {
+			return ["code" => 404, "data" => "Sorry! No record was found."];
+		}
+
+		$record = $record["data"][0];
+		unset($record->action);
+		unset($record->contact_details);
+		unset($record->the_status_label);
+
+		return $record;
+	}
+
+	/**
 	 * Update a users record
 	 * 
 	 * @param \stdClass $params
