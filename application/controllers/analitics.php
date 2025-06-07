@@ -156,6 +156,11 @@ class Analitics extends Myschoolgh {
             $this->final_report["salary_report"] = $this->salary_report($params);
         }
 
+        if(in_array("events_list", $params->stream)) {
+            // query the events data
+            $this->final_report["events_list"] = $this->events_list($params);
+        }
+
         // get the library information if not parsed in the stream
         if(in_array("library_report", $params->stream)) {
             // append this paramter
@@ -194,6 +199,20 @@ class Analitics extends Myschoolgh {
 
         return $this->final_report;
         
+    }
+
+    /**
+     * This will be used for the generation of events list
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function events_list(stdClass $params) {
+
+        $eventsClass = load_class("events", "controllers", $this->iclient);
+        return $eventsClass->list($params)['data'] ?? [];
+
     }
 
     /**

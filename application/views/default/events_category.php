@@ -57,7 +57,7 @@ if(!empty($session->clientId)) {
             <div class='col-lg-4 col-md-6' data-row_id='{$type->item_id}'>
                 <div class='card mb-2'>
                     <div class='card-header p-2 text-uppercase'><strong>{$type->name}</strong></div>
-                    ".(!empty($type->description) ? "<div class='card-body p-2'>{$type->description}</div>" : "")."
+                    ".(!empty($type->description) ? "<div class='card-body p-2' style='max-height:100px;overflow-y:hidden'>{$type->description}</div>" : "")."
                     <div class='card-footer p-2'>
                         ".($type->slug !== "public-holiday" ? 
                             "<div class='d-flex justify-content-between'>

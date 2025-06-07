@@ -76,7 +76,7 @@ class Models {
     public $default_stream = [
         "summary_report", "students_report", "fees_revenue_flow", "library_report", 
         "departments_report", "attendance_report", "class_attendance_report",
-        "salary_report", "transaction_revenue_flow"
+        "salary_report", "transaction_revenue_flow", "events_list"
     ];
 
     public $password_ErrorMessage_2 = "

@@ -58,7 +58,7 @@ class Events extends Myschoolgh {
             while($result = $stmt->fetch(PDO::FETCH_OBJ)) {
 
                 // description
-                $result->description = custom_clean(htmlspecialchars_decode($result->description));
+                $result->description = !empty($result->description) ? custom_clean(htmlspecialchars_decode($result->description)) : null;
 
                 // if the created by info was parsed
                 if(isset($result->created_by_info)) {
@@ -366,7 +366,7 @@ class Events extends Myschoolgh {
 
         /** Insert */
         $stmt = $this->db->prepare("UPDATE events_types SET name = ?, slug = ?
-            ".(isset($params->description) ? ",description = '{$params->description}'" : "")."
+            ".(isset($params->description) ? ",description = '".addslashes($params->description)."'" : "")."
             ".(isset($params->color_code) ? ",color_code = '{$params->color_code}'" : "")."
             ".(isset($params->icon) ? ",icon = '{$params->icon}'" : "")."
             WHERE client_id = ? AND item_id = ? LIMIT 1

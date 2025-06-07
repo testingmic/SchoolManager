@@ -227,7 +227,7 @@ if(!empty($item_id)) {
                             $split = !empty($student->handed_in_submitted) ? explode("|", $student->handed_in_submitted) : [];
 
                             // set a new variable for the handed in
-                            $student->handed_in = $split[0];
+                            $student->handed_in = $split[0] ?? "Pending";
 
                             // set a new variable for the submitted 
                             $student->is_submitted = $split[1] ?? 0;
