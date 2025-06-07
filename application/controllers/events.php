@@ -84,6 +84,23 @@ class Events extends Myschoolgh {
     }
 
     /**
+     * View an event
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function view(stdClass $params) {
+        if(empty($params->event_id)) {
+            return ["code" => 400, "data" => "Sorry! An invalid event id was parsed."];
+        }
+        $params->event_id = $params->event_id;
+        $record = $this->list($params);
+
+        return $record['data'][0] ?? [];
+    }
+
+    /**
      * Add a new Event
      * 
      * @return Array
