@@ -435,14 +435,16 @@ class Events extends Myschoolgh {
                     DAY(u.date_of_birth) AS the_day, MONTH(u.date_of_birth) AS the_month, cl.name AS class_name", 
                 "users u LEFT JOIN classes cl ON cl.id = u.class_id", "
                 (
-                    DATE_ADD(u.date_of_birth,
-                        INTERVAL YEAR(CURDATE()) - YEAR(u.date_of_birth)
-                            + IF(DAYOFYEAR(CURDATE()) > DAYOFYEAR(u.date_of_birth), 1, 0)
-                        YEAR)
-                    BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL {$defaultClientData->birthday_days_interval} DAY)
-                ) AND u.client_id = '{$data->client_id}' AND u.user_status='Active' AND u.status='1' AND u.deleted='0'
+                    -- Normalize date_of_birth to the current year
+                    DATE_FORMAT(u.date_of_birth, CONCAT(YEAR(CURDATE()), '-%m-%d')) 
+                    BETWEEN 
+                        DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 5 DAY), '%Y-%m-%d') 
+                    AND 
+                        DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 1 WEEK), '%Y-%m-%d')
+                )
+                 AND u.client_id = '{$data->client_id}' AND u.user_status='Active' AND u.status='1' AND u.deleted='0'
                 AND u.user_type IN ('student','teacher','admin','accountant','admin')
-                ORDER BY MONTH(u.date_of_birth), DAY(u.date_of_birth) ASC LIMIT {$this->temporal_maximum}"
+                ORDER BY MONTH(u.date_of_birth), DAY(u.date_of_birth) ASC LIMIT {$this->temporal_maximum}", false
             );
             
             // loop through the users list

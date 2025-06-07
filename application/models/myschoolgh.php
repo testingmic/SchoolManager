@@ -578,12 +578,12 @@ class Myschoolgh extends Models {
 
 			if($print) {
 				print "SELECT {$columns} FROM {$tableName} WHERE $whereClause";
+				exit;
 			}
 
 			return $query_style === "OBJ" ? $stmt->fetchAll(PDO::FETCH_OBJ) : $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 		} catch(PDOException $e) {
-			print $e->getMessage();
 			return [];
 		}
 
