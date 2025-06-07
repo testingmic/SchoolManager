@@ -603,20 +603,32 @@ class Events extends Myschoolgh {
         // append the the parameters
         $params->userData->hasEventDelete = $params->hasEventDelete;
         $params->userData->hasEventUpdate = $params->hasEventUpdate;
-
-        $scriptsClass = load_class("scripts", "controllers");
             
         // append the usertype
         $params->userData->the_user_type = $defaultUser->user_type;
 
+        $events_list = [];
+
+        // get the events list
+        $all_events = $this->events_list($params->userData);
+
+        // loop through the events list
+        foreach($all_events as $key => $event) {
+            if($key == 'birthday_list') continue;
+            $events_list = array_merge($events_list, $event);
+        }
+
         // set the parameters for the events
         $param = (object) [
             "container" => "events_management",
-            "events_list" => $this->events_list($params->userData)->calendar_events_list ?? [],
+            "events_list" => $events_list,
             "event_Sources" => "birthdayEvents,holidayEvents,calendarEvents"
         ];
 
-        return $param->events_list ?? $param;
+        return [
+            "raw_output" => true,
+            "data" => $events_list
+        ];
 
     }
     

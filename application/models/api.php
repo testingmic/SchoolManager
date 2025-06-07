@@ -409,6 +409,10 @@ class Api {
                 if($params->remote && is_array($request) && isset($request["record"])) {
                     $result["record"] = $request["record"];
                 }
+
+                if(is_array($request) && isset($request["raw_output"])) {
+                    return ['raw_output' => $request['data']];
+                }
                 
             }
 

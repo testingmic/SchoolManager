@@ -142,6 +142,10 @@ class Handler {
             unset($data['endpoint']);
         }
         
+        if(is_array($data) && isset($data['raw_output'])) {
+            $data = $data['raw_output'];
+        }
+
         // print out the response
         echo json_encode($data);
     }

@@ -88,13 +88,13 @@ if(!empty($session->clientId)) {
                 <div class="modal-dialog modal-dialog-top">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h4 id="modalTitle2" class="modal-title">Add Event Type</h4>
+                            <h4 id="modalTitle2" class="modal-title">Add Event Category</h4>
                             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">×</span> <span class="sr-only">close</span></button>
                         </div>
                         <div id="modalBody2" class="modal-body">
                             <form>
                                 <div class="form-group">
-                                    <label>Event Type Name <span class="required">*</span></label>
+                                    <label>Event Category Name <span class="required">*</span></label>
                                     <input type="text" class="form-control" name="name">
                                     <input type="hidden" class="form-control" id="type_id" hidden name="type_id">
                                 </div>

@@ -38,7 +38,7 @@ class Scripts extends Myschoolgh {
         dragRevertDuration: 0,
         defaultView: 'month',
         eventLimit: true,
-        eventSources: [{$params->event_Sources}],
+        eventSources: [birthdayEvents,holidayEvents,calendarEvents],
         eventClick:  function(event, jsEvent, view) {
             $('#modalTitle1').html(event.title);
             $('#modalBody1').html(event.description);

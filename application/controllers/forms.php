@@ -3096,7 +3096,7 @@ class Forms extends Myschoolgh {
                             <input type="text" '.$disabled.' value="'.($data->title ?? null).'" name="title" class="form-control">
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label>Type<span class="required">*</span></label>
                             <select '.$disabled.' data-width="100%" name="type" id="type" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
@@ -3110,7 +3110,7 @@ class Forms extends Myschoolgh {
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label>Audience<span class="required">*</span></label>
                             <select '.$disabled.' data-width="100%" name="audience" id="audience" class="form-control '.(!isset($data->item_id) ? "selectpicker" : "").'">
@@ -3121,7 +3121,13 @@ class Forms extends Myschoolgh {
                             $html_content .= '</select>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Venue</label>
+                            <input '.$disabled.' type="text" value="'.($data->venue ?? null).'" name="venue" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label>Date <span class="required">*</span></label>
                             <input '.$disabled.' type="text" value="'.(isset($data->start_date) ? "{$data->start_date}:{$data->end_date}" : "").'" name="date" class="daterange form-control">
