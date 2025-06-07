@@ -427,7 +427,7 @@ class Events extends Myschoolgh {
         $do_not_encode = (bool) isset($data->do_not_encode);
 
         // show birthday information if the user type is a teacher or admin
-        if(in_array($data->the_user_type, ["admin", "accountant"])) {
+        if(in_array($data->the_user_type, ["admin", "accountant", "teacher"])) {
 
             // load user birthdays
             $birth_list = $this->pushQuery(
@@ -448,7 +448,7 @@ class Events extends Myschoolgh {
             );
             
             // loop through the users list
-            foreach($birth_list as $user) {
+            foreach($birth_list as $ik => $user) {
 
                 // configure the date to load
                 $dob = date("Y")."-".$this->append_zeros($user->the_month,2)."-".$this->append_zeros($user->the_day,2);
@@ -481,18 +481,29 @@ class Events extends Myschoolgh {
                 }
 
                 // append to the array list
-                $birthday_list[] = [
+                $birthday_list[$ik] = [
                     "title" => $user->name,
                     "link" => $this->the_user_roles[$user->user_type]["link"],
                     "start" => "{$dob} 06:00:00",
-                    "end" => "{$dob} 18:00:00",
-                    "description" => $description
+                    "end" => "{$dob} 18:00:00"
                 ];
+
+                if(!empty($data->birthday_only)) {
+                    $birthday_list[$ik]["date_of_birth"] = $dob;
+                }
+
+                if(empty($data->birthday_only)) {
+                    $birthday_list[$ik]["description"] = $description;
+                }
             }
         }
 
         // set the parameters
         $result = (object) [];
+
+        if(!empty($data->birthday_only)) {
+            return $birthday_list ?? [];
+        }
 
         // append the birthday_list 
         $result->birthday_list =  !$do_not_encode ? json_encode($birthday_list) : $birthday_list;
@@ -586,6 +597,21 @@ class Events extends Myschoolgh {
         
     }
 
+    public function birthdays($params) {
+
+        // global object
+        global $accessObject, $defaultUser;
+
+        // append the usertype
+        $params->userData->the_user_type = $defaultUser->user_type;
+        $params->userData->birthday_only = true;
+
+        // get the events list
+        $all_events = $this->events_list($params->userData);
+
+        return $all_events;
+    }
+
     /**
      * Preload Events
      * 
@@ -608,6 +634,7 @@ class Events extends Myschoolgh {
             
         // append the usertype
         $params->userData->the_user_type = $defaultUser->user_type;
+        $params->birthday_only = false;
 
         $events_list = [];
 
