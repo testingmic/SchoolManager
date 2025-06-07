@@ -124,7 +124,17 @@ class Events extends Myschoolgh {
 
         /** Audience check */
         if(!in_array($params->audience, array_keys($this->event_audience))) {
-            return ["code" => 400, "data" => "Sorry! Invalid audience was parsed."];
+            return ["code" => 400, "data" => "Sorry! Invalid audience was parsed - Accepted values are: ".implode(", ", array_keys($this->event_audience))];
+        }
+
+        if(!empty($params->holiday) && !in_array($params->holiday, ["yes", "no", "on", "not"])) {
+            return ["code" => 400, "data" => "Sorry! Invalid holiday was parsed - Accepted values are: yes, no"];
+        }
+
+        if(!empty($params->holiday)) {
+            $params->holiday = $params->holiday == "yes" ? "on" : (
+                $params->holiday == "not" ? "off" : $params->holiday
+            );
         }
         
         // confirm that a logo was parsed
@@ -155,6 +165,16 @@ class Events extends Myschoolgh {
             }
         }
 
+        // check if event exits
+        $prev = $this->pushQuery("*", "events", 
+            "client_id='{$params->clientId}' AND title='{$params->title}' 
+            AND start_date='{$start_date}' AND end_date='{$end_date}' AND state = 'Pending' AND audience = '{$params->audience}'
+            LIMIT 1"
+        );
+        if(!empty($prev)) {
+            return ["code" => 400, "data" => "Sorry! An event with the same title and date already exists."];
+        }
+
         /** Insert the record */
         $stmt = $this->db->prepare("INSERT INTO events SET 
             client_id = ?, item_id = ?, title = ?, description = ?, start_date = ?, end_date = ?,
@@ -170,8 +190,13 @@ class Events extends Myschoolgh {
         /** log the user activity */
         $this->userLogs("events", $item_id, null, "{$params->userData->name} created a new Event with title <strong>{$params->title}</strong> to be held on {$start_date}.", $params->userId);
 
+        // set the event id
+        $params->event_id = $item_id;
+
+        // return the response
         return [
             "data" => "Event was successfully created.",
+            "record" => $this->view($params),
             "additional" => [
                 "clear" => true,
                 "href" => "{$this->baseUrl}update-event/{$item_id}"
@@ -311,7 +336,11 @@ class Events extends Myschoolgh {
 
         // loop through the event types
         foreach($events_types as $type) {
-            $data[$type->item_id] = $type;
+            if(!empty($params->remote)) {
+                $data[] = $type;
+            } else {
+                $data[$type->item_id] = $type;
+            }
         }
 
         // return the list
@@ -597,6 +626,13 @@ class Events extends Myschoolgh {
         
     }
 
+    /**
+     * Get the birthdays list
+     * 
+     * @param Object    $params
+     * 
+     * @return Array
+     */
     public function birthdays($params) {
 
         // global object

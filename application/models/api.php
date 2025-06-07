@@ -36,6 +36,7 @@ class Api {
     public $current_timestamp;
     public $accessCheck;
     public $requestParams;
+    public $notAccepted = [];
     
     private $isRemote = false;
 
@@ -168,6 +169,7 @@ class Api {
 
                 // set the request parameters
                 $this->requestParams = $accepted['params'];
+                $notAccepted = [];
                 
                 // confirm that the supplied parameters are within the list of expected parameters
                 foreach($params as $key => $value) {
@@ -177,11 +179,13 @@ class Api {
                         // set the error variable to true
                         $errorFound = true;                   
                         // break the loop
-                        break;
+                        $notAccepted[] = $key;
                     }
                 }
                 // if an invalid parameter was parsed
                 if($errorFound) {
+
+                    $this->notAccepted = $notAccepted;
 
                     // log the api request
                     if(isset($params["remote"])) { $this->logRequest($this->default_params, 400); }
@@ -491,7 +495,7 @@ class Api {
         // format the data to return
         $data = [
             'code' => $code,
-            'description' => $this->outputMessage($code),
+            // 'description' => $this->outputMessage($code),
             'method' => $this->requestMethod,
             'endpoint' => $_SERVER["REQUEST_URI"]
         ];
@@ -525,7 +529,7 @@ class Api {
             201 => 'The request was successful however, no results was found.',
             205 => 'The record was successfully updated.',
             202 => 'The data was successfully inserted into the database.',
-            400 => 'An invalid parameter was parsed to the endpoint.',
+            400 => 'An invalid parameter \''.implode(", ", $this->notAccepted).'\' was parsed to the endpoint.',
             401 => 'Sorry! Please ensure all required fields are not empty.',
             404 => 'Invalid request node parsed.',
             405 => 'Invalid parameters was parsed to the endpoint.',
