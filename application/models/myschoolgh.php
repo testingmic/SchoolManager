@@ -590,6 +590,24 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * Perform a quick query
+	 * 
+	 * @param String $query
+	 * 
+	 * @return Array
+	 */
+	final function quickQuery($query) {
+		try {
+			$stmt = $this->db->prepare($query);
+			$stmt->execute();
+			return $stmt->fetchAll(PDO::FETCH_OBJ);
+		} catch(PDOException $e) {
+			return $e->getMessage();
+		}
+	}
+
+
+	/**
 	 * Get the column value
 	 * 
 	 * @return Object

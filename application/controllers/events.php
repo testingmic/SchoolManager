@@ -119,7 +119,7 @@ class Events extends Myschoolgh {
         $accessObject->clientId = $params->clientId;
         $accessObject->userPermits = $params->userData->user_permissions;
 
-        $params->hasEventDelete = $accessObject->hasAccess("delete", "events");
+        // check if the user has access to update events
         $params->hasEventUpdate = $accessObject->hasAccess("update", "events");
 
         /** Audience check */
@@ -175,6 +175,10 @@ class Events extends Myschoolgh {
             return ["code" => 400, "data" => "Sorry! An event with the same title and date already exists."];
         }
 
+        if(!empty($params->status) && !in_array($params->status, ["Pending", "Ongoing", "Held", "Cancelled"])) {
+            return ["code" => 400, "data" => "Sorry! An invalid status was parsed."];
+        }
+
         /** Insert the record */
         $stmt = $this->db->prepare("INSERT INTO events SET 
             client_id = ?, item_id = ?, title = ?, description = ?, start_date = ?, end_date = ?,
@@ -211,11 +215,24 @@ class Events extends Myschoolgh {
      */
     public function update(stdClass $params) {
         
+        if(empty($params->event_id)) {
+            return ["code" => 400, "data" => "Sorry! An invalid event id was parsed."];
+        }
+
         /** Date mechanism */
-        $date = explode(":", $params->date);
-        $start_date = $date[0];
         $item_id = $params->event_id;
-        $end_date = isset($date[1]) ? $date[1] : $date[0];
+
+        // if the date parameter was parsed
+        if(!empty($params->date)) {
+            $date = explode(":", $params->date);
+            $start_date = $date[0];
+            $end_date = isset($date[1]) ? $date[1] : $date[0];
+        }
+
+        // validate the status
+        if(!empty($params->status) && !in_array($params->status, ["Pending", "Ongoing", "Held", "Cancelled"])) {
+            return ["code" => 400, "data" => "Sorry! An invalid status was parsed."];
+        }
 
         // global variables
         global $accessObject;
@@ -223,7 +240,6 @@ class Events extends Myschoolgh {
         $accessObject->clientId = $params->clientId;
         $accessObject->userPermits = $params->userData->user_permissions;
         
-        $params->hasEventDelete = $accessObject->hasAccess("delete", "events");
         $params->hasEventUpdate = $accessObject->hasAccess("update", "events");
 
         // return access denied if not permitted
@@ -233,7 +249,7 @@ class Events extends Myschoolgh {
 
         // get the assignment information
         $prev = $this->pushQuery("title,start_date,end_date,description,audience,event_type,is_holiday,state", 
-            "events", "client_id='{$params->clientId}' AND item_id='{$item_id}' LIMIT 1");
+            "events", "client_id='{$params->clientId}' AND item_id='{$item_id}' AND status = '1' LIMIT 1");
 
         // validate the record
         if(empty($prev)) {
@@ -241,7 +257,7 @@ class Events extends Myschoolgh {
         }
 
         /** Audience check */
-        if(!in_array($params->audience, array_keys($this->event_audience))) {
+        if(!empty($params->audience) && !in_array($params->audience, array_keys($this->event_audience))) {
             return ["code" => 400, "data" => "Sorry! Invalid audience was parsed."];
         }
         
@@ -277,43 +293,78 @@ class Events extends Myschoolgh {
         $params->holiday = isset($params->holiday) ? $params->holiday : "not";
 
         /** Insert the record */
-        $stmt = $this->db->prepare("UPDATE events SET title = ?, start_date = ?, end_date = ?
-            ".(isset($params->description) ? ",description = '{$params->description}'" : "")."
-            ".(isset($params->is_mailable) ? ",is_mailable = '{$params->is_mailable}'" : "")."
-            ".(isset($params->audience) ? ",audience = '{$params->audience}'" : "")."
-            ".(isset($params->holiday) ? ",is_holiday = '{$params->holiday}'" : "")."
-            ".(isset($image) ? ",event_image = '{$image}'" : "")."
-            ".(isset($params->status) ? ",state = '{$params->status}'" : "")."
-            ".(isset($params->type) ? ",event_type = '{$params->type}'" : "")."
+        $stmt = $this->db->prepare("UPDATE events SET client_id = ?
+            ".(!empty($start_date) ? ",start_date = '{$start_date}'" : "")."
+            ".(!empty($end_date) ? ",end_date = '{$end_date}'" : "")."
+            ".(!empty($params->title) ? ",title = '{$params->title}'" : "")."
+            ".(!empty($params->description) ? ",description = '{$params->description}'" : "")."
+            ".(!empty($params->is_mailable) ? ",is_mailable = '{$params->is_mailable}'" : "")."
+            ".(!empty($params->audience) ? ",audience = '{$params->audience}'" : "")."
+            ".(!empty($params->holiday) ? ",is_holiday = '{$params->holiday}'" : "")."
+            ".(!empty($image) ? ",event_image = '{$image}'" : "")."
+            ".(!empty($params->status) ? ",state = '{$params->status}'" : "")."
+            ".(!empty($params->type) ? ",event_type = '{$params->type}'" : "")."
             WHERE client_id = ? AND item_id = ? LIMIT 1
         ");
-        $stmt->execute([
-            $params->title, $start_date, $end_date, $params->clientId, $item_id
-        ]);
+        $stmt->execute([$params->clientId, $params->clientId, $item_id]);
 
         /** log the user activity */
         $this->userLogs("events", $item_id, null, "{$params->userData->name} updated the event details.", $params->userId);
-        
-        if(isset($start_date) && ($prev[0]->start_date !== $start_date)) {
-            $this->userLogs("events", $item_id, $prev[0]->start_date, "The Start Date was changed from {$prev[0]->start_date}", $params->userId);
-        }
-
-        if(isset($end_date) && ($prev[0]->end_date !== $end_date)) {
-            $this->userLogs("events", $item_id, $prev[0]->end_date, "The End Date was changed from {$prev[0]->end_date}", $params->userId);
-        }
-
-        if(isset($params->status) && ($prev[0]->state !== $params->status)) {
-            $this->userLogs("events", $item_id, $prev[0]->state, "Event Status was changed from {$prev[0]->state}", $params->userId);
-        }
 
         /** Save the changes applied to each column of the table */
         return [
             "data" => "Event was successfully updated.",
+            "record" => $this->view($params),
             "additional" => [
                 "href" => "{$this->baseUrl}update-event/{$item_id}"
             ]
         ];
 
+    }
+
+    /**
+     * Delete an Event
+     * 
+     * @return Array
+     */
+    public function delete(stdClass $params) {
+
+        // validate the event id
+        if(empty($params->event_id)) {
+            return ["code" => 400, "data" => "Sorry! An invalid event id was parsed."];
+        }
+
+        global $accessObject;
+        $accessObject->userId = $params->userId;
+        $accessObject->clientId = $params->clientId;
+        $accessObject->userPermits = $params->userData->user_permissions;
+
+        // check if the user has access to delete events
+        $params->hasEventDelete = $accessObject->hasAccess("delete", "events");
+
+        // return access denied if not permitted
+        if(!$params->hasEventDelete) {
+            return ["code" => 401, "data" => $this->permission_denied];
+        }
+        
+        // get the assignment information
+        $prev = $this->pushQuery("title,start_date,end_date,description,audience,event_type,is_holiday,state", 
+            "events", "client_id='{$params->clientId}' AND item_id='{$params->event_id}' AND status = '1' LIMIT 1");
+
+        // validate the record
+        if(empty($prev)) {
+            return ["code" => 400, "data" => "Sorry! An invalid event id was parsed."];
+        }
+
+        /** Delete the record */
+        $this->quickQuery("UPDATE events SET status = '0' WHERE client_id = '{$params->clientId}' AND item_id = '{$params->event_id}' LIMIT 1");
+
+        return [
+            "data" => "Event was successfully deleted.",
+            "additional" => [
+                "href" => "{$this->baseUrl}events"
+            ]
+        ];
     }
 
     /**
