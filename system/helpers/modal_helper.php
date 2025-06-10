@@ -528,12 +528,12 @@ function ajax_form_button() {
 }
 
 /** Add new button */
-function add_new_item($item_id = null) {
+function add_new_item($item_id = null, $label = null) {
 	global $accessObject;
 	$buttons = "
     <div class=\"btn-group dropdown d-inline\">
 		<button type=\"button\" class=\"btn btn-outline-info btn-icon-text dropdown-toggle\" data-toggle=\"dropdown\" aria-haspopup=\"true\" aria-expanded=\"false\">
-			Add New
+			Add New {$label}
 		</button>
 		<div class=\"dropdown-menu\" style=\"width:160px\" data-function=\"add-item-module\">
 			<a href=\"#\" onclick=\"return load_quick_form('course_link_upload','{$item_id}');\" class=\"dropdown-item btn-sm\" type=\"button\">New Link</a>

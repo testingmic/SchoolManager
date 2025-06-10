@@ -379,7 +379,7 @@ if(!empty($item_id)) {
                                     '.($unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success mb-1" href="'.$baseUrl.'download/coursematerial?cs_mat='.base64_encode($data->id."_".$data->item_id."_".$data->client_id).'&dw=true"><i class="fa fa-download"></i> Download</a>' : '').'
                                     '.($hasPlanner ? '
                                         <button  onclick="return load_quick_form(\'course_unit_form\',\''.$data->id.'\');" class="btn mb-1 btn-sm btn-outline-primary" type="button">
-                                            <i class="fa fa-plus"></i> New '.($labels->unit_label ?? 'Unit').'
+                                            <i class="fa fa-plus"></i> New '.(!empty($labels->unit_label) ? $labels->unit_label : 'Unit').'
                                         </button>'
                                     : null ).'
                                 </div>
@@ -393,7 +393,7 @@ if(!empty($item_id)) {
                             <div class="d-flex justify-content-between">
                                 <div><h5>SUBJECT MATERIALS</h5></div>
                                 '.($hasPlanner ? 
-                                    add_new_item($data->item_id) 
+                                    add_new_item($data->item_id, (!empty($labels->lesson_label) ? $labels->lesson_label : 'Lesson')) 
                                 : null ).'
                             </div>
                             <div class="slim-scroll p-0 m-0">
