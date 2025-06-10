@@ -131,7 +131,7 @@ if(!empty($item_id)) {
                         <div class=\"accordion-header collapsed\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\">
                             <div class=\"d-flex justify-content-between\">
                                 <div><h4>{$key}. {$link->link_name}</h4></div>
-                                <div><i class=\"fa fa-calendar-check\"></i> {$link->date_created}</div>
+                                <div class='text-right'><i class=\"fa fa-calendar-check\"></i> {$link->date_created}</div>
                             </div>
                         </div>
                         <div class=\"accordion-body collapse\" data-row_id=\"{$link->item_id}\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
@@ -160,7 +160,7 @@ if(!empty($item_id)) {
         $lessonPlanner = confirm_url_id(2, "lesson") ? true : false;
 
         // lesson planner display
-        $lessons_list = "<div class='mb-2'>&nbsp;</div>";
+        $lessons_list = "";
         $attachments_list = "";
 
         // if the attachment parameter is not empty
@@ -207,12 +207,12 @@ if(!empty($item_id)) {
             }
 
             $lessons_list .= "
-                <div id=\"accordion\" data-row_id=\"{$plan->item_id}\">
+                <div id=\"accordion\" class='mt-2' data-row_id=\"{$plan->item_id}\">
                     <div class=\"accordion\">
                     <div class=\"accordion-header ".($plan->id == $session->thisLast_UnitId ? null : "collapsed")."\" role=\"button\" data-toggle=\"collapse\" data-target=\"#panel-body-{$key}\" ".($plan->id == $session->thisLast_UnitId ? "aria-expanded=\"true\"" : null)."\">
                         <div class=\"d-flex justify-content-between\">
                             <div><h4>{$key}. {$plan->name}</h4></div>
-                            <div><i class=\"fa fa-calendar-check\"></i> {$plan->date_created}</div>
+                            <div class='text-right'><i class=\"fa fa-calendar-check\"></i> {$plan->date_created}</div>
                         </div>
                     </div>
                     <div class=\"accordion-body ".($plan->id == $session->thisLast_UnitId ? "collapse show" : "collapse")." p-0 pt-3\" id=\"panel-body-{$key}\" data-parent=\"#accordion\">
@@ -375,8 +375,8 @@ if(!empty($item_id)) {
                         <div class="tab-pane fade '.($lessonPlanner ? "show active" : null).'" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
                             <div class="d-flex justify-content-between">
                                 <div><h5>SUBJECT LESSONS</h5></div>
-                                <div>
-                                    '.($unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success mb-1" href="'.$baseUrl.'download/coursematerial?cs_mat='.base64_encode($data->id."_".$data->item_id."_".$data->client_id).'&dw=true"><i class="fa fa-download"></i> Download</a>' : '').'
+                                <div class="text-right">
+                                    '.(!$unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success mb-1" href="'.$baseUrl.'download/coursematerial?cs_mat='.base64_encode($data->id."_".$data->item_id."_".$data->client_id).'&dw=true"><i class="fa fa-download"></i> Download</a>' : '').'
                                     '.($hasPlanner ? '
                                         <button  onclick="return load_quick_form(\'course_unit_form\',\''.$data->id.'\');" class="btn mb-1 btn-sm btn-outline-primary" type="button">
                                             <i class="fa fa-plus"></i> New '.(!empty($labels->unit_label) ? $labels->unit_label : 'Unit').'
