@@ -5,7 +5,7 @@ class Forms extends Myschoolgh {
     public $thisUser;
     public $hasit;
     public $userPrefs;
-    public $default_height = 'height-250';
+    public $default_height = 'height-200';
 
     public function __construct() {
         parent::__construct();
@@ -1361,7 +1361,7 @@ class Forms extends Myschoolgh {
         $title = isset($params->data->name) ? $params->data->name : null;
 
         // set the default height
-        $this->default_height = 'height-450';
+        $this->default_height = 'height-250';
 
         $html_content = "
         <form action='{$this->baseUrl}api/courses/".(!$title ? "add_unit" : "update_unit")."' autocomplete='Off' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
@@ -1390,13 +1390,15 @@ class Forms extends Myschoolgh {
                         {$this->textarea_editor($message, "faketext", "_ajax-form-content")}
                     </div>
                 </div>
-                <div class=\"col-md-6 text-left\">
-                    <input type=\"hidden\" name=\"course_id\" id=\"course_id\" value=\"{$course_id}\" hidden class=\"form-control\">
-                    <input type=\"hidden\" name=\"unit_id\" id=\"unit_id\" value=\"{$item_id}\" hidden class=\"form-control\">
-                    <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
-                </div>
-                <div class=\"col-md-6 text-right\">
-                    <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                <div class='col-md-12 d-flex justify-content-between'>
+                    <div class=\"text-left\">
+                        <input type=\"hidden\" name=\"course_id\" id=\"course_id\" value=\"{$course_id}\" hidden class=\"form-control\">
+                        <input type=\"hidden\" name=\"unit_id\" id=\"unit_id\" value=\"{$item_id}\" hidden class=\"form-control\">
+                        <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
+                    </div>
+                    <div class=\"text-right\">
+                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                    </div>
                 </div>
             </div>
         </div>";
@@ -1494,7 +1496,7 @@ class Forms extends Myschoolgh {
             }
 
             // set the default height
-            $this->default_height = 'height-450';
+            $this->default_height = 'height-250';
 
             $html_content = "
             <form action='{$this->baseUrl}api/courses/".(!$title ? "add_lesson" : "update_lesson")."' autocomplete='Off' method='POST' id='_ajax-data-form-content' class='_ajax-data-form'>
@@ -1530,14 +1532,17 @@ class Forms extends Myschoolgh {
                     
                     $html_content .= "<div class='col-md-12 text-center mb-4'>{$preloaded_attachments}</div>";
 
-                    $html_content .= "<div class=\"col-md-6 text-left\">
-                        <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
-                        <input type=\"hidden\" name=\"course_id\" id=\"course_id\" value=\"{$course_id}\" hidden class=\"form-control\">
-                        <input type=\"hidden\" name=\"unit_id\" id=\"unit_id\" value=\"{$unit_id}\" hidden class=\"form-control\">
-                        <input type=\"hidden\" name=\"lesson_id\" id=\"lesson_id\" value=\"{$item_id}\" hidden class=\"form-control\">
-                    </div>
-                    <div class=\"col-md-6 text-right\">
-                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                    $html_content .= "
+                    <div class='col-md-12 d-flex justify-content-between'>
+                        <div class=\"text-left\">
+                            <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
+                            <input type=\"hidden\" name=\"course_id\" id=\"course_id\" value=\"{$course_id}\" hidden class=\"form-control\">
+                            <input type=\"hidden\" name=\"unit_id\" id=\"unit_id\" value=\"{$unit_id}\" hidden class=\"form-control\">
+                            <input type=\"hidden\" name=\"lesson_id\" id=\"lesson_id\" value=\"{$item_id}\" hidden class=\"form-control\">
+                        </div>
+                        <div class=\"text-right\">
+                            <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </div>";
