@@ -227,7 +227,7 @@ if(!empty($item_id)) {
                                     <i class='fa fa-edit'></i> Edit
                                 </button>
                                 <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-primary btn-sm mb-1' type='button'>
-                                    <i class='fa fa-plus'></i> Add ".($labels->lesson_label ?? 'Lesson')."
+                                    <i class='fa fa-plus'></i> Add ".(!empty($labels->lesson_label) ? $labels->lesson_label : 'Lesson')."
                                 </button>
                                 <a href='#' onclick='return delete_record(\"{$plan->item_id}\", \"course_unit\");' class='btn btn-sm btn-outline-danger mb-1'><i class='fa fa-trash'></i> Delete</a>
                             </div>
