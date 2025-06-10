@@ -223,13 +223,13 @@ if(!empty($item_id)) {
                             </div>
                             ".($hasPlanner ? "
                             <div class='text-right'>
-                                <button onclick='return load_quick_form(\"course_unit_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-success btn-sm mb-1' type='button'>
+                                <button onclick='return load_quick_form(\"course_unit_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-success btn-sm mb-2' type='button'>
                                     <i class='fa fa-edit'></i> Edit
                                 </button>
-                                <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-primary btn-sm mb-1' type='button'>
+                                <button onclick='return load_quick_form(\"course_lesson_form\",\"{$plan->course_id}_{$plan->id}\");' class='btn btn-outline-primary btn-sm mb-2' type='button'>
                                     <i class='fa fa-plus'></i> Add ".(!empty($labels->lesson_label) ? $labels->lesson_label : 'Lesson')."
                                 </button>
-                                <a href='#' onclick='return delete_record(\"{$plan->item_id}\", \"course_unit\");' class='btn btn-sm btn-outline-danger mb-1'><i class='fa fa-trash'></i> Delete</a>
+                                <a href='#' onclick='return delete_record(\"{$plan->item_id}\", \"course_unit\");' class='btn btn-sm btn-outline-danger mb-2'><i class='fa fa-trash'></i> Delete</a>
                             </div>
                             " : null)."
                         </div>
@@ -340,10 +340,10 @@ if(!empty($item_id)) {
                         <a class="nav-link '.(!$updateItem && !$lessonPlanner ? "active" : null).'" id="classes-tab2" data-toggle="tab" href="#classes" role="tab" aria-selected="true">Classes List</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link '.($lessonPlanner ? "active" : null).'" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Subject Lesson Planner</a>
+                        <a class="nav-link '.($lessonPlanner ? "active" : null).'" id="lessons-tab2" data-toggle="tab" href="#lessons" role="tab" aria-selected="true">Lesson Planner</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="resources-tab2" data-toggle="tab" href="#resources" role="tab" aria-selected="true">Subject Materials</a>
+                        <a class="nav-link" id="resources-tab2" data-toggle="tab" href="#resources" role="tab" aria-selected="true">Materials</a>
                     </li>';
 
                     if($hasUpdate) {
@@ -391,7 +391,7 @@ if(!empty($item_id)) {
                         
                         <div class="tab-pane fade" id="resources" role="tabpanel" aria-labelledby="resources-tab2">
                             <div class="d-flex justify-content-between">
-                                <div><h5>SUBJECT MATERIALS</h5></div>
+                                <div><h5>MATERIALS</h5></div>
                                 '.($hasPlanner ? 
                                     add_new_item($data->item_id, (!empty($labels->lesson_label) ? $labels->lesson_label : 'Lesson')) 
                                 : null ).'
