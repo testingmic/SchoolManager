@@ -1219,6 +1219,10 @@ body.dark table.dataTable img {
     }
 }
 
+.form-group {
+    margin-bottom: 13px;
+}
+
 .documents .back-arrow {
     color: #000;
     padding: 10px 14px;
