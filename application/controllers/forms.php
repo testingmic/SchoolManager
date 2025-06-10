@@ -1530,7 +1530,7 @@ class Forms extends Myschoolgh {
                         <div class='form-group text-center mb-1'><div class='row'>{$this->form_attachment_placeholder($form_params)}</div></div>
                     </div>";
                     
-                    $html_content .= "<div class='col-md-12 text-center mb-4'>{$preloaded_attachments}</div>";
+                    $html_content .= "<div class='col-md-12 text-center mb-2'>{$preloaded_attachments}</div>";
 
                     $html_content .= "
                     <div class='col-md-12 d-flex justify-content-between'>
@@ -1831,7 +1831,7 @@ class Forms extends Myschoolgh {
                         <div class='form-group text-center mb-1'><div class='row'>{$this->form_attachment_placeholder($form_params)}</div></div>
                     </div>";
                     
-                    $html_content .= "<div class='col-md-12 text-center mb-4'>{$preloaded_attachments}</div>";
+                    $html_content .= "<div class='col-md-12 text-center mb-2'>{$preloaded_attachments}</div>";
 
                     $html_content .= "
                     <div class=\"col-md-6 text-left\">
@@ -3972,7 +3972,7 @@ class Forms extends Myschoolgh {
                     <div class="row">'.$this->form_attachment_placeholder($form_params).'</div>
                 </div>
             </div>  
-            <div class="col-md-12 text-center mb-4">'.$preloaded_attachments.'</div>
+            <div class="col-md-12 text-center mb-2">'.$preloaded_attachments.'</div>
 
             <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-3 pt-3">NEXT ACADEMIC CALENDAR</h5></div>
             <div class="col-lg-4 col-md-6">
@@ -5117,7 +5117,7 @@ class Forms extends Myschoolgh {
                                 <div class="row">'.$this->form_attachment_placeholder($form_params).'</div>
                             </div>
                         </div>  
-                        <div class="col-md-12 text-center mb-4">'.$preloaded_attachments.'</div>
+                        <div class="col-md-12 text-center mb-2">'.$preloaded_attachments.'</div>
                     </div>
                 </div>
 
