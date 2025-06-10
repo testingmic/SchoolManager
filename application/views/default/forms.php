@@ -1166,7 +1166,7 @@ class Forms extends Myschoolgh {
                     <div class=\"".(isset($params->class) ? $params->class : "col-md-12")." text-left\">
                         <div class='d-flex justify-content-between'>";
                         if(!isset($params->no_title)) {
-                            $html_content .= "<label>Attach a Document <small class='text-danger'>(Maximum size <strong>{$this->max_attachment_size}MB</strong>)</small></label><br>";
+                            $html_content .= "<label>Attach a Document <small class='text-danger'>(Max size <strong>{$this->max_attachment_size}MB</strong>)</small></label><br>";
                         }
                     $html_content .= "
                             <div class=\"ml-3\">
@@ -1249,7 +1249,7 @@ class Forms extends Myschoolgh {
                 <div class=\"".(isset($params->class) ? $params->class : "col-md-12")." text-left\">
                     <div class='form-group row justify-content-start'>";
                     if(!isset($params->no_title)) {
-                        $html_content .= "<label>Attach a Document <small class='text-danger'>(Maximum size <strong>{$this->max_attachment_size}MB</strong>)</small></label><br>";
+                        $html_content .= "<label>Attach a Document <small class='text-danger'>(Max size <strong>{$this->max_attachment_size}MB</strong>)</small></label><br>";
                     }
                 $html_content .= "
                         <div class=\"ml-3\">
