@@ -303,11 +303,17 @@ class Attendance extends Myschoolgh {
         // $params->weekends = true;
         $params->no_list = true;
         $params->is_finalized = true;
+
+        if(empty($params->user_type)) {
+            return ["code" => 400, "data" => "Sorry! The user_type parameter is required."];
+        }
+
         $the_user_type = $params->user_type;
         $isDownloadable = (bool) isset($params->download);
 
         // set the month and year
         $start_date = !empty($params->start_date) ? $params->start_date : date("Y-m-01");
+        $params->end_date = !empty($params->end_date) ? $params->end_date : date("Y-m-t");
 
         // confirm if its a valid date
         if(!$this->validDate($start_date)) {
@@ -557,7 +563,7 @@ class Attendance extends Myschoolgh {
         return [
             "data" => [
                 "array_list" => $array_list,
-                "table_content" => $table_content
+                "table_content" => empty($params->remote) ? $table_content : ""
             ]
         ];
     }
