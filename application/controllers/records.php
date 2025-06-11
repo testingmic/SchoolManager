@@ -98,9 +98,9 @@ class Records extends Myschoolgh {
             ],
             "incident" => [
                 "table" => "incidents",
-                "update" => "deleted='0'",
+                "update" => "deleted='1'",
                 "where" => "item_id='{$record_id}'",
-                "query" => "SELECT id FROM incidents WHERE item_id='{$record_id}' {$whereClause} AND status ='1' LIMIT 1"
+                "query" => "SELECT id FROM incidents WHERE item_id='{$record_id}' {$whereClause} AND deleted = '0' LIMIT 1"
             ],
             "class_room" => [
                 "table" => "classes_rooms",

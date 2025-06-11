@@ -104,6 +104,25 @@ class Incidents extends Myschoolgh {
     }
 
     /**
+     * View incident record
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function view(stdClass $params) {
+        
+        if(empty($params->incident_id)) {
+            return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
+        }
+
+        $params->full_details = true;
+        $record = $this->list($params);
+
+        return $record["data"][0] ?? [];
+    }
+
+    /**
      * Update existing incident record
      * 
      * @param stdClass $params
@@ -113,6 +132,11 @@ class Incidents extends Myschoolgh {
     public function add(stdClass $params) {
 
         try {
+
+            // confirm that the request method is POST
+            if($params->requestMethod !== 'POST') {
+                return ["code" => 400, "data" => "Sorry! An invalid request method was supplied."];
+            }
 
             // generate a unique id
             $item_id = random_string("alnum", RANDOM_STRING);
@@ -126,17 +150,27 @@ class Incidents extends Myschoolgh {
                 $user_role = $user[0]->user_type;
             }
 
+            foreach(["subject", "incident_date", "user_id", "description"] as $each) {
+                if(empty($params->{$each})) {
+                    return ["code" => 400, "data" => "Sorry! The {$each} parameter is required."];
+                }
+            }
+
+            // set the reported by to be the user id if not set
+            $params->reported_by = empty($params->reported_by) ? $params->userId : $params->reported_by;
+            $params->assigned_to = empty($params->assigned_to) ? $params->userId : $params->assigned_to;
+
             // execute the statement
             $stmt = $this->db->prepare("
                 INSERT INTO incidents SET client_id = ?, created_by = ?, item_id = '{$item_id}'
-                ".(isset($params->subject) ? ", subject = '{$params->subject}'" : null)."
-                ".(isset($params->incident_date) ? ", incident_date = '{$params->incident_date}'" : null)."
-                ".(isset($params->assigned_to) ? ", assigned_to = '{$params->assigned_to}'" : null)."
-                ".(isset($params->reported_by) ? ", reported_by = '{$params->reported_by}'" : null)."
-                ".(isset($params->location) ? ", location = '{$params->location}'" : null)."
-                ".(isset($params->user_id) ? ", user_id = '{$params->user_id}'" : null)."
-                ".(isset($user_role) ? ", user_role = '{$user_role}'" : null)."
-                ".(isset($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
+                ".(!empty($params->subject) ? ", subject = '{$params->subject}'" : null)."
+                ".(!empty($params->incident_date) ? ", incident_date = '{$params->incident_date}'" : null)."
+                ".(!empty($params->assigned_to) ? ", assigned_to = '{$params->assigned_to}'" : null)."
+                ".(!empty($params->reported_by) ? ", reported_by = '{$params->reported_by}'" : null)."
+                ".(!empty($params->location) ? ", location = '{$params->location}'" : null)."
+                ".(!empty($params->user_id) ? ", user_id = '{$params->user_id}'" : null)."
+                ".(!empty($user_role) ? ", user_role = '{$user_role}'" : null)."
+                ".(!empty($params->description) ? ", description = '".addslashes($params->description)."'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId]);
 
@@ -160,6 +194,11 @@ class Incidents extends Myschoolgh {
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Incident successfully logged.", "refresh" => 2000];
 			
+            if(!empty($params->remote)) {
+                $params->incident_id = $item_id;
+                $return["record"] = $this->view($params);
+            }
+
 			# append to the response
 			$return["additional"] = [
                 "clear" => true, 
@@ -186,11 +225,15 @@ class Incidents extends Myschoolgh {
 
         try {
 
+            if(empty($params->incident_id)) {
+                return ["code" => 400, "data" => "Sorry! An invalid id was supplied."];
+            }
+
             // old record
             $prevData = $this->pushQuery(
                 "a.*, (SELECT b.description FROM files_attachment b WHERE b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment",
                 "incidents a", 
-                "a.item_id = '{$params->incident_id}' AND a.user_id = '{$params->user_id}' AND a.client_id = '{$params->clientId}' AND a.deleted = '0' LIMIT 1"
+                "a.item_id = '{$params->incident_id}' ".(!empty($params->user_id) ? "AND a.user_id = '{$params->user_id}'" : null)." AND a.client_id = '{$params->clientId}' AND a.deleted = '0' LIMIT 1"
             );
 
             // if empty then return
@@ -241,27 +284,15 @@ class Incidents extends Myschoolgh {
             // log the user activity
             $this->userLogs("incidents", $params->incident_id, null, "{$params->userData->name} updated the incident record.", $params->userId);
 
-            if(isset($params->subject) && ($prevData[0]->subject !== $params->subject)) {
-                $this->userLogs("incidents", $params->incident_id, $prevData[0]->subject, "Incident subject was changed from {$prevData[0]->subject}", $params->userId);
-            }
-
-            if(isset($params->incident_date) && ($prevData[0]->incident_date !== $params->incident_date)) {
-                $this->userLogs("incidents", $params->incident_id, $prevData[0]->incident_date, "Incident date was changed from {$prevData[0]->incident_date}", $params->userId);
-            }
-
-            if(isset($params->location) && ($prevData[0]->location !== $params->location)) {
-                $this->userLogs("incidents", $params->incident_id, $prevData[0]->location, "Incident location was changed from {$prevData[0]->location}", $params->userId);
-            }
-
-            if(isset($params->description) && ($prevData[0]->description !== $params->description)) {
-                $this->userLogs("incidents", $params->incident_id, $prevData[0]->description, "Incident description was changed from {$prevData[0]->description}", $params->userId);
-            }
-
             # set the output to return when successful
 			$return = ["code" => 200, "data" => "Incident successfully updated.", "refresh" => 2000];
 			
 			# append to the response
 			$return["additional"] = ["clear" => true, "href" => $this->session->user_current_url];
+
+            if(!empty($params->remote)) {
+                $return["record"] = $this->view($params);
+            }
 
 			// return the output
             return $return;
@@ -285,7 +316,7 @@ class Incidents extends Myschoolgh {
         $prevData = $this->pushQuery(
             "a.*",
             "incidents a", 
-            "a.item_id = '{$params->incident_id}' AND a.user_id = '{$params->user_id}' AND a.client_id = '{$params->clientId}' AND a.deleted = '0' LIMIT 1"
+            "a.item_id = '{$params->incident_id}' ".(!empty($params->user_id) ? "AND a.user_id = '{$params->user_id}'" : null)." AND a.client_id = '{$params->clientId}' AND a.deleted = '0' LIMIT 1"
         );
 
         // if empty then return
@@ -301,10 +332,10 @@ class Incidents extends Myschoolgh {
             // execute the statement
             $stmt = $this->db->prepare("
                 INSERT INTO incidents SET client_id = ?, created_by = ?, incident_type = ?, item_id = ?
-                ".(isset($params->incident_id) ? ", incident_id = '{$params->incident_id}'" : null)."
-                ".(isset($params->status) ? ", status = '{$params->status}'" : null)."
-                ".(isset($params->user_id) ? ", user_id = '{$params->user_id}'" : null)."
-                ".(isset($params->comment) ? ", description = '".addslashes(nl2br($params->comment))."'" : null)."
+                ".(!empty($params->incident_id) ? ", incident_id = '{$params->incident_id}'" : null)."
+                ".(!empty($params->status) ? ", status = '{$params->status}'" : null)."
+                ".(!empty($params->user_id) ? ", user_id = '{$params->user_id}'" : null)."
+                ".(!empty($params->comment) ? ", description = '".addslashes(nl2br($params->comment))."'" : null)."
             ");
             $stmt->execute([$params->clientId, $params->userId, "followup", $item_id]);
 
@@ -315,6 +346,10 @@ class Incidents extends Myschoolgh {
 			$return = ["code" => 200, "data" => "Incident followup comment added successfully."];
             $q_param = (object) ["incident_type" => "followup", "incident_id" => $item_id, "limit" => 1, "clientId" => $params->clientId];
 			$return["additional"] = ["data" => $this->list($q_param)["data"][0]];
+
+            if(!empty($params->remote)) {
+                $return["record"] = $this->view($params);
+            }
 
             return $return;
 
