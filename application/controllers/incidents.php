@@ -59,7 +59,7 @@ class Incidents extends Myschoolgh {
                 }
 
                 // if attachment variable was parsed
-                $result->attachment = json_decode($result->attachment);
+                $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : null;
 
                 // clean the description attached to the list
                 $result->description = htmlspecialchars_decode($result->description);

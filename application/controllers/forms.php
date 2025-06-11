@@ -1728,7 +1728,16 @@ class Forms extends Myschoolgh {
                         <div class='col-md-12'>{$attachments}</div>" : ""
                     )."
                     ".(!empty($followups) ? "
-                        <div class='col-md-12 border-bottom mb-3 mt-4'><h6>FOLLOWUPS</h6></div>
+                        <div class='col-md-12 border-bottom mb-3 mt-2'>
+                            <div class='d-flex justify-content-between pb-1'>
+                                <div>
+                                    <h6>FOLLOWUPS</h6>
+                                </div>
+                                <div>
+                                    <span class='btn btn-outline-secondary' data-dismiss='modal'>Close Modal</span>
+                                </div>
+                            </div>
+                        </div>
                         <div class='col-md-12'>{$followups}</div>" : ""
                     )."
                 </div>";
@@ -1941,7 +1950,7 @@ class Forms extends Myschoolgh {
                 </div>
             </div>";
         
-        $close = '<div class="col-md-12 mt-4 border-top pt-4 mb-3 text-center"><span class="btn btn-outline-secondary" data-dismiss="modal">Close Modal</span></div>';
+        $close = '';
 
         return !$list_only ? $form_content.$html_content : $html_content.$close;
     }

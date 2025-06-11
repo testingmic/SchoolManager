@@ -61,7 +61,7 @@ table.dataTable.table-sm>thead>tr>th {
 
 .drawer-content {
     margin-top: 10px;
-    max-height: 700px;
+    max-height: 630px;
     overflow-y: auto;
     padding: 20px;
 }
