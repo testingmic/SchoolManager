@@ -374,7 +374,7 @@ if(!empty($item_id)) {
 
                         <div class="tab-pane fade '.($lessonPlanner ? "show active" : null).'" id="lessons" role="tabpanel" aria-labelledby="lessons-tab2">
                             <div class="d-flex justify-content-between">
-                                <div><h5>SUBJECT LESSONS</h5></div>
+                                <div><h5>LESSON PLANNER</h5></div>
                                 <div class="text-right">
                                     '.(!$unit_lessons ? '<a target="_blank" class="btn btn-sm btn-outline-success mb-1" href="'.$baseUrl.'download/coursematerial?cs_mat='.base64_encode($data->id."_".$data->item_id."_".$data->client_id).'&dw=true"><i class="fa fa-download"></i> Download</a>' : '').'
                                     '.($hasPlanner ? '

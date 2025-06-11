@@ -251,20 +251,25 @@ class Courses extends Myschoolgh {
         try {
             
             $query = "";
-            $type = (isset($params->type) && !empty($params->type)) ? $params->type : (!empty($type) ? $type : "unit");
-            $query .= isset($params->academic_year) && !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
-            $query .= isset($params->academic_term) && !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
-            $query .= (isset($params->unit_id) && !empty($params->unit_id)) ? " AND unit_id = '{$params->unit_id}'" : (!empty($unit_id) ? " AND unit_id = '{$unit_id}'" : null);
-            $query .= (isset($params->course_id) && !empty($params->course_id)) ? " AND course_id='{$params->course_id}'" : "";
+            $type = !empty($params->type) ? $params->type : (!empty($type) ? $type : "unit");
+            $query .= !empty($params->academic_year) ? " AND a.academic_year='{$params->academic_year}'" : ($this->academic_year ? " AND a.academic_year='{$this->academic_year}'" : null);
+            $query .= !empty($params->academic_term) ? " AND a.academic_term='{$params->academic_term}'" : ($this->academic_term ? " AND a.academic_term='{$this->academic_term}'" : null);
 
-            $isMinified = (bool) isset($params->minified);
+            if(!empty($unit_id)) {
+                $query .= " AND (unit_id = '{$unit_id}' OR a.item_id = '{$unit_id}')";
+            } else {
+                $query .= !empty($params->unit_id) ? " AND (unit_id = '{$params->unit_id}' OR a.item_id = '{$params->unit_id}')" : "";
+            }
+            $query .= !empty($params->course_id) ? " AND course_id='{$params->course_id}'" : "";
+
+            $isMinified = (bool) !empty($params->minified);
 
             $stmt = $this->db->prepare("
                 SELECT a.*,
                     (SELECT b.description FROM files_attachment b WHERE b.resource='courses_plan' AND b.record_id = a.item_id ORDER BY b.id DESC LIMIT 1) AS attachment,
                     (SELECT CONCAT(b.item_id,'|',b.name,'|',COALESCE(b.phone_number,'NULL'),'|',COALESCE(b.email,'NULL'),'|',b.image,'|',b.last_seen,'|',b.online,'|',b.user_type) FROM users b WHERE b.item_id = a.created_by LIMIT 1) AS created_by_info
                 FROM courses_plan a
-                WHERE client_id=? AND plan_type = ? AND a.status = ? {$query} ORDER BY a.id LIMIT {$this->global_limit}
+                WHERE client_id=? AND plan_type = ? AND a.status = ? {$query} ORDER BY a.id DESC LIMIT {$this->global_limit}
             ");
             $stmt->execute([$params->clientId, $type, 1]);
 
@@ -306,13 +311,72 @@ class Courses extends Myschoolgh {
                 $data[] = $result;
             }
 
-            return $data;
+            return !empty($params->single_item) && empty($unit_id) ? ($data[0] ?? []) : $data;
 
 
         } catch(PDOException $e) {
             return $this->unexpected_error;
         }
         
+    }
+
+    /**
+     * List Units
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function list_units(stdClass $params) {
+        return $this->course_unit_lessons_list($params, "unit");
+    }
+
+    /**
+     * List Lessons
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function list_lessons(stdClass $params) {
+        return $this->course_unit_lessons_list($params, "lesson");
+    }
+
+    /**
+     * List Units
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function view_unit(stdClass $params) {
+
+        if(empty($params->unit_id)) {
+            return ["code" => 400, "data" => "Sorry! An invalid unit id was supplied."];
+        }
+
+        $params->single_item = true;
+        $params->minified = false;
+        return $this->course_unit_lessons_list($params, "unit");
+    }
+
+    /**
+     * List Lessons
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function view_lesson(stdClass $params) {
+
+        if(empty($params->lesson_id)) {
+            return ["code" => 400, "data" => "Sorry! An invalid lesson id was supplied."];
+        }
+
+        $params->single_item = true;
+        $params->minified = false;
+        $params->unit_id = $params->lesson_id;
+        return $this->course_unit_lessons_list($params, "lesson");
     }
 
     /**
@@ -510,6 +574,9 @@ class Courses extends Myschoolgh {
             if(!empty($params->end_date) && !isvalid_date($params->end_date)) {
                 return ["code" => 400, "data" => "Sorry! The end date is invalid."];
             }
+
+            // set the unit id
+            $params->unit_id = empty($params->unit_id) ? random_string("alnum", RANDOM_STRING) : $params->unit_id;
 
             // execute the statement
             $stmt = $this->db->prepare("

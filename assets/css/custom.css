@@ -1243,6 +1243,10 @@ body.dark table.dataTable img {
     border: dashed 1px #ccc;
 }
 
+.accordion .accordion-header {
+    background-color: #c5f2f6;
+}
+
 .upload-overlay-cover {
     display: flex;
     align-items: center;

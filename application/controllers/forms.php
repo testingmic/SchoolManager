@@ -1391,13 +1391,13 @@ class Forms extends Myschoolgh {
                     </div>
                 </div>
                 <div class='col-md-12 d-flex justify-content-between'>
+                    <div class=\"text-right\">
+                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                    </div>
                     <div class=\"text-left\">
                         <input type=\"hidden\" name=\"course_id\" id=\"course_id\" value=\"{$course_id}\" hidden class=\"form-control\">
                         <input type=\"hidden\" name=\"unit_id\" id=\"unit_id\" value=\"{$item_id}\" hidden class=\"form-control\">
                         <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
-                    </div>
-                    <div class=\"text-right\">
-                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
                     </div>
                 </div>
             </div>
@@ -1534,14 +1534,14 @@ class Forms extends Myschoolgh {
 
                     $html_content .= "
                     <div class='col-md-12 d-flex justify-content-between'>
+                        <div class=\"text-right\">
+                            <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                        </div>
                         <div class=\"text-left\">
                             <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
                             <input type=\"hidden\" name=\"course_id\" id=\"course_id\" value=\"{$course_id}\" hidden class=\"form-control\">
                             <input type=\"hidden\" name=\"unit_id\" id=\"unit_id\" value=\"{$unit_id}\" hidden class=\"form-control\">
                             <input type=\"hidden\" name=\"lesson_id\" id=\"lesson_id\" value=\"{$item_id}\" hidden class=\"form-control\">
-                        </div>
-                        <div class=\"text-right\">
-                            <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
                         </div>
                     </div>
                 </div>

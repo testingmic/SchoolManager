@@ -124,6 +124,13 @@ class Api {
     */
     public function keysChecker(array $params) {
         
+        // there are some endpoints that are not yet updated to the new structure
+        // this is to ensure that the user can still use the old endpoints
+        $replaceInnerUrl = [
+            'subjects' => 'courses'
+        ];
+        $this->inner_url = $replaceInnerUrl[$this->inner_url] ?? $this->inner_url;
+
         /**
          * check if there is a valid request method in the endpoints
          * 
