@@ -1843,13 +1843,17 @@ class Forms extends Myschoolgh {
                     $html_content .= "<div class='col-md-12 text-center mb-2'>{$preloaded_attachments}</div>";
 
                     $html_content .= "
-                    <div class=\"col-md-6 text-left\">
-                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
-                    </div>
-                    <div class=\"col-md-6 text-right\">
-                        <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
-                        <input type=\"hidden\" name=\"user_id\" id=\"user_id\" value=\"{$user_id}\" hidden class=\"form-control\">
-                        <input type=\"hidden\" name=\"incident_id\" id=\"incident_id\" value=\"{$item_id}\" hidden>
+                    <div class='col-lg-12'>
+                        <div class='d-flex justify-content-between'>
+                            <div>
+                                <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Cancel</button>
+                            </div>
+                            <div>
+                                <button class=\"btn btn-outline-success btn-sm\" data-function=\"save\" type=\"button-submit\">Save Record</button>
+                                <input type=\"hidden\" name=\"user_id\" id=\"user_id\" value=\"{$user_id}\" hidden class=\"form-control\">
+                                <input type=\"hidden\" name=\"incident_id\" id=\"incident_id\" value=\"{$item_id}\" hidden>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>";
@@ -1942,10 +1946,10 @@ class Forms extends Myschoolgh {
                     <label></label>
                     <textarea class='form-control' placeholder='Add a followup message...' name='incident_followup' id='incident_followup'></textarea>
                 </div>
-                <div class='row'>
-                    <div class='col-lg-6'><button data-resource_id='{$item_id}' onclick='return post_incident_followup(\"{$user_id}\",\"{$item_id}\")' id='post_incident_followup' class='btn btn-outline-success'>Share Comment</button></div>
-                    <div class=\"col-md-6 text-right\">
-                        <button type=\"reset\" class=\"btn btn-outline-danger btn-sm\" class=\"close\" data-dismiss=\"modal\">Close</button>
+                <div class='d-flex justify-content-between'>
+                    <div><button data-resource_id='{$item_id}' onclick='return post_incident_followup(\"{$user_id}\",\"{$item_id}\")' id='post_incident_followup' class='btn btn-outline-success'>Share Comment</button></div>
+                    <div>
+                        <button type=\"reset\" class=\"btn btn-outline-danger\" class=\"close\" data-dismiss=\"modal\">Close</button>
                     </div>
                 </div>
             </div>";
