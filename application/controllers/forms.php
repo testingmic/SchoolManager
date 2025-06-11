@@ -1895,7 +1895,7 @@ class Forms extends Myschoolgh {
         
         /** Initializing */
         $prev_date = null;
-        $html_content = "<div id='incident_log_followup_list'>";
+        $html_content = "<div id='incident_log_followup_list' class='trix-slim-scroll drawer-content'>";
         $followups_list = "";
 
         /** Load the followups for the incident */
@@ -1928,10 +1928,10 @@ class Forms extends Myschoolgh {
         $html_content .= "</div>";
 
         $form_content = "
-            <div class='mb-4'>
+            <div class='mb-4 stick_to_top p-3 bg-blue-grey'>
                 <div class='form-group'>
                     <label></label>
-                    <textarea class='form-control' name='incident_followup' id='incident_followup'></textarea>
+                    <textarea class='form-control' placeholder='Add a followup message...' name='incident_followup' id='incident_followup'></textarea>
                 </div>
                 <div class='row'>
                     <div class='col-lg-6'><button data-resource_id='{$item_id}' onclick='return post_incident_followup(\"{$user_id}\",\"{$item_id}\")' id='post_incident_followup' class='btn btn-outline-success'>Share Comment</button></div>

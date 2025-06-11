@@ -59,6 +59,13 @@ table.dataTable.table-sm>thead>tr>th {
     background-color: #fff;
 }
 
+.drawer-content {
+    margin-top: 10px;
+    max-height: 700px;
+    overflow-y: auto;
+    padding: 20px;
+}
+
 .dark-sidebar .slim-scroll::-webkit-scrollbar-track {
     border-radius: 0px;
     background-color: #0c1427;
