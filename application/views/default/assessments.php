@@ -19,7 +19,7 @@ jump_to_main($baseUrl);
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
 $response->scripts = [];
 $filter = (object) array_map("xss_clean", $_POST);
-$response->title = "School Based Assessment List ";
+$response->title = "Assessments List";
 
 // end query if the user has no permissions
 if(!in_array("class_assessment", $clientFeatures)) {
@@ -92,10 +92,10 @@ $response->array_stream["assessment_array"] = $assessment_array;
 $response->html = '
     <section class="section">
         <div class="section-header byPass_Null_Value">
-            <h1><i class="fa fa-book-reader"></i> School Based Assessment List</h1>
+            <h1><i class="fa fa-book-reader"></i> Assessments List</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item">School Based Assessment List</div>
+                <div class="breadcrumb-item">Assessments List</div>
             </div>
         </div>';
         // if the term has ended
