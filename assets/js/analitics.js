@@ -580,8 +580,6 @@ var attendanceReport = (_attendance) => {
                 _attendance_options
             );
 
-            console.log(_attendance_options);
-
             _attendance_chart.render();
 
         }
@@ -641,6 +639,11 @@ var attendanceReport = (_attendance) => {
                 return false;
             }
         }
+
+        let present = ["Present", "present"];
+        let absent = ["Absent", "absent"];
+        let holiday = ["Holiday", "holiday"];
+
         $.each(_attendance.attendance.days_list, function(day, status) {
             comments = _attendance.attendance.days_comments[day].length ? _attendance.attendance.days_comments[day] : "<em class='font-12'>No comments</em>";
             attendance_chart_list += `
@@ -648,8 +651,12 @@ var attendanceReport = (_attendance) => {
                 <div class='card mb-3'>
                     <div class='card-header pl-2 pr-2 pb-0'><h5 class='pb-0 mb-0'>${day}</h5></div>
                     <div class='card-body p-2'>
-                        <i class="fa ${status === "present" ? "text-success fa-check" : (status === "absent" ? "text-danger fa-times" : "text-warning fa-adjust")}"></i> 
-                        <strong class="${status === "present" ? "text-success" : (status === "absent" ? "text-danger" : "text-warning")}">${status.toUpperCase()}</strong>
+                        <i class="fa ${present.includes(status) ? "text-success fa-check" : (absent.includes(status) ? "text-danger fa-times" : (
+                           holiday.includes(status) ? "text-info fa-calendar-times" : "text-warning fa-adjust"
+                        ))}"></i> 
+                        <strong class="${present.includes(status) ? "text-success" : (absent.includes(status) ? "text-danger" : (
+                           holiday.includes(status) ? "text-info" : "text-warning"
+                        ))}">${status.toUpperCase()}</strong>
                     </div>
                     <div class='border-top p-2 card-footer'>
                         ${comments}

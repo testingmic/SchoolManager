@@ -213,7 +213,7 @@ var load_attendance_log = () => {
     } else {
         $(`a[id="download_link"]`).addClass("hidden");
         $.pageoverlay.show();
-        $.get(`${baseUrl}api/attendance/attendance_report`, { class_id, start_date, end_date, user_type }).then((response) => {
+        $.get(`${baseUrl}api/attendance/report`, { class_id, start_date, end_date, user_type }).then((response) => {
             if (response.code == 200) {
                 let attendance_list = response.data.result;
                 $(`div[class="attendance_log_record"]`).html(attendance_list.table_content);

@@ -21,24 +21,31 @@ class Attendance extends Myschoolgh {
             return ["code" => 400, "data" => "Sorry! The attendance parameter must be an array with the user id as the key."];
         }
 
+        // loop through the parameters and confirm they are set
+        foreach(['date', 'user_type'] as $key) {
+            if(empty($params->{$key}) && empty($params->finalize)) {
+                return ["code" => 400, "data" => "Sorry! The {$key} parameter is required."];
+            }
+        }
+
         // confirm valid date
-        if(!$this->validDate($params->date)) {
+        if(!empty($params->date) && !$this->validDate($params->date)) {
             return ["code" => 400, "data" => "Sorry! A valid date is required."];
         }
 
         // confirm if the user_type was parsed if the finalize parameter was not set
-        if(!isset($params->finalize) && !isset($params->user_type)) {
+        if(empty($params->finalize) && empty($params->user_type)) {
             return ["code" => 400, "data" => "Sorry! Please the user_type is required."];
         }
 
         // unset the user id if the user type is not teacher
-        if(isset($params->user_type) && ($params->user_type !== "student")) {
+        if(empty($params->user_type) && ($params->user_type !== "student")) {
             // set the class id to null
             $params->class_id = null;
         }
 
         // validate the class id if parsed
-        if(isset($params->class_id) && !empty($params->class_id)) {
+        if(!empty($params->class_id)) {
 
             // run the query for the class details
             $classData = $this->pushQuery("id, name", "classes", "id='{$params->class_id}' AND client_id='{$params->clientId}' AND status='1' LIMIT 1");
@@ -65,6 +72,18 @@ class Attendance extends Myschoolgh {
         // init
         $user_data = [];
         $present_list = [];
+
+        // if the user type was parsed
+        if(!empty($params->user_type)) {
+            if(!in_array($params->user_type, ["student", "staff"])) {
+                return ["code" => 400, "data" => "Sorry! An invalid user type was supplied. Please use the following: student, staff"];
+            }
+
+            // confirm if the class id is set for students
+            if($params->user_type == "student" && empty($params->class_id)) {
+                return ["code" => 400, "data" => "Sorry! The class_id parameter is required for students."];
+            }
+        }
 
         // if the attendance parameter was parsed
         if(isset($params->attendance)) {
@@ -102,9 +121,9 @@ class Attendance extends Myschoolgh {
         }
 
         // confirm existing record
-        $check = $this->pushQuery("users_list, users_data, finalize", 
+        $check = $this->pushQuery("users_list, users_data, finalize, id, date_created, date_finalized", 
             "users_attendance_log", 
-            "log_date='{$params->date}' AND client_id = '{$params->clientId}' {$the_query} ".(isset($params->class_id) ? " AND class_id='{$params->class_id}'" : "")." LIMIT 1"
+            "log_date='{$params->date}' AND client_id = '{$params->clientId}' {$the_query} ".(!empty($params->class_id) ? " AND class_id='{$params->class_id}'" : "")." LIMIT 1"
         );
 
         // Return error message if finalize was parsed and yet no results was found
@@ -126,23 +145,41 @@ class Attendance extends Myschoolgh {
                 $params->userId, $params->academic_year, $params->academic_term, $params->clientId
             ]);
 
+            $last_id = $this->lastRowId("users_attendance_log");
+
             // set the success message
             $data = "Attendance was sucessfully logged for {$params->date}.";
 
             //log the user activity
             if(isset($classData)) {
                 // update the for the class
-                $this->userLogs("attendance_log", $this->lastRowId("users_attendance_log"), null, "{$params->userData->name} logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}.", $params->userId);
+                $this->userLogs("attendance_log", $last_id, null, "{$params->userData->name} logged attendance for <strong>{$classData[0]->name}</strong> on {$params->date}.", $params->userId);
             } else {
                 // update the for user_type
-                $this->userLogs("attendance_log", $this->lastRowId("users_attendance_log"), null, "{$params->userData->name} logged attendance for <strong>{$params->user_type}</strong> on {$params->date}.", $params->userId);
+                $this->userLogs("attendance_log", $last_id, null, "{$params->userData->name} logged attendance for <strong>{$params->user_type}</strong> on {$params->date}.", $params->userId);
             }
+
+            $date_created = date("Y-m-d h:i:s");
         } else {
 
             // confirm that the user has not finalize the attendance log
-            if($check[0]->finalize === 1) {
-                return ["code" => 400, "data" => "Sorry! The attendance log for the specified date has already been finalized and cannot be updated."];
+            if((int)$check[0]->finalize === 1) {
+
+                // decode the json data
+                $check[0]->users_list = json_decode($check[0]->users_list, true);
+                $check[0]->users_data = json_decode($check[0]->users_data, true);
+
+                return [
+                    "code" => 200, 
+                    "data" => "Sorry! The attendance log for the specified date has already been finalized and cannot be updated.",
+                    "record" => $check[0]
+                ];
             }
+
+            // set the last id
+            $last_id = $check[0]->id;
+
+            $date_created = $check[0]->date_created;
 
             // prepare and execute the statement
             $stmt = $this->db->prepare("
@@ -181,7 +218,15 @@ class Attendance extends Myschoolgh {
             }
         }
 
-        return ["data" => $data];
+        return [
+            "data" => $data, 
+            "record" => [
+                "attendance_id" => $last_id,
+                "users_data" => $user_data,
+                "users_list" => $present_list,
+                "date_created" => $date_created,
+            ]
+        ];
 
     }
 
@@ -252,7 +297,7 @@ class Attendance extends Myschoolgh {
      * 
      * @return String
      */
-    public function attendance_report(stdClass $params) {
+    public function report(stdClass $params) {
 
         // set additional parameters
         // $params->weekends = true;
@@ -1045,9 +1090,13 @@ class Attendance extends Myschoolgh {
                             // confirm if present
                             $is_present = (bool) in_array($params->the_current_user_id, $present);
 
+                            if(!$is_present) {
+                                $getItem = $_user_data[$params->the_current_user_id]["state"] ?? false;
+                            }
+
                             // set the label for the day
-                            $the_state = $is_present ? "present" : "absent";
-                            $users_count["days_list"][$the_day] = $the_state;
+                            $the_state = $is_present ? "present" : (!empty($getItem) ? $getItem : "absent");
+                            $users_count["days_list"][$the_day] = ucwords($the_state);
                             $users_count["days_comments"][$the_day] = $_user_data[$params->the_current_user_id]["comments"] ?? "";
                             $users_count["days_log_time"][$the_day] = $today->date_finalized;
 

@@ -288,7 +288,7 @@ if(!$isSupport) {
         $orientation = "landscape";
         $file_name = "Attendance_Log.pdf";
         $attendanceObject = load_class("attendance", "controllers", $getObject);
-        $pages_content .= $attendanceObject->attendance_report($getObject)["data"]["table_content"];
+        $pages_content .= $attendanceObject->report($getObject)["data"]["table_content"];
 
     }
 
