@@ -341,13 +341,16 @@ class Assignments extends Myschoolgh {
                 $each->state = "Exported";
             }
 
+            // set the badge color
+            $lableBadge = $this->assessment_color_group[$each->assignment_type] ?? "warning";
+
             $assignments_list .= "<tr data-row_id=\"{$each->id}\">";
             $assignments_list .= "<td class='text-center'>".($key+1)."</td>";
             $assignments_list .= "<td>
                 <a href='#' onclick='return load(\"assessment/{$each->item_id}\");'>
                     {$each->assignment_title}
                 </a> 
-                <strong class='badge p-1 pr-2 pl-2 badge-{$this->assessment_color_group[$each->assignment_type]}'>{$each->assignment_type}</strong>
+                <strong class='badge p-1 pr-2 pl-2 badge-{$lableBadge}'>{$each->assignment_type}</strong>
                 ".($hasUpdate ? 
                     "<br>Class: <strong>{$each->class_name}</strong>
                     <br>Subject: <strong>{$each->course_name}</strong>" : 
