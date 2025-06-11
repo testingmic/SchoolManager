@@ -424,7 +424,7 @@ if(!empty($item_id)) {
         $updateItem = confirm_url_id(2, "update") ? true : false;
 
         // set the url
-        $url_link = $SITEURL[1] ?? null;
+        $url_link = $SITEURL[2] ?? null;
 
         // append the html content
         $response->html = '
@@ -495,13 +495,13 @@ if(!empty($item_id)) {
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link '.($url_link === "_grading" ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
+                                <a class="nav-link '.($url_link !== "_grading" ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
                                     Instructions
                                 </a>
                             </li>
                             ' : '
                             <li class="nav-item">
-                                <a class="nav-link '.(!$updateItem ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
+                                <a class="nav-link '.(!$updateItem && $url_link !== "_grading" ? "active" : null).'" id="details-tab2" data-toggle="tab" href="#details" role="tab" aria-selected="true">
                                     Instructions
                                 </a>
                             </li>
@@ -509,7 +509,7 @@ if(!empty($item_id)) {
                         ) : null
                     ).'
                     <li class="nav-item">
-                        <a class="nav-link '.(!$isAuto ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
+                        <a class="nav-link '.(!$isAuto || $url_link === "_grading" ? "active" : null).'" id="students-tab2" data-toggle="tab" href="#students" role="tab" aria-selected="true">
                             '.($isTutorAdmin ? "Grading" : "Handin Answers").'
                         </a>
                     </li>';
@@ -518,7 +518,7 @@ if(!empty($item_id)) {
                         $response->html .= '
                         <li class="nav-item">
                             <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
-                            aria-selected="false"><span class="d-none d-sm-block">Details</a>
+                            aria-selected="false">Details</a>
                         </li>';
                     }
                     
@@ -534,7 +534,7 @@ if(!empty($item_id)) {
                     </ul>
                     <div class="tab-content tab-bordered" id="myTab3Content">
                         '.($isTutorAdmin && $isMultipleChoice ? 
-                            '<div class="tab-pane fade '.(!$updateItem ? "show active" : null).'" id="questions" role="tabpanel" aria-labelledby="questions-tab2">
+                            '<div class="tab-pane fade '.(!$updateItem || $url_link !== "_grading" ? "show active" : null).'" id="questions" role="tabpanel" aria-labelledby="questions-tab2">
                                 <div class="pt-0">
                                     '.(!$isActive && !$isClosed ? '
                                     <div class="mb-2 text-right">
@@ -579,7 +579,7 @@ if(!empty($item_id)) {
                                 : null
                             )
                         ).'
-                        <div class="tab-pane fade '.(!$isAuto ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
+                        <div class="tab-pane fade '.(!$isAuto || $url_link === "_grading" ? "show active" : null).'" id="students" role="tabpanel" aria-labelledby="students-tab2">
                             <div id="handin_assignment_container">
                                 <div class="form-content-loader" style="display: none; position: absolute">
                                     <div class="offline-content text-center">
