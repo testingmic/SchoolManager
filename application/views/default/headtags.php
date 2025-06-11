@@ -156,7 +156,7 @@ load_helpers(['menu_helper']);
             <div class="progress-bar"></div>
             <nav class="navbar navbar-expand-lg main-navbar">
                 <div class="form-inline mr-auto">
-                <ul class="navbar-nav mr-3">
+                <ul class="mb-3 navbar-nav mr-3">
                     <li><a href="#" data-toggle="sidebar" title="Hide/Display the Side Menubar" class="nav-link mt-2 nav-link-lg collapse-btn"><i class="fas fa-bars"></i></a></li>
                     <!-- <li><a href="#" class="nav-link nav-link-lg mt-2 fullscreen-btn" title="Maximize to Fullscreen Mode"><i class="fas fa-expand"></i></a></li> -->
                     <li><a href="#" class="nav-link nav-link-lg mt-2 hidden" id="history-refresh" title="Reload Page"><i class="fas fa-redo-alt"></i></a></li>
