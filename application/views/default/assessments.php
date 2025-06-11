@@ -92,7 +92,7 @@ $response->array_stream["assessment_array"] = $assessment_array;
 $response->html = '
     <section class="section">
         <div class="section-header byPass_Null_Value">
-            <h1><i class="fa fa-book-reader"></i> Assessments List</h1>
+            <h1><i class="fa fa-book-reader"></i> School Based Assessment</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                 <div class="breadcrumb-item">Assessments List</div>
