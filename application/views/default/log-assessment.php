@@ -53,7 +53,7 @@ if(!$createAssessmentTest) {
             <h1><i class="fa fa-book"></i> '.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'assessments">List Assessement Logs</a></div>
+                <div class="breadcrumb-item active"><a href="'.$baseUrl.'assessments">Assessement Logs</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>';
@@ -151,7 +151,7 @@ if(!$createAssessmentTest) {
                             <div class="text-center" id="init_data">The students list for gradding will appear here.</div>
                             <div id="award_marks" class="hidden">
                                 '.$myClass->quick_student_search_form.'
-                                <div class="mb-4 slim-scroll" style="max-height: 800px;">
+                                <div class="mb-4 slim-scroll">
                                     <table data-empty="" id="student_staff_list" class="table table-bordered table-striped">
                                         <thead>
                                             <tr>
