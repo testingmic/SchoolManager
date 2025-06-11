@@ -1415,7 +1415,7 @@ class Assignments extends Myschoolgh {
      * 
      * @return String
      */
-    public function quick_data(stdClass $data, bool $isActive = false, bool $canReopen = false) {
+    public function quick_data(stdClass $data, bool $isActive = false, bool $canReopen = false,  $isClosed = false) {
 
         // global variable
         global $isStudent, $isWardParent;
@@ -1497,6 +1497,7 @@ class Assignments extends Myschoolgh {
                         </div>' : null
                     )
                 ).'
+                '.($isClosed ? "<div class='text-center'><button onclick='return export_Assessment_Marks(\"{$data->item_id}\",\"{$data->assignment_type}\",\"{$data->class_id}\",\"{$data->course_id}\")' class='btn mb-1 btn-outline-warning' title='Export Marks'><i class='fa fa-reply-all'></i> Export to Gradebook</button></div>" : null).'
             </div>
         </div>';
 

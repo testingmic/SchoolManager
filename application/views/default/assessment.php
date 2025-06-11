@@ -31,6 +31,7 @@ if(!in_array("class_assessment", $clientFeatures)) {
 $response->scripts = [
     "assets/js/assignments.js",
     "assets/js/comments.js",
+    "assets/js/lessons.js"
 ];
 
 // update the assignment permission
@@ -192,7 +193,7 @@ if(!empty($item_id)) {
                 $function = $isMultipleChoice ? "review_QuizAssignment" : "load_singleStudentData";
 
                 $grading_info .= '
-                <div class="col-lg-'.($isAuto && !$isMultipleChoice ? 11 : ($isUnassigned ? 12 : 11)).'" id="assignment-content">
+                <div class="col-lg-'.($isAuto && !$isMultipleChoice ? 12 : ($isUnassigned ? 12 : 12)).'" id="assignment-content">
                     '.( $isActive ?
                         '<div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
                             <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Mark As Closed</button>
@@ -215,7 +216,7 @@ if(!empty($item_id)) {
                             <th></th>
                         </thead>
                     </table>
-                    <div class="table-responsive">
+                    <div class="">
                         <table width="100%" class="table-bordered table-striped table mt-0">
                         <tbody>';
                         $counter = 0;
@@ -258,7 +259,7 @@ if(!empty($item_id)) {
                                     </td>
                                     <td>
                                         <div class="input-group">
-                                            <input '.(!$isActive || $isMultipleChoice ? 'disabled="disabled"' : 'name="test_grading" data-rvalue="'.$student->id.'" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" style="max-width:120px" class="form-control text-center font-20"> &nbsp; <span class="font-25">/ '.$data->grading.'</span>
+                                            <input '.(!$isActive || $isMultipleChoice ? 'disabled="disabled"' : 'name="test_grading" data-rvalue="'.$student->id.'" data-value="'.$student->item_id.'"').' value="'.$student->score.'" type="number" data-assignment_id="'.$data->item_id.'" maxlength="'.strlen($data->grading).'" min="0" max="'.$data->grading.'" style="max-width:120px" class="form-control text-center font-20"> &nbsp; <span class="font-25 d-none d-sm-block">/ '.$data->grading.'</span>
                                         </div>
                                     </td>
                                 </tr>';
@@ -386,7 +387,7 @@ if(!empty($item_id)) {
                 if(($data->handed_in === "Pending") || empty($data->handed_in)) {
 
                     // set the scripts to load for this user
-                    $response->scripts = ["assets/js/multichoice.js"];
+                    $response->scripts = ["assets/js/multichoice.js", "assets/js/lessons.js"];
 
                     // append the load
                     $grading_info .= '
@@ -453,7 +454,7 @@ if(!empty($item_id)) {
                     <div class="card-header">
                         <h4>'.$data->assignment_type.' Details</h4>
                     </div>
-                    '.$assignmentClass->quick_data($data, ($isActive && $isTutorAdmin), ($isAdmin && $isAuto)).'
+                    '.$assignmentClass->quick_data($data, ($isActive && $isTutorAdmin), ($isAdmin && $isAuto), $isClosed).'
                 </div>
                 <div class="card">
                     <div class="card-header"><h4>Created By Details</h4></div>
@@ -517,7 +518,7 @@ if(!empty($item_id)) {
                         $response->html .= '
                         <li class="nav-item">
                             <a class="nav-link '.($updateItem ? "active" : null).'" id="profile-tab2" data-toggle="tab" href="#settings" role="tab"
-                            aria-selected="false">Update Details</a>
+                            aria-selected="false"><span class="d-none d-sm-block">Details</a>
                         </li>';
                     }
                     

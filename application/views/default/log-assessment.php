@@ -151,7 +151,7 @@ if(!$createAssessmentTest) {
                             <div class="text-center" id="init_data">The students list for gradding will appear here.</div>
                             <div id="award_marks" class="hidden">
                                 '.$myClass->quick_student_search_form.'
-                                <div class="mb-4 slim-scroll table-responsive" style="max-height: 800px;">
+                                <div class="mb-4 slim-scroll" style="max-height: 800px;">
                                     <table data-empty="" id="student_staff_list" class="table table-bordered table-striped">
                                         <thead>
                                             <tr>
@@ -163,11 +163,11 @@ if(!$createAssessmentTest) {
                                         <tbody></tbody>
                                     </table>                         
                                 </div>
-                                <div class="row" id="buttons">
-                                    <div class="col-md-4" align="left">
+                                <div class="d-flex justify-content-between" id="buttons">
+                                    <div>
                                         <button onclick="return cancel_assessment();" class="btn text-uppercase btn-danger mb-1">Discard</button>
                                     </div>
-                                    <div class="col-lg-8" align="right">
+                                    <div class="text-right">
                                         <button onclick="return award_marks(\'save\');" class="btn text-uppercase btn-outline-primary mb-1">Award Marks & Save</button>
                                         <button onclick="return award_marks(\'close\');" class="btn text-uppercase btn-success mb-1">Award Marks & Close</button>
                                     </div>
