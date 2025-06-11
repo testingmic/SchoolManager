@@ -59,6 +59,10 @@ table.dataTable.table-sm>thead>tr>th {
     background-color: #fff;
 }
 
+.input-group-text, select.form-control:not([size]):not([multiple]), .form-control:not(.form-control-sm):not(.form-control-lg) {
+    padding: 10px 10px;
+}
+
 .drawer-content {
     margin-top: 10px;
     max-height: 630px;
