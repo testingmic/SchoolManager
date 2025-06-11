@@ -118,7 +118,7 @@ class Assignments extends Myschoolgh {
                 $result->assignment_description = !empty($result->assignment_description) ? custom_clean(htmlspecialchars_decode($result->assignment_description)) : null;
 
                 // convert to array
-                $course_tutor = json_decode($result->course_tutor, true);
+                $course_tutor = !empty($result->course_tutor) ? json_decode($result->course_tutor, true) : [];
 
                 // set the course tutor
                 if(!empty($course_tutor)) {
@@ -177,7 +177,7 @@ class Assignments extends Myschoolgh {
                                 ) : null;
 
                                 // decode the attachments as well
-                                $result->attachment = json_decode($result->attachment);
+                                $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : null;
                                 $result->attachment_html = isset($result->attachment->files) ? $filesObject->list_attachments(
                                     $result->attachment->files, $result->created_by, "col-lg-6 col-md-6", false, false
                                 ) : "";
@@ -311,7 +311,7 @@ class Assignments extends Myschoolgh {
 
         foreach($the_list["data"] as $key => $each) {
             // set the assignment label
-            $each->assignment_type_label = $this->assessment_color_group[$each->assignment_type];
+            $each->assignment_type_label = $this->assessment_color_group[$each->assignment_type] ?? $each->assignment_type;
             $assessment_array[$each->item_id] = $each;
             $action = "<a title='View Assessment record' href='#' onclick='return load(\"assessment/{$each->item_id}/view\");' class='btn btn-sm mb-1 btn-outline-primary'><i class='fa fa-eye'></i></a>";
     

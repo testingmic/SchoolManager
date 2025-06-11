@@ -454,7 +454,7 @@ if(!empty($item_id)) {
                     <div class="card-header">
                         <h4>'.$data->assignment_type.' Details</h4>
                     </div>
-                    '.$assignmentClass->quick_data($data, ($isActive && $isTutorAdmin), ($isAdmin && $isAuto), $isClosed).'
+                    '.$assignmentClass->quick_data($data, ($isActive && $isTutorAdmin), ($isAdmin && $isAuto), $isClosed && !$data->exported).'
                 </div>
                 <div class="card">
                     <div class="card-header"><h4>Created By Details</h4></div>
