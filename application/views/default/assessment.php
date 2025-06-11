@@ -17,7 +17,7 @@ jump_to_main($baseUrl);
 // additional update
 $clientId = $session->clientId;
 $response = (object) ["current_user_url" => $session->user_current_url, "page_programming" => $myClass->menu_content_array];
-$pageTitle = "Assignment Details";
+$pageTitle = "Details";
 $response->title = $pageTitle;
 
 // end query if the user has no permissions
@@ -433,7 +433,7 @@ if(!empty($item_id)) {
                 <h1><i class="fa fa-book-reader"></i> '.$data->assignment_type.' Details</h1>
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'assessments">Assessments List</a></div>
+                    <div class="breadcrumb-item active"><a href="'.$baseUrl.'assessments">Assessments</a></div>
                     <div class="breadcrumb-item">'.$pageTitle.'</div>
                 </div>
             </div>

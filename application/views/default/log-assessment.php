@@ -53,7 +53,7 @@ if(!$createAssessmentTest) {
             <h1><i class="fa fa-book"></i> '.$pageTitle.'</h1>
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
-                <div class="breadcrumb-item active"><a href="'.$baseUrl.'assessments">Assessement Logs</a></div>
+                <div class="breadcrumb-item active"><a href="'.$baseUrl.'assessments">Assessements</a></div>
                 <div class="breadcrumb-item">'.$pageTitle.'</div>
             </div>
         </div>';
