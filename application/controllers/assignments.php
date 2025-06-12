@@ -136,7 +136,7 @@ class Assignments extends Myschoolgh {
                 if(
                     ($result->assigned_to !== "selected_students") || (
                         ($result->assigned_to === "selected_students") && 
-                        in_array($defaultUser->user_id, $assigned_to_list)
+                        !empty($assigned_to_list) && in_array($defaultUser->user_id, $assigned_to_list)
                     ) || !$isAStudent
                 ) {
 
