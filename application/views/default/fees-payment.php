@@ -279,8 +279,8 @@ if(!$receivePayment) {
                                             <div class="font-18 user_name" title="Click to view record of '.$student_info["name"].'" onclick="return load(\'student/'.$student_info["user_id"].'\')">'.$student_info["name"].'</div>
                                             <div><strong>STUDENT ID:</strong> '.$student_info["unique_id"].'</div>
                                             <div><strong>FEES ARREARS:</strong> <span class="fees_arrears">'.$defaultCurrency.''.number_format($student_info["debt"], 2).'</span></div>
-                                            <div><strong>PREVIOUS ARREARS:</strong> '.$defaultCurrency.''.number_format($student_info["arrears"], 2).'</div>
-                                            <div><strong>BALANCE OUTSTANDING:</strong> <span class="balance_outstanding">'.$defaultCurrency.''.$student_info["total"].'</span></div>
+                                            <div><strong>ARREARS:</strong> '.$defaultCurrency.''.number_format($student_info["arrears"], 2).'</div>
+                                            <div><strong>OUTSTANDING:</strong> <span class="balance_outstanding">'.$defaultCurrency.''.$student_info["total"].'</span></div>
                                         </div>
                                     </div>
                                 </div>
@@ -326,9 +326,9 @@ if(!$receivePayment) {
                                             <label>Cheque Security Code <span class="required">*</span></label>
                                             <input '.$disabled.' onkeyup="this.value = this.value.replace(/[^\d.]+/g, \'\');" class="form-control text-uppercase" name="cheque_security" id="cheque_security" type="text" min="0">
                                         </div>
-                                        <div class="col-md-6 form-group" id="payment_amount_input">
+                                        <div class="col-md-6 form-group text-center" id="payment_amount_input">
                                             <label>Amount <span class="required">*</span></label>
-                                            <input onkeyup="this.value = this.value.replace(/[^\d.]+/g, \'\');" '.$disabled.' class="form-control" name="amount" id="amount" type="text">
+                                            <input onkeyup="this.value = this.value.replace(/[^\d.]+/g, \'\');" '.$disabled.' class="form-control font-30 text-center text-dark" name="amount" id="amount" type="text">
                                         </div>
                                         <div class="col-md-12 mt-0 mb-0 form-group"></div>
                                         <div class="col-md-6 hidden form-group">

@@ -149,9 +149,9 @@ if ($(`div[id="filter_Department_Class"]`).length) {
                             <div>
                                 <div class="font-20 user_name" title="Click to view record of ${option.name}" onclick="return load('student/${value}')"><strong>${option.name}</strong></div>
                                 <div><strong>STUDENT ID:</strong> ${option.unique_id}</div>
-                                <div><strong>FEES ARREARS:</strong> <span class="fees_arrears">${myPrefs.labels.currency}${option.debt_formated}</span></div>
-                                <div><strong>PREVIOUS ARREARS:</strong> ${myPrefs.labels.currency}${option.arrears_formated}</div>
-                                <div><strong>BALANCE OUTSTANDING:</strong> <span class="balance_outstanding">${myPrefs.labels.currency}${option.total_debt_formated}</span></div>
+                                <div><strong>FEES:</strong> <span class="fees_arrears">${myPrefs.labels.currency}${option.debt_formated}</span></div>
+                                <div><strong>ARREARS:</strong> ${myPrefs.labels.currency}${option.arrears_formated}</div>
+                                <div><strong>OUTSTANDING:</strong> <span class="balance_outstanding">${myPrefs.labels.currency}${option.total_debt_formated}</span></div>
                             </div>                            
                         </div>
                     </div>

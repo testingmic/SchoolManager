@@ -865,7 +865,7 @@ class Fees extends Myschoolgh {
             // if the arrears is greater than 0
             if(!empty($studentInfo) && !empty($studentInfo['arrears'])) {
                 $html_form .= "<tr>";
-                $html_form .= "<td class='font-weight-bold' width='35%'>Previous Arrears:</td>";
+                $html_form .= "<td class='font-weight-bold' width='35%'>Arrears:</td>";
                 $html_form .= "<td><span class='font-17'>{$currency} ".number_format($studentInfo['arrears'], 2)."</span></td>";
                 $html_form .= "</tr>";
 
@@ -886,7 +886,7 @@ class Fees extends Myschoolgh {
             $html_form .= "</tr>";
 
             $html_form .= "<tr>";
-            $html_form .= "<td class='font-weight-bold'>Outstanding Balance:</td>";
+            $html_form .= "<td class='font-weight-bold'>Outstanding:</td>";
             $html_form .= "<td><span data-checkout_url='general' data-amount_payable='{$balance}' class='outstanding font-17'>{$currency} ".number_format($balance, 2)."</span></td>";
             $html_form .= "</tr>";
 

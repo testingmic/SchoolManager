@@ -1022,7 +1022,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                 <h4>ABOUT ME</h4>
                             </div>
                             <div class="card-body mt-0 pt-0 pb-0">
-                                <div class="py-4">
+                                <div class="py-1 pt-3">
                                     <p class="clearfix">
                                         <span class="float-left">Name</span>
                                         <span class="float-right text-muted">'.$data->name.'</span>
