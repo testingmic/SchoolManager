@@ -468,7 +468,7 @@ class Timetable extends Myschoolgh {
                                                 <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course->lesson_start_time}</p>
                                                 <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course->lesson_end_time}</p>
                                             </div>
-                                            <div class='card-footer p-2 border-top mt-0 text-right'>
+                                            <div class='card-footer p-2 border-top mt-0 text-center'>
                                                 <a href='{$this->baseUrl}gradebook/{$course->course_id}?class_id={$course->class_id}&timetable_id={$data->item_id}' class='btn btn-outline-success btn-sm'><i class='fa fa-book-open'></i> Lesson</a>
                                                 <a href='{$this->baseUrl}course/{$course->course_id}' class='btn btn-outline-primary btn-sm'><i class='fa fa-eye'></i> View Subject</a>
                                             </div>
@@ -655,7 +655,7 @@ class Timetable extends Myschoolgh {
                                 <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course["lesson_start_time"]}</p>
                                 <p class='pb-0 mb-0'><i class='fa fa-clock'></i> {$course["lesson_end_time"]}</p>
                             </div>
-                            <div class='card-footer p-2 border-top mt-0 text-right'>
+                            <div class='card-footer p-2 border-top mt-0 text-center'>
                                 <a href='{$this->baseUrl}gradebook/{$course["course_id"]}?class_id={$course["class_id"]}&timetable_id={$course["timetable_id"]}' class='btn btn-outline-success btn-sm'><i class='fa fa-book-open'></i> Lesson</a>
                                 <a href='{$this->baseUrl}course/{$course["course_id"]}' class='btn btn-outline-primary btn-sm'><i class='fa fa-eye'></i> View Course</a>
                             </div>

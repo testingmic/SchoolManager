@@ -1800,7 +1800,7 @@ class Forms extends Myschoolgh {
                             <select data-width=\"100%\" name=\"assigned_to\" id=\"assigned_to\" class=\"form-control selectpicker\">
                                 <option value=\"null\">Select User</option>";
                                 foreach($this->pushQuery("item_id, name, unique_id", "users", "user_type IN ('employee','teacher','admin','accountant') AND status='1' AND client_id='{$params->clientId}'") as $each) {
-                                    $html_content .= "<option ".(($title && ($each->item_id == $params->data->assigned_to) || (!$title && ($each->item_id == $params->userId))) ? "selected" : null)." value=\"{$each->item_id}\">{$each->name} ({$each->unique_id})</option>";                            
+                                    $html_content .= "<option ".(($title && ($each->item_id == $params->data->assigned_to) || (!$title && ($each->item_id == $params->userId))) ? "selected" : null)." value=\"{$each->item_id}\">".strtoupper($each->name)."</option>";                            
                                 }
                             $html_content .= "</select>
                         </div>

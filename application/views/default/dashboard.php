@@ -469,9 +469,9 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     <div class="card-header text-uppercase">
                         <h4>Class Assessments</h4>
                     </div>
-                    <div class="card-body trix-slim-scroll" style="max-height:598px;height:598px;overflow-y:auto;">
+                    <div class="card-body trix-slim-scroll">
                         <div class="table-responsive">
-                            <table data-empty="" class="table table-striped raw_datatable">
+                            <table data-empty="" class="table table-striped small_datatable" data-rows_count="4">
                                 <thead>
                                     <tr>
                                         <th width="5%" class="text-center">#</th>

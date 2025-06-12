@@ -172,16 +172,16 @@ if(!empty($user_id)) {
                     <div class=\"card card-success\">
                         <div class=\"card-header pr-2 pl-2\"><h4>{$each->subject}</h4></div>
                         <div class=\"card-body p-2\" style=\"height:150px;max-height:150px;overflow:hidden;\">{$each->description}</div>
-                        <div class=\"pl-2 border-top mt-2\"><strong>Status: </strong> {$myClass->the_status_label($each->status)}</div>
+                        <div class=\"pl-2 border-top mt-1 pt-2\"><strong>Status: </strong> {$myClass->the_status_label($each->status)}</div>
                         <div class=\"pl-2\"><strong>Reported By: </strong> {$each->reported_by}</div>
                         ".(!empty($each->assigned_to_info->name) ? 
                             "<div class=\"pl-2\"><strong>Assigned To: </strong> 
-                                {$each->assigned_to_info->name}, {$each->assigned_to_info->phone_number}
+                                {$each->assigned_to_info->name}
                             </div>" : null
                         )."
                         ".(($each->created_by === $session->userId) ? 
                             "<div class=\"pl-2\"><strong>Recorded By: </strong> 
-                                {$each->created_by_information->name}, {$each->created_by_information->phone_number}
+                                {$each->created_by_information->name} ".(!empty($each->created_by_information->phone_number) ? ", {$each->created_by_information->phone_number}" : null)."
                             </div>" : null
                         )."
                         <div class=\"pl-2 mb-1 mt-2\">

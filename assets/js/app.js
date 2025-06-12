@@ -1069,6 +1069,18 @@ var initDataTables = () => {
                 }
             });
         }
+
+        $(`table[class~="small_datatable"]`).DataTable({
+            search: null,
+            lengthMenu: [
+                [4, 10, 15, -1],
+                [4, 10, 15, "All"]
+            ],
+            language: {
+                sEmptyTable: "Nothing Found",
+                lengthMenu: "Display _MENU_ rows"
+            }
+        });
     
         if ($(`table[class~="raw_datatable"]`).length > 0) {
             let t_order = $(`table[class~="raw_datatable"]`).attr("data-order_item") == undefined ? "asc" : $(`table[class~="raw_datatable"]`).attr("data-order_item");
