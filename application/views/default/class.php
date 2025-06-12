@@ -248,7 +248,7 @@ if(!empty($item_id)) {
                         </div>' ).'
                     </div>
                 </div>
-                <div class="card pb-0">
+                <div class="card pb-0 d-none d-sm-block">
                     <div class="card-header">
                         <h4>CLASS PREFECT</h4>
                     </div>

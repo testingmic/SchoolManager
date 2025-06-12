@@ -174,7 +174,7 @@ function stringToArray($string, $delimiter = ",") {
 	}
 
 	$array = [];
-	$expl = explode($delimiter, $string);
+	$expl = !empty($string) ? explode($delimiter, $string) : [];
 	foreach($expl as $each) {
 		if(!empty($each)) {
 			$array[] = trim($each);

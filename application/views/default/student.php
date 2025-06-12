@@ -375,7 +375,7 @@ if(!empty($user_id)) {
                 <div class="section-header-breadcrumb">
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'dashboard">Dashboard</a></div>
                     <div class="breadcrumb-item active"><a href="'.$baseUrl.'students">Students</a></div>
-                    <div class="breadcrumb-item">'.strtoupper($data->name).'</div>
+                    <div class="breadcrumb-item">'.ucwords(explode(" ", strtolower($data->name))[0]).' Details</div>
                 </div>
             </div>';
             // if the term has ended
@@ -389,7 +389,7 @@ if(!empty($user_id)) {
             <div class="col-md-3">
                 <div class="card">
                     <div class="card-body text-center bg-amber">
-                        <div class="font-18 text-dark font-bold">REGISTRATION ID</div>
+                        <div class="font-18 text-dark font-bold">STUDENT ID</div>
                         <div class="font-22 font-weight-bold text-uppercase text-white">'.$data->unique_id.'</div>
                     </div>
                 </div>
@@ -414,7 +414,7 @@ if(!empty($user_id)) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 d-none d-sm-block">
                 <div class="card">
                     <div class="card-body pl-0 pr-0 text-center bg-success">
                         <div class="font-18 text-dark font-bold">SECTION</div>
@@ -477,25 +477,25 @@ if(!empty($user_id)) {
                                 <span class="float-left">Birthday</span>
                                 <span class="float-right text-muted">'.$data->date_of_birth.'</span>
                             </p>
-                            '.($data->phone_number ?
+                            '.(!empty($data->phone_number) ?
                                 '<p class="clearfix">
                                     <span class="float-left">Primary Contact</span>
                                     <span class="float-right text-muted">'.$data->phone_number.'</span>
                                 </p>' : ''
                             ).'
-                            '.($data->phone_number_2 ?
+                            '.(!empty($data->phone_number_2) ?
                                 '<p class="clearfix">
                                     <span class="float-left">Secondary Contact</span>
                                     <span class="float-right text-muted">'.$data->phone_number_2.'</span>
                                 </p>' : ''
                             ).'
-                            '.($data->email ?
+                            '.(!empty($data->email) ?
                                 '<p class="clearfix">
                                     <span class="float-left">E-Mail</span>
                                     <span class="float-right text-muted">'.$data->email.'</span>
                                 </p>' : ''
                             ).'
-                            '.($data->blood_group_name ?
+                            '.(!empty($data->blood_group_name) ?
                                 '<p class="clearfix">
                                     <span class="float-left">Blood Group</span>
                                     <span class="float-right text-muted">'.$data->blood_group_name.'</span>
@@ -583,7 +583,7 @@ if(!empty($user_id)) {
                     <li class="nav-item">
                         <a class="nav-link" id="fees_payments-tab2" data-toggle="tab" href="#fees_payments" role="tab" aria-selected="true">Payments</a>
                     </li>' : '').'
-                    <li class="nav-item">
+                    <li class="nav-item d-none d-sm-block">
                         <a class="nav-link '.($url_link === "documents" ? "active" : null).'" id="documents-tab2" data-toggle="tab" href="#documents" role="tab" aria-selected="true">Documents</a>
                     </li>
                     <li class="nav-item '.(!in_array("attendance", $clientFeatures) ? "hidden" : null).'">

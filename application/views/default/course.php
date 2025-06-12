@@ -277,7 +277,7 @@ if(!empty($item_id)) {
                     </div>
                 </div>
             </div>
-            <div class="col-md-9">
+            <div class="col-md-9 d-none d-sm-block">
                 <div class="card">
                     <div class="card-body p-0">
                         <div class="card-header">
@@ -303,7 +303,7 @@ if(!empty($item_id)) {
                 </div>';
 
             $response->html .= '
-                <div class="card">
+                <div class="card d-none d-sm-block">
                     <div class="card-header">
                         <h4>SUBJECT TUTOR DETAILS</h4>
                     </div>

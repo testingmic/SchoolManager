@@ -163,7 +163,7 @@ load_helpers(['menu_helper']);
                     <?php if($isActiveAccount) { ?>
                     <li class="border-left text-white d-none d-md-block">
                         <?php if(!$isSupport) { ?>
-                        <a class="nav-link text-white nav-link-lg">
+                        <a class="nav-link text-white nav-link-lg mt-1">
                             <strong class="font-18px">
                                 <span><?= $clientPrefs->academics->academic_year ?></span> 
                                 <span>|</span>
