@@ -1098,7 +1098,7 @@ class Attendance extends Myschoolgh {
 
                             if(!$is_present) {
                                 $getItem = $_user_data[$params->the_current_user_id]["state"] ?? false;
-                                print_r(['the_day' => $the_day, '_user_data' => $_user_data, 'getItem' => $getItem]);
+                                // print_r(['the_day' => $the_day, '_user_data' => $_user_data, 'getItem' => $getItem]);
                             }
 
                             // set the label for the day
