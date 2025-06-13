@@ -316,7 +316,7 @@ class Auth extends Myschoolgh {
 
         // create the temporary accesstoken
         $token = random_string("alnum", 32);
-        $expiry = date("Y-m-d H:i:s", strtotime("+725 hours"));
+        $expiry = date("Y-m-d H:i:s", strtotime("6 months"));
 
         // replace the string
         $expiry = str_replace(": ", "", $expiry);
