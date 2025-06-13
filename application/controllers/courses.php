@@ -286,21 +286,16 @@ class Courses extends Myschoolgh {
                     }
 
                     // if attachment variable was parsed
-                    $result->attachment = json_decode($result->attachment);
-
-                    // if the files is set
-                    if(!isset($result->attachment->files)) {
-                    $result->attachment = (object) [
-                            "files" => [],
-                            "files_count" => 0,
-                            "files_size" => 0,
-                            "raw_size_mb" => 0
-                        ];
-                    }
+                    $result->attachment = !empty($result->attachment) ? json_decode($result->attachment) : (object) [
+                        "files" => [],
+                        "files_count" => 0,
+                        "files_size" => 0,
+                        "raw_size_mb" => 0
+                    ];
 
                     // clean the description attached to the list
-                    $result->description = htmlspecialchars_decode($result->description);
-                    $result->description = custom_clean($result->description);
+                    $result->description = !empty($result->description) ? htmlspecialchars_decode($result->description) : null;
+                    $result->description = !empty($result->description) ? custom_clean($result->description) : null;
                     
                     if($result->plan_type == "unit") {
                         // load the course links
