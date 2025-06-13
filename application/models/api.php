@@ -37,6 +37,7 @@ class Api {
     public $accessCheck;
     public $requestParams;
     public $notAccepted = [];
+    public $resultMessage = "";
     
     private $isRemote = false;
 
@@ -197,6 +198,8 @@ class Api {
                     // log the api request
                     if(isset($params["remote"])) { $this->logRequest($this->default_params, 400); }
 
+                    $this->resultMessage = 'Sorry! An invalid parameter \''.implode(", ", $notAccepted).'\' was parsed to the endpoint.';
+
                     // return invalid parameters parsed to the endpoint
                     return $this->output(400, ["accepted_params" => $accepted['params']]);
                 } else {
@@ -248,6 +251,9 @@ class Api {
 
                         // log the api request
                         if(isset($params["remote"])) { $this->logRequest($this->default_params, 400); }
+
+                        // set the result message
+                        $this->resultMessage = 'Sorry! The following required parameters were not parsed: \''.implode(", ", $required).'\'';
 
                         // return the response of required parameters
                         return $this->output(400, ['required' => $required_text, "accepted_params" => $accepted['params']]);
@@ -502,9 +508,7 @@ class Api {
         // format the data to return
         $data = [
             'code' => $code,
-            // 'description' => $this->outputMessage($code),
-            'method' => $this->requestMethod,
-            'endpoint' => $_SERVER["REQUEST_URI"]
+            'method' => $this->requestMethod
         ];
 
         $code = $data['code'] == 100 ? 201 : $data['code'];
@@ -513,41 +517,19 @@ class Api {
             header("HTTP/1.1 {$code}");
         }
 
-        // remove the description endpoint if the response is 200
-        if($code == 200) {
-            unset($data['description']);
+        $data['status'] = in_array($code, [400, 401, 419, 500, 502]) ? "error" : "success";
+        if(in_array($code, [200, 201, 202, 205])) {
+            $data['status'] = "success";
         }
+
+        // remove the description endpoint if the response is 200
         ( !empty($message) ) ? ($data['data'] = $message) : null;
 
+        if(!empty($this->resultMessage)) {
+            $data['data'] = $this->resultMessage;
+        }
+
         return $data;
-    }
-
-    /**
-     * This is the output message based on the code
-     * 
-     * @param Int $code
-     * 
-     * @return String
-     */
-    private function outputMessage($code) {
-
-        $description = [
-            200 => 'The request was successfully executed and returned some results.',
-            201 => 'The request was successful however, no results was found.',
-            205 => 'The record was successfully updated.',
-            202 => 'The data was successfully inserted into the database.',
-            400 => 'An invalid parameter \''.implode(", ", $this->notAccepted).'\' was parsed to the endpoint.',
-            401 => 'Sorry! Please ensure all required fields are not empty.',
-            404 => 'Invalid request node parsed.',
-            405 => 'Invalid parameters was parsed to the endpoint.',
-            100 => 'All tests parsed',
-            501 => "Sorry! You do not have the required permissions to perform this action.",
-            600 => "Sorry! Your current subscription does not grant you permission to perform this action.",
-            700 => "Unknown request parsed",
-            999 => "An error occurred please try again later"
-        ];
-        
-        return $description[$code] ?? $description[700];
     }
 
 }

@@ -29,7 +29,7 @@ $(`button[data-function="update"]`).on("click", function() {
             $(`span[class="date_created"]`).html(response.date_created);
             $(`span[class="last_updated"]`).html(response.last_updated);
             $(`div[class~="endpoint-info"], a[class~="refresh-button"]`).removeClass("hidden");
-            $(`form[class="endpoint-form"] select[name="method"]`).val(response.method.toLowerCase()).change();
+            // $(`form[class="endpoint-form"] select[name="method"]`).val(response.method.toLowerCase()).change();
             $(`form[class="endpoint-form"] select[name="status"]`).val(response.status).change();
             $(`form[class="endpoint-form"] textarea[name="parameter"]`).val(response.parameter);
             $(`form[class="endpoint-form"] textarea[name="description"]`).val(response.description);

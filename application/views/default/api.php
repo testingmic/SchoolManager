@@ -18,10 +18,8 @@ $requestMethod = strtoupper( $_SERVER["REQUEST_METHOD"] );
 
 //: initializing
 $response = (object) [
-    "code" => 200,
-    "description" => "Error Processing The Request",
-    "method" => $requestMethod,
-    "endpoint" => $_SERVER['REQUEST_URI'],
+    "status" => "success",
+    "code" => 200
 ];
 
 // get the request url for pattern matching and request payload matching
@@ -143,14 +141,16 @@ if(!$skipProcessing) {
 // in continuing your script then you can also do the following
 // if an error was found
 if( !empty($paramChecker) && ($paramChecker['code'] !== 100)) {
-    // set it if not existent
-    $paramChecker['description'] = $paramChecker['description'] ?? null;
 
+    $output = $paramChecker;
     // check the message to parse
-    $paramChecker['data']['result'] = $paramChecker['data']['result'] ?? $paramChecker['description'];
+    if(is_array($paramChecker)) {
+        $output['data'] = [];
+        $output['data']['result'] = $paramChecker['data'] ?? 'Request Failed.';
+    }
 
     // print the json output
-    echo json_encode($paramChecker);
+    echo json_encode($output);
 } else {
     
     // finalize the handler

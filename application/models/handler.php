@@ -293,6 +293,7 @@ class Handler {
 
         // initialize the bugs variable
         $bugs = false;
+        $invalidToken = false;
 
         // check if the endpoint is not the auth endpoint
         if(!in_array($endpoint, ["api/auth"])) {
@@ -303,8 +304,10 @@ class Handler {
                 // set the bug good
                 $bugs = true;
                 // set the description
-                $response->description = "Sorry! An invalid Access Token was supplied or the Access Token has expired.";
-                $response->data["result"] = $response->description;
+                $response->reason = "invalid_access_token";
+                $response->status = "error";
+                $response->data["result"] = "Sorry! An invalid Access Token was supplied or the Access Token has expired.";
+                $invalidToken = true;
             } else {
                 
                 // if the user is making the request from an api endpoint
@@ -360,8 +363,14 @@ class Handler {
         // confirm that a bug was found
         if($bugs) {
 
-            // parse the remote request
-            !empty($params) ? $response->data["remote_request"]["payload"] = $params : null;
+            if(!$invalidToken) {
+                // parse the remote request
+                !empty($params) ? $response->data["remote_request"]["payload"] = $params : null;
+            }
+
+            if($invalidToken) {
+                $response->data["must_login"] = true;
+            }
 
             // print the error description
             echo json_encode($response);
