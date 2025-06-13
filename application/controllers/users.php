@@ -70,18 +70,20 @@ class Users extends Myschoolgh {
 			$academic_year = isset($params->academic_year) ? $params->academic_year : $this->academic_year;
 			$academic_term = isset($params->academic_term) ? $params->academic_term : $this->academic_term;
 
-			// get the class ids that this teacher is allowed to teach
-			if($params->userData->user_type == "teacher") {
-				// use this section if the class id was not parsed
-				if(empty($params->class_id)) {
-					// load the list of students
-					$params->class_ids = $params->userData->class_ids;
+			if(empty($params->verify_email)) {
+				// get the class ids that this teacher is allowed to teach
+				if($params->userData->user_type == "teacher") {
+					// use this section if the class id was not parsed
+					if(empty($params->class_id)) {
+						// load the list of students
+						$params->class_ids = $params->userData->class_ids;
+					}
 				}
-			}
-			// if the user logged in is a student
-			elseif($params->userData->user_type === "student") {
-				$params->user_id = $params->userData->user_id;
-				$params->class_id = $params->userData->class_id;
+				// if the user logged in is a student
+				elseif($params->userData->user_type === "student") {
+					$params->user_id = $params->userData->user_id;
+					$params->class_id = $params->userData->class_id;
+				}
 			}
 
 			// look up query
@@ -1157,6 +1159,14 @@ class Users extends Myschoolgh {
 
 		/** Set the changed password value */
 		$params->changed_password = 1;
+
+		if(!in_array($params->user_type, array_keys($this->the_user_roles))) {
+			return ["code" => 400, "data" => "Sorry! An invalid user_type was provided for processing :- accepted values are ".implode(", ", array_keys($this->the_user_roles))];
+		}
+
+		if(!empty($params->gender) && !in_array(strtolower($params->gender), ["male", "female"])) {
+			return ["code" => 400, "data" => "Sorry! An invalid gender was provided for processing :- accepted values are Male and Female"];
+		}
 		
 		/** Run this section if the user is logged in */
 		if($loggedInAccount || (isset($params->remote) && $params->remote)) {
@@ -1165,7 +1175,7 @@ class Users extends Myschoolgh {
 			
 			/** If not permitted */
 			if(!$accessObject->hasAccess("add", $access)) {
-				return ["code" => 201, "data" => $this->permission_denied];
+				return ["code" => 401, "data" => $this->permission_denied];
 			}
 
 			/** Generate a random password */
@@ -1191,11 +1201,7 @@ class Users extends Myschoolgh {
             // set the upload directory
             $uploadDir = "assets/img/users/";
             // File path config 
-            $fileName = basename($params->image["name"]); 
-            $targetFilePath = $uploadDir . $fileName;
-
-            // Allow certain file formats 
-            $allowTypes = array('jpg', 'png', 'jpeg');
+            $fileName = basename($params->image["name"]);
 
             // check if its a valid image
             if(!empty($fileName) && validate_image($params->image["tmp_name"])){
@@ -1250,7 +1256,7 @@ class Users extends Myschoolgh {
 		if(!empty($params->email)) {
 
 			// confirm that the email does not already exist
-			$i_params = (object) ["limit" => 1, "email" => $params->email];
+			$i_params = (object) ["limit" => 1, "email" => $params->email, "verify_email" => true];
 			
 			// get the user data
 			if(!empty($this->quick_list($i_params)["data"])) {
@@ -1513,6 +1519,16 @@ class Users extends Myschoolgh {
 					"clear" => true,
 					"href" => $url_link
 				];
+			}
+
+			if(!empty($params->remote)) {
+				$return["record"] = $this->view((object) [
+					"clientId" => $params->clientId,
+					"user_id" => $params->user_id,
+					"limit" => 1,
+					"full_details" => true,
+					"no_limit" => 1,
+				]);
 			}
 
 			// return the output
