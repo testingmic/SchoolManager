@@ -12,3 +12,4 @@ assets/img/accounts/*
 !assets/img/users/index.html
 !assets/uploads/index.html
 assets/img/library/*
+vendor/
