@@ -84,7 +84,7 @@ foreach($student_list["data"] as $key => $each) {
         <span title='View Details' class='user_name' onclick='load(\"student/{$each->user_id}\");'>{$each->name}</span><br>
         {$each->unique_id}{$t_status}{$scholarship_status}
     </td>";
-    $students .= "<td>".strtoupper($each->class_name)."</td>";
+    $students .= "<td>".(!empty($each->class_name) ? strtoupper($each->class_name) : null)."</td>";
     $students .= "<td>".(!empty($each->gender) ? strtoupper($each->gender) : null)."</td>";
     $students .= "<td>".($each->department_name ?? null)."</td>";
 

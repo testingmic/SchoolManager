@@ -12,7 +12,7 @@
         ?>
         <footer class="main-footer">
             <div class="footer-left">
-                Copyright &copy; <?= date("Y") ?> <div class="bullet"></div> <a href="<?= $myClass->baseUrl; ?>" target="_blank"><?= $appName ?></a>. All rights reserved
+                Copyright &copy; <?= 2023 ?> <div class="bullet"></div> <a href="<?= $myClass->baseUrl; ?>" target="_blank"><?= $appName ?></a>. All rights reserved
                 | Powered By <strong><?= config_item("developer") ?></strong>
             </div>
             <div class="footer-right">

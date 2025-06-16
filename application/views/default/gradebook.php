@@ -279,6 +279,9 @@ if(in_array($url, ["attendance", "grading"])) {
 
             // list the students here
             foreach($students_list as $student) {
+
+                $student->name = random_names($student->name);
+                
                 $count++;
                 // variable
                 $button = null;

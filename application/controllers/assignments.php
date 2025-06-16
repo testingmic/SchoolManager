@@ -1492,7 +1492,7 @@ class Assignments extends Myschoolgh {
                             <i class="fa fa-times"></i> Mark As Closed
                         </button>
                     </div>' : (
-                        $canReopen ? '
+                        $canReopen && $isClosed ? '
                         <div class="text-center">
                             <button class="btn mb-2 btn-outline-danger" onclick="return reopen_Assignment(\''.$data->item_id.'\');">
                                 <i class="fa fa-times"></i> Reopen Assignment
@@ -2086,8 +2086,14 @@ class Assignments extends Myschoolgh {
                 "client_id='{$params->clientId}' AND class_id='{$params->class_id}' AND user_type='student' AND user_status IN ({$this->default_allowed_status_users_list}) ORDER BY name LIMIT {$this->global_limit}"
             );
 
+            $students_list = [];
+            foreach($users_list as $user) {
+                $user->name = random_names($user->name);
+                $students_list[] = $user;
+            }
+
             return [
-                "students_list" => $users_list,
+                "students_list" => $students_list,
                 "parsed_data" => [
                     "assessment_title" => $params->assessment_title,
                     "assessment_type" => $params->assessment_type,

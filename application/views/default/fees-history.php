@@ -117,6 +117,8 @@ foreach($item_list["data"] as $key => $fees) {
     $action = "<a href='#' title='View Receipt' onclick='load(\"fees_view/{$fees->payment_id}\");' class='btn btn-sm btn-outline-primary'><i class='fa fa-eye'></i></a>";
     $action .= "&nbsp;<a title='Print Receipt' target='_blank' href=\"{$baseUrl}receipt/{$fees->payment_id}\" class='btn btn-sm btn-outline-warning'><i class='fa fa-print'></i></a>";
     
+    $fees->student_info->name = random_names($fees->student_info->name);
+    
     // add the reversal button key
     if($hasReversal && $fees->has_reversal && !$fees->reversed) {
         $action .= "&nbsp;<a title='Reverse Fees Payment' href='#' onclick=\"reverse_payment('{$fees->payment_id}','{$fees->student_info->name}','{$fees->currency} ".number_format($fees->amount_paid, 2)."')\" class='btn btn-sm btn-outline-danger'><i class='fa fa-recycle'></i></a>";

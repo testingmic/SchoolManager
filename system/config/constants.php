@@ -8,6 +8,7 @@ $ini = parse_ini_file("db.ini");
 date_default_timezone_set('UTC');
 
 # set the constants for the database connection
+defined('APP_INI')  OR define('APP_INI', $ini ?? []);
 defined('DB_HOST')  OR define('DB_HOST', $ini['hostname'] ?? null);
 defined('DB_USER')  OR define('DB_USER', $ini['username'] ?? null);
 defined('DB_PASS')  OR define('DB_PASS', $ini['password'] ?? null);

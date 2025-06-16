@@ -192,6 +192,10 @@ class Users extends Myschoolgh {
 			// loop through the students list
 			while($result = $sql->fetch(PDO::FETCH_OBJ)) {
 
+				if(!empty($result->name)) {
+					$result->name = random_names($result->name);
+				}
+
 				// if the user_type is a student
 				if(($result->user_type === "student") && !$groupByUserType) {
 				    // set the init values
@@ -467,6 +471,10 @@ class Users extends Myschoolgh {
 
 				if(!empty($params->return_password)) {
 					$result->pass_word = $result->password;
+				}
+
+				if(!empty($result->name)) {
+					$result->name = random_names($result->name);
 				}
 				
 				// if the preference is set

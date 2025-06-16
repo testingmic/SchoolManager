@@ -533,6 +533,8 @@ class Events extends Myschoolgh {
                 // configure the date to load
                 $dob = date("Y")."-".$this->append_zeros($user->the_month,2)."-".$this->append_zeros($user->the_day,2);
 
+                $user->name = random_names($user->name);
+                
                 // run this section if the description is not minified
                 if(!$minified) {
                     $description = "

@@ -670,7 +670,6 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                                             <div class="text-uppercase mt-2 font-17">'.$defaultClientData->client_location.'</div>
                                             <div class="text-uppercase mt-2 font-17">
                                                 '.$defaultClientData->client_contact.'
-                                                '.(!empty($defaultClientData->client_secondary_contact) ? " / {$defaultClientData->client_secondary_contact}" : null).'
                                             </div>
                                         </div>
                                     </div>

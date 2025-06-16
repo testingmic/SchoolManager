@@ -199,7 +199,7 @@ if(!empty($item_id)) {
                             <button class="btn btn-outline-danger" onclick="return close_Assignment(\''.$data->item_id.'\');"><i class="fa fa-times"></i> Mark As Closed</button>
                             '.(!$isMultipleChoice ? '<button class="btn btn-outline-success" onclick="return save_AssignmentMarks();"><i class="fa fa-save"></i> Save</button>' : '').'
                         </div>' : (
-                            $isAdmin && $isAuto ? '
+                            $isAdmin && $isAuto && !$isClosed ? '
                             <div style="margin-top: 10px;margin-bottom: 10px" align="right" class="initial_assignment_buttons">
                                 <button class="btn mb-2 btn-outline-danger" onclick="return reopen_Assignment(\''.$data->item_id.'\');">
                                     <i class="fa fa-times"></i> Reopen Assignment
@@ -232,6 +232,8 @@ if(!empty($item_id)) {
 
                             // set a new variable for the submitted 
                             $student->is_submitted = $split[1] ?? 0;
+
+                            $student->name = random_names($student->name);
 
                             $student->handed_in = !empty($student->handed_in) ? $student->handed_in : "Pending";
                             $isSubmitted = (bool) (in_array($student->handed_in, ["Submitted", "Graded"]) && $student->is_submitted);
