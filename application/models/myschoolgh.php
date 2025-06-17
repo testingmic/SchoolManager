@@ -410,6 +410,38 @@ class Myschoolgh extends Models {
 	}
 
 	/**
+	 * client_data
+	 * 
+	 * @param String $clientId
+	 * 
+	 * @return Object
+	 */
+	final function clients_list($clientId = null) {
+		
+		try {
+
+			$clientId = !empty($clientId) ? " AND a.client_id = '{$clientId}'" : null;
+
+			// prepare and execute the statement
+			$stmt = $this->db->prepare("
+				SELECT a.client_name, a.client_preferences, a.client_id, a.client_email, a.client_contact, a.setup, b.item_id AS default_account_id
+				FROM clients_accounts a
+				LEFT JOIN accounts b ON b.client_id = a.client_id AND b.default_account = '1' AND b.status = '1'
+				WHERE a.client_status = ? {$clientId} LIMIT 100
+			");
+			$stmt->execute([1]);
+			
+			// loop through the list
+			return $stmt->fetchAll(PDO::FETCH_OBJ);
+			
+		} catch(PDOException $e) {
+			print $e->getMessage();
+			exit;
+			return [];
+		}
+	}
+
+	/**
 	 * Get the Account Package Limit
 	 * 
 	 * @param String $clientId
@@ -573,11 +605,11 @@ class Myschoolgh extends Models {
 
 			if(empty($tableName)) { return []; }
 
-			$stmt = $this->db->prepare("SELECT {$columns} FROM {$tableName} WHERE $whereClause");
+			$stmt = $this->db->prepare("SELECT {$columns} FROM {$tableName} WHERE {$whereClause}");
 			$stmt->execute();
 
 			if($print) {
-				print "SELECT {$columns} FROM {$tableName} WHERE $whereClause";
+				print "SELECT {$columns} FROM {$tableName} WHERE {$whereClause}";
 				exit;
 			}
 

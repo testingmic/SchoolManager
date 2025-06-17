@@ -623,12 +623,18 @@ class Account extends Myschoolgh {
                 $preference["billing"][$key] = nl2br($preference["billing"][$key]);
             }
         }
+        $preference["billing"]["registration_code"] = $params->general["registration_code"] ?? null;
+
+        if(!empty($preference["billing"]["registration_code"])) {
+            $preference["billing"]["registration_code"] = strtoupper($preference["billing"]["registration_code"]);
+        }
 
         // unset the values
         unset($params->general["opening_days"]);
         unset($params->general["academics"]);
         unset($params->general["labels"]);
         unset($params->general["billing"]);
+        unset($params->general["registration_code"]);
 
         // format
         $query = "";
@@ -640,7 +646,6 @@ class Account extends Myschoolgh {
         if(empty($query)) {
             return ["code" => 400, "data" => "Sorry! Academics and Labels must be an array."];
         }
-
         try {
 
             // run the update of the account information
@@ -657,7 +662,9 @@ class Account extends Myschoolgh {
 
             return $return;
 
-        } catch(PDOException $e) {}
+        } catch(PDOException $e) {
+            return ["code" => 400, "data" => $e->getMessage()];
+        }
 
     }
 

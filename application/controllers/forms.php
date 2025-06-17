@@ -3857,7 +3857,7 @@ class Forms extends Myschoolgh {
                     <textarea placeholder="Enter the billing additional information" name="general[billing][additional_info]" class="form-control">'.(!empty($prefs?->billing?->additional_info) ? strip_tags($prefs?->billing?->additional_info) : null).'</textarea>
                 </div>
             </div>
-            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">FINANCE</h5></div>
+            <div class="col-lg-12"><h5 class="border-bottom border-primary text-primary pb-2 mb-2 pt-3">FINANCE & ADDITIONAL SETTINGS</h5></div>
             <div class="col-lg-4 settings-form">
                 <div class="form-group">
                     <label for="opening_days">School Opening Days</label>';
@@ -3877,6 +3877,10 @@ class Forms extends Myschoolgh {
                 </div>
             </div>
             <div class="col-lg-4">
+                <div class="form-group">
+                    <label for="registration_code">Registration Code</label>
+                    <input type="text" value="'.($prefs?->billing?->registration_code ?? null).'" maxlength="6" name="general[registration_code]" id="registration_code" class="form-control text-uppercase">
+                </div>
                 <div class="form-group">
                     <label for="currency">Currency</label>
                     <select data-width="100%" name="general[labels][currency]" id="labels" class="form-control selectpicker">

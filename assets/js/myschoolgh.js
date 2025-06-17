@@ -126,20 +126,28 @@ var search_usersList = (user_type = "") => {
                     $.each(response.data.result, function(i, e) {
                         let is_found = e.guardian_id.length && ($.inArray(guardian_id, e.guardian_id) !== -1) ? true : false;
                         let the_link = is_found ? `<a onclick='return modifyGuardianWard("${guardian_id}_${e.user_id}","remove");' href='javascript:void(0);' class='btn btn-outline-danger btn-sm'>Remove</a>` : `<a onclick='return modifyGuardianWard("${guardian_id}_${e.user_id}","append");' class='btn btn-outline-success btn-sm' href='javascript:void(0);'>Append Ward</a>`;
+                        
+                        // get the first 16 characters of the name
+                        let name = e.name.length > 16 ? e.name.substring(0, 16) + "..." : e.name;
+                        
                         users_list += `
-                    <div class="col-lg-6 mb-4">
-                        <div class="d-flex justify-content-start">
-                            <div class="mr-2">
-                                <img src="${baseUrl}${e.image}" class="rounded-circle cursor author-box-picture" width="50px">
+                        <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-body p-2">
+                                <div class="d-flex justify-content-start">
+                                    <div class="mr-2">
+                                        <img src="${baseUrl}${e.image}" class="rounded-circle cursor author-box-picture" width="50px">
+                                    </div>
+                                    <div> 
+                                        <i class="fa fa-user"></i> ${name}
+                                        <br><i class="fa fa-home"></i> ${e.class_name}
+                                        <br><i class="fa fa-calendar-check"></i> ${typeof e.dob_clean !== "undefined" ? e.dob_clean : "N/A"}
+                                    </div> 
+                                </div>
+                                <div class="mt-2 text-right">${the_link}</div>
                             </div>
-                            <div> 
-                                <i class="fa fa-user"></i> ${e.name}
-                                <br><i class="fa fa-home"></i> ${e.class_name}
-                                <br><i class="fa fa-calendar-check"></i> ${e.dob_clean}
-                            </div> 
                         </div>
-                        <div class="mt-2 text-right">${the_link}</div>
-                    </div>`;
+                        </div>`;
                     });
                 } else if (user_type == "guardian") {
                     let student_id = $(`div[id='user_search_list']`).attr("data-student_id");

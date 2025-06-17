@@ -224,8 +224,27 @@ class Handler {
             elseif(!empty($this->params->onlineCheck)) {
                 $response["data"] = true;
             }
+            elseif(isset($this->params->school_id, $this->params->school_code)) {
 
-            if(isset($response["data"]["code"])) {
+                // set the default response
+                $response['data']['result'] = "Sorry! The school code is invalid.";
+                $response['data']['code'] = 400;
+                
+                // validate the school code
+                $validate = $logObj->validate_school_code($this->params);
+
+                if(empty($validate)) {
+                    $response['data']['result'] = "Sorry! The school code is invalid.";
+                    $response['data']['code'] = $logObj->reqCode;
+                } else {
+                    $response['data']['result'] = $validate;
+                    $response['data']['code'] = $logObj->reqCode;
+                    $response['data']['proceed_signup'] = true;
+                    $response['data']['refresh_page'] = $logObj->refreshPage;
+                }
+            }
+
+            if(is_array($response["data"]) && isset($response["data"]["code"])) {
                 $response["code"] = $response["data"]["code"];
                 unset($response["data"]["code"]);
             }

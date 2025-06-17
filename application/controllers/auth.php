@@ -11,6 +11,9 @@ class Auth extends Myschoolgh {
     private $time_period = 10;
     private $attempts_count = 10;
 
+    public $reqCode = 400;
+    public $refreshPage = false;
+
     private $password_ErrorMessage;
 
     public function __construct() {
@@ -235,6 +238,88 @@ class Auth extends Myschoolgh {
             $this->db->rollBack();
             return ["code" => 400, "result" => "Sorry! The Username/Password could not be validated"];
         }
+    }
+
+    /**
+     * Validate the school code
+     * 
+     * @param stdClass $params
+     * 
+     * @return Array
+     */
+    public function validate_school_code(stdClass $params) {
+
+        global $accessObject, $session;
+
+        // get the client id
+        $clientId = $params->school_id;
+        $schoolCode = $params->school_code ?? null;
+        $client = $this->clients_list($clientId);
+        
+        if(empty($client)) {
+            return false;
+        }
+
+        $client = $client[0];
+        $pref = json_decode($client->client_preferences, true);
+
+        if($pref['billing']['registration_code'] !== strtoupper($schoolCode)) {
+            return false;
+        }
+
+        if(empty($params->contact_number)) {
+            $this->reqCode = 200;
+            return "Signup successfully validated.";
+        }
+
+        // get the contact number
+        $myUsername = $params->contact_number;
+        
+        // check if the contact number is 10 digits
+        if(strlen($myUsername) !== 10) {
+            return "Sorry! The contact number is invalid. Maximum of 10 digits is allowed.";
+        }
+
+        $checkUser = $this->pushQuery("*", "users", "client_id='{$client->client_id}' AND username='{$myUsername}' LIMIT 1");
+        if(!empty($checkUser)) {
+            return "Sorry! The contact number is already in use.";
+        }
+
+        // get the user permissions
+		$accessPermissions = $accessObject->getPermissions('parent');
+
+        $this->reqCode = 200;
+        $permits = $accessPermissions[0]->user_permissions;
+        $level = $accessPermissions[0]->id;
+
+        // generate a random user id
+        $user_id = random_string("alnum", 10);
+
+        // default password for the users
+		$pass = password_hash($myUsername, PASSWORD_DEFAULT);
+
+        $stmt = $this->db->prepare("
+            INSERT INTO users SET item_id = ?, user_type = ?, access_level = ?, changed_password = '1', 
+                status = '1', client_id = ?, username = ?, password = ?, phone_number = ?");
+        $stmt->execute([$user_id, 'parent', $level, $client->client_id, $myUsername, $pass, $myUsername]);
+
+        // log the user access level
+        $stmt2 = $this->db->prepare("INSERT INTO users_roles SET user_id = ?, client_id = ?, permissions = ?");
+        $stmt2->execute([$user_id, $client->client_id, $permits]);
+
+        // set the username and password
+        $params->username = $myUsername;
+        $params->password = $myUsername;
+
+        // login the user
+        $this->login($params);
+
+        // refresh the page
+        $this->refreshPage = true;
+        $session->set("personalSignup", true);
+
+        // return the success message
+        return "Signup successfully validated. Please login to continue.";
     }
 
     /**
@@ -829,7 +914,7 @@ class Auth extends Myschoolgh {
             }
 
             // get the user information
-            $user = $this->pushQuery("password, changed_password, email, name", "users", "item_id='{$params->user_id}' AND client_id='{$params->clientId}' LIMIT 1");
+            $user = $this->pushQuery("password, changed_password, email, name, username", "users", "item_id='{$params->user_id}' AND client_id='{$params->clientId}' LIMIT 1");
             if(empty($user)) {
                 return ["code" => "203", "data" => "Sorry! An invalid user id was submitted."];
             }
@@ -864,7 +949,7 @@ class Auth extends Myschoolgh {
 
             // change the password
             $stmt = $this->db->prepare("UPDATE users SET last_password_change = now(), password = ?, changed_password = ? WHERE item_id = ? AND client_id = ? LIMIT 3");
-            $stmt->execute([password_hash($params->password_1, PASSWORD_DEFAULT), 0, $params->user_id, $params->clientId]);
+            $stmt->execute([password_hash($params->password_1, PASSWORD_DEFAULT), '1', $params->user_id, $params->clientId]);
 
             // log the user activity
             $this->userLogs("password_reset", $params->user_id, null, "Password was successfully changed.", $params->userId);
