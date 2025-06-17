@@ -108,6 +108,7 @@ $schools = $myClass->clients_list();
         <div>By: <strong><?= config_item("developer") ?></strong></div>
     </div>
   </div>
+  <script> var baseUrl = "<?= $baseUrl ?>"; </script>
   <script src="<?= $baseUrl; ?>assets/js/app.min.js?v=<?= version() ?>"></script>
   <script src="<?= $baseUrl; ?>assets/js/scripts.js?v=<?= version() ?>"></script>
   <script src="<?= $baseUrl; ?>assets/bundles/select2/select2.js"></script>

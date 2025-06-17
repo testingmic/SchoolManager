@@ -14,7 +14,7 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
     if(school_id) {
         form_data += `&school_id=${school_id}`;
     }
-    
+
     school_code = school_code ? school_code : $(`input[name="school_code"]`).val();
     if(school_code !== $(`input[name="school_code"]`).val()) {
         school_code = $(`input[name="school_code"]`).val();
@@ -48,6 +48,11 @@ $(`form[id="auth-form"]`).on("submit", function(evt) {
                 $(`button[id="validate_code"]`)
                     .prop("disabled", false)
                     .html("Proceed to Signup");
+            }
+            if(typeof response.data?.refresh_page !== 'undefined') {
+                setTimeout(() => {
+                    window.location.href = baseUrl;
+                }, response.data?.refresh);
             }
         } else {
             $(`form[id="auth-form"] *`).prop("disabled", false);

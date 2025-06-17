@@ -240,7 +240,9 @@ class Handler {
                     $response['data']['result'] = $validate;
                     $response['data']['code'] = $logObj->reqCode;
                     $response['data']['proceed_signup'] = true;
-                    $response['data']['refresh_page'] = $logObj->refreshPage;
+                    if($logObj->refreshPage) {
+                        $response['data']['refresh_page'] = $logObj->refreshPage;
+                    }
                 }
             }
 
