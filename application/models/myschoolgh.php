@@ -1492,11 +1492,6 @@ class Myschoolgh extends Models {
 			return false;
 		}
 	
-		if (($number >= 0 && (int) $number < 0) || (int) $number < 0 - PHP_INT_MAX) {
-			// overflow
-			return 'This function only accepts numbers between -' . PHP_INT_MAX . ' and ' . PHP_INT_MAX;
-		}
-	
 		if ($number < 0) {
 			return $negative . $this->amount_to_words(abs($number));
 		}

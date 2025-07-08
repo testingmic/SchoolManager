@@ -81,7 +81,7 @@ if(!$accessObject->hasAccess("manage", "settings")) {
         $users_list .= "<tr data-row_id=\"{$user->item_id}\">";
         $users_list .= "<td>{$counter}</td>";
         $users_list .= "<td>
-                ".strtoupper($user->name)."
+                ".(!empty($user->name) ? strtoupper($user->name) : "")."
                 <div><span class='badge badge-primary'>{$user->email}</span></div>
             </td>";
         $users_list .= "<td>".ucwords($user->user_type)."</td>";
