@@ -896,7 +896,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-md-6 col-12 col-sm-12">
+                    <div class="col-lg-4 col-md-6 col-12 col-sm-12 d-none d-sm-block">
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="text-uppercase font-13">Upcoming Events</h4>

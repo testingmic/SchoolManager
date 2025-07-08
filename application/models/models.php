@@ -113,7 +113,7 @@ class Models {
     public function __construct() {
 
         // set the global base url
-        $this->baseUrl = config_item('base_url');
+        $this->baseUrl = ($_SERVER['REQUEST_SCHEME'] ?? "http") . "://" . $_SERVER['HTTP_HOST'] . '/';
         $this->appName = config_item('site_name');
         $this->data_maxdate = date("Y-m-d", strtotime("+1 year"));
 
