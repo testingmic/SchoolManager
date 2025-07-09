@@ -97,7 +97,7 @@ load_helpers(['menu_helper']);
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/calculator.css?v=<?= version() ?>">    
     <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/fullcalendar/fullcalendar.min.css">
     <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
-    <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/img/apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/img/favicon.ico">
     <?php foreach($loadedCSS as $eachCSS) { ?>
         <link rel="stylesheet" href="<?= $baseUrl ?><?= $eachCSS ?>">
     <?php } ?>
