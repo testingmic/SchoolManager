@@ -121,7 +121,7 @@ class Auth extends Myschoolgh {
                                 unset($results->password);
 
                                 // set these sessions if not a remote call
-                                if(!$params->remote) {
+                                if(empty($params->remote)) {
 
                                     // set the user sessions for the person to continue
                                     $session->set("userLoggedIn", random_string('alnum', 50));
@@ -150,7 +150,7 @@ class Auth extends Myschoolgh {
                                 }
                                 
                                 // if a remote call was made for the access token
-                                if($params->remote) {
+                                if(!empty($params->remote)) {
                                     
                                     // get any active access token available or generate a new one if none exists
                                     $access = $this->temporary_access($results);

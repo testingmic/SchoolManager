@@ -568,7 +568,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
     <section class="section">
         <div class="default_period" data-current_period="'.$global_period.'">
         <div class="d-flex mt-3 justify-content-between" '.$data_stream.'></div>
-        <h4 class="border-bottom border-primary mb-2">Hello '.trim($defaultUser->name).', </h4>';
+        <h4 class="border-bottom border-primary mb-2">Hello '.(!empty($defaultUser->name) ? trim($defaultUser->name) : "User").', </h4>';
         
         // load this section for admins and accountants
         if($isAdminAccountant) {
