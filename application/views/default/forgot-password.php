@@ -27,6 +27,7 @@ if(loggedIn()) {
   <link id="current_url" name="current_url" value="<?= $user_current_url ?>">
   <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/img/favicon.ico">
   <meta name="theme-color" content="#2196F3">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="App - <?= $appName ?>">

@@ -99,6 +99,7 @@ load_helpers(['menu_helper']);
     <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
     <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/img/favicon.ico">
     <meta name="theme-color" content="#2196F3">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="App - <?= $appName ?>">
