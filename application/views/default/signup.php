@@ -25,6 +25,7 @@ $schools = $myClass->clients_list();
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/css/custom.css">
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/select2/select2.css">
   <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
+  <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/img/apple-touch-icon.png">
   <style>
   .bg {
     background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');
