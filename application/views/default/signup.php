@@ -26,6 +26,10 @@ $schools = $myClass->clients_list();
   <link rel="stylesheet" href="<?= $baseUrl ?>assets/bundles/select2/select2.css">
   <link rel='shortcut icon' type='image/x-icon' href='<?= $baseUrl ?>assets/img/favicon.ico' />
   <link rel="apple-touch-icon" href="<?= $baseUrl ?>assets/img/favicon.ico">
+  <meta name="theme-color" content="#2196F3">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="<?= $appName ?>">
   <style>
   .bg {
     background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');
