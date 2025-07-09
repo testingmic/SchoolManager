@@ -29,7 +29,7 @@ $schools = $myClass->clients_list();
   <meta name="theme-color" content="#2196F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="<?= $appName ?>">
+  <meta name="apple-mobile-web-app-title" content="App - <?= $appName ?>">
   <style>
   .bg {
     background-image: url('<?= $baseUrl; ?>assets/img/background_2.jpg');
