@@ -161,7 +161,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                         </div>
                                         <div class="col-lg-3 timetable" id="rightpane">
                                             <h5>Subjects List</h5>
-                                            <div class="form-group text-center trix-slim-scroll" id="courseScroll">';
+                                            <div class="form-group text-center trix-slim-scroll w-100" id="courseScroll">';
                                                 if(!empty($courses_list)) {
                                                     foreach($courses_list as $key => $value) {
                                                         $response->html .= "<div class='course p-2' id='{$value->item_id}'>{$value->name} ({$value->course_code})</div>";
@@ -175,7 +175,7 @@ if(!$accessObject->hasAccess("allocate", "timetable")) {
                                                 <h5>Assign Room</h5>
                                                 <div id="default_room_label">Click on a slot to assign room</div>
                                                 <div class="hidden" id="default_room_select">
-                                                    <select name="t_room_id" class="updateSelect form-control selectpicker" data-placeholder="Choose Room..." required="" onchange="assignRoom(this.value)" tabindex="-1">';
+                                                    <select data-width="100%" name="t_room_id" class="updateSelect form-control selectpicker" data-placeholder="Choose Room..." required="" onchange="assignRoom(this.value)" tabindex="-1">';
                                                     foreach($rooms_list as $key => $value) {
                                                         $response->html .= "<option value='{$value->item_id}'>{$value->name} - {$value->code}</option>";
                                                     }

@@ -153,7 +153,7 @@ if(!empty($item_id)) {
             <div class="section-body">
             <div class="row mt-sm-4">
             <div class="col-md-3">
-                <div class="card rounded-2xl">
+                <div class="card rounded-2xl hover:scale-105 transition-all duration-300">
                     <div class="card-body pt-3 pb-3 pr-2 pl-2 text-center bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg text-white card-type-3">
                         <div class="font-22 font-weight-bolder text-white">'.strtoupper($data->name).'</div>
                         <div class="font-18 font-weight-bold text-uppercase text-white">'.$data->class_code.'</div>
@@ -162,7 +162,7 @@ if(!empty($item_id)) {
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-green border-left-solid">
-                    <div class="card-body card-type-3">
+                    <div class="card-body card-type-3 hover:scale-105 transition-all duration-300">
                         <div class="row">
                             <div class="col">
                                 <h6 class="font-14 text-uppercase font-weight-bold mb-0">STUDENTS</h6>
@@ -179,7 +179,7 @@ if(!empty($item_id)) {
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-blue border-left-solid">
-                    <div class="card-body card-type-3">
+                    <div class="card-body card-type-3 hover:scale-105 transition-all duration-300">
                         <div class="row">
                             <div class="col">
                                 <h6 class="font-14 text-uppercase font-weight-bold mb-0">BOYS</h6>
@@ -196,7 +196,7 @@ if(!empty($item_id)) {
             </div>
             <div class="col-xl-3 col-lg-6 col-md-6">
                 <div class="card border-top-0 border-bottom-0 border-right-0 border-left-lg border-danger border-left-solid">
-                    <div class="card-body card-type-3">
+                    <div class="card-body card-type-3 hover:scale-105 transition-all duration-300">
                         <div class="row">
                             <div class="col">
                                 <h6 class="font-14 text-uppercase font-weight-bold mb-0">GIRLS</h6>

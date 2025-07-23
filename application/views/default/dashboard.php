@@ -634,7 +634,7 @@ if(in_array($defaultClientData->client_state, ["Suspended", "Expired"])) {
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6">
                         <div class="card rounded-2xl">
-                            <div class="card-body inline-flex justify-center bg-gradient-to-br from-red-500 to-red-300 rounded-2xl shadow-lg text-white card-type-3">
+                            <div class="card-body inline-flex justify-center bg-gradient-to-br from-red-600 to-red-400 rounded-2xl shadow-lg text-white card-type-3">
                                 <div align="center">
                                     <h6 class="border-bottom font-13 text-uppercase font-bold p-0 m-0">'.date("l, F d, Y").'</h6>
                                     <h3 class="p-0 m-0"><div class="plugin-clock">'.date("h:i A").'</div></h3>

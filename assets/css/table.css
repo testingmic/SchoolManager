@@ -145,7 +145,7 @@
     padding: 10px;
     display: inline-block;
     z-index: 99999;
-    max-height: 380px;
+    max-height: 450px;
     overflow-y: auto;
 }
 

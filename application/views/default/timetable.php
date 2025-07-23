@@ -110,9 +110,9 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                     $response->html .= '
                                     <div class="col-lg-3 p-0">
                                         <div class="form-group p-2 mb-0">
-                                            <h5 class="badge-success p-2">CREATED TIMETABLES LIST</h5>
+                                            <h5 class="text-white bg-gradient-to-br from-green-500 to-green-300 p-2">CREATED TIMETABLES LIST</h5>
                                         </div>
-                                        <div class="trix-slim-scroll p-2" style="max-height:500px; overflow-y:auto;">';
+                                        <div class="trix-slim-scroll p-2" style="max-height:750px; overflow-y:auto;">';
 
                                     if(empty($timetable_list)) {
                                         $response->html .= "
@@ -123,7 +123,7 @@ if(!$accessObject->hasAccess("manage", "timetable") || !in_array("timetable", $c
                                     } else {
                                         foreach($timetable_list as $key => $value) {
                                             $response->html .= "
-                                                <div data-row_id=\"{$value->item_id}\" class='form-group mb-3 border-bottom timetable-item'>
+                                                <div data-row_id=\"{$value->item_id}\" class='mb-3 rounded-2xl p-2 rounded-2xl shadow-xl border border-blue-500 overflow-hidden mb-3'>
                                                     <p class='clearfix pb-0 mb-0'>
                                                         <span class='float-left font-weight-bolder'>Name</span>
                                                         <span class='float-right'>{$value->name}</span>
