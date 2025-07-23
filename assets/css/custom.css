@@ -708,6 +708,21 @@ label {
     font-size: 2rem !important;
 }
 
+h4 {
+    font-size: 16px !important;
+    line-height: 28px;
+    padding-right: 10px;
+    margin-bottom: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700 !important;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2 !important;
+}
+
 .border-left-solid, 
 .exams_bank .card {
     border: solid 4px;
@@ -956,13 +971,6 @@ pre {
 
 code {
     font-family: "Courier New", Courier, monospace;
-}
-
-h4 {
-    font-size: 16px;
-    line-height: 28px;
-    padding-right: 10px;
-    margin-bottom: 0;
 }
 
 .btn-secondary:hover, .btn-secondary:focus, .btn-secondary:active, .btn-secondary.disabled:hover, .btn-secondary.disabled:focus, .btn-secondary.disabled:active {
